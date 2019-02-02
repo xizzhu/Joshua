@@ -1,0 +1,64 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$rootProject.ext.kotlinVersion"
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+android {
+    compileOptions {
+        sourceCompatibility rootProject.ext.sourceJavaVersion
+        targetCompatibility rootProject.ext.targetJavaVersion
+    }
+
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.sourceJavaVersion
+        targetCompatibility rootProject.ext.targetJavaVersion
+    }
+
+    defaultConfig {
+        applicationId "me.xizzhu.android.joshua"
+
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+
+        resConfigs rootProject.ext.supportedLocales
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        debug.java.srcDirs += "src/debug/kotlin"
+        release.java.srcDirs += "src/release/kotlin"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+
+            proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
+        }
+        debug {
+            applicationIdSuffix ".debug"
+        }
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$rootProject.ext.kotlinVersion"
+
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.appCompatVersion"
+}

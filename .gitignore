@@ -1,0 +1,19 @@
+# IntelliJ & Android Studio
+.gradle
+.idea
+*.iml
+captures
+local.properties
+
+# Build Artifacts
+build
+gen
+out
+.externalNativeBuild
+
+# Mac
+.DS_Store
+
+# Key Store
+keystore.properties
+*.keystore

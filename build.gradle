@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.3.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+ext {
+    sourceJavaVersion = JavaVersion.VERSION_1_7
+    targetJavaVersion = JavaVersion.VERSION_1_7
+
+    kotlinVersion = '1.3.20'
+
+    compileSdkVersion = 28
+    buildToolsVersion = '28.0.3'
+
+    minSdkVersion = 21
+    targetSdkVersion = 28
+
+    versionCode = 100
+    versionName = '0.1.0'
+
+    supportedLocales = ["en"]
+
+    appCompatVersion = '1.0.2'
+}
