@@ -16,16 +16,42 @@
 
 package me.xizzhu.android.joshua.translations
 
+import io.reactivex.disposables.Disposable
+import io.reactivex.observers.DisposableObserver
 import me.xizzhu.android.joshua.model.TranslationInfo
 import me.xizzhu.android.joshua.model.TranslationManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.applySchedulers
 
 class TranslationManagementPresenter(private val translationManager: TranslationManager) : MVPPresenter<TranslationManagementView>() {
+    private var loadTranslationsDisposable: Disposable? = null
+
+    override fun onViewDropped() {
+        disposeLoadTranslations()
+
+        super.onViewDropped()
+    }
+
+    private fun disposeLoadTranslations() {
+        loadTranslationsDisposable?.dispose()
+        loadTranslationsDisposable = null
+    }
+
     fun loadTranslations() {
-        // TODO
-        val list = ArrayList<TranslationInfo>()
-        list.add(TranslationInfo("Authorized King James", "KJV", "en_gb", 1860978L))
-        list.add(TranslationInfo("中文和合本（简体）", "中文和合本", "zh_cn", 1781521L))
-        view?.onTranslationsLoaded(list)
+        disposeLoadTranslations()
+        loadTranslationsDisposable = translationManager.loadTranslations().applySchedulers()
+                .subscribeWith(object : DisposableObserver<List<TranslationInfo>>() {
+                    override fun onComplete() {
+                        // do nothing
+                    }
+
+                    override fun onNext(translations: List<TranslationInfo>) {
+                        view?.onTranslationsLoaded(translations)
+                    }
+
+                    override fun onError(e: Throwable) {
+                        view?.onTranslationsLoadFailed()
+                    }
+                })
     }
 }

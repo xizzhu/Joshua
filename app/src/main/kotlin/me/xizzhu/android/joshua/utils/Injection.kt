@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.utils
 
 import android.content.SharedPreferences
+import com.squareup.moshi.Moshi
 import dagger.Binds
 import dagger.Component
 import dagger.Module
@@ -26,12 +27,14 @@ import dagger.android.AndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import me.xizzhu.android.joshua.App
-import me.xizzhu.android.joshua.LauncherActivity
-import me.xizzhu.android.joshua.SHARED_PREFERENCES_MODE
-import me.xizzhu.android.joshua.SHARED_PREFERENCES_NAME
+import me.xizzhu.android.joshua.*
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementComponent
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -43,6 +46,27 @@ class AppModule(private val app: App) {
     @Provides
     @Singleton
     fun provideSharedPreferences(app: App): SharedPreferences = app.getSharedPreferences(SHARED_PREFERENCES_NAME, SHARED_PREFERENCES_MODE)
+
+    @Provides
+    @Singleton
+    fun provideMoshi(): Moshi = Moshi.Builder().build()
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
+            .connectTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(moshi: Moshi, okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .build()
 }
 
 @Module(subcomponents = [(TranslationManagementComponent::class)])

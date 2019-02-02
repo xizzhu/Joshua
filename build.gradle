@@ -39,4 +39,12 @@ ext {
     recyclerViewVersion = '1.0.0'
 
     daggerVersion = '2.21'
+
+    rxJavaVersion = '2.2.6'
+    rxAndroidVersion = '2.1.0'
+
+    retrofitVersion = '2.5.0'
+    okhttpVersion = '3.12.1'
+    moshiVersion = '1.8.0'
+    okioVersion = '2.2.2'
 }

@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua
+package me.xizzhu.android.joshua.utils
 
-import android.content.Context
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
-const val SHARED_PREFERENCES_NAME = "SHARED_PREFERENCES_JOSHUA"
-const val SHARED_PREFERENCES_MODE = Context.MODE_PRIVATE
-const val SHARED_PREFERENCES_KEY_LAST_TRANSLATION = "last_translation"
-
-const val BASE_URL = "https://xizzhu.me/bible/download/"
-const val OKHTTP_TIMEOUT_IN_SECONDS = 30L
+fun <T> Observable<T>.applySchedulers(): Observable<T> = subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
