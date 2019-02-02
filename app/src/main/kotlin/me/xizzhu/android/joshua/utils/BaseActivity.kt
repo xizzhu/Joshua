@@ -14,29 +14,17 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua
+package me.xizzhu.android.joshua.utils
 
-import android.app.Activity
 import android.os.Bundle
-import me.xizzhu.android.joshua.model.TranslationManager
-import me.xizzhu.android.joshua.translations.TranslationManagementActivity
-import javax.inject.Inject
+import androidx.annotation.CallSuper
+import androidx.appcompat.app.AppCompatActivity
+import dagger.android.AndroidInjection
 
-class LauncherActivity : Activity() {
-    @Inject
-    lateinit var translationManager: TranslationManager
-
+abstract class BaseActivity : AppCompatActivity() {
+    @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
-        App.appComponent.inject(this)
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
-
-        if (translationManager.hasTranslationsInstalled()) {
-            // TODO
-        } else {
-            val startIntent = TranslationManagementActivity.newStartIntent(this)
-            startActivity(startIntent)
-        }
-
-        finish()
     }
 }
