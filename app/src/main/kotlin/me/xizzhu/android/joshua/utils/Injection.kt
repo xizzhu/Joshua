@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.utils
 
-import android.app.Activity
 import android.content.SharedPreferences
 import dagger.Binds
 import dagger.Component

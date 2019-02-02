@@ -22,6 +22,8 @@ import me.xizzhu.android.joshua.SHARED_PREFERENCES_KEY_LAST_TRANSLATION
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class TranslationInfo(val name: String, val shortName: String, val language: String, val size: Long)
+
 @Singleton
 class TranslationManager @Inject constructor(private val sharedPreferences: SharedPreferences) {
     fun hasTranslationsInstalled() = !TextUtils.isEmpty(sharedPreferences.getString(SHARED_PREFERENCES_KEY_LAST_TRANSLATION, null))

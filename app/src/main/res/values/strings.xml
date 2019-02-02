@@ -2,4 +2,6 @@
 <resources>
 
     <string name="app_name">Bible</string>
+
+    <string name="title_translation_management">Translations</string>
 </resources>
