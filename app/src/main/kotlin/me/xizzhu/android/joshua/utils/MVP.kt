@@ -14,17 +14,31 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua
+package me.xizzhu.android.joshua.utils
 
-import android.app.Application
-import android.os.StrictMode
 import androidx.annotation.CallSuper
 
-abstract class BaseApp : Application() {
-    @CallSuper
-    override fun onCreate() {
-        super.onCreate()
+interface MVPView
 
-        StrictMode.enableDefaults()
+abstract class MVPPresenter<V : MVPView> {
+    protected var view: V? = null
+        private set
+
+    fun takeView(view: V) {
+        this.view = view
+        onViewTaken()
+    }
+
+    @CallSuper
+    protected open fun onViewTaken() {
+    }
+
+    fun dropView() {
+        onViewDropped()
+        this.view = null
+    }
+
+    @CallSuper
+    protected open fun onViewDropped() {
     }
 }
