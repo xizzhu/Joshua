@@ -16,4 +16,27 @@
 
 package me.xizzhu.android.joshua
 
-class App: BaseApp()
+import android.app.Activity
+import dagger.android.AndroidInjector
+import dagger.android.DispatchingAndroidInjector
+import dagger.android.HasActivityInjector
+import me.xizzhu.android.joshua.utils.AppComponent
+import me.xizzhu.android.joshua.utils.AppModule
+import me.xizzhu.android.joshua.utils.DaggerAppComponent
+import javax.inject.Inject
+
+class App : BaseApp(), HasActivityInjector {
+    private lateinit var appComponent: AppComponent
+
+    @Inject
+    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Activity>
+
+    override fun onCreate() {
+        super.onCreate()
+
+        appComponent = DaggerAppComponent.builder().appModule(AppModule(this)).build()
+        appComponent.inject(this)
+    }
+
+    override fun activityInjector(): AndroidInjector<Activity> = dispatchingAndroidInjector
+}

@@ -33,4 +33,6 @@ ext {
     supportedLocales = ["en"]
 
     appCompatVersion = '1.0.2'
+
+    daggerVersion = '2.21'
 }
