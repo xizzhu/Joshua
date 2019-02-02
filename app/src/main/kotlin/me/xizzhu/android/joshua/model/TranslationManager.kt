@@ -17,11 +17,12 @@
 package me.xizzhu.android.joshua.model
 
 import android.content.SharedPreferences
+import android.text.TextUtils
+import me.xizzhu.android.joshua.SHARED_PREFERENCES_KEY_LAST_TRANSLATION
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class TranslationManager @Inject constructor(private val sharedPreferences: SharedPreferences) {
-    // TODO
-    fun hasTranslationsInstalled() = false
+    fun hasTranslationsInstalled() = !TextUtils.isEmpty(sharedPreferences.getString(SHARED_PREFERENCES_KEY_LAST_TRANSLATION, null))
 }

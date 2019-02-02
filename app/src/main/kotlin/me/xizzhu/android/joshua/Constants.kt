@@ -20,3 +20,5 @@ import android.content.Context
 
 const val SHARED_PREFERENCES_NAME = "SHARED_PREFERENCES_JOSHUA"
 const val SHARED_PREFERENCES_MODE = Context.MODE_PRIVATE
+
+const val SHARED_PREFERENCES_KEY_LAST_TRANSLATION = "last_translation"
