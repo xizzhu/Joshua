@@ -18,22 +18,18 @@ package me.xizzhu.android.joshua.model
 
 import android.content.SharedPreferences
 import android.text.TextUtils
-import com.squareup.moshi.Json
 import io.reactivex.Observable
 import io.reactivex.Single
 import me.xizzhu.android.joshua.SHARED_PREFERENCES_KEY_LAST_TRANSLATION
-import retrofit2.Retrofit
-import retrofit2.http.GET
 import javax.inject.Inject
 import javax.inject.Singleton
 
 data class TranslationInfo(val shortName: String, val name: String, val language: String, val size: Long)
 
 @Singleton
-class TranslationManager @Inject constructor(private val sharedPreferences: SharedPreferences, retrofit: Retrofit,
+class TranslationManager @Inject constructor(private val sharedPreferences: SharedPreferences,
+                                             private val backendService: BackendService,
                                              private val localStorage: LocalStorage) {
-    private val translationService = retrofit.create(TranslationService::class.java)
-
     fun hasTranslationsInstalled() = !TextUtils.isEmpty(sharedPreferences.getString(SHARED_PREFERENCES_KEY_LAST_TRANSLATION, null))
 
     fun loadTranslations(): Observable<List<TranslationInfo>> {
@@ -41,7 +37,7 @@ class TranslationManager @Inject constructor(private val sharedPreferences: Shar
     }
 
     private fun fetchTranslations(): Single<List<TranslationInfo>> =
-            translationService.fetchTranslationList().map {
+            backendService.translationService().fetchTranslationList().map {
                 val translations = ArrayList<TranslationInfo>(it.translations.size)
                 for (t in it.translations) {
                     translations.add(t.toTranslationInfo())
@@ -54,18 +50,4 @@ class TranslationManager @Inject constructor(private val sharedPreferences: Shar
                 }
                 localStorage.localTranslationInfoDao().save(localTranslations)
             }
-}
-
-private data class BackendTranslationInfo(@Json(name = "shortName") val shortName: String,
-                                          @Json(name = "name") val name: String,
-                                          @Json(name = "language") val language: String,
-                                          @Json(name = "size") val size: Long) {
-    fun toTranslationInfo() = TranslationInfo(shortName, name, language, size)
-}
-
-private data class BackendTranslationList(@Json(name = "translations") val translations: List<BackendTranslationInfo>)
-
-private interface TranslationService {
-    @GET("list.json")
-    fun fetchTranslationList(): Single<BackendTranslationList>
 }

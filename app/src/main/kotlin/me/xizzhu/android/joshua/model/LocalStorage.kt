@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.model
 
 import androidx.room.*
-import io.reactivex.Completable
 import io.reactivex.Single
 
 @Database(entities = [(LocalTranslationInfo::class)], version = LocalStorage.DATABASE_VERSION)
