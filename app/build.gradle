@@ -86,4 +86,6 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okhttpVersion"
     implementation "com.squareup.moshi:moshi:$rootProject.ext.moshiVersion"
     implementation "com.squareup.okio:okio:$rootProject.ext.okioVersion"
+
+    debugImplementation "com.facebook.stetho:stetho:$rootProject.ext.stethoVersion"
 }

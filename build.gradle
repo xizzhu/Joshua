@@ -48,4 +48,6 @@ ext {
     okhttpVersion = '3.12.1'
     moshiVersion = '1.8.0'
     okioVersion = '2.2.2'
+
+    stethoVersion = '1.5.0'
 }

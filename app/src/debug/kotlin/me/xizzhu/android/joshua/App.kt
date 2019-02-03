@@ -19,12 +19,14 @@ package me.xizzhu.android.joshua
 import android.app.Application
 import android.os.StrictMode
 import androidx.annotation.CallSuper
+import com.facebook.stetho.Stetho
 
 abstract class BaseApp : Application() {
     @CallSuper
     override fun onCreate() {
         super.onCreate()
 
+        Stetho.initializeWithDefaults(this)
         StrictMode.enableDefaults()
     }
 }
