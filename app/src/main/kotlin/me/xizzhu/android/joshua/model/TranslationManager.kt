@@ -16,12 +16,13 @@
 
 package me.xizzhu.android.joshua.model
 
-import io.reactivex.Maybe
 import io.reactivex.Single
+import io.reactivex.functions.BiFunction
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class TranslationInfo(val shortName: String, val name: String, val language: String, val size: Long)
+data class TranslationInfo(val shortName: String, val name: String, val language: String,
+                           val size: Long, val downloaded: Boolean)
 
 @Singleton
 class TranslationManager @Inject constructor(
@@ -32,32 +33,48 @@ class TranslationManager @Inject constructor(
 
     fun loadTranslations(forceRefresh: Boolean): Single<List<TranslationInfo>> {
         return if (forceRefresh) {
-            loadTranslationsFromBackend()
+            loadTranslationsFromBackend(true)
         } else {
-            loadTranslationsFromLocal().switchIfEmpty(loadTranslationsFromBackend())
+            loadTranslationsFromLocal().filter { it.isNotEmpty() }
+                    .switchIfEmpty(loadTranslationsFromBackend(false))
         }
     }
 
-    private fun loadTranslationsFromBackend(): Single<List<TranslationInfo>> =
-            backendService.translationService().fetchTranslationList().map {
-                val translations = ArrayList<TranslationInfo>(it.translations.size)
-                for (t in it.translations) {
-                    translations.add(TranslationInfo(t.shortName, t.name, t.language, t.size))
+    private fun loadTranslationsFromBackend(needToLoadLocal: Boolean): Single<List<TranslationInfo>> {
+        val local = if (needToLoadLocal) {
+            loadTranslationsFromLocal()
+        } else {
+            Single.just(emptyList())
+        }
+        val backend = backendService.translationService().fetchTranslationList()
+        return Single.zip(local, backend, BiFunction<List<TranslationInfo>,
+                BackendTranslationList, List<TranslationInfo>> { existing, fetched ->
+            val new = ArrayList<TranslationInfo>(fetched.translations.size)
+            for (f in fetched.translations) {
+                var downloaded = false
+                for (e in existing) {
+                    if (e.shortName == f.shortName) {
+                        downloaded = e.downloaded
+                        break
+                    }
                 }
-                translations as List<TranslationInfo>
-            }.doOnSuccess {
-                val localTranslations = ArrayList<LocalTranslationInfo>(it.size)
-                for (t in it) {
-                    localTranslations.add(LocalTranslationInfo(t.shortName, t.name, t.language, t.size))
-                }
-                localStorage.localTranslationInfoDao().save(localTranslations)
+                new.add(TranslationInfo(f.shortName, f.name, f.language, f.size, downloaded))
             }
+            new
+        }).doOnSuccess {
+            val translations = ArrayList<LocalTranslationInfo>(it.size)
+            for (t in it) {
+                translations.add(LocalTranslationInfo(t.shortName, t.name, t.language, t.size, t.downloaded))
+            }
+            localStorage.localTranslationInfoDao().save(translations)
+        }
+    }
 
-    private fun loadTranslationsFromLocal(): Maybe<List<TranslationInfo>> =
+    private fun loadTranslationsFromLocal(): Single<List<TranslationInfo>> =
             localStorage.localTranslationInfoDao().load().map {
                 val translations = ArrayList<TranslationInfo>(it.size)
                 for (t in it) {
-                    translations.add(TranslationInfo(t.shortName, t.name, t.language, t.size))
+                    translations.add(TranslationInfo(t.shortName, t.name, t.language, t.size, t.downloaded))
                 }
                 translations as List<TranslationInfo>
             }

@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.model
 
 import androidx.room.*
 import io.reactivex.Maybe
+import io.reactivex.Single
 
 @Database(entities = [(LocalTranslationInfo::class), (LocalMetadata::class)],
         version = LocalStorage.DATABASE_VERSION, exportSchema = false)
@@ -37,20 +38,22 @@ data class LocalTranslationInfo(
         @PrimaryKey @ColumnInfo(name = LocalTranslationInfo.COLUMN_SHORT_NAME) val shortName: String,
         @ColumnInfo(name = LocalTranslationInfo.COLUMN_NAME) val name: String,
         @ColumnInfo(name = LocalTranslationInfo.COLUMN_LANGUAGE) val language: String,
-        @ColumnInfo(name = LocalTranslationInfo.COLUMN_SIZE) val size: Long) {
+        @ColumnInfo(name = LocalTranslationInfo.COLUMN_SIZE) val size: Long,
+        @ColumnInfo(name = LocalTranslationInfo.COLUMN_DOWNLOADED) val downloaded: Boolean) {
     companion object {
         const val TABLE_TRANSLATION_INFO = "translation_info"
         const val COLUMN_SHORT_NAME = "shortName"
         const val COLUMN_NAME = "name"
         const val COLUMN_LANGUAGE = "language"
         const val COLUMN_SIZE = "size"
+        const val COLUMN_DOWNLOADED = "downloaded"
     }
 }
 
 @Dao
 interface LocalTranslationInfoDao {
     @Query("SELECT * FROM " + LocalTranslationInfo.TABLE_TRANSLATION_INFO)
-    fun load(): Maybe<List<LocalTranslationInfo>>
+    fun load(): Single<List<LocalTranslationInfo>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun save(translations: List<LocalTranslationInfo>)
