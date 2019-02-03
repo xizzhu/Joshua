@@ -19,7 +19,7 @@ package me.xizzhu.android.joshua.model
 import androidx.room.*
 import io.reactivex.Single
 
-@Database(entities = [(LocalTranslationInfo::class)], version = LocalStorage.DATABASE_VERSION)
+@Database(entities = [(LocalTranslationInfo::class)], version = LocalStorage.DATABASE_VERSION, exportSchema = false)
 abstract class LocalStorage : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = "DATABASE_JOSHUA.db"
