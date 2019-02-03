@@ -27,20 +27,43 @@ import retrofit2.http.GET
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class TranslationInfo(val name: String, val shortName: String, val language: String, val size: Long)
+data class TranslationInfo(val shortName: String, val name: String, val language: String, val size: Long)
 
 @Singleton
-class TranslationManager @Inject constructor(private val sharedPreferences: SharedPreferences, retrofit: Retrofit) {
+class TranslationManager @Inject constructor(private val sharedPreferences: SharedPreferences, retrofit: Retrofit,
+                                             private val localStorage: LocalStorage) {
     private val translationService = retrofit.create(TranslationService::class.java)
 
     fun hasTranslationsInstalled() = !TextUtils.isEmpty(sharedPreferences.getString(SHARED_PREFERENCES_KEY_LAST_TRANSLATION, null))
 
     fun loadTranslations(): Observable<List<TranslationInfo>> {
-        return translationService.fetchTranslationList().map { it.translations }.toObservable()
+        return fetchTranslations().toObservable()
     }
+
+    private fun fetchTranslations(): Single<List<TranslationInfo>> =
+            translationService.fetchTranslationList().map {
+                val translations = ArrayList<TranslationInfo>(it.translations.size)
+                for (t in it.translations) {
+                    translations.add(t.toTranslationInfo())
+                }
+                translations as List<TranslationInfo>
+            }.doOnSuccess {
+                val localTranslations = ArrayList<LocalTranslationInfo>(it.size)
+                for (t in it) {
+                    localTranslations.add(LocalTranslationInfo.fromTranslationInfo(t))
+                }
+                localStorage.localTranslationInfoDao().save(localTranslations)
+            }
 }
 
-private data class BackendTranslationList(@Json(name = "translations") val translations: List<TranslationInfo>)
+private data class BackendTranslationInfo(@Json(name = "shortName") val shortName: String,
+                                          @Json(name = "name") val name: String,
+                                          @Json(name = "language") val language: String,
+                                          @Json(name = "size") val size: Long) {
+    fun toTranslationInfo() = TranslationInfo(shortName, name, language, size)
+}
+
+private data class BackendTranslationList(@Json(name = "translations") val translations: List<BackendTranslationInfo>)
 
 private interface TranslationService {
     @GET("list.json")

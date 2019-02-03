@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.utils
 
 import android.content.SharedPreferences
+import androidx.room.Room
 import com.squareup.moshi.Moshi
 import dagger.Binds
 import dagger.Component
@@ -28,6 +29,7 @@ import dagger.android.support.AndroidSupportInjectionModule
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import me.xizzhu.android.joshua.*
+import me.xizzhu.android.joshua.model.LocalStorage
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementComponent
 import okhttp3.OkHttpClient
@@ -45,7 +47,13 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
-    fun provideSharedPreferences(app: App): SharedPreferences = app.getSharedPreferences(SHARED_PREFERENCES_NAME, SHARED_PREFERENCES_MODE)
+    fun provideSharedPreferences(app: App): SharedPreferences =
+            app.getSharedPreferences(SHARED_PREFERENCES_NAME, SHARED_PREFERENCES_MODE)
+
+    @Provides
+    @Singleton
+    fun provideLocalStorage(app: App): LocalStorage =
+            Room.databaseBuilder(app, LocalStorage::class.java, LocalStorage.DATABASE_NAME).build()
 
     @Provides
     @Singleton
@@ -53,20 +61,22 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
-            .connectTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-            .readTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-            .writeTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-            .build()
+    fun provideOkHttpClient(): OkHttpClient =
+            OkHttpClient.Builder()
+                    .connectTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                    .readTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                    .writeTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                    .build()
 
     @Provides
     @Singleton
-    fun provideRetrofit(moshi: Moshi, okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .build()
+    fun provideRetrofit(moshi: Moshi, okHttpClient: OkHttpClient): Retrofit =
+            Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .client(okHttpClient)
+                    .addConverterFactory(MoshiConverterFactory.create(moshi))
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .build()
 }
 
 @Module(subcomponents = [(TranslationManagementComponent::class)])
