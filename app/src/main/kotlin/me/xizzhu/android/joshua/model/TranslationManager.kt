@@ -16,6 +16,8 @@
 
 package me.xizzhu.android.joshua.model
 
+import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import javax.inject.Inject
@@ -30,6 +32,10 @@ class TranslationManager @Inject constructor(
     fun hasTranslationsInstalled(): Single<Boolean> =
             localStorage.localMetadata().load(LocalMetadata.KEY_LAST_TRANSLATION)
                     .toSingle("").map { it.isNotEmpty() }
+
+    fun loadCurrentTranslation(): Single<String> =
+            localStorage.localMetadata().load(LocalMetadata.KEY_LAST_TRANSLATION)
+                    .toSingle("")
 
     fun loadTranslations(forceRefresh: Boolean): Single<List<TranslationInfo>> {
         return if (forceRefresh) {
@@ -47,21 +53,21 @@ class TranslationManager @Inject constructor(
             Single.just(emptyList())
         }
         val backend = backendService.translationService().fetchTranslationList()
-        return Single.zip(local, backend, BiFunction<List<TranslationInfo>,
-                BackendTranslationList, List<TranslationInfo>> { existing, fetched ->
-            val new = ArrayList<TranslationInfo>(fetched.translations.size)
-            for (f in fetched.translations) {
-                var downloaded = false
-                for (e in existing) {
-                    if (e.shortName == f.shortName) {
-                        downloaded = e.downloaded
-                        break
+        return Single.zip(local, backend,
+                BiFunction<List<TranslationInfo>, BackendTranslationList, List<TranslationInfo>> { existing, fetched ->
+                    val new = ArrayList<TranslationInfo>(fetched.translations.size)
+                    for (f in fetched.translations) {
+                        var downloaded = false
+                        for (e in existing) {
+                            if (e.shortName == f.shortName) {
+                                downloaded = e.downloaded
+                                break
+                            }
+                        }
+                        new.add(TranslationInfo(f.shortName, f.name, f.language, f.size, downloaded))
                     }
-                }
-                new.add(TranslationInfo(f.shortName, f.name, f.language, f.size, downloaded))
-            }
-            new
-        }).doOnSuccess {
+                    new
+                }).doOnSuccess {
             val translations = ArrayList<LocalTranslationInfo>(it.size)
             for (t in it) {
                 translations.add(LocalTranslationInfo(t.shortName, t.name, t.language, t.size, t.downloaded))
@@ -78,4 +84,8 @@ class TranslationManager @Inject constructor(
                 }
                 translations as List<TranslationInfo>
             }
+
+    fun downloadTranslation(translationInfo: TranslationInfo): Observable<Int> {
+        return Observable.empty()
+    }
 }

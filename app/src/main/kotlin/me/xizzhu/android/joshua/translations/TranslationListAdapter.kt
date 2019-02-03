@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.translations
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -25,30 +26,51 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.model.TranslationInfo
 import java.util.ArrayList
 
-private class TranslationInfoViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_translation, parent, false)) {
-    private val textView = itemView as TextView
 
-    fun bind(translationInfo: TranslationInfo) {
+private class TranslationInfoViewHolder(private val presenter: TranslationManagementPresenter, inflater: LayoutInflater, parent: ViewGroup)
+    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_translation, parent, false)), View.OnClickListener {
+    private val textView = itemView as TextView
+    private var translationInfo: TranslationInfo? = null
+
+    init {
+        itemView.setOnClickListener(this)
+    }
+
+    fun bind(translationInfo: TranslationInfo, currentTranslation: Boolean) {
+        this.translationInfo = translationInfo
+
         textView.text = translationInfo.name
+        textView.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                if (currentTranslation) R.drawable.ic_check else 0, 0)
+    }
+
+    override fun onClick(v: View) {
+        if (translationInfo != null && !translationInfo!!.downloaded) {
+            presenter.downloadTranslation(translationInfo!!)
+        }
     }
 }
 
-class TranslationListAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class TranslationListAdapter(context: Context, private val presenter: TranslationManagementPresenter) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val inflater = LayoutInflater.from(context)
-    private val translations = ArrayList<TranslationInfo>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder = TranslationInfoViewHolder(inflater, parent)
+    private val translations = ArrayList<TranslationInfo>()
+    private var currentTranslation: String = ""
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+            TranslationInfoViewHolder(presenter, inflater, parent)
 
     override fun getItemCount(): Int = translations.size
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as TranslationInfoViewHolder).bind(translations[position])
+        val translation = translations[position]
+        (holder as TranslationInfoViewHolder).bind(translation, translation.shortName == currentTranslation)
     }
 
-    fun setTranslations(translations: List<TranslationInfo>) {
+    fun setTranslations(translations: List<TranslationInfo>, currentTranslation: String) {
         this.translations.clear()
         this.translations.addAll(translations)
+        this.currentTranslation = currentTranslation
         notifyDataSetChanged()
     }
 }

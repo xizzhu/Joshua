@@ -32,9 +32,15 @@ import me.xizzhu.android.joshua.utils.fadeOut
 import javax.inject.Inject
 
 interface TranslationManagementView : MVPView {
-    fun onTranslationsLoaded(translations: List<TranslationInfo>)
+    fun onTranslationsLoaded(translations: List<TranslationInfo>, currentTranslation: String)
 
     fun onTranslationsLoadFailed()
+
+    fun onTranslationDownloadProgressed(progress: Int)
+
+    fun onTranslationDownloaded()
+
+    fun onTranslationDownloadFailed()
 }
 
 class TranslationManagementActivity : BaseActivity(), TranslationManagementView {
@@ -58,7 +64,7 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
 
         translationListView = findViewById(R.id.translation_list)
         translationListView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        adapter = TranslationListAdapter(this)
+        adapter = TranslationListAdapter(this, presenter)
         translationListView.adapter = adapter
     }
 
@@ -80,14 +86,26 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
         super.onStop()
     }
 
-    override fun onTranslationsLoaded(translations: List<TranslationInfo>) {
-        adapter.setTranslations(translations)
+    override fun onTranslationsLoaded(translations: List<TranslationInfo>, currentTranslation: String) {
+        adapter.setTranslations(translations, currentTranslation)
 
         loadingSpinner.fadeOut()
         translationListView.fadeIn()
     }
 
     override fun onTranslationsLoadFailed() {
+        // TODO
+    }
+
+    override fun onTranslationDownloadProgressed(progress: Int) {
+        // TODO
+    }
+
+    override fun onTranslationDownloaded() {
+        loadTranslations(false)
+    }
+
+    override fun onTranslationDownloadFailed() {
         // TODO
     }
 }
