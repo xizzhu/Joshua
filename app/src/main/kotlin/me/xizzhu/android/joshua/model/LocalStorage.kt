@@ -44,13 +44,7 @@ data class LocalTranslationInfo(
         const val COLUMN_NAME = "name"
         const val COLUMN_LANGUAGE = "language"
         const val COLUMN_SIZE = "size"
-
-        fun fromTranslationInfo(translationInfo: TranslationInfo) =
-                LocalTranslationInfo(translationInfo.shortName, translationInfo.name,
-                        translationInfo.language, translationInfo.size)
     }
-
-    fun toTranslationInfo() = TranslationInfo(shortName, name, language, size)
 }
 
 @Dao

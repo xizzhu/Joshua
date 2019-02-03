@@ -59,9 +59,7 @@ class BackendService @Inject constructor() {
 data class BackendTranslationInfo(@Json(name = "shortName") val shortName: String,
                                   @Json(name = "name") val name: String,
                                   @Json(name = "language") val language: String,
-                                  @Json(name = "size") val size: Long) {
-    fun toTranslationInfo() = TranslationInfo(shortName, name, language, size)
-}
+                                  @Json(name = "size") val size: Long)
 
 data class BackendTranslationList(@Json(name = "translations") val translations: List<BackendTranslationInfo>)
 

@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.model
 
+import io.reactivex.Maybe
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -31,30 +32,33 @@ class TranslationManager @Inject constructor(
 
     fun loadTranslations(forceRefresh: Boolean): Single<List<TranslationInfo>> {
         return if (forceRefresh) {
-            fetchTranslations()
+            loadTranslationsFromBackend()
         } else {
-            localStorage.localTranslationInfoDao().load().map {
-                val translations = ArrayList<TranslationInfo>(it.size)
-                for (t in it) {
-                    translations.add(t.toTranslationInfo())
-                }
-                translations as List<TranslationInfo>
-            }.switchIfEmpty(fetchTranslations())
+            loadTranslationsFromLocal().switchIfEmpty(loadTranslationsFromBackend())
         }
     }
 
-    private fun fetchTranslations(): Single<List<TranslationInfo>> =
+    private fun loadTranslationsFromBackend(): Single<List<TranslationInfo>> =
             backendService.translationService().fetchTranslationList().map {
                 val translations = ArrayList<TranslationInfo>(it.translations.size)
                 for (t in it.translations) {
-                    translations.add(t.toTranslationInfo())
+                    translations.add(TranslationInfo(t.shortName, t.name, t.language, t.size))
                 }
                 translations as List<TranslationInfo>
             }.doOnSuccess {
                 val localTranslations = ArrayList<LocalTranslationInfo>(it.size)
                 for (t in it) {
-                    localTranslations.add(LocalTranslationInfo.fromTranslationInfo(t))
+                    localTranslations.add(LocalTranslationInfo(t.shortName, t.name, t.language, t.size))
                 }
                 localStorage.localTranslationInfoDao().save(localTranslations)
+            }
+
+    private fun loadTranslationsFromLocal(): Maybe<List<TranslationInfo>> =
+            localStorage.localTranslationInfoDao().load().map {
+                val translations = ArrayList<TranslationInfo>(it.size)
+                for (t in it) {
+                    translations.add(TranslationInfo(t.shortName, t.name, t.language, t.size))
+                }
+                translations as List<TranslationInfo>
             }
 }
