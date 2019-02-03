@@ -19,8 +19,6 @@ package me.xizzhu.android.joshua.model
 import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import io.reactivex.Single
-import me.xizzhu.android.joshua.BASE_URL
-import me.xizzhu.android.joshua.OKHTTP_TIMEOUT_IN_SECONDS
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -32,6 +30,11 @@ import javax.inject.Singleton
 
 @Singleton
 class BackendService @Inject constructor() {
+    companion object {
+        private const val BASE_URL = "https://xizzhu.me/bible/download/"
+        private const val OKHTTP_TIMEOUT_IN_SECONDS = 30L
+    }
+
     private val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(OkHttpClient.Builder()

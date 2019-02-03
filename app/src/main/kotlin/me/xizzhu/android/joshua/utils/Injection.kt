@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.utils
 
-import android.content.SharedPreferences
 import androidx.room.Room
 import dagger.Binds
 import dagger.Component
@@ -38,11 +37,6 @@ class AppModule(private val app: App) {
     @Provides
     @Singleton
     fun provideApp(): App = app
-
-    @Provides
-    @Singleton
-    fun provideSharedPreferences(app: App): SharedPreferences =
-            app.getSharedPreferences(SHARED_PREFERENCES_NAME, SHARED_PREFERENCES_MODE)
 
     @Provides
     @Singleton

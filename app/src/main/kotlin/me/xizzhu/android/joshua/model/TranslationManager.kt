@@ -16,21 +16,19 @@
 
 package me.xizzhu.android.joshua.model
 
-import android.content.SharedPreferences
-import android.text.TextUtils
 import io.reactivex.Observable
 import io.reactivex.Single
-import me.xizzhu.android.joshua.SHARED_PREFERENCES_KEY_LAST_TRANSLATION
 import javax.inject.Inject
 import javax.inject.Singleton
 
 data class TranslationInfo(val shortName: String, val name: String, val language: String, val size: Long)
 
 @Singleton
-class TranslationManager @Inject constructor(private val sharedPreferences: SharedPreferences,
-                                             private val backendService: BackendService,
-                                             private val localStorage: LocalStorage) {
-    fun hasTranslationsInstalled() = !TextUtils.isEmpty(sharedPreferences.getString(SHARED_PREFERENCES_KEY_LAST_TRANSLATION, null))
+class TranslationManager @Inject constructor(
+        private val backendService: BackendService, private val localStorage: LocalStorage) {
+    fun hasTranslationsInstalled(): Single<Boolean> =
+            localStorage.localMetadata().load(LocalMetadata.KEY_LAST_TRANSLATION)
+                    .toSingle("").map { it.isNotEmpty() }
 
     fun loadTranslations(): Observable<List<TranslationInfo>> {
         return fetchTranslations().toObservable()

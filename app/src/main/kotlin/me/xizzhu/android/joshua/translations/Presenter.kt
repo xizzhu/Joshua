@@ -42,7 +42,7 @@ class TranslationManagementPresenter(private val translationManager: Translation
         loadTranslationsDisposable = translationManager.loadTranslations().applySchedulers()
                 .subscribeWith(object : DisposableObserver<List<TranslationInfo>>() {
                     override fun onComplete() {
-                        // do nothing
+                        loadTranslationsDisposable = null
                     }
 
                     override fun onNext(translations: List<TranslationInfo>) {
@@ -50,6 +50,7 @@ class TranslationManagementPresenter(private val translationManager: Translation
                     }
 
                     override fun onError(e: Throwable) {
+                        loadTranslationsDisposable = null
                         view?.onTranslationsLoadFailed()
                     }
                 })
