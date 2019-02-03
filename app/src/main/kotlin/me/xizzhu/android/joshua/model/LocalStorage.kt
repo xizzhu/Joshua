@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.model
 
 import androidx.room.*
 import io.reactivex.Maybe
-import io.reactivex.Single
 
 @Database(entities = [(LocalTranslationInfo::class), (LocalMetadata::class)],
         version = LocalStorage.DATABASE_VERSION, exportSchema = false)
@@ -57,7 +56,7 @@ data class LocalTranslationInfo(
 @Dao
 interface LocalTranslationInfoDao {
     @Query("SELECT * FROM " + LocalTranslationInfo.TABLE_TRANSLATION_INFO)
-    fun load(): Single<List<LocalTranslationInfo>>
+    fun load(): Maybe<List<LocalTranslationInfo>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun save(translations: List<LocalTranslationInfo>)

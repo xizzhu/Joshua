@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.translations
 
 import io.reactivex.disposables.Disposable
-import io.reactivex.observers.DisposableObserver
+import io.reactivex.observers.DisposableSingleObserver
 import me.xizzhu.android.joshua.model.TranslationInfo
 import me.xizzhu.android.joshua.model.TranslationManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
@@ -37,15 +37,12 @@ class TranslationManagementPresenter(private val translationManager: Translation
         loadTranslationsDisposable = null
     }
 
-    fun loadTranslations() {
+    fun loadTranslations(forceRefresh: Boolean) {
         disposeLoadTranslations()
-        loadTranslationsDisposable = translationManager.loadTranslations().applySchedulers()
-                .subscribeWith(object : DisposableObserver<List<TranslationInfo>>() {
-                    override fun onComplete() {
+        loadTranslationsDisposable = translationManager.loadTranslations(forceRefresh).applySchedulers()
+                .subscribeWith(object : DisposableSingleObserver<List<TranslationInfo>>() {
+                    override fun onSuccess(translations: List<TranslationInfo>) {
                         loadTranslationsDisposable = null
-                    }
-
-                    override fun onNext(translations: List<TranslationInfo>) {
                         view?.onTranslationsLoaded(translations)
                     }
 

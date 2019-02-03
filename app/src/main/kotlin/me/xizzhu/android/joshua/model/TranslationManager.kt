@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.model
 
-import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,8 +29,18 @@ class TranslationManager @Inject constructor(
             localStorage.localMetadata().load(LocalMetadata.KEY_LAST_TRANSLATION)
                     .toSingle("").map { it.isNotEmpty() }
 
-    fun loadTranslations(): Observable<List<TranslationInfo>> {
-        return fetchTranslations().toObservable()
+    fun loadTranslations(forceRefresh: Boolean): Single<List<TranslationInfo>> {
+        return if (forceRefresh) {
+            fetchTranslations()
+        } else {
+            localStorage.localTranslationInfoDao().load().map {
+                val translations = ArrayList<TranslationInfo>(it.size)
+                for (t in it) {
+                    translations.add(t.toTranslationInfo())
+                }
+                translations as List<TranslationInfo>
+            }.switchIfEmpty(fetchTranslations())
+        }
     }
 
     private fun fetchTranslations(): Single<List<TranslationInfo>> =

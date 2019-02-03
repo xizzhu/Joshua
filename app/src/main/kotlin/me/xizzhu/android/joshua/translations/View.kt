@@ -65,14 +65,14 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
     override fun onStart() {
         super.onStart()
         presenter.takeView(this)
-        loadTranslations()
+        loadTranslations(false)
     }
 
-    private fun loadTranslations() {
+    private fun loadTranslations(forceRefresh: Boolean) {
         loadingSpinner.visibility = View.VISIBLE
         translationListView.visibility = View.GONE
 
-        presenter.loadTranslations()
+        presenter.loadTranslations(forceRefresh)
     }
 
     override fun onStop() {
