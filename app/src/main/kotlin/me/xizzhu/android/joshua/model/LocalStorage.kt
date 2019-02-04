@@ -33,10 +33,10 @@ class LocalStorage @Inject constructor(app: App) : SQLiteOpenHelper(app, DATABAS
         const val DATABASE_VERSION = 1
     }
 
-    val metadataDao by lazy { MetadataDao(writableDatabase) }
-    val translationInfoDao by lazy { TranslationInfoDao(writableDatabase) }
-    val translationDao by lazy { TranslationDao(writableDatabase) }
-    val bookNamesDao by lazy { BookNamesDao(writableDatabase) }
+    val metadataDao = MetadataDao(this)
+    val translationInfoDao = TranslationInfoDao(this)
+    val translationDao = TranslationDao(this)
+    val bookNamesDao = BookNamesDao(this)
 
     override fun onCreate(db: SQLiteDatabase) {
         db.beginTransaction()
@@ -56,7 +56,7 @@ class LocalStorage @Inject constructor(app: App) : SQLiteOpenHelper(app, DATABAS
     }
 }
 
-class BookNamesDao(private val db: SQLiteDatabase) {
+class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_BOOK_NAMES = "bookNames"
         private const val INDEX_BOOK_NAMES = "bookNamesIndex"
@@ -72,6 +72,8 @@ class BookNamesDao(private val db: SQLiteDatabase) {
         }
     }
 
+    private val db by lazy { sqliteHelper.writableDatabase }
+
     fun save(translationShortName: String, bookNames: List<String>) {
         val values = ContentValues(3)
         values.put(COLUMN_TRANSLATION_SHORT_NAME, translationShortName)
@@ -83,13 +85,15 @@ class BookNamesDao(private val db: SQLiteDatabase) {
     }
 }
 
-class TranslationDao(private val db: SQLiteDatabase) {
+class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val COLUMN_BOOK_INDEX = "bookIndex"
         private const val COLUMN_CHAPTER_INDEX = "chapterIndex"
         private const val COLUMN_VERSE_INDEX = "verseIndex"
         private const val COLUMN_TEXT = "text"
     }
+
+    private val db by lazy { sqliteHelper.writableDatabase }
 
     fun createTable(translationShortName: String) {
         db.execSQL("CREATE TABLE $translationShortName (" +
@@ -109,7 +113,7 @@ class TranslationDao(private val db: SQLiteDatabase) {
     }
 }
 
-class TranslationInfoDao(private val db: SQLiteDatabase) {
+class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_TRANSLATION_INFO = "translationInfo"
         private const val COLUMN_SHORT_NAME = "shortName"
@@ -125,6 +129,8 @@ class TranslationInfoDao(private val db: SQLiteDatabase) {
                     " $COLUMN_DOWNLOADED INTEGER NOT NULL);")
         }
     }
+
+    private val db by lazy { sqliteHelper.writableDatabase }
 
     fun hasTranslationsInstalled(): Single<Boolean> =
             Single.fromCallable {
@@ -185,7 +191,7 @@ class TranslationInfoDao(private val db: SQLiteDatabase) {
     }
 }
 
-class MetadataDao(private val db: SQLiteDatabase) {
+class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_METADATA = "metadata"
         private const val COLUMN_KEY = "key"
@@ -198,6 +204,8 @@ class MetadataDao(private val db: SQLiteDatabase) {
                     "$COLUMN_KEY TEXT PRIMARY KEY, $COLUMN_VALUE TEXT NOT NULL);")
         }
     }
+
+    private val db by lazy { sqliteHelper.writableDatabase }
 
     fun load(key: String, defaultValue: String): Single<String> =
             Single.fromCallable {
