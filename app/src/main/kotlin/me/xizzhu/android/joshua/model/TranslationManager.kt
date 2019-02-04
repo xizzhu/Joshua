@@ -34,12 +34,10 @@ data class TranslationInfo(val shortName: String, val name: String, val language
 class TranslationManager @Inject constructor(
         private val backendService: BackendService, private val localStorage: LocalStorage) {
     fun hasTranslationsInstalled(): Single<Boolean> =
-            localStorage.localMetadata().load(LocalMetadata.KEY_LAST_TRANSLATION)
-                    .toSingle("").map { it.isNotEmpty() }
+            loadCurrentTranslation().map { it.isNotEmpty() }
 
     fun loadCurrentTranslation(): Single<String> =
-            localStorage.localMetadata().load(LocalMetadata.KEY_LAST_TRANSLATION)
-                    .toSingle("")
+            localStorage.metadataDao.load(MetadataDao.KEY_LAST_TRANSLATION, "")
 
     fun loadTranslations(forceRefresh: Boolean): Single<List<TranslationInfo>> {
         return if (forceRefresh) {
@@ -72,22 +70,12 @@ class TranslationManager @Inject constructor(
                     }
                     new
                 }).doOnSuccess {
-            val translations = ArrayList<LocalTranslationInfo>(it.size)
-            for (t in it) {
-                translations.add(LocalTranslationInfo(t.shortName, t.name, t.language, t.size, t.downloaded))
-            }
-            localStorage.localTranslationInfoDao().save(translations)
+            localStorage.translationInfoDao.save(it)
         }
     }
 
     private fun loadTranslationsFromLocal(): Single<List<TranslationInfo>> =
-            localStorage.localTranslationInfoDao().load().map {
-                val translations = ArrayList<TranslationInfo>(it.size)
-                for (t in it) {
-                    translations.add(TranslationInfo(t.shortName, t.name, t.language, t.size, t.downloaded))
-                }
-                translations as List<TranslationInfo>
-            }
+            localStorage.translationInfoDao.load()
 
     fun downloadTranslation(translationInfo: TranslationInfo): Observable<Int> =
             Observable.create { emitter ->

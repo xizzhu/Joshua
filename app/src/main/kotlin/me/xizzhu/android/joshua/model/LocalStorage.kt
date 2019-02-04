@@ -16,67 +16,142 @@
 
 package me.xizzhu.android.joshua.model
 
-import androidx.room.*
-import io.reactivex.Maybe
+import android.content.ContentValues
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
+import io.reactivex.Completable
 import io.reactivex.Single
+import me.xizzhu.android.joshua.App
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@Database(entities = [(LocalTranslationInfo::class), (LocalMetadata::class)],
-        version = LocalStorage.DATABASE_VERSION, exportSchema = false)
-abstract class LocalStorage : RoomDatabase() {
+@Singleton
+class LocalStorage @Inject constructor(app: App) : SQLiteOpenHelper(app, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
-        const val DATABASE_NAME = "DATABASE_JOSHUA.db"
+        const val DATABASE_NAME = "DATABASE_JOSHUA"
         const val DATABASE_VERSION = 1
     }
 
-    abstract fun localMetadata(): LocalMetadataDao
+    val metadataDao by lazy { MetadataDao(writableDatabase) }
+    val translationInfoDao by lazy { TranslationInfoDao(writableDatabase) }
 
-    abstract fun localTranslationInfoDao(): LocalTranslationInfoDao
-}
+    override fun onCreate(db: SQLiteDatabase) {
+        db.beginTransaction()
+        try {
+            MetadataDao.createTable(db)
+            TranslationInfoDao.createTable(db)
 
-@Entity(tableName = LocalTranslationInfo.TABLE_TRANSLATION_INFO)
-data class LocalTranslationInfo(
-        @PrimaryKey @ColumnInfo(name = LocalTranslationInfo.COLUMN_SHORT_NAME) val shortName: String,
-        @ColumnInfo(name = LocalTranslationInfo.COLUMN_NAME) val name: String,
-        @ColumnInfo(name = LocalTranslationInfo.COLUMN_LANGUAGE) val language: String,
-        @ColumnInfo(name = LocalTranslationInfo.COLUMN_SIZE) val size: Long,
-        @ColumnInfo(name = LocalTranslationInfo.COLUMN_DOWNLOADED) val downloaded: Boolean) {
-    companion object {
-        const val TABLE_TRANSLATION_INFO = "translation_info"
-        const val COLUMN_SHORT_NAME = "shortName"
-        const val COLUMN_NAME = "name"
-        const val COLUMN_LANGUAGE = "language"
-        const val COLUMN_SIZE = "size"
-        const val COLUMN_DOWNLOADED = "downloaded"
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        // do nothing
     }
 }
 
-@Dao
-interface LocalTranslationInfoDao {
-    @Query("SELECT * FROM " + LocalTranslationInfo.TABLE_TRANSLATION_INFO)
-    fun load(): Single<List<LocalTranslationInfo>>
+class TranslationInfoDao(private val db: SQLiteDatabase) {
+    companion object {
+        private const val TABLE_TRANSLATION_INFO = "translation_info"
+        private const val COLUMN_SHORT_NAME = "shortName"
+        private const val COLUMN_NAME = "name"
+        private const val COLUMN_LANGUAGE = "language"
+        private const val COLUMN_SIZE = "size"
+        private const val COLUMN_DOWNLOADED = "downloaded"
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun save(translations: List<LocalTranslationInfo>)
+        fun createTable(db: SQLiteDatabase) {
+            db.execSQL("CREATE TABLE $TABLE_TRANSLATION_INFO (" +
+                    "$COLUMN_SHORT_NAME TEXT PRIMARY KEY, $COLUMN_NAME TEXT NOT NULL," +
+                    " $COLUMN_LANGUAGE TEXT NOT NULL, $COLUMN_SIZE INTEGER NOT NULL," +
+                    " $COLUMN_DOWNLOADED INTEGER NOT NULL);")
+        }
+    }
+
+    fun load(): Single<List<TranslationInfo>> =
+            Single.fromCallable {
+                var cursor: Cursor? = null
+                try {
+                    cursor = db.query(TABLE_TRANSLATION_INFO, null, null, null, null, null, null, null)
+                    val count = cursor.count
+                    if (count == 0) {
+                        emptyList<TranslationInfo>()
+                    } else {
+                        val shortName = cursor.getColumnIndex(COLUMN_SHORT_NAME)
+                        val name = cursor.getColumnIndex(COLUMN_NAME)
+                        val language = cursor.getColumnIndex(COLUMN_LANGUAGE)
+                        val size = cursor.getColumnIndex(COLUMN_SIZE)
+                        val downloaded = cursor.getColumnIndex(COLUMN_DOWNLOADED)
+                        val translations = ArrayList<TranslationInfo>(count)
+                        while (cursor.moveToNext()) {
+                            translations.add(TranslationInfo(cursor.getString(shortName),
+                                    cursor.getString(name), cursor.getString(language),
+                                    cursor.getLong(size), cursor.getInt(downloaded) == 1))
+                        }
+                        translations
+                    }
+                } finally {
+                    cursor?.close()
+                }
+            }
+
+    fun save(translations: List<TranslationInfo>) {
+        db.beginTransaction()
+        try {
+            val values = ContentValues(5)
+            for (t in translations) {
+                values.put(COLUMN_SHORT_NAME, t.shortName)
+                values.put(COLUMN_NAME, t.name)
+                values.put(COLUMN_LANGUAGE, t.language)
+                values.put(COLUMN_SIZE, t.size)
+                values.put(COLUMN_DOWNLOADED, if (t.downloaded) 1 else 0)
+                db.insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
 }
 
-@Entity(tableName = LocalMetadata.TABLE_METADATA)
-data class LocalMetadata(
-        @PrimaryKey @ColumnInfo(name = COLUMN_KEY) val key: String,
-        @ColumnInfo(name = COLUMN_VALUE) val value: String) {
+class MetadataDao(private val db: SQLiteDatabase) {
     companion object {
-        const val TABLE_METADATA = "metadata"
-        const val COLUMN_KEY = "key"
-        const val COLUMN_VALUE = "value"
+        private const val TABLE_METADATA = "metadata"
+        private const val COLUMN_KEY = "key"
+        private const val COLUMN_VALUE = "value"
 
         const val KEY_LAST_TRANSLATION = "last_translation"
+
+        fun createTable(db: SQLiteDatabase) {
+            db.execSQL("CREATE TABLE $TABLE_METADATA (" +
+                    "$COLUMN_KEY TEXT PRIMARY KEY, $COLUMN_VALUE TEXT NOT NULL);")
+        }
     }
-}
 
-@Dao
-interface LocalMetadataDao {
-    @Query("SELECT " + LocalMetadata.COLUMN_VALUE + " FROM " + LocalMetadata.TABLE_METADATA + " WHERE " + LocalMetadata.COLUMN_KEY + "=:key")
-    fun load(key: String): Maybe<String>
+    fun load(key: String, defaultValue: String): Single<String> =
+            Single.fromCallable {
+                var cursor: Cursor? = null
+                try {
+                    cursor = db.query(TABLE_METADATA, arrayOf(COLUMN_VALUE),
+                            "$COLUMN_KEY = ?", arrayOf(key), null, null, null)
+                    if (cursor.count > 0 && cursor.moveToNext()) {
+                        cursor.getString(0)
+                    } else {
+                        defaultValue
+                    }
+                } finally {
+                    cursor?.close()
+                }
+            }
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun save(metadata: LocalMetadata)
+    fun save(key: String, value: String): Completable =
+            Completable.fromAction {
+                val values = ContentValues(2)
+                values.put(COLUMN_KEY, key)
+                values.put(COLUMN_VALUE, value)
+                db.insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+            }
 }

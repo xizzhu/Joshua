@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.utils
 
-import androidx.room.Room
 import dagger.Binds
 import dagger.Component
 import dagger.Module
@@ -27,7 +26,6 @@ import dagger.android.support.AndroidSupportInjectionModule
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import me.xizzhu.android.joshua.*
-import me.xizzhu.android.joshua.model.LocalStorage
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementComponent
 import javax.inject.Singleton
@@ -37,11 +35,6 @@ class AppModule(private val app: App) {
     @Provides
     @Singleton
     fun provideApp(): App = app
-
-    @Provides
-    @Singleton
-    fun provideLocalStorage(app: App): LocalStorage =
-            Room.databaseBuilder(app, LocalStorage::class.java, LocalStorage.DATABASE_NAME).build()
 }
 
 @Module(subcomponents = [(TranslationManagementComponent::class)])
