@@ -35,12 +35,15 @@ class LocalStorage @Inject constructor(app: App) : SQLiteOpenHelper(app, DATABAS
 
     val metadataDao by lazy { MetadataDao(writableDatabase) }
     val translationInfoDao by lazy { TranslationInfoDao(writableDatabase) }
+    val translationDao by lazy { TranslationDao(writableDatabase) }
+    val bookNamesDao by lazy { BookNamesDao(writableDatabase) }
 
     override fun onCreate(db: SQLiteDatabase) {
         db.beginTransaction()
         try {
             MetadataDao.createTable(db)
             TranslationInfoDao.createTable(db)
+            BookNamesDao.createTable(db)
 
             db.setTransactionSuccessful()
         } finally {
@@ -53,9 +56,62 @@ class LocalStorage @Inject constructor(app: App) : SQLiteOpenHelper(app, DATABAS
     }
 }
 
+class BookNamesDao(private val db: SQLiteDatabase) {
+    companion object {
+        private const val TABLE_BOOK_NAMES = "bookNames"
+        private const val INDEX_BOOK_NAMES = "bookNamesIndex"
+        private const val COLUMN_TRANSLATION_SHORT_NAME = "translationShortName"
+        private const val COLUMN_BOOK_INDEX = "bookIndex"
+        private const val COLUMN_BOOK_NAME = "bookName"
+
+        fun createTable(db: SQLiteDatabase) {
+            db.execSQL("CREATE TABLE $TABLE_BOOK_NAMES (" +
+                    "$COLUMN_TRANSLATION_SHORT_NAME TEXT NOT NULL, $COLUMN_BOOK_INDEX INTEGER NOT NULL, " +
+                    "$COLUMN_BOOK_NAME TEXT NOT NULL);")
+            db.execSQL("CREATE INDEX $INDEX_BOOK_NAMES ON $TABLE_BOOK_NAMES ($COLUMN_TRANSLATION_SHORT_NAME);")
+        }
+    }
+
+    fun save(translationShortName: String, bookNames: List<String>) {
+        val values = ContentValues(3)
+        values.put(COLUMN_TRANSLATION_SHORT_NAME, translationShortName)
+        for ((bookIndex, bookName) in bookNames.withIndex()) {
+            values.put(COLUMN_BOOK_INDEX, bookIndex)
+            values.put(COLUMN_BOOK_NAME, bookName)
+            db.insertWithOnConflict(TABLE_BOOK_NAMES, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+        }
+    }
+}
+
+class TranslationDao(private val db: SQLiteDatabase) {
+    companion object {
+        private const val COLUMN_BOOK_INDEX = "bookIndex"
+        private const val COLUMN_CHAPTER_INDEX = "chapterIndex"
+        private const val COLUMN_VERSE_INDEX = "verseIndex"
+        private const val COLUMN_TEXT = "text"
+    }
+
+    fun createTable(translationShortName: String) {
+        db.execSQL("CREATE TABLE $translationShortName (" +
+                "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
+                "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL);")
+    }
+
+    fun save(translationShortName: String, bookIndex: Int, chapterIndex: Int, verses: List<String>) {
+        val values = ContentValues(4)
+        values.put(COLUMN_BOOK_INDEX, bookIndex)
+        values.put(COLUMN_CHAPTER_INDEX, chapterIndex)
+        for ((verseIndex, verse) in verses.withIndex()) {
+            values.put(COLUMN_VERSE_INDEX, verseIndex)
+            values.put(COLUMN_TEXT, verse)
+            db.insertWithOnConflict(translationShortName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+        }
+    }
+}
+
 class TranslationInfoDao(private val db: SQLiteDatabase) {
     companion object {
-        private const val TABLE_TRANSLATION_INFO = "translation_info"
+        private const val TABLE_TRANSLATION_INFO = "translationInfo"
         private const val COLUMN_SHORT_NAME = "shortName"
         private const val COLUMN_NAME = "name"
         private const val COLUMN_LANGUAGE = "language"
@@ -64,8 +120,8 @@ class TranslationInfoDao(private val db: SQLiteDatabase) {
 
         fun createTable(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE $TABLE_TRANSLATION_INFO (" +
-                    "$COLUMN_SHORT_NAME TEXT PRIMARY KEY, $COLUMN_NAME TEXT NOT NULL," +
-                    " $COLUMN_LANGUAGE TEXT NOT NULL, $COLUMN_SIZE INTEGER NOT NULL," +
+                    "$COLUMN_SHORT_NAME TEXT PRIMARY KEY, $COLUMN_NAME TEXT NOT NULL, " +
+                    " $COLUMN_LANGUAGE TEXT NOT NULL, $COLUMN_SIZE INTEGER NOT NULL, " +
                     " $COLUMN_DOWNLOADED INTEGER NOT NULL);")
         }
     }

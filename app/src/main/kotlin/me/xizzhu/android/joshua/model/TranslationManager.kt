@@ -16,10 +16,12 @@
 
 package me.xizzhu.android.joshua.model
 
-import io.reactivex.Completable
+import android.database.sqlite.SQLiteDatabase
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
+import okio.buffer
+import okio.source
 import java.io.IOException
 import java.lang.Exception
 import java.util.zip.ZipEntry
@@ -54,7 +56,7 @@ class TranslationManager @Inject constructor(
         } else {
             Single.just(emptyList())
         }
-        val backend = backendService.translationService().fetchTranslationList()
+        val backend = backendService.translationService.fetchTranslationList()
         return Single.zip(local, backend,
                 BiFunction<List<TranslationInfo>, BackendTranslationList, List<TranslationInfo>> { existing, fetched ->
                     val new = ArrayList<TranslationInfo>(fetched.translations.size)
@@ -80,11 +82,16 @@ class TranslationManager @Inject constructor(
     fun downloadTranslation(translationInfo: TranslationInfo): Observable<Int> =
             Observable.create { emitter ->
                 var inputStream: ZipInputStream? = null
+                var db: SQLiteDatabase? = null
                 try {
-                    val response = backendService.translationService().fetchTranslation(translationInfo.shortName).execute()
+                    val response = backendService.translationService.fetchTranslation(translationInfo.shortName).execute()
                     if (!response.isSuccessful) {
                         throw IOException("Unsupported HTTP status code - ${response.code()}")
                     }
+
+                    db = localStorage.writableDatabase
+                    db.beginTransaction()
+                    localStorage.translationDao.createTable(translationInfo.shortName)
 
                     inputStream = ZipInputStream(response.body()!!.byteStream())
                     var zipEntry: ZipEntry?
@@ -96,7 +103,18 @@ class TranslationManager @Inject constructor(
                             break
                         }
 
-                        // TODO parses and saves the entry
+                        val bufferedSource = inputStream.source().buffer()
+                        val entryName = zipEntry.name
+                        if (entryName == "books.json") {
+                            val backendBooks = backendService.booksAdapter.fromJson(bufferedSource)
+                            localStorage.bookNamesDao.save(backendBooks!!.shortName, backendBooks.books)
+                        } else {
+                            val split = entryName.substring(0, entryName.length - 5).split("-")
+                            val bookIndex = split[0].toInt()
+                            val chapterIndex = split[1].toInt()
+                            localStorage.translationDao.save(translationInfo.shortName, bookIndex, chapterIndex,
+                                    backendService.chapterAdapter.fromJson(bufferedSource)!!.verses)
+                        }
 
                         // only emits if the progress is actually changed
                         val currentProgress = ++downloaded / 12
@@ -106,16 +124,17 @@ class TranslationManager @Inject constructor(
                         }
                     }
 
+                    db.setTransactionSuccessful()
+
                     emitter.onComplete()
                 } catch (e: Exception) {
                     emitter.onError(e)
                 } finally {
-                    if (inputStream != null) {
-                        try {
-                            inputStream.close()
-                        } catch (ignored: IOException) {
-                        }
+                    try {
+                        inputStream?.close()
+                    } catch (ignored: IOException) {
                     }
+                    db?.endTransaction()
                 }
             }
 }

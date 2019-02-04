@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.model
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import io.reactivex.Single
 import okhttp3.OkHttpClient
@@ -39,6 +40,7 @@ class BackendService @Inject constructor() {
         private const val OKHTTP_TIMEOUT_IN_SECONDS = 30L
     }
 
+    private val moshi = Moshi.Builder().build()
     private val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(OkHttpClient.Builder()
@@ -46,18 +48,14 @@ class BackendService @Inject constructor() {
                     .readTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
                     .writeTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
                     .build())
-            .addConverterFactory(MoshiConverterFactory.create(Moshi.Builder().build()))
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
 
-    private var translationService: TranslationService? = null
+    val translationService: TranslationService by lazy { retrofit.create(TranslationService::class.java) }
 
-    fun translationService(): TranslationService {
-        if (translationService == null) {
-            translationService = retrofit.create(TranslationService::class.java)
-        }
-        return translationService!!
-    }
+    val booksAdapter: JsonAdapter<BackendBooks> by lazy { moshi.adapter(BackendBooks::class.java) }
+    val chapterAdapter: JsonAdapter<BackendChapter> by lazy { moshi.adapter(BackendChapter::class.java) }
 }
 
 data class BackendTranslationInfo(@Json(name = "shortName") val shortName: String,
@@ -75,3 +73,10 @@ interface TranslationService {
     @Streaming
     fun fetchTranslation(@Path("translationShortName") translationShortName: String): Call<ResponseBody>
 }
+
+data class BackendBooks(@Json(name = "shortName") val shortName: String,
+                        @Json(name = "name") val name: String,
+                        @Json(name = "language") val language: String,
+                        @Json(name = "books") val books: List<String>)
+
+data class BackendChapter(@Json(name = "verses") val verses: List<String>)
