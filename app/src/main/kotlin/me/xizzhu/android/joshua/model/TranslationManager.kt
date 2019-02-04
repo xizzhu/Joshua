@@ -116,10 +116,13 @@ class TranslationManager @Inject constructor(
                         // only emits if the progress is actually changed
                         val currentProgress = ++downloaded / 12
                         if (currentProgress > progress) {
-                            progress = currentProgress;
+                            progress = currentProgress
                             emitter.onNext(progress)
                         }
                     }
+
+                    localStorage.translationInfoDao.save(TranslationInfo(translationInfo.shortName,
+                            translationInfo.name, translationInfo.language, translationInfo.size, true))
 
                     db.setTransactionSuccessful()
 

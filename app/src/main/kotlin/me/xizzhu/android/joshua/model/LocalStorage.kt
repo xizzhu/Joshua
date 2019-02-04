@@ -189,6 +189,16 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
             db.endTransaction()
         }
     }
+
+    fun save(translation: TranslationInfo) {
+        val values = ContentValues(5)
+        values.put(COLUMN_SHORT_NAME, translation.shortName)
+        values.put(COLUMN_NAME, translation.name)
+        values.put(COLUMN_LANGUAGE, translation.language)
+        values.put(COLUMN_SIZE, translation.size)
+        values.put(COLUMN_DOWNLOADED, if (translation.downloaded) 1 else 0)
+        db.insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+    }
 }
 
 class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
