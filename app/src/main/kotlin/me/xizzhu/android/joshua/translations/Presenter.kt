@@ -19,16 +19,18 @@ package me.xizzhu.android.joshua.translations
 import io.reactivex.Single
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
-import io.reactivex.observers.DisposableCompletableObserver
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
+import me.xizzhu.android.joshua.model.BibleReadingManager
 import me.xizzhu.android.joshua.model.TranslationInfo
 import me.xizzhu.android.joshua.model.TranslationManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.applySchedulers
 
-class TranslationManagementPresenter(private val translationManager: TranslationManager) : MVPPresenter<TranslationManagementView>() {
+class TranslationManagementPresenter(
+        private val bibleReadingManager: BibleReadingManager, private val translationManager: TranslationManager)
+    : MVPPresenter<TranslationManagementView>() {
     private var loadTranslationsDisposable: Disposable? = null
     private var downloadTranslationDisposable: Disposable? = null
 
@@ -52,7 +54,7 @@ class TranslationManagementPresenter(private val translationManager: Translation
     fun loadTranslations(forceRefresh: Boolean) {
         disposeLoadTranslations()
         loadTranslationsDisposable = Single.zip(translationManager.loadTranslations(forceRefresh).subscribeOn(Schedulers.io()),
-                translationManager.loadCurrentTranslation().subscribeOn(Schedulers.io()),
+                bibleReadingManager.loadCurrentTranslation().subscribeOn(Schedulers.io()),
                 BiFunction<List<TranslationInfo>, String, Pair<List<TranslationInfo>, String>> { translations, currentTranslation ->
                     Pair(translations, currentTranslation)
                 }).applySchedulers()

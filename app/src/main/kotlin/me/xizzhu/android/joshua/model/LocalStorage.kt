@@ -126,6 +126,18 @@ class TranslationInfoDao(private val db: SQLiteDatabase) {
         }
     }
 
+    fun hasTranslationsInstalled(): Single<Boolean> =
+            Single.fromCallable {
+                var cursor: Cursor? = null
+                try {
+                    cursor = db.query(TABLE_TRANSLATION_INFO, arrayOf(COLUMN_SHORT_NAME),
+                            "$COLUMN_DOWNLOADED = ?", arrayOf("1"), null, null, null, "1")
+                    cursor.count > 0
+                } finally {
+                    cursor?.close()
+                }
+            }
+
     fun load(): Single<List<TranslationInfo>> =
             Single.fromCallable {
                 var cursor: Cursor? = null
@@ -179,7 +191,7 @@ class MetadataDao(private val db: SQLiteDatabase) {
         private const val COLUMN_KEY = "key"
         private const val COLUMN_VALUE = "value"
 
-        const val KEY_LAST_TRANSLATION = "last_translation"
+        const val KEY_CURRENT_TRANSLATION = "currentTranslation"
 
         fun createTable(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE $TABLE_METADATA (" +

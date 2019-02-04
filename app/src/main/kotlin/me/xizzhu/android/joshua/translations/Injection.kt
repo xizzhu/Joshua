@@ -20,12 +20,14 @@ import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
 import dagger.android.AndroidInjector
+import me.xizzhu.android.joshua.model.BibleReadingManager
 import me.xizzhu.android.joshua.model.TranslationManager
 
 @Module
 class TranslationManagementModule {
     @Provides
-    fun provideTranslationManagementPresenter(translationManager: TranslationManager) = TranslationManagementPresenter(translationManager)
+    fun provideTranslationManagementPresenter(bibleReadingManager: BibleReadingManager, translationManager: TranslationManager) =
+            TranslationManagementPresenter(bibleReadingManager, translationManager)
 }
 
 @Subcomponent(modules = [(TranslationManagementModule::class)])

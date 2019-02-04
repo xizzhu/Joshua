@@ -36,10 +36,7 @@ data class TranslationInfo(val shortName: String, val name: String, val language
 class TranslationManager @Inject constructor(
         private val backendService: BackendService, private val localStorage: LocalStorage) {
     fun hasTranslationsInstalled(): Single<Boolean> =
-            loadCurrentTranslation().map { it.isNotEmpty() }
-
-    fun loadCurrentTranslation(): Single<String> =
-            localStorage.metadataDao.load(MetadataDao.KEY_LAST_TRANSLATION, "")
+            localStorage.translationInfoDao.hasTranslationsInstalled()
 
     fun loadTranslations(forceRefresh: Boolean): Single<List<TranslationInfo>> {
         return if (forceRefresh) {
