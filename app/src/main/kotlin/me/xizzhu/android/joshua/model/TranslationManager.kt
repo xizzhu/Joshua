@@ -20,6 +20,10 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
+import java.io.IOException
+import java.lang.Exception
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -85,7 +89,45 @@ class TranslationManager @Inject constructor(
                 translations as List<TranslationInfo>
             }
 
-    fun downloadTranslation(translationInfo: TranslationInfo): Observable<Int> {
-        return Observable.empty()
-    }
+    fun downloadTranslation(translationInfo: TranslationInfo): Observable<Int> =
+            Observable.create { emitter ->
+                var inputStream: ZipInputStream? = null
+                try {
+                    val response = backendService.translationService().fetchTranslation(translationInfo.shortName).execute()
+                    if (!response.isSuccessful) {
+                        throw IOException("Unsupported HTTP status code - ${response.code()}")
+                    }
+
+                    inputStream = ZipInputStream(response.body()!!.byteStream())
+                    var zipEntry: ZipEntry?
+                    var downloaded = 0
+                    var progress = -1
+                    while (true) {
+                        zipEntry = inputStream.nextEntry
+                        if (zipEntry == null) {
+                            break
+                        }
+
+                        // TODO parses and saves the entry
+
+                        // only emits if the progress is actually changed
+                        val currentProgress = ++downloaded / 12
+                        if (currentProgress > progress) {
+                            progress = currentProgress;
+                            emitter.onNext(progress)
+                        }
+                    }
+
+                    emitter.onComplete()
+                } catch (e: Exception) {
+                    emitter.onError(e)
+                } finally {
+                    if (inputStream != null) {
+                        try {
+                            inputStream.close()
+                        } catch (ignored: IOException) {
+                        }
+                    }
+                }
+            }
 }
