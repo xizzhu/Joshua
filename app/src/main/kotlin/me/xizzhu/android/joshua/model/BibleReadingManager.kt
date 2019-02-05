@@ -22,7 +22,9 @@ import javax.inject.Singleton
 
 @Singleton
 class BibleReadingManager @Inject constructor(private val localStorage: LocalStorage) {
-    @WorkerThread
-    fun loadCurrentTranslation(): String =
-            localStorage.metadataDao.load(MetadataDao.KEY_CURRENT_TRANSLATION, "")
+    var currentTranslation: String
+        @WorkerThread get() = localStorage.metadataDao.load(MetadataDao.KEY_CURRENT_TRANSLATION, "")
+        @WorkerThread set(value) {
+            localStorage.metadataDao.save(MetadataDao.KEY_CURRENT_TRANSLATION, value)
+        }
 }

@@ -21,6 +21,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.model.BibleReadingManager
 import me.xizzhu.android.joshua.model.TranslationInfo
 import me.xizzhu.android.joshua.model.TranslationManager
@@ -33,7 +34,7 @@ class TranslationManagementPresenter(
     fun loadTranslations(forceRefresh: Boolean) {
         launch(Dispatchers.Main) {
             val translations = async(Dispatchers.IO) { translationManager.loadTranslations(forceRefresh) }
-            val currentTranslation = async(Dispatchers.IO) { bibleReadingManager.loadCurrentTranslation() }
+            val currentTranslation = async(Dispatchers.IO) { bibleReadingManager.currentTranslation }
             try {
                 view?.onTranslationsLoaded(translations.await(), currentTranslation.await())
             } catch (e: Exception) {
@@ -49,6 +50,11 @@ class TranslationManagementPresenter(
                     translationManager.downloadTranslation(this, translationInfo)
                 }.consumeEach {
                     view?.onTranslationDownloadProgressed(it)
+                }
+                runBlocking(Dispatchers.IO) {
+                    if (bibleReadingManager.currentTranslation.isEmpty()) {
+                        bibleReadingManager.currentTranslation = translationInfo.shortName
+                    }
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
