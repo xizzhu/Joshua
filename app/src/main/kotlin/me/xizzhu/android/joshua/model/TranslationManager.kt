@@ -17,9 +17,8 @@
 package me.xizzhu.android.joshua.model
 
 import android.database.sqlite.SQLiteDatabase
-import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.functions.BiFunction
+import androidx.annotation.WorkerThread
+import kotlinx.coroutines.channels.SendChannel
 import okio.buffer
 import okio.source
 import java.io.IOException
@@ -35,106 +34,109 @@ data class TranslationInfo(val shortName: String, val name: String, val language
 @Singleton
 class TranslationManager @Inject constructor(
         private val backendService: BackendService, private val localStorage: LocalStorage) {
-    fun hasTranslationsInstalled(): Single<Boolean> =
+    @WorkerThread
+    fun hasTranslationsInstalled(): Boolean =
             localStorage.translationInfoDao.hasTranslationsInstalled()
 
-    fun loadTranslations(forceRefresh: Boolean): Single<List<TranslationInfo>> {
-        return if (forceRefresh) {
-            loadTranslationsFromBackend(true)
-        } else {
-            loadTranslationsFromLocal().filter { it.isNotEmpty() }
-                    .switchIfEmpty(loadTranslationsFromBackend(false))
+    @WorkerThread
+    fun loadTranslations(forceRefresh: Boolean): List<TranslationInfo> {
+        if (!forceRefresh) {
+            val translations = loadTranslationsFromLocal()
+            if (translations.isNotEmpty()) {
+                return translations
+            }
         }
+        return loadTranslationsFromBackend()
     }
 
-    private fun loadTranslationsFromBackend(needToLoadLocal: Boolean): Single<List<TranslationInfo>> {
-        val local = if (needToLoadLocal) {
-            loadTranslationsFromLocal()
-        } else {
-            Single.just(emptyList())
+    @WorkerThread
+    private fun loadTranslationsFromBackend(): List<TranslationInfo> {
+        val response = backendService.translationService.fetchTranslationList().execute()
+        if (!response.isSuccessful) {
+            return emptyList()
         }
-        val backend = backendService.translationService.fetchTranslationList()
-        return Single.zip(local, backend,
-                BiFunction<List<TranslationInfo>, BackendTranslationList, List<TranslationInfo>> { existing, fetched ->
-                    val new = ArrayList<TranslationInfo>(fetched.translations.size)
-                    for (f in fetched.translations) {
-                        var downloaded = false
-                        for (e in existing) {
-                            if (e.shortName == f.shortName) {
-                                downloaded = e.downloaded
-                                break
-                            }
-                        }
-                        new.add(TranslationInfo(f.shortName, f.name, f.language, f.size, downloaded))
-                    }
-                    new
-                }).doOnSuccess {
-            localStorage.translationInfoDao.save(it)
-        }
-    }
+        val backendTranslations = response.body()!!.translations
+        val localTranslations = loadTranslationsFromLocal()
 
-    private fun loadTranslationsFromLocal(): Single<List<TranslationInfo>> =
-            localStorage.translationInfoDao.load()
-
-    fun downloadTranslation(translationInfo: TranslationInfo): Observable<Int> =
-            Observable.create { emitter ->
-                var inputStream: ZipInputStream? = null
-                var db: SQLiteDatabase? = null
-                try {
-                    val response = backendService.translationService.fetchTranslation(translationInfo.shortName).execute()
-                    if (!response.isSuccessful) {
-                        throw IOException("Unsupported HTTP status code - ${response.code()}")
-                    }
-
-                    db = localStorage.writableDatabase
-                    db.beginTransaction()
-                    localStorage.translationDao.createTable(translationInfo.shortName)
-
-                    inputStream = ZipInputStream(response.body()!!.byteStream())
-                    var zipEntry: ZipEntry?
-                    var downloaded = 0
-                    var progress = -1
-                    while (true) {
-                        zipEntry = inputStream.nextEntry
-                        if (zipEntry == null) {
-                            break
-                        }
-
-                        val bufferedSource = inputStream.source().buffer()
-                        val entryName = zipEntry.name
-                        if (entryName == "books.json") {
-                            val backendBooks = backendService.booksAdapter.fromJson(bufferedSource)
-                            localStorage.bookNamesDao.save(backendBooks!!.shortName, backendBooks.books)
-                        } else {
-                            val split = entryName.substring(0, entryName.length - 5).split("-")
-                            val bookIndex = split[0].toInt()
-                            val chapterIndex = split[1].toInt()
-                            localStorage.translationDao.save(translationInfo.shortName, bookIndex, chapterIndex,
-                                    backendService.chapterAdapter.fromJson(bufferedSource)!!.verses)
-                        }
-
-                        // only emits if the progress is actually changed
-                        val currentProgress = ++downloaded / 12
-                        if (currentProgress > progress) {
-                            progress = currentProgress
-                            emitter.onNext(progress)
-                        }
-                    }
-
-                    localStorage.translationInfoDao.save(TranslationInfo(translationInfo.shortName,
-                            translationInfo.name, translationInfo.language, translationInfo.size, true))
-
-                    db.setTransactionSuccessful()
-
-                    emitter.onComplete()
-                } catch (e: Exception) {
-                    emitter.onError(e)
-                } finally {
-                    try {
-                        inputStream?.close()
-                    } catch (ignored: IOException) {
-                    }
-                    db?.endTransaction()
+        val translations = ArrayList<TranslationInfo>(backendTranslations.size)
+        for (backend in backendTranslations) {
+            var downloaded = false
+            for (local in localTranslations) {
+                if (backend.shortName == local.shortName) {
+                    downloaded = local.downloaded
+                    break
                 }
             }
+            translations.add(TranslationInfo(backend.shortName, backend.name, backend.language, backend.size, downloaded))
+        }
+
+        localStorage.translationInfoDao.replace(translations)
+
+        return translations
+    }
+
+    @WorkerThread
+    private fun loadTranslationsFromLocal(): List<TranslationInfo> = localStorage.translationInfoDao.load()
+
+    @WorkerThread
+    suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
+        var inputStream: ZipInputStream? = null
+        var db: SQLiteDatabase? = null
+        try {
+            val response = backendService.translationService.fetchTranslation(translationInfo.shortName).execute()
+            if (!response.isSuccessful) {
+                throw IOException("Unsupported HTTP status code - ${response.code()}")
+            }
+
+            db = localStorage.writableDatabase
+            db.beginTransaction()
+            localStorage.translationDao.createTable(translationInfo.shortName)
+
+            inputStream = ZipInputStream(response.body()!!.byteStream())
+            var zipEntry: ZipEntry?
+            var downloaded = 0
+            var progress = -1
+            while (true) {
+                zipEntry = inputStream.nextEntry
+                if (zipEntry == null) {
+                    break
+                }
+
+                val bufferedSource = inputStream.source().buffer()
+                val entryName = zipEntry.name
+                if (entryName == "books.json") {
+                    val backendBooks = backendService.booksAdapter.fromJson(bufferedSource)
+                    localStorage.bookNamesDao.save(backendBooks!!.shortName, backendBooks.books)
+                } else {
+                    val split = entryName.substring(0, entryName.length - 5).split("-")
+                    val bookIndex = split[0].toInt()
+                    val chapterIndex = split[1].toInt()
+                    localStorage.translationDao.save(translationInfo.shortName, bookIndex, chapterIndex,
+                            backendService.chapterAdapter.fromJson(bufferedSource)!!.verses)
+                }
+
+                // only emits if the progress is actually changed
+                val currentProgress = ++downloaded / 12
+                if (currentProgress > progress) {
+                    progress = currentProgress
+                    channel.send(progress)
+                }
+            }
+
+            localStorage.translationInfoDao.save(TranslationInfo(translationInfo.shortName,
+                    translationInfo.name, translationInfo.language, translationInfo.size, true))
+
+            db.setTransactionSuccessful()
+
+            channel.close()
+        } catch (e: Exception) {
+            channel.close(e)
+        } finally {
+            try {
+                inputStream?.close()
+            } catch (ignored: IOException) {
+            }
+            db?.endTransaction()
+        }
+    }
 }

@@ -16,12 +16,13 @@
 
 package me.xizzhu.android.joshua.model
 
-import io.reactivex.Single
+import androidx.annotation.WorkerThread
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class BibleReadingManager @Inject constructor(private val localStorage: LocalStorage) {
-    fun loadCurrentTranslation(): Single<String> =
+    @WorkerThread
+    fun loadCurrentTranslation(): String =
             localStorage.metadataDao.load(MetadataDao.KEY_CURRENT_TRANSLATION, "")
 }

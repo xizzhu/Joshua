@@ -19,8 +19,6 @@ ext {
     sourceJavaVersion = JavaVersion.VERSION_1_7
     targetJavaVersion = JavaVersion.VERSION_1_7
 
-    kotlinVersion = '1.3.20'
-
     compileSdkVersion = 28
     buildToolsVersion = '28.0.3'
 
@@ -40,8 +38,8 @@ ext {
 
     daggerVersion = '2.21'
 
-    rxJavaVersion = '2.2.6'
-    rxAndroidVersion = '2.1.0'
+    kotlinVersion = '1.3.20'
+    kotlinCoroutinesVersion = '1.1.1'
 
     retrofitVersion = '2.5.0'
     okhttpVersion = '3.12.1'

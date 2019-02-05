@@ -19,12 +19,10 @@ package me.xizzhu.android.joshua.model
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import io.reactivex.Single
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -49,7 +47,6 @@ class BackendService @Inject constructor() {
                     .writeTimeout(OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
                     .build())
             .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
 
     val translationService: TranslationService by lazy { retrofit.create(TranslationService::class.java) }
@@ -67,7 +64,7 @@ data class BackendTranslationList(@Json(name = "translations") val translations:
 
 interface TranslationService {
     @GET("list.json")
-    fun fetchTranslationList(): Single<BackendTranslationList>
+    fun fetchTranslationList(): Call<BackendTranslationList>
 
     @GET("{translationShortName}.zip")
     @Streaming

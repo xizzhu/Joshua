@@ -20,8 +20,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import io.reactivex.Completable
-import io.reactivex.Single
+import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.App
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -64,6 +63,7 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_BOOK_INDEX = "bookIndex"
         private const val COLUMN_BOOK_NAME = "bookName"
 
+        @WorkerThread
         fun createTable(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE $TABLE_BOOK_NAMES (" +
                     "$COLUMN_TRANSLATION_SHORT_NAME TEXT NOT NULL, $COLUMN_BOOK_INDEX INTEGER NOT NULL, " +
@@ -74,6 +74,7 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     private val db by lazy { sqliteHelper.writableDatabase }
 
+    @WorkerThread
     fun save(translationShortName: String, bookNames: List<String>) {
         val values = ContentValues(3)
         values.put(COLUMN_TRANSLATION_SHORT_NAME, translationShortName)
@@ -95,12 +96,14 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     private val db by lazy { sqliteHelper.writableDatabase }
 
+    @WorkerThread
     fun createTable(translationShortName: String) {
         db.execSQL("CREATE TABLE $translationShortName (" +
                 "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
                 "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL);")
     }
 
+    @WorkerThread
     fun save(translationShortName: String, bookIndex: Int, chapterIndex: Int, verses: List<String>) {
         val values = ContentValues(4)
         values.put(COLUMN_BOOK_INDEX, bookIndex)
@@ -122,6 +125,7 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_SIZE = "size"
         private const val COLUMN_DOWNLOADED = "downloaded"
 
+        @WorkerThread
         fun createTable(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE $TABLE_TRANSLATION_INFO (" +
                     "$COLUMN_SHORT_NAME TEXT PRIMARY KEY, $COLUMN_NAME TEXT NOT NULL, " +
@@ -132,48 +136,51 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     private val db by lazy { sqliteHelper.writableDatabase }
 
-    fun hasTranslationsInstalled(): Single<Boolean> =
-            Single.fromCallable {
-                var cursor: Cursor? = null
-                try {
-                    cursor = db.query(TABLE_TRANSLATION_INFO, arrayOf(COLUMN_SHORT_NAME),
-                            "$COLUMN_DOWNLOADED = ?", arrayOf("1"), null, null, null, "1")
-                    cursor.count > 0
-                } finally {
-                    cursor?.close()
-                }
-            }
+    @WorkerThread
+    fun hasTranslationsInstalled(): Boolean {
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_TRANSLATION_INFO, arrayOf(COLUMN_SHORT_NAME),
+                    "$COLUMN_DOWNLOADED = ?", arrayOf("1"), null, null, null, "1")
+            return cursor.count > 0
+        } finally {
+            cursor?.close()
+        }
+    }
 
-    fun load(): Single<List<TranslationInfo>> =
-            Single.fromCallable {
-                var cursor: Cursor? = null
-                try {
-                    cursor = db.query(TABLE_TRANSLATION_INFO, null, null, null, null, null, null, null)
-                    val count = cursor.count
-                    if (count == 0) {
-                        emptyList<TranslationInfo>()
-                    } else {
-                        val shortName = cursor.getColumnIndex(COLUMN_SHORT_NAME)
-                        val name = cursor.getColumnIndex(COLUMN_NAME)
-                        val language = cursor.getColumnIndex(COLUMN_LANGUAGE)
-                        val size = cursor.getColumnIndex(COLUMN_SIZE)
-                        val downloaded = cursor.getColumnIndex(COLUMN_DOWNLOADED)
-                        val translations = ArrayList<TranslationInfo>(count)
-                        while (cursor.moveToNext()) {
-                            translations.add(TranslationInfo(cursor.getString(shortName),
-                                    cursor.getString(name), cursor.getString(language),
-                                    cursor.getLong(size), cursor.getInt(downloaded) == 1))
-                        }
-                        translations
-                    }
-                } finally {
-                    cursor?.close()
+    @WorkerThread
+    fun load(): List<TranslationInfo> {
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_TRANSLATION_INFO, null, null, null, null, null, null, null)
+            val count = cursor.count
+            return if (count == 0) {
+                emptyList()
+            } else {
+                val shortName = cursor.getColumnIndex(COLUMN_SHORT_NAME)
+                val name = cursor.getColumnIndex(COLUMN_NAME)
+                val language = cursor.getColumnIndex(COLUMN_LANGUAGE)
+                val size = cursor.getColumnIndex(COLUMN_SIZE)
+                val downloaded = cursor.getColumnIndex(COLUMN_DOWNLOADED)
+                val translations = ArrayList<TranslationInfo>(count)
+                while (cursor.moveToNext()) {
+                    translations.add(TranslationInfo(cursor.getString(shortName),
+                            cursor.getString(name), cursor.getString(language),
+                            cursor.getLong(size), cursor.getInt(downloaded) == 1))
                 }
+                translations
             }
+        } finally {
+            cursor?.close()
+        }
+    }
 
-    fun save(translations: List<TranslationInfo>) {
+    @WorkerThread
+    fun replace(translations: List<TranslationInfo>) {
         db.beginTransaction()
         try {
+            db.delete(TABLE_TRANSLATION_INFO, null, null)
+
             val values = ContentValues(5)
             for (t in translations) {
                 values.put(COLUMN_SHORT_NAME, t.shortName)
@@ -190,6 +197,7 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    @WorkerThread
     fun save(translation: TranslationInfo) {
         val values = ContentValues(5)
         values.put(COLUMN_SHORT_NAME, translation.shortName)
@@ -209,6 +217,7 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
 
         const val KEY_CURRENT_TRANSLATION = "currentTranslation"
 
+        @WorkerThread
         fun createTable(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE $TABLE_METADATA (" +
                     "$COLUMN_KEY TEXT PRIMARY KEY, $COLUMN_VALUE TEXT NOT NULL);")
@@ -217,27 +226,27 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     private val db by lazy { sqliteHelper.writableDatabase }
 
-    fun load(key: String, defaultValue: String): Single<String> =
-            Single.fromCallable {
-                var cursor: Cursor? = null
-                try {
-                    cursor = db.query(TABLE_METADATA, arrayOf(COLUMN_VALUE),
-                            "$COLUMN_KEY = ?", arrayOf(key), null, null, null)
-                    if (cursor.count > 0 && cursor.moveToNext()) {
-                        cursor.getString(0)
-                    } else {
-                        defaultValue
-                    }
-                } finally {
-                    cursor?.close()
-                }
+    @WorkerThread
+    fun load(key: String, defaultValue: String): String {
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_METADATA, arrayOf(COLUMN_VALUE),
+                    "$COLUMN_KEY = ?", arrayOf(key), null, null, null)
+            return if (cursor.count > 0 && cursor.moveToNext()) {
+                cursor.getString(0)
+            } else {
+                defaultValue
             }
+        } finally {
+            cursor?.close()
+        }
+    }
 
-    fun save(key: String, value: String): Completable =
-            Completable.fromAction {
-                val values = ContentValues(2)
-                values.put(COLUMN_KEY, key)
-                values.put(COLUMN_VALUE, value)
-                db.insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
-            }
+    @WorkerThread
+    fun save(key: String, value: String) {
+        val values = ContentValues(2)
+        values.put(COLUMN_KEY, key)
+        values.put(COLUMN_VALUE, value)
+        db.insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+    }
 }

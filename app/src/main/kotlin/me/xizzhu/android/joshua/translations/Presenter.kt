@@ -16,79 +16,45 @@
 
 package me.xizzhu.android.joshua.translations
 
-import io.reactivex.Single
-import io.reactivex.disposables.Disposable
-import io.reactivex.functions.BiFunction
-import io.reactivex.observers.DisposableObserver
-import io.reactivex.observers.DisposableSingleObserver
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.model.BibleReadingManager
 import me.xizzhu.android.joshua.model.TranslationInfo
 import me.xizzhu.android.joshua.model.TranslationManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
-import me.xizzhu.android.joshua.utils.applySchedulers
+import java.lang.Exception
 
 class TranslationManagementPresenter(
         private val bibleReadingManager: BibleReadingManager, private val translationManager: TranslationManager)
     : MVPPresenter<TranslationManagementView>() {
-    private var loadTranslationsDisposable: Disposable? = null
-    private var downloadTranslationDisposable: Disposable? = null
-
-    override fun onViewDropped() {
-        disposeLoadTranslations()
-        disposeDownloadTranslation()
-
-        super.onViewDropped()
-    }
-
-    private fun disposeLoadTranslations() {
-        loadTranslationsDisposable?.dispose()
-        loadTranslationsDisposable = null
-    }
-
-    private fun disposeDownloadTranslation() {
-        downloadTranslationDisposable?.dispose()
-        downloadTranslationDisposable = null
-    }
-
     fun loadTranslations(forceRefresh: Boolean) {
-        disposeLoadTranslations()
-        loadTranslationsDisposable = Single.zip(translationManager.loadTranslations(forceRefresh).subscribeOn(Schedulers.io()),
-                bibleReadingManager.loadCurrentTranslation().subscribeOn(Schedulers.io()),
-                BiFunction<List<TranslationInfo>, String, Pair<List<TranslationInfo>, String>> { translations, currentTranslation ->
-                    Pair(translations, currentTranslation)
-                }).applySchedulers()
-                .subscribeWith(object : DisposableSingleObserver<Pair<List<TranslationInfo>, String>>() {
-                    override fun onSuccess(t: Pair<List<TranslationInfo>, String>) {
-                        loadTranslationsDisposable = null
-                        view?.onTranslationsLoaded(t.first, t.second)
-                    }
-
-                    override fun onError(e: Throwable) {
-                        loadTranslationsDisposable = null
-                        view?.onTranslationsLoadFailed()
-                    }
-                })
+        launch(Dispatchers.Main) {
+            val translations = async(Dispatchers.IO) { translationManager.loadTranslations(forceRefresh) }
+            val currentTranslation = async(Dispatchers.IO) { bibleReadingManager.loadCurrentTranslation() }
+            try {
+                view?.onTranslationsLoaded(translations.await(), currentTranslation.await())
+            } catch (e: Exception) {
+                view?.onTranslationsLoadFailed()
+            }
+        }
     }
 
     fun downloadTranslation(translationInfo: TranslationInfo) {
-        disposeDownloadTranslation()
-        downloadTranslationDisposable = translationManager.downloadTranslation(translationInfo)
-                .applySchedulers()
-                .subscribeWith(object : DisposableObserver<Int>() {
-                    override fun onComplete() {
-                        downloadTranslationDisposable = null
-                        view?.onTranslationDownloaded()
-                    }
-
-                    override fun onNext(progress: Int) {
-                        view?.onTranslationDownloadProgressed(progress)
-                    }
-
-                    override fun onError(e: Throwable) {
-                        downloadTranslationDisposable = null
-                        view?.onTranslationDownloadFailed()
-                    }
-                })
+        launch(Dispatchers.Main) {
+            try {
+                produce<Int>(Dispatchers.IO) {
+                    translationManager.downloadTranslation(this, translationInfo)
+                }.consumeEach {
+                    view?.onTranslationDownloadProgressed(it)
+                }
+                view?.onTranslationDownloaded()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                view?.onTranslationDownloadFailed()
+            }
+        }
     }
 }
