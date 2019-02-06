@@ -4,4 +4,5 @@
     <string name="app_name">Bible</string>
 
     <string name="title_translation_management">Translations</string>
+    <string name="available_translations">Available translations</string>
 </resources>

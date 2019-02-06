@@ -36,30 +36,34 @@ class TranslationManagementPresenter(
     fun loadTranslations(forceRefresh: Boolean) {
         launch(Dispatchers.Main) {
             val translations = async(Dispatchers.IO) {
-                translationManager.loadTranslations(forceRefresh)
-                        .sortedWith(object : Comparator<TranslationInfo> {
-                            override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
-                                val userLocale = Locale.getDefault()
-                                val userLanguage = userLocale.language.toLowerCase(userLocale)
+                val translations = translationManager.loadTranslations(forceRefresh).groupBy { it.downloaded }
+                translations.forEach {
+                    it.value.sortedWith(object : Comparator<TranslationInfo> {
+                        override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
+                            val userLocale = Locale.getDefault()
+                            val userLanguage = userLocale.language.toLowerCase(userLocale)
 
-                                val language1 = t1.language.split(("_"))[0]
-                                val language2 = t2.language.split(("_"))[0]
-                                val score1 = if (userLanguage == language1) 1 else 0
-                                val score2 = if (userLanguage == language2) 1 else 0
-                                var r = score2 - score1
-                                if (r == 0) {
-                                    r = t1.language.compareTo(t2.language)
-                                }
-                                if (r == 0) {
-                                    r = t1.name.compareTo(t2.name)
-                                }
-                                return r
+                            val language1 = t1.language.split(("_"))[0]
+                            val language2 = t2.language.split(("_"))[0]
+                            val score1 = if (userLanguage == language1) 1 else 0
+                            val score2 = if (userLanguage == language2) 1 else 0
+                            var r = score2 - score1
+                            if (r == 0) {
+                                r = t1.language.compareTo(t2.language)
                             }
-                        })
+                            if (r == 0) {
+                                r = t1.name.compareTo(t2.name)
+                            }
+                            return r
+                        }
+                    })
+                }
+                Pair(translations.getValue(true), translations.getValue(false))
             }
             val currentTranslation = async(Dispatchers.IO) { bibleReadingManager.currentTranslation }
             try {
-                view?.onTranslationsLoaded(translations.await(), currentTranslation.await())
+                val (downloaded, available) = translations.await()
+                view?.onTranslationsLoaded(downloaded, available, currentTranslation.await())
             } catch (e: Exception) {
                 view?.onTranslationsLoadFailed()
             }

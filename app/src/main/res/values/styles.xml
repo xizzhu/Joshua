@@ -22,8 +22,12 @@
     </style>
 
     <style name="Text.Caption">
-        <item name="android:fontFamily">@string/font_family_regular</item>
+        <item name="android:fontFamily">@string/font_family_medium</item>
         <item name="android:textColor">@color/text_dark_secondary</item>
         <item name="android:textSize">@dimen/text_caption</item>
+    </style>
+
+    <style name="Text.Caption.Light">
+        <item name="android:textColor">@color/text_light_primary</item>
     </style>
 </resources>
