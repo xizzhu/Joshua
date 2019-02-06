@@ -26,7 +26,6 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.model.TranslationInfo
 import java.util.ArrayList
 
-
 private class TranslationInfoViewHolder(private val presenter: TranslationManagementPresenter, inflater: LayoutInflater, parent: ViewGroup)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_translation, parent, false)), View.OnClickListener {
     private val textView = itemView as TextView

@@ -27,13 +27,36 @@ import me.xizzhu.android.joshua.model.TranslationInfo
 import me.xizzhu.android.joshua.model.TranslationManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import java.lang.Exception
+import java.util.*
+import kotlin.Comparator
 
 class TranslationManagementPresenter(
         private val bibleReadingManager: BibleReadingManager, private val translationManager: TranslationManager)
     : MVPPresenter<TranslationManagementView>() {
     fun loadTranslations(forceRefresh: Boolean) {
         launch(Dispatchers.Main) {
-            val translations = async(Dispatchers.IO) { translationManager.loadTranslations(forceRefresh) }
+            val translations = async(Dispatchers.IO) {
+                translationManager.loadTranslations(forceRefresh)
+                        .sortedWith(object : Comparator<TranslationInfo> {
+                            override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
+                                val userLocale = Locale.getDefault()
+                                val userLanguage = userLocale.language.toLowerCase(userLocale)
+
+                                val language1 = t1.language.split(("_"))[0]
+                                val language2 = t2.language.split(("_"))[0]
+                                val score1 = if (userLanguage == language1) 1 else 0
+                                val score2 = if (userLanguage == language2) 1 else 0
+                                var r = score2 - score1
+                                if (r == 0) {
+                                    r = t1.language.compareTo(t2.language)
+                                }
+                                if (r == 0) {
+                                    r = t1.name.compareTo(t2.name)
+                                }
+                                return r
+                            }
+                        })
+            }
             val currentTranslation = async(Dispatchers.IO) { bibleReadingManager.currentTranslation }
             try {
                 view?.onTranslationsLoaded(translations.await(), currentTranslation.await())
