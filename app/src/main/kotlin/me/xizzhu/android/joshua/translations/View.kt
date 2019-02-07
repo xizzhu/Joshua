@@ -21,10 +21,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.model.TranslationInfo
+import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import me.xizzhu.android.joshua.utils.fadeIn
@@ -36,6 +38,8 @@ interface TranslationManagementView : MVPView {
                              availableTranslations: List<TranslationInfo>, currentTranslation: String)
 
     fun onTranslationsLoadFailed()
+
+    fun onTranslationDownloadStarted()
 
     fun onTranslationDownloadProgressed(progress: Int)
 
@@ -56,6 +60,8 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
     private lateinit var translationListView: RecyclerView
 
     private lateinit var adapter: TranslationListAdapter
+
+    private var downloadProgressDialog: ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,7 +90,13 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
 
     override fun onStop() {
         presenter.dropView()
+        dismissDownloadProgressDialog()
         super.onStop()
+    }
+
+    private fun dismissDownloadProgressDialog() {
+        downloadProgressDialog?.dismiss()
+        downloadProgressDialog = null
     }
 
     override fun onTranslationsLoaded(downloadedTranslations: List<TranslationInfo>,
@@ -99,15 +111,24 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
         // TODO
     }
 
+    override fun onTranslationDownloadStarted() {
+        downloadProgressDialog = ProgressDialog.showProgressDialog(this, R.string.downloading_translation, 100)
+    }
+
     override fun onTranslationDownloadProgressed(progress: Int) {
-        // TODO
+        downloadProgressDialog?.setProgress(progress)
     }
 
     override fun onTranslationDownloaded() {
+        dismissDownloadProgressDialog()
+        Toast.makeText(this, R.string.translation_downloaded, Toast.LENGTH_SHORT).show()
+
         loadTranslations(false)
     }
 
     override fun onTranslationDownloadFailed() {
+        dismissDownloadProgressDialog()
+
         // TODO
     }
 }

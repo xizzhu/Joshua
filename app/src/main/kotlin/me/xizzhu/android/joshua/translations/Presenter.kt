@@ -58,7 +58,8 @@ class TranslationManagementPresenter(
                         }
                     })
                 }
-                Pair(translations.getValue(true), translations.getValue(false))
+                Pair(translations.getOrElse(true) { emptyList() },
+                        translations.getOrElse(false) { emptyList() })
             }
             val currentTranslation = async(Dispatchers.IO) { bibleReadingManager.currentTranslation }
             try {
@@ -71,6 +72,8 @@ class TranslationManagementPresenter(
     }
 
     fun downloadTranslation(translationInfo: TranslationInfo) {
+        view?.onTranslationDownloadStarted()
+
         launch(Dispatchers.Main) {
             try {
                 produce<Int>(Dispatchers.IO) {
