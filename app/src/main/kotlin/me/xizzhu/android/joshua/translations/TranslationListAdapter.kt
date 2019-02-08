@@ -47,8 +47,11 @@ private class TranslationInfoViewHolder(private val presenter: TranslationManage
     }
 
     override fun onClick(v: View) {
-        if (translationInfo != null && !translationInfo!!.downloaded) {
-            presenter.downloadTranslation(translationInfo!!)
+        val t = translationInfo ?: return
+        if (t.downloaded) {
+            presenter.setCurrentTranslation(t)
+        } else {
+            presenter.downloadTranslation(t)
         }
     }
 }

@@ -46,6 +46,8 @@ interface TranslationManagementView : MVPView {
     fun onTranslationDownloaded()
 
     fun onTranslationDownloadFailed()
+
+    fun onTranslationSelected()
 }
 
 class TranslationManagementActivity : BaseActivity(), TranslationManagementView {
@@ -129,6 +131,10 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
     override fun onTranslationDownloadFailed() {
         dismissDownloadProgressDialog()
 
+        // TODO
+    }
+
+    override fun onTranslationSelected() {
         // TODO
     }
 }

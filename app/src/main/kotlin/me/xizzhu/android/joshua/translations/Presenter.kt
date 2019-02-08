@@ -81,10 +81,8 @@ class TranslationManagementPresenter(
                 }.consumeEach {
                     view?.onTranslationDownloadProgressed(it)
                 }
-                runBlocking(Dispatchers.IO) {
-                    if (bibleReadingManager.currentTranslation.isEmpty()) {
-                        bibleReadingManager.currentTranslation = translationInfo.shortName
-                    }
+                if (bibleReadingManager.currentTranslation.isEmpty()) {
+                    bibleReadingManager.currentTranslation = translationInfo.shortName
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
@@ -92,5 +90,10 @@ class TranslationManagementPresenter(
                 view?.onTranslationDownloadFailed()
             }
         }
+    }
+
+    fun setCurrentTranslation(currentTranslation: TranslationInfo) {
+        bibleReadingManager.currentTranslation = currentTranslation.shortName
+        view?.onTranslationSelected()
     }
 }
