@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading
 import android.content.DialogInterface
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.model.VerseIndex
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
@@ -26,25 +27,42 @@ import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
 
 interface ReadingView : MVPView {
+    fun onCurrentVerseLoaded(currentVerse: VerseIndex)
+
+    fun onCurrentVerseLoadFailed()
+
     fun onCurrentTranslationLoaded(currentTranslation: String)
 
     fun onNoCurrentTranslation()
 
     fun onCurrentTranslationLoadFailed()
+
+    fun onBookNamesLoaded(bookNames: List<String>)
+
+    fun onBookNamesLoadFailed()
 }
 
 class ReadingActivity : BaseActivity(), ReadingView {
     @Inject
     lateinit var presenter: ReadingPresenter
 
+    private lateinit var toolbar: ReadingToolbar
+
+    private val bookNames = ArrayList<String>()
+    private var currentTranslation = ""
+    private var currentVerse = VerseIndex.INVALID
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_reading)
+        toolbar = findViewById(R.id.toolbar)
     }
 
     override fun onStart() {
         super.onStart()
         presenter.takeView(this)
         presenter.loadCurrentTranslation()
+        presenter.loadCurrentVerse()
     }
 
     override fun onStop() {
@@ -52,8 +70,18 @@ class ReadingActivity : BaseActivity(), ReadingView {
         super.onStop()
     }
 
-    override fun onCurrentTranslationLoaded(currentTranslation: String) {
+    override fun onCurrentVerseLoaded(currentVerse: VerseIndex) {
+        this.currentVerse = currentVerse
+        toolbar.setVerseIndex(currentVerse)
+    }
+
+    override fun onCurrentVerseLoadFailed() {
         // TODO
+    }
+
+    override fun onCurrentTranslationLoaded(currentTranslation: String) {
+        this.currentTranslation = currentTranslation
+        presenter.loadBookNames(currentTranslation)
     }
 
     override fun onNoCurrentTranslation() {
@@ -67,6 +95,16 @@ class ReadingActivity : BaseActivity(), ReadingView {
     }
 
     override fun onCurrentTranslationLoadFailed() {
+        // TODO
+    }
+
+    override fun onBookNamesLoaded(bookNames: List<String>) {
+        this.bookNames.clear()
+        this.bookNames.addAll(bookNames)
+        toolbar.setBookNames(bookNames)
+    }
+
+    override fun onBookNamesLoadFailed() {
         // TODO
     }
 }

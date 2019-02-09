@@ -75,6 +75,23 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
     private val db by lazy { sqliteHelper.writableDatabase }
 
     @WorkerThread
+    fun load(translationShortName: String): List<String> {
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
+                    "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName), null, null,
+                    "$COLUMN_BOOK_INDEX ASC")
+            val bookNames = ArrayList<String>(BOOK_COUNT)
+            while (cursor.moveToNext()) {
+                bookNames.add(cursor.getString(0))
+            }
+            return bookNames
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    @WorkerThread
     fun save(translationShortName: String, bookNames: List<String>) {
         val values = ContentValues(3)
         values.put(COLUMN_TRANSLATION_SHORT_NAME, translationShortName)
@@ -216,6 +233,9 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_VALUE = "value"
 
         const val KEY_CURRENT_TRANSLATION = "currentTranslation"
+        const val KEY_CURRENT_BOOK_INDEX = "currentBookIndex"
+        const val KEY_CURRENT_CHAPTER_INDEX = "currentChapterIndex"
+        const val KEY_CURRENT_VERSE_INDEX = "currentVerseIndex"
 
         @WorkerThread
         fun createTable(db: SQLiteDatabase) {
@@ -248,5 +268,22 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
         values.put(COLUMN_KEY, key)
         values.put(COLUMN_VALUE, value)
         db.insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+    }
+
+    @WorkerThread
+    fun save(entries: List<Pair<String, String>>) {
+        db.beginTransaction()
+        try {
+            val values = ContentValues(2)
+            for (entry in entries) {
+                values.put(COLUMN_KEY, entry.first)
+                values.put(COLUMN_VALUE, entry.second)
+                db.insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
     }
 }

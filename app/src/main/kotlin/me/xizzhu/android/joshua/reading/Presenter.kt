@@ -40,4 +40,28 @@ class ReadingPresenter(private val bibleReadingManager: BibleReadingManager) : M
             }
         }
     }
+
+    fun loadCurrentVerse() {
+        launch(Dispatchers.Main) {
+            try {
+                view?.onCurrentVerseLoaded(withContext(Dispatchers.IO) {
+                    bibleReadingManager.currentVerseIndex
+                })
+            } catch (e: Exception) {
+                view?.onCurrentVerseLoadFailed()
+            }
+        }
+    }
+
+    fun loadBookNames(translationShortName: String) {
+        launch(Dispatchers.Main) {
+            try {
+                view?.onBookNamesLoaded(withContext(Dispatchers.IO) {
+                    bibleReadingManager.loadBookNames(translationShortName)
+                })
+            } catch (e: Exception) {
+                view?.onBookNamesLoadFailed()
+            }
+        }
+    }
 }
