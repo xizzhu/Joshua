@@ -81,7 +81,7 @@ class TranslationManagementPresenter(
                 }.consumeEach {
                     view?.onTranslationDownloadProgressed(it)
                 }
-                launch(Dispatchers.IO) {
+                runBlocking(Dispatchers.IO) {
                     if (bibleReadingManager.currentTranslation.isEmpty()) {
                         bibleReadingManager.currentTranslation = translationInfo.shortName
                     }
