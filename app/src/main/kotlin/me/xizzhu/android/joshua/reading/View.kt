@@ -16,8 +16,11 @@
 
 package me.xizzhu.android.joshua.reading
 
+import android.content.DialogInterface
 import android.os.Bundle
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
@@ -54,7 +57,13 @@ class ReadingActivity : BaseActivity(), ReadingView {
     }
 
     override fun onNoCurrentTranslation() {
-        startActivity(TranslationManagementActivity.newStartIntent(this))
+        DialogHelper.showDialog(this, false, R.string.no_translation_downloaded,
+                DialogInterface.OnClickListener { _, _ ->
+                    startActivity(TranslationManagementActivity.newStartIntent(this))
+                },
+                DialogInterface.OnClickListener { _, _ ->
+                    finish()
+                })
     }
 
     override fun onCurrentTranslationLoadFailed() {
