@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua
+package me.xizzhu.android.joshua.reading
 
-import android.app.Application
-import android.os.StrictMode
-import androidx.annotation.CallSuper
-import com.facebook.stetho.Stetho
+import dagger.Module
+import dagger.Provides
+import dagger.Subcomponent
+import dagger.android.AndroidInjector
+import me.xizzhu.android.joshua.model.BibleReadingManager
 
-abstract class BaseApp : Application() {
-    @CallSuper
-    override fun onCreate() {
-        super.onCreate()
+@Module
+class ReadingModule {
+    @Provides
+    fun provideReadingPresenter(bibleReadingManager: BibleReadingManager) = ReadingPresenter(bibleReadingManager)
+}
 
-        Stetho.initializeWithDefaults(this)
-        StrictMode.enableDefaults()
-    }
+@Subcomponent(modules = [(ReadingModule::class)])
+interface ReadingComponent : AndroidInjector<ReadingActivity> {
+    @Subcomponent.Builder
+    abstract class Builder : AndroidInjector.Builder<ReadingActivity>()
 }

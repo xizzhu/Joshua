@@ -17,15 +17,24 @@
 package me.xizzhu.android.joshua.utils
 
 import androidx.annotation.CallSuper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlin.coroutines.CoroutineContext
 
 interface MVPView
 
-abstract class MVPPresenter<V : MVPView> {
+abstract class MVPPresenter<V : MVPView> : CoroutineScope {
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+    private lateinit var job: Job
+
     protected var view: V? = null
         private set
 
-    fun takeView(view: V) {
-        this.view = view
+    fun takeView(v: V) {
+        view = v
+        job = Job()
         onViewTaken()
     }
 
@@ -35,7 +44,8 @@ abstract class MVPPresenter<V : MVPView> {
 
     fun dropView() {
         onViewDropped()
-        this.view = null
+        job.cancel()
+        view = null
     }
 
     @CallSuper

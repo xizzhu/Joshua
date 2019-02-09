@@ -4,4 +4,12 @@
     <color name="primary">#0038b8</color>
     <color name="primary_dark">#00008b</color>
     <color name="accent">#d9d919</color>
+
+    <color name="text_dark_primary">#de000000</color>
+    <color name="text_dark_secondary">#8a000000</color>
+    <color name="text_dark_disabled_hint">#61000000</color>
+
+    <color name="text_light_primary">#ffffffff</color>
+    <color name="text_light_secondary">#b3ffffff</color>
+    <color name="text_light_disabled_hint">#80ffffff</color>
 </resources>

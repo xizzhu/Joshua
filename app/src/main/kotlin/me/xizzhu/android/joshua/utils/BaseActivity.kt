@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua
+package me.xizzhu.android.joshua.utils
 
-import android.app.Activity
 import android.os.Bundle
+import androidx.annotation.CallSuper
+import androidx.appcompat.app.AppCompatActivity
+import dagger.android.AndroidInjection
 
-class LauncherActivity: Activity() {
+abstract class BaseActivity : AppCompatActivity() {
+    @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
     }
 }

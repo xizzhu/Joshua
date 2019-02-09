@@ -26,7 +26,9 @@ import me.xizzhu.android.joshua.utils.DaggerAppComponent
 import javax.inject.Inject
 
 class App : BaseApp(), HasActivityInjector {
-    private lateinit var appComponent: AppComponent
+    companion object {
+        lateinit var appComponent: AppComponent
+    }
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Activity>
