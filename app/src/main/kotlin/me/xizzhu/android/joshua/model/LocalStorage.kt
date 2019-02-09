@@ -154,18 +154,6 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
     private val db by lazy { sqliteHelper.writableDatabase }
 
     @WorkerThread
-    fun hasTranslationsInstalled(): Boolean {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_TRANSLATION_INFO, arrayOf(COLUMN_SHORT_NAME),
-                    "$COLUMN_DOWNLOADED = ?", arrayOf("1"), null, null, null, "1")
-            return cursor.count > 0
-        } finally {
-            cursor?.close()
-        }
-    }
-
-    @WorkerThread
     fun load(): List<TranslationInfo> {
         var cursor: Cursor? = null
         try {
