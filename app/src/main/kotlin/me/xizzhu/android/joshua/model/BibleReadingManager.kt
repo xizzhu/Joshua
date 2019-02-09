@@ -16,30 +16,23 @@
 
 package me.xizzhu.android.joshua.model
 
-import kotlinx.coroutines.*
+import androidx.annotation.WorkerThread
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class BibleReadingManager @Inject constructor(private val localStorage: LocalStorage) {
-    private val init = GlobalScope.launch(Dispatchers.IO) {
-        currentTranslation = localStorage.metadataDao.load(MetadataDao.KEY_CURRENT_TRANSLATION, "")
-    }
-
-    @Volatile
     var currentTranslation: String = ""
-        get() {
-            if (!init.isCompleted) {
-                runBlocking { init.join() }
+        @WorkerThread get() {
+            if (field.isEmpty()) {
+                field = localStorage.metadataDao.load(MetadataDao.KEY_CURRENT_TRANSLATION, "")
             }
             return field
         }
-        set(value) {
-            if (field != value) {
+        @WorkerThread set(value) {
+            if (value != field) {
                 field = value
-                GlobalScope.launch(Dispatchers.IO) {
-                    localStorage.metadataDao.save(MetadataDao.KEY_CURRENT_TRANSLATION, value)
-                }
+                localStorage.metadataDao.save(MetadataDao.KEY_CURRENT_TRANSLATION, value)
             }
         }
 }

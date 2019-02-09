@@ -35,10 +35,6 @@ data class TranslationInfo(val shortName: String, val name: String, val language
 class TranslationManager @Inject constructor(
         private val backendService: BackendService, private val localStorage: LocalStorage) {
     @WorkerThread
-    fun hasTranslationsInstalled(): Boolean =
-            localStorage.translationInfoDao.hasTranslationsInstalled()
-
-    @WorkerThread
     fun loadTranslations(forceRefresh: Boolean): List<TranslationInfo> {
         if (!forceRefresh) {
             val translations = loadTranslationsFromLocal()

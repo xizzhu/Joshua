@@ -26,6 +26,8 @@ import dagger.android.support.AndroidSupportInjectionModule
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import me.xizzhu.android.joshua.*
+import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.ReadingComponent
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementComponent
 import javax.inject.Singleton
@@ -37,8 +39,13 @@ class AppModule(private val app: App) {
     fun provideApp(): App = app
 }
 
-@Module(subcomponents = [(TranslationManagementComponent::class)])
+@Module(subcomponents = [(ReadingComponent::class), (TranslationManagementComponent::class)])
 abstract class ActivityModule {
+    @Binds
+    @IntoMap
+    @ClassKey(ReadingActivity::class)
+    abstract fun bindReadingActivityInjectorFactory(builder: ReadingComponent.Builder): AndroidInjector.Factory<*>
+
     @Binds
     @IntoMap
     @ClassKey(TranslationManagementActivity::class)
@@ -46,10 +53,7 @@ abstract class ActivityModule {
 }
 
 @Singleton
-@Component(modules = [(AppModule::class), (ActivityModule::class), (AndroidInjectionModule::class),
-    (AndroidSupportInjectionModule::class)])
+@Component(modules = [(AppModule::class), (ActivityModule::class), (AndroidInjectionModule::class), (AndroidSupportInjectionModule::class)])
 interface AppComponent {
     fun inject(app: App)
-
-    fun inject(launcherActivity: LauncherActivity)
 }

@@ -81,19 +81,24 @@ class TranslationManagementPresenter(
                 }.consumeEach {
                     view?.onTranslationDownloadProgressed(it)
                 }
-                if (bibleReadingManager.currentTranslation.isEmpty()) {
-                    bibleReadingManager.currentTranslation = translationInfo.shortName
+                launch(Dispatchers.IO) {
+                    if (bibleReadingManager.currentTranslation.isEmpty()) {
+                        bibleReadingManager.currentTranslation = translationInfo.shortName
+                    }
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
-                e.printStackTrace()
                 view?.onTranslationDownloadFailed()
             }
         }
     }
 
     fun setCurrentTranslation(currentTranslation: TranslationInfo) {
-        bibleReadingManager.currentTranslation = currentTranslation.shortName
-        view?.onTranslationSelected()
+        launch(Dispatchers.Main) {
+            launch(Dispatchers.IO) {
+                bibleReadingManager.currentTranslation = currentTranslation.shortName
+            }
+            view?.onTranslationSelected()
+        }
     }
 }
