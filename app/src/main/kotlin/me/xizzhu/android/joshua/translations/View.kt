@@ -25,7 +25,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.model.TranslationInfo
+import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView

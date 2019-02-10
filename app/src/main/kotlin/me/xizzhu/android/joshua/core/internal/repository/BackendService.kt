@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.model
+package me.xizzhu.android.joshua.core.internal.repository
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -28,11 +28,8 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Streaming
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class BackendService @Inject constructor() {
+class BackendService {
     companion object {
         private const val BASE_URL = "https://xizzhu.me/bible/download/"
         private const val OKHTTP_TIMEOUT_IN_SECONDS = 30L

@@ -20,7 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.Toolbar
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.model.VerseIndex
+import me.xizzhu.android.joshua.core.VerseIndex
 import java.lang.StringBuilder
 
 class ReadingToolbar : Toolbar {

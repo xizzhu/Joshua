@@ -19,7 +19,7 @@ package me.xizzhu.android.joshua.reading
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.model.BibleReadingManager
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import java.lang.Exception
 

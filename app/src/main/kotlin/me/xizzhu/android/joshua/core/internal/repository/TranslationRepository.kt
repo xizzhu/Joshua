@@ -14,45 +14,39 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.model
+package me.xizzhu.android.joshua.core.internal.repository
 
 import android.database.sqlite.SQLiteDatabase
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.SendChannel
+import me.xizzhu.android.joshua.core.TranslationInfo
 import okio.buffer
 import okio.source
 import java.io.IOException
 import java.lang.Exception
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-import javax.inject.Inject
-import javax.inject.Singleton
 
-data class TranslationInfo(val shortName: String, val name: String, val language: String,
-                           val size: Long, val downloaded: Boolean)
-
-@Singleton
-class TranslationManager @Inject constructor(
-        private val backendService: BackendService, private val localStorage: LocalStorage) {
+class TranslationRepository(private val localStorage: LocalStorage, private val backendService: BackendService) {
     @WorkerThread
-    fun loadTranslations(forceRefresh: Boolean): List<TranslationInfo> {
+    fun readTranslations(forceRefresh: Boolean): List<TranslationInfo> {
         if (!forceRefresh) {
-            val translations = loadTranslationsFromLocal()
+            val translations = readTranslationsFromLocal()
             if (translations.isNotEmpty()) {
                 return translations
             }
         }
-        return loadTranslationsFromBackend()
+        return readTranslationsFromBackend()
     }
 
     @WorkerThread
-    private fun loadTranslationsFromBackend(): List<TranslationInfo> {
+    private fun readTranslationsFromBackend(): List<TranslationInfo> {
         val response = backendService.translationService.fetchTranslationList().execute()
         if (!response.isSuccessful) {
             return emptyList()
         }
         val backendTranslations = response.body()!!.translations
-        val localTranslations = loadTranslationsFromLocal()
+        val localTranslations = readTranslationsFromLocal()
 
         val translations = ArrayList<TranslationInfo>(backendTranslations.size)
         for (backend in backendTranslations) {
@@ -72,7 +66,8 @@ class TranslationManager @Inject constructor(
     }
 
     @WorkerThread
-    private fun loadTranslationsFromLocal(): List<TranslationInfo> = localStorage.translationInfoDao.load()
+    private fun readTranslationsFromLocal(): List<TranslationInfo> =
+            localStorage.translationInfoDao.read()
 
     @WorkerThread
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {

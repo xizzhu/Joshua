@@ -23,7 +23,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.model.TranslationInfo
+import me.xizzhu.android.joshua.core.TranslationInfo
 import java.util.ArrayList
 
 private class AvailableTranslationTitleViewHolder(inflater: LayoutInflater, parent: ViewGroup)

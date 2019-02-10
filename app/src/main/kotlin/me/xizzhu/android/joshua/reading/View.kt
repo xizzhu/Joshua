@@ -19,7 +19,7 @@ package me.xizzhu.android.joshua.reading
 import android.content.DialogInterface
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.model.VerseIndex
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
