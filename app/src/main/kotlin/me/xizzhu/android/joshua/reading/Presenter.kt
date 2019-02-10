@@ -41,14 +41,14 @@ class ReadingPresenter(private val bibleReadingManager: BibleReadingManager) : M
         }
     }
 
-    fun loadCurrentVerse() {
+    fun loadCurrentVerseIndex() {
         launch(Dispatchers.Main) {
             try {
-                view?.onCurrentVerseLoaded(withContext(Dispatchers.IO) {
+                view?.onCurrentVerseIndexLoaded(withContext(Dispatchers.IO) {
                     bibleReadingManager.currentVerseIndex
                 })
             } catch (e: Exception) {
-                view?.onCurrentVerseLoadFailed()
+                view?.onCurrentVerseIndexLoadFailed()
             }
         }
     }

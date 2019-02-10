@@ -27,9 +27,9 @@ import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
 
 interface ReadingView : MVPView {
-    fun onCurrentVerseLoaded(currentVerse: VerseIndex)
+    fun onCurrentVerseIndexLoaded(currentVerse: VerseIndex)
 
-    fun onCurrentVerseLoadFailed()
+    fun onCurrentVerseIndexLoadFailed()
 
     fun onCurrentTranslationLoaded(currentTranslation: String)
 
@@ -62,7 +62,7 @@ class ReadingActivity : BaseActivity(), ReadingView {
         super.onStart()
         presenter.takeView(this)
         presenter.loadCurrentTranslation()
-        presenter.loadCurrentVerse()
+        presenter.loadCurrentVerseIndex()
     }
 
     override fun onStop() {
@@ -70,12 +70,12 @@ class ReadingActivity : BaseActivity(), ReadingView {
         super.onStop()
     }
 
-    override fun onCurrentVerseLoaded(currentVerse: VerseIndex) {
+    override fun onCurrentVerseIndexLoaded(currentVerse: VerseIndex) {
         this.currentVerse = currentVerse
         toolbar.setVerseIndex(currentVerse)
     }
 
-    override fun onCurrentVerseLoadFailed() {
+    override fun onCurrentVerseIndexLoadFailed() {
         // TODO
     }
 
