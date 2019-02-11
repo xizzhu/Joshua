@@ -24,7 +24,7 @@ import me.xizzhu.android.joshua.utils.MVPPresenter
 import java.lang.Exception
 
 class ReadingPresenter(private val bibleReadingManager: BibleReadingManager) : MVPPresenter<ReadingView>() {
-    fun loadCurrentTranslation() {
+    fun loadCurrentReadingProgress() {
         launch(Dispatchers.Main) {
             try {
                 val currentTranslation = withContext(Dispatchers.IO) {
@@ -34,6 +34,9 @@ class ReadingPresenter(private val bibleReadingManager: BibleReadingManager) : M
                     view?.onNoCurrentTranslation()
                 } else {
                     view?.onCurrentTranslationLoaded(currentTranslation)
+
+                    loadCurrentVerseIndex()
+                    loadBookNames(currentTranslation)
                 }
             } catch (e: Exception) {
                 view?.onCurrentTranslationLoadFailed()
@@ -41,27 +44,23 @@ class ReadingPresenter(private val bibleReadingManager: BibleReadingManager) : M
         }
     }
 
-    fun loadCurrentVerseIndex() {
-        launch(Dispatchers.Main) {
-            try {
-                view?.onCurrentVerseIndexLoaded(withContext(Dispatchers.IO) {
-                    bibleReadingManager.currentVerseIndex
-                })
-            } catch (e: Exception) {
-                view?.onCurrentVerseIndexLoadFailed()
-            }
+    private suspend fun loadCurrentVerseIndex() {
+        try {
+            view?.onCurrentVerseIndexLoaded(withContext(Dispatchers.IO) {
+                bibleReadingManager.currentVerseIndex
+            })
+        } catch (e: Exception) {
+            view?.onCurrentVerseIndexLoadFailed()
         }
     }
 
-    fun loadBookNames(translationShortName: String) {
-        launch(Dispatchers.Main) {
-            try {
-                view?.onBookNamesLoaded(withContext(Dispatchers.IO) {
-                    bibleReadingManager.loadBookNames(translationShortName)
-                })
-            } catch (e: Exception) {
-                view?.onBookNamesLoadFailed()
-            }
+    private suspend fun loadBookNames(translationShortName: String) {
+        try {
+            view?.onBookNamesLoaded(withContext(Dispatchers.IO) {
+                bibleReadingManager.loadBookNames(translationShortName)
+            })
+        } catch (e: Exception) {
+            view?.onBookNamesLoadFailed()
         }
     }
 }

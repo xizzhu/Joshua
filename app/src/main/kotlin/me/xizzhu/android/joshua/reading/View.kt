@@ -61,8 +61,7 @@ class ReadingActivity : BaseActivity(), ReadingView {
     override fun onStart() {
         super.onStart()
         presenter.takeView(this)
-        presenter.loadCurrentTranslation()
-        presenter.loadCurrentVerseIndex()
+        presenter.loadCurrentReadingProgress()
     }
 
     override fun onStop() {
@@ -81,7 +80,6 @@ class ReadingActivity : BaseActivity(), ReadingView {
 
     override fun onCurrentTranslationLoaded(currentTranslation: String) {
         this.currentTranslation = currentTranslation
-        presenter.loadBookNames(currentTranslation)
     }
 
     override fun onNoCurrentTranslation() {
