@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import java.lang.Exception
 
@@ -61,6 +62,20 @@ class ReadingPresenter(private val bibleReadingManager: BibleReadingManager) : M
             })
         } catch (e: Exception) {
             view?.onBookNamesLoadFailed()
+        }
+    }
+
+    fun updateCurrentVerseIndex(currentVerseIndex: VerseIndex) {
+        view?.onCurrentVerseIndexLoaded(currentVerseIndex)
+
+        launch(Dispatchers.Main) {
+            try {
+                withContext(Dispatchers.IO) {
+                    bibleReadingManager.currentVerseIndex = currentVerseIndex
+                }
+            } catch (e: Exception) {
+                view?.onCurrentVerseIndexUpdateFailed()
+            }
         }
     }
 }

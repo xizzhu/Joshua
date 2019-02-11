@@ -19,7 +19,9 @@ package me.xizzhu.android.joshua.reading
 import android.content.DialogInterface
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.Gravity
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -33,6 +35,8 @@ interface ReadingView : MVPView {
     fun onCurrentVerseIndexLoaded(verseIndex: VerseIndex)
 
     fun onCurrentVerseIndexLoadFailed()
+
+    fun onCurrentVerseIndexUpdateFailed()
 
     fun onCurrentTranslationLoaded(currentTranslation: String)
 
@@ -103,6 +107,10 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
         // TODO
     }
 
+    override fun onCurrentVerseIndexUpdateFailed() {
+        // TODO
+    }
+
     override fun onCurrentTranslationLoaded(currentTranslation: String) {
         this.currentTranslation = currentTranslation
     }
@@ -132,7 +140,8 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
         // TODO
     }
 
-    override fun onChapterSelected(bookIndex: Int, chapterIndex: Int) {
-        // TODO
+    override fun onChapterSelected(currentVerseIndex: VerseIndex) {
+        drawerLayout.closeDrawer(GravityCompat.START)
+        presenter.updateCurrentVerseIndex(currentVerseIndex)
     }
 }

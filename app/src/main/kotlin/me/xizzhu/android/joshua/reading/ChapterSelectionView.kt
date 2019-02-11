@@ -34,7 +34,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 
 class ChapterSelectionView : ExpandableListView, ExpandableListView.OnGroupClickListener {
     interface Listener {
-        fun onChapterSelected(bookIndex: Int, chapterIndex: Int)
+        fun onChapterSelected(currentVerseIndex: VerseIndex)
     }
 
     constructor(context: Context) : super(context)
@@ -149,7 +149,7 @@ private class ChapterListAdapter(context: Context) : BaseExpandableListAdapter()
         if (convertView == null) {
             linearLayout = inflater.inflate(R.layout.item_chapter_row, parent, false) as LinearLayout
 
-            val textViews = Array<TextView>(ROW_CHILD_COUNT) {
+            val textViews = Array(ROW_CHILD_COUNT) {
                 val textView = linearLayout.getChildAt(it) as TextView
                 textView.setOnClickListener(this@ChapterListAdapter)
                 textView.tag = ChapterTag(-1, -1)
@@ -187,7 +187,7 @@ private class ChapterListAdapter(context: Context) : BaseExpandableListAdapter()
         val chapterTag = v.tag as ChapterTag
         if (chapterTag.bookIndex != currentVerseIndex.bookIndex
                 || chapterTag.chapterIndex != currentVerseIndex.chapterIndex) {
-            listener?.onChapterSelected(chapterTag.bookIndex, chapterTag.chapterIndex)
+            listener?.onChapterSelected(VerseIndex(chapterTag.bookIndex, chapterTag.chapterIndex, 0))
         }
     }
 }
