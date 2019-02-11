@@ -55,8 +55,7 @@ class ReadingToolbar : Toolbar {
         }
 
         titleBuilder.setLength(0)
-        titleBuilder.append(bookNames[verseIndex.bookIndex]).append(", ")
-                .append(verseIndex.bookIndex + 1).append(":").append(verseIndex.chapterIndex + 1)
+        titleBuilder.append(bookNames[verseIndex.bookIndex]).append(", ").append(verseIndex.chapterIndex + 1)
         title = titleBuilder.toString()
     }
 }
