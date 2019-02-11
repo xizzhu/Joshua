@@ -17,7 +17,10 @@
 package me.xizzhu.android.joshua.reading
 
 import android.content.DialogInterface
+import android.content.res.Configuration
 import android.os.Bundle
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.drawerlayout.widget.DrawerLayout
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
@@ -27,7 +30,7 @@ import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
 
 interface ReadingView : MVPView {
-    fun onCurrentVerseIndexLoaded(currentVerse: VerseIndex)
+    fun onCurrentVerseIndexLoaded(verseIndex: VerseIndex)
 
     fun onCurrentVerseIndexLoadFailed()
 
@@ -42,11 +45,15 @@ interface ReadingView : MVPView {
     fun onBookNamesLoadFailed()
 }
 
-class ReadingActivity : BaseActivity(), ReadingView {
+class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listener {
     @Inject
     lateinit var presenter: ReadingPresenter
 
+    private lateinit var drawerToggle: ActionBarDrawerToggle
+
+    private lateinit var drawerLayout: DrawerLayout
     private lateinit var toolbar: ReadingToolbar
+    private lateinit var chapterSelectionView: ChapterSelectionView
 
     private val bookNames = ArrayList<String>()
     private var currentTranslation = ""
@@ -54,8 +61,20 @@ class ReadingActivity : BaseActivity(), ReadingView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_reading)
+        drawerLayout = findViewById(R.id.drawer_layout)
         toolbar = findViewById(R.id.toolbar)
+        chapterSelectionView = findViewById(R.id.chapter_selection_view)
+        chapterSelectionView.setListener(this)
+
+        drawerToggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, 0, 0)
+        drawerLayout.addDrawerListener(drawerToggle)
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        drawerToggle.syncState()
     }
 
     override fun onStart() {
@@ -69,9 +88,15 @@ class ReadingActivity : BaseActivity(), ReadingView {
         super.onStop()
     }
 
-    override fun onCurrentVerseIndexLoaded(currentVerse: VerseIndex) {
-        this.currentVerse = currentVerse
-        toolbar.setVerseIndex(currentVerse)
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        drawerToggle.onConfigurationChanged(newConfig)
+    }
+
+    override fun onCurrentVerseIndexLoaded(verseIndex: VerseIndex) {
+        this.currentVerse = verseIndex
+        toolbar.setVerseIndex(verseIndex)
+        chapterSelectionView.setCurrentVerseIndex(verseIndex)
     }
 
     override fun onCurrentVerseIndexLoadFailed() {
@@ -100,9 +125,14 @@ class ReadingActivity : BaseActivity(), ReadingView {
         this.bookNames.clear()
         this.bookNames.addAll(bookNames)
         toolbar.setBookNames(bookNames)
+        chapterSelectionView.setBookNames(bookNames)
     }
 
     override fun onBookNamesLoadFailed() {
+        // TODO
+    }
+
+    override fun onChapterSelected(bookIndex: Int, chapterIndex: Int) {
         // TODO
     }
 }
