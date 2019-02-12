@@ -24,6 +24,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
@@ -47,9 +48,13 @@ interface ReadingView : MVPView {
     fun onBookNamesLoaded(bookNames: List<String>)
 
     fun onBookNamesLoadFailed()
+
+    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>)
+
+    fun onVersesLoadFailed()
 }
 
-class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listener {
+class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listener, VerseViewPager.Listener {
     @Inject
     lateinit var presenter: ReadingPresenter
 
@@ -58,6 +63,7 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var toolbar: ReadingToolbar
     private lateinit var chapterSelectionView: ChapterSelectionView
+    private lateinit var verseViewPager: VerseViewPager
 
     private val bookNames = ArrayList<String>()
     private var currentTranslation = ""
@@ -71,6 +77,8 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
         toolbar = findViewById(R.id.toolbar)
         chapterSelectionView = findViewById(R.id.chapter_selection_view)
         chapterSelectionView.setListener(this)
+        verseViewPager = findViewById(R.id.verse_view_pager)
+        verseViewPager.setListener(this)
 
         drawerToggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, 0, 0)
         drawerLayout.addDrawerListener(drawerToggle)
@@ -98,9 +106,13 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
     }
 
     override fun onCurrentVerseIndexLoaded(verseIndex: VerseIndex) {
-        this.currentVerse = verseIndex
+        if (currentVerse == verseIndex) {
+            return
+        }
+        currentVerse = verseIndex
         toolbar.setVerseIndex(verseIndex)
         chapterSelectionView.setCurrentVerseIndex(verseIndex)
+        verseViewPager.setCurrentVerseIndex(verseIndex)
     }
 
     override fun onCurrentVerseIndexLoadFailed() {
@@ -140,8 +152,23 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
         // TODO
     }
 
+    override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
+        verseViewPager.setVerses(bookIndex, chapterIndex, verses)
+    }
+
+    override fun onVersesLoadFailed() {
+        // TODO
+    }
+
     override fun onChapterSelected(currentVerseIndex: VerseIndex) {
+        if (currentVerse == currentVerseIndex) {
+            return
+        }
         drawerLayout.closeDrawer(GravityCompat.START)
         presenter.updateCurrentVerseIndex(currentVerseIndex)
+    }
+
+    override fun onChapterRequested(bookIndex: Int, chapterIndex: Int) {
+        presenter.loadVerses(currentTranslation, bookIndex, chapterIndex)
     }
 }

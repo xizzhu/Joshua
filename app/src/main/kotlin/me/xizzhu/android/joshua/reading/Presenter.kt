@@ -58,7 +58,7 @@ class ReadingPresenter(private val bibleReadingManager: BibleReadingManager) : M
     private suspend fun loadBookNames(translationShortName: String) {
         try {
             view?.onBookNamesLoaded(withContext(Dispatchers.IO) {
-                bibleReadingManager.loadBookNames(translationShortName)
+                bibleReadingManager.readBookNames(translationShortName)
             })
         } catch (e: Exception) {
             view?.onBookNamesLoadFailed()
@@ -75,6 +75,18 @@ class ReadingPresenter(private val bibleReadingManager: BibleReadingManager) : M
                 }
             } catch (e: Exception) {
                 view?.onCurrentVerseIndexUpdateFailed()
+            }
+        }
+    }
+
+    fun loadVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int) {
+        launch(Dispatchers.Main) {
+            try {
+                view?.onVersesLoaded(bookIndex, chapterIndex, withContext(Dispatchers.IO) {
+                    bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex)
+                })
+            } catch (e: Exception) {
+                view?.onVersesLoadFailed()
             }
         }
     }

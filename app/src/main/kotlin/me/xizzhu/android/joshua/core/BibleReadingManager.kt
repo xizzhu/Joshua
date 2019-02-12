@@ -49,6 +49,10 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
         }
 
     @WorkerThread
-    fun loadBookNames(translationShortName: String): List<String> =
+    fun readBookNames(translationShortName: String): List<String> =
             bibleReadingRepository.readBookNames(translationShortName)
+
+    @WorkerThread
+    fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
+            bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
 }

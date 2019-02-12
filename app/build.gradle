@@ -69,6 +69,7 @@ dependencies {
     implementation "androidx.drawerlayout:drawerlayout:$rootProject.ext.drawerLayoutVersion"
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
     implementation "androidx.recyclerview:recyclerview:$rootProject.ext.recyclerViewVersion"
+    implementation "androidx.viewpager:viewpager:$rootProject.ext.viewPagerVersion"
 
     implementation "com.google.dagger:dagger:$rootProject.ext.daggerVersion"
     implementation "com.google.dagger:dagger-android:$rootProject.ext.daggerVersion"

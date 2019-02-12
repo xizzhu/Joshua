@@ -76,7 +76,7 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
     private val db by lazy { sqliteHelper.writableDatabase }
 
     @WorkerThread
-    fun load(translationShortName: String): List<String> {
+    fun read(translationShortName: String): List<String> {
         var cursor: Cursor? = null
         try {
             cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
@@ -125,7 +125,7 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
     private val db by lazy { sqliteHelper.writableDatabase }
 
     @WorkerThread
-    fun load(key: String, defaultValue: String): String {
+    fun read(key: String, defaultValue: String): String {
         var cursor: Cursor? = null
         try {
             cursor = db.query(TABLE_METADATA, arrayOf(COLUMN_VALUE),
@@ -193,7 +193,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             val verses = ArrayList<Verse>(cursor.count)
             var verseIndex = 0
             while (cursor.moveToNext()) {
-                verses.add(Verse(VerseIndex(bookIndex, chapterIndex, ++verseIndex),
+                verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
                         translationShortName, cursor.getString(0)))
             }
             return verses

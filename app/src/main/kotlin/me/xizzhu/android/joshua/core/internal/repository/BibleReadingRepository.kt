@@ -17,15 +17,16 @@
 package me.xizzhu.android.joshua.core.internal.repository
 
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 
 class BibleReadingRepository(private val localStorage: LocalStorage) {
     @WorkerThread
     fun readCurrentVerseIndex(): VerseIndex {
         val metadataDao = localStorage.metadataDao
-        val bookIndex = metadataDao.load(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0").toInt()
-        val chapterIndex = metadataDao.load(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0").toInt()
-        val verseIndex = metadataDao.load(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0").toInt()
+        val bookIndex = metadataDao.read(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0").toInt()
+        val chapterIndex = metadataDao.read(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0").toInt()
+        val verseIndex = metadataDao.read(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0").toInt()
         return VerseIndex(bookIndex, chapterIndex, verseIndex)
     }
 
@@ -40,7 +41,7 @@ class BibleReadingRepository(private val localStorage: LocalStorage) {
 
     @WorkerThread
     fun readCurrentTranslation(): String =
-            localStorage.metadataDao.load(MetadataDao.KEY_CURRENT_TRANSLATION, "")
+            localStorage.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, "")
 
     @WorkerThread
     fun saveCurrentTranslation(translationShortName: String) {
@@ -49,5 +50,9 @@ class BibleReadingRepository(private val localStorage: LocalStorage) {
 
     @WorkerThread
     fun readBookNames(translationShortName: String): List<String> =
-            localStorage.bookNamesDao.load(translationShortName)
+            localStorage.bookNamesDao.read(translationShortName)
+
+    @WorkerThread
+    fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
+            localStorage.translationDao.read(translationShortName, bookIndex, chapterIndex)
 }

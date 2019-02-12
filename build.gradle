@@ -36,6 +36,7 @@ ext {
     drawerLayoutVersion = '1.0.0'
     materialVersion = '1.0.0'
     recyclerViewVersion = '1.0.0'
+    viewPagerVersion = '1.0.0'
 
     daggerVersion = '2.21'
 
