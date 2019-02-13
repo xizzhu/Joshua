@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading
+package me.xizzhu.android.joshua.reading.chapter
 
 import android.content.Context
 import android.graphics.Color
@@ -28,11 +28,24 @@ import android.widget.ExpandableListView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.utils.MVPView
 
-class ChapterSelectionView : ExpandableListView, ExpandableListView.OnGroupClickListener {
+interface ChapterView : MVPView {
+    fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex)
+
+    fun onBookNamesUpdated(bookNames: List<String>)
+
+    fun onError(e: Exception)
+}
+
+class ChapterListView : ExpandableListView, LifecycleObserver, ChapterView,
+        ExpandableListView.OnGroupClickListener, View.OnClickListener {
     interface Listener {
         fun onChapterSelected(currentVerseIndex: VerseIndex)
     }
@@ -45,7 +58,13 @@ class ChapterSelectionView : ExpandableListView, ExpandableListView.OnGroupClick
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
-    private val adapter = ChapterListAdapter(context)
+    private lateinit var presenter: ChapterListPresenter
+    private lateinit var listener: Listener
+
+    private val adapter = ChapterListAdapter(context, this)
+
+    private val bookNames = ArrayList<String>()
+    private var currentVerseIndex = VerseIndex.INVALID
     private var lastExpandedGroup: Int = -1
 
     init {
@@ -59,62 +78,98 @@ class ChapterSelectionView : ExpandableListView, ExpandableListView.OnGroupClick
         setAdapter(adapter)
     }
 
+    fun setPresenter(presenter: ChapterListPresenter) {
+        this.presenter = presenter
+    }
+
     fun setListener(listener: Listener) {
-        adapter.listener = listener
+        this.listener = listener
     }
 
-    fun setBookNames(bookNames: List<String>) {
-        adapter.bookNames = bookNames
-        refreshUi()
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onStart() {
+        presenter.takeView(this)
     }
 
-    fun setCurrentVerseIndex(currentVerseIndex: VerseIndex) {
-        adapter.currentVerseIndex = currentVerseIndex
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onStop() {
+        presenter.dropView()
+    }
+
+    override fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex) {
+        this.currentVerseIndex = verseIndex
         refreshUi()
     }
 
     private fun refreshUi() {
-        if (adapter.bookNames.isEmpty() || !adapter.currentVerseIndex.isValid()) {
+        if (bookNames.isEmpty() || !currentVerseIndex.isValid()) {
             return
         }
-        adapter.notifyDataSetChanged()
+        adapter.setData(currentVerseIndex, bookNames)
 
-        val currentBookIndex = adapter.currentVerseIndex.bookIndex
+        val currentBookIndex = currentVerseIndex.bookIndex
         lastExpandedGroup = currentBookIndex
         expandGroup(currentBookIndex)
         setSelectedGroup(currentBookIndex)
     }
 
+    override fun onBookNamesUpdated(bookNames: List<String>) {
+        this.bookNames.clear()
+        this.bookNames.addAll(bookNames)
+        refreshUi()
+    }
+
+    override fun onError(e: Exception) {
+        // TODO
+    }
+
     override fun onGroupClick(parent: ExpandableListView, v: View, groupPosition: Int, id: Long): Boolean {
-        parent.smoothScrollToPosition(groupPosition)
-        if (parent.isGroupExpanded(groupPosition)) {
-            parent.collapseGroup(groupPosition)
+        smoothScrollToPosition(groupPosition)
+        if (isGroupExpanded(groupPosition)) {
+            collapseGroup(groupPosition)
         } else {
-            parent.expandGroup(groupPosition)
+            expandGroup(groupPosition)
             if (lastExpandedGroup != groupPosition) {
-                parent.collapseGroup(lastExpandedGroup)
+                collapseGroup(lastExpandedGroup)
                 lastExpandedGroup = groupPosition
             }
         }
-
         return true
+    }
+
+    override fun onClick(v: View) {
+        val chapterTag = v.tag as ChapterTag
+        if (chapterTag.bookIndex != currentVerseIndex.bookIndex
+                || chapterTag.chapterIndex != currentVerseIndex.chapterIndex) {
+            val verseIndex = VerseIndex(chapterTag.bookIndex, chapterTag.chapterIndex, 0)
+            presenter.updateCurrentVerseIndex(verseIndex)
+            listener.onChapterSelected(verseIndex)
+        }
     }
 }
 
 private data class ViewTag(val textViews: Array<TextView>)
 private data class ChapterTag(var bookIndex: Int, var chapterIndex: Int)
 
-private class ChapterListAdapter(context: Context) : BaseExpandableListAdapter(), View.OnClickListener {
+private class ChapterListAdapter(context: Context, private val onClickListener: View.OnClickListener)
+    : BaseExpandableListAdapter() {
     companion object {
         const val ROW_CHILD_COUNT = 5
     }
 
     private val inflater = LayoutInflater.from(context)
 
-    var bookNames: List<String> = emptyList()
-    var currentVerseIndex = VerseIndex.INVALID
+    private val bookNames = ArrayList<String>()
+    private var currentVerseIndex = VerseIndex.INVALID
 
-    var listener: ChapterSelectionView.Listener? = null
+    fun setData(currentVerseIndex: VerseIndex, bookNames: List<String>) {
+        this.currentVerseIndex = currentVerseIndex
+
+        this.bookNames.clear()
+        this.bookNames.addAll(bookNames)
+
+        notifyDataSetChanged()
+    }
 
     override fun hasStableIds(): Boolean = false
 
@@ -151,7 +206,7 @@ private class ChapterListAdapter(context: Context) : BaseExpandableListAdapter()
 
             val textViews = Array(ROW_CHILD_COUNT) {
                 val textView = linearLayout.getChildAt(it) as TextView
-                textView.setOnClickListener(this@ChapterListAdapter)
+                textView.setOnClickListener(onClickListener)
                 textView.tag = ChapterTag(-1, -1)
                 textView
             }
@@ -181,13 +236,5 @@ private class ChapterListAdapter(context: Context) : BaseExpandableListAdapter()
         }
 
         return linearLayout
-    }
-
-    override fun onClick(v: View) {
-        val chapterTag = v.tag as ChapterTag
-        if (chapterTag.bookIndex != currentVerseIndex.bookIndex
-                || chapterTag.chapterIndex != currentVerseIndex.chapterIndex) {
-            listener?.onChapterSelected(VerseIndex(chapterTag.bookIndex, chapterTag.chapterIndex, 0))
-        }
     }
 }

@@ -28,8 +28,8 @@
         </com.google.android.material.appbar.AppBarLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <me.xizzhu.android.joshua.reading.ChapterSelectionView
-        android:id="@+id/chapter_selection_view"
+    <me.xizzhu.android.joshua.reading.chapter.ChapterListView
+        android:id="@+id/chapter_list_view"
         android:layout_width="@dimen/chapter_selection_view_width"
         android:layout_height="match_parent"
         android:layout_gravity="start" />

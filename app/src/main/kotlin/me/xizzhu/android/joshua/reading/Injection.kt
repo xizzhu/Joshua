@@ -21,6 +21,7 @@ import dagger.Provides
 import dagger.Subcomponent
 import dagger.android.AndroidInjector
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 
 @Module
@@ -30,6 +31,9 @@ class ReadingModule {
 
     @Provides
     fun provideToolbarPresenter(bibleReadingManager: BibleReadingManager) = ToolbarPresenter(bibleReadingManager)
+
+    @Provides
+    fun provideChapterListPresenter(bibleReadingManager: BibleReadingManager) = ChapterListPresenter(bibleReadingManager)
 }
 
 @Subcomponent(modules = [(ReadingModule::class)])

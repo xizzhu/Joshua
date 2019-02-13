@@ -40,6 +40,13 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
 
     fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentIndex.openSubscription()
 
+    fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
+        GlobalScope.launch(Dispatchers.IO) {
+            currentIndex.send(verseIndex)
+            bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
+        }
+    }
+
     var currentTranslation: String = ""
         @WorkerThread get() {
             if (field.isEmpty()) {
