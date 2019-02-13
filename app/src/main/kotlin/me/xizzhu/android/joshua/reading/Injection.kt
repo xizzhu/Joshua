@@ -21,11 +21,15 @@ import dagger.Provides
 import dagger.Subcomponent
 import dagger.android.AndroidInjector
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 
 @Module
 class ReadingModule {
     @Provides
     fun provideReadingPresenter(bibleReadingManager: BibleReadingManager) = ReadingPresenter(bibleReadingManager)
+
+    @Provides
+    fun provideToolbarPresenter(bibleReadingManager: BibleReadingManager) = ToolbarPresenter(bibleReadingManager)
 }
 
 @Subcomponent(modules = [(ReadingModule::class)])

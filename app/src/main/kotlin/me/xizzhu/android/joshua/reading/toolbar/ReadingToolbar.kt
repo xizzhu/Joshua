@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading
+package me.xizzhu.android.joshua.reading.toolbar
 
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.utils.MVPView
 import java.lang.StringBuilder
 
-class ReadingToolbar : Toolbar {
+interface ToolbarView : MVPView {
+    fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex)
+
+    fun onBookNamesUpdated(bookNames: List<String>)
+
+    fun onError(e: Exception)
+}
+
+class ReadingToolbar : Toolbar, LifecycleObserver, ToolbarView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -34,17 +46,27 @@ class ReadingToolbar : Toolbar {
         setTitle(R.string.app_name)
     }
 
+    private lateinit var presenter: ToolbarPresenter
+
     private val titleBuilder = StringBuilder()
     private val bookNames = ArrayList<String>()
     private var verseIndex = VerseIndex.INVALID
 
-    fun setBookNames(bookNames: List<String>) {
-        this.bookNames.clear()
-        this.bookNames.addAll(bookNames)
-        updateTitle()
+    fun setPresenter(presenter: ToolbarPresenter) {
+        this.presenter = presenter
     }
 
-    fun setVerseIndex(verseIndex: VerseIndex) {
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onStart() {
+        presenter.takeView(this)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onStop() {
+        presenter.dropView()
+    }
+
+    override fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex) {
         this.verseIndex = verseIndex
         updateTitle()
     }
@@ -57,5 +79,15 @@ class ReadingToolbar : Toolbar {
         titleBuilder.setLength(0)
         titleBuilder.append(bookNames[verseIndex.bookIndex]).append(", ").append(verseIndex.chapterIndex + 1)
         title = titleBuilder.toString()
+    }
+
+    override fun onBookNamesUpdated(bookNames: List<String>) {
+        this.bookNames.clear()
+        this.bookNames.addAll(bookNames)
+        updateTitle()
+    }
+
+    override fun onError(e: Exception) {
+        // TODO
     }
 }

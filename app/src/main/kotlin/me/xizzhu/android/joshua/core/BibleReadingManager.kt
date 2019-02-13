@@ -17,9 +17,29 @@
 package me.xizzhu.android.joshua.core
 
 import androidx.annotation.WorkerThread
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.internal.repository.BibleReadingRepository
 
 class BibleReadingManager constructor(private val bibleReadingRepository: BibleReadingRepository) {
+    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
+    private val currentIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
+
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
+            currentIndex.send(bibleReadingRepository.readCurrentVerseIndex())
+        }
+    }
+
+    fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
+
+    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentIndex.openSubscription()
+
     var currentTranslation: String = ""
         @WorkerThread get() {
             if (field.isEmpty()) {
@@ -45,6 +65,8 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
             if (field != value && value.isValid()) {
                 field = value
                 bibleReadingRepository.saveCurrentVerseIndex(value)
+
+                GlobalScope.launch { currentIndex.send(value) }
             }
         }
 

@@ -19,13 +19,14 @@ package me.xizzhu.android.joshua.reading
 import android.content.DialogInterface
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.Gravity
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
+import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
@@ -58,6 +59,9 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
     @Inject
     lateinit var presenter: ReadingPresenter
 
+    @Inject
+    lateinit var toolbarPresenter: ToolbarPresenter
+
     private lateinit var drawerToggle: ActionBarDrawerToggle
 
     private lateinit var drawerLayout: DrawerLayout
@@ -74,7 +78,11 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
 
         setContentView(R.layout.activity_reading)
         drawerLayout = findViewById(R.id.drawer_layout)
+
         toolbar = findViewById(R.id.toolbar)
+        toolbar.setPresenter(toolbarPresenter)
+        lifecycle.addObserver(toolbar)
+
         chapterSelectionView = findViewById(R.id.chapter_selection_view)
         chapterSelectionView.setListener(this)
         verseViewPager = findViewById(R.id.verse_view_pager)
@@ -100,6 +108,11 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
         super.onStop()
     }
 
+    override fun onDestroy() {
+        lifecycle.removeObserver(toolbar)
+        super.onDestroy()
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         drawerToggle.onConfigurationChanged(newConfig)
@@ -110,7 +123,6 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
             return
         }
         currentVerse = verseIndex
-        toolbar.setVerseIndex(verseIndex)
         chapterSelectionView.setCurrentVerseIndex(verseIndex)
         verseViewPager.setCurrentVerseIndex(verseIndex)
     }
@@ -144,7 +156,6 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterSelectionView.Listen
     override fun onBookNamesLoaded(bookNames: List<String>) {
         this.bookNames.clear()
         this.bookNames.addAll(bookNames)
-        toolbar.setBookNames(bookNames)
         chapterSelectionView.setBookNames(bookNames)
     }
 

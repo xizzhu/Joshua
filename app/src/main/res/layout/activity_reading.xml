@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <me.xizzhu.android.joshua.reading.ReadingToolbar
+            <me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
