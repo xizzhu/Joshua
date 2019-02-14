@@ -29,6 +29,8 @@ import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.chapter.ChapterListView
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
+import me.xizzhu.android.joshua.reading.verse.VersePresenter
+import me.xizzhu.android.joshua.reading.verse.VerseViewPager
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
@@ -57,7 +59,7 @@ interface ReadingView : MVPView {
     fun onVersesLoadFailed()
 }
 
-class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener, VerseViewPager.Listener {
+class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener {
     @Inject
     lateinit var presenter: ReadingPresenter
 
@@ -66,6 +68,9 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener, V
 
     @Inject
     lateinit var chapterListPresenter: ChapterListPresenter
+
+    @Inject
+    lateinit var versePresenter: VersePresenter
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
 
@@ -94,7 +99,8 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener, V
         lifecycle.addObserver(chapterListView)
 
         verseViewPager = findViewById(R.id.verse_view_pager)
-        verseViewPager.setListener(this)
+        verseViewPager.setPresenter(versePresenter)
+        lifecycle.addObserver(verseViewPager)
 
         drawerToggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, 0, 0)
         drawerLayout.addDrawerListener(drawerToggle)
@@ -119,6 +125,7 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener, V
     override fun onDestroy() {
         lifecycle.removeObserver(toolbar)
         lifecycle.removeObserver(chapterListView)
+        lifecycle.removeObserver(verseViewPager)
         super.onDestroy()
     }
 
@@ -132,7 +139,6 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener, V
             return
         }
         currentVerse = verseIndex
-        verseViewPager.setCurrentVerseIndex(verseIndex)
     }
 
     override fun onCurrentVerseIndexLoadFailed() {
@@ -171,7 +177,6 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener, V
     }
 
     override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
-        verseViewPager.setVerses(bookIndex, chapterIndex, verses)
     }
 
     override fun onVersesLoadFailed() {
@@ -184,9 +189,5 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener, V
         }
         drawerLayout.closeDrawer(GravityCompat.START)
         presenter.updateCurrentVerseIndex(currentVerseIndex)
-    }
-
-    override fun onChapterRequested(bookIndex: Int, chapterIndex: Int) {
-        presenter.loadVerses(currentTranslation, bookIndex, chapterIndex)
     }
 }

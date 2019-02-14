@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading
+package me.xizzhu.android.joshua.reading.verse
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
@@ -30,25 +32,29 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.utils.MVPView
 import me.xizzhu.android.joshua.utils.fadeIn
 import me.xizzhu.android.joshua.utils.fadeOut
-import java.lang.StringBuilder
 
-class VerseViewPager : ViewPager {
-    interface Listener {
-        fun onChapterSelected(currentVerseIndex: VerseIndex)
+interface VerseView : MVPView {
+    fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex)
 
-        fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
-    }
+    fun onCurrentTranslationUpdated(currentTranslation: String)
 
+    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>)
+
+    fun onError(e: Exception)
+}
+
+class VerseViewPager : ViewPager, LifecycleObserver, VerseView, VersePagerAdapter.Listener {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    private val adapter = VersePagerAdapter(context)
+    private val adapter = VersePagerAdapter(context, this)
     private val onPageChangeListener = object : SimpleOnPageChangeListener() {
         override fun onPageSelected(position: Int) {
-            adapter.listener?.onChapterSelected(VerseIndex(pagePositionToBookIndex(position),
+            presenter.updateCurrentVerseIndex(VerseIndex(pagePositionToBookIndex(position),
                     pagePositionToChapterIndex(position), 0))
         }
     }
@@ -58,36 +64,65 @@ class VerseViewPager : ViewPager {
         addOnPageChangeListener(onPageChangeListener)
     }
 
-    fun setListener(listener: Listener) {
-        adapter.listener = listener
+    private lateinit var presenter: VersePresenter
+
+    private var currentTranslation = ""
+    private var currentVerseIndex = VerseIndex.INVALID
+
+    fun setPresenter(presenter: VersePresenter) {
+        this.presenter = presenter
     }
 
-    fun setCurrentVerseIndex(currentVerseIndex: VerseIndex) {
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onStart() {
+        presenter.takeView(this)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onStop() {
+        presenter.dropView()
+    }
+
+    override fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex) {
+        this.currentVerseIndex = currentVerseIndex
+        refreshUi()
+    }
+
+    private fun refreshUi() {
+        if (currentTranslation.isEmpty() || !currentVerseIndex.isValid()) {
+            return
+        }
+
         adapter.currentVerseIndex = currentVerseIndex
         adapter.notifyDataSetChanged()
         setCurrentItem(currentVerseIndex.toPagePosition(), false)
     }
 
-    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
+    override fun onCurrentTranslationUpdated(currentTranslation: String) {
+        this.currentTranslation = currentTranslation
+        refreshUi()
+    }
+
+    override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
         adapter.setVerses(bookIndex, chapterIndex, verses)
     }
-}
 
-private fun VerseIndex.toPagePosition(): Int = indexToPagePosition(bookIndex, chapterIndex)
-
-private fun indexToPagePosition(bookIndex: Int, chapterIndex: Int): Int {
-    var position = 0
-    for (i in 0 until bookIndex) {
-        position += Bible.getChapterCount(i)
+    override fun onError(e: Exception) {
+        // TODO
     }
-    return position + chapterIndex
+
+    override fun onChapterRequested(bookIndex: Int, chapterIndex: Int) {
+        presenter.loadVerses(currentTranslation, bookIndex, chapterIndex)
+    }
 }
 
-private class VersePagerAdapter(private val context: Context) : PagerAdapter() {
+private class VersePagerAdapter(private val context: Context, private val listener: Listener) : PagerAdapter() {
+    interface Listener {
+        fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
+    }
+
     private val inflater = LayoutInflater.from(context)
     private val pages = ArrayList<Page>()
-
-    var listener: VerseViewPager.Listener? = null
 
     var currentVerseIndex = VerseIndex.INVALID
 
@@ -134,7 +169,7 @@ private class VersePagerAdapter(private val context: Context) : PagerAdapter() {
         page.chapterIndex = pagePositionToChapterIndex(position)
         page.inUse = true
 
-        listener?.onChapterRequested(page.bookIndex, page.chapterIndex)
+        listener.onChapterRequested(page.bookIndex, page.chapterIndex)
 
         return page
     }
@@ -144,39 +179,6 @@ private class VersePagerAdapter(private val context: Context) : PagerAdapter() {
         container.removeView(page.rootView)
         page.inUse = false
     }
-}
-
-private fun pagePositionToBookIndex(position: Int): Int {
-    if (position < 0) {
-        throw IllegalArgumentException("Invalid position: $position")
-    }
-
-    var pos = position
-    for (bookIndex in 0 until Bible.BOOK_COUNT) {
-        pos -= Bible.getChapterCount(bookIndex)
-        if (pos < 0) {
-            return bookIndex
-        }
-    }
-
-    throw IllegalArgumentException("Invalid position: $position")
-}
-
-private fun pagePositionToChapterIndex(position: Int): Int {
-    if (position < 0) {
-        throw IllegalArgumentException("Invalid position: $position")
-    }
-
-    var pos = position
-    for (bookIndex in 0 until Bible.BOOK_COUNT) {
-        val chapterCount = Bible.getChapterCount(bookIndex)
-        if (pos < chapterCount) {
-            return pos
-        }
-        pos -= chapterCount
-    }
-
-    throw IllegalArgumentException("Invalid position: $position")
 }
 
 private class Page(context: Context, inflater: LayoutInflater, container: ViewGroup) {
@@ -193,48 +195,5 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
     init {
         verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         verseList.adapter = adapter
-    }
-}
-
-private class VerseListAdapter(private val inflater: LayoutInflater) : RecyclerView.Adapter<VerseItemViewHolder>() {
-    private val verses = ArrayList<Verse>()
-
-    fun setVerses(verses: List<Verse>) {
-        this.verses.clear()
-        this.verses.addAll(verses)
-        notifyDataSetChanged()
-    }
-
-    override fun getItemCount(): Int = verses.size
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerseItemViewHolder =
-            VerseItemViewHolder(inflater, parent)
-
-    override fun onBindViewHolder(holder: VerseItemViewHolder, position: Int) {
-        holder.bind(verses[position])
-    }
-}
-
-private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_verse, parent, false)) {
-    companion object {
-        private val STRING_BUILDER = StringBuilder()
-    }
-
-    private val index = itemView.findViewById(R.id.index) as TextView
-    private val text = itemView.findViewById(R.id.text) as TextView
-
-    fun bind(verse: Verse) {
-        STRING_BUILDER.setLength(0)
-        val verseIndex = verse.verseIndex.verseIndex
-        if (verseIndex + 1 < 10) {
-            STRING_BUILDER.append("  ")
-        } else if (verseIndex + 1 < 100) {
-            STRING_BUILDER.append(" ")
-        }
-        STRING_BUILDER.append(verseIndex + 1)
-        index.text = STRING_BUILDER.toString()
-
-        text.text = verse.text
     }
 }
