@@ -20,73 +20,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.utils.MVPPresenter
-import java.lang.Exception
 
 class ReadingPresenter(private val bibleReadingManager: BibleReadingManager) : MVPPresenter<ReadingView>() {
     fun loadCurrentReadingProgress() {
         launch(Dispatchers.Main) {
-            try {
-                val currentTranslation = withContext(Dispatchers.IO) {
-                    bibleReadingManager.currentTranslation
-                }
-                if (currentTranslation.isEmpty()) {
-                    view?.onNoCurrentTranslation()
-                } else {
-                    view?.onCurrentTranslationLoaded(currentTranslation)
-
-                    loadCurrentVerseIndex()
-                    loadBookNames(currentTranslation)
-                }
-            } catch (e: Exception) {
-                view?.onCurrentTranslationLoadFailed()
+            val currentTranslation = withContext(Dispatchers.IO) {
+                bibleReadingManager.currentTranslation
             }
-        }
-    }
-
-    private suspend fun loadCurrentVerseIndex() {
-        try {
-            view?.onCurrentVerseIndexLoaded(withContext(Dispatchers.IO) {
-                bibleReadingManager.currentVerseIndex
-            })
-        } catch (e: Exception) {
-            view?.onCurrentVerseIndexLoadFailed()
-        }
-    }
-
-    private suspend fun loadBookNames(translationShortName: String) {
-        try {
-            view?.onBookNamesLoaded(withContext(Dispatchers.IO) {
-                bibleReadingManager.readBookNames(translationShortName)
-            })
-        } catch (e: Exception) {
-            view?.onBookNamesLoadFailed()
-        }
-    }
-
-    fun updateCurrentVerseIndex(currentVerseIndex: VerseIndex) {
-        view?.onCurrentVerseIndexLoaded(currentVerseIndex)
-
-        launch(Dispatchers.Main) {
-            try {
-                withContext(Dispatchers.IO) {
-                    bibleReadingManager.currentVerseIndex = currentVerseIndex
-                }
-            } catch (e: Exception) {
-                view?.onCurrentVerseIndexUpdateFailed()
-            }
-        }
-    }
-
-    fun loadVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int) {
-        launch(Dispatchers.Main) {
-            try {
-                view?.onVersesLoaded(bookIndex, chapterIndex, withContext(Dispatchers.IO) {
-                    bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex)
-                })
-            } catch (e: Exception) {
-                view?.onVersesLoadFailed()
+            if (currentTranslation.isEmpty()) {
+                view?.onNoCurrentTranslation()
             }
         }
     }

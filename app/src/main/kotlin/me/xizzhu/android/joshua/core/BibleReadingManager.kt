@@ -27,22 +27,22 @@ import me.xizzhu.android.joshua.core.internal.repository.BibleReadingRepository
 
 class BibleReadingManager constructor(private val bibleReadingRepository: BibleReadingRepository) {
     private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
-    private val currentIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
+    private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
             currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
-            currentIndex.send(bibleReadingRepository.readCurrentVerseIndex())
+            currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
         }
     }
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
 
-    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentIndex.openSubscription()
+    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
         GlobalScope.launch(Dispatchers.IO) {
-            currentIndex.send(verseIndex)
+            currentVerseIndex.send(verseIndex)
             bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
         }
     }
@@ -58,22 +58,6 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
             if (value != field) {
                 field = value
                 bibleReadingRepository.saveCurrentTranslation(value)
-            }
-        }
-
-    var currentVerseIndex: VerseIndex = VerseIndex.INVALID
-        @WorkerThread get() {
-            if (!field.isValid()) {
-                field = bibleReadingRepository.readCurrentVerseIndex()
-            }
-            return field
-        }
-        @WorkerThread set(value) {
-            if (field != value && value.isValid()) {
-                field = value
-                bibleReadingRepository.saveCurrentVerseIndex(value)
-
-                GlobalScope.launch { currentIndex.send(value) }
             }
         }
 

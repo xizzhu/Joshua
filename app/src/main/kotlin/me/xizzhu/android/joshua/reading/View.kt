@@ -23,7 +23,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.chapter.ChapterListView
@@ -38,25 +37,7 @@ import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
 
 interface ReadingView : MVPView {
-    fun onCurrentVerseIndexLoaded(verseIndex: VerseIndex)
-
-    fun onCurrentVerseIndexLoadFailed()
-
-    fun onCurrentVerseIndexUpdateFailed()
-
-    fun onCurrentTranslationLoaded(currentTranslation: String)
-
     fun onNoCurrentTranslation()
-
-    fun onCurrentTranslationLoadFailed()
-
-    fun onBookNamesLoaded(bookNames: List<String>)
-
-    fun onBookNamesLoadFailed()
-
-    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>)
-
-    fun onVersesLoadFailed()
 }
 
 class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener {
@@ -78,10 +59,6 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener {
     private lateinit var toolbar: ReadingToolbar
     private lateinit var chapterListView: ChapterListView
     private lateinit var verseViewPager: VerseViewPager
-
-    private val bookNames = ArrayList<String>()
-    private var currentTranslation = ""
-    private var currentVerse = VerseIndex.INVALID
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -134,25 +111,6 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener {
         drawerToggle.onConfigurationChanged(newConfig)
     }
 
-    override fun onCurrentVerseIndexLoaded(verseIndex: VerseIndex) {
-        if (currentVerse == verseIndex) {
-            return
-        }
-        currentVerse = verseIndex
-    }
-
-    override fun onCurrentVerseIndexLoadFailed() {
-        // TODO
-    }
-
-    override fun onCurrentVerseIndexUpdateFailed() {
-        // TODO
-    }
-
-    override fun onCurrentTranslationLoaded(currentTranslation: String) {
-        this.currentTranslation = currentTranslation
-    }
-
     override fun onNoCurrentTranslation() {
         DialogHelper.showDialog(this, false, R.string.no_translation_downloaded,
                 DialogInterface.OnClickListener { _, _ ->
@@ -163,31 +121,7 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener {
                 })
     }
 
-    override fun onCurrentTranslationLoadFailed() {
-        // TODO
-    }
-
-    override fun onBookNamesLoaded(bookNames: List<String>) {
-        this.bookNames.clear()
-        this.bookNames.addAll(bookNames)
-    }
-
-    override fun onBookNamesLoadFailed() {
-        // TODO
-    }
-
-    override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
-    }
-
-    override fun onVersesLoadFailed() {
-        // TODO
-    }
-
     override fun onChapterSelected(currentVerseIndex: VerseIndex) {
-        if (currentVerse == currentVerseIndex) {
-            return
-        }
         drawerLayout.closeDrawer(GravityCompat.START)
-        presenter.updateCurrentVerseIndex(currentVerseIndex)
     }
 }
