@@ -96,7 +96,7 @@ class VerseViewPager : ViewPager, LifecycleObserver, VerseView, VersePagerAdapte
             return
         }
 
-        adapter.readyToLoad = true
+        adapter.currentTranslation = currentTranslation
         adapter.notifyDataSetChanged()
         setCurrentItem(currentVerseIndex.toPagePosition(), false)
     }
@@ -127,7 +127,7 @@ private class VersePagerAdapter(private val context: Context, private val listen
     private val inflater = LayoutInflater.from(context)
     private val pages = ArrayList<Page>()
 
-    var readyToLoad = false
+    var currentTranslation = ""
 
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
         for (page in pages) {
@@ -142,11 +142,15 @@ private class VersePagerAdapter(private val context: Context, private val listen
         }
     }
 
-    override fun getCount(): Int = if (readyToLoad) Bible.TOTAL_CHAPTER_COUNT else 0
+    override fun getCount(): Int = if (currentTranslation.isNotEmpty()) Bible.TOTAL_CHAPTER_COUNT else 0
 
     override fun getItemPosition(obj: Any): Int {
         val page = obj as Page
-        return indexToPagePosition(page.bookIndex, page.chapterIndex)
+        return if (page.translation == currentTranslation) {
+            indexToPagePosition(page.bookIndex, page.chapterIndex)
+        } else {
+            POSITION_NONE
+        }
     }
 
     override fun isViewFromObject(view: View, obj: Any): Boolean =
@@ -169,6 +173,7 @@ private class VersePagerAdapter(private val context: Context, private val listen
         page.verseList.visibility = View.GONE
         page.loadingSpinner.visibility = View.VISIBLE
 
+        page.translation = currentTranslation
         page.bookIndex = pagePositionToBookIndex(position)
         page.chapterIndex = pagePositionToChapterIndex(position)
         page.inUse = true
@@ -190,6 +195,7 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
     val verseList = rootView.findViewById(R.id.verse_list) as RecyclerView
     val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
 
+    var translation = ""
     var bookIndex = -1
     var chapterIndex = -1
     var inUse = false
