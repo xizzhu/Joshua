@@ -47,6 +47,13 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
         }
     }
 
+    fun updateCurrentTranslation(translationShortName: String) {
+        GlobalScope.launch(Dispatchers.IO) {
+            currentTranslationShortName.send(translationShortName)
+            bibleReadingRepository.saveCurrentTranslation(translationShortName)
+        }
+    }
+
     var currentTranslation: String = ""
         @WorkerThread get() {
             if (field.isEmpty()) {

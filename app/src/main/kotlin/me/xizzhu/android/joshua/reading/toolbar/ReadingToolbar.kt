@@ -18,16 +18,25 @@ package me.xizzhu.android.joshua.reading.toolbar
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
+import android.widget.AdapterView
+import android.widget.Spinner
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import java.lang.StringBuilder
 
 interface ToolbarView : MVPView {
+    fun onDownloadedTranslationsDownloaded(translations: List<TranslationInfo>)
+
+    fun onCurrentTranslationUpdated(translationShortName: String)
+
     fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex)
 
     fun onBookNamesUpdated(bookNames: List<String>)
@@ -44,12 +53,15 @@ class ReadingToolbar : Toolbar, LifecycleObserver, ToolbarView {
 
     init {
         setTitle(R.string.app_name)
+        inflateMenu(R.menu.menu_bible_reading)
     }
 
     private lateinit var presenter: ToolbarPresenter
 
     private val titleBuilder = StringBuilder()
+    private val downloadedTranslations = ArrayList<TranslationInfo>()
     private val bookNames = ArrayList<String>()
+    private var currentTranslation = ""
     private var verseIndex = VerseIndex.INVALID
 
     fun setPresenter(presenter: ToolbarPresenter) {
@@ -59,11 +71,63 @@ class ReadingToolbar : Toolbar, LifecycleObserver, ToolbarView {
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onStart() {
         presenter.takeView(this)
+        presenter.loadDownloadedTranslations()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun onStop() {
         presenter.dropView()
+    }
+
+    override fun onDownloadedTranslationsDownloaded(translations: List<TranslationInfo>) {
+        downloadedTranslations.clear()
+        downloadedTranslations.addAll(translations)
+
+        updateTranslationList()
+    }
+
+    private fun updateTranslationList() {
+        if (downloadedTranslations.isEmpty() || currentTranslation.isEmpty()) {
+            return
+        }
+
+        val names = ArrayList<String>(downloadedTranslations.size + 1)
+        var selected = 0
+        for (i in 0 until downloadedTranslations.size) {
+            val translation = downloadedTranslations[i]
+            if (currentTranslation == translation.shortName) {
+                selected = i
+            }
+            names.add(translation.shortName)
+        }
+        names.add(resources.getString(R.string.more_translation)) // amends "More" to the end of the list
+
+        val translationSpinner = menu.findItem(R.id.action_translations).actionView as Spinner
+        translationSpinner.adapter = TranslationSpinnerAdapter(context, names)
+        translationSpinner.setSelection(selected)
+        translationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (position == names.size - 1) {
+                    context.startActivity(TranslationManagementActivity.newStartIntent(context))
+                    return
+                }
+
+                val selectedTranslation = names[position]
+                if (currentTranslation != selectedTranslation) {
+                    presenter.updateCurrentTranslation(selectedTranslation)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // do nothing
+            }
+        }
+    }
+
+    override fun onCurrentTranslationUpdated(translationShortName: String) {
+        currentTranslation = translationShortName
+
+        updateTranslationList()
     }
 
     override fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex) {

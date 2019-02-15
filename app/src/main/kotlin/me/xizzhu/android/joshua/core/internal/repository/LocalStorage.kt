@@ -263,6 +263,35 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun readDownloaded(): List<TranslationInfo> {
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_TRANSLATION_INFO,
+                    arrayOf(COLUMN_SHORT_NAME, COLUMN_NAME, COLUMN_LANGUAGE, COLUMN_SIZE),
+                    "$COLUMN_DOWNLOADED = ?", arrayOf("1"),
+                    null, null, null, null)
+            val count = cursor.count
+            return if (count == 0) {
+                emptyList()
+            } else {
+                val shortName = cursor.getColumnIndex(COLUMN_SHORT_NAME)
+                val name = cursor.getColumnIndex(COLUMN_NAME)
+                val language = cursor.getColumnIndex(COLUMN_LANGUAGE)
+                val size = cursor.getColumnIndex(COLUMN_SIZE)
+                val translations = ArrayList<TranslationInfo>(count)
+                while (cursor.moveToNext()) {
+                    translations.add(TranslationInfo(cursor.getString(shortName),
+                            cursor.getString(name), cursor.getString(language),
+                            cursor.getLong(size), true))
+                }
+                translations
+            }
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    @WorkerThread
     fun replace(translations: List<TranslationInfo>) {
         db.beginTransaction()
         try {

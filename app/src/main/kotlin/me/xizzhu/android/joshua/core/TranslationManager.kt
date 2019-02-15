@@ -28,6 +28,10 @@ class TranslationManager(private val translationRepository: TranslationRepositor
     fun readTranslations(forceRefresh: Boolean): List<TranslationInfo> =
             translationRepository.readTranslations(forceRefresh)
 
+    @WorkerThread
+    fun readDownloadedTranslations(): List<TranslationInfo> =
+            translationRepository.readDownloadedTranslations()
+
     fun downloadTranslation(scope: CoroutineScope, dispatcher: CoroutineDispatcher,
                             translationInfo: TranslationInfo): ReceiveChannel<Int> =
             scope.produce(dispatcher) {

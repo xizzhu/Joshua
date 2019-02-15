@@ -22,9 +22,11 @@ import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
-class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager) : MVPPresenter<ToolbarView>() {
+class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
+                       private val translationManager: TranslationManager) : MVPPresenter<ToolbarView>() {
     override fun onViewTaken() {
         super.onViewTaken()
 
@@ -32,6 +34,7 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager) : M
             bibleReadingManager.observeCurrentTranslation()
                     .filter { it.isNotEmpty() }
                     .consumeEach {
+                        view?.onCurrentTranslationUpdated(it)
                         view?.onBookNamesUpdated(withContext(Dispatchers.IO) {
                             bibleReadingManager.readBookNames(it)
                         })
@@ -43,6 +46,18 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager) : M
                     .consumeEach {
                         view?.onCurrentVerseIndexUpdated(it)
                     }
+        }
+    }
+
+    fun updateCurrentTranslation(translationShortName: String) {
+        bibleReadingManager.updateCurrentTranslation(translationShortName)
+    }
+
+    fun loadDownloadedTranslations() {
+        launch(Dispatchers.Main) {
+            view?.onDownloadedTranslationsDownloaded(withContext(Dispatchers.IO) {
+                translationManager.readDownloadedTranslations()
+            })
         }
     }
 }
