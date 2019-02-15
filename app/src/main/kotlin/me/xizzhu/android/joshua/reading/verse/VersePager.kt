@@ -136,6 +136,7 @@ private class VersePagerAdapter(private val context: Context, private val listen
                 page.loadingSpinner.fadeOut()
 
                 page.adapter.setVerses(verses)
+                page.verseList.scrollToPosition(0)
                 break
             }
         }
