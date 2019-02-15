@@ -22,6 +22,10 @@ import me.xizzhu.android.joshua.core.VerseIndex
 fun VerseIndex.toPagePosition(): Int = indexToPagePosition(bookIndex, chapterIndex)
 
 fun indexToPagePosition(bookIndex: Int, chapterIndex: Int): Int {
+    if (bookIndex < 0 || chapterIndex < 0) {
+        return -1
+    }
+
     var position = 0
     for (i in 0 until bookIndex) {
         position += Bible.getChapterCount(i)

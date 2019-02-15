@@ -54,6 +54,9 @@ class VerseViewPager : ViewPager, LifecycleObserver, VerseView, VersePagerAdapte
     private val adapter = VersePagerAdapter(context, this)
     private val onPageChangeListener = object : SimpleOnPageChangeListener() {
         override fun onPageSelected(position: Int) {
+            if (currentVerseIndex.toPagePosition() == position) {
+                return
+            }
             presenter.updateCurrentVerseIndex(VerseIndex(pagePositionToBookIndex(position),
                     pagePositionToChapterIndex(position), 0))
         }
@@ -93,7 +96,7 @@ class VerseViewPager : ViewPager, LifecycleObserver, VerseView, VersePagerAdapte
             return
         }
 
-        adapter.currentVerseIndex = currentVerseIndex
+        adapter.readyToLoad = true
         adapter.notifyDataSetChanged()
         setCurrentItem(currentVerseIndex.toPagePosition(), false)
     }
@@ -124,7 +127,7 @@ private class VersePagerAdapter(private val context: Context, private val listen
     private val inflater = LayoutInflater.from(context)
     private val pages = ArrayList<Page>()
 
-    var currentVerseIndex = VerseIndex.INVALID
+    var readyToLoad = false
 
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
         for (page in pages) {
@@ -138,7 +141,7 @@ private class VersePagerAdapter(private val context: Context, private val listen
         }
     }
 
-    override fun getCount(): Int = if (currentVerseIndex.isValid()) Bible.TOTAL_CHAPTER_COUNT else 0
+    override fun getCount(): Int = if (readyToLoad) Bible.TOTAL_CHAPTER_COUNT else 0
 
     override fun getItemPosition(obj: Any): Int {
         val page = obj as Page
