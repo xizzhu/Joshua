@@ -38,6 +38,7 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
 
+    @WorkerThread
     suspend fun updateCurrentTranslation(translationShortName: String) {
         currentTranslationShortName.send(translationShortName)
         bibleReadingRepository.saveCurrentTranslation(translationShortName)
@@ -45,6 +46,7 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
 
     fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
 
+    @WorkerThread
     suspend fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
         currentVerseIndex.send(verseIndex)
         bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
