@@ -50,14 +50,21 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
     }
 
     fun updateCurrentTranslation(translationShortName: String) {
-        bibleReadingManager.updateCurrentTranslation(translationShortName)
+        launch(Dispatchers.IO) {
+            bibleReadingManager.updateCurrentTranslation(translationShortName)
+        }
     }
 
     fun loadDownloadedTranslations() {
         launch(Dispatchers.Main) {
-            view?.onDownloadedTranslationsDownloaded(withContext(Dispatchers.IO) {
+            val downloaded = withContext(Dispatchers.IO) {
                 translationManager.readDownloadedTranslations()
-            })
+            }
+            if (downloaded.isEmpty()) {
+                view?.onNoDownloadedTranslations()
+            } else {
+                view?.onDownloadedTranslationsLoaded(downloaded)
+            }
         }
     }
 }

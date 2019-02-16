@@ -29,9 +29,6 @@ import me.xizzhu.android.joshua.reading.verse.VersePresenter
 @Module
 class ReadingModule {
     @Provides
-    fun provideReadingPresenter(bibleReadingManager: BibleReadingManager) = ReadingPresenter(bibleReadingManager)
-
-    @Provides
     fun provideToolbarPresenter(bibleReadingManager: BibleReadingManager, translationManager: TranslationManager) =
             ToolbarPresenter(bibleReadingManager, translationManager)
 

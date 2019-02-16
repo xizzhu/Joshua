@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.translations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -60,10 +61,10 @@ class TranslationManagementPresenter(
                 Pair(translations.getOrElse(true) { emptyList() },
                         translations.getOrElse(false) { emptyList() })
             }
-            val currentTranslation = async(Dispatchers.IO) { bibleReadingManager.currentTranslation }
             try {
                 val (downloaded, available) = translations.await()
-                view?.onTranslationsLoaded(downloaded, available, currentTranslation.await())
+                view?.onTranslationsLoaded(downloaded, available,
+                        bibleReadingManager.observeCurrentTranslation().receive())
             } catch (e: Exception) {
                 view?.onTranslationsLoadFailed()
             }
@@ -79,9 +80,9 @@ class TranslationManagementPresenter(
                         .consumeEach {
                             view?.onTranslationDownloadProgressed(it)
                         }
-                runBlocking(Dispatchers.IO) {
-                    if (bibleReadingManager.currentTranslation.isEmpty()) {
-                        bibleReadingManager.currentTranslation = translationInfo.shortName
+                if (bibleReadingManager.observeCurrentTranslation().receive().isEmpty()) {
+                    launch(Dispatchers.IO) {
+                        bibleReadingManager.updateCurrentTranslation(translationInfo.shortName)
                     }
                 }
                 view?.onTranslationDownloaded()
@@ -94,7 +95,7 @@ class TranslationManagementPresenter(
     fun setCurrentTranslation(currentTranslation: TranslationInfo) {
         launch(Dispatchers.Main) {
             launch(Dispatchers.IO) {
-                bibleReadingManager.currentTranslation = currentTranslation.shortName
+                bibleReadingManager.updateCurrentTranslation(currentTranslation.shortName)
             }
             view?.onTranslationSelected()
         }

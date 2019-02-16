@@ -47,7 +47,9 @@ class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVP
     }
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        bibleReadingManager.updateCurrentVerseIndex(verseIndex)
+        launch(Dispatchers.IO) {
+            bibleReadingManager.updateCurrentVerseIndex(verseIndex)
+        }
     }
 
     fun loadVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int) {

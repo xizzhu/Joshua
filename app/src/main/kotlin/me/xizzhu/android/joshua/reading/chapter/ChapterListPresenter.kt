@@ -48,6 +48,8 @@ class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager)
     }
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        bibleReadingManager.updateCurrentVerseIndex(verseIndex)
+        launch(Dispatchers.IO) {
+            bibleReadingManager.updateCurrentVerseIndex(verseIndex)
+        }
     }
 }
