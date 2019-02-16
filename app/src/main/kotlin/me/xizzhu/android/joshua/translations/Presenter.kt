@@ -19,12 +19,11 @@ package me.xizzhu.android.joshua.translations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.model.BibleReadingManager
-import me.xizzhu.android.joshua.model.TranslationInfo
-import me.xizzhu.android.joshua.model.TranslationManager
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import java.lang.Exception
 import java.util.*
@@ -36,7 +35,7 @@ class TranslationManagementPresenter(
     fun loadTranslations(forceRefresh: Boolean) {
         launch(Dispatchers.Main) {
             val translations = async(Dispatchers.IO) {
-                val translations = translationManager.loadTranslations(forceRefresh).groupBy { it.downloaded }
+                val translations = translationManager.readTranslations(forceRefresh).groupBy { it.downloaded }
                 translations.forEach {
                     it.value.sortedWith(object : Comparator<TranslationInfo> {
                         override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
@@ -76,11 +75,10 @@ class TranslationManagementPresenter(
 
         launch(Dispatchers.Main) {
             try {
-                produce<Int>(Dispatchers.IO) {
-                    translationManager.downloadTranslation(this, translationInfo)
-                }.consumeEach {
-                    view?.onTranslationDownloadProgressed(it)
-                }
+                translationManager.downloadTranslation(this, Dispatchers.IO, translationInfo)
+                        .consumeEach {
+                            view?.onTranslationDownloadProgressed(it)
+                        }
                 runBlocking(Dispatchers.IO) {
                     if (bibleReadingManager.currentTranslation.isEmpty()) {
                         bibleReadingManager.currentTranslation = translationInfo.shortName

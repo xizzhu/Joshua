@@ -66,8 +66,12 @@ dependencies {
     implementation "androidx.annotation:annotation:$rootProject.ext.annotationVersion"
     implementation "androidx.appcompat:appcompat:$rootProject.ext.appCompatVersion"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.ext.coordinatorLayoutVersion"
+    implementation "androidx.drawerlayout:drawerlayout:$rootProject.ext.drawerLayoutVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime:$rootProject.ext.lifecycleVersion"
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
     implementation "androidx.recyclerview:recyclerview:$rootProject.ext.recyclerViewVersion"
+    implementation "androidx.viewpager:viewpager:$rootProject.ext.viewPagerVersion"
+    kapt "androidx.lifecycle:lifecycle-compiler:$rootProject.ext.lifecycleVersion"
 
     implementation "com.google.dagger:dagger:$rootProject.ext.daggerVersion"
     implementation "com.google.dagger:dagger-android:$rootProject.ext.daggerVersion"
@@ -77,7 +81,6 @@ dependencies {
 
     implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.retrofitVersion"
     implementation "com.squareup.retrofit2:converter-moshi:$rootProject.ext.retrofitVersion"
-
     implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okhttpVersion"
     implementation "com.squareup.moshi:moshi:$rootProject.ext.moshiVersion"
     implementation "com.squareup.okio:okio:$rootProject.ext.okioVersion"

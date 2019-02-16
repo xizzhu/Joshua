@@ -7,4 +7,7 @@
     <string name="available_translations">Available translations</string>
     <string name="downloading_translation">Downloading…</string>
     <string name="translation_downloaded">Translation downloaded</string>
+
+    <string name="no_translation_downloaded">No translation, download now?</string>
+    <string name="more_translation">More</string>
 </resources>

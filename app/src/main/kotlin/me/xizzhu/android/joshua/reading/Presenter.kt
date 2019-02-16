@@ -19,24 +19,17 @@ package me.xizzhu.android.joshua.reading
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.model.BibleReadingManager
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
-import java.lang.Exception
 
 class ReadingPresenter(private val bibleReadingManager: BibleReadingManager) : MVPPresenter<ReadingView>() {
-    fun loadCurrentTranslation() {
+    fun loadCurrentReadingProgress() {
         launch(Dispatchers.Main) {
-            try {
-                val currentTranslation = withContext(Dispatchers.IO) {
-                    bibleReadingManager.currentTranslation
-                }
-                if (currentTranslation.isEmpty()) {
-                    view?.onNoCurrentTranslation()
-                } else {
-                    view?.onCurrentTranslationLoaded(currentTranslation)
-                }
-            } catch (e: Exception) {
-                view?.onCurrentTranslationLoadFailed()
+            val currentTranslation = withContext(Dispatchers.IO) {
+                bibleReadingManager.currentTranslation
+            }
+            if (currentTranslation.isEmpty()) {
+                view?.onNoCurrentTranslation()
             }
         }
     }

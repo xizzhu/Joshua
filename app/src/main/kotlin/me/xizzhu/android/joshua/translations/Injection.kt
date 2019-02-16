@@ -20,8 +20,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
 import dagger.android.AndroidInjector
-import me.xizzhu.android.joshua.model.BibleReadingManager
-import me.xizzhu.android.joshua.model.TranslationManager
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.TranslationManager
 
 @Module
 class TranslationManagementModule {

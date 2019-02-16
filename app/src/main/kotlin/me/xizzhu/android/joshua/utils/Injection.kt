@@ -26,6 +26,12 @@ import dagger.android.support.AndroidSupportInjectionModule
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import me.xizzhu.android.joshua.*
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.core.internal.repository.BackendService
+import me.xizzhu.android.joshua.core.internal.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.internal.repository.LocalStorage
+import me.xizzhu.android.joshua.core.internal.repository.TranslationRepository
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingComponent
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
@@ -37,6 +43,33 @@ class AppModule(private val app: App) {
     @Provides
     @Singleton
     fun provideApp(): App = app
+
+    @Provides
+    @Singleton
+    fun provideLocalStorage(app: App) = LocalStorage(app)
+
+    @Provides
+    @Singleton
+    fun provideBackendService() = BackendService()
+
+    @Provides
+    @Singleton
+    fun provideBibleReadingRepository(localStorage: LocalStorage) = BibleReadingRepository(localStorage)
+
+    @Provides
+    @Singleton
+    fun provideTranslationRepository(localStorage: LocalStorage, backendService: BackendService) =
+            TranslationRepository(localStorage, backendService)
+
+    @Provides
+    @Singleton
+    fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository) =
+            BibleReadingManager(bibleReadingRepository)
+
+    @Provides
+    @Singleton
+    fun provideTranslationManager(translationRepository: TranslationRepository) =
+            TranslationManager(translationRepository)
 }
 
 @Module(subcomponents = [(ReadingComponent::class), (TranslationManagementComponent::class)])
