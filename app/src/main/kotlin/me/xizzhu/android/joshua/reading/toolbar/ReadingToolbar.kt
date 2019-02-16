@@ -82,7 +82,6 @@ class ReadingToolbar : Toolbar, LifecycleObserver, ToolbarView {
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onStart() {
         presenter.takeView(this)
-        presenter.loadDownloadedTranslations()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)

@@ -47,15 +47,6 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
                         view?.onCurrentVerseIndexUpdated(it)
                     }
         }
-    }
-
-    fun updateCurrentTranslation(translationShortName: String) {
-        launch(Dispatchers.IO) {
-            bibleReadingManager.updateCurrentTranslation(translationShortName)
-        }
-    }
-
-    fun loadDownloadedTranslations() {
         launch(Dispatchers.Main) {
             val downloaded = withContext(Dispatchers.IO) {
                 translationManager.readDownloadedTranslations()
@@ -65,6 +56,12 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
             } else {
                 view?.onDownloadedTranslationsLoaded(downloaded)
             }
+        }
+    }
+
+    fun updateCurrentTranslation(translationShortName: String) {
+        launch(Dispatchers.IO) {
+            bibleReadingManager.updateCurrentTranslation(translationShortName)
         }
     }
 }
