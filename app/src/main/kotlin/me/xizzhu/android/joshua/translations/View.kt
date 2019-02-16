@@ -31,13 +31,15 @@ import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import me.xizzhu.android.joshua.utils.fadeIn
 import me.xizzhu.android.joshua.utils.fadeOut
+import java.lang.Exception
 import javax.inject.Inject
 
 interface TranslationManagementView : MVPView {
-    fun onTranslationsLoaded(downloadedTranslations: List<TranslationInfo>,
-                             availableTranslations: List<TranslationInfo>, currentTranslation: String)
+    fun onCurrentTranslationUpdated(currentTranslation: String)
 
-    fun onTranslationsLoadFailed()
+    fun onAvailableTranslationsUpdated(available: List<TranslationInfo>)
+
+    fun onDownloadedTranslationsUpdated(downloaded: List<TranslationInfo>)
 
     fun onTranslationDownloadStarted()
 
@@ -45,9 +47,9 @@ interface TranslationManagementView : MVPView {
 
     fun onTranslationDownloaded()
 
-    fun onTranslationDownloadFailed()
-
     fun onTranslationSelected()
+
+    fun onError(e: Exception)
 }
 
 class TranslationManagementActivity : BaseActivity(), TranslationManagementView {
@@ -62,6 +64,9 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
     private lateinit var translationListView: RecyclerView
 
     private lateinit var adapter: TranslationListAdapter
+    private var currentTranslation: String? = null
+    private var availableTranslations: List<TranslationInfo>? = null
+    private var downloadedTranslations: List<TranslationInfo>? = null
 
     private var downloadProgressDialog: ProgressDialog? = null
 
@@ -80,14 +85,9 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
     override fun onStart() {
         super.onStart()
         presenter.takeView(this)
-        loadTranslations(false)
-    }
 
-    private fun loadTranslations(forceRefresh: Boolean) {
         loadingSpinner.visibility = View.VISIBLE
         translationListView.visibility = View.GONE
-
-        presenter.loadTranslations(forceRefresh)
     }
 
     override fun onStop() {
@@ -101,16 +101,30 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
         downloadProgressDialog = null
     }
 
-    override fun onTranslationsLoaded(downloadedTranslations: List<TranslationInfo>,
-                                      availableTranslations: List<TranslationInfo>, currentTranslation: String) {
-        adapter.setTranslations(downloadedTranslations, availableTranslations, currentTranslation)
+    override fun onCurrentTranslationUpdated(currentTranslation: String) {
+        this.currentTranslation = currentTranslation
+        refreshUi()
+    }
+
+    private fun refreshUi() {
+        if (currentTranslation == null || availableTranslations == null || downloadedTranslations == null) {
+            return
+        }
+
+        adapter.setTranslations(downloadedTranslations!!, availableTranslations!!, currentTranslation!!)
 
         loadingSpinner.fadeOut()
         translationListView.fadeIn()
     }
 
-    override fun onTranslationsLoadFailed() {
-        // TODO
+    override fun onAvailableTranslationsUpdated(available: List<TranslationInfo>) {
+        this.availableTranslations = available
+        refreshUi()
+    }
+
+    override fun onDownloadedTranslationsUpdated(downloaded: List<TranslationInfo>) {
+        this.downloadedTranslations = downloaded
+        refreshUi()
     }
 
     override fun onTranslationDownloadStarted() {
@@ -124,17 +138,15 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
     override fun onTranslationDownloaded() {
         dismissDownloadProgressDialog()
         Toast.makeText(this, R.string.translation_downloaded, Toast.LENGTH_SHORT).show()
-
-        loadTranslations(false)
-    }
-
-    override fun onTranslationDownloadFailed() {
-        dismissDownloadProgressDialog()
-
-        // TODO
     }
 
     override fun onTranslationSelected() {
+        finish()
+    }
+
+    override fun onError(e: Exception) {
+        dismissDownloadProgressDialog()
+
         // TODO
     }
 }

@@ -30,7 +30,9 @@ class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager)
         super.onViewTaken()
 
         launch(Dispatchers.Main) {
-            bibleReadingManager.observeCurrentTranslation()
+            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
+            receiveChannels.add(currentTranslation)
+            currentTranslation
                     .filter { it.isNotEmpty() }
                     .consumeEach {
                         view?.onBookNamesUpdated(withContext(Dispatchers.IO) {
@@ -39,8 +41,9 @@ class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager)
                     }
         }
         launch(Dispatchers.Main) {
-            bibleReadingManager.observeCurrentVerseIndex()
-                    .filter { it.isValid() }
+            val currentVerse = bibleReadingManager.observeCurrentVerseIndex()
+            receiveChannels.add(currentVerse)
+            currentVerse.filter { it.isValid() }
                     .consumeEach {
                         view?.onCurrentVerseIndexUpdated(it)
                     }

@@ -31,8 +31,9 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
         super.onViewTaken()
 
         launch(Dispatchers.Main) {
-            bibleReadingManager.observeCurrentTranslation()
-                    .filter { it.isNotEmpty() }
+            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
+            receiveChannels.add(currentTranslation)
+            currentTranslation.filter { it.isNotEmpty() }
                     .consumeEach {
                         view?.onCurrentTranslationUpdated(it)
                         view?.onBookNamesUpdated(withContext(Dispatchers.IO) {
@@ -41,20 +42,22 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
                     }
         }
         launch(Dispatchers.Main) {
-            bibleReadingManager.observeCurrentVerseIndex()
-                    .filter { it.isValid() }
+            val currentVerse = bibleReadingManager.observeCurrentVerseIndex()
+            receiveChannels.add(currentVerse)
+            currentVerse.filter { it.isValid() }
                     .consumeEach {
                         view?.onCurrentVerseIndexUpdated(it)
                     }
         }
         launch(Dispatchers.Main) {
-            val downloaded = withContext(Dispatchers.IO) {
-                translationManager.readDownloadedTranslations()
-            }
-            if (downloaded.isEmpty()) {
-                view?.onNoDownloadedTranslations()
-            } else {
-                view?.onDownloadedTranslationsLoaded(downloaded)
+            val downloadedTranslations = translationManager.observeDownloadedTranslations()
+            receiveChannels.add(downloadedTranslations)
+            downloadedTranslations.consumeEach {
+                if (it.isEmpty()) {
+                    view?.onNoDownloadedTranslations()
+                } else {
+                    view?.onDownloadedTranslationsLoaded(it)
+                }
             }
         }
     }

@@ -16,25 +16,53 @@
 
 package me.xizzhu.android.joshua.core
 
-import androidx.annotation.WorkerThread
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import me.xizzhu.android.joshua.core.internal.repository.TranslationRepository
 
 class TranslationManager(private val translationRepository: TranslationRepository) {
-    @WorkerThread
-    fun readTranslations(forceRefresh: Boolean): List<TranslationInfo> =
-            translationRepository.readTranslations(forceRefresh)
+    private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+    private val downloadedTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
 
-    @WorkerThread
-    fun readDownloadedTranslations(): List<TranslationInfo> =
-            translationRepository.readDownloadedTranslations()
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            val available = ArrayList<TranslationInfo>()
+            val download = ArrayList<TranslationInfo>()
+            for (t in translationRepository.readTranslations(false)) {
+                if (t.downloaded) {
+                    download.add(t)
+                } else {
+                    available.add(t)
+                }
+            }
+            availableTranslations.send(available)
+            downloadedTranslations.send(download)
+        }
+    }
+
+    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> = availableTranslations.openSubscription()
+
+    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> = downloadedTranslations.openSubscription()
 
     fun downloadTranslation(scope: CoroutineScope, dispatcher: CoroutineDispatcher,
                             translationInfo: TranslationInfo): ReceiveChannel<Int> =
             scope.produce(dispatcher) {
+                invokeOnClose {
+                    if (it == null) {
+                        scope.launch(Dispatchers.IO) {
+                            val available = ArrayList(availableTranslations.value)
+                            available.remove(translationInfo)
+                            availableTranslations.send(available)
+
+                            val downloaded = ArrayList(downloadedTranslations.value)
+                            downloaded.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
+                                    translationInfo.language, translationInfo.size, true))
+                            downloadedTranslations.send(downloaded)
+                        }
+                    }
+                }
                 translationRepository.downloadTranslation(this, translationInfo)
             }
 }

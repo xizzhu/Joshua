@@ -17,11 +17,8 @@
 package me.xizzhu.android.joshua.translations
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
@@ -33,40 +30,46 @@ import kotlin.Comparator
 class TranslationManagementPresenter(
         private val bibleReadingManager: BibleReadingManager, private val translationManager: TranslationManager)
     : MVPPresenter<TranslationManagementView>() {
-    fun loadTranslations(forceRefresh: Boolean) {
-        launch(Dispatchers.Main) {
-            val translations = async(Dispatchers.IO) {
-                val translations = translationManager.readTranslations(forceRefresh).groupBy { it.downloaded }
-                translations.forEach {
-                    it.value.sortedWith(object : Comparator<TranslationInfo> {
-                        override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
-                            val userLocale = Locale.getDefault()
-                            val userLanguage = userLocale.language.toLowerCase(userLocale)
+    private val translationComparator = object : Comparator<TranslationInfo> {
+        override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
+            val userLocale = Locale.getDefault()
+            val userLanguage = userLocale.language.toLowerCase(userLocale)
 
-                            val language1 = t1.language.split(("_"))[0]
-                            val language2 = t2.language.split(("_"))[0]
-                            val score1 = if (userLanguage == language1) 1 else 0
-                            val score2 = if (userLanguage == language2) 1 else 0
-                            var r = score2 - score1
-                            if (r == 0) {
-                                r = t1.language.compareTo(t2.language)
-                            }
-                            if (r == 0) {
-                                r = t1.name.compareTo(t2.name)
-                            }
-                            return r
-                        }
-                    })
-                }
-                Pair(translations.getOrElse(true) { emptyList() },
-                        translations.getOrElse(false) { emptyList() })
+            val language1 = t1.language.split(("_"))[0]
+            val language2 = t2.language.split(("_"))[0]
+            val score1 = if (userLanguage == language1) 1 else 0
+            val score2 = if (userLanguage == language2) 1 else 0
+            var r = score2 - score1
+            if (r == 0) {
+                r = t1.language.compareTo(t2.language)
             }
-            try {
-                val (downloaded, available) = translations.await()
-                view?.onTranslationsLoaded(downloaded, available,
-                        bibleReadingManager.observeCurrentTranslation().receive())
-            } catch (e: Exception) {
-                view?.onTranslationsLoadFailed()
+            if (r == 0) {
+                r = t1.name.compareTo(t2.name)
+            }
+            return r
+        }
+    }
+
+    override fun onViewTaken() {
+        super.onViewTaken()
+
+        launch(Dispatchers.Main) {
+            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
+            receiveChannels.add(currentTranslation)
+            currentTranslation.consumeEach { view?.onCurrentTranslationUpdated(it) }
+        }
+        launch(Dispatchers.Main) {
+            val availableTranslations = translationManager.observeAvailableTranslations()
+            receiveChannels.add(availableTranslations)
+            availableTranslations.consumeEach {
+                view?.onAvailableTranslationsUpdated(it.sortedWith(translationComparator))
+            }
+        }
+        launch(Dispatchers.Main) {
+            val downloadedTranslations = translationManager.observeDownloadedTranslations()
+            receiveChannels.add(downloadedTranslations)
+            downloadedTranslations.consumeEach {
+                view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
             }
         }
     }
@@ -87,12 +90,12 @@ class TranslationManagementPresenter(
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
-                view?.onTranslationDownloadFailed()
+                view?.onError(e)
             }
         }
     }
 
-    fun setCurrentTranslation(currentTranslation: TranslationInfo) {
+    fun updateCurrentTranslation(currentTranslation: TranslationInfo) {
         launch(Dispatchers.Main) {
             launch(Dispatchers.IO) {
                 bibleReadingManager.updateCurrentTranslation(currentTranslation.shortName)

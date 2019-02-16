@@ -20,21 +20,24 @@ import androidx.annotation.CallSuper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlin.coroutines.CoroutineContext
 
 interface MVPView
 
 abstract class MVPPresenter<V : MVPView> : CoroutineScope {
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
-    private lateinit var job: Job
+        get() = Dispatchers.Main + job!!
+    private var job: Job? = null
+
+    protected val receiveChannels = ArrayList<ReceiveChannel<*>>()
 
     protected var view: V? = null
         private set
 
     fun takeView(v: V) {
-        view = v
         job = Job()
+        view = v
         onViewTaken()
     }
 
@@ -44,7 +47,15 @@ abstract class MVPPresenter<V : MVPView> : CoroutineScope {
 
     fun dropView() {
         onViewDropped()
-        job.cancel()
+
+        job?.cancel()
+        job = null
+
+        for (r in receiveChannels) {
+            r.cancel()
+        }
+        receiveChannels.clear()
+
         view = null
     }
 

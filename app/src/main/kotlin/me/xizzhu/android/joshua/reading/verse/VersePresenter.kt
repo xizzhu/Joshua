@@ -31,15 +31,17 @@ class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVP
         super.onViewTaken()
 
         launch(Dispatchers.Main) {
-            bibleReadingManager.observeCurrentTranslation()
-                    .filter { it.isNotEmpty() }
+            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
+            receiveChannels.add(currentTranslation)
+            currentTranslation.filter { it.isNotEmpty() }
                     .consumeEach {
                         view?.onCurrentTranslationUpdated(it)
                     }
         }
         launch(Dispatchers.Main) {
-            bibleReadingManager.observeCurrentVerseIndex()
-                    .filter { it.isValid() }
+            val currentVerse = bibleReadingManager.observeCurrentVerseIndex()
+            receiveChannels.add(currentVerse)
+            currentVerse.filter { it.isValid() }
                     .consumeEach {
                         view?.onCurrentVerseIndexUpdated(it)
                     }
