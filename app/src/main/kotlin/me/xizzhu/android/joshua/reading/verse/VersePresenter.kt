@@ -49,7 +49,7 @@ class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVP
     }
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        launch(Dispatchers.IO) {
+        launch {
             bibleReadingManager.updateCurrentVerseIndex(verseIndex)
         }
     }

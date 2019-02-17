@@ -63,7 +63,7 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
     }
 
     fun updateCurrentTranslation(translationShortName: String) {
-        launch(Dispatchers.IO) {
+        launch {
             bibleReadingManager.updateCurrentTranslation(translationShortName)
         }
     }

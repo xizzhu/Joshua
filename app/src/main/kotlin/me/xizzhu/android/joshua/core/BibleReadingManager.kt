@@ -19,9 +19,7 @@ package me.xizzhu.android.joshua.core
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.internal.repository.BibleReadingRepository
 
@@ -32,24 +30,35 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
     init {
         GlobalScope.launch(Dispatchers.IO) {
             currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
+            launch(Dispatchers.IO) {
+                currentTranslationShortName.openSubscription()
+                        .drop(1)
+                        .consumeEach {
+                            bibleReadingRepository.saveCurrentTranslation(it)
+                        }
+            }
+
             currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
+            launch(Dispatchers.IO) {
+                currentVerseIndex.openSubscription()
+                        .drop(1)
+                        .consumeEach {
+                            bibleReadingRepository.saveCurrentVerseIndex(it)
+                        }
+            }
         }
     }
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
 
-    @WorkerThread
     suspend fun updateCurrentTranslation(translationShortName: String) {
         currentTranslationShortName.send(translationShortName)
-        bibleReadingRepository.saveCurrentTranslation(translationShortName)
     }
 
     fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
 
-    @WorkerThread
     suspend fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
         currentVerseIndex.send(verseIndex)
-        bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
     }
 
     @WorkerThread

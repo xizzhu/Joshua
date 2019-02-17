@@ -83,9 +83,7 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
                             view?.onTranslationDownloadProgressed(it)
                         }
                 if (bibleReadingManager.observeCurrentTranslation().receive().isEmpty()) {
-                    launch(Dispatchers.IO) {
-                        bibleReadingManager.updateCurrentTranslation(translationInfo.shortName)
-                    }
+                    bibleReadingManager.updateCurrentTranslation(translationInfo.shortName)
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
@@ -96,9 +94,7 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
 
     fun updateCurrentTranslation(currentTranslation: TranslationInfo) {
         launch(Dispatchers.Main) {
-            launch(Dispatchers.IO) {
-                bibleReadingManager.updateCurrentTranslation(currentTranslation.shortName)
-            }
+            bibleReadingManager.updateCurrentTranslation(currentTranslation.shortName)
             view?.onTranslationSelected()
         }
     }
