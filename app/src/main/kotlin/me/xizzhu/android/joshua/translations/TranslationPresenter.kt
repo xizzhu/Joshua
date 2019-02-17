@@ -71,6 +71,7 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
                 view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
             }
         }
+        launch(Dispatchers.IO) { translationManager.reload(false) }
     }
 
     fun downloadTranslation(translationInfo: TranslationInfo) {

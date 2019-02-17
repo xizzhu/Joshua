@@ -46,7 +46,6 @@ class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView
     lateinit var versePresenter: VersePresenter
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
-
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var toolbar: ReadingToolbar
     private lateinit var chapterListView: ChapterListView

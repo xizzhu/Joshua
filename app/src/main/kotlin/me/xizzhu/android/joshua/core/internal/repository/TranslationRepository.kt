@@ -66,8 +66,7 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
     }
 
     @WorkerThread
-    private fun readTranslationsFromLocal(): List<TranslationInfo> =
-            localStorage.translationInfoDao.read()
+    fun readTranslationsFromLocal(): List<TranslationInfo> = localStorage.translationInfoDao.read()
 
     @WorkerThread
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
