@@ -17,24 +17,20 @@
 package me.xizzhu.android.joshua.translations
 
 import android.content.Context
-import android.content.Intent
-import android.os.Bundle
-import android.view.View
-import android.widget.ProgressBar
+import android.util.AttributeSet
 import android.widget.Toast
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.ProgressDialog
-import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
-import me.xizzhu.android.joshua.utils.fadeIn
-import me.xizzhu.android.joshua.utils.fadeOut
 import java.lang.Exception
-import javax.inject.Inject
 
-interface TranslationManagementView : MVPView {
+interface TranslationView : MVPView {
     fun onCurrentTranslationUpdated(currentTranslation: String)
 
     fun onAvailableTranslationsUpdated(available: List<TranslationInfo>)
@@ -52,101 +48,57 @@ interface TranslationManagementView : MVPView {
     fun onError(e: Exception)
 }
 
-class TranslationManagementActivity : BaseActivity(), TranslationManagementView, TranslationListAdapter.Listener {
-    companion object {
-        fun newStartIntent(context: Context) = Intent(context, TranslationManagementActivity::class.java)
+class TranslationListView : RecyclerView, LifecycleObserver, TranslationListAdapter.Listener, TranslationView {
+    interface Listener {
+        fun onTranslationsLoaded()
+
+        fun onTranslationSelected()
     }
 
-    @Inject
-    lateinit var presenter: TranslationManagementPresenter
+    constructor(context: Context) : super(context)
 
-    private lateinit var loadingSpinner: ProgressBar
-    private lateinit var translationListView: RecyclerView
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    private val adapter: TranslationListAdapter = TranslationListAdapter(this, this)
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    private lateinit var presenter: TranslationPresenter
+    private lateinit var listener: Listener
+
+    private val adapter: TranslationListAdapter = TranslationListAdapter(context, this)
+
     private var currentTranslation: String? = null
     private var availableTranslations: List<TranslationInfo>? = null
     private var downloadedTranslations: List<TranslationInfo>? = null
 
     private var downloadProgressDialog: ProgressDialog? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_translation_management)
-        loadingSpinner = findViewById(R.id.loading_spinner)
-
-        translationListView = findViewById(R.id.translation_list)
-        translationListView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        translationListView.adapter = adapter
+    init {
+        layoutManager = LinearLayoutManager(context, VERTICAL, false)
+        setAdapter(adapter)
     }
 
-    override fun onStart() {
-        super.onStart()
+    fun setPresenter(presenter: TranslationPresenter) {
+        this.presenter = presenter
+    }
+
+    fun setListener(listener: Listener) {
+        this.listener = listener
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onStart() {
         presenter.takeView(this)
-
-        loadingSpinner.visibility = View.VISIBLE
-        translationListView.visibility = View.GONE
     }
 
-    override fun onStop() {
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onStop() {
         presenter.dropView()
         dismissDownloadProgressDialog()
-        super.onStop()
     }
 
     private fun dismissDownloadProgressDialog() {
         downloadProgressDialog?.dismiss()
         downloadProgressDialog = null
-    }
-
-    override fun onCurrentTranslationUpdated(currentTranslation: String) {
-        this.currentTranslation = currentTranslation
-        refreshUi()
-    }
-
-    private fun refreshUi() {
-        if (currentTranslation == null || availableTranslations == null || downloadedTranslations == null) {
-            return
-        }
-
-        adapter.setTranslations(downloadedTranslations!!, availableTranslations!!, currentTranslation!!)
-
-        loadingSpinner.fadeOut()
-        translationListView.fadeIn()
-    }
-
-    override fun onAvailableTranslationsUpdated(available: List<TranslationInfo>) {
-        this.availableTranslations = available
-        refreshUi()
-    }
-
-    override fun onDownloadedTranslationsUpdated(downloaded: List<TranslationInfo>) {
-        this.downloadedTranslations = downloaded
-        refreshUi()
-    }
-
-    override fun onTranslationDownloadStarted() {
-        downloadProgressDialog = ProgressDialog.showProgressDialog(this, R.string.downloading_translation, 100)
-    }
-
-    override fun onTranslationDownloadProgressed(progress: Int) {
-        downloadProgressDialog?.setProgress(progress)
-    }
-
-    override fun onTranslationDownloaded() {
-        dismissDownloadProgressDialog()
-        Toast.makeText(this, R.string.translation_downloaded, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onTranslationSelected() {
-        finish()
-    }
-
-    override fun onError(e: Exception) {
-        dismissDownloadProgressDialog()
-
-        // TODO
     }
 
     override fun onTranslationClicked(translationInfo: TranslationInfo) {
@@ -155,5 +107,52 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView,
         } else {
             presenter.downloadTranslation(translationInfo)
         }
+    }
+
+    override fun onCurrentTranslationUpdated(currentTranslation: String) {
+        this.currentTranslation = currentTranslation
+        updateTranslationList()
+    }
+
+    private fun updateTranslationList() {
+        if (currentTranslation == null || availableTranslations == null || downloadedTranslations == null) {
+            return
+        }
+
+        adapter.setTranslations(downloadedTranslations!!, availableTranslations!!, currentTranslation!!)
+        listener.onTranslationsLoaded()
+    }
+
+    override fun onAvailableTranslationsUpdated(available: List<TranslationInfo>) {
+        this.availableTranslations = available
+        updateTranslationList()
+    }
+
+    override fun onDownloadedTranslationsUpdated(downloaded: List<TranslationInfo>) {
+        this.downloadedTranslations = downloaded
+        updateTranslationList()
+    }
+
+    override fun onTranslationDownloadStarted() {
+        downloadProgressDialog = ProgressDialog.showProgressDialog(context, R.string.downloading_translation, 100)
+    }
+
+    override fun onTranslationDownloadProgressed(progress: Int) {
+        downloadProgressDialog?.setProgress(progress)
+    }
+
+    override fun onTranslationDownloaded() {
+        dismissDownloadProgressDialog()
+        Toast.makeText(context, R.string.translation_downloaded, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onTranslationSelected() {
+        listener.onTranslationSelected()
+    }
+
+    override fun onError(e: Exception) {
+        dismissDownloadProgressDialog()
+
+        // TODO
     }
 }

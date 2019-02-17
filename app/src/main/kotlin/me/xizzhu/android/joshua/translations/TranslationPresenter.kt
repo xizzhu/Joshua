@@ -27,9 +27,8 @@ import java.lang.Exception
 import java.util.*
 import kotlin.Comparator
 
-class TranslationManagementPresenter(
-        private val bibleReadingManager: BibleReadingManager, private val translationManager: TranslationManager)
-    : MVPPresenter<TranslationManagementView>() {
+class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
+                           private val translationManager: TranslationManager) : MVPPresenter<TranslationView>() {
     private val translationComparator = object : Comparator<TranslationInfo> {
         override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
             val userLocale = Locale.getDefault()

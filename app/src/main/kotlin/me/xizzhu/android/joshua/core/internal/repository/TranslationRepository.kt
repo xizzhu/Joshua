@@ -70,10 +70,6 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
             localStorage.translationInfoDao.read()
 
     @WorkerThread
-    fun readDownloadedTranslations(): List<TranslationInfo> =
-            localStorage.translationInfoDao.readDownloaded()
-
-    @WorkerThread
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
         var inputStream: ZipInputStream? = null
         var db: SQLiteDatabase? = null
