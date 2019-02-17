@@ -52,7 +52,7 @@ interface TranslationManagementView : MVPView {
     fun onError(e: Exception)
 }
 
-class TranslationManagementActivity : BaseActivity(), TranslationManagementView {
+class TranslationManagementActivity : BaseActivity(), TranslationManagementView, TranslationListAdapter.Listener {
     companion object {
         fun newStartIntent(context: Context) = Intent(context, TranslationManagementActivity::class.java)
     }
@@ -63,7 +63,7 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
     private lateinit var loadingSpinner: ProgressBar
     private lateinit var translationListView: RecyclerView
 
-    private lateinit var adapter: TranslationListAdapter
+    private val adapter: TranslationListAdapter = TranslationListAdapter(this, this)
     private var currentTranslation: String? = null
     private var availableTranslations: List<TranslationInfo>? = null
     private var downloadedTranslations: List<TranslationInfo>? = null
@@ -78,7 +78,6 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
 
         translationListView = findViewById(R.id.translation_list)
         translationListView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        adapter = TranslationListAdapter(this, presenter)
         translationListView.adapter = adapter
     }
 
@@ -148,5 +147,13 @@ class TranslationManagementActivity : BaseActivity(), TranslationManagementView 
         dismissDownloadProgressDialog()
 
         // TODO
+    }
+
+    override fun onTranslationClicked(translationInfo: TranslationInfo) {
+        if (translationInfo.downloaded) {
+            presenter.updateCurrentTranslation(translationInfo)
+        } else {
+            presenter.downloadTranslation(translationInfo)
+        }
     }
 }

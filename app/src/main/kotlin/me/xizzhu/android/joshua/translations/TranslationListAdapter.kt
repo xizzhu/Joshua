@@ -27,9 +27,9 @@ import me.xizzhu.android.joshua.core.TranslationInfo
 import java.util.ArrayList
 
 private class AvailableTranslationTitleViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_available_translation_title, parent, false)) {}
+    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_available_translation_title, parent, false))
 
-private class TranslationInfoViewHolder(private val presenter: TranslationManagementPresenter, inflater: LayoutInflater, parent: ViewGroup)
+private class TranslationInfoViewHolder(private val listener: TranslationListAdapter.Listener, inflater: LayoutInflater, parent: ViewGroup)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_translation, parent, false)), View.OnClickListener {
     private val textView = itemView as TextView
     private var translationInfo: TranslationInfo? = null
@@ -48,18 +48,18 @@ private class TranslationInfoViewHolder(private val presenter: TranslationManage
 
     override fun onClick(v: View) {
         val t = translationInfo ?: return
-        if (t.downloaded) {
-            presenter.updateCurrentTranslation(t)
-        } else {
-            presenter.downloadTranslation(t)
-        }
+        listener.onTranslationClicked(t)
     }
 }
 
-class TranslationListAdapter(context: Context, private val presenter: TranslationManagementPresenter) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class TranslationListAdapter(context: Context, private val listener: Listener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
         private const val ITEM_AVAILABLE_TRANSLATIONS_TITLE = 0
         private const val ITEM_TRANSLATION_INFO = 1
+    }
+
+    interface Listener {
+        fun onTranslationClicked(translationInfo: TranslationInfo)
     }
 
     private val inflater = LayoutInflater.from(context)
@@ -71,7 +71,7 @@ class TranslationListAdapter(context: Context, private val presenter: Translatio
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
             when (viewType) {
                 ITEM_AVAILABLE_TRANSLATIONS_TITLE -> AvailableTranslationTitleViewHolder(inflater, parent)
-                ITEM_TRANSLATION_INFO -> TranslationInfoViewHolder(presenter, inflater, parent)
+                ITEM_TRANSLATION_INFO -> TranslationInfoViewHolder(listener, inflater, parent)
                 else -> throw IllegalArgumentException("Unsupported view type: $viewType")
             }
 
