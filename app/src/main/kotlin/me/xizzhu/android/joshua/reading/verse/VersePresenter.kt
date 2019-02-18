@@ -49,7 +49,7 @@ class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVP
     }
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        launch {
+        launch(Dispatchers.Main) {
             bibleReadingManager.updateCurrentVerseIndex(verseIndex)
         }
     }
@@ -57,9 +57,8 @@ class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVP
     fun loadVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
             try {
-                view?.onVersesLoaded(bookIndex, chapterIndex, withContext(Dispatchers.IO) {
-                    bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex)
-                })
+                view?.onVersesLoaded(bookIndex, chapterIndex,
+                        bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex))
             } catch (e: Exception) {
                 view?.onError(e)
             }

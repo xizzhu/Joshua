@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
@@ -36,9 +35,7 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
             currentTranslation.filter { it.isNotEmpty() }
                     .consumeEach {
                         view?.onCurrentTranslationUpdated(it)
-                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) {
-                            bibleReadingManager.readBookNames(it)
-                        })
+                        view?.onBookNamesUpdated(bibleReadingManager.readBookNames(it))
                     }
         }
         launch(Dispatchers.Main) {
@@ -63,7 +60,7 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
     }
 
     fun updateCurrentTranslation(translationShortName: String) {
-        launch {
+        launch(Dispatchers.Main) {
             bibleReadingManager.updateCurrentTranslation(translationShortName)
         }
     }

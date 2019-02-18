@@ -71,7 +71,7 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
                 view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
             }
         }
-        launch(Dispatchers.IO) { translationManager.reload(false) }
+        launch(Dispatchers.Main) { translationManager.reload(false) }
     }
 
     fun downloadTranslation(translationInfo: TranslationInfo) {
@@ -79,7 +79,7 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
 
         launch(Dispatchers.Main) {
             try {
-                translationManager.downloadTranslation(this, Dispatchers.IO, translationInfo)
+                translationManager.downloadTranslation(this, translationInfo)
                         .consumeEach {
                             view?.onTranslationDownloadProgressed(it)
                         }

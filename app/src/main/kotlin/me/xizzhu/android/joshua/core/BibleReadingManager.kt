@@ -16,11 +16,11 @@
 
 package me.xizzhu.android.joshua.core
 
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.internal.repository.BibleReadingRepository
 
 class BibleReadingManager constructor(private val bibleReadingRepository: BibleReadingRepository) {
@@ -30,42 +30,33 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
     init {
         GlobalScope.launch(Dispatchers.IO) {
             currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
-            launch(Dispatchers.IO) {
-                currentTranslationShortName.openSubscription()
-                        .drop(1)
-                        .consumeEach {
-                            bibleReadingRepository.saveCurrentTranslation(it)
-                        }
-            }
-
             currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
-            launch(Dispatchers.IO) {
-                currentVerseIndex.openSubscription()
-                        .drop(1)
-                        .consumeEach {
-                            bibleReadingRepository.saveCurrentVerseIndex(it)
-                        }
-            }
         }
     }
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
 
-    suspend fun updateCurrentTranslation(translationShortName: String) {
-        currentTranslationShortName.send(translationShortName)
-    }
+    suspend fun updateCurrentTranslation(translationShortName: String): Unit =
+            withContext(Dispatchers.IO) {
+                currentTranslationShortName.send(translationShortName)
+                bibleReadingRepository.saveCurrentTranslation(translationShortName)
+            }
 
     fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
 
-    suspend fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        currentVerseIndex.send(verseIndex)
-    }
+    suspend fun updateCurrentVerseIndex(verseIndex: VerseIndex): Unit =
+            withContext(Dispatchers.IO) {
+                currentVerseIndex.send(verseIndex)
+                bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
+            }
 
-    @WorkerThread
-    fun readBookNames(translationShortName: String): List<String> =
-            bibleReadingRepository.readBookNames(translationShortName)
+    suspend fun readBookNames(translationShortName: String): List<String> =
+            withContext(Dispatchers.IO) {
+                bibleReadingRepository.readBookNames(translationShortName)
+            }
 
-    @WorkerThread
-    fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
-            bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
+    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
+            withContext(Dispatchers.IO) {
+                bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
+            }
 }

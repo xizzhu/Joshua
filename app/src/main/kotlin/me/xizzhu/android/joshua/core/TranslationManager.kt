@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core
 
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -47,28 +46,27 @@ class TranslationManager(private val translationRepository: TranslationRepositor
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> = downloadedTranslations.openSubscription()
 
-    @WorkerThread
-    suspend fun reload(forceRefresh: Boolean) {
-        val available = ArrayList<TranslationInfo>()
-        val downloaded = ArrayList<TranslationInfo>()
-        for (t in translationRepository.readTranslations(forceRefresh)) {
-            if (t.downloaded) {
-                downloaded.add(t)
-            } else {
-                available.add(t)
+    suspend fun reload(forceRefresh: Boolean): Unit =
+            withContext(Dispatchers.IO) {
+                val available = ArrayList<TranslationInfo>()
+                val downloaded = ArrayList<TranslationInfo>()
+                for (t in translationRepository.readTranslations(forceRefresh)) {
+                    if (t.downloaded) {
+                        downloaded.add(t)
+                    } else {
+                        available.add(t)
+                    }
+                }
+                if (available != availableTranslations.value) {
+                    availableTranslations.send(available)
+                }
+                if (downloaded != downloadedTranslations.value) {
+                    downloadedTranslations.send(downloaded)
+                }
             }
-        }
-        if (available != availableTranslations.value) {
-            availableTranslations.send(available)
-        }
-        if (downloaded != downloadedTranslations.value) {
-            downloadedTranslations.send(downloaded)
-        }
-    }
 
-    fun downloadTranslation(scope: CoroutineScope, dispatcher: CoroutineDispatcher,
-                            translationInfo: TranslationInfo): ReceiveChannel<Int> =
-            scope.produce(dispatcher) {
+    fun downloadTranslation(scope: CoroutineScope, translationInfo: TranslationInfo): ReceiveChannel<Int> =
+            scope.produce(Dispatchers.IO) {
                 invokeOnClose {
                     if (it == null) {
                         scope.launch(Dispatchers.IO) {
