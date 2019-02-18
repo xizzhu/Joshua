@@ -53,7 +53,7 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
                 if (it.isEmpty()) {
                     view?.onNoDownloadedTranslations()
                 } else {
-                    view?.onDownloadedTranslationsLoaded(it)
+                    view?.onDownloadedTranslationsLoaded(it.sortedBy { t -> t.language })
                 }
             }
         }
