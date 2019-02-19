@@ -21,13 +21,14 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import me.xizzhu.android.joshua.core.internal.repository.TranslationRepository
+import kotlin.coroutines.coroutineContext
 
 class TranslationManager(private val translationRepository: TranslationRepository) {
     private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
     private val downloadedTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
 
     init {
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Main) {
             val available = ArrayList<TranslationInfo>()
             val downloaded = ArrayList<TranslationInfo>()
             for (t in translationRepository.readTranslationsFromLocal()) {
@@ -46,30 +47,29 @@ class TranslationManager(private val translationRepository: TranslationRepositor
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> = downloadedTranslations.openSubscription()
 
-    suspend fun reload(forceRefresh: Boolean): Unit =
-            withContext(Dispatchers.IO) {
-                val available = ArrayList<TranslationInfo>()
-                val downloaded = ArrayList<TranslationInfo>()
-                for (t in translationRepository.readTranslations(forceRefresh)) {
-                    if (t.downloaded) {
-                        downloaded.add(t)
-                    } else {
-                        available.add(t)
-                    }
-                }
-                if (available != availableTranslations.value) {
-                    availableTranslations.send(available)
-                }
-                if (downloaded != downloadedTranslations.value) {
-                    downloadedTranslations.send(downloaded)
-                }
+    suspend fun reload(forceRefresh: Boolean) {
+        val available = ArrayList<TranslationInfo>()
+        val downloaded = ArrayList<TranslationInfo>()
+        for (t in translationRepository.readTranslations(forceRefresh)) {
+            if (t.downloaded) {
+                downloaded.add(t)
+            } else {
+                available.add(t)
             }
+        }
+        if (available != availableTranslations.value) {
+            availableTranslations.send(available)
+        }
+        if (downloaded != downloadedTranslations.value) {
+            downloadedTranslations.send(downloaded)
+        }
+    }
 
     fun downloadTranslation(scope: CoroutineScope, translationInfo: TranslationInfo): ReceiveChannel<Int> =
-            scope.produce(Dispatchers.IO) {
+            scope.produce {
                 invokeOnClose {
                     if (it == null) {
-                        scope.launch(Dispatchers.IO) {
+                        launch(Dispatchers.Main) {
                             val available = ArrayList(availableTranslations.value)
                             available.remove(translationInfo)
                             availableTranslations.send(available)

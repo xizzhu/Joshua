@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.internal.repository.BibleReadingRepository
 
 class BibleReadingManager constructor(private val bibleReadingRepository: BibleReadingRepository) {
@@ -28,7 +27,7 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
 
     init {
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Main) {
             currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
             currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
         }
@@ -36,27 +35,21 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
 
-    suspend fun updateCurrentTranslation(translationShortName: String): Unit =
-            withContext(Dispatchers.IO) {
-                currentTranslationShortName.send(translationShortName)
-                bibleReadingRepository.saveCurrentTranslation(translationShortName)
-            }
+    suspend fun updateCurrentTranslation(translationShortName: String) {
+        currentTranslationShortName.send(translationShortName)
+        bibleReadingRepository.saveCurrentTranslation(translationShortName)
+    }
 
     fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
 
-    suspend fun updateCurrentVerseIndex(verseIndex: VerseIndex): Unit =
-            withContext(Dispatchers.IO) {
-                currentVerseIndex.send(verseIndex)
-                bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
-            }
+    suspend fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
+        currentVerseIndex.send(verseIndex)
+        bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
+    }
 
     suspend fun readBookNames(translationShortName: String): List<String> =
-            withContext(Dispatchers.IO) {
-                bibleReadingRepository.readBookNames(translationShortName)
-            }
+            bibleReadingRepository.readBookNames(translationShortName)
 
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
-            withContext(Dispatchers.IO) {
-                bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
-            }
+            bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
 }

@@ -80,8 +80,8 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
         launch(Dispatchers.Main) {
             try {
                 translationManager.downloadTranslation(this, translationInfo)
-                        .consumeEach {
-                            view?.onTranslationDownloadProgressed(it)
+                        .consumeEach { progress ->
+                            view?.onTranslationDownloadProgressed(progress)
                         }
                 if (bibleReadingManager.observeCurrentTranslation().receive().isEmpty()) {
                     bibleReadingManager.updateCurrentTranslation(translationInfo.shortName)
