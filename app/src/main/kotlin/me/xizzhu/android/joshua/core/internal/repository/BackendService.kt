@@ -21,13 +21,15 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Retrofit
+import retrofit2.*
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Streaming
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class BackendService {
     companion object {
@@ -50,6 +52,22 @@ class BackendService {
 
     val booksAdapter: JsonAdapter<BackendBooks> by lazy { moshi.adapter(BackendBooks::class.java) }
     val chapterAdapter: JsonAdapter<BackendChapter> by lazy { moshi.adapter(BackendChapter::class.java) }
+}
+
+suspend fun <T> Call<T>.await(): T = suspendCoroutine { cont ->
+    enqueue(object : Callback<T> {
+        override fun onResponse(call: Call<T>, response: Response<T>) {
+            if (response.isSuccessful) {
+                cont.resume(response.body()!!)
+            } else {
+                cont.resumeWithException(HttpException(response))
+            }
+        }
+
+        override fun onFailure(call: Call<T>, t: Throwable) {
+            cont.resumeWithException(t)
+        }
+    })
 }
 
 data class BackendTranslationInfo(@Json(name = "shortName") val shortName: String,

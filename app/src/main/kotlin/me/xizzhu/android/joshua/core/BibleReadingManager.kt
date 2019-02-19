@@ -16,12 +16,9 @@
 
 package me.xizzhu.android.joshua.core
 
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.internal.repository.BibleReadingRepository
 
@@ -30,7 +27,7 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
 
     init {
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Main) {
             currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
             currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
         }
@@ -38,41 +35,21 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
 
+    suspend fun updateCurrentTranslation(translationShortName: String) {
+        currentTranslationShortName.send(translationShortName)
+        bibleReadingRepository.saveCurrentTranslation(translationShortName)
+    }
+
     fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
 
-    fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        GlobalScope.launch(Dispatchers.IO) {
-            currentVerseIndex.send(verseIndex)
-            bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
-        }
+    suspend fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
+        currentVerseIndex.send(verseIndex)
+        bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
     }
 
-    fun updateCurrentTranslation(translationShortName: String) {
-        GlobalScope.launch(Dispatchers.IO) {
-            currentTranslationShortName.send(translationShortName)
-            bibleReadingRepository.saveCurrentTranslation(translationShortName)
-        }
-    }
-
-    var currentTranslation: String = ""
-        @WorkerThread get() {
-            if (field.isEmpty()) {
-                field = bibleReadingRepository.readCurrentTranslation()
-            }
-            return field
-        }
-        @WorkerThread set(value) {
-            if (value != field) {
-                field = value
-                bibleReadingRepository.saveCurrentTranslation(value)
-            }
-        }
-
-    @WorkerThread
-    fun readBookNames(translationShortName: String): List<String> =
+    suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingRepository.readBookNames(translationShortName)
 
-    @WorkerThread
-    fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
+    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
 }

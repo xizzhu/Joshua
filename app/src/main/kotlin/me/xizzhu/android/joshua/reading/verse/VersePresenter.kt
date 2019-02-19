@@ -31,15 +31,17 @@ class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVP
         super.onViewTaken()
 
         launch(Dispatchers.Main) {
-            bibleReadingManager.observeCurrentTranslation()
-                    .filter { it.isNotEmpty() }
+            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
+            receiveChannels.add(currentTranslation)
+            currentTranslation.filter { it.isNotEmpty() }
                     .consumeEach {
                         view?.onCurrentTranslationUpdated(it)
                     }
         }
         launch(Dispatchers.Main) {
-            bibleReadingManager.observeCurrentVerseIndex()
-                    .filter { it.isValid() }
+            val currentVerse = bibleReadingManager.observeCurrentVerseIndex()
+            receiveChannels.add(currentVerse)
+            currentVerse.filter { it.isValid() }
                     .consumeEach {
                         view?.onCurrentVerseIndexUpdated(it)
                     }
@@ -47,15 +49,16 @@ class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVP
     }
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        bibleReadingManager.updateCurrentVerseIndex(verseIndex)
+        launch(Dispatchers.Main) {
+            bibleReadingManager.updateCurrentVerseIndex(verseIndex)
+        }
     }
 
     fun loadVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
             try {
-                view?.onVersesLoaded(bookIndex, chapterIndex, withContext(Dispatchers.IO) {
-                    bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex)
-                })
+                view?.onVersesLoaded(bookIndex, chapterIndex,
+                        bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex))
             } catch (e: Exception) {
                 view?.onError(e)
             }

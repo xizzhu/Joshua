@@ -16,43 +16,45 @@
 
 package me.xizzhu.android.joshua.core.internal.repository
 
-import androidx.annotation.WorkerThread
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 
 class BibleReadingRepository(private val localStorage: LocalStorage) {
-    @WorkerThread
-    fun readCurrentVerseIndex(): VerseIndex {
-        val metadataDao = localStorage.metadataDao
-        val bookIndex = metadataDao.read(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0").toInt()
-        val chapterIndex = metadataDao.read(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0").toInt()
-        val verseIndex = metadataDao.read(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0").toInt()
-        return VerseIndex(bookIndex, chapterIndex, verseIndex)
-    }
+    suspend fun readCurrentVerseIndex(): VerseIndex =
+            withContext(Dispatchers.IO) {
+                val metadataDao = localStorage.metadataDao
+                val bookIndex = metadataDao.read(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0").toInt()
+                val chapterIndex = metadataDao.read(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0").toInt()
+                val verseIndex = metadataDao.read(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0").toInt()
+                VerseIndex(bookIndex, chapterIndex, verseIndex)
+            }
 
-    @WorkerThread
-    fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        val entries = ArrayList<Pair<String, String>>(3)
-        entries.add(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, verseIndex.bookIndex.toString()))
-        entries.add(Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, verseIndex.chapterIndex.toString()))
-        entries.add(Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, verseIndex.verseIndex.toString()))
-        localStorage.metadataDao.save(entries)
-    }
+    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex): Unit =
+            withContext(Dispatchers.IO) {
+                val entries = ArrayList<Pair<String, String>>(3)
+                entries.add(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, verseIndex.bookIndex.toString()))
+                entries.add(Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, verseIndex.chapterIndex.toString()))
+                entries.add(Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, verseIndex.verseIndex.toString()))
+                localStorage.metadataDao.save(entries)
+            }
 
-    @WorkerThread
-    fun readCurrentTranslation(): String =
-            localStorage.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, "")
+    suspend fun readCurrentTranslation(): String =
+            withContext(Dispatchers.IO) {
+                localStorage.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, "")
+            }
 
-    @WorkerThread
-    fun saveCurrentTranslation(translationShortName: String) {
-        localStorage.metadataDao.save(MetadataDao.KEY_CURRENT_TRANSLATION, translationShortName)
-    }
+    suspend fun saveCurrentTranslation(translationShortName: String): Unit =
+            withContext(Dispatchers.IO) {
+                localStorage.metadataDao.save(MetadataDao.KEY_CURRENT_TRANSLATION, translationShortName)
+            }
 
-    @WorkerThread
-    fun readBookNames(translationShortName: String): List<String> =
-            localStorage.bookNamesDao.read(translationShortName)
+    suspend fun readBookNames(translationShortName: String): List<String> =
+            withContext(Dispatchers.IO) { localStorage.bookNamesDao.read(translationShortName) }
 
-    @WorkerThread
-    fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
-            localStorage.translationDao.read(translationShortName, bookIndex, chapterIndex)
+    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
+            withContext(Dispatchers.IO) {
+                localStorage.translationDao.read(translationShortName, bookIndex, chapterIndex)
+            }
 }

@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.utils.MVPPresenter
@@ -30,17 +29,18 @@ class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager)
         super.onViewTaken()
 
         launch(Dispatchers.Main) {
-            bibleReadingManager.observeCurrentTranslation()
+            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
+            receiveChannels.add(currentTranslation)
+            currentTranslation
                     .filter { it.isNotEmpty() }
                     .consumeEach {
-                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) {
-                            bibleReadingManager.readBookNames(it)
-                        })
+                        view?.onBookNamesUpdated(bibleReadingManager.readBookNames(it))
                     }
         }
         launch(Dispatchers.Main) {
-            bibleReadingManager.observeCurrentVerseIndex()
-                    .filter { it.isValid() }
+            val currentVerse = bibleReadingManager.observeCurrentVerseIndex()
+            receiveChannels.add(currentVerse)
+            currentVerse.filter { it.isValid() }
                     .consumeEach {
                         view?.onCurrentVerseIndexUpdated(it)
                     }
@@ -48,6 +48,8 @@ class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager)
     }
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        bibleReadingManager.updateCurrentVerseIndex(verseIndex)
+        launch(Dispatchers.Main) {
+            bibleReadingManager.updateCurrentVerseIndex(verseIndex)
+        }
     }
 }

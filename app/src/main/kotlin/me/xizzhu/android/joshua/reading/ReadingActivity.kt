@@ -33,17 +33,9 @@ import me.xizzhu.android.joshua.reading.verse.VerseViewPager
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
-import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
 
-interface ReadingView : MVPView {
-    fun onNoCurrentTranslation()
-}
-
-class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener {
-    @Inject
-    lateinit var presenter: ReadingPresenter
-
+class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView.Listener {
     @Inject
     lateinit var toolbarPresenter: ToolbarPresenter
 
@@ -54,7 +46,6 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener {
     lateinit var versePresenter: VersePresenter
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
-
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var toolbar: ReadingToolbar
     private lateinit var chapterListView: ChapterListView
@@ -68,6 +59,7 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener {
 
         toolbar = findViewById(R.id.toolbar)
         toolbar.setPresenter(toolbarPresenter)
+        toolbar.setListener(this)
         lifecycle.addObserver(toolbar)
 
         chapterListView = findViewById(R.id.chapter_list_view)
@@ -88,17 +80,6 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener {
         drawerToggle.syncState()
     }
 
-    override fun onStart() {
-        super.onStart()
-        presenter.takeView(this)
-        presenter.loadCurrentReadingProgress()
-    }
-
-    override fun onStop() {
-        presenter.dropView()
-        super.onStop()
-    }
-
     override fun onDestroy() {
         lifecycle.removeObserver(toolbar)
         lifecycle.removeObserver(chapterListView)
@@ -111,7 +92,7 @@ class ReadingActivity : BaseActivity(), ReadingView, ChapterListView.Listener {
         drawerToggle.onConfigurationChanged(newConfig)
     }
 
-    override fun onNoCurrentTranslation() {
+    override fun onNoDownloadedTranslations() {
         DialogHelper.showDialog(this, false, R.string.no_translation_downloaded,
                 DialogInterface.OnClickListener { _, _ ->
                     startActivity(TranslationManagementActivity.newStartIntent(this))

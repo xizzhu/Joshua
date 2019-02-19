@@ -33,7 +33,9 @@ import me.xizzhu.android.joshua.utils.MVPView
 import java.lang.StringBuilder
 
 interface ToolbarView : MVPView {
-    fun onDownloadedTranslationsDownloaded(translations: List<TranslationInfo>)
+    fun onNoDownloadedTranslations()
+
+    fun onDownloadedTranslationsLoaded(translations: List<TranslationInfo>)
 
     fun onCurrentTranslationUpdated(translationShortName: String)
 
@@ -45,6 +47,10 @@ interface ToolbarView : MVPView {
 }
 
 class ReadingToolbar : Toolbar, LifecycleObserver, ToolbarView {
+    interface Listener {
+        fun onNoDownloadedTranslations()
+    }
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -57,6 +63,7 @@ class ReadingToolbar : Toolbar, LifecycleObserver, ToolbarView {
     }
 
     private lateinit var presenter: ToolbarPresenter
+    private lateinit var listener: Listener
 
     private val titleBuilder = StringBuilder()
     private val downloadedTranslations = ArrayList<TranslationInfo>()
@@ -68,10 +75,13 @@ class ReadingToolbar : Toolbar, LifecycleObserver, ToolbarView {
         this.presenter = presenter
     }
 
+    fun setListener(listener: Listener) {
+        this.listener = listener
+    }
+
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onStart() {
         presenter.takeView(this)
-        presenter.loadDownloadedTranslations()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -79,7 +89,11 @@ class ReadingToolbar : Toolbar, LifecycleObserver, ToolbarView {
         presenter.dropView()
     }
 
-    override fun onDownloadedTranslationsDownloaded(translations: List<TranslationInfo>) {
+    override fun onNoDownloadedTranslations() {
+        listener.onNoDownloadedTranslations()
+    }
+
+    override fun onDownloadedTranslationsLoaded(translations: List<TranslationInfo>) {
         downloadedTranslations.clear()
         downloadedTranslations.addAll(translations)
 

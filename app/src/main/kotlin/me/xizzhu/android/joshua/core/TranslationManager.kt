@@ -16,25 +16,62 @@
 
 package me.xizzhu.android.joshua.core
 
-import androidx.annotation.WorkerThread
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.*
 import me.xizzhu.android.joshua.core.internal.repository.TranslationRepository
 
 class TranslationManager(private val translationRepository: TranslationRepository) {
-    @WorkerThread
-    fun readTranslations(forceRefresh: Boolean): List<TranslationInfo> =
-            translationRepository.readTranslations(forceRefresh)
+    private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+    private val downloadedTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
 
-    @WorkerThread
-    fun readDownloadedTranslations(): List<TranslationInfo> =
-            translationRepository.readDownloadedTranslations()
-
-    fun downloadTranslation(scope: CoroutineScope, dispatcher: CoroutineDispatcher,
-                            translationInfo: TranslationInfo): ReceiveChannel<Int> =
-            scope.produce(dispatcher) {
-                translationRepository.downloadTranslation(this, translationInfo)
+    init {
+        GlobalScope.launch(Dispatchers.Main) {
+            val available = ArrayList<TranslationInfo>()
+            val downloaded = ArrayList<TranslationInfo>()
+            for (t in translationRepository.readTranslationsFromLocal()) {
+                if (t.downloaded) {
+                    downloaded.add(t)
+                } else {
+                    available.add(t)
+                }
             }
+            availableTranslations.send(available)
+            downloadedTranslations.send(downloaded)
+        }
+    }
+
+    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> = availableTranslations.openSubscription()
+
+    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> = downloadedTranslations.openSubscription()
+
+    suspend fun reload(forceRefresh: Boolean) {
+        val available = ArrayList<TranslationInfo>()
+        val downloaded = ArrayList<TranslationInfo>()
+        for (t in translationRepository.readTranslations(forceRefresh)) {
+            if (t.downloaded) {
+                downloaded.add(t)
+            } else {
+                available.add(t)
+            }
+        }
+        if (available != availableTranslations.value) {
+            availableTranslations.send(available)
+        }
+        if (downloaded != downloadedTranslations.value) {
+            downloadedTranslations.send(downloaded)
+        }
+    }
+
+    suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
+        translationRepository.downloadTranslation(progressChannel, translationInfo)
+
+        val available = ArrayList(availableTranslations.value)
+        available.remove(translationInfo)
+        availableTranslations.send(available)
+
+        val downloaded = ArrayList(downloadedTranslations.value)
+        downloaded.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
+                translationInfo.language, translationInfo.size, true))
+        downloadedTranslations.send(downloaded)
+    }
 }
