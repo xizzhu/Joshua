@@ -17,11 +17,8 @@
 package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.channels.*
 import me.xizzhu.android.joshua.core.internal.repository.TranslationRepository
-import kotlin.coroutines.coroutineContext
 
 class TranslationManager(private val translationRepository: TranslationRepository) {
     private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
@@ -65,22 +62,16 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         }
     }
 
-    fun downloadTranslation(scope: CoroutineScope, translationInfo: TranslationInfo): ReceiveChannel<Int> =
-            scope.produce {
-                invokeOnClose {
-                    if (it == null) {
-                        launch(Dispatchers.Main) {
-                            val available = ArrayList(availableTranslations.value)
-                            available.remove(translationInfo)
-                            availableTranslations.send(available)
+    suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
+        translationRepository.downloadTranslation(progressChannel, translationInfo)
 
-                            val downloaded = ArrayList(downloadedTranslations.value)
-                            downloaded.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
-                                    translationInfo.language, translationInfo.size, true))
-                            downloadedTranslations.send(downloaded)
-                        }
-                    }
-                }
-                translationRepository.downloadTranslation(this, translationInfo)
-            }
+        val available = ArrayList(availableTranslations.value)
+        available.remove(translationInfo)
+        availableTranslations.send(available)
+
+        val downloaded = ArrayList(downloadedTranslations.value)
+        downloaded.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
+                translationInfo.language, translationInfo.size, true))
+        downloadedTranslations.send(downloaded)
+    }
 }

@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.translations
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -79,10 +80,14 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
 
         launch(Dispatchers.Main) {
             try {
-                translationManager.downloadTranslation(this, translationInfo)
-                        .consumeEach { progress ->
-                            view?.onTranslationDownloadProgressed(progress)
-                        }
+                val downloadProgressChannel = Channel<Int>()
+                launch(Dispatchers.IO) {
+                    translationManager.downloadTranslation(downloadProgressChannel, translationInfo)
+                }
+                downloadProgressChannel.consumeEach { progress ->
+                    view?.onTranslationDownloadProgressed(progress)
+                }
+
                 if (bibleReadingManager.observeCurrentTranslation().receive().isEmpty()) {
                     bibleReadingManager.updateCurrentTranslation(translationInfo.shortName)
                 }
