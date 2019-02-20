@@ -50,4 +50,7 @@ ext {
     okioVersion = '2.2.2'
 
     stethoVersion = '1.5.0'
+
+    testRunnerVersion = '1.1.0'
+    testRulesVersion = '1.1.1'
 }

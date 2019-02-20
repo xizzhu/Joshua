@@ -37,6 +37,8 @@ android {
         versionName rootProject.ext.versionName
 
         resConfigs rootProject.ext.supportedLocales
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     sourceSets {
@@ -44,6 +46,7 @@ android {
         debug.java.srcDirs += "src/debug/kotlin"
         release.java.srcDirs += "src/release/kotlin"
         test.java.srcDirs += "src/test/kotlin"
+        androidTest.java.srcDirs += "src/androidTest/kotlin"
     }
 
     buildTypes {
@@ -55,6 +58,7 @@ android {
         }
         debug {
             applicationIdSuffix ".debug"
+            testCoverageEnabled true
         }
     }
 }
@@ -89,4 +93,7 @@ dependencies {
     debugImplementation "com.facebook.stetho:stetho:$rootProject.ext.stethoVersion"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$rootProject.ext.kotlinVersion"
+
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.testRunnerVersion"
+    androidTestImplementation "androidx.test:rules:$rootProject.ext.testRulesVersion"
 }
