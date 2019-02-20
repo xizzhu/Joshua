@@ -57,8 +57,8 @@ class VerseViewPager : ViewPager, LifecycleObserver, VerseView, VersePagerAdapte
             if (currentVerseIndex.toPagePosition() == position) {
                 return
             }
-            presenter.updateCurrentVerseIndex(VerseIndex(pagePositionToBookIndex(position),
-                    pagePositionToChapterIndex(position), 0))
+            presenter.updateCurrentVerseIndex(VerseIndex(
+                    position.toBookIndex(), position.toChapterIndex(), 0))
         }
     }
 
@@ -174,8 +174,8 @@ private class VersePagerAdapter(private val context: Context, private val listen
         page.loadingSpinner.visibility = View.VISIBLE
 
         page.translation = currentTranslation
-        page.bookIndex = pagePositionToBookIndex(position)
-        page.chapterIndex = pagePositionToChapterIndex(position)
+        page.bookIndex = position.toBookIndex()
+        page.chapterIndex = position.toChapterIndex()
         page.inUse = true
 
         listener.onChapterRequested(page.bookIndex, page.chapterIndex)

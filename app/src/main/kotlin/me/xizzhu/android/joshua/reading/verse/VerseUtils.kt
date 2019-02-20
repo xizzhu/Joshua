@@ -22,8 +22,11 @@ import me.xizzhu.android.joshua.core.VerseIndex
 fun VerseIndex.toPagePosition(): Int = indexToPagePosition(bookIndex, chapterIndex)
 
 fun indexToPagePosition(bookIndex: Int, chapterIndex: Int): Int {
-    if (bookIndex < 0 || chapterIndex < 0) {
-        return -1
+    if (bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT) {
+        throw IllegalArgumentException("Invalid book index: $bookIndex")
+    }
+    if (chapterIndex < 0 || chapterIndex >= Bible.getChapterCount(bookIndex)) {
+        throw IllegalArgumentException("Invalid chapter index: $chapterIndex")
     }
 
     var position = 0
@@ -33,15 +36,15 @@ fun indexToPagePosition(bookIndex: Int, chapterIndex: Int): Int {
     return position + chapterIndex
 }
 
-fun pagePositionToBookIndex(position: Int): Int {
-    if (position < 0) {
+fun Int.toBookIndex(): Int {
+    var position = this
+    if (position < 0 || position >= Bible.TOTAL_CHAPTER_COUNT) {
         throw IllegalArgumentException("Invalid position: $position")
     }
 
-    var pos = position
     for (bookIndex in 0 until Bible.BOOK_COUNT) {
-        pos -= Bible.getChapterCount(bookIndex)
-        if (pos < 0) {
+        position -= Bible.getChapterCount(bookIndex)
+        if (position < 0) {
             return bookIndex
         }
     }
@@ -49,18 +52,18 @@ fun pagePositionToBookIndex(position: Int): Int {
     throw IllegalArgumentException("Invalid position: $position")
 }
 
-fun pagePositionToChapterIndex(position: Int): Int {
-    if (position < 0) {
+fun Int.toChapterIndex(): Int {
+    var position = this
+    if (position < 0 || position >= Bible.TOTAL_CHAPTER_COUNT) {
         throw IllegalArgumentException("Invalid position: $position")
     }
 
-    var pos = position
     for (bookIndex in 0 until Bible.BOOK_COUNT) {
         val chapterCount = Bible.getChapterCount(bookIndex)
-        if (pos < chapterCount) {
-            return pos
+        if (position < chapterCount) {
+            return position
         }
-        pos -= chapterCount
+        position -= chapterCount
     }
 
     throw IllegalArgumentException("Invalid position: $position")
