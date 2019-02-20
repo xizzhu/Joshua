@@ -34,6 +34,7 @@ import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewPager
+import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
@@ -129,7 +130,7 @@ class ReadingActivity : BaseActivity(), View.OnClickListener {
 
     override fun onClick(v: View) {
         if (v == search) {
-            // TODO
+            startActivity(SearchActivity.newStartIntent(this))
         }
     }
 }
