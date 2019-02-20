@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.utils
+package me.xizzhu.android.joshua.ui
 
 import android.animation.Animator
 import android.view.View

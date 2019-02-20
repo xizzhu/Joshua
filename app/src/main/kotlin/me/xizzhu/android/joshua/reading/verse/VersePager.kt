@@ -30,8 +30,8 @@ import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.utils.MVPView
-import me.xizzhu.android.joshua.utils.fadeIn
-import me.xizzhu.android.joshua.utils.fadeOut
+import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.fadeOut
 
 interface VerseView : MVPView {
     fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex)
