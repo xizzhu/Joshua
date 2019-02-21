@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
@@ -72,7 +73,7 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
                 view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
             }
         }
-        launch(Dispatchers.Main) { translationManager.reload(false) }
+        launch(Dispatchers.IO) { translationManager.reload(false) }
     }
 
     fun downloadTranslation(translationInfo: TranslationInfo) {
@@ -88,8 +89,10 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
                     view?.onTranslationDownloadProgressed(progress)
                 }
 
-                if (bibleReadingManager.observeCurrentTranslation().receive().isEmpty()) {
-                    bibleReadingManager.updateCurrentTranslation(translationInfo.shortName)
+                withContext(Dispatchers.IO) {
+                    if (bibleReadingManager.observeCurrentTranslation().receive().isEmpty()) {
+                        bibleReadingManager.updateCurrentTranslation(translationInfo.shortName)
+                    }
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
@@ -100,7 +103,9 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
 
     fun updateCurrentTranslation(currentTranslation: TranslationInfo) {
         launch(Dispatchers.Main) {
-            bibleReadingManager.updateCurrentTranslation(currentTranslation.shortName)
+            withContext(Dispatchers.IO) {
+                bibleReadingManager.updateCurrentTranslation(currentTranslation.shortName)
+            }
             view?.onTranslationSelected()
         }
     }

@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core
 
+import androidx.annotation.WorkerThread
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
 import me.xizzhu.android.joshua.core.internal.repository.TranslationRepository
@@ -25,7 +26,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
     private val downloadedTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
 
     init {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.IO) {
             val available = ArrayList<TranslationInfo>()
             val downloaded = ArrayList<TranslationInfo>()
             for (t in translationRepository.readTranslationsFromLocal()) {
@@ -44,6 +45,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> = downloadedTranslations.openSubscription()
 
+    @WorkerThread
     suspend fun reload(forceRefresh: Boolean) {
         val available = ArrayList<TranslationInfo>()
         val downloaded = ArrayList<TranslationInfo>()
@@ -62,6 +64,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         }
     }
 
+    @WorkerThread
     suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
         translationRepository.downloadTranslation(progressChannel, translationInfo)
 

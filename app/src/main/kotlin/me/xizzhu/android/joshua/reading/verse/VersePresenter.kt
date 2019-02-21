@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.utils.MVPPresenter
@@ -48,7 +49,7 @@ class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVP
     }
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        launch(Dispatchers.Main) {
+        launch(Dispatchers.IO) {
             bibleReadingManager.updateCurrentVerseIndex(verseIndex)
         }
     }
@@ -57,7 +58,7 @@ class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVP
         launch(Dispatchers.Main) {
             try {
                 view?.onVersesLoaded(bookIndex, chapterIndex,
-                        bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex))
+                        withContext(Dispatchers.IO) { bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex) })
             } catch (e: Exception) {
                 view?.onError(e)
             }

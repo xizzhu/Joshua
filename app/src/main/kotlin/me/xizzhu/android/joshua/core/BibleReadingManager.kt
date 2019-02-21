@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core
 
+import androidx.annotation.WorkerThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.*
@@ -27,7 +28,7 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
 
     init {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.IO) {
             currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
             currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
         }
@@ -35,6 +36,7 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
 
+    @WorkerThread
     suspend fun updateCurrentTranslation(translationShortName: String) {
         currentTranslationShortName.send(translationShortName)
         bibleReadingRepository.saveCurrentTranslation(translationShortName)
@@ -42,14 +44,17 @@ class BibleReadingManager constructor(private val bibleReadingRepository: BibleR
 
     fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
 
+    @WorkerThread
     suspend fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
         currentVerseIndex.send(verseIndex)
         bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
     }
 
-    suspend fun readBookNames(translationShortName: String): List<String> =
+    @WorkerThread
+    fun readBookNames(translationShortName: String): List<String> =
             bibleReadingRepository.readBookNames(translationShortName)
 
-    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
+    @WorkerThread
+    fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
 }
