@@ -18,10 +18,18 @@ package me.xizzhu.android.joshua.search
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.BaseActivity
 
 class SearchActivity : BaseActivity() {
     companion object {
         fun newStartIntent(context: Context) = Intent(context, SearchActivity::class.java)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.activity_search)
     }
 }
