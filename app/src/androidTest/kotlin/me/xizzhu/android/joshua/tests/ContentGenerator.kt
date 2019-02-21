@@ -17,8 +17,14 @@
 package me.xizzhu.android.joshua.tests
 
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+
+val translations = arrayListOf(
+        TranslationInfo("KJV", "Authorized King James", "en_gb", 1860978L, false),
+        TranslationInfo("中文和合本", "中文和合本（简体）", "zh_cn", 1781521L, true)
+)
 
 const val cuvTranslationShortName = "中文和合本"
 val cuvBookNames = arrayListOf("创世记", "出埃及记", "利未记", "民数记", "申命记")
@@ -49,6 +55,12 @@ val kjvVerses = arrayListOf(
         Verse(VerseIndex(0, 0, 8), cuvTranslationShortName, "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so."),
         Verse(VerseIndex(0, 0, 9), cuvTranslationShortName, "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.")
 )
+
+fun prepareTranslations() {
+    runBlocking {
+        createLocalStorage().translationInfoDao.replace(translations)
+    }
+}
 
 fun prepareBookNames(translationShortName: String, bookNames: ArrayList<String>) {
     runBlocking {

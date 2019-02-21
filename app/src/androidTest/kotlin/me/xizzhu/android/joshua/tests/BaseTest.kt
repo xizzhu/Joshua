@@ -16,13 +16,20 @@
 
 package me.xizzhu.android.joshua.tests
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
-import me.xizzhu.android.joshua.core.internal.repository.LocalStorage
+import androidx.annotation.CallSuper
+import org.junit.After
+import org.junit.Before
 
-fun createLocalStorage(): LocalStorage =
-        LocalStorage(ApplicationProvider.getApplicationContext<Context>())
+abstract class BaseTest {
+    @Before
+    @CallSuper
+    open fun setup() {
+        clearLocalStorage()
+    }
 
-fun clearLocalStorage() {
-    ApplicationProvider.getApplicationContext<Context>().deleteDatabase(LocalStorage.DATABASE_NAME)
+    @After
+    @CallSuper
+    open fun tearDown() {
+        clearLocalStorage()
+    }
 }

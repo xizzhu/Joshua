@@ -22,25 +22,18 @@ import androidx.test.filters.SmallTest
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.*
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class BibleReadingRepositoryTest {
+class BibleReadingRepositoryTest : BaseTest() {
     private lateinit var bibleReadingRepository: BibleReadingRepository
 
     @Before
-    fun setup() {
+    override fun setup() {
+        super.setup()
         bibleReadingRepository = BibleReadingRepository(createLocalStorage())
-    }
-
-    @After
-    fun tearDown() {
-        clearLocalStorage()
     }
 
     @Test
