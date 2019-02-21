@@ -44,16 +44,16 @@ val cuvVerses = arrayListOf(
 const val kjvTranslationShortName = "KJV"
 val kjvBookNames = arrayListOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
 val kjvVerses = arrayListOf(
-        Verse(VerseIndex(0, 0, 0), cuvTranslationShortName, "In the beginning God created the heaven and the earth."),
-        Verse(VerseIndex(0, 0, 1), cuvTranslationShortName, "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."),
-        Verse(VerseIndex(0, 0, 2), cuvTranslationShortName, "And God said, Let there be light: and there was light."),
-        Verse(VerseIndex(0, 0, 3), cuvTranslationShortName, "And God saw the light, that it was good: and God divided the light from the darkness."),
-        Verse(VerseIndex(0, 0, 4), cuvTranslationShortName, "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day."),
-        Verse(VerseIndex(0, 0, 5), cuvTranslationShortName, "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters."),
-        Verse(VerseIndex(0, 0, 6), cuvTranslationShortName, "And God made the firmament, and divided the waters which were under the firmament from the waters which were above the firmament: and it was so."),
-        Verse(VerseIndex(0, 0, 7), cuvTranslationShortName, "And God called the firmament Heaven. And the evening and the morning were the second day."),
-        Verse(VerseIndex(0, 0, 8), cuvTranslationShortName, "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so."),
-        Verse(VerseIndex(0, 0, 9), cuvTranslationShortName, "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.")
+        Verse(VerseIndex(0, 0, 0), kjvTranslationShortName, "In the beginning God created the heaven and the earth."),
+        Verse(VerseIndex(0, 0, 1), kjvTranslationShortName, "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."),
+        Verse(VerseIndex(0, 0, 2), kjvTranslationShortName, "And God said, Let there be light: and there was light."),
+        Verse(VerseIndex(0, 0, 3), kjvTranslationShortName, "And God saw the light, that it was good: and God divided the light from the darkness."),
+        Verse(VerseIndex(0, 0, 4), kjvTranslationShortName, "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day."),
+        Verse(VerseIndex(0, 0, 5), kjvTranslationShortName, "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters."),
+        Verse(VerseIndex(0, 0, 6), kjvTranslationShortName, "And God made the firmament, and divided the waters which were under the firmament from the waters which were above the firmament: and it was so."),
+        Verse(VerseIndex(0, 0, 7), kjvTranslationShortName, "And God called the firmament Heaven. And the evening and the morning were the second day."),
+        Verse(VerseIndex(0, 0, 8), kjvTranslationShortName, "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so."),
+        Verse(VerseIndex(0, 0, 9), kjvTranslationShortName, "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.")
 )
 
 fun prepareTranslations() {

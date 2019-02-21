@@ -25,6 +25,7 @@ import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import java.lang.StringBuilder
 
 class LocalStorage constructor(context: Context) :
         SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -195,6 +196,46 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             while (cursor.moveToNext()) {
                 verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
                         translationShortName, cursor.getString(0)))
+            }
+            return verses
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    @WorkerThread
+    fun search(translationShortName: String, query: String): List<Verse> {
+        var cursor: Cursor? = null
+        try {
+            val keywords = query.trim().replace("\\s+", " ").split(" ")
+            if (keywords.isEmpty()) {
+                return emptyList()
+            }
+
+            val singleSelection = "$COLUMN_TEXT LIKE ?"
+            val selection = StringBuilder()
+            val selectionArgs = Array(keywords.size) { "" }
+            for (i in 0 until keywords.size) {
+                if (selection.isNotEmpty()) {
+                    selection.append(" AND ")
+                }
+                selection.append(singleSelection)
+
+                selectionArgs[i] = "%%${keywords[i]}%%"
+            }
+
+            cursor = db.query(translationShortName,
+                    arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX, COLUMN_TEXT),
+                    selection.toString(), selectionArgs, null, null,
+                    "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC")
+            val verses = ArrayList<Verse>(cursor.count)
+            val bookIndex = cursor.getColumnIndex(COLUMN_BOOK_INDEX)
+            val chapterIndex = cursor.getColumnIndex(COLUMN_CHAPTER_INDEX)
+            val verseIndex = cursor.getColumnIndex(COLUMN_VERSE_INDEX)
+            val text = cursor.getColumnIndex(COLUMN_TEXT)
+            while (cursor.moveToNext()) {
+                verses.add(Verse(VerseIndex(cursor.getInt(bookIndex), cursor.getInt(chapterIndex), cursor.getInt(verseIndex)),
+                        translationShortName, cursor.getString(text)))
             }
             return verses
         } finally {

@@ -100,4 +100,31 @@ class BibleReadingRepositoryTest : BaseTest() {
         }
         Assert.assertEquals(expected, actual)
     }
+
+    @Test(expected = SQLiteException::class)
+    fun testSearchWithNoTranslations() {
+        runBlocking {
+            bibleReadingRepository.search("non_exist", "random")
+        }
+    }
+
+    @Test
+    fun testSearch() {
+        val expected = arrayListOf(kjvVerses[0])
+        val actual = runBlocking {
+            prepareVerses(kjvTranslationShortName, kjvVerses)
+            bibleReadingRepository.search(kjvTranslationShortName, "beginning")
+        }
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testSearchWithMultipleKeyWords() {
+        val expected = arrayListOf(kjvVerses[3])
+        val actual = runBlocking {
+            prepareVerses(kjvTranslationShortName, kjvVerses)
+            bibleReadingRepository.search(kjvTranslationShortName, "saw the light")
+        }
+        Assert.assertEquals(expected, actual)
+    }
 }
