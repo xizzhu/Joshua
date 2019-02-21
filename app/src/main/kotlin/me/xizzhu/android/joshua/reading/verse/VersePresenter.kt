@@ -20,15 +20,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import java.lang.Exception
 
 class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVPPresenter<VerseView>() {
-    override fun onViewTaken() {
-        super.onViewTaken()
+    override fun onViewAttached() {
+        super.onViewAttached()
 
         launch(Dispatchers.Main) {
             val currentTranslation = bibleReadingManager.observeCurrentTranslation()

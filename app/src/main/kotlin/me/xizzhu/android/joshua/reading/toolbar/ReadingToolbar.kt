@@ -22,9 +22,6 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.Spinner
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -46,7 +43,7 @@ interface ToolbarView : MVPView {
     fun onError(e: Exception)
 }
 
-class ReadingToolbar : Toolbar, LifecycleObserver, ToolbarView {
+class ReadingToolbar : Toolbar, ToolbarView {
     interface Listener {
         fun onNoDownloadedTranslations()
     }
@@ -77,16 +74,6 @@ class ReadingToolbar : Toolbar, LifecycleObserver, ToolbarView {
 
     fun setListener(listener: Listener) {
         this.listener = listener
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun onStart() {
-        presenter.takeView(this)
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    fun onStop() {
-        presenter.dropView()
     }
 
     override fun onNoDownloadedTranslations() {

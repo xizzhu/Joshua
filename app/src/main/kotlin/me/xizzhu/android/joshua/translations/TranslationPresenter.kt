@@ -50,8 +50,8 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
         }
     }
 
-    override fun onViewTaken() {
-        super.onViewTaken()
+    override fun onViewAttached() {
+        super.onViewAttached()
 
         launch(Dispatchers.Main) {
             val currentTranslation = bibleReadingManager.observeCurrentTranslation()

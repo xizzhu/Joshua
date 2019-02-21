@@ -60,16 +60,13 @@ class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView
         toolbar = findViewById(R.id.toolbar)
         toolbar.setPresenter(toolbarPresenter)
         toolbar.setListener(this)
-        lifecycle.addObserver(toolbar)
 
         chapterListView = findViewById(R.id.chapter_list_view)
         chapterListView.setPresenter(chapterListPresenter)
         chapterListView.setListener(this)
-        lifecycle.addObserver(chapterListView)
 
         verseViewPager = findViewById(R.id.verse_view_pager)
         verseViewPager.setPresenter(versePresenter)
-        lifecycle.addObserver(verseViewPager)
 
         drawerToggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, 0, 0)
         drawerLayout.addDrawerListener(drawerToggle)
@@ -80,11 +77,20 @@ class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView
         drawerToggle.syncState()
     }
 
-    override fun onDestroy() {
-        lifecycle.removeObserver(toolbar)
-        lifecycle.removeObserver(chapterListView)
-        lifecycle.removeObserver(verseViewPager)
-        super.onDestroy()
+    override fun onStart() {
+        super.onStart()
+
+        toolbarPresenter.attachView(toolbar)
+        chapterListPresenter.attachView(chapterListView)
+        versePresenter.attachView(verseViewPager)
+    }
+
+    override fun onStop() {
+        toolbarPresenter.detachView()
+        chapterListPresenter.detachView()
+        versePresenter.detachView()
+
+        super.onStop()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {

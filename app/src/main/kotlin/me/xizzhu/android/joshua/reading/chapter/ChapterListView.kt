@@ -28,9 +28,6 @@ import android.widget.ExpandableListView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -44,7 +41,7 @@ interface ChapterView : MVPView {
     fun onError(e: Exception)
 }
 
-class ChapterListView : ExpandableListView, LifecycleObserver, ChapterView,
+class ChapterListView : ExpandableListView, ChapterView,
         ExpandableListView.OnGroupClickListener, View.OnClickListener {
     interface Listener {
         fun onChapterSelected(currentVerseIndex: VerseIndex)
@@ -84,16 +81,6 @@ class ChapterListView : ExpandableListView, LifecycleObserver, ChapterView,
 
     fun setListener(listener: Listener) {
         this.listener = listener
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun onStart() {
-        presenter.takeView(this)
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    fun onStop() {
-        presenter.dropView()
     }
 
     override fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex) {

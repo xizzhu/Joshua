@@ -46,12 +46,18 @@ class TranslationManagementActivity : BaseActivity(), TranslationListView.Listen
         translationListView = findViewById(R.id.translation_list)
         translationListView.setPresenter(translationPresenter)
         translationListView.setListener(this)
-        lifecycle.addObserver(translationListView)
     }
 
-    override fun onDestroy() {
-        lifecycle.removeObserver(translationListView)
-        super.onDestroy()
+    override fun onStart() {
+        super.onStart()
+
+        translationPresenter.attachView(translationListView)
+    }
+
+    override fun onStop() {
+        translationPresenter.detachView()
+
+        super.onStop()
     }
 
     override fun onTranslationsLoaded() {

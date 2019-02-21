@@ -21,9 +21,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
@@ -46,7 +43,7 @@ interface VerseView : MVPView {
     fun onError(e: Exception)
 }
 
-class VerseViewPager : ViewPager, LifecycleObserver, VerseView, VersePagerAdapter.Listener {
+class VerseViewPager : ViewPager, VerseView, VersePagerAdapter.Listener {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -74,16 +71,6 @@ class VerseViewPager : ViewPager, LifecycleObserver, VerseView, VersePagerAdapte
 
     fun setPresenter(presenter: VersePresenter) {
         this.presenter = presenter
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun onStart() {
-        presenter.takeView(this)
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    fun onStop() {
-        presenter.dropView()
     }
 
     override fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex) {

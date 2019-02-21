@@ -26,8 +26,8 @@ import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
                        private val translationManager: TranslationManager) : MVPPresenter<ToolbarView>() {
-    override fun onViewTaken() {
-        super.onViewTaken()
+    override fun onViewAttached() {
+        super.onViewAttached()
 
         launch(Dispatchers.Main) {
             val currentTranslation = bibleReadingManager.observeCurrentTranslation()

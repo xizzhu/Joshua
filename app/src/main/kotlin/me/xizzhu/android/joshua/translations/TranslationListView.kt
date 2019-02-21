@@ -19,9 +19,6 @@ package me.xizzhu.android.joshua.translations
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.Toast
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
@@ -48,7 +45,7 @@ interface TranslationView : MVPView {
     fun onError(e: Exception)
 }
 
-class TranslationListView : RecyclerView, LifecycleObserver, TranslationListAdapter.Listener, TranslationView {
+class TranslationListView : RecyclerView, TranslationListAdapter.Listener, TranslationView {
     interface Listener {
         fun onTranslationsLoaded()
 
@@ -83,22 +80,6 @@ class TranslationListView : RecyclerView, LifecycleObserver, TranslationListAdap
 
     fun setListener(listener: Listener) {
         this.listener = listener
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun onStart() {
-        presenter.takeView(this)
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    fun onStop() {
-        presenter.dropView()
-        dismissDownloadProgressDialog()
-    }
-
-    private fun dismissDownloadProgressDialog() {
-        downloadProgressDialog?.dismiss()
-        downloadProgressDialog = null
     }
 
     override fun onTranslationClicked(translationInfo: TranslationInfo) {
@@ -144,6 +125,11 @@ class TranslationListView : RecyclerView, LifecycleObserver, TranslationListAdap
     override fun onTranslationDownloaded() {
         dismissDownloadProgressDialog()
         Toast.makeText(context, R.string.translation_downloaded, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun dismissDownloadProgressDialog() {
+        downloadProgressDialog?.dismiss()
+        downloadProgressDialog = null
     }
 
     override fun onTranslationSelected() {

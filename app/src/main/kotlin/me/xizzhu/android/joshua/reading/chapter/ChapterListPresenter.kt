@@ -25,8 +25,8 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager) : MVPPresenter<ChapterView>() {
-    override fun onViewTaken() {
-        super.onViewTaken()
+    override fun onViewAttached() {
+        super.onViewAttached()
 
         launch(Dispatchers.Main) {
             val currentTranslation = bibleReadingManager.observeCurrentTranslation()
