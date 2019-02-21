@@ -29,6 +29,7 @@ class ProgressDialog private constructor(private val dialog: AlertDialog, privat
             val progressBar = View.inflate(context, R.layout.widget_progress_bar, null) as ProgressBar
             progressBar.max = maxProgress
             val dialog = AlertDialog.Builder(context)
+                    .setCancelable(false)
                     .setTitle(title)
                     .setView(progressBar)
                     .create()
