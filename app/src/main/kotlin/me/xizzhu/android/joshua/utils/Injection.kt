@@ -16,15 +16,12 @@
 
 package me.xizzhu.android.joshua.utils
 
-import dagger.Binds
 import dagger.Component
 import dagger.Module
 import dagger.Provides
 import dagger.android.AndroidInjectionModule
-import dagger.android.AndroidInjector
+import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
 import me.xizzhu.android.joshua.*
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
@@ -33,9 +30,9 @@ import me.xizzhu.android.joshua.core.internal.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.internal.repository.LocalStorage
 import me.xizzhu.android.joshua.core.internal.repository.TranslationRepository
 import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.reading.ReadingComponent
+import me.xizzhu.android.joshua.reading.ReadingModule
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
-import me.xizzhu.android.joshua.translations.TranslationManagementComponent
+import me.xizzhu.android.joshua.translations.TranslationManagementModule
 import javax.inject.Singleton
 
 @Module
@@ -72,17 +69,13 @@ class AppModule(private val app: App) {
             TranslationManager(translationRepository)
 }
 
-@Module(subcomponents = [(ReadingComponent::class), (TranslationManagementComponent::class)])
+@Module
 abstract class ActivityModule {
-    @Binds
-    @IntoMap
-    @ClassKey(ReadingActivity::class)
-    abstract fun bindReadingActivityInjectorFactory(builder: ReadingComponent.Builder): AndroidInjector.Factory<*>
+    @ContributesAndroidInjector(modules = [(ReadingModule::class)])
+    abstract fun contributeReadingActivity(): ReadingActivity
 
-    @Binds
-    @IntoMap
-    @ClassKey(TranslationManagementActivity::class)
-    abstract fun bindTranslationManagementActivityInjectorFactory(builder: TranslationManagementComponent.Builder): AndroidInjector.Factory<*>
+    @ContributesAndroidInjector(modules = [(TranslationManagementModule::class)])
+    abstract fun contributeTranslationManagementActivity(): TranslationManagementActivity
 }
 
 @Singleton

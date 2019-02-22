@@ -18,8 +18,6 @@ package me.xizzhu.android.joshua.translations
 
 import dagger.Module
 import dagger.Provides
-import dagger.Subcomponent
-import dagger.android.AndroidInjector
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
 
@@ -28,10 +26,4 @@ class TranslationManagementModule {
     @Provides
     fun provideTranslationPresenter(bibleReadingManager: BibleReadingManager, translationManager: TranslationManager) =
             TranslationPresenter(bibleReadingManager, translationManager)
-}
-
-@Subcomponent(modules = [(TranslationManagementModule::class)])
-interface TranslationManagementComponent : AndroidInjector<TranslationManagementActivity> {
-    @Subcomponent.Builder
-    abstract class Builder : AndroidInjector.Builder<TranslationManagementActivity>()
 }
