@@ -18,8 +18,6 @@ package me.xizzhu.android.joshua.reading
 
 import dagger.Module
 import dagger.Provides
-import dagger.Subcomponent
-import dagger.android.AndroidInjector
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
@@ -37,10 +35,4 @@ class ReadingModule {
 
     @Provides
     fun provideVersePresenter(bibleReadingManager: BibleReadingManager) = VersePresenter(bibleReadingManager)
-}
-
-@Subcomponent(modules = [(ReadingModule::class)])
-interface ReadingComponent : AndroidInjector<ReadingActivity> {
-    @Subcomponent.Builder
-    abstract class Builder : AndroidInjector.Builder<ReadingActivity>()
 }
