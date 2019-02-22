@@ -33,7 +33,12 @@ import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingModule
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementModule
+import javax.inject.Scope
 import javax.inject.Singleton
+
+@Scope
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ActivityScope
 
 @Module
 class AppModule(private val app: App) {
@@ -71,9 +76,11 @@ class AppModule(private val app: App) {
 
 @Module
 abstract class ActivityModule {
+    @ActivityScope
     @ContributesAndroidInjector(modules = [(ReadingModule::class)])
     abstract fun contributeReadingActivity(): ReadingActivity
 
+    @ActivityScope
     @ContributesAndroidInjector(modules = [(TranslationManagementModule::class)])
     abstract fun contributeTranslationManagementActivity(): TranslationManagementActivity
 }
