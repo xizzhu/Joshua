@@ -20,16 +20,39 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.search.toolbar.SearchToolbar
+import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.utils.BaseActivity
+import javax.inject.Inject
 
 class SearchActivity : BaseActivity() {
     companion object {
         fun newStartIntent(context: Context) = Intent(context, SearchActivity::class.java)
     }
 
+    @Inject
+    lateinit var toolbarPresenter: ToolbarPresenter
+
+    private lateinit var toolbar: SearchToolbar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_search)
+
+        toolbar = findViewById(R.id.toolbar)
+        toolbar.setPresenter(toolbarPresenter)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        toolbarPresenter.attachView(toolbar)
+    }
+
+    override fun onStop() {
+        toolbarPresenter.detachView()
+
+        super.onStop()
     }
 }

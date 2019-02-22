@@ -16,20 +16,14 @@
 
 package me.xizzhu.android.joshua.search
 
-import dagger.Module
-import dagger.Provides
-import me.xizzhu.android.joshua.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
-import me.xizzhu.android.joshua.utils.ActivityScope
+import me.xizzhu.android.joshua.core.VerseIndex
 
-@Module
-class SearchModule {
-    @ActivityScope
-    @Provides
-    fun provideSearchManager(bibleReadingRepository: BibleReadingRepository): SearchManager =
-            SearchManager(bibleReadingRepository)
+data class SearchResult(val translationShortName: String, val verses: List<Verse>) {
+    data class Verse(val verseIndex: VerseIndex, val bookName: String, val text: String)
 
-    @Provides
-    fun provideToolbarPresenter(searchManager: SearchManager): ToolbarPresenter =
-            ToolbarPresenter(searchManager)
+    companion object {
+        val INVALID = SearchResult("", emptyList())
+    }
+
+    fun isValid(): Boolean = translationShortName.isNotEmpty()
 }
