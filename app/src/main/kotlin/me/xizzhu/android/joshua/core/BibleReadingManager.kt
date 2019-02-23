@@ -21,7 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.internal.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.repository.BibleReadingRepository
 
 class BibleReadingManager constructor(private val bibleReadingRepository: BibleReadingRepository) {
     private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()

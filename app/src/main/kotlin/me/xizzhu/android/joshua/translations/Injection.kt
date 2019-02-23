@@ -20,8 +20,8 @@ import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.core.internal.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.core.internal.repository.TranslationRepository
+import me.xizzhu.android.joshua.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.repository.TranslationRepository
 import me.xizzhu.android.joshua.utils.ActivityScope
 
 @Module

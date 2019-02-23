@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.tests
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import me.xizzhu.android.joshua.core.internal.repository.BackendService
-import me.xizzhu.android.joshua.core.internal.repository.LocalStorage
+import me.xizzhu.android.joshua.repository.internal.BackendService
+import me.xizzhu.android.joshua.repository.internal.LocalStorage
 
 fun createLocalStorage(): LocalStorage = LocalStorage(ApplicationProvider.getApplicationContext<Context>())
 

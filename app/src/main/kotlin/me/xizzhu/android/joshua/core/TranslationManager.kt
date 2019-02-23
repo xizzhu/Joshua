@@ -19,7 +19,7 @@ package me.xizzhu.android.joshua.core
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
-import me.xizzhu.android.joshua.core.internal.repository.TranslationRepository
+import me.xizzhu.android.joshua.repository.TranslationRepository
 
 class TranslationManager(private val translationRepository: TranslationRepository) {
     private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()

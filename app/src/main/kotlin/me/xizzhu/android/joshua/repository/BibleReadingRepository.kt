@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.internal.repository
+package me.xizzhu.android.joshua.repository
 
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.repository.internal.LocalStorage
+import me.xizzhu.android.joshua.repository.internal.MetadataDao
 
 class BibleReadingRepository(private val localStorage: LocalStorage) {
     fun readCurrentVerseIndex(): VerseIndex {

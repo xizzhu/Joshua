@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.internal.repository
+package me.xizzhu.android.joshua.repository
 
 import android.database.sqlite.SQLiteDatabase
 import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.repository.internal.BackendService
+import me.xizzhu.android.joshua.repository.internal.LocalStorage
+import me.xizzhu.android.joshua.repository.internal.await
 import okio.buffer
 import okio.source
 import java.io.IOException

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.internal.repository
+package me.xizzhu.android.joshua.repository.internal
 
 import android.content.ContentValues
 import android.content.Context
