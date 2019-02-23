@@ -28,8 +28,8 @@ import me.xizzhu.android.joshua.repository.internal.LocalStorage
 import me.xizzhu.android.joshua.repository.internal.MetadataDao
 
 class BibleReadingRepository(private val localStorage: LocalStorage) {
-    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
-    private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
+    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel("")
+    private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)
 
     init {
         GlobalScope.launch(Dispatchers.IO) {

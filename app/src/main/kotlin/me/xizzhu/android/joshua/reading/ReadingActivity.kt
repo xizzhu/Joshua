@@ -23,6 +23,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
@@ -101,11 +102,9 @@ class ReadingActivity : BaseActivity() {
             })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeCurrentVerseIndex().onEach {
-                if (it.isValid()) {
-                    drawerLayout.closeDrawer(GravityCompat.START)
-                }
-            })
+            receiveChannels.add(readingManager.observeCurrentVerseIndex()
+                    .filter { it.isValid() }
+                    .onEach { drawerLayout.closeDrawer(GravityCompat.START) })
         }
     }
 

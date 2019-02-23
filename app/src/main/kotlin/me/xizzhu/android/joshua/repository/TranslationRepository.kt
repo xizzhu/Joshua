@@ -36,8 +36,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class TranslationRepository(private val localStorage: LocalStorage, private val backendService: BackendService) {
-    private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
-    private val downloadedTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+    private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
+    private val downloadedTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
