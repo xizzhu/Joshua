@@ -22,59 +22,19 @@ import kotlinx.coroutines.channels.*
 import me.xizzhu.android.joshua.repository.TranslationRepository
 
 class TranslationManager(private val translationRepository: TranslationRepository) {
-    private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
-    private val downloadedTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
+            translationRepository.observeAvailableTranslations()
 
-    init {
-        GlobalScope.launch(Dispatchers.IO) {
-            val available = ArrayList<TranslationInfo>()
-            val downloaded = ArrayList<TranslationInfo>()
-            for (t in translationRepository.readTranslationsFromLocal()) {
-                if (t.downloaded) {
-                    downloaded.add(t)
-                } else {
-                    available.add(t)
-                }
-            }
-            availableTranslations.send(available)
-            downloadedTranslations.send(downloaded)
-        }
-    }
-
-    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> = availableTranslations.openSubscription()
-
-    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> = downloadedTranslations.openSubscription()
+    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
+            translationRepository.observeDownloadedTranslations()
 
     @WorkerThread
     suspend fun reload(forceRefresh: Boolean) {
-        val available = ArrayList<TranslationInfo>()
-        val downloaded = ArrayList<TranslationInfo>()
-        for (t in translationRepository.readTranslations(forceRefresh)) {
-            if (t.downloaded) {
-                downloaded.add(t)
-            } else {
-                available.add(t)
-            }
-        }
-        if (available != availableTranslations.value) {
-            availableTranslations.send(available)
-        }
-        if (downloaded != downloadedTranslations.value) {
-            downloadedTranslations.send(downloaded)
-        }
+        translationRepository.reload(forceRefresh)
     }
 
     @WorkerThread
     suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
         translationRepository.downloadTranslation(progressChannel, translationInfo)
-
-        val available = ArrayList(availableTranslations.value)
-        available.remove(translationInfo)
-        availableTranslations.send(available)
-
-        val downloaded = ArrayList(downloadedTranslations.value)
-        downloaded.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
-                translationInfo.language, translationInfo.size, true))
-        downloadedTranslations.send(downloaded)
     }
 }
