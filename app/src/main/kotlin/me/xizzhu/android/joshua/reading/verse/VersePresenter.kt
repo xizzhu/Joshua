@@ -17,13 +17,13 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.onEach
 import java.lang.Exception
 
 class VersePresenter(private val readingManager: ReadingManager) : MVPPresenter<VerseView>() {
@@ -31,20 +31,18 @@ class VersePresenter(private val readingManager: ReadingManager) : MVPPresenter<
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = readingManager.observeCurrentTranslation()
-            receiveChannels.add(currentTranslation)
-            currentTranslation.filter { it.isNotEmpty() }
-                    .consumeEach {
+            receiveChannels.add(readingManager.observeCurrentTranslation()
+                    .filter { it.isNotEmpty() }
+                    .onEach {
                         view?.onCurrentTranslationUpdated(it)
-                    }
+                    })
         }
         launch(Dispatchers.Main) {
-            val currentVerse = readingManager.observeCurrentVerseIndex()
-            receiveChannels.add(currentVerse)
-            currentVerse.filter { it.isValid() }
-                    .consumeEach {
+            receiveChannels.add(readingManager.observeCurrentVerseIndex()
+                    .filter { it.isValid() }
+                    .onEach {
                         view?.onCurrentVerseIndexUpdated(it)
-                    }
+                    })
         }
     }
 

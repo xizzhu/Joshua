@@ -19,7 +19,7 @@ package me.xizzhu.android.joshua.utils
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
 
-suspend inline fun <E> ReceiveChannel<E>.onNext(action: (E) -> Unit): ReceiveChannel<E> {
+suspend inline fun <E> ReceiveChannel<E>.onEach(action: (E) -> Unit): ReceiveChannel<E> {
     consumeEach(action)
     return this
 }

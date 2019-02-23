@@ -17,34 +17,31 @@
 package me.xizzhu.android.joshua.reading.chapter
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.onEach
 
 class ChapterListPresenter(private val readingManager: ReadingManager) : MVPPresenter<ChapterView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = readingManager.observeCurrentTranslation()
-            receiveChannels.add(currentTranslation)
-            currentTranslation
+            receiveChannels.add(readingManager.observeCurrentTranslation()
                     .filter { it.isNotEmpty() }
-                    .consumeEach {
+                    .onEach {
                         view?.onBookNamesUpdated(withContext(Dispatchers.IO) { readingManager.readBookNames(it) })
-                    }
+                    })
         }
         launch(Dispatchers.Main) {
-            val currentVerse = readingManager.observeCurrentVerseIndex()
-            receiveChannels.add(currentVerse)
-            currentVerse.filter { it.isValid() }
-                    .consumeEach {
+            receiveChannels.add(readingManager.observeCurrentVerseIndex()
+                    .filter { it.isValid() }
+                    .onEach {
                         view?.onCurrentVerseIndexUpdated(it)
-                    }
+                    })
         }
     }
 

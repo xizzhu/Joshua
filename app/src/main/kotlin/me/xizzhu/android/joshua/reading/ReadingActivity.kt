@@ -34,7 +34,7 @@ import me.xizzhu.android.joshua.reading.verse.VerseViewPager
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
-import me.xizzhu.android.joshua.utils.onNext
+import me.xizzhu.android.joshua.utils.onEach
 import javax.inject.Inject
 
 class ReadingActivity : BaseActivity() {
@@ -88,7 +88,7 @@ class ReadingActivity : BaseActivity() {
         versePresenter.attachView(verseViewPager)
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeDownloadedTranslations().onNext {
+            receiveChannels.add(readingManager.observeDownloadedTranslations().onEach {
                 if (it.isEmpty()) {
                     DialogHelper.showDialog(this@ReadingActivity, false, R.string.no_translation_downloaded,
                             DialogInterface.OnClickListener { _, _ ->
@@ -101,7 +101,7 @@ class ReadingActivity : BaseActivity() {
             })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeCurrentVerseIndex().onNext {
+            receiveChannels.add(readingManager.observeCurrentVerseIndex().onEach {
                 if (it.isValid()) {
                     drawerLayout.closeDrawer(GravityCompat.START)
                 }
