@@ -20,6 +20,7 @@ import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
+import me.xizzhu.android.joshua.search.verse.SearchResultPresenter
 import me.xizzhu.android.joshua.utils.ActivityScope
 
 @Module
@@ -32,4 +33,8 @@ class SearchModule {
     @Provides
     fun provideToolbarPresenter(searchManager: SearchManager): ToolbarPresenter =
             ToolbarPresenter(searchManager)
+
+    @Provides
+    fun provideSearchResultPresenter(searchManager: SearchManager): SearchResultPresenter =
+            SearchResultPresenter(searchManager)
 }

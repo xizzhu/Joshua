@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <me.xizzhu.android.joshua.search.verse.VerseListView
-        android:id="@+id/verse_list"
+    <me.xizzhu.android.joshua.search.verse.SearchResultListView
+        android:id="@+id/search_result"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />

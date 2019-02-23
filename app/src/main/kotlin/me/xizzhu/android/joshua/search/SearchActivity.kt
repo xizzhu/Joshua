@@ -26,7 +26,8 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbar
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
-import me.xizzhu.android.joshua.search.verse.VerseListView
+import me.xizzhu.android.joshua.search.verse.SearchResultPresenter
+import me.xizzhu.android.joshua.search.verse.SearchResultListView
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
 import me.xizzhu.android.joshua.utils.BaseActivity
@@ -44,8 +45,11 @@ class SearchActivity : BaseActivity() {
     @Inject
     lateinit var toolbarPresenter: ToolbarPresenter
 
+    @Inject
+    lateinit var searchResultPresenter: SearchResultPresenter
+
     private lateinit var toolbar: SearchToolbar
-    private lateinit var verseList: VerseListView
+    private lateinit var searchResultList: SearchResultListView
     private lateinit var loadingSpinner: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +60,8 @@ class SearchActivity : BaseActivity() {
         toolbar = findViewById(R.id.toolbar)
         toolbar.setPresenter(toolbarPresenter)
 
-        verseList = findViewById(R.id.verse_list)
+        searchResultList = findViewById(R.id.search_result)
+        searchResultList.setPresenter(searchResultPresenter)
 
         loadingSpinner = findViewById(R.id.loading_spinner)
     }
@@ -65,16 +70,17 @@ class SearchActivity : BaseActivity() {
         super.onStart()
 
         toolbarPresenter.attachView(toolbar)
+        searchResultPresenter.attachView(searchResultList)
 
         launch(Dispatchers.Main) {
             receiveChannels.add(searchManager.observeSearchState()
                     .onEach { searching ->
                         if (searching) {
                             loadingSpinner.visibility = View.VISIBLE
-                            verseList.visibility = View.GONE
+                            searchResultList.visibility = View.GONE
                         } else {
                             loadingSpinner.fadeOut()
-                            verseList.fadeIn()
+                            searchResultList.fadeIn()
                         }
                     })
         }
@@ -82,6 +88,7 @@ class SearchActivity : BaseActivity() {
 
     override fun onStop() {
         toolbarPresenter.detachView()
+        searchResultPresenter.detachView()
 
         super.onStop()
     }
