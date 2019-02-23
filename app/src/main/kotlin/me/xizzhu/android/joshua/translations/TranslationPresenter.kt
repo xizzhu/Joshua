@@ -18,11 +18,11 @@ package me.xizzhu.android.joshua.translations
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.onEach
 import java.lang.Exception
 import java.util.*
 import kotlin.Comparator
@@ -52,23 +52,20 @@ class TranslationPresenter(private val translationManager: TranslationManager) :
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = translationManager.observeCurrentTranslation()
-            receiveChannels.add(currentTranslation)
-            currentTranslation.consumeEach { view?.onCurrentTranslationUpdated(it) }
+            receiveChannels.add(translationManager.observeCurrentTranslation()
+                    .onEach { view?.onCurrentTranslationUpdated(it) })
         }
         launch(Dispatchers.Main) {
-            val availableTranslations = translationManager.observeAvailableTranslations()
-            receiveChannels.add(availableTranslations)
-            availableTranslations.consumeEach {
-                view?.onAvailableTranslationsUpdated(it.sortedWith(translationComparator))
-            }
+            receiveChannels.add(translationManager.observeAvailableTranslations()
+                    .onEach {
+                        view?.onAvailableTranslationsUpdated(it.sortedWith(translationComparator))
+                    })
         }
         launch(Dispatchers.Main) {
-            val downloadedTranslations = translationManager.observeDownloadedTranslations()
-            receiveChannels.add(downloadedTranslations)
-            downloadedTranslations.consumeEach {
-                view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
-            }
+            receiveChannels.add(translationManager.observeDownloadedTranslations()
+                    .onEach {
+                        view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
+                    })
         }
         launch(Dispatchers.IO) {
             translationManager.reload(false)
@@ -84,7 +81,7 @@ class TranslationPresenter(private val translationManager: TranslationManager) :
                 launch(Dispatchers.IO) {
                     translationManager.downloadTranslation(downloadProgressChannel, translationInfo)
                 }
-                downloadProgressChannel.consumeEach { progress ->
+                downloadProgressChannel.onEach { progress ->
                     view?.onTranslationDownloadProgressed(progress)
                 }
 
