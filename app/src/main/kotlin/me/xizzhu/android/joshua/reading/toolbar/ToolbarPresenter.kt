@@ -26,7 +26,6 @@ import me.xizzhu.android.joshua.reading.ReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class ToolbarPresenter(private val readingManager: ReadingManager,
-                       private val translationManager: TranslationManager,
                        private val listener: Listener) : MVPPresenter<ToolbarView>() {
     interface Listener {
         fun onNoDownloadedTranslations()
@@ -53,7 +52,7 @@ class ToolbarPresenter(private val readingManager: ReadingManager,
                     }
         }
         launch(Dispatchers.Main) {
-            val downloadedTranslations = translationManager.observeDownloadedTranslations()
+            val downloadedTranslations = readingManager.observeDownloadedTranslations()
             receiveChannels.add(downloadedTranslations)
             downloadedTranslations.consumeEach {
                 if (it.isEmpty()) {
