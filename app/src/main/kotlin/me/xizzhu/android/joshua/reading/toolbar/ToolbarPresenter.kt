@@ -25,12 +25,7 @@ import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.reading.ReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
-class ToolbarPresenter(private val readingManager: ReadingManager,
-                       private val listener: Listener) : MVPPresenter<ToolbarView>() {
-    interface Listener {
-        fun onNoDownloadedTranslations()
-    }
-
+class ToolbarPresenter(private val readingManager: ReadingManager) : MVPPresenter<ToolbarView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -55,9 +50,7 @@ class ToolbarPresenter(private val readingManager: ReadingManager,
             val downloadedTranslations = readingManager.observeDownloadedTranslations()
             receiveChannels.add(downloadedTranslations)
             downloadedTranslations.consumeEach {
-                if (it.isEmpty()) {
-                    listener.onNoDownloadedTranslations()
-                } else {
+                if (it.isNotEmpty()) {
                     view?.onDownloadedTranslationsLoaded(it.sortedBy { t -> t.language })
                 }
             }

@@ -34,14 +34,12 @@ class ReadingModule {
             ReadingManager(bibleReadingRepository, translationRepository)
 
     @Provides
-    fun provideToolbarPresenter(readingManager: ReadingManager,
-                                activity: ReadingActivity): ToolbarPresenter =
-            ToolbarPresenter(readingManager, activity)
+    fun provideToolbarPresenter(readingManager: ReadingManager): ToolbarPresenter =
+            ToolbarPresenter(readingManager)
 
     @Provides
-    fun provideChapterListPresenter(readingManager: ReadingManager,
-                                    activity: ReadingActivity): ChapterListPresenter =
-            ChapterListPresenter(readingManager, activity)
+    fun provideChapterListPresenter(readingManager: ReadingManager): ChapterListPresenter =
+            ChapterListPresenter(readingManager)
 
     @Provides
     fun provideVersePresenter(readingManager: ReadingManager): VersePresenter =

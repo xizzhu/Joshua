@@ -25,12 +25,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
-class ChapterListPresenter(private val readingManager: ReadingManager,
-                           private val listener: Listener) : MVPPresenter<ChapterView>() {
-    interface Listener {
-        fun onChapterSelected()
-    }
-
+class ChapterListPresenter(private val readingManager: ReadingManager) : MVPPresenter<ChapterView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -57,6 +52,5 @@ class ChapterListPresenter(private val readingManager: ReadingManager,
         launch(Dispatchers.IO) {
             readingManager.saveCurrentVerseIndex(verseIndex)
         }
-        listener.onChapterSelected()
     }
 }
