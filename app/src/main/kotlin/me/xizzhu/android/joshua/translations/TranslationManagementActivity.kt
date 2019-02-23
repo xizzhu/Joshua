@@ -19,17 +19,24 @@ package me.xizzhu.android.joshua.translations
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ProgressBar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.fadeIn
 import me.xizzhu.android.joshua.utils.fadeOut
+import me.xizzhu.android.joshua.utils.onEach
 import javax.inject.Inject
 
-class TranslationManagementActivity : BaseActivity(), TranslationPresenter.Listener {
+class TranslationManagementActivity : BaseActivity() {
     companion object {
         fun newStartIntent(context: Context) = Intent(context, TranslationManagementActivity::class.java)
     }
+
+    @Inject
+    lateinit var translationManager: TranslationManager
 
     @Inject
     lateinit var translationPresenter: TranslationPresenter
@@ -51,20 +58,28 @@ class TranslationManagementActivity : BaseActivity(), TranslationPresenter.Liste
         super.onStart()
 
         translationPresenter.attachView(translationListView)
+
+        launch(Dispatchers.Main) {
+            receiveChannels.add(translationManager.observeTranslationsLoadingState()
+                    .onEach { downloading ->
+                        if (downloading) {
+                            loadingSpinner.visibility = View.VISIBLE
+                            translationListView.visibility = View.GONE
+                        } else {
+                            loadingSpinner.fadeOut()
+                            translationListView.fadeIn()
+                        }
+                    })
+        }
+        launch(Dispatchers.Main) {
+            receiveChannels.add(translationManager.observeTranslationSelection()
+                    .onEach { finish() })
+        }
     }
 
     override fun onStop() {
         translationPresenter.detachView()
 
         super.onStop()
-    }
-
-    override fun onTranslationsLoaded() {
-        loadingSpinner.fadeOut()
-        translationListView.fadeIn()
-    }
-
-    override fun onTranslationSelected() {
-        finish()
     }
 }

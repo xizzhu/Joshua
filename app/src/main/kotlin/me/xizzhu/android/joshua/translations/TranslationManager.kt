@@ -14,23 +14,47 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core
+package me.xizzhu.android.joshua.translations
 
 import androidx.annotation.WorkerThread
-import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
+import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.repository.TranslationRepository
 
-class TranslationManager(private val translationRepository: TranslationRepository) {
+class TranslationManager(private val bibleReadingRepository: BibleReadingRepository,
+                         private val translationRepository: TranslationRepository) {
+    private val translationsLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
+    private val translationsSelected: BroadcastChannel<Unit> = ConflatedBroadcastChannel()
+
+    fun observeTranslationsLoadingState(): ReceiveChannel<Boolean> =
+            translationsLoadingState.openSubscription()
+
+    fun observeTranslationSelection(): ReceiveChannel<Unit> =
+            translationsSelected.openSubscription()
+
     fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationRepository.observeAvailableTranslations()
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationRepository.observeDownloadedTranslations()
 
+    fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingRepository.observeCurrentTranslation()
+
+    @WorkerThread
+    suspend fun saveCurrentTranslation(translationShortName: String, fromUser: Boolean) {
+        bibleReadingRepository.saveCurrentTranslation(translationShortName)
+
+        if (fromUser) {
+            translationsSelected.send(Unit)
+        }
+    }
+
     @WorkerThread
     suspend fun reload(forceRefresh: Boolean) {
+        translationsLoadingState.send(true)
         translationRepository.reload(forceRefresh)
+        translationsLoadingState.send(false)
     }
 
     @WorkerThread

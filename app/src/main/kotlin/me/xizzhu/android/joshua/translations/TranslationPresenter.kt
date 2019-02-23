@@ -21,23 +21,13 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import java.lang.Exception
 import java.util.*
 import kotlin.Comparator
 
-class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
-                           private val translationManager: TranslationManager,
-                           private val listener: Listener) : MVPPresenter<TranslationView>() {
-    interface Listener {
-        fun onTranslationsLoaded()
-
-        fun onTranslationSelected()
-    }
-
+class TranslationPresenter(private val translationManager: TranslationManager) : MVPPresenter<TranslationView>() {
     private val translationComparator = object : Comparator<TranslationInfo> {
         override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
             val userLocale = Locale.getDefault()
@@ -62,7 +52,7 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
+            val currentTranslation = translationManager.observeCurrentTranslation()
             receiveChannels.add(currentTranslation)
             currentTranslation.consumeEach { view?.onCurrentTranslationUpdated(it) }
         }
@@ -80,9 +70,8 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
                 view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
             }
         }
-        launch(Dispatchers.Main) {
-            withContext(Dispatchers.IO) { translationManager.reload(false) }
-            listener.onTranslationsLoaded()
+        launch(Dispatchers.IO) {
+            translationManager.reload(false)
         }
     }
 
@@ -100,8 +89,8 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
                 }
 
                 withContext(Dispatchers.IO) {
-                    if (bibleReadingManager.observeCurrentTranslation().receive().isEmpty()) {
-                        bibleReadingManager.updateCurrentTranslation(translationInfo.shortName)
+                    if (translationManager.observeCurrentTranslation().receive().isEmpty()) {
+                        translationManager.saveCurrentTranslation(translationInfo.shortName, false)
                     }
                 }
                 view?.onTranslationDownloaded()
@@ -114,9 +103,8 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
     fun updateCurrentTranslation(currentTranslation: TranslationInfo) {
         launch(Dispatchers.Main) {
             withContext(Dispatchers.IO) {
-                bibleReadingManager.updateCurrentTranslation(currentTranslation.shortName)
+                translationManager.saveCurrentTranslation(currentTranslation.shortName, true)
             }
-            listener.onTranslationSelected()
         }
     }
 }
