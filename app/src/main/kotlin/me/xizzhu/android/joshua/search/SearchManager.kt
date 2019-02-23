@@ -26,14 +26,18 @@ import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.repository.BibleReadingRepository
 
 class SearchManager(private val bibleReadingRepository: BibleReadingRepository) {
+    private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
     private val searchResult: BroadcastChannel<SearchResult> = ConflatedBroadcastChannel(SearchResult.INVALID)
+
+    fun observeSearchState(): ReceiveChannel<Boolean> = searchState.openSubscription()
 
     fun observeSearchResult(): ReceiveChannel<SearchResult> = searchResult.openSubscription()
 
     suspend fun search(query: String) {
+        searchState.send(true)
+
         val currentTranslation = bibleReadingRepository.observeCurrentTranslation().firstOrNull()
                 ?: throw IllegalStateException("No translation selected")
-
         searchResult.send(withContext(Dispatchers.Default) {
             val bookNamesAsync = async(Dispatchers.IO) { bibleReadingRepository.readBookNames(currentTranslation) }
             val versesAsync = async(Dispatchers.IO) { bibleReadingRepository.search(currentTranslation, query) }
@@ -46,5 +50,7 @@ class SearchManager(private val bibleReadingRepository: BibleReadingRepository) 
             }
             SearchResult(query, searchedVerses)
         })
+
+        searchState.send(false)
     }
 }
