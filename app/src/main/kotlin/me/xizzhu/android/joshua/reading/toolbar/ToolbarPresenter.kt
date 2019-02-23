@@ -21,11 +21,11 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.reading.ReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
-class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
+class ToolbarPresenter(private val readingManager: ReadingManager,
                        private val translationManager: TranslationManager,
                        private val listener: Listener) : MVPPresenter<ToolbarView>() {
     interface Listener {
@@ -36,16 +36,16 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
+            val currentTranslation = readingManager.observeCurrentTranslation()
             receiveChannels.add(currentTranslation)
             currentTranslation.filter { it.isNotEmpty() }
                     .consumeEach {
                         view?.onCurrentTranslationUpdated(it)
-                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { bibleReadingManager.readBookNames(it) })
+                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { readingManager.readBookNames(it) })
                     }
         }
         launch(Dispatchers.Main) {
-            val currentVerse = bibleReadingManager.observeCurrentVerseIndex()
+            val currentVerse = readingManager.observeCurrentVerseIndex()
             receiveChannels.add(currentVerse)
             currentVerse.filter { it.isValid() }
                     .consumeEach {
@@ -67,7 +67,7 @@ class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
 
     fun updateCurrentTranslation(translationShortName: String) {
         launch(Dispatchers.IO) {
-            bibleReadingManager.updateCurrentTranslation(translationShortName)
+            readingManager.saveCurrentTranslation(translationShortName)
         }
     }
 }

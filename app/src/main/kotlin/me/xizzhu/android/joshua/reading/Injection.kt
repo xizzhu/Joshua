@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.reading
 
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.repository.TranslationRepository
@@ -29,28 +28,29 @@ import me.xizzhu.android.joshua.utils.ActivityScope
 
 @Module
 class ReadingModule {
-    @ActivityScope
-    @Provides
-    fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository) =
-            BibleReadingManager(bibleReadingRepository)
-
     @Provides
     @ActivityScope
     fun provideTranslationManager(translationRepository: TranslationRepository) =
             TranslationManager(translationRepository)
 
+    @ActivityScope
     @Provides
-    fun provideToolbarPresenter(bibleReadingManager: BibleReadingManager,
+    fun provideReadingManager(bibleReadingRepository: BibleReadingRepository,
+                              translationRepository: TranslationRepository): ReadingManager =
+            ReadingManager(bibleReadingRepository, translationRepository)
+
+    @Provides
+    fun provideToolbarPresenter(readingManager: ReadingManager,
                                 translationManager: TranslationManager,
                                 activity: ReadingActivity): ToolbarPresenter =
-            ToolbarPresenter(bibleReadingManager, translationManager, activity)
+            ToolbarPresenter(readingManager, translationManager, activity)
 
     @Provides
-    fun provideChapterListPresenter(bibleReadingManager: BibleReadingManager,
+    fun provideChapterListPresenter(readingManager: ReadingManager,
                                     activity: ReadingActivity): ChapterListPresenter =
-            ChapterListPresenter(bibleReadingManager, activity)
+            ChapterListPresenter(readingManager, activity)
 
     @Provides
-    fun provideVersePresenter(bibleReadingManager: BibleReadingManager): VersePresenter =
-            VersePresenter(bibleReadingManager)
+    fun provideVersePresenter(readingManager: ReadingManager): VersePresenter =
+            VersePresenter(readingManager)
 }

@@ -21,11 +21,11 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.reading.ReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
-class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager,
+class ChapterListPresenter(private val readingManager: ReadingManager,
                            private val listener: Listener) : MVPPresenter<ChapterView>() {
     interface Listener {
         fun onChapterSelected()
@@ -35,16 +35,16 @@ class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager,
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
+            val currentTranslation = readingManager.observeCurrentTranslation()
             receiveChannels.add(currentTranslation)
             currentTranslation
                     .filter { it.isNotEmpty() }
                     .consumeEach {
-                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { bibleReadingManager.readBookNames(it) })
+                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { readingManager.readBookNames(it) })
                     }
         }
         launch(Dispatchers.Main) {
-            val currentVerse = bibleReadingManager.observeCurrentVerseIndex()
+            val currentVerse = readingManager.observeCurrentVerseIndex()
             receiveChannels.add(currentVerse)
             currentVerse.filter { it.isValid() }
                     .consumeEach {
@@ -55,7 +55,7 @@ class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager,
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
         launch(Dispatchers.IO) {
-            bibleReadingManager.updateCurrentVerseIndex(verseIndex)
+            readingManager.saveCurrentVerseIndex(verseIndex)
         }
         listener.onChapterSelected()
     }

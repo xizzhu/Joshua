@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.repository
 import android.database.sqlite.SQLiteException
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.*
@@ -39,7 +40,7 @@ class BibleReadingRepositoryTest : BaseTest() {
     @Test
     fun testDefaultCurrentVerseIndex() {
         val expected = VerseIndex(0, 0, 0)
-        val actual = runBlocking { bibleReadingRepository.readCurrentVerseIndex() }
+        val actual = runBlocking { bibleReadingRepository.observeCurrentVerseIndex().first() }
         Assert.assertEquals(expected, actual)
     }
 
@@ -48,7 +49,7 @@ class BibleReadingRepositoryTest : BaseTest() {
         val expected = VerseIndex(42, 2, 15)
         val actual = runBlocking {
             bibleReadingRepository.saveCurrentVerseIndex(VerseIndex(42, 2, 15))
-            bibleReadingRepository.readCurrentVerseIndex()
+            bibleReadingRepository.observeCurrentVerseIndex().first()
         }
         Assert.assertEquals(expected, actual)
     }
@@ -56,7 +57,7 @@ class BibleReadingRepositoryTest : BaseTest() {
     @Test
     fun testDefaultCurrentTranslation() {
         val expected = ""
-        val actual = runBlocking { bibleReadingRepository.readCurrentTranslation() }
+        val actual = runBlocking { bibleReadingRepository.observeCurrentTranslation().first() }
         Assert.assertEquals(expected, actual)
     }
 
@@ -65,7 +66,7 @@ class BibleReadingRepositoryTest : BaseTest() {
         val expected = "中文和合本"
         val actual = runBlocking {
             bibleReadingRepository.saveCurrentTranslation("中文和合本")
-            bibleReadingRepository.readCurrentTranslation()
+            bibleReadingRepository.observeCurrentTranslation().first()
         }
         Assert.assertEquals(expected, actual)
     }

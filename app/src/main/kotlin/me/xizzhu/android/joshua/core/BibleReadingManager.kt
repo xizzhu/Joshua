@@ -17,44 +17,14 @@
 package me.xizzhu.android.joshua.core
 
 import androidx.annotation.WorkerThread
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.*
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.repository.BibleReadingRepository
 
 class BibleReadingManager constructor(private val bibleReadingRepository: BibleReadingRepository) {
-    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
-    private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
-
-    init {
-        GlobalScope.launch(Dispatchers.IO) {
-            currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
-            currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
-        }
-    }
-
-    fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
+    fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingRepository.observeCurrentTranslation()
 
     @WorkerThread
     suspend fun updateCurrentTranslation(translationShortName: String) {
-        currentTranslationShortName.send(translationShortName)
         bibleReadingRepository.saveCurrentTranslation(translationShortName)
     }
-
-    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
-
-    @WorkerThread
-    suspend fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        currentVerseIndex.send(verseIndex)
-        bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
-    }
-
-    @WorkerThread
-    fun readBookNames(translationShortName: String): List<String> =
-            bibleReadingRepository.readBookNames(translationShortName)
-
-    @WorkerThread
-    fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
-            bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
 }

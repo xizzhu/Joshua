@@ -16,21 +16,39 @@
 
 package me.xizzhu.android.joshua.repository
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.repository.internal.LocalStorage
 import me.xizzhu.android.joshua.repository.internal.MetadataDao
 
 class BibleReadingRepository(private val localStorage: LocalStorage) {
-    fun readCurrentVerseIndex(): VerseIndex {
-        val metadataDao = localStorage.metadataDao
-        val bookIndex = metadataDao.read(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0").toInt()
-        val chapterIndex = metadataDao.read(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0").toInt()
-        val verseIndex = metadataDao.read(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0").toInt()
-        return VerseIndex(bookIndex, chapterIndex, verseIndex)
+    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
+    private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
+
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            currentTranslationShortName.send(
+                    localStorage.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, ""))
+
+            val metadataDao = localStorage.metadataDao
+            val bookIndex = metadataDao.read(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0").toInt()
+            val chapterIndex = metadataDao.read(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0").toInt()
+            val verseIndex = metadataDao.read(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0").toInt()
+            currentVerseIndex.send(VerseIndex(bookIndex, chapterIndex, verseIndex))
+        }
     }
 
-    fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
+    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
+
+    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
+        currentVerseIndex.send(verseIndex)
+
         val entries = ArrayList<Pair<String, String>>(3)
         entries.add(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, verseIndex.bookIndex.toString()))
         entries.add(Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, verseIndex.chapterIndex.toString()))
@@ -38,10 +56,10 @@ class BibleReadingRepository(private val localStorage: LocalStorage) {
         localStorage.metadataDao.save(entries)
     }
 
-    fun readCurrentTranslation(): String =
-            localStorage.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, "")
+    fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
 
-    fun saveCurrentTranslation(translationShortName: String) {
+    suspend fun saveCurrentTranslation(translationShortName: String) {
+        currentTranslationShortName.send(translationShortName)
         localStorage.metadataDao.save(MetadataDao.KEY_CURRENT_TRANSLATION, translationShortName)
     }
 
