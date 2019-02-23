@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.internal.repository
+package me.xizzhu.android.joshua.repository
 
 import android.database.sqlite.SQLiteDatabase
+import androidx.annotation.WorkerThread
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.repository.internal.BackendService
+import me.xizzhu.android.joshua.repository.internal.LocalStorage
+import me.xizzhu.android.joshua.repository.internal.await
 import okio.buffer
 import okio.source
 import java.io.IOException
@@ -27,14 +36,56 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class TranslationRepository(private val localStorage: LocalStorage, private val backendService: BackendService) {
-    suspend fun readTranslations(forceRefresh: Boolean): List<TranslationInfo> {
-        if (!forceRefresh) {
+    private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+    private val downloadedTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            val available = ArrayList<TranslationInfo>()
+            val downloaded = ArrayList<TranslationInfo>()
+            for (t in readTranslationsFromLocal()) {
+                if (t.downloaded) {
+                    downloaded.add(t)
+                } else {
+                    available.add(t)
+                }
+            }
+            availableTranslations.send(available)
+            downloadedTranslations.send(downloaded)
+        }
+    }
+
+    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> = availableTranslations.openSubscription()
+
+    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> = downloadedTranslations.openSubscription()
+
+    @WorkerThread
+    suspend fun reload(forceRefresh: Boolean) {
+        val available = ArrayList<TranslationInfo>()
+        val downloaded = ArrayList<TranslationInfo>()
+        val translations = if (forceRefresh) {
+            readTranslationsFromBackend()
+        } else {
             val translations = readTranslationsFromLocal()
             if (translations.isNotEmpty()) {
-                return translations
+                translations
+            } else {
+                readTranslationsFromBackend()
             }
         }
-        return readTranslationsFromBackend()
+        for (t in translations) {
+            if (t.downloaded) {
+                downloaded.add(t)
+            } else {
+                available.add(t)
+            }
+        }
+        if (available != availableTranslations.value) {
+            availableTranslations.send(available)
+        }
+        if (downloaded != downloadedTranslations.value) {
+            downloadedTranslations.send(downloaded)
+        }
     }
 
     private suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
@@ -108,8 +159,16 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
                     translationInfo.name, translationInfo.language, translationInfo.size, true))
 
             db.setTransactionSuccessful()
-
             channel.close()
+
+            val currentAvailable = ArrayList(availableTranslations.value)
+            currentAvailable.remove(translationInfo)
+            availableTranslations.send(currentAvailable)
+
+            val currentDownloaded = ArrayList(downloadedTranslations.value)
+            currentDownloaded.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
+                    translationInfo.language, translationInfo.size, true))
+            downloadedTranslations.send(currentDownloaded)
         } catch (e: Exception) {
             channel.close(e)
         } finally {
@@ -121,4 +180,3 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
         }
     }
 }
-

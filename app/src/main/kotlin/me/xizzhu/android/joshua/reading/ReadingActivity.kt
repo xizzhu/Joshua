@@ -22,8 +22,9 @@ import android.os.Bundle
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.chapter.ChapterListView
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
@@ -33,9 +34,13 @@ import me.xizzhu.android.joshua.reading.verse.VerseViewPager
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
+import me.xizzhu.android.joshua.utils.onEach
 import javax.inject.Inject
 
-class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView.Listener {
+class ReadingActivity : BaseActivity() {
+    @Inject
+    lateinit var readingManager: ReadingManager
+
     @Inject
     lateinit var toolbarPresenter: ToolbarPresenter
 
@@ -59,11 +64,9 @@ class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView
 
         toolbar = findViewById(R.id.toolbar)
         toolbar.setPresenter(toolbarPresenter)
-        toolbar.setListener(this)
 
         chapterListView = findViewById(R.id.chapter_list_view)
         chapterListView.setPresenter(chapterListPresenter)
-        chapterListView.setListener(this)
 
         verseViewPager = findViewById(R.id.verse_view_pager)
         verseViewPager.setPresenter(versePresenter)
@@ -83,6 +86,27 @@ class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView
         toolbarPresenter.attachView(toolbar)
         chapterListPresenter.attachView(chapterListView)
         versePresenter.attachView(verseViewPager)
+
+        launch(Dispatchers.Main) {
+            receiveChannels.add(readingManager.observeDownloadedTranslations().onEach {
+                if (it.isEmpty()) {
+                    DialogHelper.showDialog(this@ReadingActivity, false, R.string.no_translation_downloaded,
+                            DialogInterface.OnClickListener { _, _ ->
+                                startActivity(TranslationManagementActivity.newStartIntent(this@ReadingActivity))
+                            },
+                            DialogInterface.OnClickListener { _, _ ->
+                                finish()
+                            })
+                }
+            })
+        }
+        launch(Dispatchers.Main) {
+            receiveChannels.add(readingManager.observeCurrentVerseIndex().onEach {
+                if (it.isValid()) {
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                }
+            })
+        }
     }
 
     override fun onStop() {
@@ -96,19 +120,5 @@ class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         drawerToggle.onConfigurationChanged(newConfig)
-    }
-
-    override fun onNoDownloadedTranslations() {
-        DialogHelper.showDialog(this, false, R.string.no_translation_downloaded,
-                DialogInterface.OnClickListener { _, _ ->
-                    startActivity(TranslationManagementActivity.newStartIntent(this))
-                },
-                DialogInterface.OnClickListener { _, _ ->
-                    finish()
-                })
-    }
-
-    override fun onChapterSelected(currentVerseIndex: VerseIndex) {
-        drawerLayout.closeDrawer(GravityCompat.START)
     }
 }

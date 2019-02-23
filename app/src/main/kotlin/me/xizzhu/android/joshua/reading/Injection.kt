@@ -18,21 +18,30 @@ package me.xizzhu.android.joshua.reading
 
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.repository.TranslationRepository
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
+import me.xizzhu.android.joshua.utils.ActivityScope
 
 @Module
 class ReadingModule {
+    @ActivityScope
     @Provides
-    fun provideToolbarPresenter(bibleReadingManager: BibleReadingManager, translationManager: TranslationManager) =
-            ToolbarPresenter(bibleReadingManager, translationManager)
+    fun provideReadingManager(bibleReadingRepository: BibleReadingRepository,
+                              translationRepository: TranslationRepository): ReadingManager =
+            ReadingManager(bibleReadingRepository, translationRepository)
 
     @Provides
-    fun provideChapterListPresenter(bibleReadingManager: BibleReadingManager) = ChapterListPresenter(bibleReadingManager)
+    fun provideToolbarPresenter(readingManager: ReadingManager): ToolbarPresenter =
+            ToolbarPresenter(readingManager)
 
     @Provides
-    fun provideVersePresenter(bibleReadingManager: BibleReadingManager) = VersePresenter(bibleReadingManager)
+    fun provideChapterListPresenter(readingManager: ReadingManager): ChapterListPresenter =
+            ChapterListPresenter(readingManager)
+
+    @Provides
+    fun provideVersePresenter(readingManager: ReadingManager): VersePresenter =
+            VersePresenter(readingManager)
 }

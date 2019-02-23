@@ -17,52 +17,45 @@
 package me.xizzhu.android.joshua.reading.toolbar
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.reading.ReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.onEach
 
-class ToolbarPresenter(private val bibleReadingManager: BibleReadingManager,
-                       private val translationManager: TranslationManager) : MVPPresenter<ToolbarView>() {
+class ToolbarPresenter(private val readingManager: ReadingManager) : MVPPresenter<ToolbarView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
-            receiveChannels.add(currentTranslation)
-            currentTranslation.filter { it.isNotEmpty() }
-                    .consumeEach {
+            receiveChannels.add(readingManager.observeCurrentTranslation()
+                    .filter { it.isNotEmpty() }
+                    .onEach {
                         view?.onCurrentTranslationUpdated(it)
-                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { bibleReadingManager.readBookNames(it) })
-                    }
+                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { readingManager.readBookNames(it) })
+                    })
         }
         launch(Dispatchers.Main) {
-            val currentVerse = bibleReadingManager.observeCurrentVerseIndex()
-            receiveChannels.add(currentVerse)
-            currentVerse.filter { it.isValid() }
-                    .consumeEach {
+            receiveChannels.add(readingManager.observeCurrentVerseIndex()
+                    .filter { it.isValid() }
+                    .onEach {
                         view?.onCurrentVerseIndexUpdated(it)
-                    }
+                    })
         }
         launch(Dispatchers.Main) {
-            val downloadedTranslations = translationManager.observeDownloadedTranslations()
-            receiveChannels.add(downloadedTranslations)
-            downloadedTranslations.consumeEach {
-                if (it.isEmpty()) {
-                    view?.onNoDownloadedTranslations()
-                } else {
-                    view?.onDownloadedTranslationsLoaded(it.sortedBy { t -> t.language })
-                }
-            }
+            receiveChannels.add(readingManager.observeDownloadedTranslations()
+                    .onEach {
+                        if (it.isNotEmpty()) {
+                            view?.onDownloadedTranslationsLoaded(it.sortedBy { t -> t.language })
+                        }
+                    })
         }
     }
 
     fun updateCurrentTranslation(translationShortName: String) {
         launch(Dispatchers.IO) {
-            bibleReadingManager.updateCurrentTranslation(translationShortName)
+            readingManager.saveCurrentTranslation(translationShortName)
         }
     }
 }

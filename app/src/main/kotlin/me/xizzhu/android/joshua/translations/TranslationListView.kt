@@ -40,18 +40,10 @@ interface TranslationView : MVPView {
 
     fun onTranslationDownloaded()
 
-    fun onTranslationSelected()
-
     fun onError(e: Exception)
 }
 
 class TranslationListView : RecyclerView, TranslationListAdapter.Listener, TranslationView {
-    interface Listener {
-        fun onTranslationsLoaded()
-
-        fun onTranslationSelected()
-    }
-
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -59,7 +51,6 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private lateinit var presenter: TranslationPresenter
-    private lateinit var listener: Listener
 
     private val adapter: TranslationListAdapter = TranslationListAdapter(context, this)
 
@@ -76,10 +67,6 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
 
     fun setPresenter(presenter: TranslationPresenter) {
         this.presenter = presenter
-    }
-
-    fun setListener(listener: Listener) {
-        this.listener = listener
     }
 
     override fun onTranslationClicked(translationInfo: TranslationInfo) {
@@ -101,7 +88,6 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
         }
 
         adapter.setTranslations(downloadedTranslations!!, availableTranslations!!, currentTranslation!!)
-        listener.onTranslationsLoaded()
     }
 
     override fun onAvailableTranslationsUpdated(available: List<TranslationInfo>) {
@@ -130,10 +116,6 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
     private fun dismissDownloadProgressDialog() {
         downloadProgressDialog?.dismiss()
         downloadProgressDialog = null
-    }
-
-    override fun onTranslationSelected() {
-        listener.onTranslationSelected()
     }
 
     override fun onError(e: Exception) {

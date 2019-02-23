@@ -17,48 +17,48 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.reading.ReadingManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.onEach
 import java.lang.Exception
 
-class VersePresenter(private val bibleReadingManager: BibleReadingManager) : MVPPresenter<VerseView>() {
+class VersePresenter(private val readingManager: ReadingManager) : MVPPresenter<VerseView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = bibleReadingManager.observeCurrentTranslation()
-            receiveChannels.add(currentTranslation)
-            currentTranslation.filter { it.isNotEmpty() }
-                    .consumeEach {
+            receiveChannels.add(readingManager.observeCurrentTranslation()
+                    .filter { it.isNotEmpty() }
+                    .onEach {
                         view?.onCurrentTranslationUpdated(it)
-                    }
+                    })
         }
         launch(Dispatchers.Main) {
-            val currentVerse = bibleReadingManager.observeCurrentVerseIndex()
-            receiveChannels.add(currentVerse)
-            currentVerse.filter { it.isValid() }
-                    .consumeEach {
+            receiveChannels.add(readingManager.observeCurrentVerseIndex()
+                    .filter { it.isValid() }
+                    .onEach {
                         view?.onCurrentVerseIndexUpdated(it)
-                    }
+                    })
         }
     }
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
         launch(Dispatchers.IO) {
-            bibleReadingManager.updateCurrentVerseIndex(verseIndex)
+            readingManager.saveCurrentVerseIndex(verseIndex)
         }
     }
 
     fun loadVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
             try {
-                view?.onVersesLoaded(bookIndex, chapterIndex,
-                        withContext(Dispatchers.IO) { bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex) })
+                val verses = withContext(Dispatchers.IO) {
+                    readingManager.readVerses(translationShortName, bookIndex, chapterIndex)
+                }
+                view?.onVersesLoaded(bookIndex, chapterIndex, verses)
             } catch (e: Exception) {
                 view?.onError(e)
             }

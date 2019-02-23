@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.tests
+package me.xizzhu.android.joshua.utils
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
-import me.xizzhu.android.joshua.repository.internal.BackendService
-import me.xizzhu.android.joshua.repository.internal.LocalStorage
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.consumeEach
 
-fun createLocalStorage(): LocalStorage = LocalStorage(ApplicationProvider.getApplicationContext<Context>())
-
-fun clearLocalStorage() {
-    ApplicationProvider.getApplicationContext<Context>().deleteDatabase(LocalStorage.DATABASE_NAME)
+suspend inline fun <E> ReceiveChannel<E>.onEach(action: (E) -> Unit): ReceiveChannel<E> {
+    consumeEach(action)
+    return this
 }
-
-fun createBackendService(): BackendService = BackendService()

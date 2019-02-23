@@ -43,10 +43,6 @@ interface ChapterView : MVPView {
 
 class ChapterListView : ExpandableListView, ChapterView,
         ExpandableListView.OnGroupClickListener, View.OnClickListener {
-    interface Listener {
-        fun onChapterSelected(currentVerseIndex: VerseIndex)
-    }
-
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -56,7 +52,6 @@ class ChapterListView : ExpandableListView, ChapterView,
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     private lateinit var presenter: ChapterListPresenter
-    private lateinit var listener: Listener
 
     private val adapter = ChapterListAdapter(context, this)
 
@@ -77,10 +72,6 @@ class ChapterListView : ExpandableListView, ChapterView,
 
     fun setPresenter(presenter: ChapterListPresenter) {
         this.presenter = presenter
-    }
-
-    fun setListener(listener: Listener) {
-        this.listener = listener
     }
 
     override fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex) {
@@ -130,7 +121,6 @@ class ChapterListView : ExpandableListView, ChapterView,
                 || chapterTag.chapterIndex != currentVerseIndex.chapterIndex) {
             val verseIndex = VerseIndex(chapterTag.bookIndex, chapterTag.chapterIndex, 0)
             presenter.updateCurrentVerseIndex(verseIndex)
-            listener.onChapterSelected(verseIndex)
         }
     }
 }
