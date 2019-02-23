@@ -30,7 +30,14 @@ import java.util.*
 import kotlin.Comparator
 
 class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
-                           private val translationManager: TranslationManager) : MVPPresenter<TranslationView>() {
+                           private val translationManager: TranslationManager,
+                           private val listener: Listener) : MVPPresenter<TranslationView>() {
+    interface Listener {
+        fun onTranslationsLoaded()
+
+        fun onTranslationSelected()
+    }
+
     private val translationComparator = object : Comparator<TranslationInfo> {
         override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
             val userLocale = Locale.getDefault()
@@ -73,7 +80,10 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
                 view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
             }
         }
-        launch(Dispatchers.IO) { translationManager.reload(false) }
+        launch(Dispatchers.Main) {
+            withContext(Dispatchers.IO) { translationManager.reload(false) }
+            listener.onTranslationsLoaded()
+        }
     }
 
     fun downloadTranslation(translationInfo: TranslationInfo) {
@@ -106,7 +116,7 @@ class TranslationPresenter(private val bibleReadingManager: BibleReadingManager,
             withContext(Dispatchers.IO) {
                 bibleReadingManager.updateCurrentTranslation(currentTranslation.shortName)
             }
-            view?.onTranslationSelected()
+            listener.onTranslationSelected()
         }
     }
 }

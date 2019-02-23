@@ -27,12 +27,17 @@ import me.xizzhu.android.joshua.reading.verse.VersePresenter
 @Module
 class ReadingModule {
     @Provides
-    fun provideToolbarPresenter(bibleReadingManager: BibleReadingManager, translationManager: TranslationManager) =
-            ToolbarPresenter(bibleReadingManager, translationManager)
+    fun provideToolbarPresenter(bibleReadingManager: BibleReadingManager,
+                                translationManager: TranslationManager,
+                                activity: ReadingActivity): ToolbarPresenter =
+            ToolbarPresenter(bibleReadingManager, translationManager, activity)
 
     @Provides
-    fun provideChapterListPresenter(bibleReadingManager: BibleReadingManager) = ChapterListPresenter(bibleReadingManager)
+    fun provideChapterListPresenter(bibleReadingManager: BibleReadingManager,
+                                    activity: ReadingActivity): ChapterListPresenter =
+            ChapterListPresenter(bibleReadingManager, activity)
 
     @Provides
-    fun provideVersePresenter(bibleReadingManager: BibleReadingManager) = VersePresenter(bibleReadingManager)
+    fun provideVersePresenter(bibleReadingManager: BibleReadingManager): VersePresenter =
+            VersePresenter(bibleReadingManager)
 }

@@ -25,7 +25,12 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
-class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager) : MVPPresenter<ChapterView>() {
+class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager,
+                           private val listener: Listener) : MVPPresenter<ChapterView>() {
+    interface Listener {
+        fun onChapterSelected()
+    }
+
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -52,5 +57,6 @@ class ChapterListPresenter(private val bibleReadingManager: BibleReadingManager)
         launch(Dispatchers.IO) {
             bibleReadingManager.updateCurrentVerseIndex(verseIndex)
         }
+        listener.onChapterSelected()
     }
 }

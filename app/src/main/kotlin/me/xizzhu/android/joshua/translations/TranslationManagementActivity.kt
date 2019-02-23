@@ -26,7 +26,7 @@ import me.xizzhu.android.joshua.utils.fadeIn
 import me.xizzhu.android.joshua.utils.fadeOut
 import javax.inject.Inject
 
-class TranslationManagementActivity : BaseActivity(), TranslationListView.Listener {
+class TranslationManagementActivity : BaseActivity(), TranslationPresenter.Listener {
     companion object {
         fun newStartIntent(context: Context) = Intent(context, TranslationManagementActivity::class.java)
     }
@@ -45,7 +45,6 @@ class TranslationManagementActivity : BaseActivity(), TranslationListView.Listen
 
         translationListView = findViewById(R.id.translation_list)
         translationListView.setPresenter(translationPresenter)
-        translationListView.setListener(this)
     }
 
     override fun onStart() {

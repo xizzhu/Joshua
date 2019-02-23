@@ -24,6 +24,8 @@ import me.xizzhu.android.joshua.core.TranslationManager
 @Module
 class TranslationManagementModule {
     @Provides
-    fun provideTranslationPresenter(bibleReadingManager: BibleReadingManager, translationManager: TranslationManager) =
-            TranslationPresenter(bibleReadingManager, translationManager)
+    fun provideTranslationPresenter(bibleReadingManager: BibleReadingManager,
+                                    translationManager: TranslationManager,
+                                    activity: TranslationManagementActivity): TranslationPresenter =
+            TranslationPresenter(bibleReadingManager, translationManager, activity)
 }

@@ -35,7 +35,7 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
 import javax.inject.Inject
 
-class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView.Listener {
+class ReadingActivity : BaseActivity(), ToolbarPresenter.Listener, ChapterListPresenter.Listener {
     @Inject
     lateinit var toolbarPresenter: ToolbarPresenter
 
@@ -59,11 +59,9 @@ class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView
 
         toolbar = findViewById(R.id.toolbar)
         toolbar.setPresenter(toolbarPresenter)
-        toolbar.setListener(this)
 
         chapterListView = findViewById(R.id.chapter_list_view)
         chapterListView.setPresenter(chapterListPresenter)
-        chapterListView.setListener(this)
 
         verseViewPager = findViewById(R.id.verse_view_pager)
         verseViewPager.setPresenter(versePresenter)
@@ -108,7 +106,7 @@ class ReadingActivity : BaseActivity(), ReadingToolbar.Listener, ChapterListView
                 })
     }
 
-    override fun onChapterSelected(currentVerseIndex: VerseIndex) {
+    override fun onChapterSelected() {
         drawerLayout.closeDrawer(GravityCompat.START)
     }
 }
