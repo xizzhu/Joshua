@@ -2,6 +2,7 @@
 <resources>
 
     <dimen name="padding">16dp</dimen>
+    <dimen name="padding_big">32dp</dimen>
     <dimen name="padding_small">8dp</dimen>
 
     <dimen name="text_body">16sp</dimen>

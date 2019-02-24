@@ -25,9 +25,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.BaseActivity
-import me.xizzhu.android.joshua.utils.fadeIn
-import me.xizzhu.android.joshua.utils.fadeOut
 import me.xizzhu.android.joshua.utils.onEach
+import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.fadeOut
 import javax.inject.Inject
 
 class TranslationManagementActivity : BaseActivity() {

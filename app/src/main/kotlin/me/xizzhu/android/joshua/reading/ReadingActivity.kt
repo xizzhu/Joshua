@@ -16,15 +16,19 @@
 
 package me.xizzhu.android.joshua.reading
 
+import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.chapter.ChapterListView
@@ -32,13 +36,18 @@ import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewPager
+import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.onEach
 import javax.inject.Inject
 
-class ReadingActivity : BaseActivity() {
+class ReadingActivity : BaseActivity(), View.OnClickListener {
+    companion object {
+        fun newStartIntent(context: Context) = Intent(context, ReadingActivity::class.java)
+    }
+
     @Inject
     lateinit var readingManager: ReadingManager
 
@@ -56,6 +65,7 @@ class ReadingActivity : BaseActivity() {
     private lateinit var toolbar: ReadingToolbar
     private lateinit var chapterListView: ChapterListView
     private lateinit var verseViewPager: VerseViewPager
+    private lateinit var search: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +84,9 @@ class ReadingActivity : BaseActivity() {
 
         drawerToggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, 0, 0)
         drawerLayout.addDrawerListener(drawerToggle)
+
+        search = findViewById(R.id.search)
+        search.setOnClickListener(this)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -119,5 +132,11 @@ class ReadingActivity : BaseActivity() {
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         drawerToggle.onConfigurationChanged(newConfig)
+    }
+
+    override fun onClick(v: View) {
+        if (v == search) {
+            startActivity(SearchActivity.newStartIntent(this))
+        }
     }
 }

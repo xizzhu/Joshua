@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.utils
+package me.xizzhu.android.joshua.ui
 
 import android.animation.Animator
 import android.view.View
@@ -22,12 +22,20 @@ import android.view.View
 private const val ANIMATION_DURATION = 300L
 
 fun View.fadeIn() {
+    if (visibility == View.VISIBLE) {
+        return
+    }
+
     alpha = 0.0F
     visibility = View.VISIBLE
     animate().alpha(1.0F).setDuration(ANIMATION_DURATION).start()
 }
 
 fun View.fadeOut() {
+    if (visibility == View.GONE) {
+        return
+    }
+
     alpha = 1.0F
     animate().alpha(0.0F).setDuration(ANIMATION_DURATION)
             .setListener(object : Animator.AnimatorListener {

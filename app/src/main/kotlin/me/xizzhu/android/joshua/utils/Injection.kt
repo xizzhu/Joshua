@@ -29,6 +29,8 @@ import me.xizzhu.android.joshua.repository.internal.LocalStorage
 import me.xizzhu.android.joshua.repository.TranslationRepository
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingModule
+import me.xizzhu.android.joshua.search.SearchActivity
+import me.xizzhu.android.joshua.search.SearchModule
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementModule
 import javax.inject.Scope
@@ -67,6 +69,10 @@ abstract class ActivityModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = [(ReadingModule::class)])
     abstract fun contributeReadingActivity(): ReadingActivity
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [(SearchModule::class)])
+    abstract fun contributeSearchActivity(): SearchActivity
 
     @ActivityScope
     @ContributesAndroidInjector(modules = [(TranslationManagementModule::class)])

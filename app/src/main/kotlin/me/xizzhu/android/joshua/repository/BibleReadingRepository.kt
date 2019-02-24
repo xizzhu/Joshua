@@ -68,4 +68,7 @@ class BibleReadingRepository(private val localStorage: LocalStorage) {
 
     fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
             localStorage.translationDao.read(translationShortName, bookIndex, chapterIndex)
+
+    fun search(translationShortName: String, query: String): List<Verse> =
+            localStorage.translationDao.search(translationShortName, query)
 }
