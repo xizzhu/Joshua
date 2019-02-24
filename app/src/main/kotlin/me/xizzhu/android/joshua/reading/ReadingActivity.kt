@@ -16,7 +16,9 @@
 
 package me.xizzhu.android.joshua.reading
 
+import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
@@ -42,6 +44,10 @@ import me.xizzhu.android.joshua.utils.onEach
 import javax.inject.Inject
 
 class ReadingActivity : BaseActivity(), View.OnClickListener {
+    companion object {
+        fun newStartIntent(context: Context) = Intent(context, ReadingActivity::class.java)
+    }
+
     @Inject
     lateinit var readingManager: ReadingManager
 

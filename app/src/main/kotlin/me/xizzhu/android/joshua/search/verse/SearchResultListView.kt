@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.search.verse
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,7 +42,12 @@ class SearchResultListView : RecyclerView, SearchResultView {
 
     private lateinit var presenter: SearchResultPresenter
 
-    private val adapter: SearchResultListAdapter = SearchResultListAdapter(context)
+    private val listener = object : OnSearchResultClickedListener {
+        override fun onSearchResultClicked(verse: SearchResult.Verse) {
+            presenter.selectVerse(verse.verseIndex)
+        }
+    }
+    private val adapter: SearchResultListAdapter = SearchResultListAdapter(context, listener)
 
     init {
         layoutManager = LinearLayoutManager(context, VERTICAL, false)
@@ -57,7 +63,12 @@ class SearchResultListView : RecyclerView, SearchResultView {
     }
 }
 
-private class SearchResultListAdapter(context: Context) : RecyclerView.Adapter<SearchResultViewHolder>() {
+private interface OnSearchResultClickedListener {
+    fun onSearchResultClicked(verse: SearchResult.Verse)
+}
+
+private class SearchResultListAdapter(context: Context, private val listener: OnSearchResultClickedListener)
+    : RecyclerView.Adapter<SearchResultViewHolder>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private var searchResult: SearchResult? = null
 
@@ -69,23 +80,38 @@ private class SearchResultListAdapter(context: Context) : RecyclerView.Adapter<S
     override fun getItemCount(): Int = if (searchResult == null) 0 else searchResult!!.verses.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchResultViewHolder =
-            SearchResultViewHolder(inflater, parent)
+            SearchResultViewHolder(inflater, parent, listener)
 
     override fun onBindViewHolder(holder: SearchResultViewHolder, position: Int) {
         holder.bind(searchResult!!.verses[position])
     }
 }
 
-private class SearchResultViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_search_result, parent, false)) {
+private class SearchResultViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val listener: OnSearchResultClickedListener)
+    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_search_result, parent, false)),
+        View.OnClickListener {
     private val stringBuilder = StringBuilder()
     private val text = itemView as TextView
 
+    private var currentVerse: SearchResult.Verse? = null
+
+    init {
+        itemView.setOnClickListener(this)
+    }
+
     fun bind(verse: SearchResult.Verse) {
+        currentVerse = verse
+
         stringBuilder.setLength(0)
         stringBuilder.append(verse.bookName).append(' ')
                 .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
                 .append('\n').append(verse.text)
         text.text = stringBuilder.toString()
+    }
+
+    override fun onClick(v: View) {
+        if (currentVerse != null) {
+            listener.onSearchResultClicked(currentVerse!!)
+        }
     }
 }

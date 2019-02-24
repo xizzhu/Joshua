@@ -22,8 +22,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbar
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.search.verse.SearchResultPresenter
@@ -82,6 +84,13 @@ class SearchActivity : BaseActivity() {
                             loadingSpinner.fadeOut()
                             searchResultList.fadeIn()
                         }
+                    })
+        }
+        launch(Dispatchers.Main) {
+            receiveChannels.add(searchManager.observeVerseSelection()
+                    .filter { it.isValid() }
+                    .onEach {
+                        startActivity(ReadingActivity.newStartIntent(this@SearchActivity))
                     })
         }
     }

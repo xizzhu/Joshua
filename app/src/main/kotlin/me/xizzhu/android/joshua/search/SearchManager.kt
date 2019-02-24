@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.search
 
+import androidx.annotation.WorkerThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.BroadcastChannel
@@ -23,15 +24,25 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.firstOrNull
 import kotlinx.coroutines.withContext
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.repository.BibleReadingRepository
 
 class SearchManager(private val bibleReadingRepository: BibleReadingRepository) {
     private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
     private val searchResult: BroadcastChannel<SearchResult> = ConflatedBroadcastChannel(SearchResult.INVALID)
+    private val versesSelected: BroadcastChannel<VerseIndex> = BroadcastChannel(1)
 
     fun observeSearchState(): ReceiveChannel<Boolean> = searchState.openSubscription()
 
     fun observeSearchResult(): ReceiveChannel<SearchResult> = searchResult.openSubscription()
+
+    fun observeVerseSelection(): ReceiveChannel<VerseIndex> = versesSelected.openSubscription()
+
+    @WorkerThread
+    suspend fun selectVerse(verseIndex: VerseIndex) {
+        bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
+        versesSelected.send(verseIndex)
+    }
 
     suspend fun search(query: String) {
         searchState.send(true)

@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.search.verse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
@@ -31,6 +32,12 @@ class SearchResultPresenter(private val searchManager: SearchManager) : MVPPrese
             receiveChannels.add(searchManager.observeSearchResult()
                     .filter { it.isValid() }
                     .onEach { view?.onSearchResultUpdated(it) })
+        }
+    }
+
+    fun selectVerse(verseIndex: VerseIndex) {
+        launch(Dispatchers.IO) {
+            searchManager.selectVerse(verseIndex)
         }
     }
 }
