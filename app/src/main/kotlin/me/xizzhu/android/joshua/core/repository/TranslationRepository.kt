@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core.repository
 
-import android.database.sqlite.SQLiteDatabase
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -110,21 +109,18 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
 
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
         var inputStream: ZipInputStream? = null
-        var db: SQLiteDatabase? = null
         try {
             val response = backendService.translationService.fetchTranslation(translationInfo.shortName).execute()
             if (!response.isSuccessful) {
                 throw IOException("Unsupported HTTP status code - ${response.code()}")
             }
 
-            db = localStorage.getDatabase()
-            db.beginTransaction()
-            localStorage.createTranslationTable(translationInfo.shortName)
-
             inputStream = ZipInputStream(response.body()!!.byteStream())
             var zipEntry: ZipEntry?
             var downloaded = 0
             var progress = -1
+            val bookNames = ArrayList<String>()
+            val verses = HashMap<Pair<Int, Int>, List<String>>()
             while (true) {
                 zipEntry = inputStream.nextEntry
                 if (zipEntry == null) {
@@ -135,13 +131,13 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
                 val entryName = zipEntry.name
                 if (entryName == "books.json") {
                     val backendBooks = backendService.booksAdapter.fromJson(bufferedSource)
-                    localStorage.saveBookNames(backendBooks!!.shortName, backendBooks.books)
+                    bookNames.addAll(backendBooks!!.books)
                 } else {
                     val split = entryName.substring(0, entryName.length - 5).split("-")
                     val bookIndex = split[0].toInt()
                     val chapterIndex = split[1].toInt()
-                    localStorage.saveVerses(translationInfo.shortName, bookIndex, chapterIndex,
-                            backendService.chapterAdapter.fromJson(bufferedSource)!!.verses)
+                    val texts = backendService.chapterAdapter.fromJson(bufferedSource)!!.verses
+                    verses[Pair(bookIndex, chapterIndex)] = texts
                 }
 
                 // only emits if the progress is actually changed
@@ -152,10 +148,7 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
                 }
             }
 
-            localStorage.saveTranslation(TranslationInfo(translationInfo.shortName,
-                    translationInfo.name, translationInfo.language, translationInfo.size, true))
-
-            db.setTransactionSuccessful()
+            localStorage.saveTranslation(translationInfo, bookNames, verses)
             channel.close()
 
             val currentAvailable = ArrayList(availableTranslations.value)
@@ -173,7 +166,6 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
                 inputStream?.close()
             } catch (ignored: IOException) {
             }
-            db?.endTransaction()
         }
     }
 }

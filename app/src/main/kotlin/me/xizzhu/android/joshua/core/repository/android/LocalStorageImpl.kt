@@ -93,28 +93,25 @@ class LocalStorageImpl(context: Context) : LocalStorage,
     }
 
     @WorkerThread
-    override fun getDatabase(): SQLiteDatabase {
-        return writableDatabase
-    }
+    override fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>,
+                                 verses: Map<Pair<Int, Int>, List<String>>) {
+        var db: SQLiteDatabase? = null
+        try {
+            db = writableDatabase
+            db.beginTransaction()
 
-    @WorkerThread
-    override fun createTranslationTable(translationShortName: String) {
-        translationDao.createTable(translationShortName)
-    }
+            bookNamesDao.save(translationInfo.shortName, bookNames)
+            translationInfoDao.save(TranslationInfo(translationInfo.shortName,
+                    translationInfo.name, translationInfo.language, translationInfo.size, true))
+            translationDao.createTable(translationInfo.shortName)
+            for (entry in verses) {
+                translationDao.save(translationInfo.shortName, entry.key.first, entry.key.second, entry.value)
+            }
 
-    @WorkerThread
-    override fun saveBookNames(translationShortName: String, bookNames: List<String>) {
-        bookNamesDao.save(translationShortName, bookNames)
-    }
-
-    @WorkerThread
-    override fun saveVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int, verses: List<String>) {
-        translationDao.save(translationShortName, bookIndex, chapterIndex, verses)
-    }
-
-    @WorkerThread
-    override fun saveTranslation(translation: TranslationInfo) {
-        translationInfoDao.save(translation)
+            db.setTransactionSuccessful()
+        } finally {
+            db?.endTransaction()
+        }
     }
 
     override fun onCreate(db: SQLiteDatabase) {

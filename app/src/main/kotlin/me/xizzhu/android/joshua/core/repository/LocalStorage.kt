@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core.repository
 
-import android.database.sqlite.SQLiteDatabase
 import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.Verse
@@ -50,19 +49,7 @@ interface LocalStorage {
     @WorkerThread
     fun search(translationShortName: String, query: String): List<Verse>
 
-    // TODO refactor the following
     @WorkerThread
-    fun getDatabase(): SQLiteDatabase
-
-    @WorkerThread
-    fun createTranslationTable(translationShortName: String)
-
-    @WorkerThread
-    fun saveBookNames(translationShortName: String, bookNames: List<String>)
-
-    @WorkerThread
-    fun saveVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int, verses: List<String>)
-
-    @WorkerThread
-    fun saveTranslation(translation: TranslationInfo)
+    fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>,
+                        verses: Map<Pair<Int, Int>, List<String>>)
 }
