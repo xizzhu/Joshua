@@ -28,8 +28,8 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbar
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
-import me.xizzhu.android.joshua.search.verse.SearchResultPresenter
-import me.xizzhu.android.joshua.search.verse.SearchResultListView
+import me.xizzhu.android.joshua.search.result.SearchResultPresenter
+import me.xizzhu.android.joshua.search.result.SearchResultListView
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
 import me.xizzhu.android.joshua.utils.BaseActivity

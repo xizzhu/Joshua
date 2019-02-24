@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <me.xizzhu.android.joshua.search.verse.SearchResultListView
+    <me.xizzhu.android.joshua.search.result.SearchResultListView
         android:id="@+id/search_result"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.verse
+package me.xizzhu.android.joshua.search.result
 
 import android.content.Context
 import android.util.AttributeSet

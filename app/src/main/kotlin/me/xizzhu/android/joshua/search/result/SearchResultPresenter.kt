@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.verse
+package me.xizzhu.android.joshua.search.result
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
