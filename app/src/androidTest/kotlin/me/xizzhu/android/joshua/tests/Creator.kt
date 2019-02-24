@@ -20,7 +20,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.core.repository.LocalStorage
 import me.xizzhu.android.joshua.core.repository.android.LocalStorageImpl
-import me.xizzhu.android.joshua.repository.internal.BackendService
+import me.xizzhu.android.joshua.core.repository.BackendService
 
 fun createLocalStorage(): LocalStorage = LocalStorageImpl(ApplicationProvider.getApplicationContext<Context>())
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.repository.internal
+package me.xizzhu.android.joshua.core.repository
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter

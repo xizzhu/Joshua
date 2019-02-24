@@ -25,8 +25,6 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.repository.internal.BackendService
-import me.xizzhu.android.joshua.repository.internal.await
 import okio.buffer
 import okio.source
 import java.io.IOException

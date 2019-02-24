@@ -23,7 +23,7 @@ import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import me.xizzhu.android.joshua.*
-import me.xizzhu.android.joshua.repository.internal.BackendService
+import me.xizzhu.android.joshua.core.repository.BackendService
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.LocalStorage
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
