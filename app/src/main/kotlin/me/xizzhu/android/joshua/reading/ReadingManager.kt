@@ -21,8 +21,8 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.repository.TranslationRepository
 
 class ReadingManager(private val bibleReadingRepository: BibleReadingRepository,
                      private val translationRepository: TranslationRepository) {

@@ -25,7 +25,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.firstOrNull
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 
 class SearchManager(private val bibleReadingRepository: BibleReadingRepository) {
     private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)

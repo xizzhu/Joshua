@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.reading
 
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter

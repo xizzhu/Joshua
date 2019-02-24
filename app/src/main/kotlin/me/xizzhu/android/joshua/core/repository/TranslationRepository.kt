@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.repository
+package me.xizzhu.android.joshua.core.repository
 
 import android.database.sqlite.SQLiteDatabase
 import androidx.annotation.WorkerThread
@@ -26,7 +26,6 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.repository.internal.BackendService
-import me.xizzhu.android.joshua.repository.internal.LocalStorage
 import me.xizzhu.android.joshua.repository.internal.await
 import okio.buffer
 import okio.source
@@ -104,12 +103,12 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
             translations.add(TranslationInfo(backend.shortName, backend.name, backend.language, backend.size, downloaded))
         }
 
-        localStorage.translationInfoDao.replace(translations)
+        localStorage.replaceTranslations(translations)
 
         return translations
     }
 
-    fun readTranslationsFromLocal(): List<TranslationInfo> = localStorage.translationInfoDao.read()
+    fun readTranslationsFromLocal(): List<TranslationInfo> = localStorage.readTranslations()
 
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
         var inputStream: ZipInputStream? = null
@@ -120,9 +119,9 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
                 throw IOException("Unsupported HTTP status code - ${response.code()}")
             }
 
-            db = localStorage.writableDatabase
+            db = localStorage.getDatabase()
             db.beginTransaction()
-            localStorage.translationDao.createTable(translationInfo.shortName)
+            localStorage.createTranslationTable(translationInfo.shortName)
 
             inputStream = ZipInputStream(response.body()!!.byteStream())
             var zipEntry: ZipEntry?
@@ -138,12 +137,12 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
                 val entryName = zipEntry.name
                 if (entryName == "books.json") {
                     val backendBooks = backendService.booksAdapter.fromJson(bufferedSource)
-                    localStorage.bookNamesDao.save(backendBooks!!.shortName, backendBooks.books)
+                    localStorage.saveBookNames(backendBooks!!.shortName, backendBooks.books)
                 } else {
                     val split = entryName.substring(0, entryName.length - 5).split("-")
                     val bookIndex = split[0].toInt()
                     val chapterIndex = split[1].toInt()
-                    localStorage.translationDao.save(translationInfo.shortName, bookIndex, chapterIndex,
+                    localStorage.saveVerses(translationInfo.shortName, bookIndex, chapterIndex,
                             backendService.chapterAdapter.fromJson(bufferedSource)!!.verses)
                 }
 
@@ -155,7 +154,7 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
                 }
             }
 
-            localStorage.translationInfoDao.save(TranslationInfo(translationInfo.shortName,
+            localStorage.saveTranslation(TranslationInfo(translationInfo.shortName,
                     translationInfo.name, translationInfo.language, translationInfo.size, true))
 
             db.setTransactionSuccessful()

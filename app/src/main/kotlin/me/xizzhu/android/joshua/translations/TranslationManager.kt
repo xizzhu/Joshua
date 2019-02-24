@@ -19,8 +19,8 @@ package me.xizzhu.android.joshua.translations
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.*
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.repository.TranslationRepository
 
 class TranslationManager(private val bibleReadingRepository: BibleReadingRepository,
                          private val translationRepository: TranslationRepository) {

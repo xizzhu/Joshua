@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.search
 
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultPresenter
 import me.xizzhu.android.joshua.utils.ActivityScope

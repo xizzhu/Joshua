@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.translations
 
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.utils.ActivityScope
 
 @Module

@@ -24,9 +24,10 @@ import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import me.xizzhu.android.joshua.*
 import me.xizzhu.android.joshua.repository.internal.BackendService
-import me.xizzhu.android.joshua.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.repository.internal.LocalStorage
-import me.xizzhu.android.joshua.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.repository.LocalStorage
+import me.xizzhu.android.joshua.core.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.repository.android.LocalStorageImpl
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingModule
 import me.xizzhu.android.joshua.search.SearchActivity
@@ -48,7 +49,7 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
-    fun provideLocalStorage(app: App) = LocalStorage(app)
+    fun provideLocalStorage(app: App): LocalStorage = LocalStorageImpl(app)
 
     @Provides
     @Singleton

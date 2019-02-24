@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.repository
+package me.xizzhu.android.joshua.core.repository
 
 import android.database.sqlite.SQLiteException
 import androidx.test.ext.junit.runners.AndroidJUnit4

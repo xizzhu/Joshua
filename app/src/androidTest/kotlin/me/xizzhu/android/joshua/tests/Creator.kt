@@ -18,13 +18,14 @@ package me.xizzhu.android.joshua.tests
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import me.xizzhu.android.joshua.core.repository.LocalStorage
+import me.xizzhu.android.joshua.core.repository.android.LocalStorageImpl
 import me.xizzhu.android.joshua.repository.internal.BackendService
-import me.xizzhu.android.joshua.repository.internal.LocalStorage
 
-fun createLocalStorage(): LocalStorage = LocalStorage(ApplicationProvider.getApplicationContext<Context>())
+fun createLocalStorage(): LocalStorage = LocalStorageImpl(ApplicationProvider.getApplicationContext<Context>())
 
 fun clearLocalStorage() {
-    ApplicationProvider.getApplicationContext<Context>().deleteDatabase(LocalStorage.DATABASE_NAME)
+    ApplicationProvider.getApplicationContext<Context>().deleteDatabase(LocalStorageImpl.DATABASE_NAME)
 }
 
 fun createBackendService(): BackendService = BackendService()
