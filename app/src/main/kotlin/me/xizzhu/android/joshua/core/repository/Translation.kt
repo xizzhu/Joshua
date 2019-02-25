@@ -16,14 +16,7 @@
 
 package me.xizzhu.android.joshua.core.repository
 
-import androidx.annotation.WorkerThread
-import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.TranslationInfo
 
-interface BackendService {
-    @WorkerThread
-    fun fetchTranslations(): List<TranslationInfo>
-
-    @WorkerThread
-    suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo): Translation
-}
+data class Translation(val translationInfo: TranslationInfo, val bookNames: List<String>,
+                       val verses: Map<Pair<Int, Int>, List<String>>)

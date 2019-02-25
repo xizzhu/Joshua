@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.LocalStorage
+import me.xizzhu.android.joshua.core.repository.Translation
 import java.lang.StringBuilder
 
 class LocalStorageImpl(context: Context) : LocalStorage,
@@ -93,19 +94,17 @@ class LocalStorageImpl(context: Context) : LocalStorage,
     }
 
     @WorkerThread
-    override fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>,
-                                 verses: Map<Pair<Int, Int>, List<String>>) {
+    override fun saveTranslation(translation: Translation) {
         var db: SQLiteDatabase? = null
         try {
             db = writableDatabase
             db.beginTransaction()
 
-            bookNamesDao.save(translationInfo.shortName, bookNames)
-            translationInfoDao.save(TranslationInfo(translationInfo.shortName,
-                    translationInfo.name, translationInfo.language, translationInfo.size, true))
-            translationDao.createTable(translationInfo.shortName)
-            for (entry in verses) {
-                translationDao.save(translationInfo.shortName, entry.key.first, entry.key.second, entry.value)
+            bookNamesDao.save(translation.translationInfo.shortName, translation.bookNames)
+            translationInfoDao.save(translation.translationInfo)
+            translationDao.createTable(translation.translationInfo.shortName)
+            for (entry in translation.verses) {
+                translationDao.save(translation.translationInfo.shortName, entry.key.first, entry.key.second, entry.value)
             }
 
             db.setTransactionSuccessful()

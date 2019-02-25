@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.utils
 
+import com.squareup.moshi.Moshi
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -28,12 +29,15 @@ import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.LocalStorage
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.core.repository.android.LocalStorageImpl
+import me.xizzhu.android.joshua.core.repository.retrofit.BackendServiceImpl
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingModule
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.search.SearchModule
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementModule
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 import javax.inject.Scope
 import javax.inject.Singleton
 
@@ -53,7 +57,21 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
-    fun provideBackendService() = BackendService()
+    fun provideMoshi(): Moshi = Moshi.Builder().build()
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient =
+            OkHttpClient.Builder()
+                    .connectTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                    .readTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                    .writeTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                    .build()
+
+    @Provides
+    @Singleton
+    fun provideBackendService(moshi: Moshi, okHttpClient: OkHttpClient): BackendService =
+            BackendServiceImpl(moshi, okHttpClient)
 
     @Provides
     @Singleton

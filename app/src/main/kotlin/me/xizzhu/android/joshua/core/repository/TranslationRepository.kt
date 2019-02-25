@@ -24,12 +24,6 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
-import okio.buffer
-import okio.source
-import java.io.IOException
-import java.lang.Exception
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 
 class TranslationRepository(private val localStorage: LocalStorage, private val backendService: BackendService) {
     private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
@@ -84,20 +78,20 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
         }
     }
 
-    private suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
-        val backendTranslations = backendService.translationService.fetchTranslationList().await().translations
+    private fun readTranslationsFromBackend(): List<TranslationInfo> {
+        val fetchedTranslations = backendService.fetchTranslations()
         val localTranslations = readTranslationsFromLocal()
 
-        val translations = ArrayList<TranslationInfo>(backendTranslations.size)
-        for (backend in backendTranslations) {
+        val translations = ArrayList<TranslationInfo>(fetchedTranslations.size)
+        for (fetched in fetchedTranslations) {
             var downloaded = false
             for (local in localTranslations) {
-                if (backend.shortName == local.shortName) {
+                if (fetched.shortName == local.shortName) {
                     downloaded = local.downloaded
                     break
                 }
             }
-            translations.add(TranslationInfo(backend.shortName, backend.name, backend.language, backend.size, downloaded))
+            translations.add(TranslationInfo(fetched.shortName, fetched.name, fetched.language, fetched.size, downloaded))
         }
 
         localStorage.replaceTranslations(translations)
@@ -108,64 +102,20 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
     fun readTranslationsFromLocal(): List<TranslationInfo> = localStorage.readTranslations()
 
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
-        var inputStream: ZipInputStream? = null
-        try {
-            val response = backendService.translationService.fetchTranslation(translationInfo.shortName).execute()
-            if (!response.isSuccessful) {
-                throw IOException("Unsupported HTTP status code - ${response.code()}")
-            }
+        val translation = backendService.fetchTranslation(channel, translationInfo)
+        channel.send(100)
 
-            inputStream = ZipInputStream(response.body()!!.byteStream())
-            var zipEntry: ZipEntry?
-            var downloaded = 0
-            var progress = -1
-            val bookNames = ArrayList<String>()
-            val verses = HashMap<Pair<Int, Int>, List<String>>()
-            while (true) {
-                zipEntry = inputStream.nextEntry
-                if (zipEntry == null) {
-                    break
-                }
+        localStorage.saveTranslation(translation)
 
-                val bufferedSource = inputStream.source().buffer()
-                val entryName = zipEntry.name
-                if (entryName == "books.json") {
-                    val backendBooks = backendService.booksAdapter.fromJson(bufferedSource)
-                    bookNames.addAll(backendBooks!!.books)
-                } else {
-                    val split = entryName.substring(0, entryName.length - 5).split("-")
-                    val bookIndex = split[0].toInt()
-                    val chapterIndex = split[1].toInt()
-                    val texts = backendService.chapterAdapter.fromJson(bufferedSource)!!.verses
-                    verses[Pair(bookIndex, chapterIndex)] = texts
-                }
+        val currentAvailable = ArrayList(availableTranslations.value)
+        currentAvailable.remove(translationInfo)
+        availableTranslations.send(currentAvailable)
 
-                // only emits if the progress is actually changed
-                val currentProgress = ++downloaded / 12
-                if (currentProgress > progress) {
-                    progress = currentProgress
-                    channel.send(progress)
-                }
-            }
+        val currentDownloaded = ArrayList(downloadedTranslations.value)
+        currentDownloaded.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
+                translationInfo.language, translationInfo.size, true))
+        downloadedTranslations.send(currentDownloaded)
 
-            localStorage.saveTranslation(translationInfo, bookNames, verses)
-            channel.close()
-
-            val currentAvailable = ArrayList(availableTranslations.value)
-            currentAvailable.remove(translationInfo)
-            availableTranslations.send(currentAvailable)
-
-            val currentDownloaded = ArrayList(downloadedTranslations.value)
-            currentDownloaded.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
-                    translationInfo.language, translationInfo.size, true))
-            downloadedTranslations.send(currentDownloaded)
-        } catch (e: Exception) {
-            channel.close(e)
-        } finally {
-            try {
-                inputStream?.close()
-            } catch (ignored: IOException) {
-            }
-        }
+        channel.close()
     }
 }

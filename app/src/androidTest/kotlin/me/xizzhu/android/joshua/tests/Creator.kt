@@ -18,9 +18,13 @@ package me.xizzhu.android.joshua.tests
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.squareup.moshi.Moshi
+import me.xizzhu.android.joshua.core.repository.BackendService
 import me.xizzhu.android.joshua.core.repository.LocalStorage
 import me.xizzhu.android.joshua.core.repository.android.LocalStorageImpl
-import me.xizzhu.android.joshua.core.repository.BackendService
+import me.xizzhu.android.joshua.core.repository.retrofit.BackendServiceImpl
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
 fun createLocalStorage(): LocalStorage = LocalStorageImpl(ApplicationProvider.getApplicationContext<Context>())
 
@@ -28,4 +32,9 @@ fun clearLocalStorage() {
     ApplicationProvider.getApplicationContext<Context>().deleteDatabase(LocalStorageImpl.DATABASE_NAME)
 }
 
-fun createBackendService(): BackendService = BackendService()
+fun createBackendService(): BackendService = BackendServiceImpl(Moshi.Builder().build(),
+        OkHttpClient.Builder()
+                .connectTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                .writeTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                .build())
