@@ -20,7 +20,7 @@ import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.utils.ActivityScope
+import me.xizzhu.android.joshua.ActivityScope
 
 @Module
 class TranslationManagementModule {

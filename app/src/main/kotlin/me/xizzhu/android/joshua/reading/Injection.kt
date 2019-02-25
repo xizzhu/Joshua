@@ -23,7 +23,7 @@ import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
-import me.xizzhu.android.joshua.utils.ActivityScope
+import me.xizzhu.android.joshua.ActivityScope
 
 @Module
 class ReadingModule {

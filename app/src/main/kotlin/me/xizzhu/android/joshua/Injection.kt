@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.utils
+package me.xizzhu.android.joshua
 
 import com.squareup.moshi.Moshi
 import dagger.Component
@@ -23,7 +23,6 @@ import dagger.Provides
 import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
-import me.xizzhu.android.joshua.*
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.core.repository.BackendService

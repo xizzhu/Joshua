@@ -20,9 +20,6 @@ import android.app.Activity
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
-import me.xizzhu.android.joshua.utils.AppComponent
-import me.xizzhu.android.joshua.utils.AppModule
-import me.xizzhu.android.joshua.utils.DaggerAppComponent
 import javax.inject.Inject
 
 class App : BaseApp(), HasActivityInjector {

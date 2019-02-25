@@ -21,7 +21,7 @@ import dagger.Provides
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultPresenter
-import me.xizzhu.android.joshua.utils.ActivityScope
+import me.xizzhu.android.joshua.ActivityScope
 
 @Module
 class SearchModule {
