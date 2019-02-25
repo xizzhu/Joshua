@@ -16,46 +16,36 @@
 
 package me.xizzhu.android.joshua.core.repository
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.launch
+import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 
 class BibleReadingRepository(private val localStorage: LocalStorage) {
-    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel("")
-    private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)
+    @WorkerThread
+    fun readCurrentTranslation(): String = localStorage.readCurrentTranslation()
 
-    init {
-        GlobalScope.launch(Dispatchers.IO) {
-            currentTranslationShortName.send(localStorage.readCurrentTranslation())
-            currentVerseIndex.send(localStorage.readCurrentVerseIndex())
-        }
-    }
-
-    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
-
-    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        currentVerseIndex.send(verseIndex)
-        localStorage.saveCurrentVerseIndex(verseIndex)
-    }
-
-    fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
-
-    suspend fun saveCurrentTranslation(translationShortName: String) {
-        currentTranslationShortName.send(translationShortName)
+    @WorkerThread
+    fun saveCurrentTranslation(translationShortName: String) {
         localStorage.saveCurrentTranslation(translationShortName)
     }
 
+    @WorkerThread
+    fun readCurrentVerseIndex(): VerseIndex = localStorage.readCurrentVerseIndex()
+
+    @WorkerThread
+    fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
+        localStorage.saveCurrentVerseIndex(verseIndex)
+    }
+
+    @WorkerThread
     fun readBookNames(translationShortName: String): List<String> =
             localStorage.readBookNames(translationShortName)
 
+    @WorkerThread
     fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
             localStorage.readVerses(translationShortName, bookIndex, chapterIndex)
 
+    @WorkerThread
     fun search(translationShortName: String, query: String): List<Verse> =
             localStorage.search(translationShortName, query)
 }

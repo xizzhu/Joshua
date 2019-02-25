@@ -24,10 +24,10 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.firstOrNull
 import kotlinx.coroutines.withContext
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 
-class SearchManager(private val bibleReadingRepository: BibleReadingRepository) {
+class SearchManager(private val bibleReadingManager: BibleReadingManager) {
     private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
     private val searchResult: BroadcastChannel<SearchResult> = ConflatedBroadcastChannel(SearchResult.INVALID)
     private val versesSelected: BroadcastChannel<VerseIndex> = BroadcastChannel(1)
@@ -40,18 +40,18 @@ class SearchManager(private val bibleReadingRepository: BibleReadingRepository) 
 
     @WorkerThread
     suspend fun selectVerse(verseIndex: VerseIndex) {
-        bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
+        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
         versesSelected.send(verseIndex)
     }
 
     suspend fun search(query: String) {
         searchState.send(true)
 
-        val currentTranslation = bibleReadingRepository.observeCurrentTranslation().firstOrNull()
+        val currentTranslation = bibleReadingManager.observeCurrentTranslation().firstOrNull()
                 ?: throw IllegalStateException("No translation selected")
         searchResult.send(withContext(Dispatchers.Default) {
-            val bookNamesAsync = async(Dispatchers.IO) { bibleReadingRepository.readBookNames(currentTranslation) }
-            val versesAsync = async(Dispatchers.IO) { bibleReadingRepository.search(currentTranslation, query) }
+            val bookNamesAsync = async(Dispatchers.IO) { bibleReadingManager.readBookNames(currentTranslation) }
+            val versesAsync = async(Dispatchers.IO) { bibleReadingManager.search(currentTranslation, query) }
             val bookNames = bookNamesAsync.await()
             val verses = versesAsync.await()
             val searchedVerses = ArrayList<SearchResult.Verse>()

@@ -24,6 +24,7 @@ import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import me.xizzhu.android.joshua.*
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.repository.BackendService
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.LocalStorage
@@ -75,12 +76,19 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
-    fun provideBibleReadingRepository(localStorage: LocalStorage) = BibleReadingRepository(localStorage)
+    fun provideBibleReadingRepository(localStorage: LocalStorage): BibleReadingRepository =
+            BibleReadingRepository(localStorage)
 
     @Provides
     @Singleton
-    fun provideTranslationRepository(localStorage: LocalStorage, backendService: BackendService) =
+    fun provideTranslationRepository(localStorage: LocalStorage,
+                                     backendService: BackendService): TranslationRepository =
             TranslationRepository(localStorage, backendService)
+
+    @Provides
+    @Singleton
+    fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository): BibleReadingManager =
+            BibleReadingManager(bibleReadingRepository)
 }
 
 @Module

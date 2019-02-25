@@ -18,11 +18,11 @@ package me.xizzhu.android.joshua.translations
 
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.*
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 
-class TranslationManager(private val bibleReadingRepository: BibleReadingRepository,
+class TranslationManager(private val bibleReadingManager: BibleReadingManager,
                          private val translationRepository: TranslationRepository) {
     private val translationsLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
     private val translationsSelected: BroadcastChannel<Unit> = ConflatedBroadcastChannel()
@@ -39,11 +39,11 @@ class TranslationManager(private val bibleReadingRepository: BibleReadingReposit
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationRepository.observeDownloadedTranslations()
 
-    fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingRepository.observeCurrentTranslation()
+    fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
 
     @WorkerThread
     suspend fun saveCurrentTranslation(translationShortName: String, fromUser: Boolean) {
-        bibleReadingRepository.saveCurrentTranslation(translationShortName)
+        bibleReadingManager.saveCurrentTranslation(translationShortName)
 
         if (fromUser) {
             translationsSelected.send(Unit)
