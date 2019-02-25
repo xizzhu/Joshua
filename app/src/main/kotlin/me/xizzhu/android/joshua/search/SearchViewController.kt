@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
 
-class SearchManager(private val bibleReadingManager: BibleReadingManager) {
+class SearchViewController(private val bibleReadingManager: BibleReadingManager) {
     private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
     private val searchResult: BroadcastChannel<SearchResult> = ConflatedBroadcastChannel(SearchResult.INVALID)
     private val versesSelected: BroadcastChannel<VerseIndex> = BroadcastChannel(1)

@@ -21,23 +21,23 @@ import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.reading.ReadingManager
+import me.xizzhu.android.joshua.reading.ReadingViewController
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 
-class ChapterListPresenter(private val readingManager: ReadingManager) : MVPPresenter<ChapterView>() {
+class ChapterListPresenter(private val readingViewController: ReadingViewController) : MVPPresenter<ChapterView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeCurrentTranslation()
+            receiveChannels.add(readingViewController.observeCurrentTranslation()
                     .filter { it.isNotEmpty() }
                     .onEach {
-                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { readingManager.readBookNames(it) })
+                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { readingViewController.readBookNames(it) })
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeCurrentVerseIndex()
+            receiveChannels.add(readingViewController.observeCurrentVerseIndex()
                     .filter { it.isValid() }
                     .onEach {
                         view?.onCurrentVerseIndexUpdated(it)
@@ -47,7 +47,7 @@ class ChapterListPresenter(private val readingManager: ReadingManager) : MVPPres
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
         launch(Dispatchers.IO) {
-            readingManager.saveCurrentVerseIndex(verseIndex)
+            readingViewController.saveCurrentVerseIndex(verseIndex)
         }
     }
 }

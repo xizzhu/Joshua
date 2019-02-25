@@ -27,10 +27,10 @@ class TranslationManagementModule {
     @Provides
     @ActivityScope
     fun provideTranslationManager(bibleReadingManager: BibleReadingManager,
-                                  translationManager: TranslationManager): TranslationsManager =
-            TranslationsManager(bibleReadingManager, translationManager)
+                                  translationManager: TranslationManager): TranslationViewController =
+            TranslationViewController(bibleReadingManager, translationManager)
 
     @Provides
-    fun provideTranslationPresenter(translationsManager: TranslationsManager): TranslationPresenter =
-            TranslationPresenter(translationsManager)
+    fun provideTranslationPresenter(translationViewController: TranslationViewController): TranslationPresenter =
+            TranslationPresenter(translationViewController)
 }

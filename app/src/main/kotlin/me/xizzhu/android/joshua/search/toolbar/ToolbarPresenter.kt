@@ -18,16 +18,16 @@ package me.xizzhu.android.joshua.search.toolbar
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.search.SearchManager
+import me.xizzhu.android.joshua.search.SearchViewController
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
-class ToolbarPresenter(private val searchManager: SearchManager) : MVPPresenter<ToolbarView>() {
+class ToolbarPresenter(private val searchViewController: SearchViewController) : MVPPresenter<ToolbarView>() {
     fun search(query: String): Boolean {
         if (query.isEmpty()) {
             return false
         }
         launch(Dispatchers.Main) {
-            searchManager.search(query)
+            searchViewController.search(query)
         }
         return true
     }

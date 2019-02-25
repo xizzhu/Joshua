@@ -27,14 +27,14 @@ import me.xizzhu.android.joshua.utils.ActivityScope
 class SearchModule {
     @ActivityScope
     @Provides
-    fun provideSearchManager(bibleReadingManager: BibleReadingManager): SearchManager =
-            SearchManager(bibleReadingManager)
+    fun provideSearchManager(bibleReadingManager: BibleReadingManager): SearchViewController =
+            SearchViewController(bibleReadingManager)
 
     @Provides
-    fun provideToolbarPresenter(searchManager: SearchManager): ToolbarPresenter =
-            ToolbarPresenter(searchManager)
+    fun provideToolbarPresenter(searchViewController: SearchViewController): ToolbarPresenter =
+            ToolbarPresenter(searchViewController)
 
     @Provides
-    fun provideSearchResultPresenter(searchManager: SearchManager): SearchResultPresenter =
-            SearchResultPresenter(searchManager)
+    fun provideSearchResultPresenter(searchViewController: SearchViewController): SearchResultPresenter =
+            SearchResultPresenter(searchViewController)
 }

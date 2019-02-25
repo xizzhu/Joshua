@@ -49,7 +49,7 @@ class ReadingActivity : BaseActivity(), View.OnClickListener {
     }
 
     @Inject
-    lateinit var readingManager: ReadingManager
+    lateinit var readingViewController: ReadingViewController
 
     @Inject
     lateinit var toolbarPresenter: ToolbarPresenter
@@ -102,7 +102,7 @@ class ReadingActivity : BaseActivity(), View.OnClickListener {
         versePresenter.attachView(verseViewPager)
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeDownloadedTranslations().onEach {
+            receiveChannels.add(readingViewController.observeDownloadedTranslations().onEach {
                 if (it.isEmpty()) {
                     DialogHelper.showDialog(this@ReadingActivity, false, R.string.no_translation_downloaded,
                             DialogInterface.OnClickListener { _, _ ->
@@ -115,7 +115,7 @@ class ReadingActivity : BaseActivity(), View.OnClickListener {
             })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeCurrentVerseIndex()
+            receiveChannels.add(readingViewController.observeCurrentVerseIndex()
                     .filter { it.isValid() }
                     .onEach { drawerLayout.closeDrawer(GravityCompat.START) })
         }

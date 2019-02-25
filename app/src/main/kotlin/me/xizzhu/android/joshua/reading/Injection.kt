@@ -30,18 +30,18 @@ class ReadingModule {
     @ActivityScope
     @Provides
     fun provideReadingManager(bibleReadingManager: BibleReadingManager,
-                              translationManager: TranslationManager): ReadingManager =
-            ReadingManager(bibleReadingManager, translationManager)
+                              translationManager: TranslationManager): ReadingViewController =
+            ReadingViewController(bibleReadingManager, translationManager)
 
     @Provides
-    fun provideToolbarPresenter(readingManager: ReadingManager): ToolbarPresenter =
-            ToolbarPresenter(readingManager)
+    fun provideToolbarPresenter(readingViewController: ReadingViewController): ToolbarPresenter =
+            ToolbarPresenter(readingViewController)
 
     @Provides
-    fun provideChapterListPresenter(readingManager: ReadingManager): ChapterListPresenter =
-            ChapterListPresenter(readingManager)
+    fun provideChapterListPresenter(readingViewController: ReadingViewController): ChapterListPresenter =
+            ChapterListPresenter(readingViewController)
 
     @Provides
-    fun provideVersePresenter(readingManager: ReadingManager): VersePresenter =
-            VersePresenter(readingManager)
+    fun provideVersePresenter(readingViewController: ReadingViewController): VersePresenter =
+            VersePresenter(readingViewController)
 }

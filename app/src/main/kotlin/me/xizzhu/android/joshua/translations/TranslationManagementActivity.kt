@@ -36,7 +36,7 @@ class TranslationManagementActivity : BaseActivity() {
     }
 
     @Inject
-    lateinit var translationsManager: TranslationsManager
+    lateinit var translationViewController: TranslationViewController
 
     @Inject
     lateinit var translationPresenter: TranslationPresenter
@@ -60,7 +60,7 @@ class TranslationManagementActivity : BaseActivity() {
         translationPresenter.attachView(translationListView)
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationsManager.observeTranslationsLoadingState()
+            receiveChannels.add(translationViewController.observeTranslationsLoadingState()
                     .onEach { downloading ->
                         if (downloading) {
                             loadingSpinner.visibility = View.VISIBLE
@@ -72,7 +72,7 @@ class TranslationManagementActivity : BaseActivity() {
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationsManager.observeTranslationSelection()
+            receiveChannels.add(translationViewController.observeTranslationSelection()
                     .onEach { finish() })
         }
     }

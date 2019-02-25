@@ -20,16 +20,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.search.SearchManager
+import me.xizzhu.android.joshua.search.SearchViewController
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 
-class SearchResultPresenter(private val searchManager: SearchManager) : MVPPresenter<SearchResultView>() {
+class SearchResultPresenter(private val searchViewController: SearchViewController) : MVPPresenter<SearchResultView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(searchManager.observeSearchResult()
+            receiveChannels.add(searchViewController.observeSearchResult()
                     .filter { it.isValid() }
                     .onEach { view?.onSearchResultUpdated(it) })
         }
@@ -37,7 +37,7 @@ class SearchResultPresenter(private val searchManager: SearchManager) : MVPPrese
 
     fun selectVerse(verseIndex: VerseIndex) {
         launch(Dispatchers.IO) {
-            searchManager.selectVerse(verseIndex)
+            searchViewController.selectVerse(verseIndex)
         }
     }
 }

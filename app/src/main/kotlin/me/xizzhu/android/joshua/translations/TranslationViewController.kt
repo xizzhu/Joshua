@@ -22,8 +22,8 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
 
-class TranslationsManager(private val bibleReadingManager: BibleReadingManager,
-                          private val translationManager: TranslationManager) {
+class TranslationViewController(private val bibleReadingManager: BibleReadingManager,
+                                private val translationManager: TranslationManager) {
     private val translationsLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
     private val translationsSelected: BroadcastChannel<Unit> = ConflatedBroadcastChannel()
 

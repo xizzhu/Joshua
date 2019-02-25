@@ -21,24 +21,24 @@ import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.reading.ReadingManager
+import me.xizzhu.android.joshua.reading.ReadingViewController
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 import java.lang.Exception
 
-class VersePresenter(private val readingManager: ReadingManager) : MVPPresenter<VerseView>() {
+class VersePresenter(private val readingViewController: ReadingViewController) : MVPPresenter<VerseView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeCurrentTranslation()
+            receiveChannels.add(readingViewController.observeCurrentTranslation()
                     .filter { it.isNotEmpty() }
                     .onEach {
                         view?.onCurrentTranslationUpdated(it)
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeCurrentVerseIndex()
+            receiveChannels.add(readingViewController.observeCurrentVerseIndex()
                     .filter { it.isValid() }
                     .onEach {
                         view?.onCurrentVerseIndexUpdated(it)
@@ -48,7 +48,7 @@ class VersePresenter(private val readingManager: ReadingManager) : MVPPresenter<
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
         launch(Dispatchers.IO) {
-            readingManager.saveCurrentVerseIndex(verseIndex)
+            readingViewController.saveCurrentVerseIndex(verseIndex)
         }
     }
 
@@ -56,7 +56,7 @@ class VersePresenter(private val readingManager: ReadingManager) : MVPPresenter<
         launch(Dispatchers.Main) {
             try {
                 val verses = withContext(Dispatchers.IO) {
-                    readingManager.readVerses(translationShortName, bookIndex, chapterIndex)
+                    readingViewController.readVerses(translationShortName, bookIndex, chapterIndex)
                 }
                 view?.onVersesLoaded(bookIndex, chapterIndex, verses)
             } catch (e: Exception) {

@@ -20,8 +20,8 @@ import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.ReceiveChannel
 import me.xizzhu.android.joshua.core.*
 
-class ReadingManager(private val bibleReadingManager: BibleReadingManager,
-                     private val translationManager: TranslationManager) {
+class ReadingViewController(private val bibleReadingManager: BibleReadingManager,
+                            private val translationManager: TranslationManager) {
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
 
