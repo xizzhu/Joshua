@@ -28,19 +28,3 @@ object Bible {
 
     fun getChapterCount(bookIndex: Int) = CHAPTER_COUNT[bookIndex]
 }
-
-data class TranslationInfo(val shortName: String, val name: String, val language: String,
-                           val size: Long, val downloaded: Boolean)
-
-data class VerseIndex(val bookIndex: Int, val chapterIndex: Int, val verseIndex: Int) {
-    companion object {
-        val INVALID = VerseIndex(-1, -1, -1)
-    }
-
-    fun isValid(): Boolean =
-            bookIndex >= 0 && bookIndex < Bible.BOOK_COUNT
-                    && chapterIndex >= 0 && chapterIndex < Bible.getChapterCount(bookIndex)
-                    && verseIndex >= 0
-}
-
-data class Verse(val verseIndex: VerseIndex, val translationShortName: String, val text: String)

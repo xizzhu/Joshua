@@ -25,6 +25,19 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 
+data class VerseIndex(val bookIndex: Int, val chapterIndex: Int, val verseIndex: Int) {
+    companion object {
+        val INVALID = VerseIndex(-1, -1, -1)
+    }
+
+    fun isValid(): Boolean =
+            bookIndex >= 0 && bookIndex < Bible.BOOK_COUNT
+                    && chapterIndex >= 0 && chapterIndex < Bible.getChapterCount(bookIndex)
+                    && verseIndex >= 0
+}
+
+data class Verse(val verseIndex: VerseIndex, val translationShortName: String, val text: String)
+
 class BibleReadingManager(private val bibleReadingRepository: BibleReadingRepository) {
     private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel("")
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)

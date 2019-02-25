@@ -25,6 +25,9 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 
+data class TranslationInfo(val shortName: String, val name: String, val language: String,
+                           val size: Long, val downloaded: Boolean)
+
 class TranslationManager(private val translationRepository: TranslationRepository) {
     private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
     private val downloadedTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
