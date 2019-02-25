@@ -20,10 +20,10 @@ import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.*
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.core.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.TranslationManager
 
-class TranslationManager(private val bibleReadingManager: BibleReadingManager,
-                         private val translationRepository: TranslationRepository) {
+class TranslationsManager(private val bibleReadingManager: BibleReadingManager,
+                          private val translationManager: TranslationManager) {
     private val translationsLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
     private val translationsSelected: BroadcastChannel<Unit> = ConflatedBroadcastChannel()
 
@@ -34,10 +34,10 @@ class TranslationManager(private val bibleReadingManager: BibleReadingManager,
             translationsSelected.openSubscription()
 
     fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            translationRepository.observeAvailableTranslations()
+            translationManager.observeAvailableTranslations()
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            translationRepository.observeDownloadedTranslations()
+            translationManager.observeDownloadedTranslations()
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
 
@@ -53,12 +53,12 @@ class TranslationManager(private val bibleReadingManager: BibleReadingManager,
     @WorkerThread
     suspend fun reload(forceRefresh: Boolean) {
         translationsLoadingState.send(true)
-        translationRepository.reload(forceRefresh)
+        translationManager.reload(forceRefresh)
         translationsLoadingState.send(false)
     }
 
     @WorkerThread
     suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
-        translationRepository.downloadTranslation(progressChannel, translationInfo)
+        translationManager.downloadTranslation(progressChannel, translationInfo)
     }
 }

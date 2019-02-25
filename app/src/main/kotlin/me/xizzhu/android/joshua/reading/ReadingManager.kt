@@ -18,16 +18,12 @@ package me.xizzhu.android.joshua.reading
 
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.ReceiveChannel
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.*
 
 class ReadingManager(private val bibleReadingManager: BibleReadingManager,
-                     private val translationRepository: TranslationRepository) {
+                     private val translationManager: TranslationManager) {
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            translationRepository.observeDownloadedTranslations()
+            translationManager.observeDownloadedTranslations()
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
 
