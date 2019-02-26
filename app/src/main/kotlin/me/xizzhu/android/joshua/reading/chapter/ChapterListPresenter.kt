@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.reading.chapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingViewController
 import me.xizzhu.android.joshua.utils.MVPPresenter
@@ -33,7 +32,7 @@ class ChapterListPresenter(private val readingViewController: ReadingViewControl
             receiveChannels.add(readingViewController.observeCurrentTranslation()
                     .filter { it.isNotEmpty() }
                     .onEach {
-                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { readingViewController.readBookNames(it) })
+                        view?.onBookNamesUpdated(readingViewController.readBookNames(it))
                     })
         }
         launch(Dispatchers.Main) {
@@ -46,7 +45,7 @@ class ChapterListPresenter(private val readingViewController: ReadingViewControl
     }
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        launch(Dispatchers.IO) {
+        launch(Dispatchers.Main) {
             readingViewController.saveCurrentVerseIndex(verseIndex)
         }
     }

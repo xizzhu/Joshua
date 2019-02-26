@@ -41,7 +41,6 @@ class TranslationViewController(private val bibleReadingManager: BibleReadingMan
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
 
-    @WorkerThread
     suspend fun saveCurrentTranslation(translationShortName: String, fromUser: Boolean) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
 

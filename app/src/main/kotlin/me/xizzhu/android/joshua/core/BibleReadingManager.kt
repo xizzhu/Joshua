@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core
 
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
@@ -51,7 +50,6 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
 
     fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
 
-    @WorkerThread
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         currentVerseIndex.send(verseIndex)
         bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
@@ -59,21 +57,17 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
 
-    @WorkerThread
     suspend fun saveCurrentTranslation(translationShortName: String) {
         currentTranslationShortName.send(translationShortName)
         bibleReadingRepository.saveCurrentTranslation(translationShortName)
     }
 
-    @WorkerThread
-    fun readBookNames(translationShortName: String): List<String> =
+    suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingRepository.readBookNames(translationShortName)
 
-    @WorkerThread
-    fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
+    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
 
-    @WorkerThread
-    fun search(translationShortName: String, query: String): List<Verse> =
+    suspend fun search(translationShortName: String, query: String): List<Verse> =
             bibleReadingRepository.search(translationShortName, query)
 }

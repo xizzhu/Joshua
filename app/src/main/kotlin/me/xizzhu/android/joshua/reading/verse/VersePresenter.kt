@@ -47,7 +47,7 @@ class VersePresenter(private val readingViewController: ReadingViewController) :
     }
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
-        launch(Dispatchers.IO) {
+        launch(Dispatchers.Main) {
             readingViewController.saveCurrentVerseIndex(verseIndex)
         }
     }
@@ -55,10 +55,8 @@ class VersePresenter(private val readingViewController: ReadingViewController) :
     fun loadVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
             try {
-                val verses = withContext(Dispatchers.IO) {
-                    readingViewController.readVerses(translationShortName, bookIndex, chapterIndex)
-                }
-                view?.onVersesLoaded(bookIndex, chapterIndex, verses)
+                view?.onVersesLoaded(bookIndex, chapterIndex,
+                        readingViewController.readVerses(translationShortName, bookIndex, chapterIndex))
             } catch (e: Exception) {
                 view?.onError(e)
             }

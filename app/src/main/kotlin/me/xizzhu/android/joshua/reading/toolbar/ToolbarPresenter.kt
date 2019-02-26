@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.reading.toolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.reading.ReadingViewController
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
@@ -33,7 +32,7 @@ class ToolbarPresenter(private val readingViewController: ReadingViewController)
                     .filter { it.isNotEmpty() }
                     .onEach {
                         view?.onCurrentTranslationUpdated(it)
-                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { readingViewController.readBookNames(it) })
+                        view?.onBookNamesUpdated(readingViewController.readBookNames(it))
                     })
         }
         launch(Dispatchers.Main) {
@@ -54,7 +53,7 @@ class ToolbarPresenter(private val readingViewController: ReadingViewController)
     }
 
     fun updateCurrentTranslation(translationShortName: String) {
-        launch(Dispatchers.IO) {
+        launch(Dispatchers.Main) {
             readingViewController.saveCurrentTranslation(translationShortName)
         }
     }

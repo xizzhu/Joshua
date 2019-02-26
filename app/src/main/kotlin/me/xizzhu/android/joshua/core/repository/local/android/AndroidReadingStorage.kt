@@ -16,51 +16,59 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
-import androidx.annotation.WorkerThread
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 
 class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : LocalReadingStorage {
-    @WorkerThread
-    override fun readCurrentVerseIndex(): VerseIndex {
-        val bookIndex = androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0").toInt()
-        val chapterIndex = androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0").toInt()
-        val verseIndex = androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0").toInt()
-        return VerseIndex(bookIndex, chapterIndex, verseIndex)
+    override suspend fun readCurrentVerseIndex(): VerseIndex {
+        return withContext(Dispatchers.IO) {
+            val bookIndex = androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0").toInt()
+            val chapterIndex = androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0").toInt()
+            val verseIndex = androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0").toInt()
+            VerseIndex(bookIndex, chapterIndex, verseIndex)
+        }
     }
 
-    @WorkerThread
-    override fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        val entries = ArrayList<Pair<String, String>>(3)
-        entries.add(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, verseIndex.bookIndex.toString()))
-        entries.add(Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, verseIndex.chapterIndex.toString()))
-        entries.add(Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, verseIndex.verseIndex.toString()))
-        androidDatabase.metadataDao.save(entries)
+    override suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
+        withContext(Dispatchers.IO) {
+            val entries = ArrayList<Pair<String, String>>(3)
+            entries.add(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, verseIndex.bookIndex.toString()))
+            entries.add(Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, verseIndex.chapterIndex.toString()))
+            entries.add(Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, verseIndex.verseIndex.toString()))
+            androidDatabase.metadataDao.save(entries)
+        }
     }
 
-    @WorkerThread
-    override fun readCurrentTranslation(): String {
-        return androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, "")
+    override suspend fun readCurrentTranslation(): String {
+        return withContext(Dispatchers.IO) {
+            androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, "")
+        }
     }
 
-    @WorkerThread
-    override fun saveCurrentTranslation(translationShortName: String) {
-        androidDatabase.metadataDao.save(MetadataDao.KEY_CURRENT_TRANSLATION, translationShortName)
+    override suspend fun saveCurrentTranslation(translationShortName: String) {
+        withContext(Dispatchers.IO) {
+            androidDatabase.metadataDao.save(MetadataDao.KEY_CURRENT_TRANSLATION, translationShortName)
+        }
     }
 
-    @WorkerThread
-    override fun readBookNames(translationShortName: String): List<String> {
-        return androidDatabase.bookNamesDao.read(translationShortName)
+    override suspend fun readBookNames(translationShortName: String): List<String> {
+        return withContext(Dispatchers.IO) {
+            androidDatabase.bookNamesDao.read(translationShortName)
+        }
     }
 
-    @WorkerThread
-    override fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
-        return androidDatabase.translationDao.read(translationShortName, bookIndex, chapterIndex)
+    override suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
+        return withContext(Dispatchers.IO) {
+            androidDatabase.translationDao.read(translationShortName, bookIndex, chapterIndex)
+        }
     }
 
-    @WorkerThread
-    override fun search(translationShortName: String, query: String): List<Verse> {
-        return androidDatabase.translationDao.search(translationShortName, query)
+    override suspend fun search(translationShortName: String, query: String): List<Verse> {
+        return withContext(Dispatchers.IO) {
+            androidDatabase.translationDao.search(translationShortName, query)
+        }
     }
 }

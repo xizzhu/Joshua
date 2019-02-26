@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.search
 
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.BroadcastChannel
@@ -38,7 +37,6 @@ class SearchViewController(private val bibleReadingManager: BibleReadingManager)
 
     fun observeVerseSelection(): ReceiveChannel<VerseIndex> = versesSelected.openSubscription()
 
-    @WorkerThread
     suspend fun selectVerse(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
         versesSelected.send(verseIndex)

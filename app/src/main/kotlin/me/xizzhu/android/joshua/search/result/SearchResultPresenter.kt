@@ -36,7 +36,7 @@ class SearchResultPresenter(private val searchViewController: SearchViewControll
     }
 
     fun selectVerse(verseIndex: VerseIndex) {
-        launch(Dispatchers.IO) {
+        launch(Dispatchers.Main) {
             searchViewController.selectVerse(verseIndex)
         }
     }

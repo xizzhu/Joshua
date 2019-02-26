@@ -16,29 +16,21 @@
 
 package me.xizzhu.android.joshua.core.repository.local
 
-import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 
 interface LocalReadingStorage {
-    @WorkerThread
-    fun readCurrentVerseIndex(): VerseIndex
+    suspend fun readCurrentVerseIndex(): VerseIndex
 
-    @WorkerThread
-    fun saveCurrentVerseIndex(verseIndex: VerseIndex)
+    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex)
 
-    @WorkerThread
-    fun readCurrentTranslation(): String
+    suspend fun readCurrentTranslation(): String
 
-    @WorkerThread
-    fun saveCurrentTranslation(translationShortName: String)
+    suspend fun saveCurrentTranslation(translationShortName: String)
 
-    @WorkerThread
-    fun readBookNames(translationShortName: String): List<String>
+    suspend fun readBookNames(translationShortName: String): List<String>
 
-    @WorkerThread
-    fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse>
+    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse>
 
-    @WorkerThread
-    fun search(translationShortName: String, query: String): List<Verse>
+    suspend fun search(translationShortName: String, query: String): List<Verse>
 }
