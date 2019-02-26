@@ -48,8 +48,8 @@ class SearchViewController(private val bibleReadingManager: BibleReadingManager)
         val currentTranslation = bibleReadingManager.observeCurrentTranslation().firstOrNull()
                 ?: throw IllegalStateException("No translation selected")
         searchResult.send(withContext(Dispatchers.Default) {
-            val bookNamesAsync = async(Dispatchers.IO) { bibleReadingManager.readBookNames(currentTranslation) }
-            val versesAsync = async(Dispatchers.IO) { bibleReadingManager.search(currentTranslation, query) }
+            val bookNamesAsync = async { bibleReadingManager.readBookNames(currentTranslation) }
+            val versesAsync = async { bibleReadingManager.search(currentTranslation, query) }
             val bookNames = bookNamesAsync.await()
             val verses = versesAsync.await()
             val searchedVerses = ArrayList<SearchResult.Verse>()
