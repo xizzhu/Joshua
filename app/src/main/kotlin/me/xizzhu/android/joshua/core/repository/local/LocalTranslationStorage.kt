@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.toolbar
+package me.xizzhu.android.joshua.core.repository.local
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.search.SearchViewController
-import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.core.TranslationInfo
 
-class ToolbarPresenter(private val searchViewController: SearchViewController) : MVPPresenter<ToolbarView>() {
-    fun search(query: String): Boolean {
-        if (query.isEmpty()) {
-            return false
-        }
-        launch(Dispatchers.Main) {
-            searchViewController.search(query)
-        }
-        return true
-    }
+interface LocalTranslationStorage {
+    suspend fun readTranslations(): List<TranslationInfo>
+
+    suspend fun replaceTranslations(translations: List<TranslationInfo>)
+
+    suspend fun saveTranslation(translationInfo: TranslationInfo,
+                                bookNames: List<String>,
+                                verses: Map<Pair<Int, Int>, List<String>>)
 }

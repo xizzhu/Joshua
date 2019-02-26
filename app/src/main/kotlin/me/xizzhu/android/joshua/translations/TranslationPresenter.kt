@@ -19,9 +19,7 @@ package me.xizzhu.android.joshua.translations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.first
-import kotlinx.coroutines.channels.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
@@ -29,7 +27,7 @@ import java.lang.Exception
 import java.util.*
 import kotlin.Comparator
 
-class TranslationPresenter(private val translationManager: TranslationManager) : MVPPresenter<TranslationView>() {
+class TranslationPresenter(private val translationViewController: TranslationViewController) : MVPPresenter<TranslationView>() {
     private val translationComparator = object : Comparator<TranslationInfo> {
         override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
             val userLocale = Locale.getDefault()
@@ -54,23 +52,23 @@ class TranslationPresenter(private val translationManager: TranslationManager) :
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationManager.observeCurrentTranslation()
+            receiveChannels.add(translationViewController.observeCurrentTranslation()
                     .onEach { view?.onCurrentTranslationUpdated(it) })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationManager.observeAvailableTranslations()
+            receiveChannels.add(translationViewController.observeAvailableTranslations()
                     .onEach {
                         view?.onAvailableTranslationsUpdated(it.sortedWith(translationComparator))
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationManager.observeDownloadedTranslations()
+            receiveChannels.add(translationViewController.observeDownloadedTranslations()
                     .onEach {
                         view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
                     })
         }
-        launch(Dispatchers.IO) {
-            translationManager.reload(false)
+        launch(Dispatchers.Main) {
+            translationViewController.reload(false)
         }
     }
 
@@ -81,16 +79,14 @@ class TranslationPresenter(private val translationManager: TranslationManager) :
             try {
                 val downloadProgressChannel = Channel<Int>()
                 launch(Dispatchers.IO) {
-                    translationManager.downloadTranslation(downloadProgressChannel, translationInfo)
+                    translationViewController.downloadTranslation(downloadProgressChannel, translationInfo)
                 }
                 downloadProgressChannel.onEach { progress ->
                     view?.onTranslationDownloadProgressed(progress)
                 }
 
-                withContext(Dispatchers.IO) {
-                    if (translationManager.observeCurrentTranslation().first().isEmpty()) {
-                        translationManager.saveCurrentTranslation(translationInfo.shortName, false)
-                    }
+                if (translationViewController.observeCurrentTranslation().first().isEmpty()) {
+                    translationViewController.saveCurrentTranslation(translationInfo.shortName, false)
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
@@ -101,9 +97,7 @@ class TranslationPresenter(private val translationManager: TranslationManager) :
 
     fun updateCurrentTranslation(currentTranslation: TranslationInfo) {
         launch(Dispatchers.Main) {
-            withContext(Dispatchers.IO) {
-                translationManager.saveCurrentTranslation(currentTranslation.shortName, true)
-            }
+            translationViewController.saveCurrentTranslation(currentTranslation.shortName, true)
         }
     }
 }

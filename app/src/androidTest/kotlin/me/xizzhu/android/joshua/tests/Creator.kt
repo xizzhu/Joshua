@@ -18,13 +18,26 @@ package me.xizzhu.android.joshua.tests
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import me.xizzhu.android.joshua.repository.internal.BackendService
-import me.xizzhu.android.joshua.repository.internal.LocalStorage
+import com.squareup.moshi.Moshi
+import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
+import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidTranslationStorage
+import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
+import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
+import okhttp3.OkHttpClient
 
-fun createLocalStorage(): LocalStorage = LocalStorage(ApplicationProvider.getApplicationContext<Context>())
+private fun createAndroidDatabase(): AndroidDatabase =
+        AndroidDatabase(ApplicationProvider.getApplicationContext<Context>())
+
+fun createLocalReadingStorage(): LocalReadingStorage = AndroidReadingStorage(createAndroidDatabase())
+
+fun createLocalTranslationStorage(): LocalTranslationStorage = AndroidTranslationStorage(createAndroidDatabase())
 
 fun clearLocalStorage() {
-    ApplicationProvider.getApplicationContext<Context>().deleteDatabase(LocalStorage.DATABASE_NAME)
+    ApplicationProvider.getApplicationContext<Context>().deleteDatabase(AndroidDatabase.DATABASE_NAME)
 }
 
-fun createBackendService(): BackendService = BackendService()
+fun createRemoteTranslationService(): RemoteTranslationService =
+        RetrofitTranslationService(Moshi.Builder().build(), OkHttpClient.Builder().build())

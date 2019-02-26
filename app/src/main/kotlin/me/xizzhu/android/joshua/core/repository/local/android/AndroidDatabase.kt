@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.repository.internal
+package me.xizzhu.android.joshua.core.repository.local.android
 
 import android.content.ContentValues
 import android.content.Context
@@ -27,8 +27,7 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import java.lang.StringBuilder
 
-class LocalStorage constructor(context: Context) :
-        SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         const val DATABASE_NAME = "DATABASE_JOSHUA"
         const val DATABASE_VERSION = 1
@@ -142,6 +141,22 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun read(keys: List<Pair<String, String>>): List<String> {
+        val results = ArrayList<String>(keys.size)
+        db.beginTransaction()
+        try {
+            for (key in keys) {
+                results.add(read(key.first, key.second))
+            }
+
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+        return results
+    }
+
+    @WorkerThread
     fun save(key: String, value: String) {
         val values = ContentValues(2)
         values.put(COLUMN_KEY, key)
@@ -244,14 +259,16 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun save(translationShortName: String, bookIndex: Int, chapterIndex: Int, verses: List<String>) {
+    fun save(translationShortName: String, verses: Map<Pair<Int, Int>, List<String>>) {
         val values = ContentValues(4)
-        values.put(COLUMN_BOOK_INDEX, bookIndex)
-        values.put(COLUMN_CHAPTER_INDEX, chapterIndex)
-        for ((verseIndex, verse) in verses.withIndex()) {
-            values.put(COLUMN_VERSE_INDEX, verseIndex)
-            values.put(COLUMN_TEXT, verse)
-            db.insertWithOnConflict(translationShortName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+        for (entry in verses) {
+            values.put(COLUMN_BOOK_INDEX, entry.key.first)
+            values.put(COLUMN_CHAPTER_INDEX, entry.key.second)
+            for ((verseIndex, verse) in entry.value.withIndex()) {
+                values.put(COLUMN_VERSE_INDEX, verseIndex)
+                values.put(COLUMN_TEXT, verse)
+                db.insert(translationShortName, null, values)
+            }
         }
     }
 }

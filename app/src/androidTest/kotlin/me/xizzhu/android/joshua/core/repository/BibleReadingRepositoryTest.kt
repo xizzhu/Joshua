@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.repository
+package me.xizzhu.android.joshua.core.repository
 
 import android.database.sqlite.SQLiteException
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -34,13 +34,13 @@ class BibleReadingRepositoryTest : BaseTest() {
     @Before
     override fun setup() {
         super.setup()
-        bibleReadingRepository = BibleReadingRepository(createLocalStorage())
+        bibleReadingRepository = BibleReadingRepository(createLocalReadingStorage())
     }
 
     @Test
     fun testDefaultCurrentVerseIndex() {
         val expected = VerseIndex(0, 0, 0)
-        val actual = runBlocking { bibleReadingRepository.observeCurrentVerseIndex().first() }
+        val actual = runBlocking { bibleReadingRepository.readCurrentVerseIndex() }
         Assert.assertEquals(expected, actual)
     }
 
@@ -49,7 +49,7 @@ class BibleReadingRepositoryTest : BaseTest() {
         val expected = VerseIndex(42, 2, 15)
         val actual = runBlocking {
             bibleReadingRepository.saveCurrentVerseIndex(VerseIndex(42, 2, 15))
-            bibleReadingRepository.observeCurrentVerseIndex().first()
+            bibleReadingRepository.readCurrentVerseIndex()
         }
         Assert.assertEquals(expected, actual)
     }
@@ -57,7 +57,7 @@ class BibleReadingRepositoryTest : BaseTest() {
     @Test
     fun testDefaultCurrentTranslation() {
         val expected = ""
-        val actual = runBlocking { bibleReadingRepository.observeCurrentTranslation().first() }
+        val actual = runBlocking { bibleReadingRepository.readCurrentTranslation() }
         Assert.assertEquals(expected, actual)
     }
 
@@ -66,7 +66,7 @@ class BibleReadingRepositoryTest : BaseTest() {
         val expected = "中文和合本"
         val actual = runBlocking {
             bibleReadingRepository.saveCurrentTranslation("中文和合本")
-            bibleReadingRepository.observeCurrentTranslation().first()
+            bibleReadingRepository.readCurrentTranslation()
         }
         Assert.assertEquals(expected, actual)
     }

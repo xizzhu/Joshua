@@ -18,12 +18,12 @@ package me.xizzhu.android.joshua.translations
 
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.*
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.TranslationManager
 
-class TranslationManager(private val bibleReadingRepository: BibleReadingRepository,
-                         private val translationRepository: TranslationRepository) {
+class TranslationViewController(private val bibleReadingManager: BibleReadingManager,
+                                private val translationManager: TranslationManager) {
     private val translationsLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
     private val translationsSelected: BroadcastChannel<Unit> = ConflatedBroadcastChannel()
 
@@ -34,16 +34,15 @@ class TranslationManager(private val bibleReadingRepository: BibleReadingReposit
             translationsSelected.openSubscription()
 
     fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            translationRepository.observeAvailableTranslations()
+            translationManager.observeAvailableTranslations()
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            translationRepository.observeDownloadedTranslations()
+            translationManager.observeDownloadedTranslations()
 
-    fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingRepository.observeCurrentTranslation()
+    fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
 
-    @WorkerThread
     suspend fun saveCurrentTranslation(translationShortName: String, fromUser: Boolean) {
-        bibleReadingRepository.saveCurrentTranslation(translationShortName)
+        bibleReadingManager.saveCurrentTranslation(translationShortName)
 
         if (fromUser) {
             translationsSelected.send(Unit)
@@ -53,12 +52,12 @@ class TranslationManager(private val bibleReadingRepository: BibleReadingReposit
     @WorkerThread
     suspend fun reload(forceRefresh: Boolean) {
         translationsLoadingState.send(true)
-        translationRepository.reload(forceRefresh)
+        translationManager.reload(forceRefresh)
         translationsLoadingState.send(false)
     }
 
     @WorkerThread
     suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
-        translationRepository.downloadTranslation(progressChannel, translationInfo)
+        translationManager.downloadTranslation(progressChannel, translationInfo)
     }
 }

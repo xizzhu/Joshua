@@ -19,32 +19,31 @@ package me.xizzhu.android.joshua.reading.toolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.reading.ReadingManager
+import me.xizzhu.android.joshua.reading.ReadingViewController
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 
-class ToolbarPresenter(private val readingManager: ReadingManager) : MVPPresenter<ToolbarView>() {
+class ToolbarPresenter(private val readingViewController: ReadingViewController) : MVPPresenter<ToolbarView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeCurrentTranslation()
+            receiveChannels.add(readingViewController.observeCurrentTranslation()
                     .filter { it.isNotEmpty() }
                     .onEach {
                         view?.onCurrentTranslationUpdated(it)
-                        view?.onBookNamesUpdated(withContext(Dispatchers.IO) { readingManager.readBookNames(it) })
+                        view?.onBookNamesUpdated(readingViewController.readBookNames(it))
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeCurrentVerseIndex()
+            receiveChannels.add(readingViewController.observeCurrentVerseIndex()
                     .filter { it.isValid() }
                     .onEach {
                         view?.onCurrentVerseIndexUpdated(it)
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingManager.observeDownloadedTranslations()
+            receiveChannels.add(readingViewController.observeDownloadedTranslations()
                     .onEach {
                         if (it.isNotEmpty()) {
                             view?.onDownloadedTranslationsLoaded(it.sortedBy { t -> t.language })
@@ -54,8 +53,8 @@ class ToolbarPresenter(private val readingManager: ReadingManager) : MVPPresente
     }
 
     fun updateCurrentTranslation(translationShortName: String) {
-        launch(Dispatchers.IO) {
-            readingManager.saveCurrentTranslation(translationShortName)
+        launch(Dispatchers.Main) {
+            readingViewController.saveCurrentTranslation(translationShortName)
         }
     }
 }

@@ -18,19 +18,19 @@ package me.xizzhu.android.joshua.translations
 
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.repository.TranslationRepository
-import me.xizzhu.android.joshua.utils.ActivityScope
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.ActivityScope
 
 @Module
 class TranslationManagementModule {
     @Provides
     @ActivityScope
-    fun provideTranslationManager(bibleReadingRepository: BibleReadingRepository,
-                                  translationRepository: TranslationRepository): TranslationManager =
-            TranslationManager(bibleReadingRepository, translationRepository)
+    fun provideTranslationManager(bibleReadingManager: BibleReadingManager,
+                                  translationManager: TranslationManager): TranslationViewController =
+            TranslationViewController(bibleReadingManager, translationManager)
 
     @Provides
-    fun provideTranslationPresenter(translationManager: TranslationManager): TranslationPresenter =
-            TranslationPresenter(translationManager)
+    fun provideTranslationPresenter(translationViewController: TranslationViewController): TranslationPresenter =
+            TranslationPresenter(translationViewController)
 }

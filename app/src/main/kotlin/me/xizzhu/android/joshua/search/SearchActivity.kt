@@ -42,7 +42,7 @@ class SearchActivity : BaseActivity() {
     }
 
     @Inject
-    lateinit var searchManager: SearchManager
+    lateinit var searchViewController: SearchViewController
 
     @Inject
     lateinit var toolbarPresenter: ToolbarPresenter
@@ -75,7 +75,7 @@ class SearchActivity : BaseActivity() {
         searchResultPresenter.attachView(searchResultList)
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(searchManager.observeSearchState()
+            receiveChannels.add(searchViewController.observeSearchState()
                     .onEach { searching ->
                         if (searching) {
                             loadingSpinner.visibility = View.VISIBLE
@@ -87,7 +87,7 @@ class SearchActivity : BaseActivity() {
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(searchManager.observeVerseSelection()
+            receiveChannels.add(searchViewController.observeVerseSelection()
                     .filter { it.isValid() }
                     .onEach {
                         startActivity(ReadingActivity.newStartIntent(this@SearchActivity))

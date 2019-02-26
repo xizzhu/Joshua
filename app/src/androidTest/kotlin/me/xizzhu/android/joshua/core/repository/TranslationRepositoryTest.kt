@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.repository
+package me.xizzhu.android.joshua.core.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -33,7 +33,7 @@ class TranslationRepositoryTest : BaseTest() {
     @Before
     override fun setup() {
         super.setup()
-        translationRepository = TranslationRepository(createLocalStorage(), createBackendService())
+        translationRepository = TranslationRepository(createLocalTranslationStorage(), createRemoteTranslationService())
     }
 
     @Test
