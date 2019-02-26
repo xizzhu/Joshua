@@ -25,12 +25,15 @@ import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.core.repository.BackendService
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.LocalStorage
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.core.repository.android.LocalStorageImpl
-import me.xizzhu.android.joshua.core.repository.retrofit.BackendServiceImpl
+import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidTranslationStorage
+import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
+import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingModule
 import me.xizzhu.android.joshua.search.SearchActivity
@@ -67,6 +70,10 @@ class AppModule(private val app: App) {
 class RepositoryModule {
     @Provides
     @Singleton
+    fun provideAndroidDatabase(app: App): AndroidDatabase = AndroidDatabase(app)
+
+    @Provides
+    @Singleton
     fun provideLocalStorage(app: App): LocalStorage = LocalStorageImpl(app)
 
     @Provides
@@ -77,15 +84,20 @@ class RepositoryModule {
     @Singleton
     fun provideOkHttpClient(): OkHttpClient =
             OkHttpClient.Builder()
-                    .connectTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-                    .readTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-                    .writeTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                    .connectTimeout(RetrofitTranslationService.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                    .readTimeout(RetrofitTranslationService.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                    .writeTimeout(RetrofitTranslationService.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
                     .build()
 
     @Provides
     @Singleton
-    fun provideBackendService(moshi: Moshi, okHttpClient: OkHttpClient): BackendService =
-            BackendServiceImpl(moshi, okHttpClient)
+    fun provideLocalTranslationStorage(androidDatabase: AndroidDatabase): LocalTranslationStorage =
+            AndroidTranslationStorage(androidDatabase)
+
+    @Provides
+    @Singleton
+    fun provideRemoteTranslationService(moshi: Moshi, okHttpClient: OkHttpClient): RemoteTranslationService =
+            RetrofitTranslationService(moshi, okHttpClient)
 
     @Provides
     @Singleton
@@ -94,9 +106,9 @@ class RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideTranslationRepository(localStorage: LocalStorage,
-                                     backendService: BackendService): TranslationRepository =
-            TranslationRepository(localStorage, backendService)
+    fun provideTranslationRepository(localAndroidStorage: LocalTranslationStorage,
+                                     remoteTranslationService: RemoteTranslationService): TranslationRepository =
+            TranslationRepository(localAndroidStorage, remoteTranslationService)
 }
 
 @Module

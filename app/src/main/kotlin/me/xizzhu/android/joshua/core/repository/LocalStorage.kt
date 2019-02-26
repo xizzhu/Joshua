@@ -50,5 +50,5 @@ interface LocalStorage {
     fun search(translationShortName: String, query: String): List<Verse>
 
     @WorkerThread
-    fun saveTranslation(translation: Translation)
+    fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>, verses: Map<Pair<Int, Int>, List<String>>)
 }

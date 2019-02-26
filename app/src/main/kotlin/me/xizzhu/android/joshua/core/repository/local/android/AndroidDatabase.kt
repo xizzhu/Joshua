@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.repository.android
+package me.xizzhu.android.joshua.core.repository.local.android
 
 import android.content.ContentValues
 import android.content.Context
@@ -25,92 +25,18 @@ import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.repository.LocalStorage
 import java.lang.StringBuilder
 
-class LocalStorageImpl(context: Context) : LocalStorage,
-        SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         const val DATABASE_NAME = "DATABASE_JOSHUA"
         const val DATABASE_VERSION = 1
     }
 
-    private val bookNamesDao = BookNamesDao(this)
-    private val metadataDao = MetadataDao(this)
-    private val translationDao = TranslationDao(this)
-    private val translationInfoDao = TranslationInfoDao(this)
-
-    @WorkerThread
-    override fun readCurrentVerseIndex(): VerseIndex {
-        val bookIndex = metadataDao.read(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0").toInt()
-        val chapterIndex = metadataDao.read(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0").toInt()
-        val verseIndex = metadataDao.read(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0").toInt()
-        return VerseIndex(bookIndex, chapterIndex, verseIndex)
-    }
-
-    @WorkerThread
-    override fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        val entries = ArrayList<Pair<String, String>>(3)
-        entries.add(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, verseIndex.bookIndex.toString()))
-        entries.add(Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, verseIndex.chapterIndex.toString()))
-        entries.add(Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, verseIndex.verseIndex.toString()))
-        metadataDao.save(entries)
-    }
-
-    @WorkerThread
-    override fun readCurrentTranslation(): String {
-        return metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, "")
-    }
-
-    @WorkerThread
-    override fun saveCurrentTranslation(translationShortName: String) {
-        metadataDao.save(MetadataDao.KEY_CURRENT_TRANSLATION, translationShortName)
-    }
-
-    @WorkerThread
-    override fun readTranslations(): List<TranslationInfo> {
-        return translationInfoDao.read()
-    }
-
-    @WorkerThread
-    override fun replaceTranslations(translations: List<TranslationInfo>) {
-        translationInfoDao.replace(translations)
-    }
-
-    @WorkerThread
-    override fun readBookNames(translationShortName: String): List<String> {
-        return bookNamesDao.read(translationShortName)
-    }
-
-    @WorkerThread
-    override fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
-        return translationDao.read(translationShortName, bookIndex, chapterIndex)
-    }
-
-    @WorkerThread
-    override fun search(translationShortName: String, query: String): List<Verse> {
-        return translationDao.search(translationShortName, query)
-    }
-
-    @WorkerThread
-    override fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>, verses: Map<Pair<Int, Int>, List<String>>) {
-        var db: SQLiteDatabase? = null
-        try {
-            db = writableDatabase
-            db.beginTransaction()
-
-            bookNamesDao.save(translationInfo.shortName, bookNames)
-            translationInfoDao.save(translationInfo)
-            translationDao.createTable(translationInfo.shortName)
-            for (entry in verses) {
-                translationDao.save(translationInfo.shortName, entry.key.first, entry.key.second, entry.value)
-            }
-
-            db.setTransactionSuccessful()
-        } finally {
-            db?.endTransaction()
-        }
-    }
+    val bookNamesDao = BookNamesDao(this)
+    val metadataDao = MetadataDao(this)
+    val translationDao = TranslationDao(this)
+    val translationInfoDao = TranslationInfoDao(this)
 
     override fun onCreate(db: SQLiteDatabase) {
         db.beginTransaction()
@@ -130,7 +56,7 @@ class LocalStorageImpl(context: Context) : LocalStorage,
     }
 }
 
-private class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
+class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_BOOK_NAMES = "bookNames"
         private const val INDEX_BOOK_NAMES = "bookNamesIndex"
@@ -178,7 +104,7 @@ private class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 }
 
-private class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
+class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_METADATA = "metadata"
         private const val COLUMN_KEY = "key"
@@ -240,7 +166,7 @@ private class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 }
 
-private class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
+class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val COLUMN_BOOK_INDEX = "bookIndex"
         private const val COLUMN_CHAPTER_INDEX = "chapterIndex"
@@ -329,7 +255,7 @@ private class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 }
 
-private class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
+class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_TRANSLATION_INFO = "translationInfo"
         private const val COLUMN_SHORT_NAME = "shortName"

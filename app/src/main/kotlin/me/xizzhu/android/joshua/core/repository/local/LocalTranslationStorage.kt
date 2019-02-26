@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.repository
+package me.xizzhu.android.joshua.core.repository.local
 
+import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.TranslationInfo
 
-data class Translation(val translationInfo: TranslationInfo, val bookNames: List<String>,
-                       val verses: Map<Pair<Int, Int>, List<String>>)
+interface LocalTranslationStorage {
+    @WorkerThread
+    fun readTranslations(): List<TranslationInfo>
+
+    @WorkerThread
+    fun replaceTranslations(translations: List<TranslationInfo>)
+
+    @WorkerThread
+    fun saveTranslation(translationInfo: TranslationInfo,
+                        bookNames: List<String>,
+                        verses: Map<Pair<Int, Int>, List<String>>)
+}

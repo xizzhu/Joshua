@@ -19,8 +19,12 @@ package me.xizzhu.android.joshua.core.repository
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
+import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
+import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 
-class TranslationRepository(private val localStorage: LocalStorage, private val backendService: BackendService) {
+class TranslationRepository(private val localTranslationStorage: LocalTranslationStorage,
+                            private val remoteTranslationService: RemoteTranslationService) {
     @WorkerThread
     fun reload(forceRefresh: Boolean): List<TranslationInfo> {
         return if (forceRefresh) {
@@ -37,7 +41,7 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
 
     @WorkerThread
     private fun readTranslationsFromBackend(): List<TranslationInfo> {
-        val fetchedTranslations = backendService.fetchTranslations()
+        val fetchedTranslations = remoteTranslationService.fetchTranslations()
         val localTranslations = readTranslationsFromLocal()
 
         val translations = ArrayList<TranslationInfo>(fetchedTranslations.size)
@@ -49,22 +53,24 @@ class TranslationRepository(private val localStorage: LocalStorage, private val 
                     break
                 }
             }
-            translations.add(TranslationInfo(fetched.shortName, fetched.name, fetched.language, fetched.size, downloaded))
+            translations.add(fetched.toTranslationInfo(downloaded))
         }
 
-        localStorage.replaceTranslations(translations)
+        localTranslationStorage.replaceTranslations(translations)
 
         return translations
     }
 
     @WorkerThread
-    fun readTranslationsFromLocal(): List<TranslationInfo> = localStorage.readTranslations()
+    fun readTranslationsFromLocal(): List<TranslationInfo> = localTranslationStorage.readTranslations()
 
     @WorkerThread
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
-        val translation = backendService.fetchTranslation(channel, translationInfo)
+        val translation = remoteTranslationService.fetchTranslation(
+                channel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))
         channel.send(100)
 
-        localStorage.saveTranslation(translation)
+        localTranslationStorage.saveTranslation(translation.translationInfo.toTranslationInfo(true),
+                translation.bookNames, translation.verses)
     }
 }

@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.repository.retrofit
+package me.xizzhu.android.joshua.core.repository.remote.retrofit
 
-import androidx.annotation.WorkerThread
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.channels.SendChannel
-import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.core.repository.BackendService
-import me.xizzhu.android.joshua.core.repository.Translation
+import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslation
+import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
+import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okio.buffer
 import okio.source
-import retrofit2.*
+import retrofit2.Call
+import retrofit2.HttpException
+import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -38,7 +39,7 @@ import java.lang.Exception
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-class BackendServiceImpl(moshi: Moshi, okHttpClient: OkHttpClient) : BackendService {
+class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : RemoteTranslationService {
     companion object {
         const val OKHTTP_TIMEOUT_IN_SECONDS = 30L
         private const val BASE_URL = "https://xizzhu.me/bible/download/"
@@ -51,27 +52,25 @@ class BackendServiceImpl(moshi: Moshi, okHttpClient: OkHttpClient) : BackendServ
                 .addConverterFactory(MoshiConverterFactory.create(moshi))
                 .build()
     }
-    private val translationService: TranslationService by lazy { retrofit.create(TranslationService::class.java) }
-    private val booksAdapter: JsonAdapter<BackendBooks> by lazy { moshi.adapter(BackendBooks::class.java) }
-    private val chapterAdapter: JsonAdapter<BackendChapter> by lazy { moshi.adapter(BackendChapter::class.java) }
 
-    @WorkerThread
-    override fun fetchTranslations(): List<TranslationInfo> {
+    private val translationService: TranslationService by lazy { retrofit.create(TranslationService::class.java) }
+    private val booksAdapter: JsonAdapter<Books> by lazy { moshi.adapter(Books::class.java) }
+    private val chapterAdapter: JsonAdapter<Chapter> by lazy { moshi.adapter(Chapter::class.java) }
+
+    override fun fetchTranslations(): List<RemoteTranslationInfo> {
         val response = translationService.fetchTranslationList().execute()
         if (!response.isSuccessful) {
             throw HttpException(response)
         }
         val backendTranslations = response.body()!!.translations
-        val translations = ArrayList<TranslationInfo>(backendTranslations.size)
+        val translations = ArrayList<RemoteTranslationInfo>(backendTranslations.size)
         for (backend in backendTranslations) {
-            translations.add(TranslationInfo(
-                    backend.shortName, backend.name, backend.language, backend.size, false))
+            translations.add(RemoteTranslationInfo(backend.shortName, backend.name, backend.language, backend.size))
         }
         return translations
     }
 
-    @WorkerThread
-    override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo): Translation {
+    override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation {
         var inputStream: ZipInputStream? = null
         val bookNames = ArrayList<String>()
         val verses = HashMap<Pair<Int, Int>, List<String>>()
@@ -117,31 +116,29 @@ class BackendServiceImpl(moshi: Moshi, okHttpClient: OkHttpClient) : BackendServ
             }
         }
 
-        val updatedTranslationInfo = TranslationInfo(translationInfo.shortName, translationInfo.name,
-                translationInfo.language, translationInfo.size, true)
-        return Translation(updatedTranslationInfo, bookNames, verses)
+        return RemoteTranslation(translationInfo, bookNames, verses)
     }
 }
 
-data class BackendTranslationInfo(@Json(name = "shortName") val shortName: String,
-                                  @Json(name = "name") val name: String,
-                                  @Json(name = "language") val language: String,
-                                  @Json(name = "size") val size: Long)
-
-data class BackendTranslationList(@Json(name = "translations") val translations: List<BackendTranslationInfo>)
-
-interface TranslationService {
+private interface TranslationService {
     @GET("list.json")
-    fun fetchTranslationList(): Call<BackendTranslationList>
+    fun fetchTranslationList(): Call<TranslationList>
 
     @GET("{translationShortName}.zip")
     @Streaming
     fun fetchTranslation(@Path("translationShortName") translationShortName: String): Call<ResponseBody>
 }
 
-data class BackendBooks(@Json(name = "shortName") val shortName: String,
-                        @Json(name = "name") val name: String,
-                        @Json(name = "language") val language: String,
-                        @Json(name = "books") val books: List<String>)
+private data class TranslationInfo(@Json(name = "shortName") val shortName: String,
+                                   @Json(name = "name") val name: String,
+                                   @Json(name = "language") val language: String,
+                                   @Json(name = "size") val size: Long)
 
-data class BackendChapter(@Json(name = "verses") val verses: List<String>)
+private data class TranslationList(@Json(name = "translations") val translations: List<TranslationInfo>)
+
+private data class Books(@Json(name = "shortName") val shortName: String,
+                         @Json(name = "name") val name: String,
+                         @Json(name = "language") val language: String,
+                         @Json(name = "books") val books: List<String>)
+
+private data class Chapter(@Json(name = "verses") val verses: List<String>)
