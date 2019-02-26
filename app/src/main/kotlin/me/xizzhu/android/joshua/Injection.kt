@@ -54,6 +54,19 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
+    fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository): BibleReadingManager =
+            BibleReadingManager(bibleReadingRepository)
+
+    @Provides
+    @Singleton
+    fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
+            TranslationManager(translationRepository)
+}
+
+@Module
+class RepositoryModule {
+    @Provides
+    @Singleton
     fun provideLocalStorage(app: App): LocalStorage = LocalStorageImpl(app)
 
     @Provides
@@ -84,16 +97,6 @@ class AppModule(private val app: App) {
     fun provideTranslationRepository(localStorage: LocalStorage,
                                      backendService: BackendService): TranslationRepository =
             TranslationRepository(localStorage, backendService)
-
-    @Provides
-    @Singleton
-    fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository): BibleReadingManager =
-            BibleReadingManager(bibleReadingRepository)
-
-    @Provides
-    @Singleton
-    fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
-            TranslationManager(translationRepository)
 }
 
 @Module
@@ -112,7 +115,8 @@ abstract class ActivityModule {
 }
 
 @Singleton
-@Component(modules = [(AppModule::class), (ActivityModule::class), (AndroidInjectionModule::class), (AndroidSupportInjectionModule::class)])
+@Component(modules = [(AppModule::class), (RepositoryModule::class), (ActivityModule::class),
+    (AndroidInjectionModule::class), (AndroidSupportInjectionModule::class)])
 interface AppComponent {
     fun inject(app: App)
 }
