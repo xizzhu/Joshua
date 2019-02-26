@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
@@ -68,7 +67,7 @@ class TranslationPresenter(private val translationViewController: TranslationVie
                         view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
                     })
         }
-        launch(Dispatchers.IO) {
+        launch(Dispatchers.Main) {
             translationViewController.reload(false)
         }
     }
@@ -86,10 +85,8 @@ class TranslationPresenter(private val translationViewController: TranslationVie
                     view?.onTranslationDownloadProgressed(progress)
                 }
 
-                withContext(Dispatchers.IO) {
-                    if (translationViewController.observeCurrentTranslation().first().isEmpty()) {
-                        translationViewController.saveCurrentTranslation(translationInfo.shortName, false)
-                    }
+                if (translationViewController.observeCurrentTranslation().first().isEmpty()) {
+                    translationViewController.saveCurrentTranslation(translationInfo.shortName, false)
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
@@ -100,9 +97,7 @@ class TranslationPresenter(private val translationViewController: TranslationVie
 
     fun updateCurrentTranslation(currentTranslation: TranslationInfo) {
         launch(Dispatchers.Main) {
-            withContext(Dispatchers.IO) {
-                translationViewController.saveCurrentTranslation(currentTranslation.shortName, true)
-            }
+            translationViewController.saveCurrentTranslation(currentTranslation.shortName, true)
         }
     }
 }

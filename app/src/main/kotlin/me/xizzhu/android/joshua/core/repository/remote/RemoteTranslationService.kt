@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core.repository.remote
 
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.TranslationInfo
 
@@ -39,9 +38,7 @@ data class RemoteTranslation(val translationInfo: RemoteTranslationInfo,
                              val verses: Map<Pair<Int, Int>, List<String>>)
 
 interface RemoteTranslationService {
-    @WorkerThread
-    fun fetchTranslations(): List<RemoteTranslationInfo>
+    suspend fun fetchTranslations(): List<RemoteTranslationInfo>
 
-    @WorkerThread
     suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation
 }

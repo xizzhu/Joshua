@@ -17,39 +17,43 @@
 package me.xizzhu.android.joshua.core.repository.local.android
 
 import android.database.sqlite.SQLiteDatabase
-import androidx.annotation.WorkerThread
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 
 class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : LocalTranslationStorage {
-    @WorkerThread
-    override fun readTranslations(): List<TranslationInfo> {
-        return androidDatabase.translationInfoDao.read()
+    override suspend fun readTranslations(): List<TranslationInfo> {
+        return withContext(Dispatchers.IO) {
+            androidDatabase.translationInfoDao.read()
+        }
     }
 
-    @WorkerThread
-    override fun replaceTranslations(translations: List<TranslationInfo>) {
-        androidDatabase.translationInfoDao.replace(translations)
+    override suspend fun replaceTranslations(translations: List<TranslationInfo>) {
+        withContext(Dispatchers.IO) {
+            androidDatabase.translationInfoDao.replace(translations)
+        }
     }
 
-    @WorkerThread
-    override fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>,
-                                 verses: Map<Pair<Int, Int>, List<String>>) {
-        var db: SQLiteDatabase? = null
-        try {
-            db = androidDatabase.writableDatabase
-            db.beginTransaction()
+    override suspend fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>,
+                                         verses: Map<Pair<Int, Int>, List<String>>) {
+        withContext(Dispatchers.IO) {
+            var db: SQLiteDatabase? = null
+            try {
+                db = androidDatabase.writableDatabase
+                db.beginTransaction()
 
-            androidDatabase.bookNamesDao.save(translationInfo.shortName, bookNames)
-            androidDatabase.translationInfoDao.save(translationInfo)
-            androidDatabase.translationDao.createTable(translationInfo.shortName)
-            for (entry in verses) {
-                androidDatabase.translationDao.save(translationInfo.shortName, entry.key.first, entry.key.second, entry.value)
+                androidDatabase.bookNamesDao.save(translationInfo.shortName, bookNames)
+                androidDatabase.translationInfoDao.save(translationInfo)
+                androidDatabase.translationDao.createTable(translationInfo.shortName)
+                for (entry in verses) {
+                    androidDatabase.translationDao.save(translationInfo.shortName, entry.key.first, entry.key.second, entry.value)
+                }
+
+                db.setTransactionSuccessful()
+            } finally {
+                db?.endTransaction()
             }
-
-            db.setTransactionSuccessful()
-        } finally {
-            db?.endTransaction()
         }
     }
 }

@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core
 
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -52,7 +51,6 @@ class TranslationManager(private val translationRepository: TranslationRepositor
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> = downloadedTranslations.openSubscription()
 
-    @WorkerThread
     suspend fun reload(forceRefresh: Boolean) {
         val available = ArrayList<TranslationInfo>()
         val downloaded = ArrayList<TranslationInfo>()
@@ -72,7 +70,6 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         }
     }
 
-    @WorkerThread
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
         translationRepository.downloadTranslation(channel, translationInfo)
 

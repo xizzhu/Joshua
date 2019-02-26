@@ -27,9 +27,7 @@ import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okio.buffer
 import okio.source
-import retrofit2.Call
-import retrofit2.HttpException
-import retrofit2.Retrofit
+import retrofit2.*
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -38,6 +36,9 @@ import java.io.IOException
 import java.lang.Exception
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : RemoteTranslationService {
     companion object {
@@ -57,12 +58,8 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
     private val booksAdapter: JsonAdapter<Books> by lazy { moshi.adapter(Books::class.java) }
     private val chapterAdapter: JsonAdapter<Chapter> by lazy { moshi.adapter(Chapter::class.java) }
 
-    override fun fetchTranslations(): List<RemoteTranslationInfo> {
-        val response = translationService.fetchTranslationList().execute()
-        if (!response.isSuccessful) {
-            throw HttpException(response)
-        }
-        val backendTranslations = response.body()!!.translations
+    override suspend fun fetchTranslations(): List<RemoteTranslationInfo> {
+        val backendTranslations = translationService.fetchTranslationList().await().translations
         val translations = ArrayList<RemoteTranslationInfo>(backendTranslations.size)
         for (backend in backendTranslations) {
             translations.add(RemoteTranslationInfo(backend.shortName, backend.name, backend.language, backend.size))
@@ -118,6 +115,22 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
 
         return RemoteTranslation(translationInfo, bookNames, verses)
     }
+}
+
+private suspend fun <T> Call<T>.await(): T = suspendCoroutine { cont ->
+    enqueue(object : Callback<T> {
+        override fun onResponse(call: Call<T>, response: Response<T>) {
+            if (response.isSuccessful) {
+                cont.resume(response.body()!!)
+            } else {
+                cont.resumeWithException(HttpException(response))
+            }
+        }
+
+        override fun onFailure(call: Call<T>, t: Throwable) {
+            cont.resumeWithException(t)
+        }
+    })
 }
 
 private interface TranslationService {

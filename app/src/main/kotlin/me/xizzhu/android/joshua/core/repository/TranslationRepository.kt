@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core.repository
 
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
@@ -25,8 +24,7 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 
 class TranslationRepository(private val localTranslationStorage: LocalTranslationStorage,
                             private val remoteTranslationService: RemoteTranslationService) {
-    @WorkerThread
-    fun reload(forceRefresh: Boolean): List<TranslationInfo> {
+    suspend fun reload(forceRefresh: Boolean): List<TranslationInfo> {
         return if (forceRefresh) {
             readTranslationsFromBackend()
         } else {
@@ -39,8 +37,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         }
     }
 
-    @WorkerThread
-    private fun readTranslationsFromBackend(): List<TranslationInfo> {
+    private suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
         val fetchedTranslations = remoteTranslationService.fetchTranslations()
         val localTranslations = readTranslationsFromLocal()
 
@@ -61,10 +58,8 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         return translations
     }
 
-    @WorkerThread
-    fun readTranslationsFromLocal(): List<TranslationInfo> = localTranslationStorage.readTranslations()
+    suspend fun readTranslationsFromLocal(): List<TranslationInfo> = localTranslationStorage.readTranslations()
 
-    @WorkerThread
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
         val translation = remoteTranslationService.fetchTranslation(
                 channel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))

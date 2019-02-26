@@ -16,18 +16,14 @@
 
 package me.xizzhu.android.joshua.core.repository.local
 
-import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.TranslationInfo
 
 interface LocalTranslationStorage {
-    @WorkerThread
-    fun readTranslations(): List<TranslationInfo>
+    suspend fun readTranslations(): List<TranslationInfo>
 
-    @WorkerThread
-    fun replaceTranslations(translations: List<TranslationInfo>)
+    suspend fun replaceTranslations(translations: List<TranslationInfo>)
 
-    @WorkerThread
-    fun saveTranslation(translationInfo: TranslationInfo,
-                        bookNames: List<String>,
-                        verses: Map<Pair<Int, Int>, List<String>>)
+    suspend fun saveTranslation(translationInfo: TranslationInfo,
+                                bookNames: List<String>,
+                                verses: Map<Pair<Int, Int>, List<String>>)
 }
