@@ -19,33 +19,34 @@ package me.xizzhu.android.joshua.core.repository
 import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 
-class BibleReadingRepository(private val localStorage: LocalStorage) {
+class BibleReadingRepository(private val localReadingStorage: LocalReadingStorage) {
     @WorkerThread
-    fun readCurrentTranslation(): String = localStorage.readCurrentTranslation()
+    fun readCurrentTranslation(): String = localReadingStorage.readCurrentTranslation()
 
     @WorkerThread
     fun saveCurrentTranslation(translationShortName: String) {
-        localStorage.saveCurrentTranslation(translationShortName)
+        localReadingStorage.saveCurrentTranslation(translationShortName)
     }
 
     @WorkerThread
-    fun readCurrentVerseIndex(): VerseIndex = localStorage.readCurrentVerseIndex()
+    fun readCurrentVerseIndex(): VerseIndex = localReadingStorage.readCurrentVerseIndex()
 
     @WorkerThread
     fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        localStorage.saveCurrentVerseIndex(verseIndex)
+        localReadingStorage.saveCurrentVerseIndex(verseIndex)
     }
 
     @WorkerThread
     fun readBookNames(translationShortName: String): List<String> =
-            localStorage.readBookNames(translationShortName)
+            localReadingStorage.readBookNames(translationShortName)
 
     @WorkerThread
     fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
-            localStorage.readVerses(translationShortName, bookIndex, chapterIndex)
+            localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex)
 
     @WorkerThread
     fun search(translationShortName: String, query: String): List<Verse> =
-            localStorage.search(translationShortName, query)
+            localReadingStorage.search(translationShortName, query)
 }

@@ -26,11 +26,11 @@ import dagger.android.support.AndroidSupportInjectionModule
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.core.repository.LocalStorage
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
-import me.xizzhu.android.joshua.core.repository.android.LocalStorageImpl
+import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.local.android.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.android.AndroidTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
@@ -74,7 +74,13 @@ class RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideLocalStorage(app: App): LocalStorage = LocalStorageImpl(app)
+    fun provideLocalReadingStorage(androidDatabase: AndroidDatabase): LocalReadingStorage =
+            AndroidReadingStorage(androidDatabase)
+
+    @Provides
+    @Singleton
+    fun provideLocalTranslationStorage(androidDatabase: AndroidDatabase): LocalTranslationStorage =
+            AndroidTranslationStorage(androidDatabase)
 
     @Provides
     @Singleton
@@ -91,18 +97,13 @@ class RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideLocalTranslationStorage(androidDatabase: AndroidDatabase): LocalTranslationStorage =
-            AndroidTranslationStorage(androidDatabase)
-
-    @Provides
-    @Singleton
     fun provideRemoteTranslationService(moshi: Moshi, okHttpClient: OkHttpClient): RemoteTranslationService =
             RetrofitTranslationService(moshi, okHttpClient)
 
     @Provides
     @Singleton
-    fun provideBibleReadingRepository(localStorage: LocalStorage): BibleReadingRepository =
-            BibleReadingRepository(localStorage)
+    fun provideBibleReadingRepository(localReadingStorage: LocalReadingStorage): BibleReadingRepository =
+            BibleReadingRepository(localReadingStorage)
 
     @Provides
     @Singleton

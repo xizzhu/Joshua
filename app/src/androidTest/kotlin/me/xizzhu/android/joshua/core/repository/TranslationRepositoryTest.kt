@@ -33,7 +33,7 @@ class TranslationRepositoryTest : BaseTest() {
     @Before
     override fun setup() {
         super.setup()
-        translationRepository = TranslationRepository(createLocalStorage(), createBackendService())
+        translationRepository = TranslationRepository(createLocalTranslationStorage(), createRemoteTranslationService())
     }
 
     @Test

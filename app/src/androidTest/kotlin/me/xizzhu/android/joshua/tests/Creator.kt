@@ -19,22 +19,25 @@ package me.xizzhu.android.joshua.tests
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.squareup.moshi.Moshi
-import me.xizzhu.android.joshua.core.repository.BackendService
-import me.xizzhu.android.joshua.core.repository.LocalStorage
-import me.xizzhu.android.joshua.core.repository.android.LocalStorageImpl
-import me.xizzhu.android.joshua.core.repository.retrofit.BackendServiceImpl
+import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
+import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidTranslationStorage
+import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
+import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
 import okhttp3.OkHttpClient
-import java.util.concurrent.TimeUnit
 
-fun createLocalStorage(): LocalStorage = LocalStorageImpl(ApplicationProvider.getApplicationContext<Context>())
+private fun createAndroidDatabase(): AndroidDatabase =
+        AndroidDatabase(ApplicationProvider.getApplicationContext<Context>())
+
+fun createLocalReadingStorage(): LocalReadingStorage = AndroidReadingStorage(createAndroidDatabase())
+
+fun createLocalTranslationStorage(): LocalTranslationStorage = AndroidTranslationStorage(createAndroidDatabase())
 
 fun clearLocalStorage() {
-    ApplicationProvider.getApplicationContext<Context>().deleteDatabase(LocalStorageImpl.DATABASE_NAME)
+    ApplicationProvider.getApplicationContext<Context>().deleteDatabase(AndroidDatabase.DATABASE_NAME)
 }
 
-fun createBackendService(): BackendService = BackendServiceImpl(Moshi.Builder().build(),
-        OkHttpClient.Builder()
-                .connectTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-                .readTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-                .writeTimeout(BackendServiceImpl.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-                .build())
+fun createRemoteTranslationService(): RemoteTranslationService =
+        RetrofitTranslationService(Moshi.Builder().build(), OkHttpClient.Builder().build())

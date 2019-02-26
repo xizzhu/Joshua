@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.repository
+package me.xizzhu.android.joshua.core.repository.local
 
 import androidx.annotation.WorkerThread
-import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 
-interface LocalStorage {
+interface LocalReadingStorage {
     @WorkerThread
     fun readCurrentVerseIndex(): VerseIndex
 
@@ -35,12 +34,6 @@ interface LocalStorage {
     fun saveCurrentTranslation(translationShortName: String)
 
     @WorkerThread
-    fun readTranslations(): List<TranslationInfo>
-
-    @WorkerThread
-    fun replaceTranslations(translations: List<TranslationInfo>)
-
-    @WorkerThread
     fun readBookNames(translationShortName: String): List<String>
 
     @WorkerThread
@@ -48,7 +41,4 @@ interface LocalStorage {
 
     @WorkerThread
     fun search(translationShortName: String, query: String): List<Verse>
-
-    @WorkerThread
-    fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>, verses: Map<Pair<Int, Int>, List<String>>)
 }
