@@ -46,9 +46,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                 androidDatabase.bookNamesDao.save(translationInfo.shortName, bookNames)
                 androidDatabase.translationInfoDao.save(translationInfo)
                 androidDatabase.translationDao.createTable(translationInfo.shortName)
-                for (entry in verses) {
-                    androidDatabase.translationDao.save(translationInfo.shortName, entry.key.first, entry.key.second, entry.value)
-                }
+                androidDatabase.translationDao.save(translationInfo.shortName, verses)
 
                 db.setTransactionSuccessful()
             } finally {

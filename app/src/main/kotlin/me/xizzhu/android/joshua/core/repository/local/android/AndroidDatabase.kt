@@ -141,6 +141,22 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun read(keys: List<Pair<String, String>>): List<String> {
+        val results = ArrayList<String>(keys.size)
+        db.beginTransaction()
+        try {
+            for (key in keys) {
+                results.add(read(key.first, key.second))
+            }
+
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+        return results
+    }
+
+    @WorkerThread
     fun save(key: String, value: String) {
         val values = ContentValues(2)
         values.put(COLUMN_KEY, key)
@@ -243,14 +259,16 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun save(translationShortName: String, bookIndex: Int, chapterIndex: Int, verses: List<String>) {
+    fun save(translationShortName: String, verses: Map<Pair<Int, Int>, List<String>>) {
         val values = ContentValues(4)
-        values.put(COLUMN_BOOK_INDEX, bookIndex)
-        values.put(COLUMN_CHAPTER_INDEX, chapterIndex)
-        for ((verseIndex, verse) in verses.withIndex()) {
-            values.put(COLUMN_VERSE_INDEX, verseIndex)
-            values.put(COLUMN_TEXT, verse)
-            db.insertWithOnConflict(translationShortName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+        for (entry in verses) {
+            values.put(COLUMN_BOOK_INDEX, entry.key.first)
+            values.put(COLUMN_CHAPTER_INDEX, entry.key.second)
+            for ((verseIndex, verse) in entry.value.withIndex()) {
+                values.put(COLUMN_VERSE_INDEX, verseIndex)
+                values.put(COLUMN_TEXT, verse)
+                db.insert(translationShortName, null, values)
+            }
         }
     }
 }

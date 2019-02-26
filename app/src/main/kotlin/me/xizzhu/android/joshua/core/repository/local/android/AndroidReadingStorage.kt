@@ -25,10 +25,11 @@ import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : LocalReadingStorage {
     override suspend fun readCurrentVerseIndex(): VerseIndex {
         return withContext(Dispatchers.IO) {
-            val bookIndex = androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0").toInt()
-            val chapterIndex = androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0").toInt()
-            val verseIndex = androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0").toInt()
-            VerseIndex(bookIndex, chapterIndex, verseIndex)
+            val keys = arrayListOf(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0"),
+                    Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0"),
+                    Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0"))
+            val values = androidDatabase.metadataDao.read(keys)
+            VerseIndex(values[0].toInt(), values[1].toInt(), values[2].toInt())
         }
     }
 
