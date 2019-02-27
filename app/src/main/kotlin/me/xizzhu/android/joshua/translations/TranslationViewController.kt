@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.translations
 
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.channels.*
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
@@ -49,14 +48,12 @@ class TranslationViewController(private val bibleReadingManager: BibleReadingMan
         }
     }
 
-    @WorkerThread
     suspend fun reload(forceRefresh: Boolean) {
         translationsLoadingState.send(true)
         translationManager.reload(forceRefresh)
         translationsLoadingState.send(false)
     }
 
-    @WorkerThread
     suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
         translationManager.downloadTranslation(progressChannel, translationInfo)
     }

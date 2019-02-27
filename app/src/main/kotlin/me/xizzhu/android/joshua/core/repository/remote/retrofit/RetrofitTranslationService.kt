@@ -72,12 +72,8 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
         val bookNames = ArrayList<String>()
         val verses = HashMap<Pair<Int, Int>, List<String>>()
         try {
-            val response = translationService.fetchTranslation(translationInfo.shortName).execute()
-            if (!response.isSuccessful) {
-                throw HttpException(response)
-            }
-
-            inputStream = ZipInputStream(response.body()!!.byteStream())
+            val response = translationService.fetchTranslation(translationInfo.shortName).await()
+            inputStream = ZipInputStream(response.byteStream())
             var zipEntry: ZipEntry?
             var downloaded = 0
             var progress = -1

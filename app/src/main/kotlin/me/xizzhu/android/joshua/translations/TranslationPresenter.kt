@@ -78,7 +78,7 @@ class TranslationPresenter(private val translationViewController: TranslationVie
         launch(Dispatchers.Main) {
             try {
                 val downloadProgressChannel = Channel<Int>()
-                launch(Dispatchers.IO) {
+                launch(Dispatchers.Main) {
                     translationViewController.downloadTranslation(downloadProgressChannel, translationInfo)
                 }
                 downloadProgressChannel.onEach { progress ->
