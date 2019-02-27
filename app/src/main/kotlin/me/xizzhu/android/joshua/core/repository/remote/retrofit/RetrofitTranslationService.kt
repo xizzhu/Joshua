@@ -20,6 +20,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.suspendCancellableCoroutine
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslation
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
@@ -38,7 +39,6 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : RemoteTranslationService {
     companion object {
@@ -117,11 +117,19 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
     }
 }
 
-private suspend fun <T> Call<T>.await(): T = suspendCoroutine { cont ->
+private suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine { cont ->
+    cont.invokeOnCancellation { cancel() }
+
     enqueue(object : Callback<T> {
         override fun onResponse(call: Call<T>, response: Response<T>) {
             if (response.isSuccessful) {
-                cont.resume(response.body()!!)
+                val body = response.body()
+                if (body != null) {
+                    cont.resume(body)
+                } else {
+                    cont.resumeWithException(
+                            KotlinNullPointerException("Missing response body from ${call.request()}"))
+                }
             } else {
                 cont.resumeWithException(HttpException(response))
             }
