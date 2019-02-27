@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.search
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -25,7 +23,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbar
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultPresenter
@@ -37,10 +34,6 @@ import me.xizzhu.android.joshua.utils.onEach
 import javax.inject.Inject
 
 class SearchActivity : BaseActivity() {
-    companion object {
-        fun newStartIntent(context: Context) = Intent(context, SearchActivity::class.java)
-    }
-
     @Inject
     lateinit var searchViewController: SearchViewController
 
@@ -90,7 +83,7 @@ class SearchActivity : BaseActivity() {
             receiveChannels.add(searchViewController.observeVerseSelection()
                     .filter { it.isValid() }
                     .onEach {
-                        startActivity(ReadingActivity.newStartIntent(this@SearchActivity))
+                        searchViewController.openReading()
                     })
         }
     }

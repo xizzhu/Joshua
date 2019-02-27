@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.translations
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -31,10 +29,6 @@ import me.xizzhu.android.joshua.ui.fadeOut
 import javax.inject.Inject
 
 class TranslationManagementActivity : BaseActivity() {
-    companion object {
-        fun newStartIntent(context: Context) = Intent(context, TranslationManagementActivity::class.java)
-    }
-
     @Inject
     lateinit var translationViewController: TranslationViewController
 

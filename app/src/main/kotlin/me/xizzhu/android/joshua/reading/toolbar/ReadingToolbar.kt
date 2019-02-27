@@ -25,7 +25,6 @@ import androidx.appcompat.widget.Toolbar
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import java.lang.StringBuilder
 
@@ -94,7 +93,7 @@ class ReadingToolbar : Toolbar, ToolbarView {
         translationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (position == names.size - 1) {
-                    context.startActivity(TranslationManagementActivity.newStartIntent(context))
+                    presenter.openTranslationManagement()
                     return
                 }
 

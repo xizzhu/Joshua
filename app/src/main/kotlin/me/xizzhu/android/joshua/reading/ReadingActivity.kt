@@ -16,9 +16,7 @@
 
 package me.xizzhu.android.joshua.reading
 
-import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
@@ -36,18 +34,12 @@ import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewPager
-import me.xizzhu.android.joshua.search.SearchActivity
-import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.onEach
 import javax.inject.Inject
 
 class ReadingActivity : BaseActivity(), View.OnClickListener {
-    companion object {
-        fun newStartIntent(context: Context) = Intent(context, ReadingActivity::class.java)
-    }
-
     @Inject
     lateinit var readingViewController: ReadingViewController
 
@@ -106,7 +98,7 @@ class ReadingActivity : BaseActivity(), View.OnClickListener {
                 if (it.isEmpty()) {
                     DialogHelper.showDialog(this@ReadingActivity, false, R.string.no_translation_downloaded,
                             DialogInterface.OnClickListener { _, _ ->
-                                startActivity(TranslationManagementActivity.newStartIntent(this@ReadingActivity))
+                                readingViewController.openTranslationManagement()
                             },
                             DialogInterface.OnClickListener { _, _ ->
                                 finish()
@@ -136,7 +128,7 @@ class ReadingActivity : BaseActivity(), View.OnClickListener {
 
     override fun onClick(v: View) {
         if (v == search) {
-            startActivity(SearchActivity.newStartIntent(this))
+            readingViewController.openSearch()
         }
     }
 }

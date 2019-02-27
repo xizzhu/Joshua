@@ -17,9 +17,11 @@
 package me.xizzhu.android.joshua.reading
 
 import kotlinx.coroutines.channels.ReceiveChannel
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 
-class ReadingViewController(private val bibleReadingManager: BibleReadingManager,
+class ReadingViewController(private val readingActivity: ReadingActivity,
+                            private val bibleReadingManager: BibleReadingManager,
                             private val translationManager: TranslationManager) {
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
@@ -41,4 +43,12 @@ class ReadingViewController(private val bibleReadingManager: BibleReadingManager
 
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)
+
+    fun openSearch() {
+        Navigator.navigate(readingActivity, Navigator.SCREEN_SEARCH)
+    }
+
+    fun openTranslationManagement() {
+        Navigator.navigate(readingActivity, Navigator.SCREEN_TRANSLATION_MANAGEMENT)
+    }
 }

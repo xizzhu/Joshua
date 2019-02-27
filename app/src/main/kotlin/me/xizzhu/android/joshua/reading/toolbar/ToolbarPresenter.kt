@@ -57,4 +57,8 @@ class ToolbarPresenter(private val readingViewController: ReadingViewController)
             readingViewController.saveCurrentTranslation(translationShortName)
         }
     }
+
+    fun openTranslationManagement() {
+        readingViewController.openTranslationManagement()
+    }
 }

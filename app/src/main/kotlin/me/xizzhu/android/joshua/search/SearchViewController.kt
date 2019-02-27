@@ -23,10 +23,12 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.firstOrNull
 import kotlinx.coroutines.withContext
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
 
-class SearchViewController(private val bibleReadingManager: BibleReadingManager) {
+class SearchViewController(private val searchActivity: SearchActivity,
+                           private val bibleReadingManager: BibleReadingManager) {
     private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
     private val searchResult: BroadcastChannel<SearchResult> = ConflatedBroadcastChannel(SearchResult.INVALID)
     private val versesSelected: BroadcastChannel<VerseIndex> = BroadcastChannel(1)
@@ -61,5 +63,9 @@ class SearchViewController(private val bibleReadingManager: BibleReadingManager)
         })
 
         searchState.send(false)
+    }
+
+    fun openReading() {
+        Navigator.navigate(searchActivity, Navigator.SCREEN_READING)
     }
 }
