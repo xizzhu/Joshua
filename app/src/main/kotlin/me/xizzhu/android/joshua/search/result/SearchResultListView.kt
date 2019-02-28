@@ -26,10 +26,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.search.SearchResult
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.utils.MVPView
 import java.lang.StringBuilder
 
 interface SearchResultView : MVPView {
+    fun onSearchStarted()
+
+    fun onSearchCompleted()
+
     fun onSearchResultUpdated(searchResult: SearchResult)
 }
 
@@ -56,6 +61,14 @@ class SearchResultListView : RecyclerView, SearchResultView {
 
     fun setPresenter(presenter: SearchResultPresenter) {
         this.presenter = presenter
+    }
+
+    override fun onSearchStarted() {
+        visibility = GONE
+    }
+
+    override fun onSearchCompleted() {
+        fadeIn()
     }
 
     override fun onSearchResultUpdated(searchResult: SearchResult) {
