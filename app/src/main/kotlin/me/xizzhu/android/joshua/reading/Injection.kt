@@ -29,9 +29,9 @@ import me.xizzhu.android.joshua.ActivityScope
 class ReadingModule {
     @ActivityScope
     @Provides
-    fun provideReadingManager(readingActivity: ReadingActivity,
-                              bibleReadingManager: BibleReadingManager,
-                              translationManager: TranslationManager): ReadingViewController =
+    fun provideReadingViewController(readingActivity: ReadingActivity,
+                                     bibleReadingManager: BibleReadingManager,
+                                     translationManager: TranslationManager): ReadingViewController =
             ReadingViewController(readingActivity, bibleReadingManager, translationManager)
 
     @Provides

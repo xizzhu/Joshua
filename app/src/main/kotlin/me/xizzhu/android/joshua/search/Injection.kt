@@ -27,8 +27,8 @@ import me.xizzhu.android.joshua.ActivityScope
 class SearchModule {
     @ActivityScope
     @Provides
-    fun provideSearchManager(searchActivity: SearchActivity,
-                             bibleReadingManager: BibleReadingManager): SearchViewController =
+    fun provideSearchViewController(searchActivity: SearchActivity,
+                                    bibleReadingManager: BibleReadingManager): SearchViewController =
             SearchViewController(searchActivity, bibleReadingManager)
 
     @Provides

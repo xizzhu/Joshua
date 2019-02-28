@@ -26,8 +26,8 @@ import me.xizzhu.android.joshua.ActivityScope
 class TranslationManagementModule {
     @Provides
     @ActivityScope
-    fun provideTranslationManager(bibleReadingManager: BibleReadingManager,
-                                  translationManager: TranslationManager): TranslationViewController =
+    fun provideTranslationViewController(bibleReadingManager: BibleReadingManager,
+                                         translationManager: TranslationManager): TranslationViewController =
             TranslationViewController(bibleReadingManager, translationManager)
 
     @Provides
