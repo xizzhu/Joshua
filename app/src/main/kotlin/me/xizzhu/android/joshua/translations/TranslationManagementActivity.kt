@@ -17,25 +17,20 @@
 package me.xizzhu.android.joshua.translations
 
 import android.os.Bundle
-import android.view.View
-import android.widget.ProgressBar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.ui.LoadingSpinner
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.BaseActivity
-import me.xizzhu.android.joshua.utils.onEach
-import me.xizzhu.android.joshua.ui.fadeIn
-import me.xizzhu.android.joshua.ui.fadeOut
 import javax.inject.Inject
 
 class TranslationManagementActivity : BaseActivity() {
     @Inject
-    lateinit var translationViewController: TranslationViewController
+    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
     @Inject
     lateinit var translationPresenter: TranslationPresenter
 
-    private lateinit var loadingSpinner: ProgressBar
+    private lateinit var loadingSpinner: LoadingSpinner
     private lateinit var translationListView: TranslationListView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,24 +46,8 @@ class TranslationManagementActivity : BaseActivity() {
     override fun onStart() {
         super.onStart()
 
+        loadingSpinnerPresenter.attachView(loadingSpinner)
         translationPresenter.attachView(translationListView)
-
-        launch(Dispatchers.Main) {
-            receiveChannels.add(translationViewController.observeTranslationsLoadingState()
-                    .onEach { downloading ->
-                        if (downloading) {
-                            loadingSpinner.visibility = View.VISIBLE
-                            translationListView.visibility = View.GONE
-                        } else {
-                            loadingSpinner.fadeOut()
-                            translationListView.fadeIn()
-                        }
-                    })
-        }
-        launch(Dispatchers.Main) {
-            receiveChannels.add(translationViewController.observeTranslationSelection()
-                    .onEach { finish() })
-        }
     }
 
     override fun onStop() {

@@ -24,11 +24,16 @@ import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.ProgressDialog
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.utils.MVPView
 import java.lang.Exception
 
 interface TranslationView : MVPView {
     fun onCurrentTranslationUpdated(currentTranslation: String)
+
+    fun onTranslationsLoadingStarted()
+
+    fun onTranslationsLoadingCompleted()
 
     fun onAvailableTranslationsUpdated(available: List<TranslationInfo>)
 
@@ -88,6 +93,14 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
         }
 
         adapter.setTranslations(downloadedTranslations!!, availableTranslations!!, currentTranslation!!)
+    }
+
+    override fun onTranslationsLoadingStarted() {
+        visibility = GONE
+    }
+
+    override fun onTranslationsLoadingCompleted() {
+        fadeIn()
     }
 
     override fun onAvailableTranslationsUpdated(available: List<TranslationInfo>) {
