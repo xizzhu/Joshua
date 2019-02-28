@@ -31,17 +31,13 @@ class SearchViewController(private val searchActivity: SearchActivity,
                            private val bibleReadingManager: BibleReadingManager) {
     private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
     private val searchResult: BroadcastChannel<SearchResult> = ConflatedBroadcastChannel(SearchResult.INVALID)
-    private val versesSelected: BroadcastChannel<VerseIndex> = BroadcastChannel(1)
 
     fun observeSearchState(): ReceiveChannel<Boolean> = searchState.openSubscription()
 
     fun observeSearchResult(): ReceiveChannel<SearchResult> = searchResult.openSubscription()
 
-    fun observeVerseSelection(): ReceiveChannel<VerseIndex> = versesSelected.openSubscription()
-
     suspend fun selectVerse(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-        versesSelected.send(verseIndex)
     }
 
     suspend fun search(query: String) {
