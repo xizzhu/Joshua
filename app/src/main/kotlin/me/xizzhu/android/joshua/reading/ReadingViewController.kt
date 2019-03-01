@@ -21,6 +21,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 
 class ReadingViewController(private val readingActivity: ReadingActivity,
+                            private val navigator: Navigator,
                             private val bibleReadingManager: BibleReadingManager,
                             private val translationManager: TranslationManager) {
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
@@ -45,11 +46,11 @@ class ReadingViewController(private val readingActivity: ReadingActivity,
             bibleReadingManager.readBookNames(translationShortName)
 
     fun openSearch() {
-        Navigator.navigate(readingActivity, Navigator.SCREEN_SEARCH)
+        navigator.navigate(readingActivity, Navigator.SCREEN_SEARCH)
     }
 
     fun openTranslationManagement() {
-        Navigator.navigate(readingActivity, Navigator.SCREEN_TRANSLATION_MANAGEMENT)
+        navigator.navigate(readingActivity, Navigator.SCREEN_TRANSLATION_MANAGEMENT)
     }
 
     fun finish() {

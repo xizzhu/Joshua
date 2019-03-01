@@ -57,6 +57,10 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
+    fun provideNavigator(): Navigator = Navigator()
+
+    @Provides
+    @Singleton
     fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository): BibleReadingManager =
             BibleReadingManager(bibleReadingRepository)
 

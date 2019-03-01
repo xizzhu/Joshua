@@ -24,15 +24,17 @@ import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.ActivityScope
+import me.xizzhu.android.joshua.Navigator
 
 @Module
 class ReadingModule {
     @ActivityScope
     @Provides
     fun provideReadingViewController(readingActivity: ReadingActivity,
+                                     navigator: Navigator,
                                      bibleReadingManager: BibleReadingManager,
                                      translationManager: TranslationManager): ReadingViewController =
-            ReadingViewController(readingActivity, bibleReadingManager, translationManager)
+            ReadingViewController(readingActivity, navigator, bibleReadingManager, translationManager)
 
     @Provides
     fun provideReadingDrawerPresenter(readingViewController: ReadingViewController): ReadingDrawerPresenter =

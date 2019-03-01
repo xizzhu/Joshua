@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
 
 class SearchViewController(private val searchActivity: SearchActivity,
+                           private val navigator: Navigator,
                            private val bibleReadingManager: BibleReadingManager) {
     private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
     private val searchResult: BroadcastChannel<SearchResult> = ConflatedBroadcastChannel(SearchResult.INVALID)
@@ -62,6 +63,6 @@ class SearchViewController(private val searchActivity: SearchActivity,
     }
 
     fun openReading() {
-        Navigator.navigate(searchActivity, Navigator.SCREEN_READING)
+        navigator.navigate(searchActivity, Navigator.SCREEN_READING)
     }
 }
