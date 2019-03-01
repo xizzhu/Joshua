@@ -46,7 +46,6 @@ android {
         debug.java.srcDirs += "src/debug/kotlin"
         release.java.srcDirs += "src/release/kotlin"
         test.java.srcDirs += "src/test/kotlin"
-        androidTest.java.srcDirs += "src/androidTest/kotlin"
     }
 
     buildTypes {
