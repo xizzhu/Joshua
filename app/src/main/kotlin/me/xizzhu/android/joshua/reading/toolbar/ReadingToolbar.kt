@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading.toolbar
 
 import android.content.Context
+import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.View
 import android.widget.AdapterView
@@ -25,10 +26,13 @@ import androidx.appcompat.widget.Toolbar
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPView
 import java.lang.StringBuilder
 
 interface ToolbarView : MVPView {
+    fun onNoTranslationsDownloaded()
+
     fun onDownloadedTranslationsLoaded(translations: List<TranslationInfo>)
 
     fun onCurrentTranslationUpdated(translationShortName: String)
@@ -62,6 +66,16 @@ class ReadingToolbar : Toolbar, ToolbarView {
 
     fun setPresenter(presenter: ToolbarPresenter) {
         this.presenter = presenter
+    }
+
+    override fun onNoTranslationsDownloaded() {
+        DialogHelper.showDialog(context, false, R.string.no_translation_downloaded,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.openTranslationManagement()
+                },
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.finish()
+                })
     }
 
     override fun onDownloadedTranslationsLoaded(translations: List<TranslationInfo>) {

@@ -70,6 +70,16 @@ class TranslationPresenter(private val translationViewController: TranslationVie
         launch(Dispatchers.Main) {
             translationViewController.reload(false)
         }
+        launch(Dispatchers.Main) {
+            receiveChannels.add(translationViewController.observeTranslationsLoadingState()
+                    .onEach { loading ->
+                        if (loading) {
+                            view?.onTranslationsLoadingStarted()
+                        } else {
+                            view?.onTranslationsLoadingCompleted()
+                        }
+                    })
+        }
     }
 
     fun downloadTranslation(translationInfo: TranslationInfo) {
@@ -86,7 +96,7 @@ class TranslationPresenter(private val translationViewController: TranslationVie
                 }
 
                 if (translationViewController.observeCurrentTranslation().first().isEmpty()) {
-                    translationViewController.saveCurrentTranslation(translationInfo.shortName, false)
+                    translationViewController.saveCurrentTranslation(translationInfo.shortName)
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
@@ -97,7 +107,8 @@ class TranslationPresenter(private val translationViewController: TranslationVie
 
     fun updateCurrentTranslation(currentTranslation: TranslationInfo) {
         launch(Dispatchers.Main) {
-            translationViewController.saveCurrentTranslation(currentTranslation.shortName, true)
+            translationViewController.saveCurrentTranslation(currentTranslation.shortName)
+            translationViewController.finish()
         }
     }
 }

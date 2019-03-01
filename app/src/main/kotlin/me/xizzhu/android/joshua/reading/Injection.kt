@@ -35,6 +35,10 @@ class ReadingModule {
             ReadingViewController(readingActivity, bibleReadingManager, translationManager)
 
     @Provides
+    fun provideReadingDrawerPresenter(readingViewController: ReadingViewController): ReadingDrawerPresenter =
+            ReadingDrawerPresenter(readingViewController)
+
+    @Provides
     fun provideToolbarPresenter(readingViewController: ReadingViewController): ToolbarPresenter =
             ToolbarPresenter(readingViewController)
 
@@ -45,4 +49,8 @@ class ReadingModule {
     @Provides
     fun provideVersePresenter(readingViewController: ReadingViewController): VersePresenter =
             VersePresenter(readingViewController)
+
+    @Provides
+    fun provideSearchButtonPresenter(readingViewController: ReadingViewController): SearchButtonPresenter =
+            SearchButtonPresenter(readingViewController)
 }

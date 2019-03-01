@@ -22,6 +22,7 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultPresenter
 import me.xizzhu.android.joshua.ActivityScope
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 
 @Module
 class SearchModule {
@@ -34,6 +35,10 @@ class SearchModule {
     @Provides
     fun provideToolbarPresenter(searchViewController: SearchViewController): ToolbarPresenter =
             ToolbarPresenter(searchViewController)
+
+    @Provides
+    fun provideLoadingSpinnerPresenter(searchViewController: SearchViewController): LoadingSpinnerPresenter =
+            LoadingSpinnerPresenter(searchViewController.observeSearchState())
 
     @Provides
     fun provideSearchResultPresenter(searchViewController: SearchViewController): SearchResultPresenter =

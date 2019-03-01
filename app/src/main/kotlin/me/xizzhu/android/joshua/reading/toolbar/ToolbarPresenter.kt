@@ -45,7 +45,9 @@ class ToolbarPresenter(private val readingViewController: ReadingViewController)
         launch(Dispatchers.Main) {
             receiveChannels.add(readingViewController.observeDownloadedTranslations()
                     .onEach {
-                        if (it.isNotEmpty()) {
+                        if (it.isEmpty()) {
+                            view?.onNoTranslationsDownloaded()
+                        } else {
                             view?.onDownloadedTranslationsLoaded(it.sortedBy { t -> t.language })
                         }
                     })
@@ -60,5 +62,9 @@ class ToolbarPresenter(private val readingViewController: ReadingViewController)
 
     fun openTranslationManagement() {
         readingViewController.openTranslationManagement()
+    }
+
+    fun finish() {
+        readingViewController.finish()
     }
 }

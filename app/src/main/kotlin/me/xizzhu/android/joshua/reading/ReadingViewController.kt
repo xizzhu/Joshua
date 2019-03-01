@@ -51,4 +51,8 @@ class ReadingViewController(private val readingActivity: ReadingActivity,
     fun openTranslationManagement() {
         Navigator.navigate(readingActivity, Navigator.SCREEN_TRANSLATION_MANAGEMENT)
     }
+
+    fun finish() {
+        readingActivity.finish()
+    }
 }

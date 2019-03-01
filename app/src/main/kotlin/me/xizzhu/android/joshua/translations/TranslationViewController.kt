@@ -21,16 +21,13 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
 
-class TranslationViewController(private val bibleReadingManager: BibleReadingManager,
+class TranslationViewController(private val translationManagementActivity: TranslationManagementActivity,
+                                private val bibleReadingManager: BibleReadingManager,
                                 private val translationManager: TranslationManager) {
     private val translationsLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
-    private val translationsSelected: BroadcastChannel<Unit> = ConflatedBroadcastChannel()
 
     fun observeTranslationsLoadingState(): ReceiveChannel<Boolean> =
             translationsLoadingState.openSubscription()
-
-    fun observeTranslationSelection(): ReceiveChannel<Unit> =
-            translationsSelected.openSubscription()
 
     fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeAvailableTranslations()
@@ -40,12 +37,8 @@ class TranslationViewController(private val bibleReadingManager: BibleReadingMan
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
 
-    suspend fun saveCurrentTranslation(translationShortName: String, fromUser: Boolean) {
+    suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
-
-        if (fromUser) {
-            translationsSelected.send(Unit)
-        }
     }
 
     suspend fun reload(forceRefresh: Boolean) {
@@ -56,5 +49,9 @@ class TranslationViewController(private val bibleReadingManager: BibleReadingMan
 
     suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
         translationManager.downloadTranslation(progressChannel, translationInfo)
+    }
+
+    fun finish() {
+        translationManagementActivity.finish()
     }
 }

@@ -17,35 +17,29 @@
 package me.xizzhu.android.joshua.search
 
 import android.os.Bundle
-import android.view.View
-import android.widget.ProgressBar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.filter
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbar
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultListView
-import me.xizzhu.android.joshua.ui.fadeIn
-import me.xizzhu.android.joshua.ui.fadeOut
+import me.xizzhu.android.joshua.ui.LoadingSpinner
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.BaseActivity
-import me.xizzhu.android.joshua.utils.onEach
 import javax.inject.Inject
 
 class SearchActivity : BaseActivity() {
     @Inject
-    lateinit var searchViewController: SearchViewController
+    lateinit var toolbarPresenter: ToolbarPresenter
 
     @Inject
-    lateinit var toolbarPresenter: ToolbarPresenter
+    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
     @Inject
     lateinit var searchResultPresenter: SearchResultPresenter
 
     private lateinit var toolbar: SearchToolbar
     private lateinit var searchResultList: SearchResultListView
-    private lateinit var loadingSpinner: ProgressBar
+    private lateinit var loadingSpinner: LoadingSpinner
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,31 +59,13 @@ class SearchActivity : BaseActivity() {
         super.onStart()
 
         toolbarPresenter.attachView(toolbar)
+        loadingSpinnerPresenter.attachView(loadingSpinner)
         searchResultPresenter.attachView(searchResultList)
-
-        launch(Dispatchers.Main) {
-            receiveChannels.add(searchViewController.observeSearchState()
-                    .onEach { searching ->
-                        if (searching) {
-                            loadingSpinner.visibility = View.VISIBLE
-                            searchResultList.visibility = View.GONE
-                        } else {
-                            loadingSpinner.fadeOut()
-                            searchResultList.fadeIn()
-                        }
-                    })
-        }
-        launch(Dispatchers.Main) {
-            receiveChannels.add(searchViewController.observeVerseSelection()
-                    .filter { it.isValid() }
-                    .onEach {
-                        searchViewController.openReading()
-                    })
-        }
     }
 
     override fun onStop() {
         toolbarPresenter.detachView()
+        loadingSpinnerPresenter.detachView()
         searchResultPresenter.detachView()
 
         super.onStop()

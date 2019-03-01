@@ -16,17 +16,9 @@
 
 package me.xizzhu.android.joshua.reading
 
-import android.content.DialogInterface
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.filter
-import kotlinx.coroutines.launch
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.chapter.ChapterListView
@@ -34,14 +26,12 @@ import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewPager
-import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
-import me.xizzhu.android.joshua.utils.onEach
 import javax.inject.Inject
 
-class ReadingActivity : BaseActivity(), View.OnClickListener {
+class ReadingActivity : BaseActivity() {
     @Inject
-    lateinit var readingViewController: ReadingViewController
+    lateinit var readingDrawerPresenter: ReadingDrawerPresenter
 
     @Inject
     lateinit var toolbarPresenter: ToolbarPresenter
@@ -52,12 +42,15 @@ class ReadingActivity : BaseActivity(), View.OnClickListener {
     @Inject
     lateinit var versePresenter: VersePresenter
 
+    @Inject
+    lateinit var searchButtonPresenter: SearchButtonPresenter
+
     private lateinit var drawerToggle: ActionBarDrawerToggle
-    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var drawerLayout: ReadingDrawerLayout
     private lateinit var toolbar: ReadingToolbar
     private lateinit var chapterListView: ChapterListView
     private lateinit var verseViewPager: VerseViewPager
-    private lateinit var search: FloatingActionButton
+    private lateinit var search: SearchFloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +71,7 @@ class ReadingActivity : BaseActivity(), View.OnClickListener {
         drawerLayout.addDrawerListener(drawerToggle)
 
         search = findViewById(R.id.search)
-        search.setOnClickListener(this)
+        search.setPresenter(searchButtonPresenter)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -89,34 +82,19 @@ class ReadingActivity : BaseActivity(), View.OnClickListener {
     override fun onStart() {
         super.onStart()
 
+        readingDrawerPresenter.attachView(drawerLayout)
         toolbarPresenter.attachView(toolbar)
         chapterListPresenter.attachView(chapterListView)
         versePresenter.attachView(verseViewPager)
-
-        launch(Dispatchers.Main) {
-            receiveChannels.add(readingViewController.observeDownloadedTranslations().onEach {
-                if (it.isEmpty()) {
-                    DialogHelper.showDialog(this@ReadingActivity, false, R.string.no_translation_downloaded,
-                            DialogInterface.OnClickListener { _, _ ->
-                                readingViewController.openTranslationManagement()
-                            },
-                            DialogInterface.OnClickListener { _, _ ->
-                                finish()
-                            })
-                }
-            })
-        }
-        launch(Dispatchers.Main) {
-            receiveChannels.add(readingViewController.observeCurrentVerseIndex()
-                    .filter { it.isValid() }
-                    .onEach { drawerLayout.closeDrawer(GravityCompat.START) })
-        }
+        searchButtonPresenter.attachView(search)
     }
 
     override fun onStop() {
+        readingDrawerPresenter.detachView()
         toolbarPresenter.detachView()
         chapterListPresenter.detachView()
         versePresenter.detachView()
+        searchButtonPresenter.detachView()
 
         super.onStop()
     }
@@ -124,11 +102,5 @@ class ReadingActivity : BaseActivity(), View.OnClickListener {
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         drawerToggle.onConfigurationChanged(newConfig)
-    }
-
-    override fun onClick(v: View) {
-        if (v == search) {
-            readingViewController.openSearch()
-        }
     }
 }

@@ -33,11 +33,22 @@ class SearchResultPresenter(private val searchViewController: SearchViewControll
                     .filter { it.isValid() }
                     .onEach { view?.onSearchResultUpdated(it) })
         }
+        launch(Dispatchers.Main) {
+            receiveChannels.add(searchViewController.observeSearchState()
+                    .onEach { loading ->
+                        if (loading) {
+                            view?.onSearchStarted()
+                        } else {
+                            view?.onSearchCompleted()
+                        }
+                    })
+        }
     }
 
     fun selectVerse(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) {
             searchViewController.selectVerse(verseIndex)
+            searchViewController.openReading()
         }
     }
 }
