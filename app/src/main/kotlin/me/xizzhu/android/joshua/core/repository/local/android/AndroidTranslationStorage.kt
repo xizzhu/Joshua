@@ -44,7 +44,13 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                 db.beginTransaction()
 
                 androidDatabase.bookNamesDao.save(translationInfo.shortName, bookNames)
-                androidDatabase.translationInfoDao.save(translationInfo)
+                if (translationInfo.downloaded) {
+                    androidDatabase.translationInfoDao.save(translationInfo)
+                } else {
+                    androidDatabase.translationInfoDao.save(TranslationInfo(
+                            translationInfo.shortName, translationInfo.name,
+                            translationInfo.language, translationInfo.size, true))
+                }
                 androidDatabase.translationDao.createTable(translationInfo.shortName)
                 androidDatabase.translationDao.save(translationInfo.shortName, verses)
 
