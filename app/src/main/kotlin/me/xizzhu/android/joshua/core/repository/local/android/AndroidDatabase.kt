@@ -22,6 +22,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -82,7 +83,7 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
             cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
                     "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName), null, null,
                     "$COLUMN_BOOK_INDEX ASC")
-            val bookNames = ArrayList<String>(66)
+            val bookNames = ArrayList<String>(Bible.BOOK_COUNT)
             while (cursor.moveToNext()) {
                 bookNames.add(cursor.getString(0))
             }
