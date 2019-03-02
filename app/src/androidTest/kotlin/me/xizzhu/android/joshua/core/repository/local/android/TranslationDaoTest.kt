@@ -36,13 +36,21 @@ class TranslationDaoTest : BaseSqliteTest() {
     @Test
     fun testSaveThenRead() {
         saveTranslation()
-        assertEquals(MockContents.verses,
-                androidDatabase.translationDao.read(MockContents.translationShortName, 0, 0))
+        assertEquals(MockContents.verses, androidDatabase.translationDao.read(MockContents.translationShortName, 0, 0))
     }
 
     private fun saveTranslation() {
         androidDatabase.translationDao.createTable(MockContents.translationShortName)
         androidDatabase.translationDao.save(MockContents.translationShortName, MockContents.verses.toMap())
+    }
+
+    @Test
+    fun testSaveOverrideThenReadVerses() {
+        androidDatabase.translationDao.createTable(MockContents.translationShortName)
+        androidDatabase.translationDao.save(MockContents.translationShortName,
+                mapOf(Pair(Pair(0, 0), listOf("verse_1", "verse_2"))))
+        androidDatabase.translationDao.save(MockContents.translationShortName, MockContents.verses.toMap())
+        assertEquals(MockContents.verses, androidDatabase.translationDao.read(MockContents.translationShortName, 0, 0))
     }
 
     @Test

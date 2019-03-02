@@ -68,8 +68,10 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
         @WorkerThread
         fun createTable(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE $TABLE_BOOK_NAMES (" +
-                    "$COLUMN_TRANSLATION_SHORT_NAME TEXT NOT NULL, $COLUMN_BOOK_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_BOOK_NAME TEXT NOT NULL);")
+                    "$COLUMN_TRANSLATION_SHORT_NAME TEXT NOT NULL, " +
+                    "$COLUMN_BOOK_INDEX INTEGER NOT NULL, " +
+                    "$COLUMN_BOOK_NAME TEXT NOT NULL, " +
+                    "PRIMARY KEY ($COLUMN_TRANSLATION_SHORT_NAME, $COLUMN_BOOK_INDEX));")
             db.execSQL("CREATE INDEX $INDEX_BOOK_NAMES ON $TABLE_BOOK_NAMES ($COLUMN_TRANSLATION_SHORT_NAME);")
         }
     }
@@ -197,7 +199,8 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     fun createTable(translationShortName: String) {
         db.execSQL("CREATE TABLE $translationShortName (" +
                 "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
-                "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL);")
+                "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL, " +
+                "PRIMARY KEY($COLUMN_BOOK_INDEX, $COLUMN_CHAPTER_INDEX, $COLUMN_VERSE_INDEX));")
     }
 
     @WorkerThread
@@ -293,7 +296,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             for ((verseIndex, verse) in entry.value.withIndex()) {
                 values.put(COLUMN_VERSE_INDEX, verseIndex)
                 values.put(COLUMN_TEXT, verse)
-                db.insert(translationShortName, null, values)
+                db.insertWithOnConflict(translationShortName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
         }
     }

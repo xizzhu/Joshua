@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.core.repository.local.android
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -36,5 +37,14 @@ class BookNamesDaoTest : BaseSqliteTest() {
     fun testSaveThenRead() {
         androidDatabase.bookNamesDao.save(MockContents.translationShortName, MockContents.bookNames)
         assertEquals(MockContents.bookNames, androidDatabase.bookNamesDao.read(MockContents.translationShortName))
+    }
+
+    @Test
+    fun testSaveOverrideThenReadBookNames() {
+        runBlocking {
+            androidDatabase.bookNamesDao.save(MockContents.translationShortName, listOf("random_1", "whatever_2"))
+            androidDatabase.bookNamesDao.save(MockContents.translationShortName, MockContents.bookNames)
+            assertEquals(MockContents.bookNames, androidDatabase.bookNamesDao.read(MockContents.translationShortName))
+        }
     }
 }
