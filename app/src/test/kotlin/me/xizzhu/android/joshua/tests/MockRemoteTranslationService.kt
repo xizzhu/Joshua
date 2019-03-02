@@ -27,15 +27,7 @@ class MockRemoteTranslationService : RemoteTranslationService {
     }
 
     override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation {
-        val verses: HashMap<Pair<Int, Int>, ArrayList<String>> = HashMap()
-        for (verse in MockContents.verses) {
-            val key = Pair(verse.verseIndex.bookIndex, verse.verseIndex.chapterIndex)
-            if (!verses.containsKey(key)) {
-                verses[key] = ArrayList()
-            }
-            verses[key]!!.add(verse.text)
-        }
         return RemoteTranslation(RemoteTranslationInfo.fromTranslationInfo(MockContents.translationInfo),
-                MockContents.bookNames, verses)
+                MockContents.bookNames, MockContents.verses.toMap())
     }
 }

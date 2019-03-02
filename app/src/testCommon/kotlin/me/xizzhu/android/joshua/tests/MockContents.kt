@@ -38,3 +38,15 @@ object MockContents {
             Verse(VerseIndex(0, 0, 9), translationShortName, "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.")
     )
 }
+
+fun List<Verse>.toMap(): Map<Pair<Int, Int>, List<String>> {
+    val results: HashMap<Pair<Int, Int>, ArrayList<String>> = HashMap()
+    for (verse in this) {
+        val key = Pair(verse.verseIndex.bookIndex, verse.verseIndex.chapterIndex)
+        if (!results.containsKey(key)) {
+            results[key] = ArrayList()
+        }
+        results[key]!!.add(verse.text)
+    }
+    return results
+}

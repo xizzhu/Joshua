@@ -203,7 +203,12 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     @WorkerThread
     fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
         var cursor: Cursor? = null
+        db.beginTransaction()
         try {
+            if (!db.hasTable(translationShortName)) {
+                return emptyList()
+            }
+
             cursor = db.query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?", arrayOf(bookIndex.toString(), chapterIndex.toString()),
                     null, null, "$COLUMN_VERSE_INDEX ASC")
@@ -213,9 +218,19 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                 verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
                         translationShortName, cursor.getString(0)))
             }
+
+            db.setTransactionSuccessful()
             return verses
         } finally {
+            db.endTransaction()
             cursor?.close()
+        }
+    }
+
+    private fun SQLiteDatabase.hasTable(name: String): Boolean {
+        val cursor: Cursor = rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null)
+        return cursor.use {
+            cursor.count > 0
         }
     }
 
@@ -240,6 +255,11 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                 selectionArgs[i] = "%%${keywords[i]}%%"
             }
 
+            db.beginTransaction()
+            if (!db.hasTable(translationShortName)) {
+                return emptyList()
+            }
+
             cursor = db.query(translationShortName,
                     arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX, COLUMN_TEXT),
                     selection.toString(), selectionArgs, null, null,
@@ -253,8 +273,13 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                 verses.add(Verse(VerseIndex(cursor.getInt(bookIndex), cursor.getInt(chapterIndex), cursor.getInt(verseIndex)),
                         translationShortName, cursor.getString(text)))
             }
+
+            db.setTransactionSuccessful()
             return verses
         } finally {
+            if (db.inTransaction()) {
+                db.endTransaction()
+            }
             cursor?.close()
         }
     }
