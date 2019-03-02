@@ -329,11 +329,7 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
 
             val values = ContentValues(5)
             for (t in translations) {
-                values.put(COLUMN_SHORT_NAME, t.shortName)
-                values.put(COLUMN_NAME, t.name)
-                values.put(COLUMN_LANGUAGE, t.language)
-                values.put(COLUMN_SIZE, t.size)
-                values.put(COLUMN_DOWNLOADED, if (t.downloaded) 1 else 0)
+                t.saveTo(values)
                 db.insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
 
@@ -343,14 +339,18 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    private fun TranslationInfo.saveTo(`out`: ContentValues) {
+        `out`.put(COLUMN_SHORT_NAME, shortName)
+        `out`.put(COLUMN_NAME, name)
+        `out`.put(COLUMN_LANGUAGE, language)
+        `out`.put(COLUMN_SIZE, size)
+        `out`.put(COLUMN_DOWNLOADED, if (downloaded) 1 else 0)
+    }
+
     @WorkerThread
     fun save(translation: TranslationInfo) {
         val values = ContentValues(5)
-        values.put(COLUMN_SHORT_NAME, translation.shortName)
-        values.put(COLUMN_NAME, translation.name)
-        values.put(COLUMN_LANGUAGE, translation.language)
-        values.put(COLUMN_SIZE, translation.size)
-        values.put(COLUMN_DOWNLOADED, if (translation.downloaded) 1 else 0)
+        translation.saveTo(values)
         db.insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 }
