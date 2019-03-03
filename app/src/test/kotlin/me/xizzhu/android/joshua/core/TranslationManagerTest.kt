@@ -55,7 +55,7 @@ class TranslationManagerTest {
     @Test
     fun testReload() {
         runBlocking {
-            val expectedAvailable = listOf(MockContents.translationInfo)
+            val expectedAvailable = listOf(MockContents.kjvTranslationInfo)
             val expectedDownloaded = emptyList<TranslationInfo>()
 
             translationManager.reload(false)
@@ -71,11 +71,11 @@ class TranslationManagerTest {
     fun testDownloadTranslation() {
         runBlocking {
             val expectedAvailable = emptyList<TranslationInfo>()
-            val expectedDownloaded = listOf(MockContents.downloadedTranslationInfo)
+            val expectedDownloaded = listOf(MockContents.kjvDownloadedTranslationInfo)
 
             val channel = Channel<Int>()
             launch {
-                translationManager.downloadTranslation(channel, MockContents.translationInfo)
+                translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
             }
             var called = false
             channel.onEach { called = true }
@@ -93,11 +93,11 @@ class TranslationManagerTest {
     fun testDownloadTranslationThenReload() {
         runBlocking {
             val expectedAvailable = emptyList<TranslationInfo>()
-            val expectedDownloaded = listOf(MockContents.downloadedTranslationInfo)
+            val expectedDownloaded = listOf(MockContents.kjvDownloadedTranslationInfo)
 
             val channel = Channel<Int>()
             launch {
-                translationManager.downloadTranslation(channel, MockContents.translationInfo)
+                translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
             }
             var called = false
             channel.onEach { called = true }
@@ -116,11 +116,11 @@ class TranslationManagerTest {
     fun testDownloadTranslationThenReloadWithForceRefresh() {
         runBlocking {
             val expectedAvailable = emptyList<TranslationInfo>()
-            val expectedDownloaded = listOf(MockContents.downloadedTranslationInfo)
+            val expectedDownloaded = listOf(MockContents.kjvDownloadedTranslationInfo)
 
             val channel = Channel<Int>()
             launch {
-                translationManager.downloadTranslation(channel, MockContents.translationInfo)
+                translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
             }
             var called = false
             channel.onEach { called = true }

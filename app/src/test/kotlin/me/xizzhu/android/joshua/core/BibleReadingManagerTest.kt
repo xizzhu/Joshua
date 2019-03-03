@@ -68,22 +68,22 @@ class BibleReadingManagerTest {
 
     @Test
     fun testBookNames() {
-        val expected = ArrayList<String>(MockContents.bookNames)
-        val actual = runBlocking { bibleReadingManager.readBookNames(MockContents.translationShortName) }
+        val expected = ArrayList<String>(MockContents.kjvBookNames)
+        val actual = runBlocking { bibleReadingManager.readBookNames(MockContents.kjvShortName) }
         assertEquals(expected, actual)
     }
 
     @Test
     fun testVerses() {
-        val expected = ArrayList<Verse>(MockContents.verses)
-        val actual = runBlocking { bibleReadingManager.readVerses(MockContents.translationShortName, 0, 0) }
+        val expected = ArrayList<Verse>(MockContents.kjvVerses)
+        val actual = runBlocking { bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0) }
         assertEquals(expected, actual)
     }
 
     @Test
     fun testSearch() {
-        val expected = ArrayList<Verse>(MockContents.verses)
-        val actual = runBlocking { bibleReadingManager.search(MockContents.translationShortName, "God") }
+        val expected = ArrayList<Verse>(MockContents.kjvVerses)
+        val actual = runBlocking { bibleReadingManager.search(MockContents.kjvShortName, "God") }
         assertEquals(expected, actual)
     }
 }

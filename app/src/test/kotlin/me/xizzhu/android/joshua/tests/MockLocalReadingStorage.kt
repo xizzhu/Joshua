@@ -41,25 +41,25 @@ class MockLocalReadingStorage : LocalReadingStorage {
     }
 
     override suspend fun readBookNames(translationShortName: String): List<String> {
-        return if (MockContents.translationShortName == translationShortName) {
-            MockContents.bookNames
+        return if (MockContents.kjvShortName == translationShortName) {
+            MockContents.kjvBookNames
         } else {
             emptyList()
         }
     }
 
     override suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
-        return if (MockContents.translationShortName == translationShortName && bookIndex == 0 && chapterIndex == 0) {
-            MockContents.verses
+        return if (MockContents.kjvShortName == translationShortName && bookIndex == 0 && chapterIndex == 0) {
+            MockContents.kjvVerses
         } else {
             emptyList()
         }
     }
 
     override suspend fun search(translationShortName: String, query: String): List<Verse> {
-        return if (MockContents.translationShortName == translationShortName) {
+        return if (MockContents.kjvShortName == translationShortName) {
             val result = mutableListOf<Verse>()
-            for (verse in MockContents.verses) {
+            for (verse in MockContents.kjvVerses) {
                 if (verse.text.contains(query, true)) {
                     result.add(verse)
                 }

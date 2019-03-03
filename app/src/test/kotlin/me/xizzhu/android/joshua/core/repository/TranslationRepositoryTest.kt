@@ -46,14 +46,14 @@ class TranslationRepositoryTest {
 
     @Test
     fun testReload() {
-        val expected = listOf(MockContents.translationInfo)
+        val expected = listOf(MockContents.kjvTranslationInfo)
         val actual = runBlocking { translationRepository.reload(false) }
         assertEquals(expected, actual)
     }
 
     @Test
     fun testReloadAgain() {
-        val expected = listOf(MockContents.translationInfo)
+        val expected = listOf(MockContents.kjvTranslationInfo)
         val actual = runBlocking {
             translationRepository.reload(false)
             translationRepository.reload(false)
@@ -63,7 +63,7 @@ class TranslationRepositoryTest {
 
     @Test
     fun testReloadAgainWithForceRefresh() {
-        val expected = listOf(MockContents.translationInfo)
+        val expected = listOf(MockContents.kjvTranslationInfo)
         val actual = runBlocking {
             translationRepository.reload(false)
             translationRepository.reload(true)
@@ -73,11 +73,11 @@ class TranslationRepositoryTest {
 
     @Test
     fun testDownloadTranslation() {
-        val expected = listOf(MockContents.downloadedTranslationInfo)
+        val expected = listOf(MockContents.kjvDownloadedTranslationInfo)
         val actual = runBlocking {
             val channel = Channel<Int>()
             launch {
-                translationRepository.downloadTranslation(channel, MockContents.translationInfo)
+                translationRepository.downloadTranslation(channel, MockContents.kjvTranslationInfo)
                 channel.close()
             }
             var called = false

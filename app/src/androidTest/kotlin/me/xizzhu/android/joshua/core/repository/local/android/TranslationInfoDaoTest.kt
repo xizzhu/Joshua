@@ -35,32 +35,32 @@ class TranslationInfoDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenRead() {
-        androidDatabase.translationInfoDao.save(MockContents.translationInfo)
+        androidDatabase.translationInfoDao.save(MockContents.kjvTranslationInfo)
 
         val actual = androidDatabase.translationInfoDao.read()
         assertEquals(1, actual.size)
-        assertEquals(MockContents.translationInfo, actual[0])
+        assertEquals(MockContents.kjvTranslationInfo, actual[0])
     }
 
     @Test
     fun testSaveOverrideThenRead() {
-        androidDatabase.translationInfoDao.save(MockContents.translationInfo)
-        androidDatabase.translationInfoDao.save(MockContents.downloadedTranslationInfo)
+        androidDatabase.translationInfoDao.save(MockContents.kjvTranslationInfo)
+        androidDatabase.translationInfoDao.save(MockContents.kjvDownloadedTranslationInfo)
 
         val actual = androidDatabase.translationInfoDao.read()
         assertEquals(1, actual.size)
-        assertEquals(MockContents.downloadedTranslationInfo, actual[0])
+        assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
     }
 
     @Test
     fun testReplace() {
-        androidDatabase.translationInfoDao.save(MockContents.downloadedTranslationInfo)
+        androidDatabase.translationInfoDao.save(MockContents.kjvDownloadedTranslationInfo)
         androidDatabase.translationInfoDao.save(TranslationInfo("shortName", "name", "language", 12345L, true))
 
-        androidDatabase.translationInfoDao.replace(listOf(MockContents.translationInfo))
+        androidDatabase.translationInfoDao.replace(listOf(MockContents.kjvTranslationInfo))
 
         val actual = androidDatabase.translationInfoDao.read()
         assertEquals(1, actual.size)
-        assertEquals(MockContents.translationInfo, actual[0])
+        assertEquals(MockContents.kjvTranslationInfo, actual[0])
     }
 }

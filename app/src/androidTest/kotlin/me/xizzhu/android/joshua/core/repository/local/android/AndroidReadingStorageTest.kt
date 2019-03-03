@@ -101,17 +101,17 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenReadBookNames() {
         runBlocking {
-            androidDatabase.bookNamesDao.save(MockContents.translationShortName, MockContents.bookNames)
-            assertEquals(MockContents.bookNames, androidReadingStorage.readBookNames(MockContents.translationShortName))
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+            assertEquals(MockContents.kjvBookNames, androidReadingStorage.readBookNames(MockContents.kjvShortName))
         }
     }
 
     @Test
     fun testSaveOverrideThenReadBookNames() {
         runBlocking {
-            androidDatabase.bookNamesDao.save(MockContents.translationShortName, listOf("random_1", "whatever_2"))
-            androidDatabase.bookNamesDao.save(MockContents.translationShortName, MockContents.bookNames)
-            assertEquals(MockContents.bookNames, androidReadingStorage.readBookNames(MockContents.translationShortName))
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"))
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+            assertEquals(MockContents.kjvBookNames, androidReadingStorage.readBookNames(MockContents.kjvShortName))
         }
     }
 
@@ -126,23 +126,23 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     fun testSaveThenReadVerses() {
         runBlocking {
             saveTranslation()
-            assertEquals(MockContents.verses, androidReadingStorage.readVerses(MockContents.translationShortName, 0, 0))
+            assertEquals(MockContents.kjvVerses, androidReadingStorage.readVerses(MockContents.kjvShortName, 0, 0))
         }
     }
 
     private fun saveTranslation() {
-        androidDatabase.translationDao.createTable(MockContents.translationShortName)
-        androidDatabase.translationDao.save(MockContents.translationShortName, MockContents.verses.toMap())
+        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
+        androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
     }
 
     @Test
     fun testSaveOverrideThenReadVerses() {
         runBlocking {
-            androidDatabase.translationDao.createTable(MockContents.translationShortName)
-            androidDatabase.translationDao.save(MockContents.translationShortName,
+            androidDatabase.translationDao.createTable(MockContents.kjvShortName)
+            androidDatabase.translationDao.save(MockContents.kjvShortName,
                     mapOf(Pair(Pair(0, 0), listOf("verse_1", "verse_2"))))
-            androidDatabase.translationDao.save(MockContents.translationShortName, MockContents.verses.toMap())
-            assertEquals(MockContents.verses, androidReadingStorage.readVerses(MockContents.translationShortName, 0, 0))
+            androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
+            assertEquals(MockContents.kjvVerses, androidReadingStorage.readVerses(MockContents.kjvShortName, 0, 0))
         }
     }
 
@@ -158,9 +158,9 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
         runBlocking {
             saveTranslation()
 
-            assertEquals(MockContents.verses, androidReadingStorage.search(MockContents.translationShortName, "God"))
-            assertEquals(MockContents.verses, androidReadingStorage.search(MockContents.translationShortName, "god"))
-            assertEquals(MockContents.verses, androidReadingStorage.search(MockContents.translationShortName, "GOD"))
+            assertEquals(MockContents.kjvVerses, androidReadingStorage.search(MockContents.kjvShortName, "God"))
+            assertEquals(MockContents.kjvVerses, androidReadingStorage.search(MockContents.kjvShortName, "god"))
+            assertEquals(MockContents.kjvVerses, androidReadingStorage.search(MockContents.kjvShortName, "GOD"))
         }
     }
 
@@ -169,8 +169,8 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
         runBlocking {
             saveTranslation()
 
-            assertEquals(listOf(MockContents.verses[0]), androidReadingStorage.search(MockContents.translationShortName, "God created"))
-            assertEquals(listOf(MockContents.verses[0]), androidReadingStorage.search(MockContents.translationShortName, "beginning created"))
+            assertEquals(listOf(MockContents.kjvVerses[0]), androidReadingStorage.search(MockContents.kjvShortName, "God created"))
+            assertEquals(listOf(MockContents.kjvVerses[0]), androidReadingStorage.search(MockContents.kjvShortName, "beginning created"))
         }
     }
 }

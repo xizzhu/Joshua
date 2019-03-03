@@ -48,47 +48,47 @@ class AndroidTranslationStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenRead() {
         runBlocking {
-            androidTranslationStorage.replaceTranslations(listOf(MockContents.translationInfo))
+            androidTranslationStorage.replaceTranslations(listOf(MockContents.kjvTranslationInfo))
 
             val actual = androidTranslationStorage.readTranslations()
             assertEquals(1, actual.size)
-            assertEquals(MockContents.translationInfo, actual[0])
+            assertEquals(MockContents.kjvTranslationInfo, actual[0])
         }
     }
 
     @Test
     fun testSaveOverrideThenRead() {
         runBlocking {
-            androidTranslationStorage.replaceTranslations(listOf(MockContents.downloadedTranslationInfo))
-            androidTranslationStorage.replaceTranslations(listOf(MockContents.translationInfo))
+            androidTranslationStorage.replaceTranslations(listOf(MockContents.kjvDownloadedTranslationInfo))
+            androidTranslationStorage.replaceTranslations(listOf(MockContents.kjvTranslationInfo))
 
             val actual = androidTranslationStorage.readTranslations()
             assertEquals(1, actual.size)
-            assertEquals(MockContents.translationInfo, actual[0])
+            assertEquals(MockContents.kjvTranslationInfo, actual[0])
         }
     }
 
     @Test
     fun testSaveTranslationThenRead() {
         runBlocking {
-            androidTranslationStorage.saveTranslation(MockContents.downloadedTranslationInfo,
-                    MockContents.bookNames, MockContents.verses.toMap())
+            androidTranslationStorage.saveTranslation(MockContents.kjvDownloadedTranslationInfo,
+                    MockContents.kjvBookNames, MockContents.kjvVerses.toMap())
 
             val actual = androidTranslationStorage.readTranslations()
             assertEquals(1, actual.size)
-            assertEquals(MockContents.downloadedTranslationInfo, actual[0])
+            assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
         }
     }
 
     @Test
     fun testSaveTranslationWithDownloadedFalseThenRead() {
         runBlocking {
-            androidTranslationStorage.saveTranslation(MockContents.translationInfo,
-                    MockContents.bookNames, MockContents.verses.toMap())
+            androidTranslationStorage.saveTranslation(MockContents.kjvTranslationInfo,
+                    MockContents.kjvBookNames, MockContents.kjvVerses.toMap())
 
             val actual = androidTranslationStorage.readTranslations()
             assertEquals(1, actual.size)
-            assertEquals(MockContents.downloadedTranslationInfo, actual[0])
+            assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
         }
     }
 }

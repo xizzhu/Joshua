@@ -35,16 +35,16 @@ class BookNamesDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenRead() {
-        androidDatabase.bookNamesDao.save(MockContents.translationShortName, MockContents.bookNames)
-        assertEquals(MockContents.bookNames, androidDatabase.bookNamesDao.read(MockContents.translationShortName))
+        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+        assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(MockContents.kjvShortName))
     }
 
     @Test
     fun testSaveOverrideThenReadBookNames() {
         runBlocking {
-            androidDatabase.bookNamesDao.save(MockContents.translationShortName, listOf("random_1", "whatever_2"))
-            androidDatabase.bookNamesDao.save(MockContents.translationShortName, MockContents.bookNames)
-            assertEquals(MockContents.bookNames, androidDatabase.bookNamesDao.read(MockContents.translationShortName))
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"))
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+            assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(MockContents.kjvShortName))
         }
     }
 }

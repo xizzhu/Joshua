@@ -23,11 +23,11 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 
 class MockRemoteTranslationService : RemoteTranslationService {
     override suspend fun fetchTranslations(): List<RemoteTranslationInfo> {
-        return listOf(RemoteTranslationInfo.fromTranslationInfo(MockContents.translationInfo))
+        return listOf(RemoteTranslationInfo.fromTranslationInfo(MockContents.kjvTranslationInfo))
     }
 
     override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation {
-        return RemoteTranslation(RemoteTranslationInfo.fromTranslationInfo(MockContents.translationInfo),
-                MockContents.bookNames, MockContents.verses.toMap())
+        return RemoteTranslation(RemoteTranslationInfo.fromTranslationInfo(MockContents.kjvTranslationInfo),
+                MockContents.kjvBookNames, MockContents.kjvVerses.toMap())
     }
 }
