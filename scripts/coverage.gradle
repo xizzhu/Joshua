@@ -1,0 +1,22 @@
+apply plugin: 'jacoco'
+
+task debugCoverageReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'connectedDebugAndroidTest']) {
+    def kotlinClasses = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug")
+
+    def coverageSourceDirs = ['src/debug/kotlin', 'src/main/kotlin']
+
+    def executionDataDirs = fileTree(dir: "$buildDir", includes: [
+            'jacoco/testDebugUnitTest.exec',
+            'outputs/code_coverage/debugAndroidTest/connected/*.ec'
+    ])
+
+    classDirectories.setFrom(files([kotlinClasses]))
+    additionalSourceDirs.setFrom(files(coverageSourceDirs))
+    sourceDirectories.setFrom(coverageSourceDirs)
+    executionData.setFrom(executionDataDirs)
+
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
