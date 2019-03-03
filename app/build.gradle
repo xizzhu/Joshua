@@ -12,6 +12,7 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply from: '../scripts/coverage.gradle'
 
 android {
     compileOptions {
@@ -45,8 +46,9 @@ android {
         main.java.srcDirs += "src/main/kotlin"
         debug.java.srcDirs += "src/debug/kotlin"
         release.java.srcDirs += "src/release/kotlin"
-        test.java.srcDirs += "src/test/kotlin"
-        androidTest.java.srcDirs += "src/androidTest/kotlin"
+
+        test.java.srcDirs += ["src/testCommon/kotlin", "src/test/kotlin"]
+        androidTest.java.srcDirs += ["src/testCommon/kotlin", "src/androidTest/kotlin"]
     }
 
     buildTypes {

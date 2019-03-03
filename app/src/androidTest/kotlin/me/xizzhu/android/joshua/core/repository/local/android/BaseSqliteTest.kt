@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.tests
+package me.xizzhu.android.joshua.core.repository.local.android
 
+import android.content.Context
 import androidx.annotation.CallSuper
+import androidx.test.core.app.ApplicationProvider
 import org.junit.After
 import org.junit.Before
 
-abstract class BaseTest {
+abstract class BaseSqliteTest {
+    protected lateinit var androidDatabase: AndroidDatabase
+
     @Before
     @CallSuper
     open fun setup() {
         clearLocalStorage()
+        androidDatabase = AndroidDatabase(ApplicationProvider.getApplicationContext<Context>())
+    }
+
+    private fun clearLocalStorage() {
+        ApplicationProvider.getApplicationContext<Context>().deleteDatabase(AndroidDatabase.DATABASE_NAME)
     }
 
     @After
     @CallSuper
     open fun tearDown() {
+        androidDatabase.close()
         clearLocalStorage()
     }
 }

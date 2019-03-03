@@ -22,6 +22,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -67,8 +68,10 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
         @WorkerThread
         fun createTable(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE $TABLE_BOOK_NAMES (" +
-                    "$COLUMN_TRANSLATION_SHORT_NAME TEXT NOT NULL, $COLUMN_BOOK_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_BOOK_NAME TEXT NOT NULL);")
+                    "$COLUMN_TRANSLATION_SHORT_NAME TEXT NOT NULL, " +
+                    "$COLUMN_BOOK_INDEX INTEGER NOT NULL, " +
+                    "$COLUMN_BOOK_NAME TEXT NOT NULL, " +
+                    "PRIMARY KEY ($COLUMN_TRANSLATION_SHORT_NAME, $COLUMN_BOOK_INDEX));")
             db.execSQL("CREATE INDEX $INDEX_BOOK_NAMES ON $TABLE_BOOK_NAMES ($COLUMN_TRANSLATION_SHORT_NAME);")
         }
     }
@@ -82,7 +85,7 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
             cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
                     "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName), null, null,
                     "$COLUMN_BOOK_INDEX ASC")
-            val bookNames = ArrayList<String>(66)
+            val bookNames = ArrayList<String>(Bible.BOOK_COUNT)
             while (cursor.moveToNext()) {
                 bookNames.add(cursor.getString(0))
             }
@@ -196,13 +199,19 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     fun createTable(translationShortName: String) {
         db.execSQL("CREATE TABLE $translationShortName (" +
                 "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
-                "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL);")
+                "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL, " +
+                "PRIMARY KEY($COLUMN_BOOK_INDEX, $COLUMN_CHAPTER_INDEX, $COLUMN_VERSE_INDEX));")
     }
 
     @WorkerThread
     fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
         var cursor: Cursor? = null
+        db.beginTransaction()
         try {
+            if (!db.hasTable(translationShortName)) {
+                return emptyList()
+            }
+
             cursor = db.query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?", arrayOf(bookIndex.toString(), chapterIndex.toString()),
                     null, null, "$COLUMN_VERSE_INDEX ASC")
@@ -212,9 +221,19 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                 verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
                         translationShortName, cursor.getString(0)))
             }
+
+            db.setTransactionSuccessful()
             return verses
         } finally {
+            db.endTransaction()
             cursor?.close()
+        }
+    }
+
+    private fun SQLiteDatabase.hasTable(name: String): Boolean {
+        val cursor: Cursor = rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null)
+        return cursor.use {
+            cursor.count > 0
         }
     }
 
@@ -239,6 +258,11 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                 selectionArgs[i] = "%%${keywords[i]}%%"
             }
 
+            db.beginTransaction()
+            if (!db.hasTable(translationShortName)) {
+                return emptyList()
+            }
+
             cursor = db.query(translationShortName,
                     arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX, COLUMN_TEXT),
                     selection.toString(), selectionArgs, null, null,
@@ -252,8 +276,13 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                 verses.add(Verse(VerseIndex(cursor.getInt(bookIndex), cursor.getInt(chapterIndex), cursor.getInt(verseIndex)),
                         translationShortName, cursor.getString(text)))
             }
+
+            db.setTransactionSuccessful()
             return verses
         } finally {
+            if (db.inTransaction()) {
+                db.endTransaction()
+            }
             cursor?.close()
         }
     }
@@ -267,7 +296,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             for ((verseIndex, verse) in entry.value.withIndex()) {
                 values.put(COLUMN_VERSE_INDEX, verseIndex)
                 values.put(COLUMN_TEXT, verse)
-                db.insert(translationShortName, null, values)
+                db.insertWithOnConflict(translationShortName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
         }
     }
@@ -328,11 +357,7 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
 
             val values = ContentValues(5)
             for (t in translations) {
-                values.put(COLUMN_SHORT_NAME, t.shortName)
-                values.put(COLUMN_NAME, t.name)
-                values.put(COLUMN_LANGUAGE, t.language)
-                values.put(COLUMN_SIZE, t.size)
-                values.put(COLUMN_DOWNLOADED, if (t.downloaded) 1 else 0)
+                t.saveTo(values)
                 db.insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
 
@@ -342,14 +367,18 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    private fun TranslationInfo.saveTo(`out`: ContentValues) {
+        `out`.put(COLUMN_SHORT_NAME, shortName)
+        `out`.put(COLUMN_NAME, name)
+        `out`.put(COLUMN_LANGUAGE, language)
+        `out`.put(COLUMN_SIZE, size)
+        `out`.put(COLUMN_DOWNLOADED, if (downloaded) 1 else 0)
+    }
+
     @WorkerThread
     fun save(translation: TranslationInfo) {
         val values = ContentValues(5)
-        values.put(COLUMN_SHORT_NAME, translation.shortName)
-        values.put(COLUMN_NAME, translation.name)
-        values.put(COLUMN_LANGUAGE, translation.language)
-        values.put(COLUMN_SIZE, translation.size)
-        values.put(COLUMN_DOWNLOADED, if (translation.downloaded) 1 else 0)
+        translation.saveTo(values)
         db.insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 }

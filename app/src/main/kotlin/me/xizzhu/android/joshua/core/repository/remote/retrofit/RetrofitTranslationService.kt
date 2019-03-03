@@ -43,7 +43,7 @@ import kotlin.coroutines.resumeWithException
 class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : RemoteTranslationService {
     companion object {
         const val OKHTTP_TIMEOUT_IN_SECONDS = 30L
-        private const val BASE_URL = "https://xizzhu.me/bible/download/"
+        const val BASE_URL = "https://xizzhu.me/bible/download/"
     }
 
     private val retrofit: Retrofit by lazy {
