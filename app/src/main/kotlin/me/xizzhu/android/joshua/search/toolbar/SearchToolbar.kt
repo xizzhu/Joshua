@@ -38,6 +38,7 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private val searchView: SearchView
+    private var currentQuery: String = ""
 
     init {
         setLogo(R.drawable.ic_toolbar)
@@ -59,6 +60,14 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {
+        if (query == currentQuery) {
+            // Seems there's a bug inside SearchView.mOnEditorActionListener that onEditorAction()
+            // will be called both when the key is down and when the key is up.
+            // Therefore, if the query is the same, we do nothing.
+            return true
+        }
+        currentQuery = query
+
         val handled = presenter.search(query)
         if (handled) {
             if (hasFocus()) {
