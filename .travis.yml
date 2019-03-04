@@ -23,7 +23,10 @@ before_script:
   - adb shell input keyevent 82 &
 
 script:
-  - ./gradlew debugCoverageReport
+  - ./gradlew testDebugUnitTest connectedDebugAndroidTest
+
+after_success:
+  - ./gradlew debugCoverageReport coveralls
 
 notifications:
   email: false
