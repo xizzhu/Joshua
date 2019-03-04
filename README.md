@@ -2,6 +2,7 @@ Joshua
 ======
 
 [![Build Status](https://travis-ci.org/xizzhu/Joshua.svg?branch=master)](https://travis-ci.org/xizzhu/Joshua)
+[![Coverage Status](https://coveralls.io/repos/github/xizzhu/Joshua/badge.svg)](https://coveralls.io/github/xizzhu/Joshua)
 [![API](https://img.shields.io/badge/API-21%2B-green.svg?style=flat)](https://developer.android.com/about/versions/android-5.0.html)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 
