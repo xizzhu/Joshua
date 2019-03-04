@@ -10,4 +10,6 @@
 
     <string name="no_translation_downloaded">No translation, download now?</string>
     <string name="more_translation">More</string>
+
+    <string name="error_search">Error occurred during search, retry?</string>
 </resources>

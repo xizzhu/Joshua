@@ -44,22 +44,24 @@ class SearchViewController(private val searchActivity: SearchActivity,
     suspend fun search(query: String) {
         searchState.send(true)
 
-        val currentTranslation = bibleReadingManager.observeCurrentTranslation().firstOrNull()
-                ?: throw IllegalStateException("No translation selected")
-        searchResult.send(withContext(Dispatchers.Default) {
-            val bookNamesAsync = async { bibleReadingManager.readBookNames(currentTranslation) }
-            val versesAsync = async { bibleReadingManager.search(currentTranslation, query) }
-            val bookNames = bookNamesAsync.await()
-            val verses = versesAsync.await()
-            val searchedVerses = ArrayList<SearchResult.Verse>()
-            for (verse in verses) {
-                searchedVerses.add(SearchResult.Verse(
-                        verse.verseIndex, bookNames[verse.verseIndex.bookIndex], verse.text))
-            }
-            SearchResult(query, searchedVerses)
-        })
-
-        searchState.send(false)
+        try {
+            val currentTranslation = bibleReadingManager.observeCurrentTranslation().firstOrNull()
+                    ?: throw IllegalStateException("No translation selected")
+            searchResult.send(withContext(Dispatchers.Default) {
+                val bookNamesAsync = async { bibleReadingManager.readBookNames(currentTranslation) }
+                val versesAsync = async { bibleReadingManager.search(currentTranslation, query) }
+                val bookNames = bookNamesAsync.await()
+                val verses = versesAsync.await()
+                val searchedVerses = ArrayList<SearchResult.Verse>()
+                for (verse in verses) {
+                    searchedVerses.add(SearchResult.Verse(
+                            verse.verseIndex, bookNames[verse.verseIndex.bookIndex], verse.text))
+                }
+                SearchResult(query, searchedVerses)
+            })
+        } finally {
+            searchState.send(false)
+        }
     }
 
     fun openReading() {

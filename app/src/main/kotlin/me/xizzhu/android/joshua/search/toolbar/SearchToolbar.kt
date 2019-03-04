@@ -17,14 +17,18 @@
 package me.xizzhu.android.joshua.search.toolbar
 
 import android.content.Context
+import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPView
 
-interface ToolbarView : MVPView
+interface ToolbarView : MVPView {
+    fun onError(e: Exception)
+}
 
 class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
     constructor(context: Context) : super(context)
@@ -33,6 +37,8 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    private val searchView: SearchView
+
     init {
         setLogo(R.drawable.ic_toolbar)
 
@@ -40,7 +46,7 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
         val searchMenuItem = menu.findItem(R.id.action_search)
         searchMenuItem.expandActionView()
 
-        val searchView = searchMenuItem.actionView as SearchView
+        searchView = searchMenuItem.actionView as SearchView
         searchView.setOnQueryTextListener(this)
         searchView.isQueryRefinementEnabled = true
         searchView.isIconified = false
@@ -64,4 +70,11 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
     }
 
     override fun onQueryTextChange(newText: String): Boolean = false
+
+    override fun onError(e: Exception) {
+        DialogHelper.showDialog(context, true, R.string.error_search,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.search(searchView.query.toString())
+                }, null)
+    }
 }

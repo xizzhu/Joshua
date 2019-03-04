@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.search.SearchViewController
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import java.lang.Exception
 
 class ToolbarPresenter(private val searchViewController: SearchViewController) : MVPPresenter<ToolbarView>() {
     fun search(query: String): Boolean {
@@ -27,7 +28,11 @@ class ToolbarPresenter(private val searchViewController: SearchViewController) :
             return false
         }
         launch(Dispatchers.Main) {
-            searchViewController.search(query)
+            try {
+                searchViewController.search(query)
+            } catch (e: Exception) {
+                view?.onError(e)
+            }
         }
         return true
     }
