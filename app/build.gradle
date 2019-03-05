@@ -12,7 +12,7 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply from: '../scripts/coverage.gradle'
+apply from: '../scripts/coverage.gradle.kts'
 
 android {
     compileOptions {
