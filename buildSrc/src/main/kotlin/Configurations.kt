@@ -53,6 +53,7 @@ object Versions {
 
     const val testRunner = "1.1.0"
     const val testRules = "1.1.1"
+    const val mockito = "2.25.0"
 }
 
 object Dependencies {
@@ -93,5 +94,9 @@ object Dependencies {
 
     object Stetho {
         const val stetho = "com.facebook.stetho:stetho:${Versions.stetho}"
+    }
+
+    object Mockito {
+        const val mockito = "org.mockito:mockito-core:${Versions.mockito}"
     }
 }

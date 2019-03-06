@@ -94,6 +94,7 @@ dependencies {
     debugImplementation(Dependencies.Stetho.stetho)
 
     testImplementation(Dependencies.Kotlin.test)
+    testImplementation(Dependencies.Mockito.mockito)
 
     androidTestImplementation(Dependencies.AndroidX.testRunner)
     androidTestImplementation(Dependencies.AndroidX.testRules)

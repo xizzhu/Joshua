@@ -57,7 +57,7 @@ class SearchViewController(private val searchActivity: SearchActivity,
                     searchedVerses.add(SearchResult.Verse(
                             verse.verseIndex, bookNames[verse.verseIndex.bookIndex], verse.text))
                 }
-                SearchResult(query, searchedVerses)
+                SearchResult(currentTranslation, searchedVerses)
             })
         } finally {
             searchState.send(false)
