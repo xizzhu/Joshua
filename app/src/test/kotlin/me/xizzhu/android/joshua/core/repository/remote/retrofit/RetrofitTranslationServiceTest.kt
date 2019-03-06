@@ -22,6 +22,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.utils.onEach
 import okhttp3.*
@@ -30,7 +31,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import retrofit2.HttpException
 
-class RetrofitTranslationServiceTest {
+class RetrofitTranslationServiceTest : BaseUnitTest() {
     @Test(expected = HttpException::class)
     fun testFetchTranslationsWithErrorCode() {
         runBlocking {

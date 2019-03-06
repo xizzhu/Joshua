@@ -18,17 +18,19 @@ package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.MockLocalReadingStorage
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class BibleReadingManagerTest {
+class BibleReadingManagerTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
 
     @Before
-    fun setup() {
+    override fun setUp() {
+        super.setUp()
         bibleReadingManager = BibleReadingManager(BibleReadingRepository(MockLocalReadingStorage()))
     }
 

@@ -20,6 +20,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.MockLocalTranslationStorage
 import me.xizzhu.android.joshua.tests.MockRemoteTranslationService
@@ -29,11 +30,12 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TranslationManagerTest {
+class TranslationManagerTest : BaseUnitTest() {
     private lateinit var translationManager: TranslationManager
 
     @Before
-    fun setup() {
+    override fun setUp() {
+        super.setUp()
         translationManager = TranslationManager(TranslationRepository(
                 MockLocalTranslationStorage(), MockRemoteTranslationService()))
     }

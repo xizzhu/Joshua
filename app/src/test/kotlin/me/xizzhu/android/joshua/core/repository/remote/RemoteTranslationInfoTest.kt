@@ -16,11 +16,12 @@
 
 package me.xizzhu.android.joshua.core.repository.remote
 
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class RemoteTranslationInfoTest {
+class RemoteTranslationInfoTest : BaseUnitTest() {
     @Test
     fun testFromTranslationInfo() {
         val expected = MockContents.kjvRemoteTranslationInfo

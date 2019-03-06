@@ -16,10 +16,11 @@
 
 package me.xizzhu.android.joshua.core
 
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Assert
 import org.junit.Test
 
-class VerseIndexTest {
+class VerseIndexTest : BaseUnitTest() {
     @Test
     fun testValidIndex() {
         for (bookIndex in 0 until Bible.BOOK_COUNT) {

@@ -22,6 +22,7 @@ import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Before
 import org.junit.Test
@@ -32,7 +33,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class SearchViewControllerTest {
+class SearchViewControllerTest : BaseUnitTest() {
     @Mock
     private lateinit var searchActivity: SearchActivity
     @Mock
@@ -42,7 +43,8 @@ class SearchViewControllerTest {
     private lateinit var searchViewController: SearchViewController
 
     @Before
-    fun setUp() {
+    override fun setUp() {
+        super.setUp()
         MockitoAnnotations.initMocks(this)
         searchViewController = SearchViewController(searchActivity, navigator, bibleReadingManager)
     }

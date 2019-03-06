@@ -18,10 +18,11 @@ package me.xizzhu.android.joshua.reading.verse
 
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Assert
 import org.junit.Test
 
-class VerseUtilsTest {
+class VerseUtilsTest : BaseUnitTest() {
     @Test
     fun testPositionToBookIndex() {
         Assert.assertEquals(0, 0.toBookIndex())
