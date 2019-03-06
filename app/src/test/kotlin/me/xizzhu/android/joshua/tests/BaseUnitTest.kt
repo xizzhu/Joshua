@@ -18,25 +18,21 @@ package me.xizzhu.android.joshua.tests
 
 import androidx.annotation.CallSuper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 
 abstract class BaseUnitTest {
-    private val mainThreadSurrogate = newSingleThreadContext("Main thread")
-
     @CallSuper
     @Before
     open fun setUp() {
-        Dispatchers.setMain(mainThreadSurrogate)
+        Dispatchers.setMain(Dispatchers.Unconfined)
     }
 
     @CallSuper
     @After
     open fun tearDown() {
         Dispatchers.resetMain()
-        mainThreadSurrogate.close()
     }
 }
