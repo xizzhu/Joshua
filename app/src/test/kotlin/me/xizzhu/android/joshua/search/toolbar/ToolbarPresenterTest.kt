@@ -30,6 +30,8 @@ import kotlin.test.assertTrue
 class ToolbarPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var searchViewController: SearchViewController
+    @Mock
+    private lateinit var toolbarView: ToolbarView
     private lateinit var toolbarPresenter: ToolbarPresenter
 
     @Before
@@ -50,6 +52,20 @@ class ToolbarPresenterTest : BaseUnitTest() {
             val query = "query"
             assertTrue(toolbarPresenter.search(query))
             verify(searchViewController, times(1)).search(query)
+        }
+    }
+
+    @Test
+    fun testQueryException() {
+        runBlocking {
+            val query = "query"
+            val exception = RuntimeException("Random exception")
+            `when`(searchViewController.search(query)).thenThrow(exception)
+
+            toolbarPresenter.attachView(toolbarView)
+            assertTrue(toolbarPresenter.search(query))
+            verify(searchViewController, times(1)).search(query)
+            verify(toolbarView, times(1)).onError(exception)
         }
     }
 }
