@@ -28,7 +28,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import org.mockito.MockitoAnnotations
 
 class SearchResultPresenterTest : BaseUnitTest() {
     @Mock
@@ -40,7 +39,6 @@ class SearchResultPresenterTest : BaseUnitTest() {
     @Before
     override fun setUp() {
         super.setUp()
-        MockitoAnnotations.initMocks(this)
         searchResultPresenter = SearchResultPresenter(searchInteractor)
     }
 

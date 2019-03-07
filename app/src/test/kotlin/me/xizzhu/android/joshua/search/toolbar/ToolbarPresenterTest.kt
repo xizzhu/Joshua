@@ -23,7 +23,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import org.mockito.MockitoAnnotations
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -37,7 +36,6 @@ class ToolbarPresenterTest : BaseUnitTest() {
     @Before
     override fun setUp() {
         super.setUp()
-        MockitoAnnotations.initMocks(this)
         toolbarPresenter = ToolbarPresenter(searchInteractor)
     }
 

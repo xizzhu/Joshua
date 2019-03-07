@@ -28,7 +28,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import org.mockito.MockitoAnnotations
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -45,7 +44,6 @@ class SearchInteractorTest : BaseUnitTest() {
     @Before
     override fun setUp() {
         super.setUp()
-        MockitoAnnotations.initMocks(this)
         searchInteractor = SearchInteractor(searchActivity, navigator, bibleReadingManager)
     }
 

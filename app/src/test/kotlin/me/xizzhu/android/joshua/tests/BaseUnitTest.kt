@@ -23,12 +23,14 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.mockito.Mockito
+import org.mockito.MockitoAnnotations
 
 abstract class BaseUnitTest {
     @CallSuper
     @Before
     open fun setUp() {
         Dispatchers.setMain(Dispatchers.Unconfined)
+        MockitoAnnotations.initMocks(this)
     }
 
     @CallSuper
