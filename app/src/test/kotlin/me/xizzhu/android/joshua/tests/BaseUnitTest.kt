@@ -22,6 +22,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import org.mockito.Mockito
 
 abstract class BaseUnitTest {
     @CallSuper
@@ -34,5 +35,11 @@ abstract class BaseUnitTest {
     @After
     open fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    protected fun <T> any(): T {
+        // Mockito.any() returns null, but Kotlin hates it, so we have this hack here.
+        Mockito.any<T>()
+        return null as T
     }
 }
