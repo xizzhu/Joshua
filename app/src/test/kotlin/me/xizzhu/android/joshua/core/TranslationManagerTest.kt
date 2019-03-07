@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
@@ -43,14 +44,14 @@ class TranslationManagerTest : BaseUnitTest() {
     @Test
     fun testDefaultAvailableTranslations() {
         val expected = emptyList<TranslationInfo>()
-        val actual = runBlocking { translationManager.observeAvailableTranslations().receive() }
+        val actual = runBlocking { translationManager.observeAvailableTranslations().first() }
         assertEquals(expected, actual)
     }
 
     @Test
     fun testDefaultDownloadedTranslations() {
         val expected = emptyList<TranslationInfo>()
-        val actual = runBlocking { translationManager.observeDownloadedTranslations().receive() }
+        val actual = runBlocking { translationManager.observeDownloadedTranslations().first() }
         assertEquals(expected, actual)
     }
 
@@ -61,8 +62,8 @@ class TranslationManagerTest : BaseUnitTest() {
             val expectedDownloaded = emptyList<TranslationInfo>()
 
             translationManager.reload(false)
-            val actualAvailable = translationManager.observeAvailableTranslations().receive()
-            val actualDownloaded = translationManager.observeDownloadedTranslations().receive()
+            val actualAvailable = translationManager.observeAvailableTranslations().first()
+            val actualDownloaded = translationManager.observeDownloadedTranslations().first()
 
             assertEquals(expectedAvailable, actualAvailable)
             assertEquals(expectedDownloaded, actualDownloaded)
@@ -83,8 +84,8 @@ class TranslationManagerTest : BaseUnitTest() {
             channel.onEach { called = true }
             assertTrue(called)
 
-            val actualAvailable = translationManager.observeAvailableTranslations().receive()
-            val actualDownloaded = translationManager.observeDownloadedTranslations().receive()
+            val actualAvailable = translationManager.observeAvailableTranslations().first()
+            val actualDownloaded = translationManager.observeDownloadedTranslations().first()
 
             assertEquals(expectedAvailable, actualAvailable)
             assertEquals(expectedDownloaded, actualDownloaded)
@@ -106,8 +107,8 @@ class TranslationManagerTest : BaseUnitTest() {
             assertTrue(called)
 
             translationManager.reload(false)
-            val actualAvailable = translationManager.observeAvailableTranslations().receive()
-            val actualDownloaded = translationManager.observeDownloadedTranslations().receive()
+            val actualAvailable = translationManager.observeAvailableTranslations().first()
+            val actualDownloaded = translationManager.observeDownloadedTranslations().first()
 
             assertEquals(expectedAvailable, actualAvailable)
             assertEquals(expectedDownloaded, actualDownloaded)
@@ -129,8 +130,8 @@ class TranslationManagerTest : BaseUnitTest() {
             assertTrue(called)
 
             translationManager.reload(true)
-            val actualAvailable = translationManager.observeAvailableTranslations().receive()
-            val actualDownloaded = translationManager.observeDownloadedTranslations().receive()
+            val actualAvailable = translationManager.observeAvailableTranslations().first()
+            val actualDownloaded = translationManager.observeDownloadedTranslations().first()
 
             assertEquals(expectedAvailable, actualAvailable)
             assertEquals(expectedDownloaded, actualDownloaded)

@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -37,7 +38,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     @Test
     fun testDefaultCurrentVerseIndex() {
         val expected = VerseIndex.INVALID
-        val actual = runBlocking { bibleReadingManager.observeCurrentVerseIndex().receive() }
+        val actual = runBlocking { bibleReadingManager.observeCurrentVerseIndex().first() }
         assertEquals(expected, actual)
     }
 
@@ -46,7 +47,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
         val expected = VerseIndex(1, 2, 3)
         val actual = runBlocking {
             bibleReadingManager.saveCurrentVerseIndex(VerseIndex(1, 2, 3))
-            bibleReadingManager.observeCurrentVerseIndex().receive()
+            bibleReadingManager.observeCurrentVerseIndex().first()
         }
         assertEquals(expected, actual)
     }
@@ -54,7 +55,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     @Test
     fun testDefaultCurrentTranslation() {
         val expected = ""
-        val actual = runBlocking { bibleReadingManager.observeCurrentTranslation().receive() }
+        val actual = runBlocking { bibleReadingManager.observeCurrentTranslation().first() }
         assertEquals(expected, actual)
     }
 
@@ -63,7 +64,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
         val expected = "KJV"
         val actual = runBlocking {
             bibleReadingManager.saveCurrentTranslation("KJV")
-            bibleReadingManager.observeCurrentTranslation().receive()
+            bibleReadingManager.observeCurrentTranslation().first()
         }
         assertEquals(expected, actual)
     }
