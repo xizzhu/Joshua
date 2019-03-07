@@ -90,11 +90,15 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     }
 
     fun downloadTranslation(translationInfo: TranslationInfo) {
+        downloadTranslation(translationInfo, Channel())
+    }
+
+    @VisibleForTesting
+    fun downloadTranslation(translationInfo: TranslationInfo, downloadProgressChannel: Channel<Int>) {
         view?.onTranslationDownloadStarted()
 
         launch(Dispatchers.Main) {
             try {
-                val downloadProgressChannel = Channel<Int>()
                 launch(Dispatchers.Main) {
                     translationInteractor.downloadTranslation(downloadProgressChannel, translationInfo)
                 }
