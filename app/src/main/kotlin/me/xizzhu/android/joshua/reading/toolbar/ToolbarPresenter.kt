@@ -19,31 +19,31 @@ package me.xizzhu.android.joshua.reading.toolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.reading.ReadingViewController
+import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 
-class ToolbarPresenter(private val readingViewController: ReadingViewController) : MVPPresenter<ToolbarView>() {
+class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ToolbarView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingViewController.observeCurrentTranslation()
+            receiveChannels.add(readingInteractor.observeCurrentTranslation()
                     .filter { it.isNotEmpty() }
                     .onEach {
                         view?.onCurrentTranslationUpdated(it)
-                        view?.onBookNamesUpdated(readingViewController.readBookNames(it))
+                        view?.onBookNamesUpdated(readingInteractor.readBookNames(it))
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingViewController.observeCurrentVerseIndex()
+            receiveChannels.add(readingInteractor.observeCurrentVerseIndex()
                     .filter { it.isValid() }
                     .onEach {
                         view?.onCurrentVerseIndexUpdated(it)
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingViewController.observeDownloadedTranslations()
+            receiveChannels.add(readingInteractor.observeDownloadedTranslations()
                     .onEach {
                         if (it.isEmpty()) {
                             view?.onNoTranslationsDownloaded()
@@ -56,15 +56,15 @@ class ToolbarPresenter(private val readingViewController: ReadingViewController)
 
     fun updateCurrentTranslation(translationShortName: String) {
         launch(Dispatchers.Main) {
-            readingViewController.saveCurrentTranslation(translationShortName)
+            readingInteractor.saveCurrentTranslation(translationShortName)
         }
     }
 
     fun openTranslationManagement() {
-        readingViewController.openTranslationManagement()
+        readingInteractor.openTranslationManagement()
     }
 
     fun finish() {
-        readingViewController.finish()
+        readingInteractor.finish()
     }
 }

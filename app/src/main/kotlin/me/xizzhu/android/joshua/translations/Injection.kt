@@ -29,14 +29,14 @@ class TranslationManagementModule {
     @ActivityScope
     fun provideTranslationViewController(translationManagementActivity: TranslationManagementActivity,
                                          bibleReadingManager: BibleReadingManager,
-                                         translationManager: TranslationManager): TranslationViewController =
-            TranslationViewController(translationManagementActivity, bibleReadingManager, translationManager)
+                                         translationManager: TranslationManager): TranslationInteractor =
+            TranslationInteractor(translationManagementActivity, bibleReadingManager, translationManager)
 
     @Provides
-    fun provideLoadingSpinnerPresenter(translationViewController: TranslationViewController): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(translationViewController.observeTranslationsLoadingState())
+    fun provideLoadingSpinnerPresenter(translationInteractor: TranslationInteractor): LoadingSpinnerPresenter =
+            LoadingSpinnerPresenter(translationInteractor.observeTranslationsLoadingState())
 
     @Provides
-    fun provideTranslationPresenter(translationViewController: TranslationViewController): TranslationPresenter =
-            TranslationPresenter(translationViewController)
+    fun provideTranslationPresenter(translationInteractor: TranslationInteractor): TranslationPresenter =
+            TranslationPresenter(translationInteractor)
 }

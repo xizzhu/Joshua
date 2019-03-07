@@ -23,9 +23,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
 
-class SearchButtonPresenter(private val readingViewController: ReadingViewController) : MVPPresenter<SearchButtonView>() {
+class SearchButtonPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<SearchButtonView>() {
     fun openSearch() {
-        readingViewController.openSearch()
+        readingInteractor.openSearch()
     }
 }
 

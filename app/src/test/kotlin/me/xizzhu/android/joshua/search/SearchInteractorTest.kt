@@ -33,33 +33,33 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class SearchViewControllerTest : BaseUnitTest() {
+class SearchInteractorTest : BaseUnitTest() {
     @Mock
     private lateinit var searchActivity: SearchActivity
     @Mock
     private lateinit var navigator: Navigator
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
-    private lateinit var searchViewController: SearchViewController
+    private lateinit var searchInteractor: SearchInteractor
 
     @Before
     override fun setUp() {
         super.setUp()
         MockitoAnnotations.initMocks(this)
-        searchViewController = SearchViewController(searchActivity, navigator, bibleReadingManager)
+        searchInteractor = SearchInteractor(searchActivity, navigator, bibleReadingManager)
     }
 
     @Test
     fun testDefaultSearchState() {
         runBlocking {
-            assertFalse(searchViewController.observeSearchState().first())
+            assertFalse(searchInteractor.observeSearchState().first())
         }
     }
 
     @Test
     fun testDefaultSearchResult() {
         runBlocking {
-            assertFalse(searchViewController.observeSearchResult().first().isValid())
+            assertFalse(searchInteractor.observeSearchResult().first().isValid())
         }
     }
 
@@ -67,14 +67,14 @@ class SearchViewControllerTest : BaseUnitTest() {
     fun testSelectVerse() {
         runBlocking {
             val verseIndex = VerseIndex(1, 2, 3)
-            searchViewController.selectVerse(verseIndex)
+            searchInteractor.selectVerse(verseIndex)
             verify(bibleReadingManager, times(1)).saveCurrentVerseIndex(verseIndex)
         }
     }
 
     @Test
     fun testOpenReading() {
-        searchViewController.openReading()
+        searchInteractor.openReading()
         verify(navigator, times(1)).navigate(searchActivity, Navigator.SCREEN_READING)
     }
 
@@ -90,10 +90,10 @@ class SearchViewControllerTest : BaseUnitTest() {
             val query = "query"
             `when`(bibleReadingManager.search(MockContents.kjvShortName, query)).thenReturn(MockContents.kjvVerses)
 
-            searchViewController.search(query)
-            assertFalse(searchViewController.observeSearchState().first())
+            searchInteractor.search(query)
+            assertFalse(searchInteractor.observeSearchState().first())
 
-            val searchResult = searchViewController.observeSearchResult().first()
+            val searchResult = searchInteractor.observeSearchResult().first()
             assertTrue(searchResult.isValid())
             assertEquals(MockContents.kjvShortName, searchResult.translationShortName)
             assertEquals(MockContents.kjvVerses.size, searchResult.verses.size)

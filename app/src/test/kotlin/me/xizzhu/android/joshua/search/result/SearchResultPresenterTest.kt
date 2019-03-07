@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.search.result
 
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.search.SearchViewController
+import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Before
 import org.junit.Test
@@ -28,14 +28,14 @@ import org.mockito.MockitoAnnotations
 
 class SearchResultPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var searchViewController: SearchViewController
+    private lateinit var searchInteractor: SearchInteractor
     private lateinit var searchResultPresenter: SearchResultPresenter
 
     @Before
     override fun setUp() {
         super.setUp()
         MockitoAnnotations.initMocks(this)
-        searchResultPresenter = SearchResultPresenter(searchViewController)
+        searchResultPresenter = SearchResultPresenter(searchInteractor)
     }
 
     @Test
@@ -43,8 +43,8 @@ class SearchResultPresenterTest : BaseUnitTest() {
         runBlocking {
             val verseIndex = VerseIndex(1, 2, 3)
             searchResultPresenter.selectVerse(verseIndex)
-            verify(searchViewController, times(1)).selectVerse(verseIndex)
-            verify(searchViewController, times(1)).openReading()
+            verify(searchInteractor, times(1)).selectVerse(verseIndex)
+            verify(searchInteractor, times(1)).openReading()
         }
     }
 }

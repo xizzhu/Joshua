@@ -19,26 +19,25 @@ package me.xizzhu.android.joshua.reading.verse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.reading.ReadingViewController
+import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 import java.lang.Exception
 
-class VersePresenter(private val readingViewController: ReadingViewController) : MVPPresenter<VerseView>() {
+class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<VerseView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingViewController.observeCurrentTranslation()
+            receiveChannels.add(readingInteractor.observeCurrentTranslation()
                     .filter { it.isNotEmpty() }
                     .onEach {
                         view?.onCurrentTranslationUpdated(it)
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingViewController.observeCurrentVerseIndex()
+            receiveChannels.add(readingInteractor.observeCurrentVerseIndex()
                     .filter { it.isValid() }
                     .onEach {
                         view?.onCurrentVerseIndexUpdated(it)
@@ -48,7 +47,7 @@ class VersePresenter(private val readingViewController: ReadingViewController) :
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) {
-            readingViewController.saveCurrentVerseIndex(verseIndex)
+            readingInteractor.saveCurrentVerseIndex(verseIndex)
         }
     }
 
@@ -56,7 +55,7 @@ class VersePresenter(private val readingViewController: ReadingViewController) :
         launch(Dispatchers.Main) {
             try {
                 view?.onVersesLoaded(bookIndex, chapterIndex,
-                        readingViewController.readVerses(translationShortName, bookIndex, chapterIndex))
+                        readingInteractor.readVerses(translationShortName, bookIndex, chapterIndex))
             } catch (e: Exception) {
                 view?.onError(e)
             }

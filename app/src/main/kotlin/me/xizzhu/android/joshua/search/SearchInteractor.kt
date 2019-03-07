@@ -27,9 +27,9 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
 
-class SearchViewController(private val searchActivity: SearchActivity,
-                           private val navigator: Navigator,
-                           private val bibleReadingManager: BibleReadingManager) {
+class SearchInteractor(private val searchActivity: SearchActivity,
+                       private val navigator: Navigator,
+                       private val bibleReadingManager: BibleReadingManager) {
     private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
     private val searchResult: BroadcastChannel<SearchResult> = ConflatedBroadcastChannel(SearchResult.INVALID)
 

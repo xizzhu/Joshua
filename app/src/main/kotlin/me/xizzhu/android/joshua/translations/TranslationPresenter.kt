@@ -52,33 +52,33 @@ class TranslationInfoComparator : Comparator<TranslationInfo> {
     }
 }
 
-class TranslationPresenter(private val translationViewController: TranslationViewController) : MVPPresenter<TranslationView>() {
+class TranslationPresenter(private val translationInteractor: TranslationInteractor) : MVPPresenter<TranslationView>() {
     private val translationComparator = TranslationInfoComparator()
 
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationViewController.observeCurrentTranslation()
+            receiveChannels.add(translationInteractor.observeCurrentTranslation()
                     .onEach { view?.onCurrentTranslationUpdated(it) })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationViewController.observeAvailableTranslations()
+            receiveChannels.add(translationInteractor.observeAvailableTranslations()
                     .onEach {
                         view?.onAvailableTranslationsUpdated(it.sortedWith(translationComparator))
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationViewController.observeDownloadedTranslations()
+            receiveChannels.add(translationInteractor.observeDownloadedTranslations()
                     .onEach {
                         view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
                     })
         }
         launch(Dispatchers.Main) {
-            translationViewController.reload(false)
+            translationInteractor.reload(false)
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationViewController.observeTranslationsLoadingState()
+            receiveChannels.add(translationInteractor.observeTranslationsLoadingState()
                     .onEach { loading ->
                         if (loading) {
                             view?.onTranslationsLoadingStarted()
@@ -96,14 +96,14 @@ class TranslationPresenter(private val translationViewController: TranslationVie
             try {
                 val downloadProgressChannel = Channel<Int>()
                 launch(Dispatchers.Main) {
-                    translationViewController.downloadTranslation(downloadProgressChannel, translationInfo)
+                    translationInteractor.downloadTranslation(downloadProgressChannel, translationInfo)
                 }
                 downloadProgressChannel.onEach { progress ->
                     view?.onTranslationDownloadProgressed(progress)
                 }
 
-                if (translationViewController.observeCurrentTranslation().first().isEmpty()) {
-                    translationViewController.saveCurrentTranslation(translationInfo.shortName)
+                if (translationInteractor.observeCurrentTranslation().first().isEmpty()) {
+                    translationInteractor.saveCurrentTranslation(translationInfo.shortName)
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
@@ -114,8 +114,8 @@ class TranslationPresenter(private val translationViewController: TranslationVie
 
     fun updateCurrentTranslation(currentTranslation: TranslationInfo) {
         launch(Dispatchers.Main) {
-            translationViewController.saveCurrentTranslation(currentTranslation.shortName)
-            translationViewController.finish()
+            translationInteractor.saveCurrentTranslation(currentTranslation.shortName)
+            translationInteractor.finish()
         }
     }
 }

@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.search.toolbar
 
 import kotlinx.coroutines.*
-import me.xizzhu.android.joshua.search.SearchViewController
+import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Before
 import org.junit.Test
@@ -29,7 +29,7 @@ import kotlin.test.assertTrue
 
 class ToolbarPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var searchViewController: SearchViewController
+    private lateinit var searchInteractor: SearchInteractor
     @Mock
     private lateinit var toolbarView: ToolbarView
     private lateinit var toolbarPresenter: ToolbarPresenter
@@ -38,7 +38,7 @@ class ToolbarPresenterTest : BaseUnitTest() {
     override fun setUp() {
         super.setUp()
         MockitoAnnotations.initMocks(this)
-        toolbarPresenter = ToolbarPresenter(searchViewController)
+        toolbarPresenter = ToolbarPresenter(searchInteractor)
     }
 
     @Test
@@ -51,7 +51,7 @@ class ToolbarPresenterTest : BaseUnitTest() {
         runBlocking {
             val query = "query"
             assertTrue(toolbarPresenter.search(query))
-            verify(searchViewController, times(1)).search(query)
+            verify(searchInteractor, times(1)).search(query)
         }
     }
 
@@ -60,11 +60,11 @@ class ToolbarPresenterTest : BaseUnitTest() {
         runBlocking {
             val query = "query"
             val exception = RuntimeException("Random exception")
-            `when`(searchViewController.search(query)).thenThrow(exception)
+            `when`(searchInteractor.search(query)).thenThrow(exception)
 
             toolbarPresenter.attachView(toolbarView)
             assertTrue(toolbarPresenter.search(query))
-            verify(searchViewController, times(1)).search(query)
+            verify(searchInteractor, times(1)).search(query)
             verify(toolbarView, times(1)).onError(exception)
         }
     }
