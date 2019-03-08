@@ -47,7 +47,13 @@ interface TranslationView : MVPView {
 
     fun onTranslationDownloaded()
 
-    fun onError(e: Exception)
+    fun onTranslationDownloadFailed()
+
+    fun onTranslationDeleteStarted()
+
+    fun onTranslationDeleted()
+
+    fun onTranslationDeleteFailed()
 }
 
 class TranslationListView : RecyclerView, TranslationListAdapter.Listener, TranslationView {
@@ -66,6 +72,7 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
     private var downloadedTranslations: List<TranslationInfo>? = null
 
     private var downloadProgressDialog: ProgressDialog? = null
+    private var deleteProgressDialog: ProgressDialog? = null
 
     init {
         layoutManager = LinearLayoutManager(context, VERTICAL, false)
@@ -88,6 +95,7 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
         if (translationInfo.downloaded) {
             DialogHelper.showDialog(context, true, R.string.delete_translation_confirmation,
                     DialogInterface.OnClickListener { _, _ ->
+                        presenter.removeTranslation(translationInfo)
                     }, null)
         }
     }
@@ -141,8 +149,28 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
         downloadProgressDialog = null
     }
 
-    override fun onError(e: Exception) {
+    override fun onTranslationDownloadFailed() {
         dismissDownloadProgressDialog()
+
+        // TODO
+    }
+
+    override fun onTranslationDeleteStarted() {
+        deleteProgressDialog = ProgressDialog.showIndeterminateProgressDialog(context, R.string.deleting_translation)
+    }
+
+    override fun onTranslationDeleted() {
+        dismissDeleteProgressDialog()
+        Toast.makeText(context, R.string.translation_deleted, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun dismissDeleteProgressDialog() {
+        deleteProgressDialog?.dismiss()
+        deleteProgressDialog = null
+    }
+
+    override fun onTranslationDeleteFailed() {
+        dismissDeleteProgressDialog()
 
         // TODO
     }

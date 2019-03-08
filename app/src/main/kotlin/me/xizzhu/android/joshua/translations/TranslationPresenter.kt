@@ -24,7 +24,6 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
-import java.lang.Exception
 import java.util.*
 import kotlin.Comparator
 
@@ -111,7 +110,20 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
-                view?.onError(e)
+                view?.onTranslationDownloadFailed()
+            }
+        }
+    }
+
+    fun removeTranslation(translationInfo: TranslationInfo) {
+        view?.onTranslationDeleteStarted()
+
+        launch(Dispatchers.Main) {
+            try {
+                translationInteractor.removeTranslation(translationInfo)
+                view?.onTranslationDeleted()
+            } catch (e: Exception) {
+                view?.onTranslationDeleteFailed()
             }
         }
     }

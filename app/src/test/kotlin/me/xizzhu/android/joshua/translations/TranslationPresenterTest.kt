@@ -151,7 +151,7 @@ class TranslationPresenterTest : BaseUnitTest() {
             verify(translationInteractor, times(1))
                     .downloadTranslation(downloadProgressChannel, MockContents.kjvTranslationInfo)
             verify(translationView, never()).onTranslationDownloaded()
-            verify(translationView, times(1)).onError(any())
+            verify(translationView, times(1)).onTranslationDownloadFailed(any())
 
             translationPresenter.detachView()
         }

@@ -51,6 +51,10 @@ class TranslationInteractor(private val translationManagementActivity: Translati
         translationManager.downloadTranslation(progressChannel, translationInfo)
     }
 
+    suspend fun removeTranslation(translationInfo: TranslationInfo) {
+        translationManager.removeTranslation(translationInfo)
+    }
+
     fun finish() {
         translationManagementActivity.finish()
     }
