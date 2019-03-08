@@ -16,12 +16,13 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.toMap
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -78,5 +79,28 @@ class TranslationDaoTest : BaseSqliteTest() {
                 androidDatabase.translationDao.search(MockContents.kjvShortName, "God created"))
         assertEquals(listOf(MockContents.kjvVerses[0]),
                 androidDatabase.translationDao.search(MockContents.kjvShortName, "beginning created"))
+    }
+
+    @Test
+    fun testRemoveNonExistTranslation() {
+        assertFalse(androidDatabase.readableDatabase.hasTable("non_exist"))
+        androidDatabase.translationDao.removeTable("non_exist")
+        assertFalse(androidDatabase.readableDatabase.hasTable("non_exist"))
+    }
+
+    @Test
+    fun testRemoveTranslation() {
+        saveTranslation()
+        assertTrue(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
+
+        androidDatabase.translationDao.removeTable(MockContents.kjvShortName)
+        assertFalse(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
+    }
+
+    private fun SQLiteDatabase.hasTable(name: String): Boolean {
+        val cursor: Cursor = rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null)
+        return cursor.use {
+            cursor.count > 0
+        }
     }
 }

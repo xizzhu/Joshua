@@ -209,6 +209,11 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun removeTable(translationShortName: String) {
+        db.execSQL("DROP TABLE IF EXISTS $translationShortName")
+    }
+
+    @WorkerThread
     fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
         var cursor: Cursor? = null
         db.beginTransaction()
