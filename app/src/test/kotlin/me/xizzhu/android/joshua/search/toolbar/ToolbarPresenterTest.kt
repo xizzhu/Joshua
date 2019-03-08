@@ -34,8 +34,8 @@ class ToolbarPresenterTest : BaseUnitTest() {
     private lateinit var toolbarPresenter: ToolbarPresenter
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
         toolbarPresenter = ToolbarPresenter(searchInteractor)
     }
 

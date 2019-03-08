@@ -28,7 +28,7 @@ import org.mockito.MockitoAnnotations
 abstract class BaseUnitTest {
     @CallSuper
     @Before
-    open fun setUp() {
+    open fun setup() {
         Dispatchers.setMain(Dispatchers.Unconfined)
         MockitoAnnotations.initMocks(this)
     }

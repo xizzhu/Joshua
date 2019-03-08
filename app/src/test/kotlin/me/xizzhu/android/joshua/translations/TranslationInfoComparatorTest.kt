@@ -33,8 +33,8 @@ class TranslationInfoComparatorTest : BaseUnitTest() {
     private lateinit var comparator: TranslationInfoComparator
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
         comparator = spy(TranslationInfoComparator())
         `when`(comparator.userLanguage()).thenReturn("en")
     }

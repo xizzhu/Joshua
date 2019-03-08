@@ -35,8 +35,8 @@ class TranslationManagerTest : BaseUnitTest() {
     private lateinit var translationManager: TranslationManager
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
         translationManager = TranslationManager(TranslationRepository(
                 MockLocalTranslationStorage(), MockRemoteTranslationService()))
     }

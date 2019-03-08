@@ -39,8 +39,8 @@ class TranslationPresenterTest : BaseUnitTest() {
     private lateinit var currentTranslationChannel: ConflatedBroadcastChannel<String>
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
 
         translationLoadingStateChannel = ConflatedBroadcastChannel(true)
         `when`(translationInteractor.observeTranslationsLoadingState()).then { translationLoadingStateChannel.openSubscription() }

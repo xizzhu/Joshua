@@ -30,8 +30,8 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     private lateinit var bibleReadingRepository: BibleReadingRepository
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
         bibleReadingRepository = BibleReadingRepository(MockLocalReadingStorage())
     }
 

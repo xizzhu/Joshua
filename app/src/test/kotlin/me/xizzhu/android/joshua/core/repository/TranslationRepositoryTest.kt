@@ -34,8 +34,8 @@ class TranslationRepositoryTest : BaseUnitTest() {
     private lateinit var translationRepository: TranslationRepository
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
         translationRepository = TranslationRepository(MockLocalTranslationStorage(), MockRemoteTranslationService())
     }
 

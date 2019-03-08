@@ -37,8 +37,8 @@ class SearchResultPresenterTest : BaseUnitTest() {
     private lateinit var searchResultPresenter: SearchResultPresenter
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
         searchResultPresenter = SearchResultPresenter(searchInteractor)
     }
 

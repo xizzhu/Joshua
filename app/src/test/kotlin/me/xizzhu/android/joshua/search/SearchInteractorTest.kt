@@ -42,8 +42,8 @@ class SearchInteractorTest : BaseUnitTest() {
     private lateinit var searchInteractor: SearchInteractor
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
         searchInteractor = SearchInteractor(searchActivity, navigator, bibleReadingManager)
     }
 

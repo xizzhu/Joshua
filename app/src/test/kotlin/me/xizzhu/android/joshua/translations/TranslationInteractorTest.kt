@@ -39,8 +39,8 @@ class TranslationInteractorTest : BaseUnitTest() {
     private lateinit var translationInteractor: TranslationInteractor
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
         translationInteractor = TranslationInteractor(translationManagementActivity, bibleReadingManager, translationManager)
     }
 

@@ -38,8 +38,8 @@ class ChapterListPresenterTest : BaseUnitTest() {
     private lateinit var currentVerseIndexChannel: ConflatedBroadcastChannel<VerseIndex>
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
 
         currentTranslationChannel = ConflatedBroadcastChannel("")
         `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
