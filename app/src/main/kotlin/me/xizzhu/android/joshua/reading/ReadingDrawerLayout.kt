@@ -27,12 +27,12 @@ import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
 import me.xizzhu.android.joshua.utils.onEach
 
-class ReadingDrawerPresenter(private val readingViewController: ReadingViewController) : MVPPresenter<ReadingDrawerView>() {
+class ReadingDrawerPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ReadingDrawerView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingViewController.observeCurrentVerseIndex()
+            receiveChannels.add(readingInteractor.observeCurrentVerseIndex()
                     .filter { it.isValid() }
                     .onEach { view?.hide() })
         }

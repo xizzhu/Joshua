@@ -33,26 +33,26 @@ class ReadingModule {
     fun provideReadingViewController(readingActivity: ReadingActivity,
                                      navigator: Navigator,
                                      bibleReadingManager: BibleReadingManager,
-                                     translationManager: TranslationManager): ReadingViewController =
-            ReadingViewController(readingActivity, navigator, bibleReadingManager, translationManager)
+                                     translationManager: TranslationManager): ReadingInteractor =
+            ReadingInteractor(readingActivity, navigator, bibleReadingManager, translationManager)
 
     @Provides
-    fun provideReadingDrawerPresenter(readingViewController: ReadingViewController): ReadingDrawerPresenter =
-            ReadingDrawerPresenter(readingViewController)
+    fun provideReadingDrawerPresenter(readingInteractor: ReadingInteractor): ReadingDrawerPresenter =
+            ReadingDrawerPresenter(readingInteractor)
 
     @Provides
-    fun provideToolbarPresenter(readingViewController: ReadingViewController): ToolbarPresenter =
-            ToolbarPresenter(readingViewController)
+    fun provideToolbarPresenter(readingInteractor: ReadingInteractor): ToolbarPresenter =
+            ToolbarPresenter(readingInteractor)
 
     @Provides
-    fun provideChapterListPresenter(readingViewController: ReadingViewController): ChapterListPresenter =
-            ChapterListPresenter(readingViewController)
+    fun provideChapterListPresenter(readingInteractor: ReadingInteractor): ChapterListPresenter =
+            ChapterListPresenter(readingInteractor)
 
     @Provides
-    fun provideVersePresenter(readingViewController: ReadingViewController): VersePresenter =
-            VersePresenter(readingViewController)
+    fun provideVersePresenter(readingInteractor: ReadingInteractor): VersePresenter =
+            VersePresenter(readingInteractor)
 
     @Provides
-    fun provideSearchButtonPresenter(readingViewController: ReadingViewController): SearchButtonPresenter =
-            SearchButtonPresenter(readingViewController)
+    fun provideSearchButtonPresenter(readingInteractor: ReadingInteractor): SearchButtonPresenter =
+            SearchButtonPresenter(readingInteractor)
 }

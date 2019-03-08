@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading
+package me.xizzhu.android.joshua.translations
 
-import kotlinx.coroutines.channels.ReceiveChannel
-import me.xizzhu.android.joshua.Navigator
-import me.xizzhu.android.joshua.core.*
+import kotlinx.coroutines.channels.*
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.core.TranslationManager
 
-class ReadingViewController(private val readingActivity: ReadingActivity,
-                            private val navigator: Navigator,
+class TranslationInteractor(private val translationManagementActivity: TranslationManagementActivity,
                             private val bibleReadingManager: BibleReadingManager,
                             private val translationManager: TranslationManager) {
+    private val translationsLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
+
+    fun observeTranslationsLoadingState(): ReceiveChannel<Boolean> =
+            translationsLoadingState.openSubscription()
+
+    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
+            translationManager.observeAvailableTranslations()
+
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
 
@@ -33,27 +41,17 @@ class ReadingViewController(private val readingActivity: ReadingActivity,
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
-    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
-
-    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
+    suspend fun reload(forceRefresh: Boolean) {
+        translationsLoadingState.send(true)
+        translationManager.reload(forceRefresh)
+        translationsLoadingState.send(false)
     }
 
-    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
-            bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex)
-
-    suspend fun readBookNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookNames(translationShortName)
-
-    fun openSearch() {
-        navigator.navigate(readingActivity, Navigator.SCREEN_SEARCH)
-    }
-
-    fun openTranslationManagement() {
-        navigator.navigate(readingActivity, Navigator.SCREEN_TRANSLATION_MANAGEMENT)
+    suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
+        translationManager.downloadTranslation(progressChannel, translationInfo)
     }
 
     fun finish() {
-        readingActivity.finish()
+        translationManagementActivity.finish()
     }
 }

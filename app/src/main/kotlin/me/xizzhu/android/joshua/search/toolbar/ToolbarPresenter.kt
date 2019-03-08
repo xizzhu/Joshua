@@ -18,18 +18,18 @@ package me.xizzhu.android.joshua.search.toolbar
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.search.SearchViewController
+import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import java.lang.Exception
 
-class ToolbarPresenter(private val searchViewController: SearchViewController) : MVPPresenter<ToolbarView>() {
+class ToolbarPresenter(private val searchInteractor: SearchInteractor) : MVPPresenter<ToolbarView>() {
     fun search(query: String): Boolean {
         if (query.isEmpty()) {
             return false
         }
         launch(Dispatchers.Main) {
             try {
-                searchViewController.search(query)
+                searchInteractor.search(query)
             } catch (e: Exception) {
                 view?.onError(e)
             }

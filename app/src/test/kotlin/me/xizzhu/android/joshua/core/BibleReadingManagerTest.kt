@@ -16,26 +16,29 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.MockLocalReadingStorage
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class BibleReadingManagerTest {
+class BibleReadingManagerTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
 
     @Before
-    fun setup() {
+    override fun setup() {
+        super.setup()
         bibleReadingManager = BibleReadingManager(BibleReadingRepository(MockLocalReadingStorage()))
     }
 
     @Test
     fun testDefaultCurrentVerseIndex() {
         val expected = VerseIndex.INVALID
-        val actual = runBlocking { bibleReadingManager.observeCurrentVerseIndex().receive() }
+        val actual = runBlocking { bibleReadingManager.observeCurrentVerseIndex().first() }
         assertEquals(expected, actual)
     }
 
@@ -44,7 +47,7 @@ class BibleReadingManagerTest {
         val expected = VerseIndex(1, 2, 3)
         val actual = runBlocking {
             bibleReadingManager.saveCurrentVerseIndex(VerseIndex(1, 2, 3))
-            bibleReadingManager.observeCurrentVerseIndex().receive()
+            bibleReadingManager.observeCurrentVerseIndex().first()
         }
         assertEquals(expected, actual)
     }
@@ -52,7 +55,7 @@ class BibleReadingManagerTest {
     @Test
     fun testDefaultCurrentTranslation() {
         val expected = ""
-        val actual = runBlocking { bibleReadingManager.observeCurrentTranslation().receive() }
+        val actual = runBlocking { bibleReadingManager.observeCurrentTranslation().first() }
         assertEquals(expected, actual)
     }
 
@@ -61,7 +64,7 @@ class BibleReadingManagerTest {
         val expected = "KJV"
         val actual = runBlocking {
             bibleReadingManager.saveCurrentTranslation("KJV")
-            bibleReadingManager.observeCurrentTranslation().receive()
+            bibleReadingManager.observeCurrentTranslation().first()
         }
         assertEquals(expected, actual)
     }

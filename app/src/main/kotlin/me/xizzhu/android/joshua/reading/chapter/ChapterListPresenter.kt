@@ -20,23 +20,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.reading.ReadingViewController
+import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 
-class ChapterListPresenter(private val readingViewController: ReadingViewController) : MVPPresenter<ChapterView>() {
+class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ChapterView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingViewController.observeCurrentTranslation()
+            receiveChannels.add(readingInteractor.observeCurrentTranslation()
                     .filter { it.isNotEmpty() }
                     .onEach {
-                        view?.onBookNamesUpdated(readingViewController.readBookNames(it))
+                        view?.onBookNamesUpdated(readingInteractor.readBookNames(it))
                     })
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingViewController.observeCurrentVerseIndex()
+            receiveChannels.add(readingInteractor.observeCurrentVerseIndex()
                     .filter { it.isValid() }
                     .onEach {
                         view?.onCurrentVerseIndexUpdated(it)
@@ -46,7 +46,7 @@ class ChapterListPresenter(private val readingViewController: ReadingViewControl
 
     fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) {
-            readingViewController.saveCurrentVerseIndex(verseIndex)
+            readingInteractor.saveCurrentVerseIndex(verseIndex)
         }
     }
 }

@@ -31,18 +31,18 @@ class SearchModule {
     @Provides
     fun provideSearchViewController(searchActivity: SearchActivity,
                                     navigator: Navigator,
-                                    bibleReadingManager: BibleReadingManager): SearchViewController =
-            SearchViewController(searchActivity, navigator, bibleReadingManager)
+                                    bibleReadingManager: BibleReadingManager): SearchInteractor =
+            SearchInteractor(searchActivity, navigator, bibleReadingManager)
 
     @Provides
-    fun provideToolbarPresenter(searchViewController: SearchViewController): ToolbarPresenter =
-            ToolbarPresenter(searchViewController)
+    fun provideToolbarPresenter(searchInteractor: SearchInteractor): ToolbarPresenter =
+            ToolbarPresenter(searchInteractor)
 
     @Provides
-    fun provideLoadingSpinnerPresenter(searchViewController: SearchViewController): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(searchViewController.observeSearchState())
+    fun provideLoadingSpinnerPresenter(searchInteractor: SearchInteractor): LoadingSpinnerPresenter =
+            LoadingSpinnerPresenter(searchInteractor.observeSearchState())
 
     @Provides
-    fun provideSearchResultPresenter(searchViewController: SearchViewController): SearchResultPresenter =
-            SearchResultPresenter(searchViewController)
+    fun provideSearchResultPresenter(searchInteractor: SearchInteractor): SearchResultPresenter =
+            SearchResultPresenter(searchInteractor)
 }

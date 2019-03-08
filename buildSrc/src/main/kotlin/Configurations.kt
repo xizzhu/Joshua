@@ -53,6 +53,7 @@ object Versions {
 
     const val testRunner = "1.1.0"
     const val testRules = "1.1.1"
+    const val mockito = "2.25.0"
 }
 
 object Dependencies {
@@ -60,6 +61,7 @@ object Dependencies {
         const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}"
         const val coroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}"
         const val test = "org.jetbrains.kotlin:kotlin-test-junit:${Versions.kotlin}"
+        const val coroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.kotlinCoroutines}"
     }
 
     object AndroidX {
@@ -93,5 +95,9 @@ object Dependencies {
 
     object Stetho {
         const val stetho = "com.facebook.stetho:stetho:${Versions.stetho}"
+    }
+
+    object Mockito {
+        const val mockito = "org.mockito:mockito-core:${Versions.mockito}"
     }
 }
