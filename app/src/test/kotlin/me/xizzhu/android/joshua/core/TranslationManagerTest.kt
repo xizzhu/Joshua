@@ -137,4 +137,30 @@ class TranslationManagerTest : BaseUnitTest() {
             assertEquals(expectedDownloaded, actualDownloaded)
         }
     }
+
+    @Test
+    fun testRemoveNonExistTranslation() {
+        runBlocking {
+            translationManager.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, false))
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+        }
+    }
+
+    @Test
+    fun testDownloadThenRemove() {
+        runBlocking {
+            val channel = Channel<Int>(Channel.UNLIMITED)
+            translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationManager.observeDownloadedTranslations().first())
+
+            translationManager.removeTranslation(MockContents.kjvTranslationInfo)
+            System.out.println("--> available: ${translationManager.observeAvailableTranslations().first()}")
+            System.out.println("--> downloaded: ${translationManager.observeDownloadedTranslations().first()}")
+
+            assertEquals(listOf(MockContents.kjvTranslationInfo), translationManager.observeAvailableTranslations().first())
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+        }
+    }
 }
