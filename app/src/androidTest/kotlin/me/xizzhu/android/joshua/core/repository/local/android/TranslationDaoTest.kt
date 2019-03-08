@@ -96,11 +96,4 @@ class TranslationDaoTest : BaseSqliteTest() {
         androidDatabase.translationDao.removeTable(MockContents.kjvShortName)
         assertFalse(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
     }
-
-    private fun SQLiteDatabase.hasTable(name: String): Boolean {
-        val cursor: Cursor = rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null)
-        return cursor.use {
-            cursor.count > 0
-        }
-    }
 }

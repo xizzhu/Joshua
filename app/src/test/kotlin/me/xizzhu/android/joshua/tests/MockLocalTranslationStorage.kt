@@ -41,4 +41,8 @@ class MockLocalTranslationStorage : LocalTranslationStorage {
         }
         translations.add(translationInfo)
     }
+
+    override suspend fun removeTranslation(translationInfo: TranslationInfo) {
+        translations.removeIf { it.shortName == translationInfo.shortName }
+    }
 }

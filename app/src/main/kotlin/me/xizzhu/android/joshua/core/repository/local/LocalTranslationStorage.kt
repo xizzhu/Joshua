@@ -26,4 +26,6 @@ interface LocalTranslationStorage {
     suspend fun saveTranslation(translationInfo: TranslationInfo,
                                 bookNames: List<String>,
                                 verses: Map<Pair<Int, Int>, List<String>>)
+
+    suspend fun removeTranslation(translationInfo: TranslationInfo)
 }

@@ -60,4 +60,28 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
             }
         }
     }
+
+    override suspend fun removeTranslation(translationInfo: TranslationInfo) {
+        withContext(Dispatchers.IO) {
+            var db: SQLiteDatabase? = null
+            try {
+                db = androidDatabase.writableDatabase
+                db.beginTransaction()
+
+                androidDatabase.bookNamesDao.remove(translationInfo.shortName)
+                if (translationInfo.downloaded) {
+                    androidDatabase.translationInfoDao.save(TranslationInfo(
+                            translationInfo.shortName, translationInfo.name,
+                            translationInfo.language, translationInfo.size, false))
+                } else {
+                    androidDatabase.translationInfoDao.save(translationInfo)
+                }
+                androidDatabase.translationDao.removeTable(translationInfo.shortName)
+
+                db.setTransactionSuccessful()
+            } finally {
+                db?.endTransaction()
+            }
+        }
+    }
 }
