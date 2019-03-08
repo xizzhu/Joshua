@@ -71,6 +71,20 @@ class TranslationManagerTest : BaseUnitTest() {
     }
 
     @Test
+    fun testReloadThenDownload() {
+        runBlocking {
+            translationManager.reload(false)
+            assertEquals(listOf(MockContents.kjvTranslationInfo), translationManager.observeAvailableTranslations().first())
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+
+            val channel = Channel<Int>(Channel.UNLIMITED)
+            translationManager.downloadTranslation(channel, MockContents.kjvDownloadedTranslationInfo)
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationManager.observeDownloadedTranslations().first())
+        }
+    }
+
+    @Test
     fun testDownloadTranslation() {
         runBlocking {
             val expectedAvailable = emptyList<TranslationInfo>()
@@ -156,9 +170,6 @@ class TranslationManagerTest : BaseUnitTest() {
             assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationManager.observeDownloadedTranslations().first())
 
             translationManager.removeTranslation(MockContents.kjvTranslationInfo)
-            System.out.println("--> available: ${translationManager.observeAvailableTranslations().first()}")
-            System.out.println("--> downloaded: ${translationManager.observeDownloadedTranslations().first()}")
-
             assertEquals(listOf(MockContents.kjvTranslationInfo), translationManager.observeAvailableTranslations().first())
             assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
         }

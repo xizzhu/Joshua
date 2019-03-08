@@ -74,7 +74,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         translationRepository.downloadTranslation(channel, translationInfo)
 
         val currentAvailable = ArrayList(availableTranslations.value)
-        currentAvailable.remove(translationInfo)
+        currentAvailable.removeByShortName(translationInfo.shortName)
         availableTranslations.send(currentAvailable)
 
         val currentDownloaded = ArrayList(downloadedTranslations.value)
