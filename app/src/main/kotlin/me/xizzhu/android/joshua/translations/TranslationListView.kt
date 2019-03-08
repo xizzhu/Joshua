@@ -17,12 +17,14 @@
 package me.xizzhu.android.joshua.translations
 
 import android.content.Context
+import android.content.DialogInterface
 import android.util.AttributeSet
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.utils.MVPView
@@ -79,6 +81,14 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
             presenter.updateCurrentTranslation(translationInfo)
         } else {
             presenter.downloadTranslation(translationInfo)
+        }
+    }
+
+    override fun onTranslationLongClicked(translationInfo: TranslationInfo) {
+        if (translationInfo.downloaded) {
+            DialogHelper.showDialog(context, true, R.string.delete_translation_confirmation,
+                    DialogInterface.OnClickListener { _, _ ->
+                    }, null)
         }
     }
 

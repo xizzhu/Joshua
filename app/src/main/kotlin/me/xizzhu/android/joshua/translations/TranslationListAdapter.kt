@@ -30,12 +30,14 @@ private class AvailableTranslationTitleViewHolder(inflater: LayoutInflater, pare
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_available_translation_title, parent, false))
 
 private class TranslationInfoViewHolder(private val listener: TranslationListAdapter.Listener, inflater: LayoutInflater, parent: ViewGroup)
-    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_translation, parent, false)), View.OnClickListener {
+    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_translation, parent, false)),
+        View.OnClickListener, View.OnLongClickListener {
     private val textView = itemView as TextView
     private var translationInfo: TranslationInfo? = null
 
     init {
         itemView.setOnClickListener(this)
+        itemView.setOnLongClickListener(this)
     }
 
     fun bind(translationInfo: TranslationInfo, currentTranslation: Boolean) {
@@ -50,6 +52,12 @@ private class TranslationInfoViewHolder(private val listener: TranslationListAda
         val t = translationInfo ?: return
         listener.onTranslationClicked(t)
     }
+
+    override fun onLongClick(v: View): Boolean {
+        val t = translationInfo ?: return false
+        listener.onTranslationLongClicked(t)
+        return true
+    }
 }
 
 class TranslationListAdapter(context: Context, private val listener: Listener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -60,6 +68,8 @@ class TranslationListAdapter(context: Context, private val listener: Listener) :
 
     interface Listener {
         fun onTranslationClicked(translationInfo: TranslationInfo)
+
+        fun onTranslationLongClicked(translationInfo: TranslationInfo)
     }
 
     private val inflater = LayoutInflater.from(context)
