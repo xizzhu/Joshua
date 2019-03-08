@@ -105,6 +105,11 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
             db.insertWithOnConflict(TABLE_BOOK_NAMES, null, values, SQLiteDatabase.CONFLICT_REPLACE)
         }
     }
+
+    @WorkerThread
+    fun remove(translationShortName: String) {
+        db.delete(TABLE_BOOK_NAMES, "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName))
+    }
 }
 
 class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
