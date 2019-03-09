@@ -151,7 +151,7 @@ class TranslationPresenterTest : BaseUnitTest() {
             verify(translationInteractor, times(1))
                     .downloadTranslation(downloadProgressChannel, MockContents.kjvTranslationInfo)
             verify(translationView, never()).onTranslationDownloaded()
-            verify(translationView, times(1)).onTranslationDownloadFailed()
+            verify(translationView, times(1)).onTranslationDownloadFailed(MockContents.kjvTranslationInfo)
 
             translationPresenter.detachView()
         }
@@ -161,10 +161,11 @@ class TranslationPresenterTest : BaseUnitTest() {
     fun testNonExistRemoveTranslation() {
         translationPresenter.attachView(translationView)
 
-        translationPresenter.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, false))
+        val translationToRemove = TranslationInfo("non_exist", "name", "language", 12345L, false)
+        translationPresenter.removeTranslation(translationToRemove)
         verify(translationView, times(1)).onTranslationDeleteStarted()
         verify(translationView, times(1)).onTranslationDeleted()
-        verify(translationView, never()).onTranslationDeleteFailed()
+        verify(translationView, never()).onTranslationDeleteFailed(translationToRemove)
 
         translationPresenter.detachView()
     }
@@ -182,7 +183,7 @@ class TranslationPresenterTest : BaseUnitTest() {
             translationPresenter.removeTranslation(MockContents.kjvTranslationInfo)
             verify(translationView, times(1)).onTranslationDeleteStarted()
             verify(translationView, times(1)).onTranslationDeleted()
-            verify(translationView, never()).onTranslationDeleteFailed()
+            verify(translationView, never()).onTranslationDeleteFailed(MockContents.kjvTranslationInfo)
 
             translationPresenter.detachView()
         }
@@ -198,7 +199,7 @@ class TranslationPresenterTest : BaseUnitTest() {
 
             translationPresenter.removeTranslation(MockContents.kjvTranslationInfo)
             verify(translationView, times(1)).onTranslationDeleteStarted()
-            verify(translationView, times(1)).onTranslationDeleteFailed()
+            verify(translationView, times(1)).onTranslationDeleteFailed(MockContents.kjvTranslationInfo)
             verify(translationView, never()).onTranslationDeleted()
 
             translationPresenter.detachView()
