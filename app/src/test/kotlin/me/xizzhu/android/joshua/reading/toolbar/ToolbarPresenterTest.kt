@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -53,12 +54,18 @@ class ToolbarPresenterTest : BaseUnitTest() {
         `when`(readingInteractor.observeDownloadedTranslations()).then { downloadedTranslationsChannel.openSubscription() }
 
         toolbarPresenter = ToolbarPresenter(readingInteractor)
+        toolbarPresenter.attachView(toolbarView)
+    }
+
+    @After
+    override fun tearDown() {
+        toolbarPresenter.detachView()
+        super.tearDown()
     }
 
     @Test
     fun testObserveCurrentTranslation() {
         runBlocking {
-            toolbarPresenter.attachView(toolbarView)
             verify(toolbarView, never()).onCurrentTranslationUpdated(any())
             verify(toolbarView, never()).onBookNamesUpdated(any())
 
@@ -66,36 +73,51 @@ class ToolbarPresenterTest : BaseUnitTest() {
             currentTranslationChannel.send(MockContents.kjvShortName)
             verify(toolbarView, times(1)).onCurrentTranslationUpdated(MockContents.kjvShortName)
             verify(toolbarView, times(1)).onBookNamesUpdated(MockContents.kjvBookNames)
-
-            toolbarPresenter.detachView()
         }
     }
 
     @Test
     fun testObserveCurrentVerseIndex() {
         runBlocking {
-            toolbarPresenter.attachView(toolbarView)
             verify(toolbarView, never()).onCurrentVerseIndexUpdated(any())
 
             val verseIndex = VerseIndex(1, 2, 3)
             currentVerseIndexChannel.send(verseIndex)
             verify(toolbarView, times(1)).onCurrentVerseIndexUpdated(verseIndex)
-
-            toolbarPresenter.detachView()
         }
     }
 
     @Test
     fun testObserveDownloadedTranslations() {
         runBlocking {
-            toolbarPresenter.attachView(toolbarView)
             verify(toolbarView, times(1)).onNoTranslationsDownloaded()
 
             downloadedTranslationsChannel.send(listOf(MockContents.kjvDownloadedTranslationInfo))
             verify(toolbarView, times(1))
                     .onDownloadedTranslationsLoaded(listOf(MockContents.kjvDownloadedTranslationInfo))
+        }
+    }
 
-            toolbarPresenter.detachView()
+    @Test
+    fun testUpdateCurrentTranslation() {
+        runBlocking {
+            `when`(readingInteractor.saveCurrentTranslation(MockContents.kjvShortName))
+                    .then { runBlocking { currentTranslationChannel.send(MockContents.kjvShortName) } }
+
+            toolbarPresenter.updateCurrentTranslation(MockContents.kjvShortName)
+            verify(toolbarView, times(1)).onCurrentTranslationUpdated(MockContents.kjvShortName)
+            verify(toolbarView, never()).onCurrentTranslationUpdateFailed(MockContents.kjvShortName)
+        }
+    }
+
+    @Test
+    fun testUpdateCurrentTranslationWithException() {
+        runBlocking {
+            `when`(readingInteractor.saveCurrentTranslation(MockContents.kjvShortName)).thenThrow(RuntimeException("Random exception"))
+
+            toolbarPresenter.updateCurrentTranslation(MockContents.kjvShortName)
+            verify(toolbarView, never()).onCurrentTranslationUpdated(MockContents.kjvShortName)
+            verify(toolbarView, times(1)).onCurrentTranslationUpdateFailed(MockContents.kjvShortName)
         }
     }
 }

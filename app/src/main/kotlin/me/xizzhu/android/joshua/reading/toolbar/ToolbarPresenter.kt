@@ -56,7 +56,11 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
 
     fun updateCurrentTranslation(translationShortName: String) {
         launch(Dispatchers.Main) {
-            readingInteractor.saveCurrentTranslation(translationShortName)
+            try {
+                readingInteractor.saveCurrentTranslation(translationShortName)
+            } catch (e: Exception) {
+                view?.onCurrentTranslationUpdateFailed(translationShortName)
+            }
         }
     }
 

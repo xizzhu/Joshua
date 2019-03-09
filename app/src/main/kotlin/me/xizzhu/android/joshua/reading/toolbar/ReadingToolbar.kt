@@ -37,11 +37,11 @@ interface ToolbarView : MVPView {
 
     fun onCurrentTranslationUpdated(translationShortName: String)
 
+    fun onCurrentTranslationUpdateFailed(translationShortName: String)
+
     fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex)
 
     fun onBookNamesUpdated(bookNames: List<String>)
-
-    fun onError(e: Exception)
 }
 
 class ReadingToolbar : Toolbar, ToolbarView {
@@ -129,6 +129,13 @@ class ReadingToolbar : Toolbar, ToolbarView {
         updateTranslationList()
     }
 
+    override fun onCurrentTranslationUpdateFailed(translationShortName: String) {
+        DialogHelper.showDialog(context, true, R.string.dialog_update_translation_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.updateCurrentTranslation(translationShortName)
+                })
+    }
+
     override fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex) {
         this.verseIndex = verseIndex
         updateTitle()
@@ -148,9 +155,5 @@ class ReadingToolbar : Toolbar, ToolbarView {
         this.bookNames.clear()
         this.bookNames.addAll(bookNames)
         updateTitle()
-    }
-
-    override fun onError(e: Exception) {
-        // TODO
     }
 }
