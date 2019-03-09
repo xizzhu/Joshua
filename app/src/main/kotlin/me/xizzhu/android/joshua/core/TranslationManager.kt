@@ -74,7 +74,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         translationRepository.downloadTranslation(channel, translationInfo)
 
         val currentAvailable = ArrayList(availableTranslations.value)
-        currentAvailable.remove(translationInfo)
+        currentAvailable.removeByShortName(translationInfo.shortName)
         availableTranslations.send(currentAvailable)
 
         val currentDownloaded = ArrayList(downloadedTranslations.value)
@@ -84,4 +84,28 @@ class TranslationManager(private val translationRepository: TranslationRepositor
 
         channel.close()
     }
+
+    suspend fun removeTranslation(translationInfo: TranslationInfo) {
+        translationRepository.removeTranslation(translationInfo)
+
+        val currentDownloaded = ArrayList(downloadedTranslations.value)
+        if (currentDownloaded.removeByShortName(translationInfo.shortName)) {
+            downloadedTranslations.send(currentDownloaded)
+
+            val currentAvailable = ArrayList(availableTranslations.value)
+            currentAvailable.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
+                    translationInfo.language, translationInfo.size, false))
+            availableTranslations.send(currentAvailable)
+        }
+    }
+}
+
+private fun ArrayList<TranslationInfo>.removeByShortName(translationShortName: String): Boolean {
+    for (i in 0 until size) {
+        if (this[i].shortName == translationShortName) {
+            removeAt(i)
+            return true
+        }
+    }
+    return false
 }

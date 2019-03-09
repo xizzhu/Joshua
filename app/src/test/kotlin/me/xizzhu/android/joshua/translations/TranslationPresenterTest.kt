@@ -151,7 +151,55 @@ class TranslationPresenterTest : BaseUnitTest() {
             verify(translationInteractor, times(1))
                     .downloadTranslation(downloadProgressChannel, MockContents.kjvTranslationInfo)
             verify(translationView, never()).onTranslationDownloaded()
-            verify(translationView, times(1)).onError(any())
+            verify(translationView, times(1)).onTranslationDownloadFailed()
+
+            translationPresenter.detachView()
+        }
+    }
+
+    @Test
+    fun testNonExistRemoveTranslation() {
+        translationPresenter.attachView(translationView)
+
+        translationPresenter.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, false))
+        verify(translationView, times(1)).onTranslationDeleteStarted()
+        verify(translationView, times(1)).onTranslationDeleted()
+        verify(translationView, never()).onTranslationDeleteFailed()
+
+        translationPresenter.detachView()
+    }
+
+    @Test
+    fun testDownloadThenRemoveTranslation() {
+        runBlocking {
+            translationPresenter.attachView(translationView)
+
+            val downloadProgressChannel = Channel<Int>()
+            translationPresenter.downloadTranslation(MockContents.kjvTranslationInfo, downloadProgressChannel)
+            downloadProgressChannel.close()
+            verify(translationView, times(1)).onTranslationDownloaded()
+
+            translationPresenter.removeTranslation(MockContents.kjvTranslationInfo)
+            verify(translationView, times(1)).onTranslationDeleteStarted()
+            verify(translationView, times(1)).onTranslationDeleted()
+            verify(translationView, never()).onTranslationDeleteFailed()
+
+            translationPresenter.detachView()
+        }
+    }
+
+    @Test
+    fun testRemoveTranslationWithException() {
+        runBlocking {
+            `when`(translationInteractor.removeTranslation(MockContents.kjvTranslationInfo))
+                    .thenThrow(RuntimeException("Random exception"))
+
+            translationPresenter.attachView(translationView)
+
+            translationPresenter.removeTranslation(MockContents.kjvTranslationInfo)
+            verify(translationView, times(1)).onTranslationDeleteStarted()
+            verify(translationView, times(1)).onTranslationDeleteFailed()
+            verify(translationView, never()).onTranslationDeleted()
 
             translationPresenter.detachView()
         }

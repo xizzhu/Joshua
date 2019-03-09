@@ -17,6 +17,8 @@
 package me.xizzhu.android.joshua.core.repository.local.android
 
 import android.content.Context
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import androidx.annotation.CallSuper
 import androidx.test.core.app.ApplicationProvider
 import org.junit.After
@@ -41,5 +43,12 @@ abstract class BaseSqliteTest {
     open fun tearDown() {
         androidDatabase.close()
         clearLocalStorage()
+    }
+
+    protected fun SQLiteDatabase.hasTable(name: String): Boolean {
+        val cursor: Cursor = rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null)
+        return cursor.use {
+            cursor.count > 0
+        }
     }
 }

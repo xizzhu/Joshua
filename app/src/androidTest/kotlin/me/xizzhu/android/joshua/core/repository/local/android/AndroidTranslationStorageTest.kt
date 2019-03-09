@@ -19,10 +19,10 @@ package me.xizzhu.android.joshua.core.repository.local.android
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.toMap
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -89,6 +89,33 @@ class AndroidTranslationStorageTest : BaseSqliteTest() {
             val actual = androidTranslationStorage.readTranslations()
             assertEquals(1, actual.size)
             assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
+        }
+    }
+
+    @Test
+    fun testRemoveNonExistTranslation() {
+        runBlocking {
+            assertFalse(androidDatabase.readableDatabase.hasTable("non_exist"))
+            androidTranslationStorage.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, true))
+            assertFalse(androidDatabase.readableDatabase.hasTable("non_exist"))
+        }
+    }
+
+    @Test
+    fun testRemoveTranslation() {
+        runBlocking {
+            androidTranslationStorage.saveTranslation(MockContents.kjvTranslationInfo,
+                    MockContents.kjvBookNames, MockContents.kjvVerses.toMap())
+            assertTrue(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
+            assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(MockContents.kjvShortName))
+            assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(MockContents.kjvShortName,
+                    MockContents.kjvVerses[0].verseIndex.bookIndex, MockContents.kjvVerses[0].verseIndex.chapterIndex))
+
+            androidTranslationStorage.removeTranslation(MockContents.kjvTranslationInfo)
+            assertFalse(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
+            assertTrue(androidDatabase.bookNamesDao.read(MockContents.kjvShortName).isEmpty())
+            assertTrue(androidDatabase.translationDao.read(MockContents.kjvShortName,
+                    MockContents.kjvVerses[0].verseIndex.bookIndex, MockContents.kjvVerses[0].verseIndex.chapterIndex).isEmpty())
         }
     }
 }

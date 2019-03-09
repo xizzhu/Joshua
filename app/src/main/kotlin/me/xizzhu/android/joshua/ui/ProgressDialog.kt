@@ -36,6 +36,16 @@ class ProgressDialog private constructor(private val dialog: AlertDialog, privat
             dialog.show()
             return ProgressDialog(dialog, progressBar)
         }
+
+        fun showIndeterminateProgressDialog(context: Context, @StringRes title: Int): ProgressDialog {
+            val dialog = AlertDialog.Builder(context)
+                    .setCancelable(false)
+                    .setTitle(title)
+                    .setView(View.inflate(context, R.layout.widget_indeterminate_progress_bar, null))
+                    .create()
+            dialog.show()
+            return ProgressDialog(dialog, null)
+        }
     }
 
     fun setProgress(progress: Int) {

@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.core.repository.local.android
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -35,16 +34,33 @@ class BookNamesDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenRead() {
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
-        assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(MockContents.kjvShortName))
+        val translationShortName = MockContents.kjvShortName
+        androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames)
+        assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(translationShortName))
     }
 
     @Test
     fun testSaveOverrideThenReadBookNames() {
-        runBlocking {
-            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"))
-            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
-            assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(MockContents.kjvShortName))
-        }
+        val translationShortName = MockContents.kjvShortName
+        androidDatabase.bookNamesDao.save(translationShortName, listOf("random_1", "whatever_2"))
+        androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames)
+        assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(translationShortName))
+    }
+
+    @Test
+    fun testRemoveNonExist() {
+        val translationShortName = "not_exist"
+        androidDatabase.bookNamesDao.remove(translationShortName)
+        assertTrue(androidDatabase.bookNamesDao.read(translationShortName).isEmpty())
+    }
+
+    @Test
+    fun testSaveThenRemove() {
+        val translationShortName = MockContents.kjvShortName
+        androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames)
+        assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(translationShortName))
+
+        androidDatabase.bookNamesDao.remove(translationShortName)
+        assertTrue(androidDatabase.bookNamesDao.read(translationShortName).isEmpty())
     }
 }

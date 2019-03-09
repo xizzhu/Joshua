@@ -71,6 +71,20 @@ class TranslationManagerTest : BaseUnitTest() {
     }
 
     @Test
+    fun testReloadThenDownload() {
+        runBlocking {
+            translationManager.reload(false)
+            assertEquals(listOf(MockContents.kjvTranslationInfo), translationManager.observeAvailableTranslations().first())
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+
+            val channel = Channel<Int>(Channel.UNLIMITED)
+            translationManager.downloadTranslation(channel, MockContents.kjvDownloadedTranslationInfo)
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationManager.observeDownloadedTranslations().first())
+        }
+    }
+
+    @Test
     fun testDownloadTranslation() {
         runBlocking {
             val expectedAvailable = emptyList<TranslationInfo>()
@@ -135,6 +149,29 @@ class TranslationManagerTest : BaseUnitTest() {
 
             assertEquals(expectedAvailable, actualAvailable)
             assertEquals(expectedDownloaded, actualDownloaded)
+        }
+    }
+
+    @Test
+    fun testRemoveNonExistTranslation() {
+        runBlocking {
+            translationManager.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, false))
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+        }
+    }
+
+    @Test
+    fun testDownloadThenRemove() {
+        runBlocking {
+            val channel = Channel<Int>(Channel.UNLIMITED)
+            translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationManager.observeDownloadedTranslations().first())
+
+            translationManager.removeTranslation(MockContents.kjvTranslationInfo)
+            assertEquals(listOf(MockContents.kjvTranslationInfo), translationManager.observeAvailableTranslations().first())
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
         }
     }
 }
