@@ -19,4 +19,5 @@
     <string name="menu_more_translation">More</string>
 
     <string name="dialog_search_error">Error occurred during search, retry?</string>
+    <string name="dialog_verse_selection_error">Failed to select the verse, retry?</string>
 </resources>
