@@ -40,6 +40,8 @@ interface VerseView : MVPView {
 
     fun onCurrentTranslationUpdated(currentTranslation: String)
 
+    fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int)
+
     fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>)
 
     fun onVersesLoadFailed(translationShortName: String, bookIndex: Int, chapterIndex: Int)
@@ -56,8 +58,7 @@ class VerseViewPager : ViewPager, VerseView, VersePagerAdapter.Listener {
             if (currentVerseIndex.toPagePosition() == position) {
                 return
             }
-            presenter.updateCurrentVerseIndex(VerseIndex(
-                    position.toBookIndex(), position.toChapterIndex(), 0))
+            presenter.selectChapter(position.toBookIndex(), position.toChapterIndex())
         }
     }
 
@@ -93,6 +94,13 @@ class VerseViewPager : ViewPager, VerseView, VersePagerAdapter.Listener {
     override fun onCurrentTranslationUpdated(currentTranslation: String) {
         this.currentTranslation = currentTranslation
         refreshUi()
+    }
+
+    override fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int) {
+        DialogHelper.showDialog(context, true, R.string.dialog_chapter_selection_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.selectChapter(bookIndex, chapterIndex)
+                })
     }
 
     override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {

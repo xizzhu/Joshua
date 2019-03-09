@@ -81,6 +81,28 @@ class VersePresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testSelectChapter() {
+        runBlocking {
+            val bookIndex = 1
+            val chapterIndex = 2
+            versePresenter.selectChapter(bookIndex, chapterIndex)
+            verify(verseView, never()).onChapterSelectionFailed(bookIndex, chapterIndex)
+        }
+    }
+
+    @Test
+    fun testSelectChapterWithException() {
+        runBlocking {
+            `when`(readingInteractor.saveCurrentVerseIndex(any())).thenThrow(RuntimeException("Random exception"))
+
+            val bookIndex = 1
+            val chapterIndex = 2
+            versePresenter.selectChapter(bookIndex, chapterIndex)
+            verify(verseView, times(1)).onChapterSelectionFailed(bookIndex, chapterIndex)
+        }
+    }
+
+    @Test
     fun testLoadVerses() {
         runBlocking {
             val translationShortName = MockContents.kjvShortName

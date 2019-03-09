@@ -23,7 +23,6 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
-import java.lang.Exception
 
 class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<VerseView>() {
     override fun onViewAttached() {
@@ -45,9 +44,13 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         }
     }
 
-    fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
+    fun selectChapter(bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
-            readingInteractor.saveCurrentVerseIndex(verseIndex)
+            try {
+                readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+            } catch (e: Exception) {
+                view?.onChapterSelectionFailed(bookIndex, chapterIndex)
+            }
         }
     }
 
