@@ -7,9 +7,11 @@
     <string name="header_available_translations">Available translations</string>
     <string name="dialog_downloading_translation">Downloading…</string>
     <string name="dialog_installing_translation">Installing…</string>
+    <string name="dialog_download_error">Failed to download, retry?</string>
     <string name="toast_translation_downloaded">Translation downloaded</string>
     <string name="dialog_delete_translation_confirmation">Delete now?</string>
     <string name="dialog_deleting_translation">Deleting…</string>
+    <string name="dialog_delete_error">Failed to delete, retry?</string>
     <string name="toast_translation_deleted">Translation deleted</string>
 
     <string name="dialog_no_translation_downloaded">No translation, download now?</string>

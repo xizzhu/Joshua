@@ -70,7 +70,9 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
     private var availableTranslations: List<TranslationInfo>? = null
     private var downloadedTranslations: List<TranslationInfo>? = null
 
+    private var translationToDownload: TranslationInfo? = null
     private var downloadProgressDialog: ProgressDialog? = null
+    private var translationToDelete: TranslationInfo? = null
     private var deleteProgressDialog: ProgressDialog? = null
 
     init {
@@ -86,17 +88,27 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
         if (translationInfo.downloaded) {
             presenter.updateCurrentTranslation(translationInfo)
         } else {
-            presenter.downloadTranslation(translationInfo)
+            downloadTranslation(translationInfo)
         }
+    }
+
+    private fun downloadTranslation(translationInfo: TranslationInfo) {
+        translationToDownload = translationInfo
+        presenter.downloadTranslation(translationInfo)
     }
 
     override fun onTranslationLongClicked(translationInfo: TranslationInfo) {
         if (translationInfo.downloaded && translationInfo.shortName != currentTranslation) {
             DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
                     DialogInterface.OnClickListener { _, _ ->
-                        presenter.removeTranslation(translationInfo)
+                        removeTranslation(translationInfo)
                     }, null)
         }
+    }
+
+    private fun removeTranslation(translationInfo: TranslationInfo) {
+        translationToDelete = translationInfo
+        presenter.removeTranslation(translationInfo)
     }
 
     override fun onCurrentTranslationUpdated(currentTranslation: String) {
@@ -145,6 +157,7 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
 
     override fun onTranslationDownloaded() {
         dismissDownloadProgressDialog()
+        translationToDownload = null
         Toast.makeText(context, R.string.toast_translation_downloaded, Toast.LENGTH_SHORT).show()
     }
 
@@ -156,7 +169,14 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
     override fun onTranslationDownloadFailed() {
         dismissDownloadProgressDialog()
 
-        // TODO
+        val translationToDownload = this.translationToDownload
+        this.translationToDownload = null
+        if (translationToDownload != null) {
+            DialogHelper.showDialog(context, true, R.string.dialog_download_error,
+                    DialogInterface.OnClickListener { _, _ ->
+                        downloadTranslation(translationToDownload)
+                    }, null)
+        }
     }
 
     override fun onTranslationDeleteStarted() {
@@ -165,6 +185,7 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
 
     override fun onTranslationDeleted() {
         dismissDeleteProgressDialog()
+        translationToDelete = null
         Toast.makeText(context, R.string.toast_translation_deleted, Toast.LENGTH_SHORT).show()
     }
 
@@ -176,6 +197,13 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
     override fun onTranslationDeleteFailed() {
         dismissDeleteProgressDialog()
 
-        // TODO
+        val translationToDelete = this.translationToDelete
+        this.translationToDelete = null
+        if (translationToDelete != null) {
+            DialogHelper.showDialog(context, true, R.string.dialog_delete_error,
+                    DialogInterface.OnClickListener { _, _ ->
+                        removeTranslation(translationToDelete)
+                    }, null)
+        }
     }
 }
