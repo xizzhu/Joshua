@@ -44,9 +44,13 @@ class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : M
         }
     }
 
-    fun updateCurrentVerseIndex(verseIndex: VerseIndex) {
+    fun selectChapter(bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
-            readingInteractor.saveCurrentVerseIndex(verseIndex)
+            try {
+                readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+            } catch (e: Exception) {
+                view?.onChapterSelectionFailed(bookIndex, chapterIndex)
+            }
         }
     }
 }

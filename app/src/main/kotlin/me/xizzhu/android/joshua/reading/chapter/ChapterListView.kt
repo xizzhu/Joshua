@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading.chapter
 
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.util.AttributeSet
@@ -31,6 +32,7 @@ import androidx.core.content.ContextCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPView
 
 interface ChapterView : MVPView {
@@ -38,7 +40,7 @@ interface ChapterView : MVPView {
 
     fun onBookNamesUpdated(bookNames: List<String>)
 
-    fun onError(e: Exception)
+    fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int)
 }
 
 class ChapterListView : ExpandableListView, ChapterView,
@@ -97,8 +99,11 @@ class ChapterListView : ExpandableListView, ChapterView,
         refreshUi()
     }
 
-    override fun onError(e: Exception) {
-        // TODO
+    override fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int) {
+        DialogHelper.showDialog(context, true, R.string.dialog_chapter_selection_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.selectChapter(bookIndex, chapterIndex)
+                })
     }
 
     override fun onGroupClick(parent: ExpandableListView, v: View, groupPosition: Int, id: Long): Boolean {
@@ -119,8 +124,7 @@ class ChapterListView : ExpandableListView, ChapterView,
         val chapterTag = v.tag as ChapterTag
         if (chapterTag.bookIndex != currentVerseIndex.bookIndex
                 || chapterTag.chapterIndex != currentVerseIndex.chapterIndex) {
-            val verseIndex = VerseIndex(chapterTag.bookIndex, chapterTag.chapterIndex, 0)
-            presenter.updateCurrentVerseIndex(verseIndex)
+            presenter.selectChapter(chapterTag.bookIndex, chapterTag.chapterIndex)
         }
     }
 }
