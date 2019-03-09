@@ -32,6 +32,8 @@ import me.xizzhu.android.joshua.utils.MVPView
 interface TranslationView : MVPView {
     fun onCurrentTranslationUpdated(currentTranslation: String)
 
+    fun onCurrentTranslationUpdateFailed(translationShortName: String)
+
     fun onTranslationsLoadingStarted()
 
     fun onTranslationsLoadingCompleted()
@@ -86,7 +88,7 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
 
     override fun onTranslationClicked(translationInfo: TranslationInfo) {
         if (translationInfo.downloaded) {
-            presenter.updateCurrentTranslation(translationInfo)
+            presenter.updateCurrentTranslation(translationInfo.shortName)
         } else {
             downloadTranslation(translationInfo)
         }
@@ -122,6 +124,13 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
         }
 
         adapter.setTranslations(downloadedTranslations!!, availableTranslations!!, currentTranslation!!)
+    }
+
+    override fun onCurrentTranslationUpdateFailed(translationShortName: String) {
+        DialogHelper.showDialog(context, true, R.string.dialog_update_translation_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.updateCurrentTranslation(translationShortName)
+                })
     }
 
     override fun onTranslationsLoadingStarted() {

@@ -13,6 +13,7 @@
     <string name="dialog_deleting_translation">Deleting…</string>
     <string name="dialog_delete_error">Failed to delete, retry?</string>
     <string name="toast_translation_deleted">Translation deleted</string>
+    <string name="dialog_update_translation_error">Failed to select the translation, retry?</string>
 
     <string name="dialog_no_translation_downloaded">No translation, download now?</string>
     <string name="menu_more_translation">More</string>

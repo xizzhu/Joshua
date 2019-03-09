@@ -204,4 +204,19 @@ class TranslationPresenterTest : BaseUnitTest() {
             translationPresenter.detachView()
         }
     }
+
+    @Test
+    fun testUpdateCurrentTranslationWithException() {
+        runBlocking {
+            `when`(translationInteractor.saveCurrentTranslation(MockContents.kjvShortName))
+                    .thenThrow(RuntimeException("Random exception"))
+
+            translationPresenter.attachView(translationView)
+
+            translationPresenter.updateCurrentTranslation(MockContents.kjvShortName)
+            verify(translationView, times(1)).onCurrentTranslationUpdateFailed(MockContents.kjvShortName)
+
+            translationPresenter.detachView()
+        }
+    }
 }

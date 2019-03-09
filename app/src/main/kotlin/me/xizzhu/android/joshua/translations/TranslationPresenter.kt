@@ -128,10 +128,14 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
     }
 
-    fun updateCurrentTranslation(currentTranslation: TranslationInfo) {
+    fun updateCurrentTranslation(translationShortName: String) {
         launch(Dispatchers.Main) {
-            translationInteractor.saveCurrentTranslation(currentTranslation.shortName)
-            translationInteractor.finish()
+            try {
+                translationInteractor.saveCurrentTranslation(translationShortName)
+                translationInteractor.finish()
+            } catch (e: Exception) {
+                view?.onCurrentTranslationUpdateFailed(translationShortName)
+            }
         }
     }
 }
