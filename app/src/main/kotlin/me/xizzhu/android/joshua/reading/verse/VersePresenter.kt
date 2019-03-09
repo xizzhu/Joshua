@@ -57,7 +57,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
                 view?.onVersesLoaded(bookIndex, chapterIndex,
                         readingInteractor.readVerses(translationShortName, bookIndex, chapterIndex))
             } catch (e: Exception) {
-                view?.onError(e)
+                view?.onVersesLoadFailed(translationShortName, bookIndex, chapterIndex)
             }
         }
     }

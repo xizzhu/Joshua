@@ -22,6 +22,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -48,41 +49,40 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
 
         versePresenter = VersePresenter(readingInteractor)
+        versePresenter.attachView(verseView)
+    }
+
+    @After
+    override fun tearDown() {
+        versePresenter.detachView()
+        super.tearDown()
     }
 
     @Test
     fun testObserveCurrentTranslation() {
         runBlocking {
-            versePresenter.attachView(verseView)
             verify(verseView, never()).onCurrentTranslationUpdated(any())
 
             `when`(readingInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
             currentTranslationChannel.send(MockContents.kjvShortName)
             verify(verseView, times(1)).onCurrentTranslationUpdated(MockContents.kjvShortName)
-
-            versePresenter.detachView()
         }
     }
 
     @Test
     fun testObserveCurrentVerseIndex() {
         runBlocking {
-            versePresenter.attachView(verseView)
             verify(verseView, never()).onCurrentVerseIndexUpdated(any())
 
             val verseIndex = VerseIndex(1, 2, 3)
             currentVerseIndexChannel.send(verseIndex)
             verify(verseView, times(1)).onCurrentVerseIndexUpdated(verseIndex)
-
-            versePresenter.detachView()
         }
     }
 
     @Test
     fun testLoadVerses() {
         runBlocking {
-            versePresenter.attachView(verseView)
-
             val translationShortName = MockContents.kjvShortName
             val bookIndex = 1
             val chapterIndex = 2
@@ -90,17 +90,13 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(translationShortName, bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
-            verify(verseView, never()).onError(any())
-
-            versePresenter.detachView()
+            verify(verseView, never()).onVersesLoadFailed(translationShortName, bookIndex, chapterIndex)
         }
     }
 
     @Test
     fun testLoadVersesWithExceptions() {
         runBlocking {
-            versePresenter.attachView(verseView)
-
             val translationShortName = MockContents.kjvShortName
             val bookIndex = 1
             val chapterIndex = 2
@@ -108,9 +104,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(translationShortName, bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
-            verify(verseView, times(1)).onError(any())
-
-            versePresenter.detachView()
+            verify(verseView, times(1)).onVersesLoadFailed(translationShortName, bookIndex, chapterIndex)
         }
     }
 }
