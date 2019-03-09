@@ -28,7 +28,6 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.utils.MVPView
-import java.lang.Exception
 
 interface TranslationView : MVPView {
     fun onCurrentTranslationUpdated(currentTranslation: String)
@@ -93,7 +92,7 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
 
     override fun onTranslationLongClicked(translationInfo: TranslationInfo) {
         if (translationInfo.downloaded && translationInfo.shortName != currentTranslation) {
-            DialogHelper.showDialog(context, true, R.string.delete_translation_confirmation,
+            DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
                     DialogInterface.OnClickListener { _, _ ->
                         presenter.removeTranslation(translationInfo)
                     }, null)
@@ -132,21 +131,21 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
     }
 
     override fun onTranslationDownloadStarted() {
-        downloadProgressDialog = ProgressDialog.showProgressDialog(context, R.string.downloading_translation, 100)
+        downloadProgressDialog = ProgressDialog.showProgressDialog(context, R.string.dialog_downloading_translation, 100)
     }
 
     override fun onTranslationDownloadProgressed(progress: Int) {
         if (progress < 100) {
             downloadProgressDialog?.setProgress(progress)
         } else {
-            downloadProgressDialog?.setTitle(R.string.installing_translation)
+            downloadProgressDialog?.setTitle(R.string.dialog_installing_translation)
             downloadProgressDialog?.setIsIndeterminate(true)
         }
     }
 
     override fun onTranslationDownloaded() {
         dismissDownloadProgressDialog()
-        Toast.makeText(context, R.string.translation_downloaded, Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, R.string.toast_translation_downloaded, Toast.LENGTH_SHORT).show()
     }
 
     private fun dismissDownloadProgressDialog() {
@@ -161,12 +160,12 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
     }
 
     override fun onTranslationDeleteStarted() {
-        deleteProgressDialog = ProgressDialog.showIndeterminateProgressDialog(context, R.string.deleting_translation)
+        deleteProgressDialog = ProgressDialog.showIndeterminateProgressDialog(context, R.string.dialog_deleting_translation)
     }
 
     override fun onTranslationDeleted() {
         dismissDeleteProgressDialog()
-        Toast.makeText(context, R.string.translation_deleted, Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, R.string.toast_translation_deleted, Toast.LENGTH_SHORT).show()
     }
 
     private fun dismissDeleteProgressDialog() {

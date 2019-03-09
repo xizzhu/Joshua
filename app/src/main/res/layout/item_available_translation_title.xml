@@ -4,4 +4,4 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/padding"
-    android:text="@string/available_translations" />
+    android:text="@string/header_available_translations" />

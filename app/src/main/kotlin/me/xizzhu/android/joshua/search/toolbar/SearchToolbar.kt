@@ -81,7 +81,7 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
     override fun onQueryTextChange(newText: String): Boolean = false
 
     override fun onError(e: Exception) {
-        DialogHelper.showDialog(context, true, R.string.error_search,
+        DialogHelper.showDialog(context, true, R.string.dialog_search_error,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.search(searchView.query.toString())
                 }, null)

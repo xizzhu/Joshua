@@ -69,7 +69,7 @@ class ReadingToolbar : Toolbar, ToolbarView {
     }
 
     override fun onNoTranslationsDownloaded() {
-        DialogHelper.showDialog(context, false, R.string.no_translation_downloaded,
+        DialogHelper.showDialog(context, false, R.string.dialog_no_translation_downloaded,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.openTranslationManagement()
                 },
@@ -99,7 +99,7 @@ class ReadingToolbar : Toolbar, ToolbarView {
             }
             names.add(translation.shortName)
         }
-        names.add(resources.getString(R.string.more_translation)) // amends "More" to the end of the list
+        names.add(resources.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
 
         val translationSpinner = menu.findItem(R.id.action_translations).actionView as Spinner
         translationSpinner.adapter = TranslationSpinnerAdapter(context, names)
