@@ -48,6 +48,14 @@ class ProgressDialog private constructor(private val dialog: AlertDialog, privat
         }
     }
 
+    fun setTitle(@StringRes title: Int) {
+        dialog.setTitle(title)
+    }
+
+    fun setIsIndeterminate(indeterminate: Boolean) {
+        progressBar?.isIndeterminate = indeterminate
+    }
+
     fun setProgress(progress: Int) {
         progressBar?.progress = progress
     }

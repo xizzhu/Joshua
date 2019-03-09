@@ -136,7 +136,12 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
     }
 
     override fun onTranslationDownloadProgressed(progress: Int) {
-        downloadProgressDialog?.setProgress(progress)
+        if (progress < 100) {
+            downloadProgressDialog?.setProgress(progress)
+        } else {
+            downloadProgressDialog?.setTitle(R.string.installing_translation)
+            downloadProgressDialog?.setIsIndeterminate(true)
+        }
     }
 
     override fun onTranslationDownloaded() {

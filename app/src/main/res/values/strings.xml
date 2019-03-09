@@ -6,6 +6,7 @@
     <string name="title_translation_management">Translations</string>
     <string name="available_translations">Available translations</string>
     <string name="downloading_translation">Downloading…</string>
+    <string name="installing_translation">Installing…</string>
     <string name="translation_downloaded">Translation downloaded</string>
     <string name="delete_translation_confirmation">Delete now?</string>
     <string name="deleting_translation">Deleting…</string>
