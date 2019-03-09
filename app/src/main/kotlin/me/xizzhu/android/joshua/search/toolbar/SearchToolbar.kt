@@ -84,6 +84,6 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
         DialogHelper.showDialog(context, true, R.string.dialog_search_error,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.search(searchView.query.toString())
-                }, null)
+                })
     }
 }

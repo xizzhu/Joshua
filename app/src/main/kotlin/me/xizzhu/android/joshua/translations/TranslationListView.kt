@@ -102,7 +102,7 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
             DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
                     DialogInterface.OnClickListener { _, _ ->
                         removeTranslation(translationInfo)
-                    }, null)
+                    })
         }
     }
 
@@ -175,7 +175,7 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
             DialogHelper.showDialog(context, true, R.string.dialog_download_error,
                     DialogInterface.OnClickListener { _, _ ->
                         downloadTranslation(translationToDownload)
-                    }, null)
+                    })
         }
     }
 
@@ -203,7 +203,7 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
             DialogHelper.showDialog(context, true, R.string.dialog_delete_error,
                     DialogInterface.OnClickListener { _, _ ->
                         removeTranslation(translationToDelete)
-                    }, null)
+                    })
         }
     }
 }
