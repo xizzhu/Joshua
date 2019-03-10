@@ -27,7 +27,7 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPView
 
 interface ToolbarView : MVPView {
-    fun onError(e: Exception)
+    fun onError(query: String)
 }
 
 class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
@@ -80,10 +80,10 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
 
     override fun onQueryTextChange(newText: String): Boolean = false
 
-    override fun onError(e: Exception) {
-        DialogHelper.showDialog(context, true, R.string.error_search,
+    override fun onError(query: String) {
+        DialogHelper.showDialog(context, true, R.string.dialog_search_error,
                 DialogInterface.OnClickListener { _, _ ->
-                    presenter.search(searchView.query.toString())
-                }, null)
+                    presenter.search(query)
+                })
     }
 }

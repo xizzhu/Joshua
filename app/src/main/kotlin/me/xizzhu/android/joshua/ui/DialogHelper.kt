@@ -24,6 +24,11 @@ import androidx.appcompat.app.AlertDialog
 class DialogHelper {
     companion object {
         fun showDialog(context: Context, cancelable: Boolean, @StringRes message: Int,
+                       onPositive: DialogInterface.OnClickListener) {
+            showDialog(context, cancelable, message, onPositive, null)
+        }
+
+        fun showDialog(context: Context, cancelable: Boolean, @StringRes message: Int,
                        onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener?) {
             AlertDialog.Builder(context)
                     .setCancelable(cancelable)

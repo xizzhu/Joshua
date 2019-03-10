@@ -17,19 +17,28 @@
 package me.xizzhu.android.joshua.reading
 
 import android.content.Context
+import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.View
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
 
 class SearchButtonPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<SearchButtonView>() {
     fun openSearch() {
-        readingInteractor.openSearch()
+        try {
+            readingInteractor.openSearch()
+        } catch (e: Exception) {
+            view?.onFailedToNavigateToSearch()
+        }
     }
 }
 
-interface SearchButtonView : MVPView
+interface SearchButtonView : MVPView {
+    fun onFailedToNavigateToSearch()
+}
 
 class SearchFloatingActionButton : FloatingActionButton, SearchButtonView, View.OnClickListener {
     constructor(context: Context) : super(context)
@@ -50,5 +59,12 @@ class SearchFloatingActionButton : FloatingActionButton, SearchButtonView, View.
 
     override fun onClick(v: View) {
         presenter.openSearch()
+    }
+
+    override fun onFailedToNavigateToSearch() {
+        DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_search_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.openSearch()
+                })
     }
 }

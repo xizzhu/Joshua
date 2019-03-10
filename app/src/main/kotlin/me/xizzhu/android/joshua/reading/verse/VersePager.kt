@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.content.Context
+import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -29,6 +30,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPView
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
@@ -38,9 +40,11 @@ interface VerseView : MVPView {
 
     fun onCurrentTranslationUpdated(currentTranslation: String)
 
+    fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int)
+
     fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>)
 
-    fun onError(e: Exception)
+    fun onVersesLoadFailed(translationShortName: String, bookIndex: Int, chapterIndex: Int)
 }
 
 class VerseViewPager : ViewPager, VerseView, VersePagerAdapter.Listener {
@@ -54,8 +58,7 @@ class VerseViewPager : ViewPager, VerseView, VersePagerAdapter.Listener {
             if (currentVerseIndex.toPagePosition() == position) {
                 return
             }
-            presenter.updateCurrentVerseIndex(VerseIndex(
-                    position.toBookIndex(), position.toChapterIndex(), 0))
+            presenter.selectChapter(position.toBookIndex(), position.toChapterIndex())
         }
     }
 
@@ -93,12 +96,22 @@ class VerseViewPager : ViewPager, VerseView, VersePagerAdapter.Listener {
         refreshUi()
     }
 
+    override fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int) {
+        DialogHelper.showDialog(context, true, R.string.dialog_chapter_selection_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.selectChapter(bookIndex, chapterIndex)
+                })
+    }
+
     override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
         adapter.setVerses(bookIndex, chapterIndex, verses)
     }
 
-    override fun onError(e: Exception) {
-        // TODO
+    override fun onVersesLoadFailed(translationShortName: String, bookIndex: Int, chapterIndex: Int) {
+        DialogHelper.showDialog(context, true, R.string.dialog_verse_load_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.loadVerses(translationShortName, bookIndex, chapterIndex)
+                })
     }
 
     override fun onChapterRequested(bookIndex: Int, chapterIndex: Int) {

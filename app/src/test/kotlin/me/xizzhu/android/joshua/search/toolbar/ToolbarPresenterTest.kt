@@ -63,7 +63,7 @@ class ToolbarPresenterTest : BaseUnitTest() {
             toolbarPresenter.attachView(toolbarView)
             assertTrue(toolbarPresenter.search(query))
             verify(searchInteractor, times(1)).search(query)
-            verify(toolbarView, times(1)).onError(exception)
+            verify(toolbarView, times(1)).onError(query)
         }
     }
 }

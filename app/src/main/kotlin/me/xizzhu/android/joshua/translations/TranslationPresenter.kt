@@ -93,45 +93,49 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     }
 
     @VisibleForTesting
-    fun downloadTranslation(translationInfo: TranslationInfo, downloadProgressChannel: Channel<Int>) {
+    fun downloadTranslation(translationToDelete: TranslationInfo, downloadProgressChannel: Channel<Int>) {
         view?.onTranslationDownloadStarted()
 
         launch(Dispatchers.Main) {
             try {
                 launch(Dispatchers.Main) {
-                    translationInteractor.downloadTranslation(downloadProgressChannel, translationInfo)
+                    translationInteractor.downloadTranslation(downloadProgressChannel, translationToDelete)
                 }
                 downloadProgressChannel.onEach { progress ->
                     view?.onTranslationDownloadProgressed(progress)
                 }
 
                 if (translationInteractor.observeCurrentTranslation().first().isEmpty()) {
-                    translationInteractor.saveCurrentTranslation(translationInfo.shortName)
+                    translationInteractor.saveCurrentTranslation(translationToDelete.shortName)
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
-                view?.onTranslationDownloadFailed()
+                view?.onTranslationDownloadFailed(translationToDelete)
             }
         }
     }
 
-    fun removeTranslation(translationInfo: TranslationInfo) {
+    fun removeTranslation(translationToRemove: TranslationInfo) {
         view?.onTranslationDeleteStarted()
 
         launch(Dispatchers.Main) {
             try {
-                translationInteractor.removeTranslation(translationInfo)
+                translationInteractor.removeTranslation(translationToRemove)
                 view?.onTranslationDeleted()
             } catch (e: Exception) {
-                view?.onTranslationDeleteFailed()
+                view?.onTranslationDeleteFailed(translationToRemove)
             }
         }
     }
 
-    fun updateCurrentTranslation(currentTranslation: TranslationInfo) {
+    fun updateCurrentTranslation(translationShortName: String) {
         launch(Dispatchers.Main) {
-            translationInteractor.saveCurrentTranslation(currentTranslation.shortName)
-            translationInteractor.finish()
+            try {
+                translationInteractor.saveCurrentTranslation(translationShortName)
+                translationInteractor.finish()
+            } catch (e: Exception) {
+                view?.onCurrentTranslationUpdateFailed(translationShortName)
+            }
         }
     }
 }

@@ -31,7 +31,7 @@ class ToolbarPresenter(private val searchInteractor: SearchInteractor) : MVPPres
             try {
                 searchInteractor.search(query)
             } catch (e: Exception) {
-                view?.onError(e)
+                view?.onError(query)
             }
         }
         return true

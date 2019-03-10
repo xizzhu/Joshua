@@ -45,10 +45,14 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor) : MV
         }
     }
 
-    fun selectVerse(verseIndex: VerseIndex) {
+    fun selectVerse(verseToSelect: VerseIndex) {
         launch(Dispatchers.Main) {
-            searchInteractor.selectVerse(verseIndex)
-            searchInteractor.openReading()
+            try {
+                searchInteractor.selectVerse(verseToSelect)
+                searchInteractor.openReading()
+            } catch (e: Exception) {
+                view?.onVerseSelectionFailed(verseToSelect)
+            }
         }
     }
 }

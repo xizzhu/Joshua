@@ -37,11 +37,13 @@ interface ToolbarView : MVPView {
 
     fun onCurrentTranslationUpdated(translationShortName: String)
 
+    fun onCurrentTranslationUpdateFailed(translationShortName: String)
+
     fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex)
 
     fun onBookNamesUpdated(bookNames: List<String>)
 
-    fun onError(e: Exception)
+    fun onFailedToNavigateToTranslationManagement()
 }
 
 class ReadingToolbar : Toolbar, ToolbarView {
@@ -69,7 +71,7 @@ class ReadingToolbar : Toolbar, ToolbarView {
     }
 
     override fun onNoTranslationsDownloaded() {
-        DialogHelper.showDialog(context, false, R.string.no_translation_downloaded,
+        DialogHelper.showDialog(context, false, R.string.dialog_no_translation_downloaded,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.openTranslationManagement()
                 },
@@ -99,7 +101,7 @@ class ReadingToolbar : Toolbar, ToolbarView {
             }
             names.add(translation.shortName)
         }
-        names.add(resources.getString(R.string.more_translation)) // amends "More" to the end of the list
+        names.add(resources.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
 
         val translationSpinner = menu.findItem(R.id.action_translations).actionView as Spinner
         translationSpinner.adapter = TranslationSpinnerAdapter(context, names)
@@ -129,6 +131,13 @@ class ReadingToolbar : Toolbar, ToolbarView {
         updateTranslationList()
     }
 
+    override fun onCurrentTranslationUpdateFailed(translationShortName: String) {
+        DialogHelper.showDialog(context, true, R.string.dialog_update_translation_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.updateCurrentTranslation(translationShortName)
+                })
+    }
+
     override fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex) {
         this.verseIndex = verseIndex
         updateTitle()
@@ -150,7 +159,10 @@ class ReadingToolbar : Toolbar, ToolbarView {
         updateTitle()
     }
 
-    override fun onError(e: Exception) {
-        // TODO
+    override fun onFailedToNavigateToTranslationManagement() {
+        DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_translation_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.openTranslationManagement()
+                })
     }
 }

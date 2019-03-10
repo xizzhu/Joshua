@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.search.result
 
 import android.content.Context
+import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -25,7 +26,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchResult
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.utils.MVPView
 import java.lang.StringBuilder
@@ -36,6 +39,8 @@ interface SearchResultView : MVPView {
     fun onSearchCompleted()
 
     fun onSearchResultUpdated(searchResult: SearchResult)
+
+    fun onVerseSelectionFailed(verseToSelect: VerseIndex)
 }
 
 class SearchResultListView : RecyclerView, SearchResultView {
@@ -73,6 +78,13 @@ class SearchResultListView : RecyclerView, SearchResultView {
 
     override fun onSearchResultUpdated(searchResult: SearchResult) {
         adapter.setSearchResult(searchResult)
+    }
+
+    override fun onVerseSelectionFailed(verseToSelect: VerseIndex) {
+        DialogHelper.showDialog(context, true, R.string.dialog_verse_selection_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.selectVerse(verseToSelect)
+                })
     }
 }
 

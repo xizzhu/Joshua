@@ -22,6 +22,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -48,33 +49,56 @@ class ChapterListPresenterTest : BaseUnitTest() {
         `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
 
         chapterListPresenter = ChapterListPresenter(readingInteractor)
+        chapterListPresenter.attachView(chapterListView)
+    }
+
+    @After
+    override fun tearDown() {
+        chapterListPresenter.detachView()
+        super.tearDown()
     }
 
     @Test
     fun testObserveCurrentTranslation() {
         runBlocking {
-            chapterListPresenter.attachView(chapterListView)
             verify(chapterListView, never()).onBookNamesUpdated(any())
 
             `when`(readingInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
             currentTranslationChannel.send(MockContents.kjvShortName)
             verify(chapterListView, times(1)).onBookNamesUpdated(MockContents.kjvBookNames)
-
-            chapterListPresenter.detachView()
         }
     }
 
     @Test
     fun testObserveCurrentVerseIndex() {
         runBlocking {
-            chapterListPresenter.attachView(chapterListView)
             verify(chapterListView, never()).onCurrentVerseIndexUpdated(any())
 
             val verseIndex = VerseIndex(1, 2, 3)
             currentVerseIndexChannel.send(verseIndex)
             verify(chapterListView, times(1)).onCurrentVerseIndexUpdated(verseIndex)
+        }
+    }
 
-            chapterListPresenter.detachView()
+    @Test
+    fun testSelectChapter() {
+        runBlocking {
+            val bookIndex = 1
+            val chapterIndex = 2
+            chapterListPresenter.selectChapter(bookIndex, chapterIndex)
+            verify(chapterListView, never()).onChapterSelectionFailed(bookIndex, chapterIndex)
+        }
+    }
+
+    @Test
+    fun testSelectChapterWithException() {
+        runBlocking {
+            `when`(readingInteractor.saveCurrentVerseIndex(any())).thenThrow(RuntimeException("Random exception"))
+
+            val bookIndex = 1
+            val chapterIndex = 2
+            chapterListPresenter.selectChapter(bookIndex, chapterIndex)
+            verify(chapterListView, times(1)).onChapterSelectionFailed(bookIndex, chapterIndex)
         }
     }
 }
