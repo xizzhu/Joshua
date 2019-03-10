@@ -20,11 +20,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 
 class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<VerseView>() {
+    companion object {
+        private val TAG: String = VersePresenter::class.java.simpleName
+    }
+
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -49,6 +54,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
             try {
                 readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
+                Log.e(TAG, e, "Failed to update chapter selection")
                 view?.onChapterSelectionFailed(bookIndex, chapterIndex)
             }
         }
@@ -60,6 +66,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
                 view?.onVersesLoaded(bookIndex, chapterIndex,
                         readingInteractor.readVerses(translationShortName, bookIndex, chapterIndex))
             } catch (e: Exception) {
+                Log.e(TAG, e, "Failed to load verses")
                 view?.onVersesLoadFailed(translationShortName, bookIndex, chapterIndex)
             }
         }

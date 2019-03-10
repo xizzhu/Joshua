@@ -20,11 +20,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 
 class SearchResultPresenter(private val searchInteractor: SearchInteractor) : MVPPresenter<SearchResultView>() {
+    companion object {
+        private val TAG: String = SearchResultPresenter::class.java.simpleName
+    }
+
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -51,6 +56,7 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor) : MV
                 searchInteractor.selectVerse(verseToSelect)
                 searchInteractor.openReading()
             } catch (e: Exception) {
+                Log.e(TAG, e, "Failed to select verse and open reading activity")
                 view?.onVerseSelectionFailed(verseToSelect)
             }
         }

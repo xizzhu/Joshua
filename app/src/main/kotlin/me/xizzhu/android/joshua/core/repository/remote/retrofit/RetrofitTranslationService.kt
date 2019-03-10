@@ -21,6 +21,7 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.suspendCancellableCoroutine
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslation
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
@@ -44,6 +45,8 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
     companion object {
         const val OKHTTP_TIMEOUT_IN_SECONDS = 30L
         const val BASE_URL = "https://xizzhu.me/bible/download/"
+
+        private val TAG: String = RetrofitTranslationService::class.java.simpleName
     }
 
     private val retrofit: Retrofit by lazy {
@@ -101,11 +104,13 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
                 }
             }
         } catch (e: Exception) {
+            Log.e(TAG, e, "Failed to fetch translation")
             channel.close(e)
         } finally {
             try {
                 inputStream?.close()
-            } catch (ignored: IOException) {
+            } catch (e: IOException) {
+                Log.w(TAG, e, "Failed to close input stream")
             }
         }
 
