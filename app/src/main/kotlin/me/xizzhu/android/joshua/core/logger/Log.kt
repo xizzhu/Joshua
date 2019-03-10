@@ -46,27 +46,57 @@ object Log {
         log(VERBOSE, tag, msg)
     }
 
+    fun v(tag: String, e: Throwable, msg: String) {
+        log(VERBOSE, tag, e, msg)
+    }
+
     fun d(tag: String, msg: String) {
         log(DEBUG, tag, msg)
+    }
+
+    fun d(tag: String, e: Throwable, msg: String) {
+        log(DEBUG, tag, e, msg)
     }
 
     fun i(tag: String, msg: String) {
         log(INFO, tag, msg)
     }
 
+    fun i(tag: String, e: Throwable, msg: String) {
+        log(INFO, tag, e, msg)
+    }
+
     fun w(tag: String, msg: String) {
         log(WARN, tag, msg)
+    }
+
+    fun w(tag: String, e: Throwable, msg: String) {
+        log(WARN, tag, e, msg)
     }
 
     fun e(tag: String, msg: String) {
         log(ERROR, tag, msg)
     }
 
+    fun e(tag: String, e: Throwable, msg: String) {
+        log(ERROR, tag, e, msg)
+    }
+
     fun f(tag: String, msg: String) {
         log(FATAL, tag, msg)
     }
 
+    fun f(tag: String, e: Throwable, msg: String) {
+        log(FATAL, tag, e, msg)
+    }
+
     private fun log(@Level level: Int, tag: String, msg: String) {
+        for (logger in loggers) {
+            logger.log(level, tag, msg)
+        }
+    }
+
+    private fun log(@Level level: Int, tag: String, e: Throwable, msg: String) {
         for (logger in loggers) {
             logger.log(level, tag, msg)
         }

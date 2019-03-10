@@ -18,4 +18,6 @@ package me.xizzhu.android.joshua.core.logger
 
 interface Logger {
     fun log(@Log.Level level: Int, tag: String, msg: String)
+
+    fun log(@Log.Level level: Int, tag: String, e: Throwable, msg: String)
 }

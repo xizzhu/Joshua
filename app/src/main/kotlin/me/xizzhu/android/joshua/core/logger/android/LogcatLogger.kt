@@ -30,4 +30,15 @@ class LogcatLogger : Logger {
             Log.FATAL -> android.util.Log.wtf(tag, msg)
         }
     }
+
+    override fun log(level: Int, tag: String, e: Throwable, msg: String) {
+        when (level) {
+            Log.VERBOSE -> android.util.Log.v(tag, msg, e)
+            Log.DEBUG -> android.util.Log.d(tag, msg, e)
+            Log.INFO -> android.util.Log.i(tag, msg, e)
+            Log.WARN -> android.util.Log.w(tag, msg, e)
+            Log.ERROR -> android.util.Log.e(tag, msg, e)
+            Log.FATAL -> android.util.Log.wtf(tag, msg, e)
+        }
+    }
 }
