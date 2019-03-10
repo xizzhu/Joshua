@@ -42,6 +42,8 @@ interface ToolbarView : MVPView {
     fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex)
 
     fun onBookNamesUpdated(bookNames: List<String>)
+
+    fun onFailedToNavigateToTranslationManagement()
 }
 
 class ReadingToolbar : Toolbar, ToolbarView {
@@ -155,5 +157,12 @@ class ReadingToolbar : Toolbar, ToolbarView {
         this.bookNames.clear()
         this.bookNames.addAll(bookNames)
         updateTitle()
+    }
+
+    override fun onFailedToNavigateToTranslationManagement() {
+        DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_translation_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.openTranslationManagement()
+                })
     }
 }

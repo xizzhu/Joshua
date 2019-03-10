@@ -120,4 +120,18 @@ class ToolbarPresenterTest : BaseUnitTest() {
             verify(toolbarView, times(1)).onCurrentTranslationUpdateFailed(MockContents.kjvShortName)
         }
     }
+
+    @Test
+    fun testOpenTranslation() {
+        toolbarPresenter.openTranslationManagement()
+        verify(toolbarView, never()).onFailedToNavigateToTranslationManagement()
+    }
+
+    @Test
+    fun testOpenTranslationWithException() {
+        `when`(readingInteractor.openTranslationManagement()).thenThrow(RuntimeException("Random exception"))
+
+        toolbarPresenter.openTranslationManagement()
+        verify(toolbarView, times(1)).onFailedToNavigateToTranslationManagement()
+    }
 }

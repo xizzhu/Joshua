@@ -65,7 +65,11 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
     }
 
     fun openTranslationManagement() {
-        readingInteractor.openTranslationManagement()
+        try {
+            readingInteractor.openTranslationManagement()
+        } catch (e: Exception) {
+            view?.onFailedToNavigateToTranslationManagement()
+        }
     }
 
     fun finish() {
