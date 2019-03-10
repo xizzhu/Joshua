@@ -20,11 +20,45 @@ import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
 import dagger.android.AndroidInjection
+import me.xizzhu.android.joshua.core.logger.Log
 
 abstract class BaseActivity : AppCompatActivity() {
+    private val tag = javaClass.simpleName
+
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
+        Log.i(tag, "onCreate()")
+    }
+
+    @CallSuper
+    override fun onStart() {
+        super.onStart()
+        Log.i(tag, "onStart()")
+    }
+
+    @CallSuper
+    override fun onResume() {
+        super.onResume()
+        Log.i(tag, "onResume()")
+    }
+
+    @CallSuper
+    override fun onPause() {
+        Log.i(tag, "onPause()")
+        super.onPause()
+    }
+
+    @CallSuper
+    override fun onStop() {
+        Log.i(tag, "onStop()")
+        super.onStop()
+    }
+
+    @CallSuper
+    override fun onDestroy() {
+        Log.i(tag, "onDestroy()")
+        super.onDestroy()
     }
 }
