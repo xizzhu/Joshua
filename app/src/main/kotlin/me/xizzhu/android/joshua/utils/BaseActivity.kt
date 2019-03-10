@@ -20,35 +20,11 @@ import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
 import dagger.android.AndroidInjection
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlin.coroutines.CoroutineContext
 
-abstract class BaseActivity : AppCompatActivity(), CoroutineScope {
-    private val job: Job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
-
-    protected val receiveChannels = ArrayList<ReceiveChannel<*>>()
-
+abstract class BaseActivity : AppCompatActivity() {
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
-    }
-
-    @CallSuper
-    override fun onStop() {
-        job.cancelChildren()
-
-        for (r in receiveChannels) {
-            r.cancel()
-        }
-        receiveChannels.clear()
-
-        super.onStop()
     }
 }
