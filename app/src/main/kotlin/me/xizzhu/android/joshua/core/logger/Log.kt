@@ -98,7 +98,7 @@ object Log {
 
     private fun log(@Level level: Int, tag: String, e: Throwable, msg: String) {
         for (logger in loggers) {
-            logger.log(level, tag, msg)
+            logger.log(level, tag, e, msg)
         }
     }
 }
