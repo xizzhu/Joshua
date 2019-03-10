@@ -19,21 +19,12 @@ package me.xizzhu.android.joshua.reading.verse
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPView
-import me.xizzhu.android.joshua.ui.fadeIn
-import me.xizzhu.android.joshua.ui.fadeOut
 
 interface VerseView : MVPView {
     fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex)
@@ -47,12 +38,17 @@ interface VerseView : MVPView {
     fun onVersesLoadFailed(translationShortName: String, bookIndex: Int, chapterIndex: Int)
 }
 
-class VerseViewPager : ViewPager, VerseView, VersePagerAdapter.Listener {
+class VerseViewPager : ViewPager, VerseView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    private val adapter = VersePagerAdapter(context, this)
+    private val versePagerAdapterListener = object : VersePagerAdapter.Listener {
+        override fun onChapterRequested(bookIndex: Int, chapterIndex: Int) {
+            presenter.loadVerses(currentTranslation, bookIndex, chapterIndex)
+        }
+    }
+    private val adapter = VersePagerAdapter(context, versePagerAdapterListener)
     private val onPageChangeListener = object : SimpleOnPageChangeListener() {
         override fun onPageSelected(position: Int) {
             if (currentVerseIndex.toPagePosition() == position) {
@@ -112,98 +108,5 @@ class VerseViewPager : ViewPager, VerseView, VersePagerAdapter.Listener {
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.loadVerses(translationShortName, bookIndex, chapterIndex)
                 })
-    }
-
-    override fun onChapterRequested(bookIndex: Int, chapterIndex: Int) {
-        presenter.loadVerses(currentTranslation, bookIndex, chapterIndex)
-    }
-}
-
-private class VersePagerAdapter(private val context: Context, private val listener: Listener) : PagerAdapter() {
-    interface Listener {
-        fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
-    }
-
-    private val inflater = LayoutInflater.from(context)
-    private val pages = ArrayList<Page>()
-
-    var currentTranslation = ""
-
-    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
-        for (page in pages) {
-            if (page.bookIndex == bookIndex && page.chapterIndex == chapterIndex) {
-                page.verseList.fadeIn()
-                page.loadingSpinner.fadeOut()
-
-                page.adapter.setVerses(verses)
-                page.verseList.scrollToPosition(0)
-                break
-            }
-        }
-    }
-
-    override fun getCount(): Int = if (currentTranslation.isNotEmpty()) Bible.TOTAL_CHAPTER_COUNT else 0
-
-    override fun getItemPosition(obj: Any): Int {
-        val page = obj as Page
-        return if (page.translation == currentTranslation) {
-            indexToPagePosition(page.bookIndex, page.chapterIndex)
-        } else {
-            POSITION_NONE
-        }
-    }
-
-    override fun isViewFromObject(view: View, obj: Any): Boolean =
-            (obj as Page).rootView == view
-
-    override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        var page: Page? = null
-        for (p in pages) {
-            if (!p.inUse) {
-                page = p
-                break
-            }
-        }
-        if (page == null) {
-            page = Page(context, inflater, container)
-            pages.add(page)
-        }
-
-        container.addView(page.rootView, 0)
-        page.verseList.visibility = View.GONE
-        page.loadingSpinner.visibility = View.VISIBLE
-
-        page.translation = currentTranslation
-        page.bookIndex = position.toBookIndex()
-        page.chapterIndex = position.toChapterIndex()
-        page.inUse = true
-
-        listener.onChapterRequested(page.bookIndex, page.chapterIndex)
-
-        return page
-    }
-
-    override fun destroyItem(container: ViewGroup, position: Int, obj: Any) {
-        val page = obj as Page
-        container.removeView(page.rootView)
-        page.inUse = false
-    }
-}
-
-private class Page(context: Context, inflater: LayoutInflater, container: ViewGroup) {
-    val rootView = inflater.inflate(R.layout.page_verse, container, false)
-    val verseList = rootView.findViewById(R.id.verse_list) as RecyclerView
-    val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
-
-    var translation = ""
-    var bookIndex = -1
-    var chapterIndex = -1
-    var inUse = false
-
-    val adapter = VerseListAdapter(inflater)
-
-    init {
-        verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
-        verseList.adapter = adapter
     }
 }

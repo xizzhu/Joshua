@@ -24,7 +24,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
 import java.lang.StringBuilder
 
-class VerseListAdapter(private val inflater: LayoutInflater) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class VerseListAdapter(private val inflater: LayoutInflater) : RecyclerView.Adapter<VerseItemViewHolder>() {
     private val verses = ArrayList<Verse>()
 
     fun setVerses(verses: List<Verse>) {
@@ -35,15 +35,15 @@ class VerseListAdapter(private val inflater: LayoutInflater) : RecyclerView.Adap
 
     override fun getItemCount(): Int = verses.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerseItemViewHolder =
             VerseItemViewHolder(inflater, parent)
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as VerseItemViewHolder).bind(verses[position])
+    override fun onBindViewHolder(holder: VerseItemViewHolder, position: Int) {
+        holder.bind(verses[position])
     }
 }
 
-private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_verse, parent, false)) {
     private val stringBuilder = StringBuilder()
     private val index = itemView.findViewById(R.id.index) as TextView
