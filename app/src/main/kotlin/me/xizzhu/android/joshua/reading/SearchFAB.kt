@@ -22,15 +22,21 @@ import android.util.AttributeSet
 import android.view.View
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
 
 class SearchButtonPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<SearchButtonView>() {
+    companion object {
+        private val TAG: String = SearchButtonPresenter::class.java.simpleName
+    }
+
     fun openSearch() {
         try {
             readingInteractor.openSearch()
         } catch (e: Exception) {
+            Log.e(TAG, e, "Failed to open search activity")
             view?.onFailedToNavigateToSearch()
         }
     }

@@ -20,6 +20,8 @@ import android.app.Activity
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
+import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.core.logger.android.LogcatLogger
 import javax.inject.Inject
 
 class App : BaseApp(), HasActivityInjector {
@@ -35,6 +37,8 @@ class App : BaseApp(), HasActivityInjector {
 
         appComponent = DaggerAppComponent.builder().appModule(AppModule(this)).build()
         appComponent.inject(this)
+
+        Log.addLogger(LogcatLogger())
     }
 
     override fun activityInjector(): AndroidInjector<Activity> = dispatchingAndroidInjector

@@ -19,11 +19,16 @@ package me.xizzhu.android.joshua.reading.toolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 
 class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ToolbarView>() {
+    companion object {
+        private val TAG: String = ToolbarPresenter::class.java.simpleName
+    }
+
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -59,6 +64,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
             try {
                 readingInteractor.saveCurrentTranslation(translationShortName)
             } catch (e: Exception) {
+                Log.e(TAG, e, "Failed to update current translation")
                 view?.onCurrentTranslationUpdateFailed(translationShortName)
             }
         }
@@ -68,6 +74,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         try {
             readingInteractor.openTranslationManagement()
         } catch (e: Exception) {
+            Log.e(TAG, e, "Failed to open translation management activity")
             view?.onFailedToNavigateToTranslationManagement()
         }
     }
