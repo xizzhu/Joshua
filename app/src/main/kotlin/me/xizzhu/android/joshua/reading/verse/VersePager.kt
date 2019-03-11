@@ -47,6 +47,14 @@ class VerseViewPager : ViewPager, VerseView {
         override fun onChapterRequested(bookIndex: Int, chapterIndex: Int) {
             presenter.loadVerses(currentTranslation, bookIndex, chapterIndex)
         }
+
+        override fun onVerseClicked(verseIndex: VerseIndex) {
+            presenter.onVerseClicked(verseIndex)
+        }
+
+        override fun onVerseLongClicked(verseIndex: VerseIndex) {
+            presenter.onVerseLongClicked(verseIndex)
+        }
     }
     private val adapter = VersePagerAdapter(context, versePagerAdapterListener)
     private val onPageChangeListener = object : SimpleOnPageChangeListener() {

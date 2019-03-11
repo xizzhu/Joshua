@@ -25,7 +25,8 @@ import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 
-class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<VerseView>() {
+class VersePresenter(private val readingInteractor: ReadingInteractor,
+                     private val verseSelectionHandler: VerseSelectionHandler) : MVPPresenter<VerseView>() {
     companion object {
         private val TAG: String = VersePresenter::class.java.simpleName
     }
@@ -70,5 +71,13 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
                 view?.onVersesLoadFailed(translationShortName, bookIndex, chapterIndex)
             }
         }
+    }
+
+    fun onVerseClicked(verseIndex: VerseIndex) {
+        verseSelectionHandler.onVerseClicked(verseIndex)
+    }
+
+    fun onVerseLongClicked(verseIndex: VerseIndex) {
+        verseSelectionHandler.onVerseLongClicked(verseIndex)
     }
 }

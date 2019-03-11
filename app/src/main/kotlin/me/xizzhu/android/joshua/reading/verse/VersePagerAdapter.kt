@@ -26,12 +26,17 @@ import androidx.viewpager.widget.PagerAdapter
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
 
 class VersePagerAdapter(private val context: Context, private val listener: Listener) : PagerAdapter() {
     interface Listener {
         fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
+
+        fun onVerseClicked(verseIndex: VerseIndex)
+
+        fun onVerseLongClicked(verseIndex: VerseIndex)
     }
 
     private val inflater = LayoutInflater.from(context)
@@ -104,6 +109,7 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         private set
 
     private val adapter = VerseListAdapter(inflater)
+    private var verses: List<Verse>? = null
 
     init {
         verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
@@ -130,6 +136,7 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 
+        this.verses = verses
         adapter.setVerses(verses)
         verseList.scrollToPosition(0)
     }
@@ -146,20 +153,20 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
 
     override fun onClick(v: View) {
         val position = verseList.getChildAdapterPosition(v)
-        if (position == RecyclerView.NO_POSITION) {
+        if (position == RecyclerView.NO_POSITION || verses == null) {
             return
         }
 
-        // TODO
+        listener.onVerseClicked(verses!![position].verseIndex)
     }
 
     override fun onLongClick(v: View): Boolean {
         val position = verseList.getChildAdapterPosition(v)
-        if (position == RecyclerView.NO_POSITION) {
+        if (position == RecyclerView.NO_POSITION || verses == null) {
             return false
         }
 
-        // TODO
+        listener.onVerseLongClicked(verses!![position].verseIndex)
 
         return true
     }

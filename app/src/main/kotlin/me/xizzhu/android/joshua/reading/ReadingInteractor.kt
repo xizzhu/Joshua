@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading
 
+import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ReceiveChannel
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
@@ -56,4 +57,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     fun finish() {
         readingActivity.finish()
     }
+
+    fun startActionMode(callback: ActionMode.Callback): ActionMode? =
+            readingActivity.startSupportActionMode(callback)
 }
