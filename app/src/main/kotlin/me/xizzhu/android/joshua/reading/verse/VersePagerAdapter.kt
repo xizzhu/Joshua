@@ -100,7 +100,8 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     }
 }
 
-private class Page(context: Context, inflater: LayoutInflater, container: ViewGroup) {
+private class Page(context: Context, inflater: LayoutInflater, container: ViewGroup)
+    : RecyclerView.OnChildAttachStateChangeListener, View.OnClickListener, View.OnLongClickListener {
     val rootView = inflater.inflate(R.layout.page_verse, container, false)
     val verseList = rootView.findViewById(R.id.verse_list) as RecyclerView
     val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
@@ -115,5 +116,36 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
     init {
         verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         verseList.adapter = adapter
+        verseList.addOnChildAttachStateChangeListener(this)
+    }
+
+    override fun onChildViewAttachedToWindow(view: View) {
+        view.setOnClickListener(this)
+        view.setOnLongClickListener(this)
+    }
+
+    override fun onChildViewDetachedFromWindow(view: View) {
+        view.setOnClickListener(null)
+        view.setOnLongClickListener(null)
+    }
+
+    override fun onClick(v: View) {
+        val position = verseList.getChildAdapterPosition(v)
+        if (position == RecyclerView.NO_POSITION) {
+            return
+        }
+
+        // TODO
+    }
+
+    override fun onLongClick(v: View): Boolean {
+        val position = verseList.getChildAdapterPosition(v)
+        if (position == RecyclerView.NO_POSITION) {
+            return false
+        }
+
+        // TODO
+
+        return true
     }
 }
