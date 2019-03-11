@@ -25,7 +25,6 @@ import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
-import me.xizzhu.android.joshua.reading.verse.VerseSelectionHandler
 
 @Module
 class ReadingModule {
@@ -50,13 +49,8 @@ class ReadingModule {
             ChapterListPresenter(readingInteractor)
 
     @Provides
-    fun provideVerseSelectionHandler(readingInteractor: ReadingInteractor): VerseSelectionHandler =
-            VerseSelectionHandler(readingInteractor)
-
-    @Provides
-    fun provideVersePresenter(readingInteractor: ReadingInteractor,
-                              verseSelectionHandler: VerseSelectionHandler): VersePresenter =
-            VersePresenter(readingInteractor, verseSelectionHandler)
+    fun provideVersePresenter(readingInteractor: ReadingInteractor): VersePresenter =
+            VersePresenter(readingInteractor)
 
     @Provides
     fun provideSearchButtonPresenter(readingInteractor: ReadingInteractor): SearchButtonPresenter =

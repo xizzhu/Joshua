@@ -45,12 +45,24 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     var currentTranslation = ""
 
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
+        findPage(bookIndex, chapterIndex)?.setVerses(verses)
+    }
+
+    private fun findPage(bookIndex: Int, chapterIndex: Int): Page? {
         for (page in pages) {
             if (page.bookIndex == bookIndex && page.chapterIndex == chapterIndex) {
-                page.setVerses(verses)
-                break
+                return page
             }
         }
+        return null
+    }
+
+    fun selectVerse(verseIndex: VerseIndex) {
+        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.selectVerse(verseIndex)
+    }
+
+    fun deselectVerse(verseIndex: VerseIndex) {
+        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.deselectVerse(verseIndex)
     }
 
     override fun getCount(): Int = if (currentTranslation.isNotEmpty()) Bible.TOTAL_CHAPTER_COUNT else 0
@@ -139,6 +151,14 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         this.verses = verses
         adapter.setVerses(verses)
         verseList.scrollToPosition(0)
+    }
+
+    fun selectVerse(verseIndex: VerseIndex) {
+        adapter.selectVerse(verseIndex)
+    }
+
+    fun deselectVerse(verseIndex: VerseIndex) {
+        adapter.deselectVerse(verseIndex)
     }
 
     override fun onChildViewAttachedToWindow(view: View) {

@@ -16,19 +16,56 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+import android.view.Menu
+import android.view.MenuItem
+import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.onEach
 
-class VersePresenter(private val readingInteractor: ReadingInteractor,
-                     private val verseSelectionHandler: VerseSelectionHandler) : MVPPresenter<VerseView>() {
+class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<VerseView>() {
     companion object {
         private val TAG: String = VersePresenter::class.java.simpleName
+    }
+
+    private val selectedVerses: HashSet<VerseIndex> = HashSet()
+    private var actionMode: ActionMode? = null
+    private val actionModeCallback = object : ActionMode.Callback {
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.menuInflater.inflate(R.menu.menu_verse_selection, menu)
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
+
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            return when (item.itemId) {
+                R.id.action_copy -> {
+                    mode.finish()
+                    true
+                }
+                R.id.action_share -> {
+                    mode.finish()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode) {
+            for (verse in selectedVerses) {
+                view?.onVerseDeselected(verse)
+            }
+            selectedVerses.clear()
+
+            actionMode = null
+        }
     }
 
     override fun onViewAttached() {
@@ -45,6 +82,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor,
             receiveChannels.add(readingInteractor.observeCurrentVerseIndex()
                     .filter { it.isValid() }
                     .onEach {
+                        actionMode?.finish()
                         view?.onCurrentVerseIndexUpdated(it)
                     })
         }
@@ -74,10 +112,27 @@ class VersePresenter(private val readingInteractor: ReadingInteractor,
     }
 
     fun onVerseClicked(verseIndex: VerseIndex) {
-        verseSelectionHandler.onVerseClicked(verseIndex)
+        if (selectedVerses.contains(verseIndex)) {
+            // de-select the verse
+            selectedVerses.remove(verseIndex)
+            if (selectedVerses.isEmpty()) {
+                actionMode?.finish()
+            }
+
+            view?.onVerseDeselected(verseIndex)
+        } else {
+            // select the verse
+            selectedVerses.add(verseIndex)
+
+            view?.onVerseSelected(verseIndex)
+        }
     }
 
     fun onVerseLongClicked(verseIndex: VerseIndex) {
-        verseSelectionHandler.onVerseLongClicked(verseIndex)
+        if (actionMode == null) {
+            actionMode = readingInteractor.startActionMode(actionModeCallback)
+        }
+
+        onVerseClicked(verseIndex)
     }
 }

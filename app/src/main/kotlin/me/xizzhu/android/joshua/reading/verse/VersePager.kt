@@ -36,6 +36,10 @@ interface VerseView : MVPView {
     fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>)
 
     fun onVersesLoadFailed(translationShortName: String, bookIndex: Int, chapterIndex: Int)
+
+    fun onVerseSelected(verseIndex: VerseIndex)
+
+    fun onVerseDeselected(verseIndex: VerseIndex)
 }
 
 class VerseViewPager : ViewPager, VerseView {
@@ -116,5 +120,13 @@ class VerseViewPager : ViewPager, VerseView {
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.loadVerses(translationShortName, bookIndex, chapterIndex)
                 })
+    }
+
+    override fun onVerseSelected(verseIndex: VerseIndex) {
+        adapter.selectVerse(verseIndex)
+    }
+
+    override fun onVerseDeselected(verseIndex: VerseIndex) {
+        adapter.deselectVerse(verseIndex)
     }
 }
