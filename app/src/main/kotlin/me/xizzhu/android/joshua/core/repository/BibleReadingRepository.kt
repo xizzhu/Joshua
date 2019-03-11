@@ -16,11 +16,22 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import androidx.collection.LruCache
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 
 class BibleReadingRepository(private val localReadingStorage: LocalReadingStorage) {
+    private val bookNamesCache = object : LruCache<String, List<String>>((Runtime.getRuntime().maxMemory() / 16L).toInt()) {
+        override fun sizeOf(key: String, value: List<String>): Int {
+            // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
+            var length = 0
+            for (text in value)
+                length += text.length * 4
+            return length
+        }
+    }
+
     suspend fun readCurrentTranslation(): String = localReadingStorage.readCurrentTranslation()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
@@ -33,8 +44,14 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
         localReadingStorage.saveCurrentVerseIndex(verseIndex)
     }
 
-    suspend fun readBookNames(translationShortName: String): List<String> =
-            localReadingStorage.readBookNames(translationShortName)
+    suspend fun readBookNames(translationShortName: String): List<String> {
+        var bookNames = bookNamesCache.get(translationShortName)
+        if (bookNames == null) {
+            bookNames = localReadingStorage.readBookNames(translationShortName)
+            bookNamesCache.put(translationShortName, bookNames)
+        }
+        return bookNames
+    }
 
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
             localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex)
