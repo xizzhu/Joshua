@@ -42,11 +42,7 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
         for (page in pages) {
             if (page.bookIndex == bookIndex && page.chapterIndex == chapterIndex) {
-                page.verseList.fadeIn()
-                page.loadingSpinner.fadeOut()
-
-                page.adapter.setVerses(verses)
-                page.verseList.scrollToPosition(0)
+                page.setVerses(verses)
                 break
             }
         }
@@ -75,20 +71,12 @@ class VersePagerAdapter(private val context: Context, private val listener: List
             }
         }
         if (page == null) {
-            page = Page(context, inflater, container)
+            page = Page(context, inflater, container, listener)
             pages.add(page)
         }
 
         container.addView(page.rootView, 0)
-        page.verseList.visibility = View.GONE
-        page.loadingSpinner.visibility = View.VISIBLE
-
-        page.translation = currentTranslation
-        page.bookIndex = position.toBookIndex()
-        page.chapterIndex = position.toChapterIndex()
-        page.inUse = true
-
-        listener.onChapterRequested(page.bookIndex, page.chapterIndex)
+        page.bind(currentTranslation, position.toBookIndex(), position.toChapterIndex())
 
         return page
     }
@@ -96,27 +84,54 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     override fun destroyItem(container: ViewGroup, position: Int, obj: Any) {
         val page = obj as Page
         container.removeView(page.rootView)
-        page.inUse = false
+        page.unbind()
     }
 }
 
-private class Page(context: Context, inflater: LayoutInflater, container: ViewGroup)
+private class Page(context: Context, inflater: LayoutInflater, container: ViewGroup, private val listener: VersePagerAdapter.Listener)
     : RecyclerView.OnChildAttachStateChangeListener, View.OnClickListener, View.OnLongClickListener {
-    val rootView = inflater.inflate(R.layout.page_verse, container, false)
-    val verseList = rootView.findViewById(R.id.verse_list) as RecyclerView
-    val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
+    val rootView: View = inflater.inflate(R.layout.page_verse, container, false)
+    private val verseList = rootView.findViewById(R.id.verse_list) as RecyclerView
+    private val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
 
     var translation = ""
+        private set
     var bookIndex = -1
+        private set
     var chapterIndex = -1
+        private set
     var inUse = false
+        private set
 
-    val adapter = VerseListAdapter(inflater)
+    private val adapter = VerseListAdapter(inflater)
 
     init {
         verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         verseList.adapter = adapter
         verseList.addOnChildAttachStateChangeListener(this)
+    }
+
+    fun bind(translation: String, bookIndex: Int, chapterIndex: Int) {
+        this.translation = translation
+        this.bookIndex = bookIndex
+        this.chapterIndex = chapterIndex
+        listener.onChapterRequested(bookIndex, chapterIndex)
+
+        verseList.visibility = View.GONE
+        loadingSpinner.visibility = View.VISIBLE
+        inUse = true
+    }
+
+    fun unbind() {
+        inUse = false
+    }
+
+    fun setVerses(verses: List<Verse>) {
+        verseList.fadeIn()
+        loadingSpinner.fadeOut()
+
+        adapter.setVerses(verses)
+        verseList.scrollToPosition(0)
     }
 
     override fun onChildViewAttachedToWindow(view: View) {
