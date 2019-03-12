@@ -115,6 +115,10 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
     }
 
     fun onVerseClicked(verse: Verse) {
+        if (actionMode == null) {
+            return
+        }
+
         if (selectedVerses.contains(verse)) {
             // de-select the verse
             selectedVerses.remove(verse)
