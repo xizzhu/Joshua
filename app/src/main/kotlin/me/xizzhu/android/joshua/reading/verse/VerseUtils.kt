@@ -71,7 +71,7 @@ fun Int.toChapterIndex(): Int {
     throw IllegalArgumentException("Invalid position: $position")
 }
 
-fun List<Verse>.toStringForSharing(): String {
+fun Collection<Verse>.toStringForSharing(): String {
     val stringBuilder = StringBuilder()
     for (verse in this) {
         if (stringBuilder.isNotEmpty()) {

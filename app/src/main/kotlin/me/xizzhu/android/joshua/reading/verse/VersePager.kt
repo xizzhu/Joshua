@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.verse
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
+import android.widget.Toast
 import androidx.viewpager.widget.ViewPager
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
@@ -37,9 +38,11 @@ interface VerseView : MVPView {
 
     fun onVersesLoadFailed(translationShortName: String, bookIndex: Int, chapterIndex: Int)
 
-    fun onVerseSelected(verseIndex: VerseIndex)
+    fun onVerseSelected(verse: Verse)
 
-    fun onVerseDeselected(verseIndex: VerseIndex)
+    fun onVerseDeselected(verse: Verse)
+
+    fun onVersesCopied()
 }
 
 class VerseViewPager : ViewPager, VerseView {
@@ -52,12 +55,12 @@ class VerseViewPager : ViewPager, VerseView {
             presenter.loadVerses(currentTranslation, bookIndex, chapterIndex)
         }
 
-        override fun onVerseClicked(verseIndex: VerseIndex) {
-            presenter.onVerseClicked(verseIndex)
+        override fun onVerseClicked(verse: Verse) {
+            presenter.onVerseClicked(verse)
         }
 
-        override fun onVerseLongClicked(verseIndex: VerseIndex) {
-            presenter.onVerseLongClicked(verseIndex)
+        override fun onVerseLongClicked(verse: Verse) {
+            presenter.onVerseLongClicked(verse)
         }
     }
     private val adapter = VersePagerAdapter(context, versePagerAdapterListener)
@@ -122,11 +125,15 @@ class VerseViewPager : ViewPager, VerseView {
                 })
     }
 
-    override fun onVerseSelected(verseIndex: VerseIndex) {
-        adapter.selectVerse(verseIndex)
+    override fun onVerseSelected(verse: Verse) {
+        adapter.selectVerse(verse)
     }
 
-    override fun onVerseDeselected(verseIndex: VerseIndex) {
-        adapter.deselectVerse(verseIndex)
+    override fun onVerseDeselected(verse: Verse) {
+        adapter.deselectVerse(verse)
+    }
+
+    override fun onVersesCopied() {
+        Toast.makeText(context, R.string.toast_verses_copied, Toast.LENGTH_SHORT).show()
     }
 }

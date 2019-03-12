@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -34,7 +35,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         private val TAG: String = VersePresenter::class.java.simpleName
     }
 
-    private val selectedVerses: HashSet<VerseIndex> = HashSet()
+    private val selectedVerses: HashSet<Verse> = HashSet()
     private var actionMode: ActionMode? = null
     private val actionModeCallback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
@@ -47,6 +48,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.action_copy -> {
+                    readingInteractor.copyToClipBoard(selectedVerses)
+                    view?.onVersesCopied()
                     mode.finish()
                     true
                 }
@@ -111,28 +114,28 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         }
     }
 
-    fun onVerseClicked(verseIndex: VerseIndex) {
-        if (selectedVerses.contains(verseIndex)) {
+    fun onVerseClicked(verse: Verse) {
+        if (selectedVerses.contains(verse)) {
             // de-select the verse
-            selectedVerses.remove(verseIndex)
+            selectedVerses.remove(verse)
             if (selectedVerses.isEmpty()) {
                 actionMode?.finish()
             }
 
-            view?.onVerseDeselected(verseIndex)
+            view?.onVerseDeselected(verse)
         } else {
             // select the verse
-            selectedVerses.add(verseIndex)
+            selectedVerses.add(verse)
 
-            view?.onVerseSelected(verseIndex)
+            view?.onVerseSelected(verse)
         }
     }
 
-    fun onVerseLongClicked(verseIndex: VerseIndex) {
+    fun onVerseLongClicked(verse: Verse) {
         if (actionMode == null) {
             actionMode = readingInteractor.startActionMode(actionModeCallback)
         }
 
-        onVerseClicked(verseIndex)
+        onVerseClicked(verse)
     }
 }

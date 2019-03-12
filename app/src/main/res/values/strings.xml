@@ -9,6 +9,7 @@
 
     <string name="toast_translation_downloaded">Translation downloaded</string>
     <string name="toast_translation_deleted">Translation deleted</string>
+    <string name="toast_verses_copied">Copied to clipboard.</string>
 
     <string name="menu_more_translation">More</string>
     <string name="action_copy">Copy</string>

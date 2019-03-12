@@ -34,9 +34,9 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     interface Listener {
         fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
 
-        fun onVerseClicked(verseIndex: VerseIndex)
+        fun onVerseClicked(verse: Verse)
 
-        fun onVerseLongClicked(verseIndex: VerseIndex)
+        fun onVerseLongClicked(verse: Verse)
     }
 
     private val inflater = LayoutInflater.from(context)
@@ -57,12 +57,12 @@ class VersePagerAdapter(private val context: Context, private val listener: List
         return null
     }
 
-    fun selectVerse(verseIndex: VerseIndex) {
-        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.selectVerse(verseIndex)
+    fun selectVerse(verse: Verse) {
+        findPage(verse.verseIndex.bookIndex, verse.verseIndex.chapterIndex)?.selectVerse(verse.verseIndex)
     }
 
-    fun deselectVerse(verseIndex: VerseIndex) {
-        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.deselectVerse(verseIndex)
+    fun deselectVerse(verse: Verse) {
+        findPage(verse.verseIndex.bookIndex, verse.verseIndex.chapterIndex)?.deselectVerse(verse.verseIndex)
     }
 
     override fun getCount(): Int = if (currentTranslation.isNotEmpty()) Bible.TOTAL_CHAPTER_COUNT else 0
@@ -177,7 +177,7 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
             return
         }
 
-        listener.onVerseClicked(verses!![position].verseIndex)
+        listener.onVerseClicked(verses!![position])
     }
 
     override fun onLongClick(v: View): Boolean {
@@ -186,7 +186,7 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
             return false
         }
 
-        listener.onVerseLongClicked(verses!![position].verseIndex)
+        listener.onVerseLongClicked(verses!![position])
 
         return true
     }

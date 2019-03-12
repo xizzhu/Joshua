@@ -16,10 +16,14 @@
 
 package me.xizzhu.android.joshua.reading
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ReceiveChannel
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 
 class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val navigator: Navigator,
@@ -60,4 +64,14 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     fun startActionMode(callback: ActionMode.Callback): ActionMode? =
             readingActivity.startSupportActionMode(callback)
+
+    fun copyToClipBoard(verses: Collection<Verse>) {
+        if (verses.isEmpty()) {
+            return
+        }
+
+        val verse = verses.first()
+        (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).primaryClip =
+                ClipData.newPlainText(verse.text.translationShortName + " " + verse.text.bookName, verses.toStringForSharing())
+    }
 }
