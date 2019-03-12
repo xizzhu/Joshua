@@ -35,7 +35,9 @@ data class VerseIndex(val bookIndex: Int, val chapterIndex: Int, val verseIndex:
                     && verseIndex >= 0
 }
 
-data class Verse(val verseIndex: VerseIndex, val translationShortName: String, val text: String)
+data class Verse(val verseIndex: VerseIndex, val text: Text) {
+    data class Text(val translationShortName: String, val bookName: String, val text: String)
+}
 
 class BibleReadingManager(private val bibleReadingRepository: BibleReadingRepository) {
     private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel("")

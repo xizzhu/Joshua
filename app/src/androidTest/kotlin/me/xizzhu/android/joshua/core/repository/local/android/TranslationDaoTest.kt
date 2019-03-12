@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
-import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -31,13 +29,14 @@ import org.junit.runner.RunWith
 class TranslationDaoTest : BaseSqliteTest() {
     @Test
     fun testReadNonExistTranslation() {
-        assertTrue(androidDatabase.translationDao.read("not_exist", 0, 0).isEmpty())
+        assertTrue(androidDatabase.translationDao.read("not_exist", 0, 0, "").isEmpty())
     }
 
     @Test
     fun testSaveThenRead() {
         saveTranslation()
-        assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(MockContents.kjvShortName, 0, 0))
+        assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(
+                MockContents.kjvShortName, 0, 0, MockContents.kjvBookNames[0]))
     }
 
     private fun saveTranslation() {
@@ -51,34 +50,35 @@ class TranslationDaoTest : BaseSqliteTest() {
         androidDatabase.translationDao.save(MockContents.kjvShortName,
                 mapOf(Pair(Pair(0, 0), listOf("verse_1", "verse_2"))))
         androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
-        assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(MockContents.kjvShortName, 0, 0))
+        assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(
+                MockContents.kjvShortName, 0, 0, MockContents.kjvBookNames[0]))
     }
 
     @Test
     fun testSearchNonExistTranslation() {
-        assertTrue(androidDatabase.translationDao.search("not_exist", "keyword").isEmpty())
+        assertTrue(androidDatabase.translationDao.search("not_exist", emptyList(), "keyword").isEmpty())
     }
 
     @Test
     fun testSaveThenSearch() {
         saveTranslation()
 
-        assertEquals(MockContents.kjvVerses,
-                androidDatabase.translationDao.search(MockContents.kjvShortName, "God"))
-        assertEquals(MockContents.kjvVerses,
-                androidDatabase.translationDao.search(MockContents.kjvShortName, "god"))
-        assertEquals(MockContents.kjvVerses,
-                androidDatabase.translationDao.search(MockContents.kjvShortName, "GOD"))
+        assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.search(
+                MockContents.kjvShortName, MockContents.kjvBookNames, "God"))
+        assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.search(
+                MockContents.kjvShortName, MockContents.kjvBookNames, "god"))
+        assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.search(
+                MockContents.kjvShortName, MockContents.kjvBookNames, "GOD"))
     }
 
     @Test
     fun testSaveThenSearchMultiKeywords() {
         saveTranslation()
 
-        assertEquals(listOf(MockContents.kjvVerses[0]),
-                androidDatabase.translationDao.search(MockContents.kjvShortName, "God created"))
-        assertEquals(listOf(MockContents.kjvVerses[0]),
-                androidDatabase.translationDao.search(MockContents.kjvShortName, "beginning created"))
+        assertEquals(listOf(MockContents.kjvVerses[0]), androidDatabase.translationDao.search(
+                MockContents.kjvShortName, MockContents.kjvBookNames, "God created"))
+        assertEquals(listOf(MockContents.kjvVerses[0]), androidDatabase.translationDao.search(
+                MockContents.kjvShortName, MockContents.kjvBookNames, "beginning created"))
     }
 
     @Test

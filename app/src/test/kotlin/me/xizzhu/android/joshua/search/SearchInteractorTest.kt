@@ -57,7 +57,7 @@ class SearchInteractorTest : BaseUnitTest() {
     @Test
     fun testDefaultSearchResult() {
         runBlocking {
-            assertFalse(searchInteractor.observeSearchResult().first().isValid())
+            assertTrue(searchInteractor.observeSearchResult().first().isEmpty())
         }
     }
 
@@ -92,13 +92,9 @@ class SearchInteractorTest : BaseUnitTest() {
             assertFalse(searchInteractor.observeSearchState().first())
 
             val searchResult = searchInteractor.observeSearchResult().first()
-            assertTrue(searchResult.isValid())
-            assertEquals(MockContents.kjvShortName, searchResult.translationShortName)
-            assertEquals(MockContents.kjvVerses.size, searchResult.verses.size)
+            assertEquals(MockContents.kjvVerses.size, searchResult.size)
             for (i in 0 until MockContents.kjvVerses.size) {
-                assertEquals(MockContents.kjvVerses[i].verseIndex, searchResult.verses[i].verseIndex)
-                assertEquals(MockContents.kjvBookNames[searchResult.verses[i].verseIndex.bookIndex], searchResult.verses[i].bookName)
-                assertEquals(MockContents.kjvVerses[i].text, searchResult.verses[i].text)
+                assertEquals(MockContents.kjvVerses[i], searchResult[i])
             }
         }
     }

@@ -19,9 +19,9 @@ package me.xizzhu.android.joshua.search.result
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
-import me.xizzhu.android.joshua.search.SearchResult
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.After
@@ -37,7 +37,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
     private lateinit var searchResultView: SearchResultView
     private lateinit var searchResultPresenter: SearchResultPresenter
     private lateinit var searchStateChannel: BroadcastChannel<Boolean>
-    private lateinit var searchResultChannel: BroadcastChannel<SearchResult>
+    private lateinit var searchResultChannel: BroadcastChannel<List<Verse>>
 
     @Before
     override fun setup() {
@@ -46,7 +46,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
         searchStateChannel = ConflatedBroadcastChannel(false)
         `when`(searchInteractor.observeSearchState()).thenReturn(searchStateChannel.openSubscription())
 
-        searchResultChannel = ConflatedBroadcastChannel(SearchResult.INVALID)
+        searchResultChannel = ConflatedBroadcastChannel(emptyList())
         `when`(searchInteractor.observeSearchResult()).thenReturn(searchResultChannel.openSubscription())
 
         searchResultPresenter = SearchResultPresenter(searchInteractor)
@@ -82,7 +82,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveDefaultSearchResultAndState() {
         runBlocking {
-            verify(searchResultView, never()).onSearchResultUpdated(any())
+            verify(searchResultView, times(1)).onSearchResultUpdated(emptyList())
             verify(searchResultView, times(1)).onSearchCompleted()
         }
     }
@@ -91,7 +91,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
     fun testObserveSearchResultAndState() {
         runBlocking {
             searchStateChannel.send(true)
-            val searchResult = SearchResult(MockContents.kjvShortName, emptyList())
+            val searchResult: List<Verse> = listOf(MockContents.kjvVerses[0])
             searchResultChannel.send(searchResult)
             searchStateChannel.send(false)
 

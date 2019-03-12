@@ -60,6 +60,6 @@ private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
         stringBuilder.append(verseIndex + 1)
         index.text = stringBuilder.toString()
 
-        text.text = verse.text
+        text.text = verse.text.text
     }
 }

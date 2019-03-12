@@ -16,26 +16,24 @@
 
 package me.xizzhu.android.joshua.search
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.firstOrNull
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 
 class SearchInteractor(private val searchActivity: SearchActivity,
                        private val navigator: Navigator,
                        private val bibleReadingManager: BibleReadingManager) {
     private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
-    private val searchResult: BroadcastChannel<SearchResult> = ConflatedBroadcastChannel(SearchResult.INVALID)
+    private val searchResult: BroadcastChannel<List<Verse>> = ConflatedBroadcastChannel(emptyList())
 
     fun observeSearchState(): ReceiveChannel<Boolean> = searchState.openSubscription()
 
-    fun observeSearchResult(): ReceiveChannel<SearchResult> = searchResult.openSubscription()
+    fun observeSearchResult(): ReceiveChannel<List<Verse>> = searchResult.openSubscription()
 
     suspend fun selectVerse(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
@@ -47,18 +45,7 @@ class SearchInteractor(private val searchActivity: SearchActivity,
         try {
             val currentTranslation = bibleReadingManager.observeCurrentTranslation().firstOrNull()
                     ?: throw IllegalStateException("No translation selected")
-            searchResult.send(withContext(Dispatchers.Default) {
-                val bookNamesAsync = async { bibleReadingManager.readBookNames(currentTranslation) }
-                val versesAsync = async { bibleReadingManager.search(currentTranslation, query) }
-                val bookNames = bookNamesAsync.await()
-                val verses = versesAsync.await()
-                val searchedVerses = ArrayList<SearchResult.Verse>()
-                for (verse in verses) {
-                    searchedVerses.add(SearchResult.Verse(
-                            verse.verseIndex, bookNames[verse.verseIndex.bookIndex], verse.text))
-                }
-                SearchResult(currentTranslation, searchedVerses)
-            })
+            searchResult.send(bibleReadingManager.search(currentTranslation, query))
         } finally {
             searchState.send(false)
         }

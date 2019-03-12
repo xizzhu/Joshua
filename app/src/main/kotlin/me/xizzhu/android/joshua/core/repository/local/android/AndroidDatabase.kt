@@ -214,7 +214,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
+    fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int, bookName: String): List<Verse> {
         var cursor: Cursor? = null
         db.beginTransaction()
         try {
@@ -229,7 +229,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             var verseIndex = 0
             while (cursor.moveToNext()) {
                 verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
-                        translationShortName, cursor.getString(0)))
+                        Verse.Text(translationShortName, bookName, cursor.getString(0))))
             }
 
             db.setTransactionSuccessful()
@@ -248,7 +248,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun search(translationShortName: String, query: String): List<Verse> {
+    fun search(translationShortName: String, bookNames: List<String>, query: String): List<Verse> {
         var cursor: Cursor? = null
         try {
             val keywords = query.trim().replace("\\s+", " ").split(" ")
@@ -278,13 +278,15 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                     selection.toString(), selectionArgs, null, null,
                     "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC")
             val verses = ArrayList<Verse>(cursor.count)
-            val bookIndex = cursor.getColumnIndex(COLUMN_BOOK_INDEX)
-            val chapterIndex = cursor.getColumnIndex(COLUMN_CHAPTER_INDEX)
-            val verseIndex = cursor.getColumnIndex(COLUMN_VERSE_INDEX)
-            val text = cursor.getColumnIndex(COLUMN_TEXT)
+            val bookColumnIndex = cursor.getColumnIndex(COLUMN_BOOK_INDEX)
+            val chapterColumnIndex = cursor.getColumnIndex(COLUMN_CHAPTER_INDEX)
+            val verseColumnIndex = cursor.getColumnIndex(COLUMN_VERSE_INDEX)
+            val textColumnIndex = cursor.getColumnIndex(COLUMN_TEXT)
             while (cursor.moveToNext()) {
-                verses.add(Verse(VerseIndex(cursor.getInt(bookIndex), cursor.getInt(chapterIndex), cursor.getInt(verseIndex)),
-                        translationShortName, cursor.getString(text)))
+                val verseIndex = VerseIndex(cursor.getInt(bookColumnIndex),
+                        cursor.getInt(chapterColumnIndex), cursor.getInt(verseColumnIndex))
+                verses.add(Verse(verseIndex, Verse.Text(translationShortName,
+                        bookNames[verseIndex.bookIndex], cursor.getString(textColumnIndex))))
             }
 
             db.setTransactionSuccessful()
