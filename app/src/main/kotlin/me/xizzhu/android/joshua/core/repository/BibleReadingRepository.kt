@@ -27,8 +27,9 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
         override fun sizeOf(key: String, bookNames: List<String>): Int {
             // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
             var length = 0
-            for (bookName in bookNames)
+            for (bookName in bookNames) {
                 length += bookName.length * 4
+            }
             return length
         }
     }
@@ -37,8 +38,9 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
             // each Verse contains 3 integers and 2 strings
             // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
             var length = 12
-            for (verse in verses)
+            for (verse in verses) {
                 length += (verse.translationShortName.length + verse.text.length) * 4
+            }
             return length
         }
     }
