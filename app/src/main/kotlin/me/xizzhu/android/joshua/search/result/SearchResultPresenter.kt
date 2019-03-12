@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.search.result
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
@@ -35,7 +34,6 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor) : MV
 
         launch(Dispatchers.Main) {
             receiveChannels.add(searchInteractor.observeSearchResult()
-                    .filter { it.isValid() }
                     .onEach { view?.onSearchResultUpdated(it) })
         }
         launch(Dispatchers.Main) {

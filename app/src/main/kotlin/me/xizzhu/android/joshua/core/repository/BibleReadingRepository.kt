@@ -37,9 +37,9 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
         override fun sizeOf(key: String, verses: List<Verse>): Int {
             // each Verse contains 3 integers and 2 strings
             // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
-            var length = 12
+            var length = 0
             for (verse in verses) {
-                length += (verse.translationShortName.length + verse.text.length) * 4
+                length += 12 + (verse.text.bookName.length + verse.text.translationShortName.length + verse.text.text.length) * 4
             }
             return length
         }
@@ -70,12 +70,13 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
         val key = "$translationShortName-$bookIndex-$chapterIndex"
         var verses = versesCache.get(key)
         if (verses == null) {
-            verses = localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex)
+            verses = localReadingStorage.readVerses(
+                    translationShortName, bookIndex, chapterIndex, readBookNames(translationShortName)[bookIndex])
             versesCache.put(key, verses)
         }
         return verses
     }
 
     suspend fun search(translationShortName: String, query: String): List<Verse> =
-            localReadingStorage.search(translationShortName, query)
+            localReadingStorage.search(translationShortName, readBookNames(translationShortName), query)
 }

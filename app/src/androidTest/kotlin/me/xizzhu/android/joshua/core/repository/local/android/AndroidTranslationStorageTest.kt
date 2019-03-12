@@ -108,14 +108,17 @@ class AndroidTranslationStorageTest : BaseSqliteTest() {
                     MockContents.kjvBookNames, MockContents.kjvVerses.toMap())
             assertTrue(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
             assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(MockContents.kjvShortName))
-            assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(MockContents.kjvShortName,
-                    MockContents.kjvVerses[0].verseIndex.bookIndex, MockContents.kjvVerses[0].verseIndex.chapterIndex))
+            assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(
+                    MockContents.kjvShortName, MockContents.kjvVerses[0].verseIndex.bookIndex,
+                    MockContents.kjvVerses[0].verseIndex.chapterIndex, MockContents.kjvBookNames[0]))
 
             androidTranslationStorage.removeTranslation(MockContents.kjvTranslationInfo)
             assertFalse(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
             assertTrue(androidDatabase.bookNamesDao.read(MockContents.kjvShortName).isEmpty())
             assertTrue(androidDatabase.translationDao.read(MockContents.kjvShortName,
-                    MockContents.kjvVerses[0].verseIndex.bookIndex, MockContents.kjvVerses[0].verseIndex.chapterIndex).isEmpty())
+                    MockContents.kjvVerses[0].verseIndex.bookIndex,
+                    MockContents.kjvVerses[0].verseIndex.chapterIndex,
+                    MockContents.kjvBookNames[0]).isEmpty())
         }
     }
 }
