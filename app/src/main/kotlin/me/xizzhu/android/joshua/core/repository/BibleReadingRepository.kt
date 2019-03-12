@@ -16,11 +16,35 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import androidx.collection.LruCache
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 
 class BibleReadingRepository(private val localReadingStorage: LocalReadingStorage) {
+    private val maxMemory = Runtime.getRuntime().maxMemory()
+    private val bookNamesCache = object : LruCache<String, List<String>>((maxMemory / 16L).toInt()) {
+        override fun sizeOf(key: String, bookNames: List<String>): Int {
+            // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
+            var length = 0
+            for (bookName in bookNames) {
+                length += bookName.length * 4
+            }
+            return length
+        }
+    }
+    private val versesCache = object : LruCache<String, List<Verse>>((maxMemory / 8L).toInt()) {
+        override fun sizeOf(key: String, verses: List<Verse>): Int {
+            // each Verse contains 3 integers and 2 strings
+            // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
+            var length = 12
+            for (verse in verses) {
+                length += (verse.translationShortName.length + verse.text.length) * 4
+            }
+            return length
+        }
+    }
+
     suspend fun readCurrentTranslation(): String = localReadingStorage.readCurrentTranslation()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
@@ -33,11 +57,24 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
         localReadingStorage.saveCurrentVerseIndex(verseIndex)
     }
 
-    suspend fun readBookNames(translationShortName: String): List<String> =
-            localReadingStorage.readBookNames(translationShortName)
+    suspend fun readBookNames(translationShortName: String): List<String> {
+        var bookNames = bookNamesCache.get(translationShortName)
+        if (bookNames == null) {
+            bookNames = localReadingStorage.readBookNames(translationShortName)
+            bookNamesCache.put(translationShortName, bookNames)
+        }
+        return bookNames
+    }
 
-    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
-            localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex)
+    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
+        val key = "$translationShortName-$bookIndex-$chapterIndex"
+        var verses = versesCache.get(key)
+        if (verses == null) {
+            verses = localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex)
+            versesCache.put(key, verses)
+        }
+        return verses
+    }
 
     suspend fun search(translationShortName: String, query: String): List<Verse> =
             localReadingStorage.search(translationShortName, query)
