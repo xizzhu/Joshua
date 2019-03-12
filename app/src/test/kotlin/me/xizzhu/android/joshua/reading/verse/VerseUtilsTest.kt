@@ -17,21 +17,24 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.Assert
+import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class VerseUtilsTest : BaseUnitTest() {
     @Test
     fun testPositionToBookIndex() {
-        Assert.assertEquals(0, 0.toBookIndex())
-        Assert.assertEquals(0, 49.toBookIndex())
+        assertEquals(0, 0.toBookIndex())
+        assertEquals(0, 49.toBookIndex())
 
-        Assert.assertEquals(1, 50.toBookIndex())
-        Assert.assertEquals(1, 55.toBookIndex())
+        assertEquals(1, 50.toBookIndex())
+        assertEquals(1, 55.toBookIndex())
 
-        Assert.assertEquals(65, 1188.toBookIndex())
+        assertEquals(65, 1188.toBookIndex())
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -46,13 +49,13 @@ class VerseUtilsTest : BaseUnitTest() {
 
     @Test
     fun testPositionToChapterIndex() {
-        Assert.assertEquals(0, 0.toChapterIndex())
-        Assert.assertEquals(49, 49.toChapterIndex())
+        assertEquals(0, 0.toChapterIndex())
+        assertEquals(49, 49.toChapterIndex())
 
-        Assert.assertEquals(0, 50.toChapterIndex())
-        Assert.assertEquals(5, 55.toChapterIndex())
+        assertEquals(0, 50.toChapterIndex())
+        assertEquals(5, 55.toChapterIndex())
 
-        Assert.assertEquals(21, 1188.toChapterIndex())
+        assertEquals(21, 1188.toChapterIndex())
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -67,24 +70,24 @@ class VerseUtilsTest : BaseUnitTest() {
 
     @Test
     fun testVerseIndexToPosition() {
-        Assert.assertEquals(0, VerseIndex(0, 0, 0).toPagePosition())
-        Assert.assertEquals(49, VerseIndex(0, 49, 0).toPagePosition())
+        assertEquals(0, VerseIndex(0, 0, 0).toPagePosition())
+        assertEquals(49, VerseIndex(0, 49, 0).toPagePosition())
 
-        Assert.assertEquals(50, VerseIndex(1, 0, 0).toPagePosition())
-        Assert.assertEquals(55, VerseIndex(1, 5, 0).toPagePosition())
+        assertEquals(50, VerseIndex(1, 0, 0).toPagePosition())
+        assertEquals(55, VerseIndex(1, 5, 0).toPagePosition())
 
-        Assert.assertEquals(1188, VerseIndex(65, 21, 0).toPagePosition())
+        assertEquals(1188, VerseIndex(65, 21, 0).toPagePosition())
     }
 
     @Test
     fun testIndexToPosition() {
-        Assert.assertEquals(0, indexToPagePosition(0, 0))
-        Assert.assertEquals(49, indexToPagePosition(0, 49))
+        assertEquals(0, indexToPagePosition(0, 0))
+        assertEquals(49, indexToPagePosition(0, 49))
 
-        Assert.assertEquals(50, indexToPagePosition(1, 0))
-        Assert.assertEquals(55, indexToPagePosition(1, 5))
+        assertEquals(50, indexToPagePosition(1, 0))
+        assertEquals(55, indexToPagePosition(1, 5))
 
-        Assert.assertEquals(1188, indexToPagePosition(65, 21))
+        assertEquals(1188, indexToPagePosition(65, 21))
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -105,5 +108,24 @@ class VerseUtilsTest : BaseUnitTest() {
     @Test(expected = IllegalArgumentException::class)
     fun testTooBigChapterIndexToPosition() {
         indexToPagePosition(0, Bible.getChapterCount(0))
+    }
+
+    @Test
+    fun testEmptyVerseToStringForSharing() {
+        assertTrue(emptyList<Verse>().toStringForSharing().isEmpty())
+    }
+
+    @Test
+    fun testSingleVerseToStringForSharing() {
+        val expected = "Genesis 1:1 In the beginning God created the heaven and the earth."
+        val actual = listOf(MockContents.kjvVerses[0]).toStringForSharing()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testMultipleVersesToStringForSharing() {
+        val expected = "Genesis 1:1 In the beginning God created the heaven and the earth.\nGenesis 1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."
+        val actual = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toStringForSharing()
+        assertEquals(expected, actual)
     }
 }

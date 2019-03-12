@@ -17,7 +17,9 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import java.lang.StringBuilder
 
 fun VerseIndex.toPagePosition(): Int = indexToPagePosition(bookIndex, chapterIndex)
 
@@ -67,4 +69,18 @@ fun Int.toChapterIndex(): Int {
     }
 
     throw IllegalArgumentException("Invalid position: $position")
+}
+
+fun List<Verse>.toStringForSharing(): String {
+    val stringBuilder = StringBuilder()
+    for (verse in this) {
+        if (stringBuilder.isNotEmpty()) {
+            stringBuilder.append('\n')
+        }
+        // format: <book name> <chapter index>:<verse index> <text>
+        stringBuilder.append(verse.text.bookName).append(' ')
+                .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append(' ')
+                .append(verse.text.text)
+    }
+    return stringBuilder.toString()
 }
