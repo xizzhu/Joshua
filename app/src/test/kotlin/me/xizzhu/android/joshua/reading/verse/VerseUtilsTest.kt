@@ -128,4 +128,11 @@ class VerseUtilsTest : BaseUnitTest() {
         val actual = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toStringForSharing()
         assertEquals(expected, actual)
     }
+
+    @Test
+    fun testMultipleVersesRandomOrderToStringForSharing() {
+        val expected = "Genesis 1:1 In the beginning God created the heaven and the earth.\nGenesis 1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.\nGenesis 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good."
+        val actual = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[9], MockContents.kjvVerses[1]).toStringForSharing()
+        assertEquals(expected, actual)
+    }
 }

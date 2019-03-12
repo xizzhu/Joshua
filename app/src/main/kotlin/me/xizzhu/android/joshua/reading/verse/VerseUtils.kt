@@ -73,7 +73,10 @@ fun Int.toChapterIndex(): Int {
 
 fun Collection<Verse>.toStringForSharing(): String {
     val stringBuilder = StringBuilder()
-    for (verse in this) {
+    for (verse in sortedBy { verse ->
+        val verseIndex = verse.verseIndex
+        verseIndex.bookIndex * 100000 + verseIndex.chapterIndex * 1000 + verseIndex.verseIndex
+    }) {
         if (stringBuilder.isNotEmpty()) {
             stringBuilder.append('\n')
         }
