@@ -54,6 +54,9 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
                     true
                 }
                 R.id.action_share -> {
+                    if (!readingInteractor.share(selectedVerses)) {
+                        view?.onVersesSharedFailed()
+                    }
                     mode.finish()
                     true
                 }

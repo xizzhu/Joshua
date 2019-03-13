@@ -43,6 +43,8 @@ interface VerseView : MVPView {
     fun onVerseDeselected(verse: Verse)
 
     fun onVersesCopied()
+
+    fun onVersesSharedFailed()
 }
 
 class VerseViewPager : ViewPager, VerseView {
@@ -135,5 +137,9 @@ class VerseViewPager : ViewPager, VerseView {
 
     override fun onVersesCopied() {
         Toast.makeText(context, R.string.toast_verses_copied, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onVersesSharedFailed() {
+        Toast.makeText(context, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
     }
 }
