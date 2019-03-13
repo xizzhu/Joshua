@@ -28,59 +28,55 @@ data class TranslationInfo(val shortName: String, val name: String, val language
                            val size: Long, val downloaded: Boolean)
 
 class TranslationManager(private val translationRepository: TranslationRepository) {
-    private val availableTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
-    private val downloadedTranslations: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
+    private val translationsLock: Any = Any()
+    private val availableTranslations: MutableMap<String, TranslationInfo> = mutableMapOf()
+    private val downloadedTranslations: MutableMap<String, TranslationInfo> = mutableMapOf()
+    private val availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
+    private val downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
-            val available = ArrayList<TranslationInfo>()
-            val downloaded = ArrayList<TranslationInfo>()
-            for (t in translationRepository.readTranslationsFromLocal()) {
-                if (t.downloaded) {
-                    downloaded.add(t)
-                } else {
-                    available.add(t)
-                }
-            }
-            availableTranslations.send(available)
-            downloadedTranslations.send(downloaded)
+            updateTranslations(translationRepository.readTranslationsFromLocal())
         }
     }
 
-    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> = availableTranslations.openSubscription()
+    private suspend fun updateTranslations(updatedTranslations: List<TranslationInfo>) {
+        val (available, downloaded) = synchronized(translationsLock) {
+            for (t in updatedTranslations) {
+                if (t.downloaded) {
+                    downloadedTranslations[t.shortName] = t
+                } else {
+                    availableTranslations[t.shortName] = t
+                }
+            }
+            Pair(availableTranslations.values.toList(), downloadedTranslations.values.toList())
+        }
+        availableTranslationsChannel.send(available)
+        downloadedTranslationsChannel.send(downloaded)
+    }
 
-    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> = downloadedTranslations.openSubscription()
+    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> = availableTranslationsChannel.openSubscription()
+
+    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> = downloadedTranslationsChannel.openSubscription()
 
     suspend fun reload(forceRefresh: Boolean) {
-        val available = ArrayList<TranslationInfo>()
-        val downloaded = ArrayList<TranslationInfo>()
-        val translations = translationRepository.reload(forceRefresh)
-        for (t in translations) {
-            if (t.downloaded) {
-                downloaded.add(t)
-            } else {
-                available.add(t)
-            }
-        }
-        if (available != availableTranslations.value) {
-            availableTranslations.send(available)
-        }
-        if (downloaded != downloadedTranslations.value) {
-            downloadedTranslations.send(downloaded)
-        }
+        updateTranslations(translationRepository.reload(forceRefresh))
     }
 
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
         translationRepository.downloadTranslation(channel, translationInfo)
 
-        val currentAvailable = ArrayList(availableTranslations.value)
-        currentAvailable.removeByShortName(translationInfo.shortName)
-        availableTranslations.send(currentAvailable)
+        val (available, downloaded) = synchronized(translationsLock) {
+            availableTranslations.remove(translationInfo.shortName)
 
-        val currentDownloaded = ArrayList(downloadedTranslations.value)
-        currentDownloaded.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
-                translationInfo.language, translationInfo.size, true))
-        downloadedTranslations.send(currentDownloaded)
+            downloadedTranslations[translationInfo.shortName] = TranslationInfo(
+                    translationInfo.shortName, translationInfo.name,
+                    translationInfo.language, translationInfo.size, true)
+
+            Pair(availableTranslations.values.toList(), downloadedTranslations.values.toList())
+        }
+        availableTranslationsChannel.send(available)
+        downloadedTranslationsChannel.send(downloaded)
 
         channel.close()
     }
@@ -88,24 +84,16 @@ class TranslationManager(private val translationRepository: TranslationRepositor
     suspend fun removeTranslation(translationInfo: TranslationInfo) {
         translationRepository.removeTranslation(translationInfo)
 
-        val currentDownloaded = ArrayList(downloadedTranslations.value)
-        if (currentDownloaded.removeByShortName(translationInfo.shortName)) {
-            downloadedTranslations.send(currentDownloaded)
+        val (available, downloaded) = synchronized(translationsLock) {
+            if (downloadedTranslations.remove(translationInfo.shortName) != null) {
+                availableTranslations[translationInfo.shortName] = TranslationInfo(
+                        translationInfo.shortName, translationInfo.name,
+                        translationInfo.language, translationInfo.size, false)
+            }
 
-            val currentAvailable = ArrayList(availableTranslations.value)
-            currentAvailable.add(TranslationInfo(translationInfo.shortName, translationInfo.name,
-                    translationInfo.language, translationInfo.size, false))
-            availableTranslations.send(currentAvailable)
+            Pair(availableTranslations.values.toList(), downloadedTranslations.values.toList())
         }
+        availableTranslationsChannel.send(available)
+        downloadedTranslationsChannel.send(downloaded)
     }
-}
-
-private fun ArrayList<TranslationInfo>.removeByShortName(translationShortName: String): Boolean {
-    for (i in 0 until size) {
-        if (this[i].shortName == translationShortName) {
-            removeAt(i)
-            return true
-        }
-    }
-    return false
 }
