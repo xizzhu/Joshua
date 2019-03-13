@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.reading.verse
 
 import android.view.Menu
 import android.view.MenuItem
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.filter
@@ -35,7 +36,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         private val TAG: String = VersePresenter::class.java.simpleName
     }
 
-    private val selectedVerses: HashSet<Verse> = HashSet()
+    @VisibleForTesting
+    val selectedVerses: HashSet<Verse> = HashSet()
     private var actionMode: ActionMode? = null
     private val actionModeCallback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {

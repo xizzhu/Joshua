@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -27,6 +28,8 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class VersePresenterTest : BaseUnitTest() {
     @Mock
@@ -128,5 +131,40 @@ class VersePresenterTest : BaseUnitTest() {
             verify(verseView, never()).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
             verify(verseView, times(1)).onVersesLoadFailed(translationShortName, bookIndex, chapterIndex)
         }
+    }
+
+    @Test
+    fun testOnVerseClickedWithoutActionMode() {
+        val verse = MockContents.kjvVerses[0]
+        versePresenter.onVerseClicked(verse)
+        assertTrue(versePresenter.selectedVerses.isEmpty())
+        verify(verseView, never()).onVerseDeselected(verse)
+        verify(verseView, never()).onVerseSelected(verse)
+    }
+
+    @Test
+    fun testVerseSelectionAndDeselection() {
+        val actionMode = mock(ActionMode::class.java)
+        `when`(readingInteractor.startActionMode(any())).thenReturn(actionMode)
+
+        val verse = MockContents.kjvVerses[0]
+        versePresenter.onVerseLongClicked(verse)
+        assertEquals(1, versePresenter.selectedVerses.size)
+        verify(readingInteractor, times(1)).startActionMode(any())
+        verify(verseView, times(1)).onVerseSelected(verse)
+
+        val anotherVerse = MockContents.kjvVerses[5]
+        versePresenter.onVerseLongClicked(anotherVerse)
+        assertEquals(2, versePresenter.selectedVerses.size)
+        verify(verseView, times(1)).onVerseSelected(anotherVerse)
+
+        versePresenter.onVerseClicked(anotherVerse)
+        assertEquals(1, versePresenter.selectedVerses.size)
+        verify(verseView, times(1)).onVerseDeselected(anotherVerse)
+
+        versePresenter.onVerseClicked(verse)
+        assertTrue(versePresenter.selectedVerses.isEmpty())
+        verify(verseView, times(1)).onVerseDeselected(verse)
+        verify(actionMode, times(1)).finish()
     }
 }
