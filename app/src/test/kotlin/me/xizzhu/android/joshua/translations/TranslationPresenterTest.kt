@@ -143,7 +143,7 @@ class TranslationPresenterTest : BaseUnitTest() {
         runBlocking {
             val downloadProgressChannel = Channel<Int>()
             `when`(translationInteractor.downloadTranslation(downloadProgressChannel, MockContents.kjvTranslationInfo))
-                    .thenThrow(RuntimeException("Random exception"))
+                    .then { downloadProgressChannel.close(RuntimeException("Random exception")) }
 
             translationPresenter.attachView(translationView)
             translationPresenter.downloadTranslation(MockContents.kjvTranslationInfo, downloadProgressChannel)
