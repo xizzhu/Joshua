@@ -5,6 +5,9 @@
     <color name="primary_dark">#00008b</color>
     <color name="accent">#d9d919</color>
 
+    <color name="light_gray">#cccccc</color>
+    <color name="dark_gray">#dddddd</color>
+
     <color name="text_dark_primary">#de000000</color>
     <color name="text_dark_secondary">#8a000000</color>
     <color name="text_dark_disabled_hint">#61000000</color>
