@@ -10,6 +10,15 @@
 
         <item name="actionModeBackground">@color/primary</item>
         <item name="windowActionModeOverlay">true</item>
+
+        <item name="android:windowAnimationStyle">@style/AppWindowAnimationStyle</item>
+    </style>
+
+    <style name="AppWindowAnimationStyle">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right_to_left</item>
+        <item name="android:activityOpenExitAnimation">@anim/fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@anim/fade_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_left_to_right</item>
     </style>
 
     <style name="Text" />
