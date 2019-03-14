@@ -34,6 +34,8 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     interface Listener {
         fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
 
+        fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int)
+
         fun onVerseClicked(verse: Verse)
 
         fun onVerseLongClicked(verse: Verse)
@@ -43,9 +45,10 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     private val pages = ArrayList<Page>()
 
     var currentTranslation = ""
+    var currentVerseIndex = VerseIndex.INVALID
 
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
-        findPage(bookIndex, chapterIndex)?.setVerses(verses)
+        findPage(bookIndex, chapterIndex)?.setVerses(verses, currentVerseIndex)
     }
 
     private fun findPage(bookIndex: Int, chapterIndex: Int): Page? {
@@ -127,6 +130,14 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         verseList.adapter = adapter
         verseList.addOnChildAttachStateChangeListener(this)
+        verseList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if (inUse && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    listener.onCurrentVerseUpdated(bookIndex, chapterIndex,
+                            (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition())
+                }
+            }
+        })
     }
 
     fun bind(translation: String, bookIndex: Int, chapterIndex: Int) {
@@ -144,13 +155,23 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         inUse = false
     }
 
-    fun setVerses(verses: List<Verse>) {
+    fun setVerses(verses: List<Verse>, currentVerseIndex: VerseIndex) {
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 
         this.verses = verses
         adapter.setVerses(verses)
-        verseList.scrollToPosition(0)
+
+        if (currentVerseIndex.verseIndex > 0
+                && currentVerseIndex.bookIndex == bookIndex
+                && currentVerseIndex.chapterIndex == chapterIndex) {
+            verseList.post {
+                (verseList.layoutManager as LinearLayoutManager)
+                        .scrollToPositionWithOffset(currentVerseIndex.verseIndex, 0)
+            }
+        } else {
+            verseList.scrollToPosition(0)
+        }
     }
 
     fun selectVerse(verseIndex: VerseIndex) {

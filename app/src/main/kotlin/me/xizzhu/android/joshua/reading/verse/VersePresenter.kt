@@ -107,6 +107,16 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         }
     }
 
+    fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
+        launch(Dispatchers.Main) {
+            try {
+                readingInteractor.saveCurrentVerseIndex(verseIndex)
+            } catch (e: Exception) {
+                Log.e(TAG, e, "Failed to save current verse")
+            }
+        }
+    }
+
     fun loadVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
             try {

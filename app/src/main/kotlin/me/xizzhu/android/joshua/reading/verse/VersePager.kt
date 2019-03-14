@@ -57,6 +57,15 @@ class VerseViewPager : ViewPager, VerseView {
             presenter.loadVerses(currentTranslation, bookIndex, chapterIndex)
         }
 
+        override fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int) {
+            val updatedVerseIndex = VerseIndex(bookIndex, chapterIndex, verseIndex)
+            if (currentVerseIndex == updatedVerseIndex) {
+                return
+            }
+            currentVerseIndex = updatedVerseIndex
+            presenter.saveCurrentVerseIndex(updatedVerseIndex)
+        }
+
         override fun onVerseClicked(verse: Verse) {
             presenter.onVerseClicked(verse)
         }
@@ -90,6 +99,9 @@ class VerseViewPager : ViewPager, VerseView {
     }
 
     override fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex) {
+        if (this.currentVerseIndex == currentVerseIndex) {
+            return
+        }
         this.currentVerseIndex = currentVerseIndex
         refreshUi()
     }
@@ -100,11 +112,15 @@ class VerseViewPager : ViewPager, VerseView {
         }
 
         adapter.currentTranslation = currentTranslation
+        adapter.currentVerseIndex = currentVerseIndex
         adapter.notifyDataSetChanged()
         setCurrentItem(currentVerseIndex.toPagePosition(), false)
     }
 
     override fun onCurrentTranslationUpdated(currentTranslation: String) {
+        if (this.currentTranslation == currentTranslation) {
+            return
+        }
         this.currentTranslation = currentTranslation
         refreshUi()
     }

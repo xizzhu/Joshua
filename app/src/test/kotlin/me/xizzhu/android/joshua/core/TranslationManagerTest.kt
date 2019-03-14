@@ -16,10 +16,9 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -184,6 +183,50 @@ class TranslationManagerTest : BaseUnitTest() {
                     MockContents.kjvDownloadedTranslationInfo))
             assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationManager.observeDownloadedTranslations().first())
             assertEquals(listOf(MockContents.kjvTranslationInfo), translationManager.observeAvailableTranslations().first())
+        }
+    }
+
+    @Test
+    fun testNotifyTranslationsUpdated() {
+        runBlocking {
+            withTimeout(5000L) {
+                var availableUpdated = 0
+                val availableJob = launch(Dispatchers.Unconfined) {
+                    val availableReceiver = translationManager.observeAvailableTranslations()
+                    availableReceiver.onEach {
+                        if (++availableUpdated == 3) {
+                            availableReceiver.cancel()
+                        }
+                    }
+                }
+
+                var downloadedUpdated = 0
+                val downloadedJob = launch(Dispatchers.Unconfined) {
+                    val downloadedReceiver = translationManager.observeDownloadedTranslations()
+                    downloadedReceiver.onEach {
+                        if (++downloadedUpdated == 4) {
+                            downloadedReceiver.cancel()
+                        }
+                    }
+                }
+
+                translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
+                translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
+                translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
+
+                translationManager.notifyTranslationsUpdated(
+                        listOf(MockContents.kjvTranslationInfo), listOf(MockContents.kjvDownloadedTranslationInfo))
+                translationManager.notifyTranslationsUpdated(
+                        listOf(MockContents.kjvTranslationInfo), listOf(MockContents.kjvDownloadedTranslationInfo))
+
+                translationManager.notifyTranslationsUpdated(listOf(MockContents.kjvTranslationInfo), emptyList())
+                translationManager.notifyTranslationsUpdated(listOf(MockContents.kjvTranslationInfo), emptyList())
+
+                translationManager.notifyTranslationsUpdated(emptyList(), listOf(MockContents.kjvDownloadedTranslationInfo))
+
+                availableJob.join()
+                downloadedJob.join()
+            }
         }
     }
 }

@@ -32,8 +32,8 @@ class TranslationManager(private val translationRepository: TranslationRepositor
     private val translationsLock: Any = Any()
     private val availableTranslations: MutableMap<String, TranslationInfo> = mutableMapOf()
     private val downloadedTranslations: MutableMap<String, TranslationInfo> = mutableMapOf()
-    private val availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
-    private val downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
+    private val availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+    private val downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
@@ -53,8 +53,18 @@ class TranslationManager(private val translationRepository: TranslationRepositor
             }
             Pair(availableTranslations.values.toList(), downloadedTranslations.values.toList())
         }
-        availableTranslationsChannel.send(available)
-        downloadedTranslationsChannel.send(downloaded)
+        notifyTranslationsUpdated(available, downloaded)
+    }
+
+    @VisibleForTesting
+    suspend fun notifyTranslationsUpdated(available: List<TranslationInfo>, downloaded: List<TranslationInfo>) {
+        if (available != availableTranslationsChannel.valueOrNull) {
+            availableTranslationsChannel.send(available)
+        }
+
+        if (downloaded != downloadedTranslationsChannel.valueOrNull) {
+            downloadedTranslationsChannel.send(downloaded)
+        }
     }
 
     fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> = availableTranslationsChannel.openSubscription()
@@ -77,8 +87,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
 
             Pair(availableTranslations.values.toList(), downloadedTranslations.values.toList())
         }
-        availableTranslationsChannel.send(available)
-        downloadedTranslationsChannel.send(downloaded)
+        notifyTranslationsUpdated(available, downloaded)
 
         channel.close()
     }
@@ -95,7 +104,6 @@ class TranslationManager(private val translationRepository: TranslationRepositor
 
             Pair(availableTranslations.values.toList(), downloadedTranslations.values.toList())
         }
-        availableTranslationsChannel.send(available)
-        downloadedTranslationsChannel.send(downloaded)
+        notifyTranslationsUpdated(available, downloaded)
     }
 }
