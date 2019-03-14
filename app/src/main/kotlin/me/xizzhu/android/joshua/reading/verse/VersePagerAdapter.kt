@@ -34,6 +34,8 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     interface Listener {
         fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
 
+        fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int)
+
         fun onVerseClicked(verse: Verse)
 
         fun onVerseLongClicked(verse: Verse)
@@ -128,6 +130,14 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         verseList.adapter = adapter
         verseList.addOnChildAttachStateChangeListener(this)
+        verseList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if (inUse && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    listener.onCurrentVerseUpdated(bookIndex, chapterIndex,
+                            (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition())
+                }
+            }
+        })
     }
 
     fun bind(translation: String, bookIndex: Int, chapterIndex: Int) {
