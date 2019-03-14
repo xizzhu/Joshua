@@ -174,4 +174,16 @@ class TranslationManagerTest : BaseUnitTest() {
             assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
         }
     }
+
+    @Test
+    fun testUpdateTranslations() {
+        runBlocking {
+            translationManager.updateTranslations(listOf(MockContents.kjvTranslationInfo,
+                    MockContents.kjvDownloadedTranslationInfo, MockContents.kjvDownloadedTranslationInfo,
+                    MockContents.kjvTranslationInfo, MockContents.kjvTranslationInfo,
+                    MockContents.kjvDownloadedTranslationInfo))
+            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationManager.observeDownloadedTranslations().first())
+            assertEquals(listOf(MockContents.kjvTranslationInfo), translationManager.observeAvailableTranslations().first())
+        }
+    }
 }

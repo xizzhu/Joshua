@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -40,7 +41,8 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         }
     }
 
-    private suspend fun updateTranslations(updatedTranslations: List<TranslationInfo>) {
+    @VisibleForTesting
+    suspend fun updateTranslations(updatedTranslations: List<TranslationInfo>) {
         val (available, downloaded) = synchronized(translationsLock) {
             for (t in updatedTranslations) {
                 if (t.downloaded) {
