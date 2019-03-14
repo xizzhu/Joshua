@@ -100,6 +100,7 @@ class VerseViewPager : ViewPager, VerseView {
         }
 
         adapter.currentTranslation = currentTranslation
+        adapter.currentVerseIndex = currentVerseIndex
         adapter.notifyDataSetChanged()
         setCurrentItem(currentVerseIndex.toPagePosition(), false)
     }
