@@ -95,7 +95,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
             searchResultChannel.send(searchResult)
             searchStateChannel.send(false)
 
-            verify(searchResultView, times(1)).onSearchResultUpdated(searchResult)
+            verify(searchResultView, times(1)).onSearchResultUpdated(searchResult.toSearchResult())
             verify(searchResultView, times(1)).onSearchStarted()
 
             // once from initial state, and second time when search finishes

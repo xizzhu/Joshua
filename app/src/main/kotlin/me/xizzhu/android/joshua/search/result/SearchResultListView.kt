@@ -26,19 +26,17 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.utils.MVPView
-import java.lang.StringBuilder
 
 interface SearchResultView : MVPView {
     fun onSearchStarted()
 
     fun onSearchCompleted()
 
-    fun onSearchResultUpdated(verses: List<Verse>)
+    fun onSearchResultUpdated(searchResult: SearchResult)
 
     fun onVerseSelectionFailed(verseToSelect: VerseIndex)
 }
@@ -53,8 +51,8 @@ class SearchResultListView : RecyclerView, SearchResultView {
     private lateinit var presenter: SearchResultPresenter
 
     private val listener = object : OnSearchResultClickedListener {
-        override fun onSearchResultClicked(verse: Verse) {
-            presenter.selectVerse(verse.verseIndex)
+        override fun onSearchResultClicked(verseIndex: VerseIndex) {
+            presenter.selectVerse(verseIndex)
         }
     }
     private val adapter: SearchResultListAdapter = SearchResultListAdapter(context, listener)
@@ -76,8 +74,8 @@ class SearchResultListView : RecyclerView, SearchResultView {
         fadeIn()
     }
 
-    override fun onSearchResultUpdated(verses: List<Verse>) {
-        adapter.setSearchResult(verses)
+    override fun onSearchResultUpdated(searchResult: SearchResult) {
+        adapter.setSearchResult(searchResult)
     }
 
     override fun onVerseSelectionFailed(verseToSelect: VerseIndex) {
@@ -89,55 +87,48 @@ class SearchResultListView : RecyclerView, SearchResultView {
 }
 
 private interface OnSearchResultClickedListener {
-    fun onSearchResultClicked(verse: Verse)
+    fun onSearchResultClicked(verseIndex: VerseIndex)
 }
 
 private class SearchResultListAdapter(context: Context, private val listener: OnSearchResultClickedListener)
     : RecyclerView.Adapter<SearchResultViewHolder>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
-    private val searchResult: ArrayList<Verse> = ArrayList()
+    private var searchResult: SearchResult? = null
 
-    fun setSearchResult(verses: List<Verse>) {
-        searchResult.clear()
-        searchResult.addAll(verses)
+    fun setSearchResult(searchResult: SearchResult) {
+        this.searchResult = searchResult
         notifyDataSetChanged()
     }
 
-    override fun getItemCount(): Int = searchResult.size
+    override fun getItemCount(): Int = searchResult?.size ?: 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchResultViewHolder =
             SearchResultViewHolder(inflater, parent, listener)
 
     override fun onBindViewHolder(holder: SearchResultViewHolder, position: Int) {
-        holder.bind(searchResult[position])
+        holder.bind(searchResult!![position])
     }
 }
 
 private class SearchResultViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val listener: OnSearchResultClickedListener)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_search_result, parent, false)),
         View.OnClickListener {
-    private val stringBuilder = StringBuilder()
     private val text = itemView as TextView
 
-    private var currentVerse: Verse? = null
+    private var currentVerse: SearchedVerse? = null
 
     init {
         itemView.setOnClickListener(this)
     }
 
-    fun bind(verse: Verse) {
+    fun bind(verse: SearchedVerse) {
         currentVerse = verse
-
-        stringBuilder.setLength(0)
-        stringBuilder.append(verse.text.bookName).append(' ')
-                .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
-                .append('\n').append(verse.text.text)
-        text.text = stringBuilder.toString()
+        text.text = verse.getTextForDisplay()
     }
 
     override fun onClick(v: View) {
         if (currentVerse != null) {
-            listener.onSearchResultClicked(currentVerse!!)
+            listener.onSearchResultClicked(currentVerse!!.verseIndex)
         }
     }
 }
