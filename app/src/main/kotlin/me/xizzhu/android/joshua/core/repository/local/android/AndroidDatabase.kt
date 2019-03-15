@@ -122,7 +122,7 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
         const val KEY_CURRENT_CHAPTER_INDEX = "currentChapterIndex"
         const val KEY_CURRENT_VERSE_INDEX = "currentVerseIndex"
         const val KEY_CONTINUOUS_READING_DAYS = "continuousReadingDays"
-        const val COLUMN_LAST_READING_TIMESTAMP = "lastReadingTimestamp"
+        const val KEY_LAST_READING_TIMESTAMP = "lastReadingTimestamp"
 
         @WorkerThread
         fun createTable(db: SQLiteDatabase) {
@@ -150,19 +150,41 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(keys: List<Pair<String, String>>): List<String> {
-        val results = ArrayList<String>(keys.size)
-        db.beginTransaction()
-        try {
-            for (key in keys) {
-                results.add(read(key.first, key.second))
-            }
-
-            db.setTransactionSuccessful()
-        } finally {
-            db.endTransaction()
+    fun read(keys: List<Pair<String, String>>): Map<String, String> {
+        if (keys.isEmpty()) {
+            return emptyMap()
         }
-        return results
+
+        val results = HashMap<String, String>(keys.size)
+
+        val singleSelection = "$COLUMN_KEY = ?"
+        val selection = StringBuilder()
+        val selectionArgs = Array(keys.size) { "" }
+        for ((i, key) in keys.withIndex()) {
+            if (selection.isNotEmpty()) {
+                selection.append(" OR ")
+            }
+            selection.append(singleSelection)
+            selectionArgs[i] = key.first
+
+            results[key.first] = key.second
+        }
+
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_METADATA, arrayOf(COLUMN_KEY, COLUMN_VALUE),
+                    selection.toString(), selectionArgs, null, null, null)
+            if (cursor.count > 0) {
+                val keyIndex = cursor.getColumnIndex(COLUMN_KEY)
+                val valueIndex = cursor.getColumnIndex(COLUMN_VALUE)
+                while (cursor.moveToNext()) {
+                    results[cursor.getString(keyIndex)] = cursor.getString(valueIndex)
+                }
+            }
+            return results
+        } finally {
+            cursor?.close()
+        }
     }
 
     @WorkerThread
