@@ -37,7 +37,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
     private lateinit var searchResultView: SearchResultView
     private lateinit var searchResultPresenter: SearchResultPresenter
     private lateinit var searchStateChannel: BroadcastChannel<Boolean>
-    private lateinit var searchResultChannel: BroadcastChannel<List<Verse>>
+    private lateinit var searchResultChannel: BroadcastChannel<Pair<String, List<Verse>>>
 
     @Before
     override fun setup() {
@@ -46,7 +46,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
         searchStateChannel = ConflatedBroadcastChannel(false)
         `when`(searchInteractor.observeSearchState()).thenReturn(searchStateChannel.openSubscription())
 
-        searchResultChannel = ConflatedBroadcastChannel(emptyList())
+        searchResultChannel = ConflatedBroadcastChannel(Pair("", emptyList()))
         `when`(searchInteractor.observeSearchResult()).thenReturn(searchResultChannel.openSubscription())
 
         searchResultPresenter = SearchResultPresenter(searchInteractor)
@@ -91,11 +91,12 @@ class SearchResultPresenterTest : BaseUnitTest() {
     fun testObserveSearchResultAndState() {
         runBlocking {
             searchStateChannel.send(true)
-            val searchResult: List<Verse> = listOf(MockContents.kjvVerses[0])
-            searchResultChannel.send(searchResult)
+            val query = "query"
+            val verses: List<Verse> = listOf(MockContents.kjvVerses[0])
+            searchResultChannel.send(Pair(query, verses))
             searchStateChannel.send(false)
 
-            verify(searchResultView, times(1)).onSearchResultUpdated(searchResult.toSearchResult())
+            verify(searchResultView, times(1)).onSearchResultUpdated(verses.toSearchResult(query))
             verify(searchResultView, times(1)).onSearchStarted()
 
             // once from initial state, and second time when search finishes

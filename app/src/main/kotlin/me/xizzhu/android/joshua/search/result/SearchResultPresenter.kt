@@ -34,7 +34,7 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor) : MV
 
         launch(Dispatchers.Main) {
             receiveChannels.add(searchInteractor.observeSearchResult()
-                    .onEach { view?.onSearchResultUpdated(it.toSearchResult()) })
+                    .onEach { (query, verses) -> view?.onSearchResultUpdated(verses.toSearchResult(query)) })
         }
         launch(Dispatchers.Main) {
             receiveChannels.add(searchInteractor.observeSearchState()

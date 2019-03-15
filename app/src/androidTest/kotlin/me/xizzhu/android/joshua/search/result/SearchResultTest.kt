@@ -16,18 +16,22 @@
 
 package me.xizzhu.android.joshua.search.result
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import kotlin.test.assertEquals
+import org.junit.runner.RunWith
 
-class SearchResultTest : BaseUnitTest() {
+@RunWith(AndroidJUnit4::class)
+@SmallTest
+class SearchResultTest {
     @Test
     fun testToSearchResult() {
         val expected = listOf(SearchedVerse(MockContents.kjvVerses[0].verseIndex,
-                MockContents.kjvVerses[0].text.bookName, MockContents.kjvVerses[0].text.text))
-        val actual = listOf(MockContents.kjvVerses[0]).toSearchResult()
+                MockContents.kjvVerses[0].text.bookName, MockContents.kjvVerses[0].text.text, ""))
+        val actual = listOf(MockContents.kjvVerses[0]).toSearchResult("")
         assertEquals(expected, actual)
     }
 
@@ -37,7 +41,7 @@ class SearchResultTest : BaseUnitTest() {
         val bookName = MockContents.kjvVerses[0].text.bookName
         val text = MockContents.kjvVerses[0].text.text
         val expected = "$bookName ${verseIndex.chapterIndex + 1}:${verseIndex.verseIndex + 1}\n$text"
-        val actual = SearchedVerse(verseIndex, bookName, text).getTextForDisplay()
+        val actual = SearchedVerse(verseIndex, bookName, text, "").getTextForDisplay().toString()
         assertEquals(expected, actual)
     }
 }
