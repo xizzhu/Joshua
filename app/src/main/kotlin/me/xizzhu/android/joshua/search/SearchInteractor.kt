@@ -29,11 +29,11 @@ class SearchInteractor(private val searchActivity: SearchActivity,
                        private val navigator: Navigator,
                        private val bibleReadingManager: BibleReadingManager) {
     private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
-    private val searchResult: BroadcastChannel<List<Verse>> = ConflatedBroadcastChannel(emptyList())
+    private val searchResult: BroadcastChannel<Pair<String, List<Verse>>> = ConflatedBroadcastChannel(Pair("", emptyList()))
 
     fun observeSearchState(): ReceiveChannel<Boolean> = searchState.openSubscription()
 
-    fun observeSearchResult(): ReceiveChannel<List<Verse>> = searchResult.openSubscription()
+    fun observeSearchResult(): ReceiveChannel<Pair<String, List<Verse>>> = searchResult.openSubscription()
 
     suspend fun selectVerse(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
@@ -45,7 +45,7 @@ class SearchInteractor(private val searchActivity: SearchActivity,
         try {
             val currentTranslation = bibleReadingManager.observeCurrentTranslation().firstOrNull()
                     ?: throw IllegalStateException("No translation selected")
-            searchResult.send(bibleReadingManager.search(currentTranslation, query))
+            searchResult.send(Pair(query, bibleReadingManager.search(currentTranslation, query)))
         } finally {
             searchState.send(false)
         }
