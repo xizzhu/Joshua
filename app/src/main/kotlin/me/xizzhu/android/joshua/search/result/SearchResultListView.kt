@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
@@ -56,6 +57,7 @@ class SearchResultListView : RecyclerView, SearchResultView {
         }
     }
     private val adapter: SearchResultListAdapter = SearchResultListAdapter(context, listener)
+    private var hasSearchStarted = false
 
     init {
         layoutManager = LinearLayoutManager(context, VERTICAL, false)
@@ -68,6 +70,7 @@ class SearchResultListView : RecyclerView, SearchResultView {
 
     override fun onSearchStarted() {
         visibility = GONE
+        hasSearchStarted = true
     }
 
     override fun onSearchCompleted() {
@@ -75,6 +78,11 @@ class SearchResultListView : RecyclerView, SearchResultView {
     }
 
     override fun onSearchResultUpdated(searchResult: SearchResult) {
+        if (hasSearchStarted) {
+            hasSearchStarted = false
+            Toast.makeText(context, resources.getString(R.string.toast_verses_searched, searchResult.size),
+                    Toast.LENGTH_SHORT).show()
+        }
         adapter.setSearchResult(searchResult)
     }
 
