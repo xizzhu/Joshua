@@ -33,6 +33,7 @@ import me.xizzhu.android.joshua.R
 class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val navigator: Navigator,
                         private val bibleReadingManager: BibleReadingManager,
+                        private val readingProgressManager: ReadingProgressManager,
                         private val translationManager: TranslationManager) {
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
@@ -121,5 +122,13 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, filteredIntents.toArray())
         }
         return chooserIntent
+    }
+
+    suspend fun startTrackingReadingProgress() {
+        readingProgressManager.startTracking()
+    }
+
+    suspend fun stopTrackingReadingProgress() {
+        readingProgressManager.stopTracking()
     }
 }

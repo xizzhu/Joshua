@@ -21,15 +21,19 @@ import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
+import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 
 class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : LocalReadingStorage {
     override suspend fun readCurrentVerseIndex(): VerseIndex {
         return withContext(Dispatchers.IO) {
-            val keys = arrayListOf(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0"),
+            val keys = listOf(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0"),
                     Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0"),
                     Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0"))
             val values = androidDatabase.metadataDao.read(keys)
-            VerseIndex(values[0].toInt(), values[1].toInt(), values[2].toInt())
+            VerseIndex(values.getValue(MetadataDao.KEY_CURRENT_BOOK_INDEX).toInt(),
+                    values.getValue(MetadataDao.KEY_CURRENT_CHAPTER_INDEX).toInt(),
+                    values.getValue(MetadataDao.KEY_CURRENT_VERSE_INDEX).toInt())
         }
     }
 

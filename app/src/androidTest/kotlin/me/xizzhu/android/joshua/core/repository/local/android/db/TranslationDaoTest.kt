@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.repository.local.android
+package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.toMap
 import org.junit.Assert.*

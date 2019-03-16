@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.repository.local.android
+package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -36,8 +38,8 @@ class MetadataDaoTest : BaseSqliteTest() {
         val values = listOf("default-value", "")
         val actual = androidDatabase.metadataDao.read(listOf(Pair("not-exist", values[0]), Pair("still-not-exist", values[1])))
         assertEquals(2, actual.size)
-        assertEquals(values[0], actual[0])
-        assertEquals(values[1], actual[1])
+        assertEquals(values[0], actual["not-exist"])
+        assertEquals(values[1], actual["still-not-exist"])
     }
 
     @Test
@@ -60,6 +62,22 @@ class MetadataDaoTest : BaseSqliteTest() {
     }
 
     @Test
+    fun testSaveThenMultiReadEmpty() {
+        androidDatabase.metadataDao.save("key", "value")
+        assertTrue(androidDatabase.metadataDao.read(emptyList()).isEmpty())
+    }
+
+    @Test
+    fun testSaveThenMultiReadWithPartialDefaultValues() {
+        androidDatabase.metadataDao.save("key", "value")
+
+        val expected = mapOf(Pair("key", "value"), Pair("key1", "default1"), Pair("key2", "default2"))
+        val actual = androidDatabase.metadataDao.read(listOf(
+                Pair("key", ""), Pair("key1", "default1"), Pair("key2", "default2")))
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun testMultiSaveThenRead() {
         val entries = listOf(Pair("key1", "value1"), Pair("key2", "value2"))
         androidDatabase.metadataDao.save(entries)
@@ -75,7 +93,7 @@ class MetadataDaoTest : BaseSqliteTest() {
         val actual = androidDatabase.metadataDao.read(keys)
         assertEquals(entries.size, actual.size)
         for (i in 0 until entries.size) {
-            assertEquals(entries[i].second, actual[i])
+            assertEquals(entries[i].second, actual[keys[i].first])
         }
     }
 
@@ -97,7 +115,7 @@ class MetadataDaoTest : BaseSqliteTest() {
         val actual = androidDatabase.metadataDao.read(keys)
         assertEquals(entries.size, actual.size)
         for (i in 0 until entries.size) {
-            assertEquals(entries[i].second, actual[i])
+            assertEquals(entries[i].second, actual[keys[i].first])
         }
     }
 }
