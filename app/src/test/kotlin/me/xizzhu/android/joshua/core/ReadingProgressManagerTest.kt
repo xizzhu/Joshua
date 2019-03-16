@@ -51,10 +51,12 @@ class ReadingProgressManagerTest : BaseUnitTest() {
             launch(Dispatchers.Unconfined) {
                 readingProgressManager.startTracking()
             }
-            verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong())
+            verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
 
             verseIndexChannel.send(VerseIndex(1, 2, 3))
-            verify(readingProgressRepository, times(1)).trackReadingProgress(anyInt(), anyInt(), anyLong())
+            verseIndexChannel.send(VerseIndex(1, 2, 3))
+            verify(readingProgressRepository, times(1))
+                    .trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
 
             readingProgressManager.stopTracking()
         }

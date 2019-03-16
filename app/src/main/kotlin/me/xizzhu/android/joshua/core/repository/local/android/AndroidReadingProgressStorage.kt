@@ -26,7 +26,7 @@ import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 
 class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase) : LocalReadingProgressStorage {
-    override suspend fun trackReadingProgress(bookIndex: Int, chapterIndex: Int, timestamp: Long) {
+    override suspend fun trackReadingProgress(bookIndex: Int, chapterIndex: Int, timeSpentInMills: Long, timestamp: Long) {
         withContext(Dispatchers.IO) {
             var db: SQLiteDatabase? = null
             try {
@@ -36,7 +36,8 @@ class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase
                 val previousChapterReadingStatus = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
                 if (previousChapterReadingStatus.lastReadingTimestamp < timestamp) {
                     val currentChapterReadingStatus = ReadingProgress.ChapterReadingStatus(
-                            bookIndex, chapterIndex, previousChapterReadingStatus.readCount + 1, timestamp)
+                            bookIndex, chapterIndex, previousChapterReadingStatus.readCount + 1,
+                            previousChapterReadingStatus.timeSpentInMillis + timeSpentInMills, timestamp)
                     androidDatabase.readingProgressDao.save(currentChapterReadingStatus)
                 }
 

@@ -128,7 +128,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         readingProgressManager.startTracking()
     }
 
-    fun stopTrackingReadingProgress() {
+    suspend fun stopTrackingReadingProgress() {
         readingProgressManager.stopTracking()
     }
 }

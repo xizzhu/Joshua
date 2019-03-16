@@ -17,5 +17,5 @@
 package me.xizzhu.android.joshua.core.repository.local
 
 interface LocalReadingProgressStorage {
-    suspend fun trackReadingProgress(bookIndex: Int, chapterIndex: Int, timestamp: Long)
+    suspend fun trackReadingProgress(bookIndex: Int, chapterIndex: Int, timeSpentInMills: Long, timestamp: Long)
 }

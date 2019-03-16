@@ -16,20 +16,26 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 
 data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimestamp: Long,
                            val chapterReadingStatus: List<ChapterReadingStatus>) {
-    data class ChapterReadingStatus(val bookIndex: Int, val chapterIndex: Int,
-                                    val readCount: Int, val lastReadingTimestamp: Long)
+    data class ChapterReadingStatus(val bookIndex: Int, val chapterIndex: Int, val readCount: Int,
+                                    val timeSpentInMillis: Long, val lastReadingTimestamp: Long)
 }
 
 class ReadingProgressManager(private val bibleReadingManager: BibleReadingManager,
                              private val readingProgressRepository: ReadingProgressRepository) {
     private var currentVerseIndexObserver: ReceiveChannel<VerseIndex>? = null
+
+    private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
+    private var lastTimestamp: Long = 0L
 
     suspend fun startTracking() {
         if (currentVerseIndexObserver != null) {
@@ -37,14 +43,33 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
         }
 
         currentVerseIndexObserver = bibleReadingManager.observeCurrentVerseIndex()
-        currentVerseIndexObserver!!.filter { it.isValid() }
-                .consumeEach {
-                    readingProgressRepository.trackReadingProgress(
-                            it.bookIndex, it.chapterIndex, System.currentTimeMillis())
-                }
+        GlobalScope.launch(Dispatchers.Main) {
+            currentVerseIndexObserver!!.filter { it.isValid() }
+                    .consumeEach {
+                        trackReadingProgress()
+                        currentVerseIndex = it
+                        lastTimestamp = System.currentTimeMillis()
+                    }
+        }
     }
 
-    fun stopTracking() {
+    private suspend fun trackReadingProgress() {
+        val verseIndex = currentVerseIndex
+        if (!verseIndex.isValid() || lastTimestamp == 0L) {
+            return
+        }
+
+        val now = System.currentTimeMillis()
+        val timeSpentInMillis = now - lastTimestamp
+        readingProgressRepository.trackReadingProgress(
+                verseIndex.bookIndex, verseIndex.chapterIndex, timeSpentInMillis, now)
+    }
+
+    suspend fun stopTracking() {
+        trackReadingProgress()
+        currentVerseIndex = VerseIndex.INVALID
+        lastTimestamp = 0L
+
         currentVerseIndexObserver?.cancel()
         currentVerseIndexObserver = null
     }

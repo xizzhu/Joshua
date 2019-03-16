@@ -100,7 +100,9 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
     }
 
     override fun onViewDetached() {
-        readingInteractor.stopTrackingReadingProgress()
+        launch(Dispatchers.Unconfined) {
+            readingInteractor.stopTrackingReadingProgress()
+        }
         super.onViewDetached()
     }
 

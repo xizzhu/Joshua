@@ -31,7 +31,7 @@ class ReadingProgressDaoTest : BaseSqliteTest() {
     fun testEmptyTable() {
         val bookIndex = 1
         val chapterIndex = 2
-        val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 0, 0L)
+        val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 0, 0L, 0L)
         val actual = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
         assertEquals(expected, actual)
     }
@@ -41,11 +41,12 @@ class ReadingProgressDaoTest : BaseSqliteTest() {
         val bookIndex = 1
         val chapterIndex = 2
         val readCount = 3
+        val timeSpentInMills = 4L
         val lastReadingTimestamp = 987654321L
-        val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, readCount, lastReadingTimestamp)
+        val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, readCount, timeSpentInMills, lastReadingTimestamp)
 
         androidDatabase.readingProgressDao.save(ReadingProgress.ChapterReadingStatus(
-                bookIndex, chapterIndex, readCount, lastReadingTimestamp))
+                bookIndex, chapterIndex, readCount, timeSpentInMills, lastReadingTimestamp))
         val actual = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
         assertEquals(expected, actual)
     }
@@ -54,14 +55,14 @@ class ReadingProgressDaoTest : BaseSqliteTest() {
     fun testSaveThenReadNonExist() {
         val bookIndex = 1
         val chapterIndex = 2
-        val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 0, 0)
+        val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 0, 0L, 0L)
 
         androidDatabase.readingProgressDao.save(ReadingProgress.ChapterReadingStatus(
-                bookIndex + 1, chapterIndex, 1234, 5678L))
+                bookIndex + 1, chapterIndex, 1234, 4321L, 5678L))
         androidDatabase.readingProgressDao.save(ReadingProgress.ChapterReadingStatus(
-                bookIndex, chapterIndex + 1, 1234, 5678L))
+                bookIndex, chapterIndex + 1, 1234, 4321L, 5678L))
         androidDatabase.readingProgressDao.save(ReadingProgress.ChapterReadingStatus(
-                bookIndex + 1, chapterIndex + 1, 1234, 5678L))
+                bookIndex + 1, chapterIndex + 1, 1234, 4321L, 5678L))
         val actual = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
         assertEquals(expected, actual)
     }
@@ -71,13 +72,14 @@ class ReadingProgressDaoTest : BaseSqliteTest() {
         val bookIndex = 1
         val chapterIndex = 2
         val readCount = 3
+        val timeSpentInMills = 4L
         val lastReadingTimestamp = 987654321L
-        val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, readCount, lastReadingTimestamp)
+        val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, readCount, timeSpentInMills, lastReadingTimestamp)
 
         androidDatabase.readingProgressDao.save(ReadingProgress.ChapterReadingStatus(
-                bookIndex, chapterIndex, 12345, 54321L))
+                bookIndex, chapterIndex, 12345, 67890L, 54321L))
         androidDatabase.readingProgressDao.save(ReadingProgress.ChapterReadingStatus(
-                bookIndex, chapterIndex, readCount, lastReadingTimestamp))
+                bookIndex, chapterIndex, readCount, timeSpentInMills, lastReadingTimestamp))
         val actual = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
         assertEquals(expected, actual)
     }

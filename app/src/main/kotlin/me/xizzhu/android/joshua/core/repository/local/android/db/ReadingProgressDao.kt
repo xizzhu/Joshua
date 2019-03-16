@@ -29,13 +29,15 @@ class ReadingProgressDao(private val sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_BOOK_INDEX = "bookIndex"
         private const val COLUMN_CHAPTER_INDEX = "chapterIndex"
         private const val COLUMN_READ_COUNT = "readCount"
+        private const val COLUMN_TIME_SPENT_IN_MILLS = "timeSpentInMills"
         private const val COLUMN_LAST_READING_TIMESTAMP = "lastReadingTimestamp"
 
         @WorkerThread
         fun createTable(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE $TABLE_READING_PROGRESS (" +
                     "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_LAST_READING_TIMESTAMP INTEGER NOT NULL, $COLUMN_READ_COUNT INTEGER NOT NULL, " +
+                    "$COLUMN_READ_COUNT INTEGER NOT NULL, $COLUMN_TIME_SPENT_IN_MILLS INTEGER NOT NULL, " +
+                    "$COLUMN_LAST_READING_TIMESTAMP INTEGER NOT NULL, " +
                     "PRIMARY KEY ($COLUMN_BOOK_INDEX, $COLUMN_CHAPTER_INDEX));")
         }
     }
@@ -44,10 +46,11 @@ class ReadingProgressDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun save(chapterReadingStatus: ReadingProgress.ChapterReadingStatus) {
-        val values = ContentValues(4)
+        val values = ContentValues(5)
         values.put(COLUMN_BOOK_INDEX, chapterReadingStatus.bookIndex)
         values.put(COLUMN_CHAPTER_INDEX, chapterReadingStatus.chapterIndex)
         values.put(COLUMN_READ_COUNT, chapterReadingStatus.readCount)
+        values.put(COLUMN_TIME_SPENT_IN_MILLS, chapterReadingStatus.timeSpentInMillis)
         values.put(COLUMN_LAST_READING_TIMESTAMP, chapterReadingStatus.lastReadingTimestamp)
         db.insertWithOnConflict(TABLE_READING_PROGRESS, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
@@ -56,19 +59,22 @@ class ReadingProgressDao(private val sqliteHelper: SQLiteOpenHelper) {
     fun read(bookIndex: Int, chapterIndex: Int): ReadingProgress.ChapterReadingStatus {
         var cursor: Cursor? = null
         try {
-            cursor = db.query(TABLE_READING_PROGRESS, arrayOf(COLUMN_READ_COUNT, COLUMN_LAST_READING_TIMESTAMP),
+            cursor = db.query(TABLE_READING_PROGRESS, arrayOf(COLUMN_READ_COUNT, COLUMN_TIME_SPENT_IN_MILLS, COLUMN_LAST_READING_TIMESTAMP),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
                     arrayOf(bookIndex.toString(), chapterIndex.toString()), null, null, null)
             val readCount: Int
+            val timeSpentInMills: Long
             val lastReadingTimestamp: Long
             if (cursor.count > 0 && cursor.moveToNext()) {
                 readCount = cursor.getInt(cursor.getColumnIndex(COLUMN_READ_COUNT))
+                timeSpentInMills = cursor.getLong(cursor.getColumnIndex(COLUMN_TIME_SPENT_IN_MILLS))
                 lastReadingTimestamp = cursor.getLong(cursor.getColumnIndex(COLUMN_LAST_READING_TIMESTAMP))
             } else {
                 readCount = 0
+                timeSpentInMills = 0L
                 lastReadingTimestamp = 0L
             }
-            return ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, readCount, lastReadingTimestamp)
+            return ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, readCount, timeSpentInMills, lastReadingTimestamp)
         } finally {
             cursor?.close()
         }
