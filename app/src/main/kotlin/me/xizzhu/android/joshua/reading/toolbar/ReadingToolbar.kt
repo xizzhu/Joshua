@@ -104,7 +104,7 @@ class ReadingToolbar : Toolbar, ToolbarView {
         names.add(resources.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
 
         val translationSpinner = menu.findItem(R.id.action_translations).actionView as Spinner
-        translationSpinner.adapter = TranslationSpinnerAdapter(context, names)
+        translationSpinner.adapter = TranslationSpinnerAdapter(context, currentTranslation, names)
         translationSpinner.setSelection(selected)
         translationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
