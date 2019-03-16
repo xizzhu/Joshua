@@ -18,13 +18,13 @@ package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.MockLocalTranslationStorage
 import me.xizzhu.android.joshua.tests.MockRemoteTranslationService
-import me.xizzhu.android.joshua.utils.onEach
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -94,7 +94,7 @@ class TranslationManagerTest : BaseUnitTest() {
                 translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
             }
             var called = false
-            channel.onEach { called = true }
+            channel.consumeEach { called = true }
             assertTrue(called)
 
             val actualAvailable = translationManager.observeAvailableTranslations().first()
@@ -116,7 +116,7 @@ class TranslationManagerTest : BaseUnitTest() {
                 translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
             }
             var called = false
-            channel.onEach { called = true }
+            channel.consumeEach { called = true }
             assertTrue(called)
 
             translationManager.reload(false)
@@ -139,7 +139,7 @@ class TranslationManagerTest : BaseUnitTest() {
                 translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
             }
             var called = false
-            channel.onEach { called = true }
+            channel.consumeEach { called = true }
             assertTrue(called)
 
             translationManager.reload(true)
@@ -193,7 +193,7 @@ class TranslationManagerTest : BaseUnitTest() {
                 var availableUpdated = 0
                 val availableJob = launch(Dispatchers.Unconfined) {
                     val availableReceiver = translationManager.observeAvailableTranslations()
-                    availableReceiver.onEach {
+                    availableReceiver.consumeEach {
                         if (++availableUpdated == 3) {
                             availableReceiver.cancel()
                         }
@@ -203,7 +203,7 @@ class TranslationManagerTest : BaseUnitTest() {
                 var downloadedUpdated = 0
                 val downloadedJob = launch(Dispatchers.Unconfined) {
                     val downloadedReceiver = translationManager.observeDownloadedTranslations()
-                    downloadedReceiver.onEach {
+                    downloadedReceiver.consumeEach {
                         if (++downloadedUpdated == 4) {
                             downloadedReceiver.cancel()
                         }

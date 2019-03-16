@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.core.repository
 
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.TranslationInfo
@@ -24,7 +25,6 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.MockLocalTranslationStorage
 import me.xizzhu.android.joshua.tests.MockRemoteTranslationService
-import me.xizzhu.android.joshua.utils.onEach
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -83,7 +83,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
                 channel.close()
             }
             var called = false
-            channel.onEach { called = true }
+            channel.consumeEach { called = true }
             assertTrue(called)
 
             translationRepository.readTranslationsFromLocal()

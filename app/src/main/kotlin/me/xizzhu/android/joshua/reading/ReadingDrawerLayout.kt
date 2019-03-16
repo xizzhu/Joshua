@@ -21,20 +21,21 @@ import android.util.AttributeSet
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
-import me.xizzhu.android.joshua.utils.onEach
 
 class ReadingDrawerPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ReadingDrawerView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingInteractor.observeCurrentVerseIndex()
-                    .filter { it.isValid() }
-                    .onEach { view?.hide() })
+            val currentVerseIndex = readingInteractor.observeCurrentVerseIndex()
+            receiveChannels.add(currentVerseIndex)
+            currentVerseIndex.filter { it.isValid() }
+                    .consumeEach { view?.hide() }
         }
     }
 }

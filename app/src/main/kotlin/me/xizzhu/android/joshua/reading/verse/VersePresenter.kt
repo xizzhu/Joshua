@@ -21,6 +21,7 @@ import android.view.MenuItem
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
@@ -29,7 +30,6 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
-import me.xizzhu.android.joshua.utils.onEach
 
 class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<VerseView>() {
     companion object {
@@ -80,19 +80,19 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingInteractor.observeCurrentTranslation()
-                    .filter { it.isNotEmpty() }
-                    .onEach {
-                        view?.onCurrentTranslationUpdated(it)
-                    })
+            val currentTranslation = readingInteractor.observeCurrentTranslation()
+            receiveChannels.add(currentTranslation)
+            currentTranslation.filter { it.isNotEmpty() }
+                    .consumeEach { view?.onCurrentTranslationUpdated(it) }
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingInteractor.observeCurrentVerseIndex()
-                    .filter { it.isValid() }
-                    .onEach {
+            val currentVerseIndex = readingInteractor.observeCurrentVerseIndex()
+            receiveChannels.add(currentVerseIndex)
+            currentVerseIndex.filter { it.isValid() }
+                    .consumeEach {
                         actionMode?.finish()
                         view?.onCurrentVerseIndexUpdated(it)
-                    })
+                    }
         }
         launch(Dispatchers.Main) {
             readingInteractor.startTrackingReadingProgress()

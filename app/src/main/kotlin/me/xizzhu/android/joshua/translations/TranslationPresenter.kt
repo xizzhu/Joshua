@@ -19,12 +19,12 @@ package me.xizzhu.android.joshua.translations
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.MVPPresenter
-import me.xizzhu.android.joshua.utils.onEach
 import java.util.*
 import kotlin.Comparator
 
@@ -63,33 +63,33 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationInteractor.observeCurrentTranslation()
-                    .onEach { view?.onCurrentTranslationUpdated(it) })
+            val currentTranslation = translationInteractor.observeCurrentTranslation()
+            receiveChannels.add(currentTranslation)
+            currentTranslation.consumeEach { view?.onCurrentTranslationUpdated(it) }
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationInteractor.observeAvailableTranslations()
-                    .onEach {
-                        view?.onAvailableTranslationsUpdated(it.sortedWith(translationComparator))
-                    })
+            val availableTranslations = translationInteractor.observeAvailableTranslations()
+            receiveChannels.add(availableTranslations)
+            availableTranslations.consumeEach { view?.onAvailableTranslationsUpdated(it.sortedWith(translationComparator)) }
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationInteractor.observeDownloadedTranslations()
-                    .onEach {
-                        view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
-                    })
+            val downloadedTranslations = translationInteractor.observeDownloadedTranslations()
+            receiveChannels.add(downloadedTranslations)
+            downloadedTranslations.consumeEach { view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator)) }
         }
         launch(Dispatchers.Main) {
             translationInteractor.reload(false)
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(translationInteractor.observeTranslationsLoadingState()
-                    .onEach { loading ->
-                        if (loading) {
-                            view?.onTranslationsLoadingStarted()
-                        } else {
-                            view?.onTranslationsLoadingCompleted()
-                        }
-                    })
+            val translationLoadingState = translationInteractor.observeTranslationsLoadingState()
+            receiveChannels.add(translationLoadingState)
+            translationLoadingState.consumeEach { loading ->
+                if (loading) {
+                    view?.onTranslationsLoadingStarted()
+                } else {
+                    view?.onTranslationsLoadingCompleted()
+                }
+            }
         }
     }
 
@@ -106,7 +106,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 launch(Dispatchers.Main) {
                     translationInteractor.downloadTranslation(downloadProgressChannel, translationToDelete)
                 }
-                downloadProgressChannel.onEach { progress ->
+                downloadProgressChannel.consumeEach { progress ->
                     view?.onTranslationDownloadProgressed(progress)
                 }
 

@@ -19,12 +19,12 @@ package me.xizzhu.android.joshua.core.repository.remote.retrofit
 import com.squareup.moshi.JsonEncodingException
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.utils.onEach
 import okhttp3.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -80,7 +80,7 @@ class RetrofitTranslationServiceTest : BaseUnitTest() {
         runBlocking {
             val channel = Channel<Int>()
             launch {
-                channel.onEach {
+                channel.consumeEach {
                     assertTrue(it in 0..100)
                 }
             }

@@ -17,13 +17,13 @@
 package me.xizzhu.android.joshua.reading.chapter
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
-import me.xizzhu.android.joshua.utils.onEach
 
 class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ChapterView>() {
     companion object {
@@ -34,18 +34,16 @@ class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : M
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingInteractor.observeCurrentTranslation()
-                    .filter { it.isNotEmpty() }
-                    .onEach {
-                        view?.onBookNamesUpdated(readingInteractor.readBookNames(it))
-                    })
+            val currentTranslation = readingInteractor.observeCurrentTranslation()
+            receiveChannels.add(currentTranslation)
+            currentTranslation.filter { it.isNotEmpty() }
+                    .consumeEach { view?.onBookNamesUpdated(readingInteractor.readBookNames(it)) }
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingInteractor.observeCurrentVerseIndex()
-                    .filter { it.isValid() }
-                    .onEach {
-                        view?.onCurrentVerseIndexUpdated(it)
-                    })
+            val currentVerseIndex = readingInteractor.observeCurrentVerseIndex()
+            receiveChannels.add(currentVerseIndex)
+            currentVerseIndex.filter { it.isValid() }
+                    .consumeEach { view?.onCurrentVerseIndexUpdated(it) }
         }
     }
 

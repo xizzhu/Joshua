@@ -17,12 +17,12 @@
 package me.xizzhu.android.joshua.reading.toolbar
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
-import me.xizzhu.android.joshua.utils.onEach
 
 class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ToolbarView>() {
     companion object {
@@ -33,29 +33,30 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingInteractor.observeCurrentTranslation()
-                    .filter { it.isNotEmpty() }
-                    .onEach {
+            val currentTranslation = readingInteractor.observeCurrentTranslation()
+            receiveChannels.add(currentTranslation)
+            currentTranslation.filter { it.isNotEmpty() }
+                    .consumeEach {
                         view?.onCurrentTranslationUpdated(it)
                         view?.onBookNamesUpdated(readingInteractor.readBookNames(it))
-                    })
+                    }
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingInteractor.observeCurrentVerseIndex()
-                    .filter { it.isValid() }
-                    .onEach {
-                        view?.onCurrentVerseIndexUpdated(it)
-                    })
+            val currentVerseIndex = readingInteractor.observeCurrentVerseIndex()
+            receiveChannels.add(currentVerseIndex)
+            currentVerseIndex.filter { it.isValid() }
+                    .consumeEach { view?.onCurrentVerseIndexUpdated(it) }
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(readingInteractor.observeDownloadedTranslations()
-                    .onEach {
-                        if (it.isEmpty()) {
-                            view?.onNoTranslationsDownloaded()
-                        } else {
-                            view?.onDownloadedTranslationsLoaded(it.sortedBy { t -> t.language })
-                        }
-                    })
+            val downloadedTranslations = readingInteractor.observeDownloadedTranslations()
+            receiveChannels.add(downloadedTranslations)
+            downloadedTranslations.consumeEach {
+                if (it.isEmpty()) {
+                    view?.onNoTranslationsDownloaded()
+                } else {
+                    view?.onDownloadedTranslationsLoaded(it.sortedBy { t -> t.language })
+                }
+            }
         }
     }
 

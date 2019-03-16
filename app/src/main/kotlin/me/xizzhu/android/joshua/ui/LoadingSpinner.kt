@@ -22,15 +22,15 @@ import android.view.View
 import android.widget.ProgressBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
-import me.xizzhu.android.joshua.utils.onEach
 
 class LoadingSpinnerPresenter(loadingState: ReceiveChannel<Boolean>) : MVPPresenter<LoadingSpinnerView>() {
     init {
         launch(Dispatchers.Main) {
-            loadingState.onEach { loading ->
+            loadingState.consumeEach { loading ->
                 if (loading) {
                     view?.show()
                 } else {

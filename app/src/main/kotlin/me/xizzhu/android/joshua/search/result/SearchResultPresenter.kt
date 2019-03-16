@@ -17,12 +17,12 @@
 package me.xizzhu.android.joshua.search.result
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
-import me.xizzhu.android.joshua.utils.onEach
 
 class SearchResultPresenter(private val searchInteractor: SearchInteractor) : MVPPresenter<SearchResultView>() {
     companion object {
@@ -33,18 +33,20 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor) : MV
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            receiveChannels.add(searchInteractor.observeSearchResult()
-                    .onEach { (query, verses) -> view?.onSearchResultUpdated(verses.toSearchResult(query)) })
+            val searchResult = searchInteractor.observeSearchResult()
+            receiveChannels.add(searchResult)
+            searchResult.consumeEach { (query, verses) -> view?.onSearchResultUpdated(verses.toSearchResult(query)) }
         }
         launch(Dispatchers.Main) {
-            receiveChannels.add(searchInteractor.observeSearchState()
-                    .onEach { loading ->
-                        if (loading) {
-                            view?.onSearchStarted()
-                        } else {
-                            view?.onSearchCompleted()
-                        }
-                    })
+            val searchState = searchInteractor.observeSearchState()
+            receiveChannels.add(searchState)
+            searchState.consumeEach { loading ->
+                if (loading) {
+                    view?.onSearchStarted()
+                } else {
+                    view?.onSearchCompleted()
+                }
+            }
         }
     }
 
