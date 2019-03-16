@@ -22,6 +22,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingProgressStorage
+import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 
 class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase) : LocalReadingProgressStorage {
     override suspend fun trackReadingProgress(bookIndex: Int, chapterIndex: Int, timestamp: Long) {

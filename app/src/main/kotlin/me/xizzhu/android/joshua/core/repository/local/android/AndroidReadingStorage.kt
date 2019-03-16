@@ -21,6 +21,8 @@ import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
+import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 
 class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : LocalReadingStorage {
     override suspend fun readCurrentVerseIndex(): VerseIndex {

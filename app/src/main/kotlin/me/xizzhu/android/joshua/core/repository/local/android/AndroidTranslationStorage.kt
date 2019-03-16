@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
+import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 
 class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : LocalTranslationStorage {
     override suspend fun readTranslations(): List<TranslationInfo> {

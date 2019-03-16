@@ -21,6 +21,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import androidx.annotation.CallSuper
 import androidx.test.core.app.ApplicationProvider
+import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import org.junit.After
 import org.junit.Before
 

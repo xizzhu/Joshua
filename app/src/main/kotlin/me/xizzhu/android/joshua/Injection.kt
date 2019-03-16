@@ -29,7 +29,7 @@ import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
-import me.xizzhu.android.joshua.core.repository.local.android.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.android.AndroidTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService

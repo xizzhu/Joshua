@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.ReadingProgress
+import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
