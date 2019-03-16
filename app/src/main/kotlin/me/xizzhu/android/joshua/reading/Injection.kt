@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
@@ -33,8 +34,9 @@ class ReadingModule {
     fun provideReadingViewController(readingActivity: ReadingActivity,
                                      navigator: Navigator,
                                      bibleReadingManager: BibleReadingManager,
+                                     readingProgressManager: ReadingProgressManager,
                                      translationManager: TranslationManager): ReadingInteractor =
-            ReadingInteractor(readingActivity, navigator, bibleReadingManager, translationManager)
+            ReadingInteractor(readingActivity, navigator, bibleReadingManager, readingProgressManager, translationManager)
 
     @Provides
     fun provideReadingDrawerPresenter(readingInteractor: ReadingInteractor): ReadingDrawerPresenter =

@@ -24,11 +24,15 @@ import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.repository.local.LocalReadingProgressStorage
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingProgressStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.android.AndroidTranslationStorage
@@ -66,6 +70,12 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
+    fun provideReadingProgressManager(bibleReadingManager: BibleReadingManager,
+                                      readingProgressRepository: ReadingProgressRepository): ReadingProgressManager =
+            ReadingProgressManager(bibleReadingManager, readingProgressRepository)
+
+    @Provides
+    @Singleton
     fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
             TranslationManager(translationRepository)
 }
@@ -75,6 +85,11 @@ class RepositoryModule {
     @Provides
     @Singleton
     fun provideAndroidDatabase(app: App): AndroidDatabase = AndroidDatabase(app)
+
+    @Provides
+    @Singleton
+    fun provideLocalReadingProgressStorage(androidDatabase: AndroidDatabase): LocalReadingProgressStorage =
+            AndroidReadingProgressStorage(androidDatabase)
 
     @Provides
     @Singleton
@@ -108,6 +123,11 @@ class RepositoryModule {
     @Singleton
     fun provideBibleReadingRepository(localReadingStorage: LocalReadingStorage): BibleReadingRepository =
             BibleReadingRepository(localReadingStorage)
+
+    @Provides
+    @Singleton
+    fun provideReadingProgressRepository(localReadingProgressStorage: LocalReadingProgressStorage): ReadingProgressRepository =
+            ReadingProgressRepository(localReadingProgressStorage)
 
     @Provides
     @Singleton
