@@ -26,9 +26,7 @@ import android.widget.CompoundButton
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 
-class TranslationSpinnerAdapter(context: Context, private val listener: Listener,
-                                private val currentTranslation: String,
-                                private val translationShortNames: ArrayList<String>) : BaseAdapter() {
+class TranslationSpinnerAdapter(context: Context, private val listener: Listener) : BaseAdapter() {
     interface Listener {
         fun onParallelTranslationRequested(translationShortName: String)
 
@@ -44,6 +42,27 @@ class TranslationSpinnerAdapter(context: Context, private val listener: Listener
         } else {
             listener.onParallelTranslationRemoved(translationShortName)
         }
+    }
+
+    private var currentTranslation: String = ""
+    private val parallelTranslations: MutableSet<String> = mutableSetOf()
+    private val translationShortNames: MutableList<String> = mutableListOf()
+
+    fun setCurrentTranslation(currentTranslation: String) {
+        this.currentTranslation = currentTranslation
+        notifyDataSetChanged()
+    }
+
+    fun setTranslationShortNames(translationShortNames: List<String>) {
+        this.translationShortNames.clear()
+        this.translationShortNames.addAll(translationShortNames)
+        notifyDataSetChanged()
+    }
+
+    fun setParallelTranslations(parallelTranslations: List<String>) {
+        this.parallelTranslations.clear()
+        this.parallelTranslations.addAll(parallelTranslations)
+        notifyDataSetChanged()
     }
 
     override fun getCount(): Int = translationShortNames.size
@@ -78,7 +97,7 @@ class TranslationSpinnerAdapter(context: Context, private val listener: Listener
                 viewHolder.checkBox.isChecked = true
             } else {
                 viewHolder.checkBox.isEnabled = true
-                viewHolder.checkBox.isChecked = false
+                viewHolder.checkBox.isChecked = parallelTranslations.contains(translationShortName)
                 viewHolder.checkBox.tag = translationShortName
 
                 // Sets the listener after isChecked is updated, to avoid unwanted callback.

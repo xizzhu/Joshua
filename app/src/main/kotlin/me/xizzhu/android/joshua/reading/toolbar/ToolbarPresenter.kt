@@ -58,6 +58,11 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
                 }
             }
         }
+        launch(Dispatchers.Main) {
+            val parallelTranslations = readingInteractor.observeParallelTranslations()
+            receiveChannels.add(parallelTranslations)
+            parallelTranslations.consumeEach { view?.onParallelTranslationsUpdated(it) }
+        }
     }
 
     fun updateCurrentTranslation(translationShortName: String) {
