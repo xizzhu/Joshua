@@ -112,28 +112,64 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVerses() {
         runBlocking {
-            val translationShortName = MockContents.kjvShortName
             val bookIndex = 1
             val chapterIndex = 2
-            `when`(readingInteractor.readVerses(translationShortName, bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
+            `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
 
-            versePresenter.loadVerses(translationShortName, bookIndex, chapterIndex)
+            versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
-            verify(verseView, never()).onVersesLoadFailed(translationShortName, bookIndex, chapterIndex)
+            verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
 
     @Test
     fun testLoadVersesWithExceptions() {
         runBlocking {
-            val translationShortName = MockContents.kjvShortName
             val bookIndex = 1
             val chapterIndex = 2
-            `when`(readingInteractor.readVerses(translationShortName, bookIndex, chapterIndex)).thenThrow(RuntimeException("Random exception"))
+            `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenThrow(RuntimeException("Random exception"))
 
-            versePresenter.loadVerses(translationShortName, bookIndex, chapterIndex)
+            versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
-            verify(verseView, times(1)).onVersesLoadFailed(translationShortName, bookIndex, chapterIndex)
+            verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
+        }
+    }
+
+    @Test
+    fun testLoadVersesWithParallelTranslations() {
+        runBlocking {
+            val translationShortName = MockContents.kjvShortName
+            val parallelTranslations = listOf(MockContents.cuvShortName)
+            val bookIndex = 1
+            val chapterIndex = 2
+            `when`(readingInteractor.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex))
+                    .thenReturn(MockContents.kjvVerses)
+
+            currentTranslationChannel.send(translationShortName)
+            parallelTranslationsChannel.send(parallelTranslations)
+
+            versePresenter.loadVerses(bookIndex, chapterIndex)
+            verify(verseView, times(1)).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
+            verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
+        }
+    }
+
+    @Test
+    fun testLoadVersesWithParallelTranslationsWithException() {
+        runBlocking {
+            val translationShortName = MockContents.kjvShortName
+            val parallelTranslations = listOf(MockContents.cuvShortName)
+            val bookIndex = 1
+            val chapterIndex = 2
+            `when`(readingInteractor.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex))
+                    .thenThrow(RuntimeException("Random exception"))
+
+            currentTranslationChannel.send(translationShortName)
+            parallelTranslationsChannel.send(parallelTranslations)
+
+            versePresenter.loadVerses(bookIndex, chapterIndex)
+            verify(verseView, never()).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
+            verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
 

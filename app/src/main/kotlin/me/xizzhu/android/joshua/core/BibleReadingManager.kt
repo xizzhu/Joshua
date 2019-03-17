@@ -35,7 +35,7 @@ data class VerseIndex(val bookIndex: Int, val chapterIndex: Int, val verseIndex:
                     && verseIndex >= 0
 }
 
-data class Verse(val verseIndex: VerseIndex, val text: Text) {
+data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<Text>) {
     data class Text(val translationShortName: String, val bookName: String, val text: String)
 }
 
@@ -86,6 +86,10 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
 
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
+
+    suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
+                           bookIndex: Int, chapterIndex: Int): List<Verse> =
+            bibleReadingRepository.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
 
     suspend fun search(translationShortName: String, query: String): List<Verse> =
             bibleReadingRepository.search(translationShortName, query)

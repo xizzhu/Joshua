@@ -64,7 +64,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             var verseIndex = 0
             while (cursor.moveToNext()) {
                 verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
-                        Verse.Text(translationShortName, bookName, cursor.getString(0))))
+                        Verse.Text(translationShortName, bookName, cursor.getString(0)), emptyList()))
             }
 
             db.setTransactionSuccessful()
@@ -121,7 +121,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                 val verseIndex = VerseIndex(cursor.getInt(bookColumnIndex),
                         cursor.getInt(chapterColumnIndex), cursor.getInt(verseColumnIndex))
                 verses.add(Verse(verseIndex, Verse.Text(translationShortName,
-                        bookNames[verseIndex.bookIndex], cursor.getString(textColumnIndex))))
+                        bookNames[verseIndex.bookIndex], cursor.getString(textColumnIndex)), emptyList()))
             }
 
             db.setTransactionSuccessful()
