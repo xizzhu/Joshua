@@ -22,12 +22,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.CheckBox
+import android.widget.CompoundButton
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 
-class TranslationSpinnerAdapter(context: Context, private val currentTranslation: String,
+class TranslationSpinnerAdapter(context: Context, private val listener: Listener,
+                                private val currentTranslation: String,
                                 private val translationShortNames: ArrayList<String>) : BaseAdapter() {
+    interface Listener {
+        fun onParallelTranslationRequested(translationShortName: String)
+
+        fun onParallelTranslationRemoved(translationShortName: String)
+    }
+
     private val inflater = LayoutInflater.from(context)
+
+    private val checkBoxListener = CompoundButton.OnCheckedChangeListener { checkBox, isChecked ->
+        val translationShortName = checkBox.tag as String
+        if (isChecked) {
+            listener.onParallelTranslationRequested(translationShortName)
+        } else {
+            listener.onParallelTranslationRemoved(translationShortName)
+        }
+    }
 
     override fun getCount(): Int = translationShortNames.size
 
@@ -54,6 +71,7 @@ class TranslationSpinnerAdapter(context: Context, private val currentTranslation
         val translationShortName = translationShortNames[position]
         viewHolder.title.text = translationShortName
 
+        viewHolder.checkBox.setOnCheckedChangeListener(null)
         if (position < count - 1) {
             if (currentTranslation == translationShortName) {
                 viewHolder.checkBox.isEnabled = false
@@ -61,6 +79,10 @@ class TranslationSpinnerAdapter(context: Context, private val currentTranslation
             } else {
                 viewHolder.checkBox.isEnabled = true
                 viewHolder.checkBox.isChecked = false
+                viewHolder.checkBox.tag = translationShortName
+
+                // Sets the listener after isChecked is updated, to avoid unwanted callback.
+                viewHolder.checkBox.setOnCheckedChangeListener(checkBoxListener)
             }
 
             viewHolder.checkBox.visibility = View.VISIBLE

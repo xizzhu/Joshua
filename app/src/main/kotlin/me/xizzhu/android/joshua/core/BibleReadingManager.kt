@@ -40,8 +40,9 @@ data class Verse(val verseIndex: VerseIndex, val text: Text) {
 }
 
 class BibleReadingManager(private val bibleReadingRepository: BibleReadingRepository) {
-    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel("")
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)
+    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel("")
+    private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
@@ -62,6 +63,22 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
     suspend fun saveCurrentTranslation(translationShortName: String) {
         currentTranslationShortName.send(translationShortName)
         bibleReadingRepository.saveCurrentTranslation(translationShortName)
+    }
+
+    fun observeParallelTranslations(): ReceiveChannel<List<String>> = parallelTranslations.openSubscription()
+
+    suspend fun requestParallelTranslation(translationShortName: String) {
+        val parallel = parallelTranslations.value.toMutableSet()
+        if (parallel.add(translationShortName)) {
+            parallelTranslations.send(parallel.toList())
+        }
+    }
+
+    suspend fun removeParallelTranslation(translationShortName: String) {
+        val parallel = parallelTranslations.value.toMutableSet()
+        if (parallel.remove(translationShortName)) {
+            parallelTranslations.send(parallel.toList())
+        }
     }
 
     suspend fun readBookNames(translationShortName: String): List<String> =

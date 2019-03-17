@@ -44,6 +44,16 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
+    fun observeParallelTranslations(): ReceiveChannel<List<String>> = bibleReadingManager.observeParallelTranslations()
+
+    suspend fun requestParallelTranslation(translationShortName: String) {
+        bibleReadingManager.requestParallelTranslation(translationShortName)
+    }
+
+    suspend fun removeParallelTranslation(translationShortName: String) {
+        bibleReadingManager.removeParallelTranslation(translationShortName)
+    }
+
     fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {

@@ -71,6 +71,14 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         }
     }
 
+    fun requestParallelTranslation(translationShortName: String) {
+        launch(Dispatchers.Main) { readingInteractor.requestParallelTranslation(translationShortName) }
+    }
+
+    fun removeParallelTranslation(translationShortName: String) {
+        launch(Dispatchers.Main) { readingInteractor.removeParallelTranslation(translationShortName) }
+    }
+
     fun openTranslationManagement() {
         try {
             readingInteractor.openTranslationManagement()

@@ -60,6 +60,16 @@ class ReadingToolbar : Toolbar, ToolbarView {
 
     private lateinit var presenter: ToolbarPresenter
 
+    private val translationSpinnerAdapterListener = object : TranslationSpinnerAdapter.Listener {
+        override fun onParallelTranslationRequested(translationShortName: String) {
+            presenter.requestParallelTranslation(translationShortName)
+        }
+
+        override fun onParallelTranslationRemoved(translationShortName: String) {
+            presenter.removeParallelTranslation(translationShortName)
+        }
+    }
+
     private val titleBuilder = StringBuilder()
     private val downloadedTranslations = ArrayList<TranslationInfo>()
     private val bookNames = ArrayList<String>()
@@ -104,7 +114,8 @@ class ReadingToolbar : Toolbar, ToolbarView {
         names.add(resources.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
 
         val translationSpinner = menu.findItem(R.id.action_translations).actionView as Spinner
-        translationSpinner.adapter = TranslationSpinnerAdapter(context, currentTranslation, names)
+        translationSpinner.adapter = TranslationSpinnerAdapter(
+                context, translationSpinnerAdapterListener, currentTranslation, names)
         translationSpinner.setSelection(selected)
         translationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
