@@ -44,6 +44,18 @@ object MockContents {
     const val cuvShortName = "中文和合本"
     val cuvTranslationInfo = TranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L, false)
     val cuvBookNames: List<String> = arrayListOf("创世记", "出埃及记", "利未记", "民数记", "申命记")
+    val cuvVerses: List<Verse> = arrayListOf(
+            Verse(VerseIndex(0, 0, 0), Verse.Text(cuvShortName, "创世记", "起初神创造天地。"), emptyList()),
+            Verse(VerseIndex(0, 0, 1), Verse.Text(cuvShortName, "创世记", "地是空虚混沌。渊面黑暗。神的灵运行在水面上。"), emptyList()),
+            Verse(VerseIndex(0, 0, 2), Verse.Text(cuvShortName, "创世记", "神说，要有光，就有了光。"), emptyList()),
+            Verse(VerseIndex(0, 0, 3), Verse.Text(cuvShortName, "创世记", "神看光是好的，就把光暗分开了。"), emptyList()),
+            Verse(VerseIndex(0, 0, 4), Verse.Text(cuvShortName, "创世记", "神称光为昼，称暗为夜。有晚上，有早晨，这是头一日。"), emptyList()),
+            Verse(VerseIndex(0, 0, 5), Verse.Text(cuvShortName, "创世记", "神说，诸水之间要有空气，将水分为上下。"), emptyList()),
+            Verse(VerseIndex(0, 0, 6), Verse.Text(cuvShortName, "创世记", "神就造出空气，将空气以下的水，空气以上的水分开了。事就这样成了。"), emptyList()),
+            Verse(VerseIndex(0, 0, 7), Verse.Text(cuvShortName, "创世记", "神称空气为天。有晚上，有早晨，是第二日。"), emptyList()),
+            Verse(VerseIndex(0, 0, 8), Verse.Text(cuvShortName, "创世记", "神说，天下的水要聚在一处，使旱地露出来。事就这样成了。"), emptyList()),
+            Verse(VerseIndex(0, 0, 9), Verse.Text(cuvShortName, "创世记", "神称旱地为地，称水的聚处为海。神看着是好的。"), emptyList())
+    )
     const val cuvTranslationInfoJson = "{\"translations\":[{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
     val cuvRemoteTranslationInfo = RemoteTranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L)
 
