@@ -97,9 +97,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         launch(Dispatchers.Main) {
             val parallelTranslations = readingInteractor.observeParallelTranslations()
             receiveChannels.add(parallelTranslations)
-            parallelTranslations.consumeEach {
-                // TODO
-            }
+            parallelTranslations.consumeEach { view?.onParallelTranslationsUpdated(it) }
         }
         launch(Dispatchers.Main) {
             readingInteractor.startTrackingReadingProgress()

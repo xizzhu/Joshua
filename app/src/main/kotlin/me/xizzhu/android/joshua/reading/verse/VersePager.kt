@@ -32,6 +32,8 @@ interface VerseView : MVPView {
 
     fun onCurrentTranslationUpdated(currentTranslation: String)
 
+    fun onParallelTranslationsUpdated(parallelTranslations: List<String>)
+
     fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int)
 
     fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>)
@@ -91,8 +93,9 @@ class VerseViewPager : ViewPager, VerseView {
 
     private lateinit var presenter: VersePresenter
 
-    private var currentTranslation = ""
     private var currentVerseIndex = VerseIndex.INVALID
+    private var currentTranslation = ""
+    private var parallelTranslations = emptyList<String>()
 
     fun setPresenter(presenter: VersePresenter) {
         this.presenter = presenter
@@ -111,8 +114,8 @@ class VerseViewPager : ViewPager, VerseView {
             return
         }
 
-        adapter.currentTranslation = currentTranslation
         adapter.currentVerseIndex = currentVerseIndex
+        adapter.currentTranslation = currentTranslation
         adapter.notifyDataSetChanged()
         setCurrentItem(currentVerseIndex.toPagePosition(), false)
     }
@@ -122,6 +125,14 @@ class VerseViewPager : ViewPager, VerseView {
             return
         }
         this.currentTranslation = currentTranslation
+        refreshUi()
+    }
+
+    override fun onParallelTranslationsUpdated(parallelTranslations: List<String>) {
+        if (this.parallelTranslations == parallelTranslations) {
+            return
+        }
+        this.parallelTranslations = parallelTranslations
         refreshUi()
     }
 
