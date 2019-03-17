@@ -43,6 +43,7 @@ object MockContents {
 
     const val cuvShortName = "中文和合本"
     val cuvTranslationInfo = TranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L, false)
+    val cuvBookNames: List<String> = arrayListOf("创世记", "出埃及记", "利未记", "民数记", "申命记")
     const val cuvTranslationInfoJson = "{\"translations\":[{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
     val cuvRemoteTranslationInfo = RemoteTranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L)
 
