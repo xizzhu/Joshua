@@ -117,7 +117,8 @@ class VersePresenterTest : BaseUnitTest() {
             `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
-            verify(verseView, times(1)).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
+            verify(verseView, times(1)).onVersesLoaded(
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseForReading(it, MockContents.kjvVerses.size) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -130,7 +131,8 @@ class VersePresenterTest : BaseUnitTest() {
             `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenThrow(RuntimeException("Random exception"))
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
-            verify(verseView, never()).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
+            verify(verseView, never()).onVersesLoaded(
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseForReading(it, MockContents.kjvVerses.size) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -149,7 +151,8 @@ class VersePresenterTest : BaseUnitTest() {
             parallelTranslationsChannel.send(parallelTranslations)
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
-            verify(verseView, times(1)).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
+            verify(verseView, times(1)).onVersesLoaded(
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseForReading(it, MockContents.kjvVerses.size) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -168,7 +171,8 @@ class VersePresenterTest : BaseUnitTest() {
             parallelTranslationsChannel.send(parallelTranslations)
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
-            verify(verseView, never()).onVersesLoaded(bookIndex, chapterIndex, MockContents.kjvVerses)
+            verify(verseView, never()).onVersesLoaded(
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseForReading(it, MockContents.kjvVerses.size) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -176,7 +180,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testOnVerseClickedWithoutActionMode() {
         val verse = MockContents.kjvVerses[0]
-        versePresenter.onVerseClicked(verse)
+        versePresenter.onVerseClicked(VerseForReading(verse, 1))
         assertTrue(versePresenter.selectedVerses.isEmpty())
         verify(verseView, never()).onVerseDeselected(verse)
         verify(verseView, never()).onVerseSelected(verse)
@@ -188,21 +192,21 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(readingInteractor.startActionMode(any())).thenReturn(actionMode)
 
         val verse = MockContents.kjvVerses[0]
-        versePresenter.onVerseLongClicked(verse)
+        versePresenter.onVerseLongClicked(VerseForReading(verse, 1))
         assertEquals(1, versePresenter.selectedVerses.size)
         verify(readingInteractor, times(1)).startActionMode(any())
         verify(verseView, times(1)).onVerseSelected(verse)
 
         val anotherVerse = MockContents.kjvVerses[5]
-        versePresenter.onVerseLongClicked(anotherVerse)
+        versePresenter.onVerseLongClicked(VerseForReading(anotherVerse, 1))
         assertEquals(2, versePresenter.selectedVerses.size)
         verify(verseView, times(1)).onVerseSelected(anotherVerse)
 
-        versePresenter.onVerseClicked(anotherVerse)
+        versePresenter.onVerseClicked(VerseForReading(anotherVerse, 1))
         assertEquals(1, versePresenter.selectedVerses.size)
         verify(verseView, times(1)).onVerseDeselected(anotherVerse)
 
-        versePresenter.onVerseClicked(verse)
+        versePresenter.onVerseClicked(VerseForReading(verse, 1))
         assertTrue(versePresenter.selectedVerses.isEmpty())
         verify(verseView, times(1)).onVerseDeselected(verse)
         verify(actionMode, times(1)).finish()

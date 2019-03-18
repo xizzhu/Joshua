@@ -36,9 +36,9 @@ class VersePagerAdapter(private val context: Context, private val listener: List
 
         fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int)
 
-        fun onVerseClicked(verse: Verse)
+        fun onVerseClicked(verse: VerseForReading)
 
-        fun onVerseLongClicked(verse: Verse)
+        fun onVerseLongClicked(verse: VerseForReading)
     }
 
     private val inflater = LayoutInflater.from(context)
@@ -48,7 +48,7 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     var currentTranslation = ""
     var parallelTranslations = emptyList<String>()
 
-    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
+    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<VerseForReading>) {
         findPage(bookIndex, chapterIndex)?.setVerses(verses, currentVerseIndex)
     }
 
@@ -128,7 +128,7 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         private set
 
     private val adapter = VerseListAdapter(inflater)
-    private var verses: List<Verse>? = null
+    private var verses: List<VerseForReading>? = null
 
     init {
         verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
@@ -160,7 +160,7 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         inUse = false
     }
 
-    fun setVerses(verses: List<Verse>, currentVerseIndex: VerseIndex) {
+    fun setVerses(verses: List<VerseForReading>, currentVerseIndex: VerseIndex) {
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 
