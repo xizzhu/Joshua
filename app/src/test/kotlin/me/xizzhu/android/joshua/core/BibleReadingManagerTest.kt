@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.tests.MockLocalReadingStorage
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class BibleReadingManagerTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
@@ -67,6 +68,48 @@ class BibleReadingManagerTest : BaseUnitTest() {
             bibleReadingManager.observeCurrentTranslation().first()
         }
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testDefaultParallelTranslations() {
+        runBlocking {
+            assertTrue(bibleReadingManager.observeParallelTranslations().first().isEmpty())
+        }
+    }
+
+    @Test
+    fun testParallelTranslations() {
+        runBlocking {
+            bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
+            assertEquals(listOf(MockContents.kjvShortName),
+                    bibleReadingManager.observeParallelTranslations().first())
+
+            bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
+            bibleReadingManager.requestParallelTranslation(MockContents.cuvShortName)
+            assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),
+                    bibleReadingManager.observeParallelTranslations().first().toSet())
+
+            bibleReadingManager.removeParallelTranslation(MockContents.kjvShortName)
+            assertEquals(listOf(MockContents.cuvShortName),
+                    bibleReadingManager.observeParallelTranslations().first())
+
+            bibleReadingManager.removeParallelTranslation(MockContents.cuvShortName)
+            assertTrue(bibleReadingManager.observeParallelTranslations().first().isEmpty())
+        }
+    }
+
+    @Test
+    fun testRemoveNonExistParallelTranslations() {
+        runBlocking {
+            bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
+            bibleReadingManager.requestParallelTranslation(MockContents.cuvShortName)
+            assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),
+                    bibleReadingManager.observeParallelTranslations().first().toSet())
+
+            bibleReadingManager.removeParallelTranslation("not_exist")
+            assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),
+                    bibleReadingManager.observeParallelTranslations().first().toSet())
+        }
     }
 
     @Test

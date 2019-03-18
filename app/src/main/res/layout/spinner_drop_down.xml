@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Text.Body"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:minHeight="@dimen/item_height"
+    android:orientation="horizontal"
     android:paddingStart="@dimen/padding"
-    android:paddingEnd="@dimen/padding" />
+    android:paddingEnd="@dimen/padding">
+
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="40dp"
+        android:layout_height="48dp"
+        android:focusable="false"
+        android:theme="@style/AppCheckBoxStyle" />
+
+    <TextView
+        android:id="@+id/title"
+        style="@style/Text.Body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>

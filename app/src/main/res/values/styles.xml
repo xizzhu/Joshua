@@ -21,6 +21,21 @@
         <item name="android:activityCloseExitAnimation">@anim/slide_out_left_to_right</item>
     </style>
 
+    <style name="AppCheckBoxStyle">
+        <item name="colorControlNormal">@color/dark_gray</item>
+        <item name="colorControlActivated">@color/primary</item>
+        <item name="colorControlHighlight">@color/primary</item>
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:textColorSecondary">@color/dark_gray</item>
+    </style>
+
+    <style name="Divider" />
+
+    <style name="Divider.Horizontal" parent="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1px</item>
+    </style>
+
     <style name="Text" />
 
     <style name="Text.Body">

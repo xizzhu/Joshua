@@ -44,8 +44,9 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     private val inflater = LayoutInflater.from(context)
     private val pages = ArrayList<Page>()
 
-    var currentTranslation = ""
     var currentVerseIndex = VerseIndex.INVALID
+    var currentTranslation = ""
+    var parallelTranslations = emptyList<String>()
 
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
         findPage(bookIndex, chapterIndex)?.setVerses(verses, currentVerseIndex)
@@ -72,7 +73,8 @@ class VersePagerAdapter(private val context: Context, private val listener: List
 
     override fun getItemPosition(obj: Any): Int {
         val page = obj as Page
-        return if (page.translation == currentTranslation) {
+        return if (page.currentTranslation == currentTranslation
+                && page.parallelTranslations == parallelTranslations) {
             indexToPagePosition(page.bookIndex, page.chapterIndex)
         } else {
             POSITION_NONE
@@ -96,7 +98,7 @@ class VersePagerAdapter(private val context: Context, private val listener: List
         }
 
         container.addView(page.rootView, 0)
-        page.bind(currentTranslation, position.toBookIndex(), position.toChapterIndex())
+        page.bind(currentTranslation, parallelTranslations, position.toBookIndex(), position.toChapterIndex())
 
         return page
     }
@@ -114,7 +116,9 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
     private val verseList = rootView.findViewById(R.id.verse_list) as RecyclerView
     private val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
 
-    var translation = ""
+    var currentTranslation = ""
+        private set
+    var parallelTranslations = emptyList<String>()
         private set
     var bookIndex = -1
         private set
@@ -140,8 +144,9 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         })
     }
 
-    fun bind(translation: String, bookIndex: Int, chapterIndex: Int) {
-        this.translation = translation
+    fun bind(currentTranslation: String, parallelTranslations: List<String>, bookIndex: Int, chapterIndex: Int) {
+        this.currentTranslation = currentTranslation
+        this.parallelTranslations = parallelTranslations
         this.bookIndex = bookIndex
         this.chapterIndex = chapterIndex
         listener.onChapterRequested(bookIndex, chapterIndex)

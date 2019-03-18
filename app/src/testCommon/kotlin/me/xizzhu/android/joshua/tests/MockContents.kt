@@ -27,24 +27,42 @@ object MockContents {
     val kjvDownloadedTranslationInfo = TranslationInfo(kjvShortName, "Authorized King James", "en_gb", 1860978L, true)
     val kjvBookNames: List<String> = arrayListOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
     val kjvVerses: List<Verse> = arrayListOf(
-            Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "Genesis", "In the beginning God created the heaven and the earth.")),
-            Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "Genesis", "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.")),
-            Verse(VerseIndex(0, 0, 2), Verse.Text(kjvShortName, "Genesis", "And God said, Let there be light: and there was light.")),
-            Verse(VerseIndex(0, 0, 3), Verse.Text(kjvShortName, "Genesis", "And God saw the light, that it was good: and God divided the light from the darkness.")),
-            Verse(VerseIndex(0, 0, 4), Verse.Text(kjvShortName, "Genesis", "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day.")),
-            Verse(VerseIndex(0, 0, 5), Verse.Text(kjvShortName, "Genesis", "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters.")),
-            Verse(VerseIndex(0, 0, 6), Verse.Text(kjvShortName, "Genesis", "And God made the firmament, and divided the waters which were under the firmament from the waters which were above the firmament: and it was so.")),
-            Verse(VerseIndex(0, 0, 7), Verse.Text(kjvShortName, "Genesis", "And God called the firmament Heaven. And the evening and the morning were the second day.")),
-            Verse(VerseIndex(0, 0, 8), Verse.Text(kjvShortName, "Genesis", "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so.")),
-            Verse(VerseIndex(0, 0, 9), Verse.Text(kjvShortName, "Genesis", "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good."))
+            Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "Genesis", "In the beginning God created the heaven and the earth."), emptyList()),
+            Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "Genesis", "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), emptyList()),
+            Verse(VerseIndex(0, 0, 2), Verse.Text(kjvShortName, "Genesis", "And God said, Let there be light: and there was light."), emptyList()),
+            Verse(VerseIndex(0, 0, 3), Verse.Text(kjvShortName, "Genesis", "And God saw the light, that it was good: and God divided the light from the darkness."), emptyList()),
+            Verse(VerseIndex(0, 0, 4), Verse.Text(kjvShortName, "Genesis", "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day."), emptyList()),
+            Verse(VerseIndex(0, 0, 5), Verse.Text(kjvShortName, "Genesis", "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters."), emptyList()),
+            Verse(VerseIndex(0, 0, 6), Verse.Text(kjvShortName, "Genesis", "And God made the firmament, and divided the waters which were under the firmament from the waters which were above the firmament: and it was so."), emptyList()),
+            Verse(VerseIndex(0, 0, 7), Verse.Text(kjvShortName, "Genesis", "And God called the firmament Heaven. And the evening and the morning were the second day."), emptyList()),
+            Verse(VerseIndex(0, 0, 8), Verse.Text(kjvShortName, "Genesis", "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so."), emptyList()),
+            Verse(VerseIndex(0, 0, 9), Verse.Text(kjvShortName, "Genesis", "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good."), emptyList())
     )
     const val kjvTranslationInfoJson = "{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1860978}]}"
     val kjvRemoteTranslationInfo = RemoteTranslationInfo(kjvShortName, "Authorized King James", "en_gb", 1860978L)
 
     const val cuvShortName = "中文和合本"
     val cuvTranslationInfo = TranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L, false)
+    val cuvBookNames: List<String> = arrayListOf("创世记", "出埃及记", "利未记", "民数记", "申命记")
+    val cuvVerses: List<Verse> = arrayListOf(
+            Verse(VerseIndex(0, 0, 0), Verse.Text(cuvShortName, "创世记", "起初神创造天地。"), emptyList()),
+            Verse(VerseIndex(0, 0, 1), Verse.Text(cuvShortName, "创世记", "地是空虚混沌。渊面黑暗。神的灵运行在水面上。"), emptyList()),
+            Verse(VerseIndex(0, 0, 2), Verse.Text(cuvShortName, "创世记", "神说，要有光，就有了光。"), emptyList()),
+            Verse(VerseIndex(0, 0, 3), Verse.Text(cuvShortName, "创世记", "神看光是好的，就把光暗分开了。"), emptyList()),
+            Verse(VerseIndex(0, 0, 4), Verse.Text(cuvShortName, "创世记", "神称光为昼，称暗为夜。有晚上，有早晨，这是头一日。"), emptyList()),
+            Verse(VerseIndex(0, 0, 5), Verse.Text(cuvShortName, "创世记", "神说，诸水之间要有空气，将水分为上下。"), emptyList()),
+            Verse(VerseIndex(0, 0, 6), Verse.Text(cuvShortName, "创世记", "神就造出空气，将空气以下的水，空气以上的水分开了。事就这样成了。"), emptyList()),
+            Verse(VerseIndex(0, 0, 7), Verse.Text(cuvShortName, "创世记", "神称空气为天。有晚上，有早晨，是第二日。"), emptyList()),
+            Verse(VerseIndex(0, 0, 8), Verse.Text(cuvShortName, "创世记", "神说，天下的水要聚在一处，使旱地露出来。事就这样成了。"), emptyList()),
+            Verse(VerseIndex(0, 0, 9), Verse.Text(cuvShortName, "创世记", "神称旱地为地，称水的聚处为海。神看着是好的。"), emptyList())
+    )
     const val cuvTranslationInfoJson = "{\"translations\":[{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
     val cuvRemoteTranslationInfo = RemoteTranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L)
+
+    val kjvVersesWithCuvParallel = listOf(
+            Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "Genesis", "In the beginning God created the heaven and the earth."), listOf(Verse.Text(cuvShortName, "创世记", "起初神创造天地。"))),
+            Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "Genesis", "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), listOf(Verse.Text(cuvShortName, "创世记", "地是空虚混沌。渊面黑暗。神的灵运行在水面上。")))
+    )
 
     const val kjvCuvTranslationInfoJson = "{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1860978},{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
 }

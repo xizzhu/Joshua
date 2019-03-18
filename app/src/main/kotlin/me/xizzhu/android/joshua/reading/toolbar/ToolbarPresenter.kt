@@ -58,6 +58,11 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
                 }
             }
         }
+        launch(Dispatchers.Main) {
+            val parallelTranslations = readingInteractor.observeParallelTranslations()
+            receiveChannels.add(parallelTranslations)
+            parallelTranslations.consumeEach { view?.onParallelTranslationsUpdated(it) }
+        }
     }
 
     fun updateCurrentTranslation(translationShortName: String) {
@@ -69,6 +74,14 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
                 view?.onCurrentTranslationUpdateFailed(translationShortName)
             }
         }
+    }
+
+    fun requestParallelTranslation(translationShortName: String) {
+        launch(Dispatchers.Main) { readingInteractor.requestParallelTranslation(translationShortName) }
+    }
+
+    fun removeParallelTranslation(translationShortName: String) {
+        launch(Dispatchers.Main) { readingInteractor.removeParallelTranslation(translationShortName) }
     }
 
     fun openTranslationManagement() {

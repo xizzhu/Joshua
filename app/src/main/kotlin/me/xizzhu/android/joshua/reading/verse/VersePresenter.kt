@@ -76,6 +76,9 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         }
     }
 
+    private var currentTranslation = ""
+    private var parallelTranslations = emptyList<String>()
+
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -83,7 +86,10 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
             val currentTranslation = readingInteractor.observeCurrentTranslation()
             receiveChannels.add(currentTranslation)
             currentTranslation.filter { it.isNotEmpty() }
-                    .consumeEach { view?.onCurrentTranslationUpdated(it) }
+                    .consumeEach {
+                        this@VersePresenter.currentTranslation = it
+                        view?.onCurrentTranslationUpdated(it)
+                    }
         }
         launch(Dispatchers.Main) {
             val currentVerseIndex = readingInteractor.observeCurrentVerseIndex()
@@ -93,6 +99,14 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
                         actionMode?.finish()
                         view?.onCurrentVerseIndexUpdated(it)
                     }
+        }
+        launch(Dispatchers.Main) {
+            val parallelTranslations = readingInteractor.observeParallelTranslations()
+            receiveChannels.add(parallelTranslations)
+            parallelTranslations.consumeEach {
+                this@VersePresenter.parallelTranslations = it
+                view?.onParallelTranslationsUpdated(it)
+            }
         }
         launch(Dispatchers.Main) {
             readingInteractor.startTrackingReadingProgress()
@@ -127,14 +141,18 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         }
     }
 
-    fun loadVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int) {
+    fun loadVerses(bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
             try {
-                view?.onVersesLoaded(bookIndex, chapterIndex,
-                        readingInteractor.readVerses(translationShortName, bookIndex, chapterIndex))
+                val verses = if (parallelTranslations.isEmpty()) {
+                    readingInteractor.readVerses(currentTranslation, bookIndex, chapterIndex)
+                } else {
+                    readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+                }
+                view?.onVersesLoaded(bookIndex, chapterIndex, verses)
             } catch (e: Exception) {
                 Log.e(TAG, e, "Failed to load verses")
-                view?.onVersesLoadFailed(translationShortName, bookIndex, chapterIndex)
+                view?.onVersesLoadFailed(bookIndex, chapterIndex)
             }
         }
     }

@@ -22,6 +22,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.Bible
+import java.lang.StringBuilder
 
 class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
     companion object {
@@ -54,6 +55,44 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
             val bookNames = ArrayList<String>(Bible.BOOK_COUNT)
             while (cursor.moveToNext()) {
                 bookNames.add(cursor.getString(0))
+            }
+            return bookNames
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    @WorkerThread
+    fun read(translations: List<String>, bookIndex: Int): Map<String, String> {
+        if (translations.isEmpty() || bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT) {
+            return emptyMap()
+        }
+
+        val selection = StringBuilder()
+        val selectionArgs = Array(translations.size + 1) { "" }
+        selection.append('(')
+        for ((i, translation) in translations.withIndex()) {
+            if (i > 0) {
+                selection.append(" OR ")
+            }
+            selection.append("$COLUMN_TRANSLATION_SHORT_NAME = ?")
+            selectionArgs[i] = translation
+        }
+
+        selection.append(") AND ($COLUMN_BOOK_INDEX = ?)")
+        selectionArgs[translations.size] = bookIndex.toString()
+
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_NAME),
+                    selection.toString(), selectionArgs, null, null, null)
+            val bookNames = HashMap<String, String>(translations.size)
+            if (cursor.count > 0) {
+                val translationShortName = cursor.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
+                val bookName = cursor.getColumnIndex(COLUMN_BOOK_NAME)
+                while (cursor.moveToNext()) {
+                    bookNames[cursor.getString(translationShortName)] = cursor.getString(bookName)
+                }
             }
             return bookNames
         } finally {

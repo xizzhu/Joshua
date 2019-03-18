@@ -35,13 +35,14 @@ data class VerseIndex(val bookIndex: Int, val chapterIndex: Int, val verseIndex:
                     && verseIndex >= 0
 }
 
-data class Verse(val verseIndex: VerseIndex, val text: Text) {
+data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<Text>) {
     data class Text(val translationShortName: String, val bookName: String, val text: String)
 }
 
 class BibleReadingManager(private val bibleReadingRepository: BibleReadingRepository) {
-    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel("")
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)
+    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel("")
+    private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
@@ -64,11 +65,31 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
         bibleReadingRepository.saveCurrentTranslation(translationShortName)
     }
 
+    fun observeParallelTranslations(): ReceiveChannel<List<String>> = parallelTranslations.openSubscription()
+
+    suspend fun requestParallelTranslation(translationShortName: String) {
+        val parallel = parallelTranslations.value.toMutableSet()
+        if (parallel.add(translationShortName)) {
+            parallelTranslations.send(parallel.toList())
+        }
+    }
+
+    suspend fun removeParallelTranslation(translationShortName: String) {
+        val parallel = parallelTranslations.value.toMutableSet()
+        if (parallel.remove(translationShortName)) {
+            parallelTranslations.send(parallel.toList())
+        }
+    }
+
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingRepository.readBookNames(translationShortName)
 
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
+
+    suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
+                           bookIndex: Int, chapterIndex: Int): List<Verse> =
+            bibleReadingRepository.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
 
     suspend fun search(translationShortName: String, query: String): List<Verse> =
             bibleReadingRepository.search(translationShortName, query)

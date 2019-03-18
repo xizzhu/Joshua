@@ -39,6 +39,8 @@ interface ToolbarView : MVPView {
 
     fun onCurrentTranslationUpdateFailed(translationShortName: String)
 
+    fun onParallelTranslationsUpdated(parallelTranslations: List<String>)
+
     fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex)
 
     fun onBookNamesUpdated(bookNames: List<String>)
@@ -53,12 +55,44 @@ class ReadingToolbar : Toolbar, ToolbarView {
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    private lateinit var presenter: ToolbarPresenter
+
+    private val translationSpinnerItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            if (position == translationSpinnerAdapter.count - 1) {
+                presenter.openTranslationManagement()
+                return
+            }
+
+            val selectedTranslation = downloadedTranslations[position].shortName
+            if (currentTranslation != selectedTranslation) {
+                presenter.updateCurrentTranslation(selectedTranslation)
+            }
+        }
+
+        override fun onNothingSelected(parent: AdapterView<*>?) {
+            // do nothing
+        }
+    }
+    private val translationSpinnerAdapterListener = object : TranslationSpinnerAdapter.Listener {
+        override fun onParallelTranslationRequested(translationShortName: String) {
+            presenter.requestParallelTranslation(translationShortName)
+        }
+
+        override fun onParallelTranslationRemoved(translationShortName: String) {
+            presenter.removeParallelTranslation(translationShortName)
+        }
+    }
+    private val translationSpinnerAdapter = TranslationSpinnerAdapter(context, translationSpinnerAdapterListener)
+
     init {
         setTitle(R.string.app_name)
         inflateMenu(R.menu.menu_bible_reading)
-    }
 
-    private lateinit var presenter: ToolbarPresenter
+        val translationSpinner = menu.findItem(R.id.action_translations).actionView as Spinner
+        translationSpinner.adapter = translationSpinnerAdapter
+        translationSpinner.onItemSelectedListener = translationSpinnerItemSelectedListener
+    }
 
     private val titleBuilder = StringBuilder()
     private val downloadedTranslations = ArrayList<TranslationInfo>()
@@ -84,14 +118,6 @@ class ReadingToolbar : Toolbar, ToolbarView {
         downloadedTranslations.clear()
         downloadedTranslations.addAll(translations)
 
-        updateTranslationList()
-    }
-
-    private fun updateTranslationList() {
-        if (downloadedTranslations.isEmpty() || currentTranslation.isEmpty()) {
-            return
-        }
-
         val names = ArrayList<String>(downloadedTranslations.size + 1)
         var selected = 0
         for (i in 0 until downloadedTranslations.size) {
@@ -103,32 +129,23 @@ class ReadingToolbar : Toolbar, ToolbarView {
         }
         names.add(resources.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
 
-        val translationSpinner = menu.findItem(R.id.action_translations).actionView as Spinner
-        translationSpinner.adapter = TranslationSpinnerAdapter(context, names)
-        translationSpinner.setSelection(selected)
-        translationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (position == names.size - 1) {
-                    presenter.openTranslationManagement()
-                    return
-                }
+        translationSpinnerAdapter.setTranslationShortNames(names)
 
-                val selectedTranslation = names[position]
-                if (currentTranslation != selectedTranslation) {
-                    presenter.updateCurrentTranslation(selectedTranslation)
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // do nothing
-            }
-        }
+        (menu.findItem(R.id.action_translations).actionView as Spinner).setSelection(selected)
     }
 
     override fun onCurrentTranslationUpdated(translationShortName: String) {
         currentTranslation = translationShortName
+        translationSpinnerAdapter.setCurrentTranslation(currentTranslation)
 
-        updateTranslationList()
+        var selected = 0
+        for (i in 0 until downloadedTranslations.size) {
+            val translation = downloadedTranslations[i]
+            if (currentTranslation == translation.shortName) {
+                selected = i
+            }
+        }
+        (menu.findItem(R.id.action_translations).actionView as Spinner).setSelection(selected)
     }
 
     override fun onCurrentTranslationUpdateFailed(translationShortName: String) {
@@ -136,6 +153,10 @@ class ReadingToolbar : Toolbar, ToolbarView {
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.updateCurrentTranslation(translationShortName)
                 })
+    }
+
+    override fun onParallelTranslationsUpdated(parallelTranslations: List<String>) {
+        translationSpinnerAdapter.setParallelTranslations(parallelTranslations)
     }
 
     override fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex) {

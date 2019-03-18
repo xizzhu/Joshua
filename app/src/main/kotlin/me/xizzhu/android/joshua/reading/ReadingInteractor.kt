@@ -44,6 +44,16 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
+    fun observeParallelTranslations(): ReceiveChannel<List<String>> = bibleReadingManager.observeParallelTranslations()
+
+    suspend fun requestParallelTranslation(translationShortName: String) {
+        bibleReadingManager.requestParallelTranslation(translationShortName)
+    }
+
+    suspend fun removeParallelTranslation(translationShortName: String) {
+        bibleReadingManager.removeParallelTranslation(translationShortName)
+    }
+
     fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
@@ -52,6 +62,10 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex)
+
+    suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
+                           bookIndex: Int, chapterIndex: Int): List<Verse> =
+            bibleReadingManager.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
 
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)

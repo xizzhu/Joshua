@@ -68,14 +68,13 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
 
         val results = HashMap<String, String>(keys.size)
 
-        val singleSelection = "$COLUMN_KEY = ?"
         val selection = StringBuilder()
         val selectionArgs = Array(keys.size) { "" }
         for ((i, key) in keys.withIndex()) {
-            if (selection.isNotEmpty()) {
+            if (i > 0) {
                 selection.append(" OR ")
             }
-            selection.append(singleSelection)
+            selection.append("$COLUMN_KEY = ?")
             selectionArgs[i] = key.first
 
             results[key.first] = key.second

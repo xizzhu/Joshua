@@ -56,6 +56,35 @@ class TranslationDaoTest : BaseSqliteTest() {
     }
 
     @Test
+    fun testSaveThenReadWithParallelTranslations() {
+        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
+        androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
+
+        androidDatabase.translationDao.createTable(MockContents.cuvShortName)
+        androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
+
+        val actual = androidDatabase.translationDao.read(mutableMapOf(
+                Pair(MockContents.kjvShortName, "Genesis"), Pair(MockContents.cuvShortName, "创世记")), 0, 0)
+        for ((translation, texts) in actual) {
+            when (translation) {
+                MockContents.kjvShortName -> {
+                    assertEquals(MockContents.kjvVerses.size, texts.size)
+                    for (i in 0 until MockContents.kjvVerses.size) {
+                        assertEquals(MockContents.kjvVerses[i].text, texts[i])
+                    }
+                }
+                MockContents.cuvShortName -> {
+                    assertEquals(MockContents.cuvVerses.size, texts.size)
+                    for (i in 0 until MockContents.cuvVerses.size) {
+                        assertEquals(MockContents.cuvVerses[i].text, texts[i])
+                    }
+                }
+                else -> fail()
+            }
+        }
+    }
+
+    @Test
     fun testSearchNonExistTranslation() {
         assertTrue(androidDatabase.translationDao.search("not_exist", emptyList(), "keyword").isEmpty())
     }

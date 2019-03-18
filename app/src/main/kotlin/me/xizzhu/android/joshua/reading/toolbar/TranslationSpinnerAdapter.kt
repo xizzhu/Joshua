@@ -21,27 +21,100 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.CheckBox
+import android.widget.CompoundButton
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 
-class TranslationSpinnerAdapter(context: Context, private val names: ArrayList<String>) : BaseAdapter() {
+class TranslationSpinnerAdapter(context: Context, private val listener: Listener) : BaseAdapter() {
+    interface Listener {
+        fun onParallelTranslationRequested(translationShortName: String)
+
+        fun onParallelTranslationRemoved(translationShortName: String)
+    }
+
     private val inflater = LayoutInflater.from(context)
 
-    override fun getCount(): Int = names.size
+    private val checkBoxListener = CompoundButton.OnCheckedChangeListener { checkBox, isChecked ->
+        val translationShortName = checkBox.tag as String
+        if (isChecked) {
+            listener.onParallelTranslationRequested(translationShortName)
+        } else {
+            listener.onParallelTranslationRemoved(translationShortName)
+        }
+    }
 
-    override fun getItem(position: Int): String = names[position]
+    private var currentTranslation: String = ""
+    private val parallelTranslations: MutableSet<String> = mutableSetOf()
+    private val translationShortNames: MutableList<String> = mutableListOf()
+
+    fun setCurrentTranslation(currentTranslation: String) {
+        this.currentTranslation = currentTranslation
+        notifyDataSetChanged()
+    }
+
+    fun setTranslationShortNames(translationShortNames: List<String>) {
+        this.translationShortNames.clear()
+        this.translationShortNames.addAll(translationShortNames)
+        notifyDataSetChanged()
+    }
+
+    fun setParallelTranslations(parallelTranslations: List<String>) {
+        this.parallelTranslations.clear()
+        this.parallelTranslations.addAll(parallelTranslations)
+        notifyDataSetChanged()
+    }
+
+    override fun getCount(): Int = translationShortNames.size
+
+    override fun getItem(position: Int): String = translationShortNames[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val textView = (convertView ?: inflater.inflate(R.layout.spinner_selected, parent, false)) as TextView
+        val textView = (convertView
+                ?: inflater.inflate(R.layout.spinner_selected, parent, false)) as TextView
         textView.text = getItem(position)
         return textView
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val textView = (convertView ?: inflater.inflate(R.layout.spinner_drop_down, parent, false)) as TextView
-        textView.text = getItem(position)
-        return textView
+        val viewHolder = if (convertView == null) {
+            val holder = DropDownViewHolder(inflater.inflate(R.layout.spinner_drop_down, parent, false))
+            holder.rootView.tag = holder
+            holder
+        } else {
+            convertView.tag as DropDownViewHolder
+        }
+
+        val translationShortName = translationShortNames[position]
+        viewHolder.title.text = translationShortName
+
+        viewHolder.checkBox.setOnCheckedChangeListener(null)
+        if (position < count - 1) {
+            if (currentTranslation == translationShortName) {
+                viewHolder.checkBox.isEnabled = false
+                viewHolder.checkBox.isChecked = true
+            } else {
+                viewHolder.checkBox.isEnabled = true
+                viewHolder.checkBox.isChecked = parallelTranslations.contains(translationShortName)
+                viewHolder.checkBox.tag = translationShortName
+
+                // Sets the listener after isChecked is updated, to avoid unwanted callback.
+                viewHolder.checkBox.setOnCheckedChangeListener(checkBoxListener)
+            }
+
+            viewHolder.checkBox.visibility = View.VISIBLE
+        } else {
+            // Hides the check box for last item ("More")
+            viewHolder.checkBox.visibility = View.INVISIBLE
+        }
+
+        return viewHolder.rootView
     }
+}
+
+private class DropDownViewHolder(val rootView: View) {
+    val title: TextView = rootView.findViewById(R.id.title)
+    val checkBox: CheckBox = rootView.findViewById(R.id.checkbox)
 }

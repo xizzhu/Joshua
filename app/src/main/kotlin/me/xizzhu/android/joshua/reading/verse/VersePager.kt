@@ -32,11 +32,13 @@ interface VerseView : MVPView {
 
     fun onCurrentTranslationUpdated(currentTranslation: String)
 
+    fun onParallelTranslationsUpdated(parallelTranslations: List<String>)
+
     fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int)
 
     fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>)
 
-    fun onVersesLoadFailed(translationShortName: String, bookIndex: Int, chapterIndex: Int)
+    fun onVersesLoadFailed(bookIndex: Int, chapterIndex: Int)
 
     fun onVerseSelected(verse: Verse)
 
@@ -54,7 +56,7 @@ class VerseViewPager : ViewPager, VerseView {
 
     private val versePagerAdapterListener = object : VersePagerAdapter.Listener {
         override fun onChapterRequested(bookIndex: Int, chapterIndex: Int) {
-            presenter.loadVerses(currentTranslation, bookIndex, chapterIndex)
+            presenter.loadVerses(bookIndex, chapterIndex)
         }
 
         override fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int) {
@@ -91,8 +93,9 @@ class VerseViewPager : ViewPager, VerseView {
 
     private lateinit var presenter: VersePresenter
 
-    private var currentTranslation = ""
     private var currentVerseIndex = VerseIndex.INVALID
+    private var currentTranslation = ""
+    private var parallelTranslations = emptyList<String>()
 
     fun setPresenter(presenter: VersePresenter) {
         this.presenter = presenter
@@ -111,8 +114,9 @@ class VerseViewPager : ViewPager, VerseView {
             return
         }
 
-        adapter.currentTranslation = currentTranslation
         adapter.currentVerseIndex = currentVerseIndex
+        adapter.currentTranslation = currentTranslation
+        adapter.parallelTranslations = parallelTranslations
         adapter.notifyDataSetChanged()
         setCurrentItem(currentVerseIndex.toPagePosition(), false)
     }
@@ -122,6 +126,14 @@ class VerseViewPager : ViewPager, VerseView {
             return
         }
         this.currentTranslation = currentTranslation
+        refreshUi()
+    }
+
+    override fun onParallelTranslationsUpdated(parallelTranslations: List<String>) {
+        if (this.parallelTranslations == parallelTranslations) {
+            return
+        }
+        this.parallelTranslations = parallelTranslations
         refreshUi()
     }
 
@@ -136,10 +148,10 @@ class VerseViewPager : ViewPager, VerseView {
         adapter.setVerses(bookIndex, chapterIndex, verses)
     }
 
-    override fun onVersesLoadFailed(translationShortName: String, bookIndex: Int, chapterIndex: Int) {
+    override fun onVersesLoadFailed(bookIndex: Int, chapterIndex: Int) {
         DialogHelper.showDialog(context, true, R.string.dialog_verse_load_error,
                 DialogInterface.OnClickListener { _, _ ->
-                    presenter.loadVerses(translationShortName, bookIndex, chapterIndex)
+                    presenter.loadVerses(bookIndex, chapterIndex)
                 })
     }
 
