@@ -123,9 +123,23 @@ class VerseUtilsTest : BaseUnitTest() {
     }
 
     @Test
+    fun testSingleVerseWithMultipleTranslationsToStringForSharing() {
+        val expected = "Genesis 1:1\nKJV: In the beginning God created the heaven and the earth.\n中文和合本: 起初神创造天地。"
+        val actual = listOf(MockContents.kjvVersesWithCuvParallel[0]).toStringForSharing()
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun testMultipleVersesToStringForSharing() {
         val expected = "Genesis 1:1 In the beginning God created the heaven and the earth.\nGenesis 1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."
         val actual = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toStringForSharing()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testMultipleVerseWithMultipleTranslationsToStringForSharing() {
+        val expected = "Genesis 1:1\nKJV: In the beginning God created the heaven and the earth.\n中文和合本: 起初神创造天地。\nGenesis 1:2\nKJV: And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.\n中文和合本: 地是空虚混沌。渊面黑暗。神的灵运行在水面上。"
+        val actual = listOf(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvVersesWithCuvParallel[1]).toStringForSharing()
         assertEquals(expected, actual)
     }
 

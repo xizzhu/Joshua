@@ -80,10 +80,25 @@ fun Collection<Verse>.toStringForSharing(): String {
         if (stringBuilder.isNotEmpty()) {
             stringBuilder.append('\n')
         }
-        // format: <book name> <chapter index>:<verse index> <text>
-        stringBuilder.append(verse.text.bookName).append(' ')
-                .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append(' ')
-                .append(verse.text.text)
+        if (verse.parallel.isEmpty()) {
+            // format: <book name> <chapter index>:<verse index> <text>
+            stringBuilder.append(verse.text.bookName).append(' ')
+                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append(' ')
+                    .append(verse.text.text)
+        } else {
+            // format:
+            // <book name> <chapter verseIndex>:<verse verseIndex>
+            // <primary translation>: <verse text>
+            // <parallel translation 1>: <verse text>
+            // <parallel translation 2>: <verse text>
+            stringBuilder.append(verse.text.bookName).append(' ')
+                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
+                    .append(verse.text.translationShortName).append(": ").append(verse.text.text).append('\n')
+            for (text in verse.parallel) {
+                stringBuilder.append(text.translationShortName).append(": ").append(text.text).append('\n')
+            }
+            stringBuilder.setLength(stringBuilder.length - 1)
+        }
     }
     return stringBuilder.toString()
 }

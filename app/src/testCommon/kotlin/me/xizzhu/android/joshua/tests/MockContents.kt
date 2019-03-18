@@ -59,6 +59,11 @@ object MockContents {
     const val cuvTranslationInfoJson = "{\"translations\":[{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
     val cuvRemoteTranslationInfo = RemoteTranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L)
 
+    val kjvVersesWithCuvParallel = listOf(
+            Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "Genesis", "In the beginning God created the heaven and the earth."), listOf(Verse.Text(cuvShortName, "创世记", "起初神创造天地。"))),
+            Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "Genesis", "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), listOf(Verse.Text(cuvShortName, "创世记", "地是空虚混沌。渊面黑暗。神的灵运行在水面上。")))
+    )
+
     const val kjvCuvTranslationInfoJson = "{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1860978},{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
 }
 
