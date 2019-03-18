@@ -36,7 +36,7 @@ interface VerseView : MVPView {
 
     fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int)
 
-    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>)
+    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<VerseForReading>)
 
     fun onVersesLoadFailed(bookIndex: Int, chapterIndex: Int)
 
@@ -68,11 +68,11 @@ class VerseViewPager : ViewPager, VerseView {
             presenter.saveCurrentVerseIndex(updatedVerseIndex)
         }
 
-        override fun onVerseClicked(verse: Verse) {
+        override fun onVerseClicked(verse: VerseForReading) {
             presenter.onVerseClicked(verse)
         }
 
-        override fun onVerseLongClicked(verse: Verse) {
+        override fun onVerseLongClicked(verse: VerseForReading) {
             presenter.onVerseLongClicked(verse)
         }
     }
@@ -144,7 +144,7 @@ class VerseViewPager : ViewPager, VerseView {
                 })
     }
 
-    override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<Verse>) {
+    override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<VerseForReading>) {
         adapter.setVerses(bookIndex, chapterIndex, verses)
     }
 

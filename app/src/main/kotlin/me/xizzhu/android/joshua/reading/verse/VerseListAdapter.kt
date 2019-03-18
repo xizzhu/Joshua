@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import android.text.SpannableStringBuilder
-import android.text.style.RelativeSizeSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,9 +23,7 @@ import android.widget.TextView
 import androidx.annotation.IntDef
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import java.lang.StringBuilder
 
 class VerseListAdapter(private val inflater: LayoutInflater) : RecyclerView.Adapter<VerseItemViewHolder>() {
     companion object {
@@ -39,10 +35,10 @@ class VerseListAdapter(private val inflater: LayoutInflater) : RecyclerView.Adap
         annotation class Payload
     }
 
-    private val verses = ArrayList<Verse>()
+    private val verses = ArrayList<VerseForReading>()
     private val selected = ArrayList<Boolean>()
 
-    fun setVerses(verses: List<Verse>) {
+    fun setVerses(verses: List<VerseForReading>) {
         this.verses.clear()
         this.verses.addAll(verses)
 
@@ -73,7 +69,7 @@ class VerseListAdapter(private val inflater: LayoutInflater) : RecyclerView.Adap
             VerseItemViewHolder(inflater, parent)
 
     override fun onBindViewHolder(holder: VerseItemViewHolder, position: Int) {
-        holder.bind(verses[position], itemCount, selected[position])
+        holder.bind(verses[position], selected[position])
     }
 
     override fun onBindViewHolder(holder: VerseItemViewHolder, position: Int, payloads: MutableList<Any>) {
@@ -93,67 +89,18 @@ class VerseListAdapter(private val inflater: LayoutInflater) : RecyclerView.Adap
 
 class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_verse, parent, false)) {
-    companion object {
-        private val STRING_BUILDER = StringBuilder()
-        private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
-        private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
-
-        private fun buildVerseForDisplay(out: StringBuilder, verseIndex: VerseIndex, text: Verse.Text) {
-            if (out.isNotEmpty()) {
-                out.append('\n').append('\n')
-            }
-            out.append(text.translationShortName).append(' ')
-                    .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                    .append('\n').append(text.text)
-        }
-    }
-
     private val index = itemView.findViewById(R.id.index) as TextView
     private val text = itemView.findViewById(R.id.text) as TextView
     private val divider = itemView.findViewById(R.id.divider) as View
 
-    fun bind(verse: Verse, totalVerse: Int, selected: Boolean) {
-        if (verse.parallel.isEmpty()) {
-            STRING_BUILDER.setLength(0)
-            val verseIndex = verse.verseIndex.verseIndex
-            if (totalVerse >= 10) {
-                if (totalVerse < 100) {
-                    if (verseIndex + 1 < 10) {
-                        STRING_BUILDER.append(' ')
-                    }
-                } else {
-                    if (verseIndex + 1 < 10) {
-                        STRING_BUILDER.append("  ")
-                    } else if (verseIndex + 1 < 100) {
-                        STRING_BUILDER.append(" ")
-                    }
-                }
-            }
-            STRING_BUILDER.append(verseIndex + 1)
-            index.text = STRING_BUILDER.toString()
+    fun bind(verse: VerseForReading, selected: Boolean) {
+        text.text = verse.getTextForDisplay()
+        if (verse.verse.parallel.isEmpty()) {
+            index.text = verse.getIndexForDisplay()
             index.visibility = View.VISIBLE
-
-            text.text = verse.text.text
-
             divider.visibility = View.GONE
         } else {
             index.visibility = View.GONE
-
-            STRING_BUILDER.setLength(0)
-            buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, verse.text)
-            val primaryTextLength = STRING_BUILDER.length
-
-            for (text in verse.parallel) {
-                buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, text)
-            }
-
-            SPANNABLE_STRING_BUILDER.clear()
-            SPANNABLE_STRING_BUILDER.clearSpans()
-            SPANNABLE_STRING_BUILDER.append(STRING_BUILDER)
-            val length = SPANNABLE_STRING_BUILDER.length
-            SPANNABLE_STRING_BUILDER.setSpan(PARALLEL_VERSE_SIZE_SPAN, primaryTextLength, length, 0)
-            text.text = SPANNABLE_STRING_BUILDER.subSequence(0, length)
-
             divider.visibility = View.VISIBLE
         }
 

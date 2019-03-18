@@ -149,7 +149,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
                 } else {
                     readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
                 }
-                view?.onVersesLoaded(bookIndex, chapterIndex, verses)
+                val totalVerseCount = verses.size
+                view?.onVersesLoaded(bookIndex, chapterIndex, verses.map { VerseForReading(it, totalVerseCount) })
             } catch (e: Exception) {
                 Log.e(TAG, e, "Failed to load verses")
                 view?.onVersesLoadFailed(bookIndex, chapterIndex)
@@ -157,11 +158,12 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         }
     }
 
-    fun onVerseClicked(verse: Verse) {
+    fun onVerseClicked(verseForReading: VerseForReading) {
         if (actionMode == null) {
             return
         }
 
+        val verse = verseForReading.verse
         if (selectedVerses.contains(verse)) {
             // de-select the verse
             selectedVerses.remove(verse)
@@ -178,11 +180,11 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
         }
     }
 
-    fun onVerseLongClicked(verse: Verse) {
+    fun onVerseLongClicked(verseForReading: VerseForReading) {
         if (actionMode == null) {
             actionMode = readingInteractor.startActionMode(actionModeCallback)
         }
 
-        onVerseClicked(verse)
+        onVerseClicked(verseForReading)
     }
 }
