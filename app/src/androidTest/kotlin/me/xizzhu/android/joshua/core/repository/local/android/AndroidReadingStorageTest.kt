@@ -169,6 +169,23 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     }
 
     @Test
+    fun testSaveThenReadByVerseIndex() {
+        runBlocking {
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+            androidDatabase.translationDao.createTable(MockContents.kjvShortName)
+            androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
+
+            androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames)
+            androidDatabase.translationDao.createTable(MockContents.cuvShortName)
+            androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
+
+            val expected = setOf(MockContents.kjvVerses[0], MockContents.cuvVerses[0])
+            val actual = androidReadingStorage.readVerses(VerseIndex(0, 0, 0)).toSet()
+            assertEquals(expected, actual)
+        }
+    }
+
+    @Test
     fun testSearchNonExistTranslation() {
         runBlocking {
             assertTrue(androidReadingStorage.search("not_exist", emptyList(), "keyword").isEmpty())

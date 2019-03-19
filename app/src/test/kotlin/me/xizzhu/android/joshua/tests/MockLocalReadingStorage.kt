@@ -62,6 +62,14 @@ class MockLocalReadingStorage : LocalReadingStorage {
         return readVerses(translationShortName, bookIndex, chapterIndex, "")
     }
 
+    override suspend fun readVerses(verseIndex: VerseIndex): List<Verse> {
+        return if (verseIndex.bookIndex == 0 && verseIndex.chapterIndex == 0 && verseIndex.verseIndex < MockContents.kjvVerses.size) {
+            listOf(MockContents.kjvVerses[verseIndex.verseIndex], MockContents.cuvVerses[verseIndex.verseIndex])
+        } else {
+            emptyList()
+        }
+    }
+
     override suspend fun search(translationShortName: String, bookNames: List<String>, query: String): List<Verse> {
         return if (MockContents.kjvShortName == translationShortName) {
             val result = mutableListOf<Verse>()
