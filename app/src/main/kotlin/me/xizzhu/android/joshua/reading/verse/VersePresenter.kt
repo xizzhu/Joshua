@@ -160,6 +160,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
 
     fun onVerseClicked(verseForReading: VerseForReading) {
         if (actionMode == null) {
+            launch(Dispatchers.Main) { readingInteractor.openVerseDetail() }
             return
         }
 

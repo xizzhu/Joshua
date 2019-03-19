@@ -18,10 +18,17 @@ package me.xizzhu.android.joshua.reading
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.ViewTreeObserver
 import androidx.appcompat.app.ActionBarDrawerToggle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.chapter.ChapterListView
+import me.xizzhu.android.joshua.reading.detail.VerseDetailPresenter
+import me.xizzhu.android.joshua.reading.detail.VerseDetailViewLayout
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
@@ -30,6 +37,9 @@ import me.xizzhu.android.joshua.utils.BaseActivity
 import javax.inject.Inject
 
 class ReadingActivity : BaseActivity() {
+    @Inject
+    lateinit var readingInteractor: ReadingInteractor
+
     @Inject
     lateinit var readingDrawerPresenter: ReadingDrawerPresenter
 
@@ -43,6 +53,9 @@ class ReadingActivity : BaseActivity() {
     lateinit var versePresenter: VersePresenter
 
     @Inject
+    lateinit var verseDetailPresenter: VerseDetailPresenter
+
+    @Inject
     lateinit var searchButtonPresenter: SearchButtonPresenter
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
@@ -50,6 +63,7 @@ class ReadingActivity : BaseActivity() {
     private lateinit var toolbar: ReadingToolbar
     private lateinit var chapterListView: ChapterListView
     private lateinit var verseViewPager: VerseViewPager
+    private lateinit var verseDetailView: VerseDetailViewLayout
     private lateinit var search: SearchFloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +80,9 @@ class ReadingActivity : BaseActivity() {
 
         verseViewPager = findViewById(R.id.verse_view_pager)
         verseViewPager.setPresenter(versePresenter)
+
+        verseDetailView = findViewById(R.id.verse_detail_view)
+        verseDetailView.setPresenter(verseDetailPresenter)
 
         drawerToggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, 0, 0)
         drawerLayout.addDrawerListener(drawerToggle)
@@ -86,6 +103,7 @@ class ReadingActivity : BaseActivity() {
         toolbarPresenter.attachView(toolbar)
         chapterListPresenter.attachView(chapterListView)
         versePresenter.attachView(verseViewPager)
+        verseDetailPresenter.attachView(verseDetailView)
         searchButtonPresenter.attachView(search)
     }
 
@@ -94,6 +112,7 @@ class ReadingActivity : BaseActivity() {
         toolbarPresenter.detachView()
         chapterListPresenter.detachView()
         versePresenter.detachView()
+        verseDetailPresenter.detachView()
         searchButtonPresenter.detachView()
 
         super.onStop()
@@ -102,5 +121,13 @@ class ReadingActivity : BaseActivity() {
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         drawerToggle.onConfigurationChanged(newConfig)
+    }
+
+    override fun onBackPressed() {
+        GlobalScope.launch(Dispatchers.Main) {
+            if (!readingInteractor.closeVerseDetail()) {
+                super.onBackPressed()
+            }
+        }
     }
 }

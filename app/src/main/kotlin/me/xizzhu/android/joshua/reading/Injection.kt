@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.reading.detail.VerseDetailPresenter
 
 @Module
 class ReadingModule {
@@ -53,6 +54,10 @@ class ReadingModule {
     @Provides
     fun provideVersePresenter(readingInteractor: ReadingInteractor): VersePresenter =
             VersePresenter(readingInteractor)
+
+    @Provides
+    fun provideVerseDetailPresenter(readingInteractor: ReadingInteractor): VerseDetailPresenter =
+            VerseDetailPresenter(readingInteractor)
 
     @Provides
     fun provideSearchButtonPresenter(readingInteractor: ReadingInteractor): SearchButtonPresenter =

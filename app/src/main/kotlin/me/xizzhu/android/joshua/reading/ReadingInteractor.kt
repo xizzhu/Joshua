@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import android.content.ComponentName
 import android.content.pm.LabeledIntent
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import me.xizzhu.android.joshua.R
 
 
@@ -35,6 +36,8 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val bibleReadingManager: BibleReadingManager,
                         private val readingProgressManager: ReadingProgressManager,
                         private val translationManager: TranslationManager) {
+    private val verseDetailOpenState: ConflatedBroadcastChannel<Boolean> = ConflatedBroadcastChannel()
+
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
 
@@ -45,6 +48,23 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     }
 
     fun observeParallelTranslations(): ReceiveChannel<List<String>> = bibleReadingManager.observeParallelTranslations()
+
+    fun observeVerseDetailOpenState(): ReceiveChannel<Boolean> = verseDetailOpenState.openSubscription()
+
+    suspend fun openVerseDetail() {
+        verseDetailOpenState.send(true)
+    }
+
+    /**
+     * @return true if verse detail view was open, or false otherwise
+     * */
+    suspend fun closeVerseDetail(): Boolean {
+        if (verseDetailOpenState.value) {
+            verseDetailOpenState.send(false)
+            return true
+        }
+        return false
+    }
 
     suspend fun requestParallelTranslation(translationShortName: String) {
         bibleReadingManager.requestParallelTranslation(translationShortName)
