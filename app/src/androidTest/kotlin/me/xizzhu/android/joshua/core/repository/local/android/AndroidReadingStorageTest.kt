@@ -179,8 +179,8 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
             androidDatabase.translationDao.createTable(MockContents.cuvShortName)
             androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
 
-            val expected = setOf(MockContents.kjvVerses[0], MockContents.cuvVerses[0])
-            val actual = androidReadingStorage.readVerses(VerseIndex(0, 0, 0)).toSet()
+            val expected = MockContents.kjvVersesWithCuvParallel[0]
+            val actual = androidReadingStorage.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 0))
             assertEquals(expected, actual)
         }
     }

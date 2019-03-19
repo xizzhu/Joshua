@@ -81,6 +81,9 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
                            bookIndex: Int, chapterIndex: Int): List<Verse> =
             localReadingStorage.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
 
+    suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
+            localReadingStorage.readVerse(translationShortName, verseIndex)
+
     suspend fun search(translationShortName: String, query: String): List<Verse> =
             localReadingStorage.search(translationShortName, readBookNames(translationShortName), query)
 }

@@ -93,11 +93,20 @@ class TranslationDaoTest : BaseSqliteTest() {
         androidDatabase.translationDao.createTable(MockContents.cuvShortName)
         androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
 
-        val expected = setOf(MockContents.kjvVerses[0], MockContents.cuvVerses[0])
         val actual = androidDatabase.translationDao.read(mutableMapOf(
                 Pair(MockContents.kjvShortName, "Genesis"), Pair(MockContents.cuvShortName, "创世记")),
-                VerseIndex(0, 0, 0)).toSet()
-        assertEquals(expected, actual)
+                VerseIndex(0, 0, 0))
+        for ((translation, text) in actual) {
+            when (translation) {
+                MockContents.kjvShortName -> {
+                    assertEquals(MockContents.kjvVerses[0].text, text)
+                }
+                MockContents.cuvShortName -> {
+                    assertEquals(MockContents.cuvVerses[0].text, text)
+                }
+                else -> fail()
+            }
+        }
     }
 
     @Test
