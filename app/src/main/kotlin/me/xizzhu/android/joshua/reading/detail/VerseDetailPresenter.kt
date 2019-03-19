@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.reading.detail
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
@@ -30,12 +31,18 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor) : M
             val verseDetailOpenState = readingInteractor.observeVerseDetailOpenState()
             receiveChannels.add(verseDetailOpenState)
             verseDetailOpenState.consumeEach {
-                if (it) {
+                if (it.isValid()) {
                     view?.show()
+                    view?.showVerse(readingInteractor.readVerse(
+                            readingInteractor.observeCurrentTranslation().first(), it))
                 } else {
                     view?.hide()
                 }
             }
         }
+    }
+
+    fun hide() {
+        launch(Dispatchers.Main) { readingInteractor.closeVerseDetail() }
     }
 }

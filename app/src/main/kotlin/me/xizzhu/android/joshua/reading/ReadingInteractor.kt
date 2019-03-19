@@ -36,7 +36,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val bibleReadingManager: BibleReadingManager,
                         private val readingProgressManager: ReadingProgressManager,
                         private val translationManager: TranslationManager) {
-    private val verseDetailOpenState: ConflatedBroadcastChannel<Boolean> = ConflatedBroadcastChannel()
+    private val verseDetailOpenState: ConflatedBroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
@@ -49,18 +49,18 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     fun observeParallelTranslations(): ReceiveChannel<List<String>> = bibleReadingManager.observeParallelTranslations()
 
-    fun observeVerseDetailOpenState(): ReceiveChannel<Boolean> = verseDetailOpenState.openSubscription()
+    fun observeVerseDetailOpenState(): ReceiveChannel<VerseIndex> = verseDetailOpenState.openSubscription()
 
-    suspend fun openVerseDetail() {
-        verseDetailOpenState.send(true)
+    suspend fun openVerseDetail(verseIndex: VerseIndex) {
+        verseDetailOpenState.send(verseIndex)
     }
 
     /**
      * @return true if verse detail view was open, or false otherwise
      * */
     suspend fun closeVerseDetail(): Boolean {
-        if (verseDetailOpenState.value) {
-            verseDetailOpenState.send(false)
+        if (verseDetailOpenState.value.isValid()) {
+            verseDetailOpenState.send(VerseIndex.INVALID)
             return true
         }
         return false
@@ -86,6 +86,9 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
                            bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingManager.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
+
+    suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
+            bibleReadingManager.readVerse(translationShortName, verseIndex)
 
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)

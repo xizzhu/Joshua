@@ -18,11 +18,19 @@ package me.xizzhu.android.joshua.reading.detail
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
+import android.widget.TextView
+import androidx.viewpager.widget.ViewPager
+import com.google.android.material.tabs.TabLayout
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.utils.MVPView
 
 interface VerseDetailView : MVPView {
+    fun showVerse(verse: Verse)
+
     fun show()
 
     fun hide()
@@ -39,7 +47,23 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     private lateinit var presenter: VerseDetailPresenter
 
+    private val onClickListener = View.OnClickListener { presenter.hide() }
+
+    private val adapter: VerseDetailPagerAdapter
+    private val tabLayout: TabLayout
+    private val viewPager: ViewPager
+
     init {
+        View.inflate(context, R.layout.inner_verse_detail_view, this)
+        tabLayout = findViewById(R.id.tab_layout)
+        viewPager = findViewById(R.id.view_pager)
+
+        adapter = VerseDetailPagerAdapter(context)
+        viewPager.adapter = adapter
+        tabLayout.setupWithViewPager(viewPager)
+
+        setOnClickListener(onClickListener)
+
         viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -50,6 +74,10 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     fun setPresenter(presenter: VerseDetailPresenter) {
         this.presenter = presenter
+    }
+
+    override fun showVerse(verse: Verse) {
+        adapter.setVerse(verse)
     }
 
     override fun show() {
