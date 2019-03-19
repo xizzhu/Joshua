@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Assert.assertEquals
@@ -31,6 +32,10 @@ class BookNamesDaoTest : BaseSqliteTest() {
     @Test
     fun testEmptyTable() {
         assertTrue(androidDatabase.bookNamesDao.read("not_exist").isEmpty())
+
+        for (bookIndex in 0 until Bible.BOOK_COUNT) {
+            assertTrue(androidDatabase.bookNamesDao.read(bookIndex).isEmpty())
+        }
     }
 
     @Test
@@ -66,6 +71,30 @@ class BookNamesDaoTest : BaseSqliteTest() {
         assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[1]),
                 Pair(MockContents.cuvShortName, MockContents.cuvBookNames[1])),
                 androidDatabase.bookNamesDao.read(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
+    }
+
+    @Test
+    fun testSaveThenReadByBookIndex() {
+        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames)
+
+        val expected = mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[0]),
+                Pair(MockContents.cuvShortName, MockContents.cuvBookNames[0]))
+        val actual = androidDatabase.bookNamesDao.read(0)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testSaveOverrideThenReadByBookIndex() {
+        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"))
+        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, listOf("random_3", "whatever_4"))
+        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames)
+
+        val expected = mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[0]),
+                Pair(MockContents.cuvShortName, MockContents.cuvBookNames[0]))
+        val actual = androidDatabase.bookNamesDao.read(0)
+        assertEquals(expected, actual)
     }
 
     @Test
