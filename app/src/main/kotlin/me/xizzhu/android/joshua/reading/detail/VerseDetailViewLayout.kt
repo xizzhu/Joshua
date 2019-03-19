@@ -29,7 +29,7 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.utils.MVPView
 
 interface VerseDetailView : MVPView {
-    fun showVerse(verse: Verse)
+    fun showVerse(verseDetail: VerseDetail)
 
     fun show()
 
@@ -76,8 +76,8 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
         this.presenter = presenter
     }
 
-    override fun showVerse(verse: Verse) {
-        adapter.setVerse(verse)
+    override fun showVerse(verseDetail: VerseDetail) {
+        adapter.setVerse(verseDetail)
     }
 
     override fun show() {

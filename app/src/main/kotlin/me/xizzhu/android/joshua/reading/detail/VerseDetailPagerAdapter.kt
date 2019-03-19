@@ -33,16 +33,16 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
 
     private val resources: Resources = context.resources
     private val inflater: LayoutInflater = LayoutInflater.from(context)
-    private var verse: Verse? = null
+    private var verseDetail: VerseDetail? = null
 
     override fun getCount(): Int {
-        return if (verse != null) 1 else 0
+        return if (verseDetail != null) 1 else 0
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val view = inflater.inflate(R.layout.page_verse_detail, container, false)
         (view.findViewById(R.id.detail) as TextView).text = when (position) {
-            PAGE_VERSES -> verse?.text?.text
+            PAGE_VERSES -> verseDetail?.getStringForDisplay()
             else -> ""
         }
 
@@ -67,8 +67,8 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
 
     override fun getItemPosition(obj: Any): Int = POSITION_NONE
 
-    fun setVerse(verse: Verse) {
-        this.verse = verse
+    fun setVerse(verseDetail: VerseDetail) {
+        this.verseDetail = verseDetail
         notifyDataSetChanged()
     }
 }

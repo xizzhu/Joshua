@@ -33,8 +33,8 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor) : M
             verseDetailOpenState.consumeEach {
                 if (it.isValid()) {
                     view?.show()
-                    view?.showVerse(readingInteractor.readVerse(
-                            readingInteractor.observeCurrentTranslation().first(), it))
+                    view?.showVerse(VerseDetail(readingInteractor.readVerse(
+                            readingInteractor.observeCurrentTranslation().first(), it)))
                 } else {
                     view?.hide()
                 }
