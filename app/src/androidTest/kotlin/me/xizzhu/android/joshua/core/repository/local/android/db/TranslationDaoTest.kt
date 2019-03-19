@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.toMap
@@ -82,6 +83,21 @@ class TranslationDaoTest : BaseSqliteTest() {
                 else -> fail()
             }
         }
+    }
+
+    @Test
+    fun testSaveThenReadByVerseIndex() {
+        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
+        androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
+
+        androidDatabase.translationDao.createTable(MockContents.cuvShortName)
+        androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
+
+        val expected = setOf(MockContents.kjvVerses[0], MockContents.cuvVerses[0])
+        val actual = androidDatabase.translationDao.read(mutableMapOf(
+                Pair(MockContents.kjvShortName, "Genesis"), Pair(MockContents.cuvShortName, "创世记")),
+                VerseIndex(0, 0, 0)).toSet()
+        assertEquals(expected, actual)
     }
 
     @Test

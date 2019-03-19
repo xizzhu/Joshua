@@ -76,6 +76,13 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    private fun SQLiteDatabase.hasTable(name: String): Boolean {
+        val cursor: Cursor = rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null)
+        return cursor.use {
+            cursor.count > 0
+        }
+    }
+
     @WorkerThread
     fun read(translationToBookName: Map<String, String>, bookIndex: Int, chapterIndex: Int): Map<String, List<Verse.Text>> {
         if (translationToBookName.isEmpty() || bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT
@@ -112,10 +119,40 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
-    private fun SQLiteDatabase.hasTable(name: String): Boolean {
-        val cursor: Cursor = rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null)
-        return cursor.use {
-            cursor.count > 0
+    @WorkerThread
+    fun read(translationToBookName: Map<String, String>, verseIndex: VerseIndex): List<Verse> {
+        if (translationToBookName.isEmpty()
+                || verseIndex.bookIndex < 0 || verseIndex.bookIndex >= Bible.BOOK_COUNT
+                || verseIndex.chapterIndex < 0 || verseIndex.chapterIndex >= Bible.getChapterCount(verseIndex.bookIndex)
+                || verseIndex.verseIndex < 0) {
+            return emptyList()
+        }
+
+        db.beginTransaction()
+        try {
+            val verses = mutableListOf<Verse>()
+            for ((translation, bookName) in translationToBookName) {
+                var cursor: Cursor? = null
+                try {
+                    cursor = db.query(translation, arrayOf(COLUMN_TEXT),
+                            "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
+                            arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
+                            null, null, null)
+                    if (cursor.moveToNext()) {
+                        verses.add(Verse(verseIndex,
+                                Verse.Text(translation, bookName, cursor.getString(0)), emptyList()))
+                    }
+                } finally {
+                    cursor?.close()
+                }
+            }
+
+            db.setTransactionSuccessful()
+            return verses
+        } finally {
+            if (db.inTransaction()) {
+                db.endTransaction()
+            }
         }
     }
 
