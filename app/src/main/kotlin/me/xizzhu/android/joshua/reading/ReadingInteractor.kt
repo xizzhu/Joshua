@@ -59,7 +59,8 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
      * @return true if verse detail view was open, or false otherwise
      * */
     suspend fun closeVerseDetail(): Boolean {
-        if (verseDetailOpenState.value.isValid()) {
+        val openState = verseDetailOpenState.valueOrNull
+        if (openState?.isValid() == true) {
             verseDetailOpenState.send(VerseIndex.INVALID)
             return true
         }
