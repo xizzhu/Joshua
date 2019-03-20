@@ -17,6 +17,23 @@
 package me.xizzhu.android.joshua.progress
 
 import dagger.Module
+import dagger.Provides
+import me.xizzhu.android.joshua.ActivityScope
+import me.xizzhu.android.joshua.core.ReadingProgressManager
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 
 @Module
-class ReadingProgressModule {}
+class ReadingProgressModule {
+    @Provides
+    @ActivityScope
+    fun provideReadingProgressInteractor(readingProgressManager: ReadingProgressManager): ReadingProgressInteractor =
+            ReadingProgressInteractor(readingProgressManager)
+
+    @Provides
+    fun provideLoadingSpinnerPresenter(readingProgressInteractor: ReadingProgressInteractor): LoadingSpinnerPresenter =
+            LoadingSpinnerPresenter(readingProgressInteractor.observeReadingProgressLoadingState())
+
+    @Provides
+    fun provideReadingProgressPresenter(readingProgressInteractor: ReadingProgressInteractor): ReadingProgressPresenter =
+            ReadingProgressPresenter(readingProgressInteractor)
+}

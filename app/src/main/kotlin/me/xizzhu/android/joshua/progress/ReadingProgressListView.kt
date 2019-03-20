@@ -19,11 +19,20 @@ package me.xizzhu.android.joshua.progress
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.RecyclerView
+import me.xizzhu.android.joshua.utils.MVPView
 
-class ReadingProgressListView : RecyclerView {
+interface ReadingProgressView : MVPView
+
+class ReadingProgressListView : RecyclerView, ReadingProgressView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    private lateinit var presenter: ReadingProgressPresenter
+
+    fun setPresenter(presenter: ReadingProgressPresenter) {
+        this.presenter = presenter
+    }
 }

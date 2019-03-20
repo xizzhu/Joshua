@@ -19,9 +19,17 @@ package me.xizzhu.android.joshua.progress
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.LoadingSpinner
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.BaseActivity
+import javax.inject.Inject
 
 class ReadingProgressActivity : BaseActivity() {
+    @Inject
+    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
+
+    @Inject
+    lateinit var readingProgressPresenter: ReadingProgressPresenter
+
     private lateinit var loadingSpinner: LoadingSpinner
     private lateinit var readingProgressListView: ReadingProgressListView
 
@@ -32,5 +40,20 @@ class ReadingProgressActivity : BaseActivity() {
         loadingSpinner = findViewById(R.id.loading_spinner)
 
         readingProgressListView = findViewById(R.id.reading_progress_list)
+        readingProgressListView.setPresenter(readingProgressPresenter)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        loadingSpinnerPresenter.attachView(loadingSpinner)
+        readingProgressPresenter.attachView(readingProgressListView)
+    }
+
+    override fun onStop() {
+        loadingSpinnerPresenter.detachView()
+        readingProgressPresenter.detachView()
+
+        super.onStop()
     }
 }
