@@ -51,6 +51,7 @@ class TranslationManagementActivity : BaseActivity() {
     }
 
     override fun onStop() {
+        loadingSpinnerPresenter.detachView()
         translationPresenter.detachView()
 
         super.onStop()
