@@ -111,6 +111,27 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
         }
     }
 
+    override suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse {
+        return withContext(Dispatchers.IO) {
+            val db = androidDatabase.readableDatabase
+            try {
+                db.beginTransaction()
+
+                val translationToBookNames = androidDatabase.bookNamesDao.read(verseIndex.bookIndex)
+                val translationToText = androidDatabase.translationDao.read(translationToBookNames, verseIndex).toMutableMap()
+                val primaryText = translationToText.remove(translationShortName)!!
+                val verse = Verse(verseIndex, primaryText, translationToText.values.toList())
+
+                db.setTransactionSuccessful()
+                return@withContext verse
+            } finally {
+                if (db.inTransaction()) {
+                    db.endTransaction()
+                }
+            }
+        }
+    }
+
     override suspend fun search(translationShortName: String, bookNames: List<String>, query: String): List<Verse> {
         return withContext(Dispatchers.IO) {
             androidDatabase.translationDao.search(translationShortName, bookNames, query)

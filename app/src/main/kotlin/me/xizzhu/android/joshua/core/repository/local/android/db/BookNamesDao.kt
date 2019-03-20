@@ -101,6 +101,32 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun read(bookIndex: Int): Map<String, String> {
+        if (bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT) {
+            return emptyMap()
+        }
+
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_NAME),
+                    "$COLUMN_BOOK_INDEX = ?", arrayOf(bookIndex.toString()), null, null, null)
+            val count = cursor.count
+            if (count > 0) {
+                val bookNames = HashMap<String, String>(count)
+                val translationShortName = cursor.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
+                val bookName = cursor.getColumnIndex(COLUMN_BOOK_NAME)
+                while (cursor.moveToNext()) {
+                    bookNames[cursor.getString(translationShortName)] = cursor.getString(bookName)
+                }
+                return bookNames
+            }
+            return emptyMap()
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    @WorkerThread
     fun save(translationShortName: String, bookNames: List<String>) {
         val values = ContentValues(3)
         values.put(COLUMN_TRANSLATION_SHORT_NAME, translationShortName)

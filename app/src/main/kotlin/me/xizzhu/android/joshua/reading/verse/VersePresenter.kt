@@ -159,11 +159,12 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
     }
 
     fun onVerseClicked(verseForReading: VerseForReading) {
+        val verse = verseForReading.verse
         if (actionMode == null) {
+            launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex) }
             return
         }
 
-        val verse = verseForReading.verse
         if (selectedVerses.contains(verse)) {
             // de-select the verse
             selectedVerses.remove(verse)

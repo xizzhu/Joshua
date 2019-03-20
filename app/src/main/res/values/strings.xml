@@ -35,4 +35,5 @@
     <string name="dialog_navigate_to_translation_error">Failed to open translation management view, retry?</string>
 
     <string name="text_share_with">Share with</string>
+    <string name="text_verse_comparison">Verses</string>
 </resources>

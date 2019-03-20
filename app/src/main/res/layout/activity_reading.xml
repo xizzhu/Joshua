@@ -36,6 +36,12 @@
                 app:layout_scrollFlags="scroll|enterAlways"
                 app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
         </com.google.android.material.appbar.AppBarLayout>
+
+        <me.xizzhu.android.joshua.reading.detail.VerseDetailViewLayout
+            android:id="@+id/verse_detail_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:elevation="8dp" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <me.xizzhu.android.joshua.reading.chapter.ChapterListView
