@@ -24,6 +24,7 @@ import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
@@ -38,6 +39,8 @@ import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingStor
 import me.xizzhu.android.joshua.core.repository.local.android.AndroidTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
+import me.xizzhu.android.joshua.progress.ReadingProgressActivity
+import me.xizzhu.android.joshua.progress.ReadingProgressModule
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingModule
 import me.xizzhu.android.joshua.search.SearchActivity
@@ -138,6 +141,10 @@ class RepositoryModule {
 
 @Module
 abstract class ActivityModule {
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [(ReadingProgressModule::class)])
+    abstract fun contributeReadingProgressActivity(): ReadingProgressActivity
+
     @ActivityScope
     @ContributesAndroidInjector(modules = [(ReadingModule::class)])
     abstract fun contributeReadingActivity(): ReadingActivity

@@ -7,4 +7,9 @@
         android:title="@null"
         app:actionViewClass="androidx.appcompat.widget.AppCompatSpinner"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_reading_progress"
+        android:title="@string/action_reading_progress"
+        app:showAsAction="never" />
 </menu>

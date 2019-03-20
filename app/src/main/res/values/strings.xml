@@ -16,6 +16,7 @@
     <string name="menu_more_translation">More</string>
     <string name="action_copy">Copy</string>
     <string name="action_share">Share</string>
+    <string name="action_reading_progress">Reading progress</string>
 
     <string name="dialog_delete_translation_confirmation">Delete now?</string>
     <string name="dialog_no_translation_downloaded">No translation, download now?</string>
@@ -33,6 +34,7 @@
     <string name="dialog_verse_selection_error">Failed to select the verse, retry?</string>
     <string name="dialog_navigate_to_search_error">Failed to open search view, retry?</string>
     <string name="dialog_navigate_to_translation_error">Failed to open translation management view, retry?</string>
+    <string name="dialog_navigate_to_reading_progress_error">Failed to open reading progress view, retry?</string>
 
     <string name="text_share_with">Share with</string>
     <string name="text_verse_comparison">Verses</string>

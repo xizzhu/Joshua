@@ -93,6 +93,15 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         }
     }
 
+    fun openReadingProgress() {
+        try {
+            readingInteractor.openReadingProgress()
+        } catch (e: Exception) {
+            Log.e(TAG, e, "Failed to open reading progress activity")
+            view?.onFailedToNavigateToReadingProgress()
+        }
+    }
+
     fun finish() {
         readingInteractor.finish()
     }

@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.toolbar
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Spinner
@@ -46,6 +47,8 @@ interface ToolbarView : MVPView {
     fun onBookNamesUpdated(bookNames: List<String>)
 
     fun onFailedToNavigateToTranslationManagement()
+
+    fun onFailedToNavigateToReadingProgress()
 }
 
 class ReadingToolbar : Toolbar, ToolbarView {
@@ -85,9 +88,21 @@ class ReadingToolbar : Toolbar, ToolbarView {
     }
     private val translationSpinnerAdapter = TranslationSpinnerAdapter(context, translationSpinnerAdapterListener)
 
+    private val onMenuItemClickListener = OnMenuItemClickListener { menuItem ->
+        when (menuItem.itemId) {
+            R.id.action_reading_progress -> {
+                presenter.openReadingProgress()
+                return@OnMenuItemClickListener true
+            }
+            else -> return@OnMenuItemClickListener false
+        }
+    }
+
     init {
         setTitle(R.string.app_name)
+
         inflateMenu(R.menu.menu_bible_reading)
+        setOnMenuItemClickListener(onMenuItemClickListener)
 
         val translationSpinner = menu.findItem(R.id.action_translations).actionView as Spinner
         translationSpinner.adapter = translationSpinnerAdapter
@@ -184,6 +199,13 @@ class ReadingToolbar : Toolbar, ToolbarView {
         DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_translation_error,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.openTranslationManagement()
+                })
+    }
+
+    override fun onFailedToNavigateToReadingProgress() {
+        DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_reading_progress_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.openReadingProgress()
                 })
     }
 }
