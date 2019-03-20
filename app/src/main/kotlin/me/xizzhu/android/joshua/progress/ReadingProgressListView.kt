@@ -16,21 +16,14 @@
 
 package me.xizzhu.android.joshua.progress
 
-import android.os.Bundle
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.LoadingSpinner
-import me.xizzhu.android.joshua.utils.BaseActivity
+import android.content.Context
+import android.util.AttributeSet
+import androidx.recyclerview.widget.RecyclerView
 
-class ReadingProgressActivity : BaseActivity() {
-    private lateinit var loadingSpinner: LoadingSpinner
-    private lateinit var readingProgressListView: ReadingProgressListView
+class ReadingProgressListView : RecyclerView {
+    constructor(context: Context) : super(context)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-        setContentView(R.layout.activity_reading_progress)
-        loadingSpinner = findViewById(R.id.loading_spinner)
-
-        readingProgressListView = findViewById(R.id.reading_progress_list)
-    }
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 }
