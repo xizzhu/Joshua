@@ -28,9 +28,9 @@ data class VerseDetail(val verse: Verse) {
             if (out.isNotEmpty()) {
                 out.append('\n').append('\n')
             }
-            out.append(text.translationShortName).append(' ')
+            out.append(text.translationShortName).append(", ").append(text.bookName).append(' ')
                     .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                    .append(' ').append(text.text)
+                    .append('\n').append(text.text)
         }
     }
 
