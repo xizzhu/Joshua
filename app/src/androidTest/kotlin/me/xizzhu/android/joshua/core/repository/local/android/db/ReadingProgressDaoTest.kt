@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -34,6 +35,7 @@ class ReadingProgressDaoTest : BaseSqliteTest() {
         val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 0, 0L, 0L)
         val actual = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
         assertEquals(expected, actual)
+        assertTrue(androidDatabase.readingProgressDao.read().isEmpty())
     }
 
     @Test
@@ -81,6 +83,18 @@ class ReadingProgressDaoTest : BaseSqliteTest() {
         androidDatabase.readingProgressDao.save(ReadingProgress.ChapterReadingStatus(
                 bookIndex, chapterIndex, readCount, timeSpentInMills, lastReadingTimestamp))
         val actual = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testSaveThenReadAll() {
+        val expected = listOf(ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
+                ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L))
+
+        for (chapterReadingStatus in expected) {
+            androidDatabase.readingProgressDao.save(chapterReadingStatus)
+        }
+        val actual = androidDatabase.readingProgressDao.read()
         assertEquals(expected, actual)
     }
 }

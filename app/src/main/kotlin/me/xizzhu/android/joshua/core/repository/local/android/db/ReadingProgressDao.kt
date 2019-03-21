@@ -56,6 +56,34 @@ class ReadingProgressDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun read(): List<ReadingProgress.ChapterReadingStatus> {
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_READING_PROGRESS, arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX,
+                    COLUMN_READ_COUNT, COLUMN_TIME_SPENT_IN_MILLS, COLUMN_LAST_READING_TIMESTAMP),
+                    null, null, null, null, null)
+            val count = cursor.count
+            if (count == 0) {
+                return emptyList()
+            }
+
+            val bookIndex = cursor.getColumnIndex(COLUMN_BOOK_INDEX)
+            val chapterIndex = cursor.getColumnIndex(COLUMN_CHAPTER_INDEX)
+            val readCount = cursor.getColumnIndex(COLUMN_READ_COUNT)
+            val timeSpentInMills = cursor.getColumnIndex(COLUMN_TIME_SPENT_IN_MILLS)
+            val lastReadingTimestamp = cursor.getColumnIndex(COLUMN_LAST_READING_TIMESTAMP)
+            val result = ArrayList<ReadingProgress.ChapterReadingStatus>(count)
+            while (cursor.moveToNext()) {
+                result.add(ReadingProgress.ChapterReadingStatus(cursor.getInt(bookIndex), cursor.getInt(chapterIndex),
+                        cursor.getInt(readCount), cursor.getLong(timeSpentInMills), cursor.getLong(lastReadingTimestamp)))
+            }
+            return result
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    @WorkerThread
     fun read(bookIndex: Int, chapterIndex: Int): ReadingProgress.ChapterReadingStatus {
         var cursor: Cursor? = null
         try {
