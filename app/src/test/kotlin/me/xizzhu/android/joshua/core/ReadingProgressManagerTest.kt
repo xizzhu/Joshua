@@ -54,11 +54,10 @@ class ReadingProgressManagerTest : BaseUnitTest() {
             verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
 
             verseIndexChannel.send(VerseIndex(1, 2, 3))
-            verseIndexChannel.send(VerseIndex(1, 2, 3))
+            readingProgressManager.stopTracking()
+
             verify(readingProgressRepository, times(1))
                     .trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
-
-            readingProgressManager.stopTracking()
         }
     }
 
@@ -74,9 +73,9 @@ class ReadingProgressManagerTest : BaseUnitTest() {
             launch(Dispatchers.Unconfined) {
                 readingProgressManager.startTracking()
             }
-            verify(bibleReadingManager, times(1)).observeCurrentVerseIndex()
-
             readingProgressManager.stopTracking()
+
+            verify(bibleReadingManager, times(1)).observeCurrentVerseIndex()
         }
     }
 }
