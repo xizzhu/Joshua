@@ -108,16 +108,6 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
                 view?.onParallelTranslationsUpdated(it)
             }
         }
-        launch(Dispatchers.Main) {
-            readingInteractor.startTrackingReadingProgress()
-        }
-    }
-
-    override fun onViewDetached() {
-        launch(Dispatchers.Unconfined) {
-            readingInteractor.stopTrackingReadingProgress()
-        }
-        super.onViewDetached()
     }
 
     fun selectChapter(bookIndex: Int, chapterIndex: Int) {
