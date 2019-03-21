@@ -16,7 +16,31 @@
 
 package me.xizzhu.android.joshua.progress
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class ReadingProgressPresenter(private val readingProgressInteractor: ReadingProgressInteractor)
-    : MVPPresenter<ReadingProgressView>() {}
+    : MVPPresenter<ReadingProgressView>() {
+    companion object {
+        private val TAG: String = ReadingProgressPresenter::class.java.simpleName
+    }
+
+    override fun onViewAttached() {
+        super.onViewAttached()
+        loadReadingProgress()
+    }
+
+    fun loadReadingProgress() {
+        launch(Dispatchers.Main) {
+            try {
+                view?.onReadingProgressLoaded(readingProgressInteractor.readReadingProgress())
+                readingProgressInteractor.notifyLoadingFinished()
+            } catch (e: Exception) {
+                Log.e(TAG, e, "Failed to load reading progress")
+                view?.onReadingProgressLoadFailed()
+            }
+        }
+    }
+}

@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.progress
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
+import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 
 class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager) {
@@ -26,4 +27,10 @@ class ReadingProgressInteractor(private val readingProgressManager: ReadingProgr
 
     fun observeReadingProgressLoadingState(): ReceiveChannel<Boolean> =
             readingProgressLoadingState.openSubscription()
+
+    suspend fun notifyLoadingFinished() {
+        readingProgressLoadingState.send(false)
+    }
+
+    suspend fun readReadingProgress(): ReadingProgress = readingProgressManager.readReadingProgress()
 }

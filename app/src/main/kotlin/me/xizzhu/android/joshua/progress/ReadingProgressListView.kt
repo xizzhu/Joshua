@@ -17,11 +17,19 @@
 package me.xizzhu.android.joshua.progress
 
 import android.content.Context
+import android.content.DialogInterface
 import android.util.AttributeSet
 import androidx.recyclerview.widget.RecyclerView
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.ReadingProgress
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPView
 
-interface ReadingProgressView : MVPView
+interface ReadingProgressView : MVPView {
+    fun onReadingProgressLoaded(readingProgress: ReadingProgress)
+
+    fun onReadingProgressLoadFailed()
+}
 
 class ReadingProgressListView : RecyclerView, ReadingProgressView {
     constructor(context: Context) : super(context)
@@ -34,5 +42,16 @@ class ReadingProgressListView : RecyclerView, ReadingProgressView {
 
     fun setPresenter(presenter: ReadingProgressPresenter) {
         this.presenter = presenter
+    }
+
+    override fun onReadingProgressLoaded(readingProgress: ReadingProgress) {
+        // TODO
+    }
+
+    override fun onReadingProgressLoadFailed() {
+        DialogHelper.showDialog(context, true, R.string.dialog_load_reading_progress_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.loadReadingProgress()
+                })
     }
 }
