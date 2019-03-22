@@ -40,4 +40,11 @@
 
     <string name="text_share_with">Share with</string>
     <string name="text_verse_comparison">Verses</string>
+
+    <string name="text_continuous_reading">Consecutive Reading</string>
+    <string name="text_continuous_reading_count">%1$d day(s)</string>
+    <string name="text_chapters_read">Chapters Read</string>
+    <string name="text_finished_books">Books Finished</string>
+    <string name="text_finished_old_testament">Old Testament</string>
+    <string name="text_finished_new_testament">New Testament</string>
 </resources>

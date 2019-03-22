@@ -19,19 +19,37 @@ package me.xizzhu.android.joshua.progress
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 
-data class ReadingProgressForDisplay(val bookReadingStatus: List<BookReadingStatus>) {
+data class ReadingProgressForDisplay(val continuousReadingDays: Int, val chaptersRead: Int,
+                                     val finishedBooks: Int, val finishedOldTestament: Int,
+                                     val finishedNewTestament: Int, val bookReadingStatus: List<BookReadingStatus>) {
     data class BookReadingStatus(val bookName: String, val chaptersRead: Int, val chaptersCount: Int)
 }
 
 fun ReadingProgress.toReadingProgressForDisplay(bookNames: List<String>): ReadingProgressForDisplay {
-    val chaptersRead = Array(Bible.BOOK_COUNT) { 0 }
+    var totalChaptersRead = 0
+    val chaptersReadPerBook = Array(Bible.BOOK_COUNT) { 0 }
     for (chapter in chapterReadingStatus) {
-        chaptersRead[chapter.bookIndex]++
+        chaptersReadPerBook[chapter.bookIndex]++
+        ++totalChaptersRead
     }
+
+    var finishedBooks = 0
+    var finishedOldTestament = 0
+    var finishedNewTestament = 0
     val bookReadingStatus = ArrayList<ReadingProgressForDisplay.BookReadingStatus>(Bible.BOOK_COUNT)
-    for ((i, readCount) in chaptersRead.withIndex()) {
+    for ((bookIndex, chaptersRead) in chaptersReadPerBook.withIndex()) {
+        val chaptersCount = Bible.getChapterCount(bookIndex)
+        if (chaptersRead == chaptersCount) {
+            ++finishedBooks
+            if (bookIndex < Bible.OLD_TESTAMENT_COUNT) {
+                ++finishedOldTestament
+            } else {
+                ++finishedNewTestament
+            }
+        }
         bookReadingStatus.add(ReadingProgressForDisplay.BookReadingStatus(
-                bookNames[i], readCount, Bible.getChapterCount(i)))
+                bookNames[bookIndex], chaptersRead, chaptersCount))
     }
-    return ReadingProgressForDisplay(bookReadingStatus)
+    return ReadingProgressForDisplay(continuousReadingDays, totalChaptersRead, finishedBooks,
+            finishedOldTestament, finishedNewTestament, bookReadingStatus)
 }
