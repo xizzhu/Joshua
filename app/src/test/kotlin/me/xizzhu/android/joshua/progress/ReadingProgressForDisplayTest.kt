@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.progress
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.tests.BaseUnitTest
+import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -29,11 +30,11 @@ class ReadingProgressForDisplayTest : BaseUnitTest() {
                 listOf(ReadingProgress.ChapterReadingStatus(0, 1, 1, 500L, 23456L),
                         ReadingProgress.ChapterReadingStatus(0, 2, 2, 600L, 23457L),
                         ReadingProgress.ChapterReadingStatus(2, 0, 3, 700L, 23458L)))
-        val actual = readingProgress.toReadingProgressForDisplay()
+        val actual = readingProgress.toReadingProgressForDisplay(Array(Bible.BOOK_COUNT) { "" }.toList())
 
         assertEquals(Bible.BOOK_COUNT, actual.bookReadingStatus.size)
-        for (bookReadingStatus in actual.bookReadingStatus) {
-            when (bookReadingStatus.bookIndex) {
+        for ((i, bookReadingStatus) in actual.bookReadingStatus.withIndex()) {
+            when (i) {
                 0 -> {
                     assertEquals(2, bookReadingStatus.chaptersRead)
                 }

@@ -19,10 +19,13 @@ package me.xizzhu.android.joshua.progress
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.first
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 
-class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager) {
+class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager,
+                                private val bibleReadingManager: BibleReadingManager) {
     private val readingProgressLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
 
     fun observeReadingProgressLoadingState(): ReceiveChannel<Boolean> =
@@ -31,6 +34,10 @@ class ReadingProgressInteractor(private val readingProgressManager: ReadingProgr
     suspend fun notifyLoadingFinished() {
         readingProgressLoadingState.send(false)
     }
+
+    suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
+
+    suspend fun readBookNames(translationShortName: String): List<String> = bibleReadingManager.readBookNames(translationShortName)
 
     suspend fun readReadingProgress(): ReadingProgress = readingProgressManager.readReadingProgress()
 }

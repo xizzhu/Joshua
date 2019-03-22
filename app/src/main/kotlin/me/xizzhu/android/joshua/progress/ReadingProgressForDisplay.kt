@@ -20,17 +20,18 @@ import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 
 data class ReadingProgressForDisplay(val bookReadingStatus: List<BookReadingStatus>) {
-    data class BookReadingStatus(val bookIndex: Int, val chaptersRead: Int, val chaptersCount: Int)
+    data class BookReadingStatus(val bookName: String, val chaptersRead: Int, val chaptersCount: Int)
 }
 
-fun ReadingProgress.toReadingProgressForDisplay(): ReadingProgressForDisplay {
+fun ReadingProgress.toReadingProgressForDisplay(bookNames: List<String>): ReadingProgressForDisplay {
     val chaptersRead = Array(Bible.BOOK_COUNT) { 0 }
     for (chapter in chapterReadingStatus) {
         chaptersRead[chapter.bookIndex]++
     }
     val bookReadingStatus = ArrayList<ReadingProgressForDisplay.BookReadingStatus>(Bible.BOOK_COUNT)
     for ((i, readCount) in chaptersRead.withIndex()) {
-        bookReadingStatus.add(ReadingProgressForDisplay.BookReadingStatus(i, readCount, Bible.getChapterCount(i)))
+        bookReadingStatus.add(ReadingProgressForDisplay.BookReadingStatus(
+                bookNames[i], readCount, Bible.getChapterCount(i)))
     }
     return ReadingProgressForDisplay(bookReadingStatus)
 }

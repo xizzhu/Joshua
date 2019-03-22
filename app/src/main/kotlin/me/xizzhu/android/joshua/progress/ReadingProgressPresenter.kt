@@ -35,7 +35,12 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
     fun loadReadingProgress() {
         launch(Dispatchers.Main) {
             try {
-                view?.onReadingProgressLoaded(readingProgressInteractor.readReadingProgress())
+                val currentTranslation = readingProgressInteractor.readCurrentTranslation()
+                val bookNames = readingProgressInteractor.readBookNames(currentTranslation)
+                val readingProgress = readingProgressInteractor.readReadingProgress()
+                        .toReadingProgressForDisplay(bookNames)
+                view?.onReadingProgressLoaded(readingProgress)
+
                 readingProgressInteractor.notifyLoadingFinished()
             } catch (e: Exception) {
                 Log.e(TAG, e, "Failed to load reading progress")
