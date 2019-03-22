@@ -54,7 +54,7 @@ class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase
                             lastReadingTimestamp / DateUtils.DAY_IN_MILLIS
                     val continuousReadingDays = when (daysSinceLastReadingTimestamp) {
                         0L -> {
-                            values.getValue(MetadataDao.KEY_CONTINUOUS_READING_DAYS).toInt()
+                            Math.max(1, values.getValue(MetadataDao.KEY_CONTINUOUS_READING_DAYS).toInt())
                         }
                         1L -> {
                             values.getValue(MetadataDao.KEY_CONTINUOUS_READING_DAYS).toInt() + 1
@@ -70,6 +70,33 @@ class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase
                 }
 
                 db.setTransactionSuccessful()
+            } finally {
+                if (db?.inTransaction() == true) {
+                    db.endTransaction()
+                }
+            }
+        }
+    }
+
+    override suspend fun readReadingProgress(): ReadingProgress {
+        return withContext(Dispatchers.IO) {
+            var db: SQLiteDatabase? = null
+            try {
+                db = androidDatabase.readableDatabase
+                db.beginTransaction()
+
+                val metadata = androidDatabase.metadataDao.read(listOf(
+                        Pair(MetadataDao.KEY_CONTINUOUS_READING_DAYS, "1"),
+                        Pair(MetadataDao.KEY_LAST_READING_TIMESTAMP, "0")
+                ))
+                val readingProgress = ReadingProgress(
+                        metadata.getValue(MetadataDao.KEY_CONTINUOUS_READING_DAYS).toInt(),
+                        metadata.getValue(MetadataDao.KEY_LAST_READING_TIMESTAMP).toLong(),
+                        androidDatabase.readingProgressDao.read())
+
+                db.setTransactionSuccessful()
+
+                return@withContext readingProgress
             } finally {
                 if (db?.inTransaction() == true) {
                     db.endTransaction()

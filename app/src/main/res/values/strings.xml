@@ -4,6 +4,7 @@
     <string name="app_name">Bible</string>
 
     <string name="title_translation_management">Translations</string>
+    <string name="title_reading_progress">Reading progress</string>
 
     <string name="header_available_translations">Available translations</string>
 
@@ -16,6 +17,7 @@
     <string name="menu_more_translation">More</string>
     <string name="action_copy">Copy</string>
     <string name="action_share">Share</string>
+    <string name="action_reading_progress">Reading progress</string>
 
     <string name="dialog_delete_translation_confirmation">Delete now?</string>
     <string name="dialog_no_translation_downloaded">No translation, download now?</string>
@@ -33,7 +35,16 @@
     <string name="dialog_verse_selection_error">Failed to select the verse, retry?</string>
     <string name="dialog_navigate_to_search_error">Failed to open search view, retry?</string>
     <string name="dialog_navigate_to_translation_error">Failed to open translation management view, retry?</string>
+    <string name="dialog_navigate_to_reading_progress_error">Failed to open reading progress view, retry?</string>
+    <string name="dialog_load_reading_progress_error">Failed to load reading progress, retry?</string>
 
     <string name="text_share_with">Share with</string>
     <string name="text_verse_comparison">Verses</string>
+
+    <string name="text_continuous_reading">Consecutive Reading</string>
+    <string name="text_continuous_reading_count">%1$d day(s)</string>
+    <string name="text_chapters_read">Chapters Read</string>
+    <string name="text_finished_books">Books Finished</string>
+    <string name="text_finished_old_testament">Old Testament</string>
+    <string name="text_finished_new_testament">New Testament</string>
 </resources>

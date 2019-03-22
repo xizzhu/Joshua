@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.translations
+package me.xizzhu.android.joshua.progress
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
@@ -23,36 +23,36 @@ import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.BaseActivity
 import javax.inject.Inject
 
-class TranslationManagementActivity : BaseActivity() {
+class ReadingProgressActivity : BaseActivity() {
     @Inject
     lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
     @Inject
-    lateinit var translationPresenter: TranslationPresenter
+    lateinit var readingProgressPresenter: ReadingProgressPresenter
 
     private lateinit var loadingSpinner: LoadingSpinner
-    private lateinit var translationListView: TranslationListView
+    private lateinit var readingProgressListView: ReadingProgressListView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_translation_management)
+        setContentView(R.layout.activity_reading_progress)
         loadingSpinner = findViewById(R.id.loading_spinner)
 
-        translationListView = findViewById(R.id.translation_list)
-        translationListView.setPresenter(translationPresenter)
+        readingProgressListView = findViewById(R.id.reading_progress_list)
+        readingProgressListView.setPresenter(readingProgressPresenter)
     }
 
     override fun onStart() {
         super.onStart()
 
         loadingSpinnerPresenter.attachView(loadingSpinner)
-        translationPresenter.attachView(translationListView)
+        readingProgressPresenter.attachView(readingProgressListView)
     }
 
     override fun onStop() {
         loadingSpinnerPresenter.detachView()
-        translationPresenter.detachView()
+        readingProgressPresenter.detachView()
 
         super.onStop()
     }

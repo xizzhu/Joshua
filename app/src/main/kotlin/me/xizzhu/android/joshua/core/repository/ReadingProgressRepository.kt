@@ -16,10 +16,13 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingProgressStorage
 
 class ReadingProgressRepository(private val localReadingProgressStorage: LocalReadingProgressStorage) {
     suspend fun trackReadingProgress(bookIndex: Int, chapterIndex: Int, timeSpentInMills: Long, timestamp: Long) {
         localReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
     }
+
+    suspend fun readReadingProgress(): ReadingProgress = localReadingProgressStorage.readReadingProgress()
 }

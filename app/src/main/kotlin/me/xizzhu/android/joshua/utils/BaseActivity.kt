@@ -20,10 +20,19 @@ import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
 import dagger.android.AndroidInjection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
 import me.xizzhu.android.joshua.core.logger.Log
+import kotlin.coroutines.CoroutineContext
 
-abstract class BaseActivity : AppCompatActivity() {
+abstract class BaseActivity : AppCompatActivity(), CoroutineScope {
     private val tag = javaClass.simpleName
+
+    private val job: Job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,6 +68,7 @@ abstract class BaseActivity : AppCompatActivity() {
     @CallSuper
     override fun onDestroy() {
         Log.i(tag, "onDestroy()")
+        job.cancelChildren()
         super.onDestroy()
     }
 }

@@ -22,6 +22,7 @@
             </intent-filter>
         </activity-alias>
 
+        <activity android:name=".progress.ReadingProgressActivity" />
         <activity android:name=".reading.ReadingActivity" />
         <activity android:name=".search.SearchActivity" />
         <activity android:name=".translations.TranslationManagementActivity" />

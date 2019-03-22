@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="@dimen/padding"
+    android:paddingTop="@dimen/padding_small"
+    android:paddingEnd="@dimen/padding"
+    android:paddingBottom="@dimen/padding_small">
+
+    <TextView
+        android:id="@+id/continuous_reading_days_value"
+        style="@style/Text.Body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:textStyle="bold"
+        tools:text="10 days" />
+
+    <TextView
+        android:id="@+id/continuous_reading_days_title"
+        style="@style/Text.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/continuous_reading_days_value"
+        android:text="@string/text_continuous_reading" />
+
+    <TextView
+        android:id="@+id/chapters_read_value"
+        style="@style/Text.Body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/continuous_reading_days_title"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="@dimen/padding_small"
+        android:textStyle="bold"
+        tools:text="123" />
+
+    <TextView
+        android:id="@+id/chapters_read_title"
+        style="@style/Text.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/chapters_read_value"
+        android:text="@string/text_chapters_read" />
+
+    <TextView
+        android:id="@+id/finished_books_value"
+        style="@style/Text.Body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/chapters_read_title"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="@dimen/padding_small"
+        android:textStyle="bold"
+        tools:text="45" />
+
+    <TextView
+        android:id="@+id/finished_books_title"
+        style="@style/Text.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/finished_books_value"
+        android:text="@string/text_finished_books" />
+
+    <TextView
+        android:id="@+id/finished_old_testament_value"
+        style="@style/Text.Body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/finished_books_title"
+        android:layout_alignParentEnd="true"
+        android:textStyle="bold"
+        tools:text="12" />
+
+    <TextView
+        android:id="@+id/finished_old_testament_title"
+        style="@style/Text.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/finished_old_testament_value"
+        android:layout_marginStart="@dimen/padding_small"
+        android:text="@string/text_finished_old_testament" />
+
+    <TextView
+        android:id="@+id/finished_new_testament_value"
+        style="@style/Text.Body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/finished_old_testament_title"
+        android:layout_alignParentEnd="true"
+        android:textStyle="bold"
+        tools:text="3" />
+
+    <TextView
+        android:id="@+id/finished_new_testament_title"
+        style="@style/Text.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/finished_new_testament_value"
+        android:layout_marginStart="@dimen/padding_small"
+        android:text="@string/text_finished_new_testament" />
+</RelativeLayout>

@@ -27,7 +27,14 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import android.content.ComponentName
 import android.content.pm.LabeledIntent
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
 
 
@@ -99,6 +106,10 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     fun openTranslationManagement() {
         navigator.navigate(readingActivity, Navigator.SCREEN_TRANSLATION_MANAGEMENT)
+    }
+
+    fun openReadingProgress() {
+        navigator.navigate(readingActivity, Navigator.SCREEN_READING_PROGRESS)
     }
 
     fun finish() {

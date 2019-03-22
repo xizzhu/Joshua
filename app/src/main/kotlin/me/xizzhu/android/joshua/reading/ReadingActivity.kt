@@ -107,6 +107,20 @@ class ReadingActivity : BaseActivity() {
         searchButtonPresenter.attachView(search)
     }
 
+    override fun onResume() {
+        super.onResume()
+        launch(Dispatchers.Main) {
+            readingInteractor.startTrackingReadingProgress()
+        }
+    }
+
+    override fun onPause() {
+        launch(Dispatchers.Unconfined) {
+            readingInteractor.stopTrackingReadingProgress()
+        }
+        super.onPause()
+    }
+
     override fun onStop() {
         readingDrawerPresenter.detachView()
         toolbarPresenter.detachView()
@@ -124,7 +138,7 @@ class ReadingActivity : BaseActivity() {
     }
 
     override fun onBackPressed() {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch(Dispatchers.Main) {
             if (!readingInteractor.closeVerseDetail()) {
                 super.onBackPressed()
             }
