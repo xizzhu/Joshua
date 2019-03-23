@@ -48,9 +48,9 @@ class AndroidSettingsStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenRead() {
         runBlocking {
-            androidSettingsStorage.saveSettings(Settings(true))
+            androidSettingsStorage.saveSettings(Settings(false, true))
 
-            val expected = Settings(true)
+            val expected = Settings(false, true)
             val actual = androidSettingsStorage.readSettings()
             assertEquals(expected, actual)
         }
@@ -59,10 +59,10 @@ class AndroidSettingsStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveOverrideThenRead() {
         runBlocking {
-            androidSettingsStorage.saveSettings(Settings(false))
-            androidSettingsStorage.saveSettings(Settings(true))
+            androidSettingsStorage.saveSettings(Settings(true, false))
+            androidSettingsStorage.saveSettings(Settings(false, true))
 
-            val expected = Settings(true)
+            val expected = Settings(false, true)
             val actual = androidSettingsStorage.readSettings()
             assertEquals(expected, actual)
         }

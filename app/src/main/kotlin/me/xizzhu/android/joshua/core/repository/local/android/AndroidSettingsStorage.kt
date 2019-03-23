@@ -27,16 +27,19 @@ class AndroidSettingsStorage(private val androidDatabase: AndroidDatabase) : Loc
     override suspend fun readSettings(): Settings {
         return withContext(Dispatchers.IO) {
             val values = androidDatabase.metadataDao.read(listOf(
-                    Pair(MetadataDao.KEY_SCREEN_ON, Settings.DEFAULT.keepScreenOn.toString())
+                    Pair(MetadataDao.KEY_SCREEN_ON, Settings.DEFAULT.keepScreenOn.toString()),
+                    Pair(MetadataDao.KEY_NIGHT_MODE_ON, Settings.DEFAULT.nightModeOn.toString())
             ))
-            return@withContext Settings(values.getValue(MetadataDao.KEY_SCREEN_ON).toBoolean())
+            return@withContext Settings(values.getValue(MetadataDao.KEY_SCREEN_ON).toBoolean(),
+                    values.getValue(MetadataDao.KEY_NIGHT_MODE_ON).toBoolean())
         }
     }
 
     override suspend fun saveSettings(settings: Settings) {
         withContext(Dispatchers.IO) {
             androidDatabase.metadataDao.save(listOf(
-                    Pair(MetadataDao.KEY_SCREEN_ON, settings.keepScreenOn.toString())
+                    Pair(MetadataDao.KEY_SCREEN_ON, settings.keepScreenOn.toString()),
+                    Pair(MetadataDao.KEY_NIGHT_MODE_ON, settings.nightModeOn.toString())
             ))
         }
     }

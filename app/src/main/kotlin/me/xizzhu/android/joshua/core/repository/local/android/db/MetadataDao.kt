@@ -35,6 +35,7 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
         const val KEY_CONTINUOUS_READING_DAYS = "continuousReadingDays"
         const val KEY_LAST_READING_TIMESTAMP = "lastReadingTimestamp"
         const val KEY_SCREEN_ON = "screenOn"
+        const val KEY_NIGHT_MODE_ON = "nightModeOn"
 
         @WorkerThread
         fun createTable(db: SQLiteDatabase) {

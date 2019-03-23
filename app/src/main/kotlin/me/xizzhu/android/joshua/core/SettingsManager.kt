@@ -18,17 +18,18 @@ package me.xizzhu.android.joshua.core
 
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
-data class Settings(val keepScreenOn: Boolean) {
+data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean) {
     companion object {
-        val DEFAULT = Settings(true)
+        val DEFAULT = Settings(true, false)
     }
 
-    data class Builder(var keepScreenOn: Boolean) {
+    data class Builder(var keepScreenOn: Boolean, var nightModeOn: Boolean) {
         fun keepScreenOn(keepScreenOn: Boolean) = apply { this.keepScreenOn = keepScreenOn }
-        fun build() = Settings(keepScreenOn)
+        fun nightModeOn(nightModeOn: Boolean) = apply { this.nightModeOn = nightModeOn }
+        fun build() = Settings(keepScreenOn, nightModeOn)
     }
 
-    fun toBuilder(): Builder = Builder(keepScreenOn)
+    fun toBuilder(): Builder = Builder(keepScreenOn, nightModeOn)
 }
 
 class SettingsManager(private val settingsRepository: SettingsRepository) {
