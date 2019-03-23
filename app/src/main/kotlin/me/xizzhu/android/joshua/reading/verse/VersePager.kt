@@ -22,12 +22,13 @@ import android.util.AttributeSet
 import android.widget.Toast
 import androidx.viewpager.widget.ViewPager
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.joshua.utils.BaseSettingsView
 
-interface VerseView : MVPView {
+interface VerseView : BaseSettingsView {
     fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex)
 
     fun onCurrentTranslationUpdated(currentTranslation: String)
@@ -96,9 +97,15 @@ class VerseViewPager : ViewPager, VerseView {
     private var currentVerseIndex = VerseIndex.INVALID
     private var currentTranslation = ""
     private var parallelTranslations = emptyList<String>()
+    private var settings: Settings? = null
 
     fun setPresenter(presenter: VersePresenter) {
         this.presenter = presenter
+    }
+
+    override fun onSettingsLoaded(settings: Settings) {
+        this.settings = settings
+        adapter.settings = settings
     }
 
     override fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex) {
@@ -110,7 +117,7 @@ class VerseViewPager : ViewPager, VerseView {
     }
 
     private fun refreshUi() {
-        if (currentTranslation.isEmpty() || !currentVerseIndex.isValid()) {
+        if (currentTranslation.isEmpty() || !currentVerseIndex.isValid() || settings == null) {
             return
         }
 

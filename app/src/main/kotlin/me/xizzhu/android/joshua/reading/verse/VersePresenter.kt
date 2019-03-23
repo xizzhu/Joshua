@@ -29,9 +29,10 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
-import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
-class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<VerseView>() {
+class VersePresenter(private val readingInteractor: ReadingInteractor)
+    : BaseSettingsPresenter<VerseView>(readingInteractor) {
     companion object {
         private val TAG: String = VersePresenter::class.java.simpleName
     }

@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -47,6 +48,14 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     var currentVerseIndex = VerseIndex.INVALID
     var currentTranslation = ""
     var parallelTranslations = emptyList<String>()
+    var settings: Settings? = null
+        set(value) {
+            val shouldRefresh = field != null
+            field = value
+            if (shouldRefresh) {
+                notifyDataSetChanged()
+            }
+        }
 
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<VerseForReading>) {
         findPage(bookIndex, chapterIndex)?.setVerses(verses, currentVerseIndex)
@@ -69,12 +78,13 @@ class VersePagerAdapter(private val context: Context, private val listener: List
         findPage(verse.verseIndex.bookIndex, verse.verseIndex.chapterIndex)?.deselectVerse(verse.verseIndex)
     }
 
-    override fun getCount(): Int = if (currentTranslation.isNotEmpty()) Bible.TOTAL_CHAPTER_COUNT else 0
+    override fun getCount(): Int = if (currentTranslation.isNotEmpty() && settings != null) Bible.TOTAL_CHAPTER_COUNT else 0
 
     override fun getItemPosition(obj: Any): Int {
         val page = obj as Page
         return if (page.currentTranslation == currentTranslation
-                && page.parallelTranslations == parallelTranslations) {
+                && page.parallelTranslations == parallelTranslations
+                && page.settings == settings) {
             indexToPagePosition(page.bookIndex, page.chapterIndex)
         } else {
             POSITION_NONE
@@ -99,6 +109,7 @@ class VersePagerAdapter(private val context: Context, private val listener: List
 
         container.addView(page.rootView, 0)
         page.bind(currentTranslation, parallelTranslations, position.toBookIndex(), position.toChapterIndex())
+        page.settings = settings
 
         return page
     }
@@ -126,8 +137,15 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         private set
     var inUse = false
         private set
+    var settings: Settings? = null
+        set(value) {
+            field = value
+            if (value != null) {
+                adapter.setSettings(value)
+            }
+        }
 
-    private val adapter = VerseListAdapter(inflater)
+    private val adapter = VerseListAdapter(context, inflater)
     private var verses: List<VerseForReading>? = null
 
     init {
