@@ -42,6 +42,7 @@ class SettingsActivity : BaseSettingsActivity(), SettingsView {
     lateinit var presenter: SettingsPresenter
 
     private lateinit var keepScreenOn: SwitchCompat
+    private lateinit var nightModeOn: SwitchCompat
     private lateinit var version: SettingButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +53,10 @@ class SettingsActivity : BaseSettingsActivity(), SettingsView {
         keepScreenOn = findViewById(R.id.keep_screen_on)
         keepScreenOn.setOnCheckedChangeListener { _, isChecked ->
             presenter.setKeepScreenOn(isChecked)
+        }
+        nightModeOn = findViewById(R.id.night_mode_on)
+        nightModeOn.setOnCheckedChangeListener { _, isChecked ->
+            presenter.setNightModeOn(isChecked)
         }
     }
 
@@ -72,6 +77,7 @@ class SettingsActivity : BaseSettingsActivity(), SettingsView {
     override fun onSettingsLoaded(settings: Settings) {
         super.onSettingsLoaded(settings)
         keepScreenOn.isChecked = settings.keepScreenOn
+        nightModeOn.isChecked = settings.nightModeOn
     }
 
     override fun onSettingsLoadFailed() {

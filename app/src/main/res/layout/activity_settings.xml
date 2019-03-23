@@ -30,6 +30,16 @@
                 android:paddingEnd="@dimen/padding"
                 android:text="@string/settings_title_keep_screen_on" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/night_mode_on"
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/item_height"
+                android:paddingStart="@dimen/padding"
+                android:paddingEnd="@dimen/padding"
+                android:text="@string/settings_title_night_mode_on" />
+
             <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

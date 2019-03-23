@@ -81,4 +81,11 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
             saveSettings(settings.toBuilder().keepScreenOn(keepScreenOn).build())
         }
     }
+
+    fun setNightModeOn(nightModeOn: Boolean) {
+        val settings: Settings = this.settings ?: Settings.DEFAULT
+        if (nightModeOn != settings.nightModeOn) {
+            saveSettings(settings.toBuilder().nightModeOn(nightModeOn).build())
+        }
+    }
 }
