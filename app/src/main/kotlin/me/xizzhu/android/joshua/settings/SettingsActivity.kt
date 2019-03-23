@@ -23,7 +23,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.utils.BaseActivity
+import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
 
@@ -37,7 +37,7 @@ interface SettingsView : MVPView {
     fun onSettingsUpdateFailed(settingsToUpdate: Settings)
 }
 
-class SettingsActivity : BaseActivity(), SettingsView {
+class SettingsActivity : BaseSettingsActivity(), SettingsView {
     @Inject
     lateinit var presenter: SettingsPresenter
 
@@ -70,8 +70,8 @@ class SettingsActivity : BaseActivity(), SettingsView {
     }
 
     override fun onSettingsLoaded(settings: Settings) {
+        super.onSettingsLoaded(settings)
         keepScreenOn.isChecked = settings.keepScreenOn
-        window.decorView.keepScreenOn = settings.keepScreenOn
     }
 
     override fun onSettingsLoadFailed() {
