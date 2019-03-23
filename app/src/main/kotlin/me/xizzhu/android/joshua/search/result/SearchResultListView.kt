@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.search.result
 
 import android.content.Context
 import android.content.DialogInterface
+import android.content.res.Resources
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -27,12 +28,14 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
-import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.utils.BaseSettingsView
 
-interface SearchResultView : MVPView {
+interface SearchResultView : BaseSettingsView {
     fun onSearchStarted()
 
     fun onSearchCompleted()
@@ -68,6 +71,10 @@ class SearchResultListView : RecyclerView, SearchResultView {
         this.presenter = presenter
     }
 
+    override fun onSettingsLoaded(settings: Settings) {
+        adapter.setSettings(settings)
+    }
+
     override fun onSearchStarted() {
         visibility = GONE
         hasSearchStarted = true
@@ -101,24 +108,34 @@ private interface OnSearchResultClickedListener {
 private class SearchResultListAdapter(context: Context, private val listener: OnSearchResultClickedListener)
     : RecyclerView.Adapter<SearchResultViewHolder>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
+    private val resources: Resources = context.resources
+
     private var searchResult: SearchResult? = null
+    private var settings: Settings? = null
 
     fun setSearchResult(searchResult: SearchResult) {
         this.searchResult = searchResult
         notifyDataSetChanged()
     }
 
-    override fun getItemCount(): Int = searchResult?.size ?: 0
+    fun setSettings(settings: Settings) {
+        this.settings = settings
+        notifyDataSetChanged()
+    }
+
+    override fun getItemCount(): Int = if (settings != null && searchResult != null) searchResult!!.size else 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchResultViewHolder =
-            SearchResultViewHolder(inflater, parent, listener)
+            SearchResultViewHolder(inflater, parent, resources, listener)
 
     override fun onBindViewHolder(holder: SearchResultViewHolder, position: Int) {
-        holder.bind(searchResult!![position])
+        holder.bind(searchResult!![position], settings!!)
     }
 }
 
-private class SearchResultViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val listener: OnSearchResultClickedListener)
+private class SearchResultViewHolder(inflater: LayoutInflater, parent: ViewGroup,
+                                     private val resources: Resources,
+                                     private val listener: OnSearchResultClickedListener)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_search_result, parent, false)),
         View.OnClickListener {
     private val text = itemView as TextView
@@ -129,9 +146,10 @@ private class SearchResultViewHolder(inflater: LayoutInflater, parent: ViewGroup
         itemView.setOnClickListener(this)
     }
 
-    fun bind(verse: SearchedVerse) {
+    fun bind(verse: SearchedVerse, settings: Settings) {
         currentVerse = verse
         text.text = verse.getTextForDisplay()
+        text.setTextColor(settings.getPrimaryTextColor(resources))
     }
 
     override fun onClick(v: View) {

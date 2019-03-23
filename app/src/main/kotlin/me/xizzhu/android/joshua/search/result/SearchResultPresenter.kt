@@ -22,9 +22,10 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.search.SearchInteractor
-import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
-class SearchResultPresenter(private val searchInteractor: SearchInteractor) : MVPPresenter<SearchResultView>() {
+class SearchResultPresenter(private val searchInteractor: SearchInteractor)
+    : BaseSettingsPresenter<SearchResultView>(searchInteractor) {
     companion object {
         private val TAG: String = SearchResultPresenter::class.java.simpleName
     }
