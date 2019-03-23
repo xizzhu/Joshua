@@ -16,12 +16,27 @@
 
 package me.xizzhu.android.joshua.settings
 
-import dagger.Module
-import dagger.Provides
 import me.xizzhu.android.joshua.App
+import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.utils.MVPPresenter
 
-@Module
-class SettingsModule {
-    @Provides
-    fun provideSettingsPresenter(app: App): SettingsPresenter = SettingsPresenter(app)
+class SettingsPresenter(private val app: App) : MVPPresenter<SettingsView>() {
+    companion object {
+        private val TAG: String = SettingsPresenter::class.java.simpleName
+    }
+
+    override fun onViewAttached() {
+        super.onViewAttached()
+
+        loadVersion()
+    }
+
+    private fun loadVersion() {
+        try {
+            val version = app.packageManager.getPackageInfo(app.packageName, 0).versionName
+            view?.onVersionLoaded(version)
+        } catch (e: Exception) {
+            Log.e(TAG, e, "Failed to load app version")
+        }
+    }
 }

@@ -9,10 +9,22 @@
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:settingSectionHeaderTitle="@string/settings_about" />
+            android:orientation="vertical">
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingSectionHeaderTitle="@string/settings_header_about" />
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingButton
+                android:id="@+id/version"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingButtonTitle="@string/settings_title_version" />
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.appbar.AppBarLayout

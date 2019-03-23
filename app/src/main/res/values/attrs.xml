@@ -4,4 +4,9 @@
     <declare-styleable name="SettingSectionHeader">
         <attr name="settingSectionHeaderTitle" format="string|reference" />
     </declare-styleable>
+
+    <declare-styleable name="SettingButton">
+        <attr name="settingButtonTitle" format="string|reference" />
+        <attr name="settingButtonDescription" format="string|reference" />
+    </declare-styleable>
 </resources>

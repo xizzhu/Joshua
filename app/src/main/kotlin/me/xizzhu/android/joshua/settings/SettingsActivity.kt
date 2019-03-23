@@ -18,12 +18,39 @@ package me.xizzhu.android.joshua.settings
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.utils.BaseActivity
+import me.xizzhu.android.joshua.utils.MVPView
+import javax.inject.Inject
 
-class SettingsActivity : BaseActivity() {
+interface SettingsView : MVPView {
+    fun onVersionLoaded(version: String)
+}
+
+class SettingsActivity : BaseActivity(), SettingsView {
+    @Inject
+    lateinit var presenter: SettingsPresenter
+
+    private lateinit var version: SettingButton
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_settings)
+        version = findViewById(R.id.version)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        presenter.attachView(this)
+    }
+
+    override fun onStop() {
+        presenter.detachView()
+        super.onStop()
+    }
+
+    override fun onVersionLoaded(version: String) {
+        this.version.setDescription(version)
     }
 }

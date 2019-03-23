@@ -21,9 +21,10 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.ui.setBackground
 import me.xizzhu.android.joshua.ui.setText
 
-class SettingSectionHeader : FrameLayout {
+class SettingButton : FrameLayout {
     constructor(context: Context) : super(context) {
         init(context, null)
     }
@@ -41,15 +42,25 @@ class SettingSectionHeader : FrameLayout {
     }
 
     private lateinit var title: TextView
+    private lateinit var description: TextView
 
     private fun init(context: Context, attrs: AttributeSet?) {
-        inflate(context, R.layout.inner_setting_section_header, this)
+        setBackground(android.R.attr.selectableItemBackground)
+        minimumHeight = context.resources.getDimensionPixelSize(R.dimen.item_height)
+
+        inflate(context, R.layout.inner_setting_button, this)
         title = findViewById(R.id.title)
+        description = findViewById(R.id.description)
 
         if (attrs != null) {
-            val a = context.obtainStyledAttributes(attrs, R.styleable.SettingSectionHeader)
-            title.setText(a, R.styleable.SettingSectionHeader_settingSectionHeaderTitle)
+            val a = context.obtainStyledAttributes(attrs, R.styleable.SettingButton)
+            title.setText(a, R.styleable.SettingButton_settingButtonTitle)
+            description.setText(a, R.styleable.SettingButton_settingButtonDescription)
             a.recycle()
         }
+    }
+
+    fun setDescription(desc: CharSequence) {
+        description.text = desc
     }
 }
