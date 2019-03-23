@@ -27,6 +27,8 @@ import kotlin.coroutines.CoroutineContext
 interface MVPView
 
 abstract class MVPPresenter<V : MVPView> : CoroutineScope {
+    protected val tag = javaClass.simpleName
+
     private val job: Job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
