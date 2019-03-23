@@ -9,6 +9,10 @@
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:settingSectionHeaderTitle="@string/settings_about" />
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.appbar.AppBarLayout

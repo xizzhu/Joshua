@@ -50,4 +50,6 @@
     <string name="text_finished_books">Books Finished</string>
     <string name="text_finished_old_testament">Old Testament</string>
     <string name="text_finished_new_testament">New Testament</string>
+
+    <string name="settings_about">About</string>
 </resources>
