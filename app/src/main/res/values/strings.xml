@@ -40,7 +40,6 @@
     <string name="dialog_navigate_to_reading_progress_error">Failed to open reading progress view, retry?</string>
     <string name="dialog_load_reading_progress_error">Failed to load reading progress, retry?</string>
     <string name="dialog_navigate_to_settings_error">Failed to open settings, retry?</string>
-    <string name="dialog_load_settings_error">Failed to load settings, retry?</string>
     <string name="dialog_update_settings_error">Failed to update settings, retry?</string>
 
     <string name="text_share_with">Share with</string>

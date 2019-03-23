@@ -16,6 +16,12 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
 data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean) {
@@ -33,9 +39,16 @@ data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean) {
 }
 
 class SettingsManager(private val settingsRepository: SettingsRepository) {
-    suspend fun readSettings(): Settings = settingsRepository.readSettings()
+    private val currentSettings: BroadcastChannel<Settings> = ConflatedBroadcastChannel()
+
+    init {
+        GlobalScope.launch(Dispatchers.IO) { currentSettings.send(settingsRepository.readSettings()) }
+    }
+
+    fun observeSettings(): ReceiveChannel<Settings> = currentSettings.openSubscription()
 
     suspend fun saveSettings(settings: Settings) {
         settingsRepository.saveSettings(settings)
+        currentSettings.send(settings)
     }
 }

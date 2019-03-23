@@ -86,6 +86,8 @@ class ReadingActivity : BaseSettingsActivity() {
 
         search = findViewById(R.id.search)
         search.setPresenter(searchButtonPresenter)
+
+        observeSettings(readingInteractor)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -102,8 +104,6 @@ class ReadingActivity : BaseSettingsActivity() {
         versePresenter.attachView(verseViewPager)
         verseDetailPresenter.attachView(verseDetailView)
         searchButtonPresenter.attachView(search)
-
-        launch(Dispatchers.Main) { onSettingsLoaded(readingInteractor.loadSettings()) }
     }
 
     override fun onResume() {

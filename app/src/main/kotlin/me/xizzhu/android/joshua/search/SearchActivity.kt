@@ -17,8 +17,6 @@
 package me.xizzhu.android.joshua.search
 
 import android.os.Bundle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbar
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
@@ -58,6 +56,8 @@ class SearchActivity : BaseSettingsActivity() {
         searchResultList.setPresenter(searchResultPresenter)
 
         loadingSpinner = findViewById(R.id.loading_spinner)
+
+        observeSettings(searchInteractor)
     }
 
     override fun onStart() {
@@ -66,8 +66,6 @@ class SearchActivity : BaseSettingsActivity() {
         toolbarPresenter.attachView(toolbar)
         loadingSpinnerPresenter.attachView(loadingSpinner)
         searchResultPresenter.attachView(searchResultList)
-
-        launch(Dispatchers.Main) { onSettingsLoaded(searchInteractor.loadSettings()) }
     }
 
     override fun onStop() {

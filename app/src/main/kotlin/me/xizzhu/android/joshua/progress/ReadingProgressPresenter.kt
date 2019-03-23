@@ -20,14 +20,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
-import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class ReadingProgressPresenter(private val readingProgressInteractor: ReadingProgressInteractor)
     : BaseSettingsPresenter<ReadingProgressView>(readingProgressInteractor) {
     override fun onViewAttached() {
         super.onViewAttached()
-
-        loadSettings()
         loadReadingProgress()
     }
 

@@ -17,6 +17,8 @@
 package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.firstOrNull
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.App
 import me.xizzhu.android.joshua.core.Settings
@@ -29,12 +31,14 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
         private val TAG: String = SettingsPresenter::class.java.simpleName
     }
 
-    private var settings: Settings? = null
-
     override fun onViewAttached() {
         super.onViewAttached()
 
-        loadSettings()
+        launch(Dispatchers.Main) {
+            val currentSettings = settingsManager.observeSettings()
+            receiveChannels.add(currentSettings)
+            currentSettings.consumeEach { view?.onSettingsLoaded(it) }
+        }
         loadVersion()
     }
 
@@ -47,27 +51,10 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
         }
     }
 
-    fun loadSettings() {
-        launch(Dispatchers.Main) {
-            try {
-                onSettingsLoaded(settingsManager.readSettings())
-            } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to load settings")
-                view?.onSettingsLoadFailed()
-            }
-        }
-    }
-
-    private fun onSettingsLoaded(settings: Settings) {
-        this.settings = settings
-        view?.onSettingsLoaded(settings)
-    }
-
     fun saveSettings(settings: Settings) {
         launch(Dispatchers.Main) {
             try {
                 settingsManager.saveSettings(settings)
-                onSettingsLoaded(settings)
             } catch (e: Exception) {
                 Log.e(TAG, e, "Failed to save settings")
                 view?.onSettingsUpdateFailed(settings)
@@ -76,16 +63,22 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     }
 
     fun setKeepScreenOn(keepScreenOn: Boolean) {
-        val settings: Settings = this.settings ?: Settings.DEFAULT
-        if (keepScreenOn != settings.keepScreenOn) {
-            saveSettings(settings.toBuilder().keepScreenOn(keepScreenOn).build())
+        launch(Dispatchers.Main) {
+            val settings: Settings = settingsManager.observeSettings().firstOrNull()
+                    ?: Settings.DEFAULT
+            if (keepScreenOn != settings.keepScreenOn) {
+                saveSettings(settings.toBuilder().keepScreenOn(keepScreenOn).build())
+            }
         }
     }
 
     fun setNightModeOn(nightModeOn: Boolean) {
-        val settings: Settings = this.settings ?: Settings.DEFAULT
-        if (nightModeOn != settings.nightModeOn) {
-            saveSettings(settings.toBuilder().nightModeOn(nightModeOn).build())
+        launch(Dispatchers.Main) {
+            val settings: Settings = settingsManager.observeSettings().firstOrNull()
+                    ?: Settings.DEFAULT
+            if (nightModeOn != settings.nightModeOn) {
+                saveSettings(settings.toBuilder().nightModeOn(nightModeOn).build())
+            }
         }
     }
 }

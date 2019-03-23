@@ -34,13 +34,10 @@ import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
 
-
 interface SettingsView : MVPView {
     fun onVersionLoaded(version: String)
 
     fun onSettingsLoaded(settings: Settings)
-
-    fun onSettingsLoadFailed()
 
     fun onSettingsUpdateFailed(settingsToUpdate: Settings)
 }
@@ -147,13 +144,6 @@ class SettingsActivity : BaseActivity(), SettingsView {
         keepScreenOn.setTextColor(primaryTextColor)
         nightModeOn.setTextColor(primaryTextColor)
         version.setTextColor(primaryTextColor, secondaryTextColor)
-    }
-
-    override fun onSettingsLoadFailed() {
-        DialogHelper.showDialog(this, true, R.string.dialog_load_settings_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.loadSettings()
-                })
     }
 
     override fun onSettingsUpdateFailed(settingsToUpdate: Settings) {

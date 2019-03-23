@@ -18,13 +18,22 @@ package me.xizzhu.android.joshua.utils
 
 import androidx.annotation.CallSuper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.getBackgroundColor
 
 abstract class BaseSettingsActivity : BaseActivity() {
+    protected fun observeSettings(baseSettingsInteractor: BaseSettingsInteractor) {
+        launch(Dispatchers.Main) {
+            val currentSettings = baseSettingsInteractor.observeSettings()
+            receiveChannels.add(currentSettings)
+            currentSettings.consumeEach { onSettingsLoaded(it) }
+        }
+    }
+
     @CallSuper
     open fun onSettingsLoaded(settings: Settings) {
         val rootView = window.decorView
@@ -34,7 +43,7 @@ abstract class BaseSettingsActivity : BaseActivity() {
 }
 
 abstract class BaseSettingsInteractor(private val settingsManager: SettingsManager) {
-    suspend fun loadSettings(): Settings = settingsManager.readSettings()
+    fun observeSettings(): ReceiveChannel<Settings> = settingsManager.observeSettings()
 }
 
 interface BaseSettingsView : MVPView {
@@ -43,14 +52,13 @@ interface BaseSettingsView : MVPView {
 
 abstract class BaseSettingsPresenter<V : BaseSettingsView>(private val baseSettingsInteractor: BaseSettingsInteractor)
     : MVPPresenter<V>() {
-    fun loadSettings() {
+    override fun onViewAttached() {
+        super.onViewAttached()
+
         launch(Dispatchers.Main) {
-            view?.onSettingsLoaded(baseSettingsInteractor.loadSettings())
-            try {
-            } catch (e: Exception) {
-                Log.e(tag, e, "Failed to load settings")
-                view?.onSettingsLoaded(Settings.DEFAULT)
-            }
+            val currentSettings = baseSettingsInteractor.observeSettings()
+            receiveChannels.add(currentSettings)
+            currentSettings.consumeEach { view?.onSettingsLoaded(it) }
         }
     }
 }

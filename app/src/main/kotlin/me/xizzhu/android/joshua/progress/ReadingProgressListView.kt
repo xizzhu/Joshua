@@ -25,7 +25,6 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseSettingsView
-import me.xizzhu.android.joshua.utils.MVPView
 
 interface ReadingProgressView : BaseSettingsView {
     fun onReadingProgressLoaded(readingProgress: ReadingProgressForDisplay)
