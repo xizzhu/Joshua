@@ -39,7 +39,7 @@ class AndroidSettingsStorageTest : BaseSqliteTest() {
     @Test
     fun testReadDefault() {
         runBlocking {
-            val expected = Settings(false)
+            val expected = Settings.DEFAULT
             val actual = androidSettingsStorage.readSettings()
             assertEquals(expected, actual)
         }

@@ -27,7 +27,7 @@ class AndroidSettingsStorage(private val androidDatabase: AndroidDatabase) : Loc
     override suspend fun readSettings(): Settings {
         return withContext(Dispatchers.IO) {
             val values = androidDatabase.metadataDao.read(listOf(
-                    Pair(MetadataDao.KEY_SCREEN_ON, "false")
+                    Pair(MetadataDao.KEY_SCREEN_ON, Settings.DEFAULT.keepScreenOn.toString())
             ))
             return@withContext Settings(values.getValue(MetadataDao.KEY_SCREEN_ON).toBoolean())
         }

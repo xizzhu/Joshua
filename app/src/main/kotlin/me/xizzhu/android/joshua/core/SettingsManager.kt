@@ -20,7 +20,7 @@ import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
 data class Settings(val keepScreenOn: Boolean) {
     companion object {
-        val DEFAULT = Settings(false)
+        val DEFAULT = Settings(true)
     }
 
     data class Builder(var keepScreenOn: Boolean) {
