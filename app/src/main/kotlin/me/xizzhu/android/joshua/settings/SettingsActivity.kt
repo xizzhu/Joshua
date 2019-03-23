@@ -16,6 +16,14 @@
 
 package me.xizzhu.android.joshua.settings
 
+import android.os.Bundle
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.BaseActivity
 
-class SettingsActivity : BaseActivity()
+class SettingsActivity : BaseActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.activity_settings)
+    }
+}
