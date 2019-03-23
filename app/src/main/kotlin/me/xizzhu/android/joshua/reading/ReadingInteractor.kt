@@ -27,22 +27,17 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import android.content.ComponentName
 import android.content.pm.LabeledIntent
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 
 
 class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val navigator: Navigator,
                         private val bibleReadingManager: BibleReadingManager,
                         private val readingProgressManager: ReadingProgressManager,
-                        private val translationManager: TranslationManager) {
+                        private val translationManager: TranslationManager,
+                        settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
     private val verseDetailOpenState: ConflatedBroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =

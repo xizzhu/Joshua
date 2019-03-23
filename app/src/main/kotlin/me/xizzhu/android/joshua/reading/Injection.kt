@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPresenter
 
 @Module
@@ -36,8 +37,10 @@ class ReadingModule {
                                      navigator: Navigator,
                                      bibleReadingManager: BibleReadingManager,
                                      readingProgressManager: ReadingProgressManager,
-                                     translationManager: TranslationManager): ReadingInteractor =
-            ReadingInteractor(readingActivity, navigator, bibleReadingManager, readingProgressManager, translationManager)
+                                     translationManager: TranslationManager,
+                                     settingsManager: SettingsManager): ReadingInteractor =
+            ReadingInteractor(readingActivity, navigator, bibleReadingManager,
+                    readingProgressManager, translationManager, settingsManager)
 
     @Provides
     fun provideReadingDrawerPresenter(readingInteractor: ReadingInteractor): ReadingDrawerPresenter =

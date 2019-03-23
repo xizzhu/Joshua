@@ -18,12 +18,9 @@ package me.xizzhu.android.joshua.reading
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.ViewTreeObserver
 import androidx.appcompat.app.ActionBarDrawerToggle
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.chapter.ChapterListView
@@ -33,10 +30,10 @@ import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewPager
-import me.xizzhu.android.joshua.utils.BaseActivity
+import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
-class ReadingActivity : BaseActivity() {
+class ReadingActivity : BaseSettingsActivity() {
     @Inject
     lateinit var readingInteractor: ReadingInteractor
 
@@ -105,19 +102,17 @@ class ReadingActivity : BaseActivity() {
         versePresenter.attachView(verseViewPager)
         verseDetailPresenter.attachView(verseDetailView)
         searchButtonPresenter.attachView(search)
+
+        launch(Dispatchers.Main) { onSettingsLoaded(readingInteractor.loadSettings()) }
     }
 
     override fun onResume() {
         super.onResume()
-        launch(Dispatchers.Main) {
-            readingInteractor.startTrackingReadingProgress()
-        }
+        launch(Dispatchers.Main) { readingInteractor.startTrackingReadingProgress() }
     }
 
     override fun onPause() {
-        launch(Dispatchers.Unconfined) {
-            readingInteractor.stopTrackingReadingProgress()
-        }
+        launch(Dispatchers.Unconfined) { readingInteractor.stopTrackingReadingProgress() }
         super.onPause()
     }
 

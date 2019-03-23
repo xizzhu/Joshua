@@ -17,13 +17,18 @@
 package me.xizzhu.android.joshua.translations
 
 import android.os.Bundle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
-import me.xizzhu.android.joshua.utils.BaseActivity
+import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
-class TranslationManagementActivity : BaseActivity() {
+class TranslationManagementActivity : BaseSettingsActivity() {
+    @Inject
+    lateinit var translationInteractor: TranslationInteractor
+
     @Inject
     lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
@@ -48,6 +53,8 @@ class TranslationManagementActivity : BaseActivity() {
 
         loadingSpinnerPresenter.attachView(loadingSpinner)
         translationPresenter.attachView(translationListView)
+
+        launch(Dispatchers.Main) { onSettingsLoaded(translationInteractor.loadSettings()) }
     }
 
     override fun onStop() {

@@ -21,6 +21,7 @@ import dagger.Provides
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.ActivityScope
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 
 @Module
@@ -29,8 +30,10 @@ class TranslationManagementModule {
     @ActivityScope
     fun provideTranslationViewController(translationManagementActivity: TranslationManagementActivity,
                                          bibleReadingManager: BibleReadingManager,
-                                         translationManager: TranslationManager): TranslationInteractor =
-            TranslationInteractor(translationManagementActivity, bibleReadingManager, translationManager)
+                                         translationManager: TranslationManager,
+                                         settingsManager: SettingsManager): TranslationInteractor =
+            TranslationInteractor(translationManagementActivity, bibleReadingManager,
+                    translationManager, settingsManager)
 
     @Provides
     fun provideLoadingSpinnerPresenter(translationInteractor: TranslationInteractor): LoadingSpinnerPresenter =

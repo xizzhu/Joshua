@@ -23,9 +23,12 @@ import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.ReadingProgressManager
+import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 
 class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager,
-                                private val bibleReadingManager: BibleReadingManager) {
+                                private val bibleReadingManager: BibleReadingManager,
+                                settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
     private val readingProgressLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
 
     fun observeReadingProgressLoadingState(): ReceiveChannel<Boolean> =

@@ -17,13 +17,18 @@
 package me.xizzhu.android.joshua.progress
 
 import android.os.Bundle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
-import me.xizzhu.android.joshua.utils.BaseActivity
+import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
-class ReadingProgressActivity : BaseActivity() {
+class ReadingProgressActivity : BaseSettingsActivity() {
+    @Inject
+    lateinit var readingProgressInteractor: ReadingProgressInteractor
+
     @Inject
     lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
@@ -48,6 +53,8 @@ class ReadingProgressActivity : BaseActivity() {
 
         loadingSpinnerPresenter.attachView(loadingSpinner)
         readingProgressPresenter.attachView(readingProgressListView)
+
+        launch(Dispatchers.Main) { onSettingsLoaded(readingProgressInteractor.loadSettings()) }
     }
 
     override fun onStop() {
