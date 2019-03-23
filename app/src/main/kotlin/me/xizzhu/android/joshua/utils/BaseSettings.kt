@@ -19,11 +19,14 @@ package me.xizzhu.android.joshua.utils
 import androidx.annotation.CallSuper
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.ui.getBackgroundColor
 
 abstract class BaseSettingsActivity : BaseActivity() {
     @CallSuper
     open fun onSettingsLoaded(settings: Settings) {
-        window.decorView.keepScreenOn = settings.keepScreenOn
+        val rootView = window.decorView
+        rootView.keepScreenOn = settings.keepScreenOn
+        // rootView.setBackgroundColor(settings.getBackgroundColor())
     }
 }
 

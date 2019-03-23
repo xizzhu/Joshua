@@ -20,6 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.setBackground
 import me.xizzhu.android.joshua.ui.setText
@@ -62,5 +63,10 @@ class SettingButton : FrameLayout {
 
     fun setDescription(desc: CharSequence) {
         description.text = desc
+    }
+
+    fun setTextColor(@ColorInt titleColor: Int, @ColorInt descriptionColor: Int) {
+        title.setTextColor(titleColor)
+        description.setTextColor(descriptionColor)
     }
 }
