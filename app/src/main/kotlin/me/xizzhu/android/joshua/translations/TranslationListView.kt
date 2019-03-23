@@ -23,13 +23,14 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.ui.fadeIn
-import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.joshua.utils.BaseSettingsView
 
-interface TranslationView : MVPView {
+interface TranslationView : BaseSettingsView {
     fun onCurrentTranslationUpdated(currentTranslation: String)
 
     fun onCurrentTranslationUpdateFailed(translationShortName: String)
@@ -99,6 +100,10 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
                         presenter.removeTranslation(translationInfo)
                     })
         }
+    }
+
+    override fun onSettingsLoaded(settings: Settings) {
+        adapter.setSettings(settings)
     }
 
     override fun onCurrentTranslationUpdated(currentTranslation: String) {

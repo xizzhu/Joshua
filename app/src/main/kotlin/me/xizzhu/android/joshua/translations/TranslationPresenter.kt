@@ -24,7 +24,7 @@ import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.logger.Log
-import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import java.util.*
 import kotlin.Comparator
 
@@ -52,11 +52,7 @@ class TranslationInfoComparator : Comparator<TranslationInfo> {
     }
 }
 
-class TranslationPresenter(private val translationInteractor: TranslationInteractor) : MVPPresenter<TranslationView>() {
-    companion object {
-        private val TAG: String = TranslationPresenter::class.java.simpleName
-    }
-
+class TranslationPresenter(private val translationInteractor: TranslationInteractor) : BaseSettingsPresenter<TranslationView>(translationInteractor) {
     private val translationComparator = TranslationInfoComparator()
 
     override fun onViewAttached() {
@@ -115,7 +111,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to download translation")
+                Log.e(tag, e, "Failed to download translation")
                 view?.onTranslationDownloadFailed(translationToDelete)
             }
         }
@@ -129,7 +125,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 translationInteractor.removeTranslation(translationToRemove)
                 view?.onTranslationDeleted()
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to remove translation")
+                Log.e(tag, e, "Failed to remove translation")
                 view?.onTranslationDeleteFailed(translationToRemove)
             }
         }
@@ -141,7 +137,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 translationInteractor.saveCurrentTranslation(translationShortName)
                 translationInteractor.finish()
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to select translation and close translation management activity")
+                Log.e(tag, e, "Failed to select translation and close translation management activity")
                 view?.onCurrentTranslationUpdateFailed(translationShortName)
             }
         }
