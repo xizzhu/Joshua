@@ -12,7 +12,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingTop="@dimen/padding_small">
 
             <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
                 android:layout_width="match_parent"
