@@ -45,6 +45,8 @@ import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingModule
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.search.SearchModule
+import me.xizzhu.android.joshua.settings.SettingsActivity
+import me.xizzhu.android.joshua.settings.SettingsModule
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementModule
 import okhttp3.OkHttpClient
@@ -152,6 +154,10 @@ abstract class ActivityModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = [(SearchModule::class)])
     abstract fun contributeSearchActivity(): SearchActivity
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [(SettingsModule::class)])
+    abstract fun contributeSettingsActivity(): SettingsActivity
 
     @ActivityScope
     @ContributesAndroidInjector(modules = [(TranslationManagementModule::class)])

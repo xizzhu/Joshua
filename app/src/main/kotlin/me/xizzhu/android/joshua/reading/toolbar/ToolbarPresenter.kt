@@ -102,6 +102,15 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         }
     }
 
+    fun openSettings() {
+        try {
+            readingInteractor.openSettings()
+        } catch (e: Exception) {
+            Log.e(TAG, e, "Failed to open settings activity")
+            view?.onFailedToNavigateToSettings()
+        }
+    }
+
     fun finish() {
         readingInteractor.finish()
     }

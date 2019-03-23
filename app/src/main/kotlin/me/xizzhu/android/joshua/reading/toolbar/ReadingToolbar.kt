@@ -49,6 +49,8 @@ interface ToolbarView : MVPView {
     fun onFailedToNavigateToTranslationManagement()
 
     fun onFailedToNavigateToReadingProgress()
+
+    fun onFailedToNavigateToSettings()
 }
 
 class ReadingToolbar : Toolbar, ToolbarView {
@@ -92,6 +94,10 @@ class ReadingToolbar : Toolbar, ToolbarView {
         when (menuItem.itemId) {
             R.id.action_reading_progress -> {
                 presenter.openReadingProgress()
+                return@OnMenuItemClickListener true
+            }
+            R.id.action_settings -> {
+                presenter.openSettings()
                 return@OnMenuItemClickListener true
             }
             else -> return@OnMenuItemClickListener false
@@ -206,6 +212,13 @@ class ReadingToolbar : Toolbar, ToolbarView {
         DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_reading_progress_error,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.openReadingProgress()
+                })
+    }
+
+    override fun onFailedToNavigateToSettings() {
+        DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_settings_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.openSettings()
                 })
     }
 }

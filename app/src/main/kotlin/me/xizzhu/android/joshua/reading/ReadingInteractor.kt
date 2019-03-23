@@ -112,6 +112,10 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         navigator.navigate(readingActivity, Navigator.SCREEN_READING_PROGRESS)
     }
 
+    fun openSettings() {
+        navigator.navigate(readingActivity, Navigator.SCREEN_SETTINGS)
+    }
+
     fun finish() {
         readingActivity.finish()
     }
