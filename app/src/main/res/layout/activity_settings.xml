@@ -17,6 +17,21 @@
             <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:settingSectionHeaderTitle="@string/settings_header_display" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/keep_screen_on"
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/item_height"
+                android:paddingStart="@dimen/padding"
+                android:paddingEnd="@dimen/padding"
+                android:text="@string/settings_title_keep_screen_on" />
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 app:settingSectionHeaderTitle="@string/settings_header_about" />
 
             <me.xizzhu.android.joshua.settings.widgets.SettingButton

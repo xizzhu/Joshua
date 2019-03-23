@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.settings
 
 import android.os.Bundle
+import androidx.appcompat.widget.SwitchCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.utils.BaseActivity
@@ -31,6 +32,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
     @Inject
     lateinit var presenter: SettingsPresenter
 
+    private lateinit var keepScreenOn: SwitchCompat
     private lateinit var version: SettingButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +40,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
         setContentView(R.layout.activity_settings)
         version = findViewById(R.id.version)
+        keepScreenOn = findViewById(R.id.keep_screen_on)
     }
 
     override fun onStart() {
