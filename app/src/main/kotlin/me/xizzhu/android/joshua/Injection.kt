@@ -23,19 +23,19 @@ import dagger.Provides
 import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.ReadingProgress
-import me.xizzhu.android.joshua.core.ReadingProgressManager
-import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
+import me.xizzhu.android.joshua.core.repository.SettingsRepository
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingProgressStorage
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
+import me.xizzhu.android.joshua.core.repository.local.LocalSettingsStorage
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingProgressStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidSettingsStorage
 import me.xizzhu.android.joshua.core.repository.local.android.AndroidTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
@@ -81,6 +81,11 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
+    fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager =
+            SettingsManager(settingsRepository)
+
+    @Provides
+    @Singleton
     fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
             TranslationManager(translationRepository)
 }
@@ -100,6 +105,11 @@ class RepositoryModule {
     @Singleton
     fun provideLocalReadingStorage(androidDatabase: AndroidDatabase): LocalReadingStorage =
             AndroidReadingStorage(androidDatabase)
+
+    @Provides
+    @Singleton
+    fun provideLocalSettingsStorage(androidDatabase: AndroidDatabase): LocalSettingsStorage =
+            AndroidSettingsStorage(androidDatabase)
 
     @Provides
     @Singleton
@@ -133,6 +143,11 @@ class RepositoryModule {
     @Singleton
     fun provideReadingProgressRepository(localReadingProgressStorage: LocalReadingProgressStorage): ReadingProgressRepository =
             ReadingProgressRepository(localReadingProgressStorage)
+
+    @Provides
+    @Singleton
+    fun provideSettingsRepository(localSettingsStorage: LocalSettingsStorage): SettingsRepository =
+            SettingsRepository(localSettingsStorage)
 
     @Provides
     @Singleton

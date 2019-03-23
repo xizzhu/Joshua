@@ -16,16 +16,25 @@
 
 package me.xizzhu.android.joshua.settings
 
+import android.content.DialogInterface
 import android.os.Bundle
 import androidx.appcompat.widget.SwitchCompat
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
 
 interface SettingsView : MVPView {
     fun onVersionLoaded(version: String)
+
+    fun onSettingsLoaded(settings: Settings)
+
+    fun onSettingsLoadFailed()
+
+    fun onSettingsUpdateFailed(settingsToUpdate: Settings)
 }
 
 class SettingsActivity : BaseActivity(), SettingsView {
@@ -41,6 +50,9 @@ class SettingsActivity : BaseActivity(), SettingsView {
         setContentView(R.layout.activity_settings)
         version = findViewById(R.id.version)
         keepScreenOn = findViewById(R.id.keep_screen_on)
+        keepScreenOn.setOnCheckedChangeListener { _, isChecked ->
+            presenter.setKeepScreenOn(isChecked)
+        }
     }
 
     override fun onStart() {
@@ -55,5 +67,24 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
     override fun onVersionLoaded(version: String) {
         this.version.setDescription(version)
+    }
+
+    override fun onSettingsLoaded(settings: Settings) {
+        keepScreenOn.isChecked = settings.keepScreenOn
+        window.decorView.keepScreenOn = settings.keepScreenOn
+    }
+
+    override fun onSettingsLoadFailed() {
+        DialogHelper.showDialog(this, true, R.string.dialog_load_settings_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.loadSettings()
+                })
+    }
+
+    override fun onSettingsUpdateFailed(settingsToUpdate: Settings) {
+        DialogHelper.showDialog(this, true, R.string.dialog_update_settings_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.saveSettings(settingsToUpdate)
+                })
     }
 }

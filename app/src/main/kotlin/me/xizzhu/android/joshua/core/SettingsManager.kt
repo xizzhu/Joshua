@@ -19,10 +19,16 @@ package me.xizzhu.android.joshua.core
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
 data class Settings(val keepScreenOn: Boolean) {
+    companion object {
+        val DEFAULT = Settings(false)
+    }
+
     data class Builder(var keepScreenOn: Boolean) {
         fun keepScreenOn(keepScreenOn: Boolean) = apply { this.keepScreenOn = keepScreenOn }
         fun build() = Settings(keepScreenOn)
     }
+
+    fun toBuilder(): Builder = Builder(keepScreenOn)
 }
 
 class SettingsManager(private val settingsRepository: SettingsRepository) {

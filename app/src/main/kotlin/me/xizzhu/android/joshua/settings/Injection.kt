@@ -19,9 +19,11 @@ package me.xizzhu.android.joshua.settings
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.App
+import me.xizzhu.android.joshua.core.SettingsManager
 
 @Module
 class SettingsModule {
     @Provides
-    fun provideSettingsPresenter(app: App): SettingsPresenter = SettingsPresenter(app)
+    fun provideSettingsPresenter(app: App, settingsManager: SettingsManager): SettingsPresenter =
+            SettingsPresenter(app, settingsManager)
 }
