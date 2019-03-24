@@ -45,15 +45,15 @@ object Versions {
     const val dagger = "2.21"
 
     const val retrofit = "2.5.0"
-    const val okhttp = "3.13.1"
+    const val okhttp = "3.14.0"
     const val moshi = "1.8.0"
     const val okio = "2.2.2"
 
-    const val stetho = "1.5.0"
+    const val stetho = "1.5.1"
 
     const val testRunner = "1.1.0"
     const val testRules = "1.1.1"
-    const val mockito = "2.25.0"
+    const val mockito = "2.25.1"
 }
 
 object Dependencies {
