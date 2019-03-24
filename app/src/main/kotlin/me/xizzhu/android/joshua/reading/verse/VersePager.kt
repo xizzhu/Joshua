@@ -103,7 +103,7 @@ class VerseViewPager : ViewPager, VerseView {
         this.presenter = presenter
     }
 
-    override fun onSettingsLoaded(settings: Settings) {
+    override fun onSettingsUpdated(settings: Settings) {
         this.settings = settings
         adapter.settings = settings
     }

@@ -56,10 +56,10 @@ class BaseSettingsPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() {
         runBlocking {
-            Mockito.verify(baseSettingsView, Mockito.never()).onSettingsLoaded(any())
+            Mockito.verify(baseSettingsView, Mockito.never()).onSettingsUpdated(any())
 
             currentSettings.send(Settings.DEFAULT)
-            Mockito.verify(baseSettingsView, Mockito.times(1)).onSettingsLoaded(Settings.DEFAULT)
+            Mockito.verify(baseSettingsView, Mockito.times(1)).onSettingsUpdated(Settings.DEFAULT)
         }
     }
 }

@@ -30,12 +30,12 @@ abstract class BaseSettingsActivity : BaseActivity() {
         launch(Dispatchers.Main) {
             val currentSettings = baseSettingsInteractor.observeSettings()
             receiveChannels.add(currentSettings)
-            currentSettings.consumeEach { onSettingsLoaded(it) }
+            currentSettings.consumeEach { onSettingsUpdated(it) }
         }
     }
 
     @CallSuper
-    open fun onSettingsLoaded(settings: Settings) {
+    open fun onSettingsUpdated(settings: Settings) {
         val rootView = window.decorView
         rootView.keepScreenOn = settings.keepScreenOn
         rootView.setBackgroundColor(settings.getBackgroundColor())
@@ -47,7 +47,7 @@ abstract class BaseSettingsInteractor(private val settingsManager: SettingsManag
 }
 
 interface BaseSettingsView : MVPView {
-    fun onSettingsLoaded(settings: Settings)
+    fun onSettingsUpdated(settings: Settings)
 }
 
 abstract class BaseSettingsPresenter<V : BaseSettingsView>(private val baseSettingsInteractor: BaseSettingsInteractor)
@@ -58,7 +58,7 @@ abstract class BaseSettingsPresenter<V : BaseSettingsView>(private val baseSetti
         launch(Dispatchers.Main) {
             val currentSettings = baseSettingsInteractor.observeSettings()
             receiveChannels.add(currentSettings)
-            currentSettings.consumeEach { view?.onSettingsLoaded(it) }
+            currentSettings.consumeEach { view?.onSettingsUpdated(it) }
         }
     }
 }

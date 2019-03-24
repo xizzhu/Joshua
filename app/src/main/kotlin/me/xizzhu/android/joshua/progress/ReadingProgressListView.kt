@@ -53,7 +53,7 @@ class ReadingProgressListView : RecyclerView, ReadingProgressView {
         this.presenter = presenter
     }
 
-    override fun onSettingsLoaded(settings: Settings) {
+    override fun onSettingsUpdated(settings: Settings) {
         adapter.setSettings(settings)
     }
 

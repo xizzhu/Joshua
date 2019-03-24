@@ -60,10 +60,10 @@ class SettingsPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() {
         runBlocking {
-            verify(settingsView, never()).onSettingsLoaded(any())
+            verify(settingsView, never()).onSettingsUpdated(any())
 
             currentSettings.send(Settings.DEFAULT)
-            verify(settingsView, times(1)).onSettingsLoaded(Settings.DEFAULT)
+            verify(settingsView, times(1)).onSettingsUpdated(Settings.DEFAULT)
         }
     }
 

@@ -71,7 +71,7 @@ class SearchResultListView : RecyclerView, SearchResultView {
         this.presenter = presenter
     }
 
-    override fun onSettingsLoaded(settings: Settings) {
+    override fun onSettingsUpdated(settings: Settings) {
         adapter.setSettings(settings)
     }
 

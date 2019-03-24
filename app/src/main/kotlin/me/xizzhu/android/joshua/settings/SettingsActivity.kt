@@ -37,7 +37,7 @@ import javax.inject.Inject
 interface SettingsView : MVPView {
     fun onVersionLoaded(version: String)
 
-    fun onSettingsLoaded(settings: Settings)
+    fun onSettingsUpdated(settings: Settings)
 
     fun onSettingsUpdateFailed(settingsToUpdate: Settings)
 }
@@ -82,7 +82,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
         this.version.setDescription(version)
     }
 
-    override fun onSettingsLoaded(settings: Settings) {
+    override fun onSettingsUpdated(settings: Settings) {
         window.decorView.keepScreenOn = settings.keepScreenOn
         if (shouldAnimateColor) {
             val fromBackgroundColor: Int
