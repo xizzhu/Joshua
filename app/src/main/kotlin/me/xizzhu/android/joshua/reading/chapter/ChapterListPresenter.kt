@@ -26,10 +26,6 @@ import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ChapterView>() {
-    companion object {
-        private val TAG: String = ChapterListPresenter::class.java.simpleName
-    }
-
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -52,7 +48,7 @@ class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : M
             try {
                 readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to select chapter")
+                Log.e(tag, e, "Failed to select chapter")
                 view?.onChapterSelectionFailed(bookIndex, chapterIndex)
             }
         }

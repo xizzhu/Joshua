@@ -21,6 +21,7 @@ import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -39,12 +40,14 @@ class SearchInteractorTest : BaseUnitTest() {
     private lateinit var navigator: Navigator
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
+    @Mock
+    private lateinit var settingsManager: SettingsManager
     private lateinit var searchInteractor: SearchInteractor
 
     @Before
     override fun setup() {
         super.setup()
-        searchInteractor = SearchInteractor(searchActivity, navigator, bibleReadingManager)
+        searchInteractor = SearchInteractor(searchActivity, navigator, bibleReadingManager, settingsManager)
     }
 
     @Test

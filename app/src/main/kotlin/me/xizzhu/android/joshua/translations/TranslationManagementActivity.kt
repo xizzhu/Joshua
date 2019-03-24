@@ -20,10 +20,13 @@ import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
-import me.xizzhu.android.joshua.utils.BaseActivity
+import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
-class TranslationManagementActivity : BaseActivity() {
+class TranslationManagementActivity : BaseSettingsActivity() {
+    @Inject
+    lateinit var translationInteractor: TranslationInteractor
+
     @Inject
     lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
@@ -41,6 +44,8 @@ class TranslationManagementActivity : BaseActivity() {
 
         translationListView = findViewById(R.id.translation_list)
         translationListView.setPresenter(translationPresenter)
+
+        observeSettings(translationInteractor)
     }
 
     override fun onStart() {

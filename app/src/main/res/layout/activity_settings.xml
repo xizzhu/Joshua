@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/padding_small">
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingSectionHeaderTitle="@string/settings_header_display" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/keep_screen_on"
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/item_height"
+                android:paddingStart="@dimen/padding"
+                android:paddingEnd="@dimen/padding"
+                android:text="@string/settings_title_keep_screen_on" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/night_mode_on"
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/item_height"
+                android:paddingStart="@dimen/padding"
+                android:paddingEnd="@dimen/padding"
+                android:text="@string/settings_title_night_mode_on" />
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingSectionHeaderTitle="@string/settings_header_about" />
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingButton
+                android:id="@+id/version"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingButtonTitle="@string/settings_title_version" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:title="@string/title_settings" />
+    </com.google.android.material.appbar.AppBarLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

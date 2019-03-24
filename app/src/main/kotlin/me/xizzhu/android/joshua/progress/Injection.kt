@@ -21,6 +21,7 @@ import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgressManager
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 
 @Module
@@ -28,8 +29,9 @@ class ReadingProgressModule {
     @Provides
     @ActivityScope
     fun provideReadingProgressInteractor(readingProgressManager: ReadingProgressManager,
-                                         bibleReadingManager: BibleReadingManager): ReadingProgressInteractor =
-            ReadingProgressInteractor(readingProgressManager, bibleReadingManager)
+                                         bibleReadingManager: BibleReadingManager,
+                                         settingsManager: SettingsManager): ReadingProgressInteractor =
+            ReadingProgressInteractor(readingProgressManager, bibleReadingManager, settingsManager)
 
     @Provides
     fun provideLoadingSpinnerPresenter(readingProgressInteractor: ReadingProgressInteractor): LoadingSpinnerPresenter =

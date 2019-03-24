@@ -138,4 +138,32 @@ class ToolbarPresenterTest : BaseUnitTest() {
         toolbarPresenter.openTranslationManagement()
         verify(toolbarView, times(1)).onFailedToNavigateToTranslationManagement()
     }
+
+    @Test
+    fun testOpenReadingProgress() {
+        toolbarPresenter.openReadingProgress()
+        verify(toolbarView, never()).onFailedToNavigateToReadingProgress()
+    }
+
+    @Test
+    fun testOpenReadingProgressWithException() {
+        `when`(readingInteractor.openReadingProgress()).thenThrow(RuntimeException("Random exception"))
+
+        toolbarPresenter.openReadingProgress()
+        verify(toolbarView, times(1)).onFailedToNavigateToReadingProgress()
+    }
+
+    @Test
+    fun testOpenSettings() {
+        toolbarPresenter.openSettings()
+        verify(toolbarView, never()).onFailedToNavigateToSettings()
+    }
+
+    @Test
+    fun testOpenSettingsWithException() {
+        `when`(readingInteractor.openSettings()).thenThrow(RuntimeException("Random exception"))
+
+        toolbarPresenter.openSettings()
+        verify(toolbarView, times(1)).onFailedToNavigateToSettings()
+    }
 }

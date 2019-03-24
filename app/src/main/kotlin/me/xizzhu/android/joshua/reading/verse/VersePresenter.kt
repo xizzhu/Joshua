@@ -29,13 +29,10 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
-import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
-class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<VerseView>() {
-    companion object {
-        private val TAG: String = VersePresenter::class.java.simpleName
-    }
-
+class VersePresenter(private val readingInteractor: ReadingInteractor)
+    : BaseSettingsPresenter<VerseView>(readingInteractor) {
     @VisibleForTesting
     val selectedVerses: HashSet<Verse> = HashSet()
     private var actionMode: ActionMode? = null
@@ -115,7 +112,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
             try {
                 readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to update chapter selection")
+                Log.e(tag, e, "Failed to update chapter selection")
                 view?.onChapterSelectionFailed(bookIndex, chapterIndex)
             }
         }
@@ -126,7 +123,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
             try {
                 readingInteractor.saveCurrentVerseIndex(verseIndex)
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to save current verse")
+                Log.e(tag, e, "Failed to save current verse")
             }
         }
     }
@@ -142,7 +139,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor) : MVPPres
                 val totalVerseCount = verses.size
                 view?.onVersesLoaded(bookIndex, chapterIndex, verses.map { VerseForReading(it, totalVerseCount) })
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to load verses")
+                Log.e(tag, e, "Failed to load verses")
                 view?.onVersesLoadFailed(bookIndex, chapterIndex)
             }
         }

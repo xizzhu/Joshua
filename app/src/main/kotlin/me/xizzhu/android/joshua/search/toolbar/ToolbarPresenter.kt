@@ -24,10 +24,6 @@ import me.xizzhu.android.joshua.utils.MVPPresenter
 import java.lang.Exception
 
 class ToolbarPresenter(private val searchInteractor: SearchInteractor) : MVPPresenter<ToolbarView>() {
-    companion object {
-        private val TAG: String = ToolbarPresenter::class.java.simpleName
-    }
-
     fun search(query: String): Boolean {
         if (query.isEmpty()) {
             return false
@@ -36,7 +32,7 @@ class ToolbarPresenter(private val searchInteractor: SearchInteractor) : MVPPres
             try {
                 searchInteractor.search(query)
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to search Bible verses")
+                Log.e(tag, e, "Failed to search Bible verses")
                 view?.onError(query)
             }
         }

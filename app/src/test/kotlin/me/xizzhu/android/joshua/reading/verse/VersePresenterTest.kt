@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.verse
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -38,6 +39,7 @@ class VersePresenterTest : BaseUnitTest() {
     private lateinit var verseView: VerseView
 
     private lateinit var versePresenter: VersePresenter
+    private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
     private lateinit var currentTranslationChannel: ConflatedBroadcastChannel<String>
     private lateinit var currentVerseIndexChannel: ConflatedBroadcastChannel<VerseIndex>
     private lateinit var parallelTranslationsChannel: ConflatedBroadcastChannel<List<String>>
@@ -45,6 +47,9 @@ class VersePresenterTest : BaseUnitTest() {
     @Before
     override fun setup() {
         super.setup()
+
+        settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+        `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
         currentTranslationChannel = ConflatedBroadcastChannel("")
         `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }

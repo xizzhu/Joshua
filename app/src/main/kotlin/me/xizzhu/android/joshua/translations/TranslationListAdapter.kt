@@ -17,19 +17,32 @@
 package me.xizzhu.android.joshua.translations
 
 import android.content.Context
+import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.getSecondaryTextColor
 import java.util.ArrayList
 
-private class AvailableTranslationTitleViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_available_translation_title, parent, false))
+private class AvailableTranslationTitleViewHolder(inflater: LayoutInflater, parent: ViewGroup,
+                                                  resources: Resources, settings: Settings)
+    : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_available_translation_title, parent, false)) {
+    private val title: TextView = itemView.findViewById(R.id.title)
 
-private class TranslationInfoViewHolder(private val listener: TranslationListAdapter.Listener, inflater: LayoutInflater, parent: ViewGroup)
+    init {
+        title.setTextColor(settings.getSecondaryTextColor(resources))
+    }
+}
+
+private class TranslationInfoViewHolder(private val listener: TranslationListAdapter.Listener,
+                                        inflater: LayoutInflater, parent: ViewGroup,
+                                        resources: Resources, settings: Settings)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_translation, parent, false)),
         View.OnClickListener, View.OnLongClickListener {
     private val textView = itemView as TextView
@@ -38,6 +51,8 @@ private class TranslationInfoViewHolder(private val listener: TranslationListAda
     init {
         itemView.setOnClickListener(this)
         itemView.setOnLongClickListener(this)
+
+        textView.setTextColor(settings.getPrimaryTextColor(resources))
     }
 
     fun bind(translationInfo: TranslationInfo, currentTranslation: Boolean) {
@@ -72,24 +87,41 @@ class TranslationListAdapter(context: Context, private val listener: Listener) :
         fun onTranslationLongClicked(translationInfo: TranslationInfo)
     }
 
+    private val resources = context.resources
     private val inflater = LayoutInflater.from(context)
 
     private val downloadedTranslations = ArrayList<TranslationInfo>()
     private val availableTranslations = ArrayList<TranslationInfo>()
     private var currentTranslation: String = ""
+    private var settings: Settings? = null
+
+    fun setTranslations(downloadedTranslations: List<TranslationInfo>,
+                        availableTranslations: List<TranslationInfo>, currentTranslation: String) {
+        this.downloadedTranslations.clear()
+        this.downloadedTranslations.addAll(downloadedTranslations)
+        this.availableTranslations.clear()
+        this.availableTranslations.addAll(availableTranslations)
+        this.currentTranslation = currentTranslation
+        notifyDataSetChanged()
+    }
+
+    fun setSettings(settings: Settings) {
+        this.settings = settings
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
             when (viewType) {
-                ITEM_AVAILABLE_TRANSLATIONS_TITLE -> AvailableTranslationTitleViewHolder(inflater, parent)
-                ITEM_TRANSLATION_INFO -> TranslationInfoViewHolder(listener, inflater, parent)
+                ITEM_AVAILABLE_TRANSLATIONS_TITLE -> AvailableTranslationTitleViewHolder(inflater, parent, resources, settings!!)
+                ITEM_TRANSLATION_INFO -> TranslationInfoViewHolder(listener, inflater, parent, resources, settings!!)
                 else -> throw IllegalArgumentException("Unsupported view type: $viewType")
             }
 
     override fun getItemCount(): Int =
-            if (availableTranslations.size == 0) {
-                downloadedTranslations.size
-            } else {
-                downloadedTranslations.size + 1 + availableTranslations.size
+            when {
+                settings == null -> 0
+                availableTranslations.size == 0 -> downloadedTranslations.size
+                else -> downloadedTranslations.size + 1 + availableTranslations.size
             }
 
     override fun getItemViewType(position: Int): Int =
@@ -113,15 +145,5 @@ class TranslationListAdapter(context: Context, private val listener: Listener) :
         if (index >= 0) {
             (holder as TranslationInfoViewHolder).bind(availableTranslations[index], false)
         }
-    }
-
-    fun setTranslations(downloadedTranslations: List<TranslationInfo>,
-                        availableTranslations: List<TranslationInfo>, currentTranslation: String) {
-        this.downloadedTranslations.clear()
-        this.downloadedTranslations.addAll(downloadedTranslations)
-        this.availableTranslations.clear()
-        this.availableTranslations.addAll(availableTranslations)
-        this.currentTranslation = currentTranslation
-        notifyDataSetChanged()
     }
 }

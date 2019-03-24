@@ -28,15 +28,11 @@ import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
 
 class SearchButtonPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<SearchButtonView>() {
-    companion object {
-        private val TAG: String = SearchButtonPresenter::class.java.simpleName
-    }
-
     fun openSearch() {
         try {
             readingInteractor.openSearch()
         } catch (e: Exception) {
-            Log.e(TAG, e, "Failed to open search activity")
+            Log.e(tag, e, "Failed to open search activity")
             view?.onFailedToNavigateToSearch()
         }
     }

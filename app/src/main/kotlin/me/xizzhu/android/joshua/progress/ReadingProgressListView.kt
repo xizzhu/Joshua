@@ -22,10 +22,11 @@ import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.joshua.utils.BaseSettingsView
 
-interface ReadingProgressView : MVPView {
+interface ReadingProgressView : BaseSettingsView {
     fun onReadingProgressLoaded(readingProgress: ReadingProgressForDisplay)
 
     fun onReadingProgressLoadFailed()
@@ -52,8 +53,12 @@ class ReadingProgressListView : RecyclerView, ReadingProgressView {
         this.presenter = presenter
     }
 
+    override fun onSettingsUpdated(settings: Settings) {
+        adapter.setSettings(settings)
+    }
+
     override fun onReadingProgressLoaded(readingProgress: ReadingProgressForDisplay) {
-        adapter.setData(readingProgress)
+        adapter.setReadingProgress(readingProgress)
     }
 
     override fun onReadingProgressLoadFailed() {

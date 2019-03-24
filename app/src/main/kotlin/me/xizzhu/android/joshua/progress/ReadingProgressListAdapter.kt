@@ -23,6 +23,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.getSecondaryTextColor
 
 class ReadingProgressListAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
@@ -34,20 +37,31 @@ class ReadingProgressListAdapter(context: Context) : RecyclerView.Adapter<Recycl
     private val resources = context.resources
 
     private var readingProgress: ReadingProgressForDisplay? = null
+    private var settings: Settings? = null
 
-    fun setData(readingProgress: ReadingProgressForDisplay) {
+    fun setReadingProgress(readingProgress: ReadingProgressForDisplay) {
         this.readingProgress = readingProgress
         notifyDataSetChanged()
     }
 
-    override fun getItemCount(): Int = readingProgress?.bookReadingStatus?.size?.plus(1) ?: 0
+    fun setSettings(settings: Settings) {
+        this.settings = settings
+        notifyDataSetChanged()
+    }
+
+    override fun getItemCount(): Int =
+            if (readingProgress != null && settings != null) {
+                readingProgress!!.bookReadingStatus.size + 1
+            } else {
+                0
+            }
 
     override fun getItemViewType(position: Int) = if (position == 0) VIEW_TYPE_HEADER else VIEW_TYPE_ITEM
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
             when (viewType) {
-                VIEW_TYPE_HEADER -> ReadingProgressHeaderViewHolder(inflater, parent, resources)
-                VIEW_TYPE_ITEM -> ReadingProgressItemViewHolder(inflater, parent)
+                VIEW_TYPE_HEADER -> ReadingProgressHeaderViewHolder(inflater, parent, resources, settings!!)
+                VIEW_TYPE_ITEM -> ReadingProgressItemViewHolder(inflater, parent, resources, settings!!)
                 else -> throw IllegalArgumentException("Unsupported view type: $viewType")
             }
 
@@ -60,13 +74,35 @@ class ReadingProgressListAdapter(context: Context) : RecyclerView.Adapter<Recycl
     }
 }
 
-private class ReadingProgressHeaderViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val resources: Resources)
+private class ReadingProgressHeaderViewHolder(inflater: LayoutInflater, parent: ViewGroup,
+                                              private val resources: Resources, settings: Settings)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_reading_progress_header, parent, false)) {
+    private val continuousReadingDaysTitle: TextView = itemView.findViewById(R.id.continuous_reading_days_title)
     private val continuousReadingDays: TextView = itemView.findViewById(R.id.continuous_reading_days_value)
+    private val chaptersReadTitle: TextView = itemView.findViewById(R.id.chapters_read_title)
     private val chaptersRead: TextView = itemView.findViewById(R.id.chapters_read_value)
+    private val finishedBooksTitle: TextView = itemView.findViewById(R.id.finished_books_title)
     private val finishedBooks: TextView = itemView.findViewById(R.id.finished_books_value)
+    private val finishedOldTestamentTitle: TextView = itemView.findViewById(R.id.finished_old_testament_title)
     private val finishedOldTestament: TextView = itemView.findViewById(R.id.finished_old_testament_value)
+    private val finishedNewTestamentTitle: TextView = itemView.findViewById(R.id.finished_new_testament_title)
     private val finishedNewTestament: TextView = itemView.findViewById(R.id.finished_new_testament_value)
+
+    init {
+        val primaryTextColor = settings.getPrimaryTextColor(resources)
+        val secondaryTextColor = settings.getSecondaryTextColor(resources)
+
+        continuousReadingDaysTitle.setTextColor(secondaryTextColor)
+        continuousReadingDays.setTextColor(primaryTextColor)
+        chaptersReadTitle.setTextColor(secondaryTextColor)
+        chaptersRead.setTextColor(primaryTextColor)
+        finishedBooksTitle.setTextColor(secondaryTextColor)
+        finishedBooks.setTextColor(primaryTextColor)
+        finishedOldTestamentTitle.setTextColor(secondaryTextColor)
+        finishedOldTestament.setTextColor(primaryTextColor)
+        finishedNewTestamentTitle.setTextColor(secondaryTextColor)
+        finishedNewTestament.setTextColor(primaryTextColor)
+    }
 
     fun bind(readingProgress: ReadingProgressForDisplay) {
         continuousReadingDays.text = resources.getString(R.string.text_continuous_reading_count, readingProgress.continuousReadingDays)
@@ -77,10 +113,15 @@ private class ReadingProgressHeaderViewHolder(inflater: LayoutInflater, parent: 
     }
 }
 
-private class ReadingProgressItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class ReadingProgressItemViewHolder(inflater: LayoutInflater, parent: ViewGroup,
+                                            resources: Resources, settings: Settings)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_reading_progress, parent, false)) {
     private val bookName: TextView = itemView.findViewById(R.id.book_name)
     private val readingProgressBar: ReadingProgressBar = itemView.findViewById(R.id.reading_progress_bar)
+
+    init {
+        bookName.setTextColor(settings.getPrimaryTextColor(resources))
+    }
 
     fun bind(bookReadingStatus: ReadingProgressForDisplay.BookReadingStatus) {
         bookName.text = bookReadingStatus.bookName

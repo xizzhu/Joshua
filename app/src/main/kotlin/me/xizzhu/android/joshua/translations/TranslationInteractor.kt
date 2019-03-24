@@ -18,12 +18,15 @@ package me.xizzhu.android.joshua.translations
 
 import kotlinx.coroutines.channels.*
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 
 class TranslationInteractor(private val translationManagementActivity: TranslationManagementActivity,
                             private val bibleReadingManager: BibleReadingManager,
-                            private val translationManager: TranslationManager) {
+                            private val translationManager: TranslationManager,
+                            settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
     private val translationsLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
 
     fun observeTranslationsLoadingState(): ReceiveChannel<Boolean> =

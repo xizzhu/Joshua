@@ -19,10 +19,7 @@ package me.xizzhu.android.joshua.reading
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.ReadingProgressManager
-import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -42,13 +39,16 @@ class ReadingInteractorTest : BaseUnitTest() {
     private lateinit var readingProgressManager: ReadingProgressManager
     @Mock
     private lateinit var translationManager: TranslationManager
+    @Mock
+    private lateinit var settingsManager: SettingsManager
 
     private lateinit var readingInteractor: ReadingInteractor
 
     @Before
     override fun setup() {
         super.setup()
-        readingInteractor = ReadingInteractor(readingActivity, navigator, bibleReadingManager, readingProgressManager, translationManager)
+        readingInteractor = ReadingInteractor(readingActivity, navigator, bibleReadingManager,
+                readingProgressManager, translationManager, settingsManager)
     }
 
     @Test

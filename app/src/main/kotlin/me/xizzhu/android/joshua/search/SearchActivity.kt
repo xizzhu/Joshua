@@ -24,10 +24,13 @@ import me.xizzhu.android.joshua.search.result.SearchResultPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultListView
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
-import me.xizzhu.android.joshua.utils.BaseActivity
+import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
-class SearchActivity : BaseActivity() {
+class SearchActivity : BaseSettingsActivity() {
+    @Inject
+    lateinit var searchInteractor: SearchInteractor
+
     @Inject
     lateinit var toolbarPresenter: ToolbarPresenter
 
@@ -53,6 +56,8 @@ class SearchActivity : BaseActivity() {
         searchResultList.setPresenter(searchResultPresenter)
 
         loadingSpinner = findViewById(R.id.loading_spinner)
+
+        observeSettings(searchInteractor)
     }
 
     override fun onStart() {

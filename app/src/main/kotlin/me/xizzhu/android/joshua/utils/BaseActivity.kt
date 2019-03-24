@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.channels.ReceiveChannel
 import me.xizzhu.android.joshua.core.logger.Log
 import kotlin.coroutines.CoroutineContext
 
@@ -33,6 +34,8 @@ abstract class BaseActivity : AppCompatActivity(), CoroutineScope {
     private val job: Job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
+
+    protected val receiveChannels = ArrayList<ReceiveChannel<*>>()
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,7 +71,14 @@ abstract class BaseActivity : AppCompatActivity(), CoroutineScope {
     @CallSuper
     override fun onDestroy() {
         Log.i(tag, "onDestroy()")
-        job.cancelChildren()
+
+        job.cancel()
+
+        for (r in receiveChannels) {
+            r.cancel()
+        }
+        receiveChannels.clear()
+
         super.onDestroy()
     }
 }
