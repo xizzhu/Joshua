@@ -27,10 +27,6 @@ import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class SettingsPresenter(private val app: App, private val settingsManager: SettingsManager) : MVPPresenter<SettingsView>() {
-    companion object {
-        private val TAG: String = SettingsPresenter::class.java.simpleName
-    }
-
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -47,7 +43,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
             val version = app.packageManager.getPackageInfo(app.packageName, 0).versionName
             view?.onVersionLoaded(version)
         } catch (e: Exception) {
-            Log.e(TAG, e, "Failed to load app version")
+            Log.e(tag, e, "Failed to load app version")
         }
     }
 
@@ -56,7 +52,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
             try {
                 settingsManager.saveSettings(settings)
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to save settings")
+                Log.e(tag, e, "Failed to save settings")
                 view?.onSettingsUpdateFailed(settings)
             }
         }

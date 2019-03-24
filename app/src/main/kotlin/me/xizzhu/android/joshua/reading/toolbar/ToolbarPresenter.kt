@@ -25,10 +25,6 @@ import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ToolbarView>() {
-    companion object {
-        private val TAG: String = ToolbarPresenter::class.java.simpleName
-    }
-
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -70,7 +66,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
             try {
                 readingInteractor.saveCurrentTranslation(translationShortName)
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to update current translation")
+                Log.e(tag, e, "Failed to update current translation")
                 view?.onCurrentTranslationUpdateFailed(translationShortName)
             }
         }
@@ -88,7 +84,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         try {
             readingInteractor.openTranslationManagement()
         } catch (e: Exception) {
-            Log.e(TAG, e, "Failed to open translation management activity")
+            Log.e(tag, e, "Failed to open translation management activity")
             view?.onFailedToNavigateToTranslationManagement()
         }
     }
@@ -97,7 +93,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         try {
             readingInteractor.openReadingProgress()
         } catch (e: Exception) {
-            Log.e(TAG, e, "Failed to open reading progress activity")
+            Log.e(tag, e, "Failed to open reading progress activity")
             view?.onFailedToNavigateToReadingProgress()
         }
     }
@@ -106,7 +102,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         try {
             readingInteractor.openSettings()
         } catch (e: Exception) {
-            Log.e(TAG, e, "Failed to open settings activity")
+            Log.e(tag, e, "Failed to open settings activity")
             view?.onFailedToNavigateToSettings()
         }
     }

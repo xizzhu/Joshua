@@ -26,10 +26,6 @@ import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class SearchResultPresenter(private val searchInteractor: SearchInteractor)
     : BaseSettingsPresenter<SearchResultView>(searchInteractor) {
-    companion object {
-        private val TAG: String = SearchResultPresenter::class.java.simpleName
-    }
-
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -57,7 +53,7 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
                 searchInteractor.selectVerse(verseToSelect)
                 searchInteractor.openReading()
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to select verse and open reading activity")
+                Log.e(tag, e, "Failed to select verse and open reading activity")
                 view?.onVerseSelectionFailed(verseToSelect)
             }
         }
