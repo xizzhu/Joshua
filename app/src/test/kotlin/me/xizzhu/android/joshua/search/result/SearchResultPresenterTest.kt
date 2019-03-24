@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.search.result
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
@@ -36,12 +37,16 @@ class SearchResultPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var searchResultView: SearchResultView
     private lateinit var searchResultPresenter: SearchResultPresenter
+    private lateinit var settingsChannel: BroadcastChannel<Settings>
     private lateinit var searchStateChannel: BroadcastChannel<Boolean>
     private lateinit var searchResultChannel: BroadcastChannel<Pair<String, List<Verse>>>
 
     @Before
     override fun setup() {
         super.setup()
+
+        settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+        `when`(searchInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
         searchStateChannel = ConflatedBroadcastChannel(false)
         `when`(searchInteractor.observeSearchState()).thenReturn(searchStateChannel.openSubscription())

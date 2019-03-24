@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.translations
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Before
@@ -36,12 +37,15 @@ class TranslationInteractorTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
     @Mock
     private lateinit var translationManager: TranslationManager
+    @Mock
+    private lateinit var settingsManager: SettingsManager
     private lateinit var translationInteractor: TranslationInteractor
 
     @Before
     override fun setup() {
         super.setup()
-        translationInteractor = TranslationInteractor(translationManagementActivity, bibleReadingManager, translationManager)
+        translationInteractor = TranslationInteractor(translationManagementActivity,
+                bibleReadingManager, translationManager, settingsManager)
     }
 
     @Test

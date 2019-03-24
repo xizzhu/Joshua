@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.translations
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -33,6 +34,7 @@ class TranslationPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var translationView: TranslationView
     private lateinit var translationPresenter: TranslationPresenter
+    private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
     private lateinit var translationLoadingStateChannel: ConflatedBroadcastChannel<Boolean>
     private lateinit var availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
     private lateinit var downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
@@ -41,6 +43,9 @@ class TranslationPresenterTest : BaseUnitTest() {
     @Before
     override fun setup() {
         super.setup()
+
+        settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+        `when`(translationInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
         translationLoadingStateChannel = ConflatedBroadcastChannel(true)
         `when`(translationInteractor.observeTranslationsLoadingState()).then { translationLoadingStateChannel.openSubscription() }
