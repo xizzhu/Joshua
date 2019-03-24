@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.channels.firstOrNull
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.App
@@ -27,18 +28,20 @@ import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class SettingsPresenter(private val app: App, private val settingsManager: SettingsManager) : MVPPresenter<SettingsView>() {
+    private var settings: Settings = Settings.DEFAULT
+
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
             val currentSettings = settingsManager.observeSettings()
             receiveChannels.add(currentSettings)
-            currentSettings.consumeEach { view?.onSettingsLoaded(it) }
+            currentSettings.consumeEach {
+                settings = it
+                view?.onSettingsLoaded(it)
+            }
         }
-        loadVersion()
-    }
 
-    private fun loadVersion() {
         try {
             val version = app.packageManager.getPackageInfo(app.packageName, 0).versionName
             view?.onVersionLoaded(version)
@@ -60,8 +63,6 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
 
     fun setKeepScreenOn(keepScreenOn: Boolean) {
         launch(Dispatchers.Main) {
-            val settings: Settings = settingsManager.observeSettings().firstOrNull()
-                    ?: Settings.DEFAULT
             if (keepScreenOn != settings.keepScreenOn) {
                 saveSettings(settings.toBuilder().keepScreenOn(keepScreenOn).build())
             }
@@ -70,8 +71,6 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
 
     fun setNightModeOn(nightModeOn: Boolean) {
         launch(Dispatchers.Main) {
-            val settings: Settings = settingsManager.observeSettings().firstOrNull()
-                    ?: Settings.DEFAULT
             if (nightModeOn != settings.nightModeOn) {
                 saveSettings(settings.toBuilder().nightModeOn(nightModeOn).build())
             }
