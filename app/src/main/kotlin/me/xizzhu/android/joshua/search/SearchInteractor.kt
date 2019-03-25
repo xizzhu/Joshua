@@ -25,16 +25,17 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 
 class SearchInteractor(private val searchActivity: SearchActivity,
                        private val navigator: Navigator,
                        private val bibleReadingManager: BibleReadingManager,
-                       settingsManager: SettingsManager): BaseSettingsInteractor(settingsManager) {
-    private val searchState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(false)
+                       settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
+    private val searchState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.NOT_LOADING)
     private val searchResult: BroadcastChannel<Pair<String, List<Verse>>> = ConflatedBroadcastChannel(Pair("", emptyList()))
 
-    fun observeSearchState(): ReceiveChannel<Boolean> = searchState.openSubscription()
+    fun observeSearchState(): ReceiveChannel<LoadingSpinnerState> = searchState.openSubscription()
 
     fun observeSearchResult(): ReceiveChannel<Pair<String, List<Verse>>> = searchResult.openSubscription()
 
@@ -43,14 +44,14 @@ class SearchInteractor(private val searchActivity: SearchActivity,
     }
 
     suspend fun search(query: String) {
-        searchState.send(true)
+        searchState.send(LoadingSpinnerState.IS_LOADING)
 
         try {
             val currentTranslation = bibleReadingManager.observeCurrentTranslation().firstOrNull()
                     ?: throw IllegalStateException("No translation selected")
             searchResult.send(Pair(query, bibleReadingManager.search(currentTranslation, query)))
         } finally {
-            searchState.send(false)
+            searchState.send(LoadingSpinnerState.NOT_LOADING)
         }
     }
 

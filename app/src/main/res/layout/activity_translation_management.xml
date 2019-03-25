@@ -4,17 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <me.xizzhu.android.joshua.translations.TranslationListView
-        android:id="@+id/translation_list"
+    <me.xizzhu.android.joshua.ui.SwipeRefresher
+        android:id="@+id/swipe_refresher"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <me.xizzhu.android.joshua.ui.LoadingSpinner
-        android:id="@+id/loading_spinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        <me.xizzhu.android.joshua.translations.TranslationListView
+            android:id="@+id/translation_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </me.xizzhu.android.joshua.ui.SwipeRefresher>
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"

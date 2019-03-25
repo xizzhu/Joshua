@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.search.SearchInteractor
+import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class SearchResultPresenter(private val searchInteractor: SearchInteractor)
@@ -37,11 +38,10 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
         launch(Dispatchers.Main) {
             val searchState = searchInteractor.observeSearchState()
             receiveChannels.add(searchState)
-            searchState.consumeEach { loading ->
-                if (loading) {
-                    view?.onSearchStarted()
-                } else {
-                    view?.onSearchCompleted()
+            searchState.consumeEach { loadingState ->
+                when (loadingState) {
+                    LoadingSpinnerState.IS_LOADING -> view?.onSearchStarted()
+                    LoadingSpinnerState.NOT_LOADING -> view?.onSearchCompleted()
                 }
             }
         }

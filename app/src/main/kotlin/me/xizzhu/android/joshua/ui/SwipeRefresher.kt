@@ -18,50 +18,63 @@ package me.xizzhu.android.joshua.ui
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
-import android.widget.ProgressBar
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
 
-enum class LoadingSpinnerState { IS_LOADING, NOT_LOADING }
+enum class SwipeRefresherState { IS_REFRESHING, NOT_REFRESHING }
 
-class LoadingSpinnerPresenter(loadingState: ReceiveChannel<LoadingSpinnerState>) : MVPPresenter<LoadingSpinnerView>() {
+class SwipeRefresherPresenter(refresherState: ReceiveChannel<SwipeRefresherState>,
+                              private val refreshRequest: SendChannel<Unit>) : MVPPresenter<SwipeRefresherView>() {
     init {
         launch(Dispatchers.Main) {
-            loadingState.consumeEach { state ->
+            refresherState.consumeEach { state ->
                 when (state) {
-                    LoadingSpinnerState.IS_LOADING -> view?.show()
-                    LoadingSpinnerState.NOT_LOADING -> view?.hide()
+                    SwipeRefresherState.IS_REFRESHING -> view?.show()
+                    SwipeRefresherState.NOT_REFRESHING -> view?.hide()
                 }
             }
         }
     }
+
+    fun refresh() {
+        launch(Dispatchers.Main) { refreshRequest.send(Unit) }
+    }
 }
 
-interface LoadingSpinnerView : MVPView {
+interface SwipeRefresherView : MVPView {
     fun show()
 
     fun hide()
 }
 
-class LoadingSpinner : ProgressBar, LoadingSpinnerView {
+class SwipeRefresher : SwipeRefreshLayout, SwipeRefresherView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    private val onRefreshListener = OnRefreshListener { presenter.refresh() }
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
+    private lateinit var presenter: SwipeRefresherPresenter
+
+    init {
+        setOnRefreshListener(onRefreshListener)
+    }
+
+    fun setPresenter(presenter: SwipeRefresherPresenter) {
+        this.presenter = presenter
+    }
 
     override fun show() {
-        visibility = View.VISIBLE
+        isRefreshing = true
     }
 
     override fun hide() {
-        fadeOut()
+        isRefreshing = false
     }
 }

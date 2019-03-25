@@ -24,6 +24,7 @@ import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.ui.SwipeRefresherState
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import java.util.*
 import kotlin.Comparator
@@ -79,13 +80,17 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         launch(Dispatchers.Main) {
             val translationLoadingState = translationInteractor.observeTranslationsLoadingState()
             receiveChannels.add(translationLoadingState)
-            translationLoadingState.consumeEach { loading ->
-                if (loading) {
-                    view?.onTranslationsLoadingStarted()
-                } else {
-                    view?.onTranslationsLoadingCompleted()
+            translationLoadingState.consumeEach { loadingState ->
+                when (loadingState) {
+                    SwipeRefresherState.IS_REFRESHING -> view?.onTranslationsLoadingStarted()
+                    SwipeRefresherState.NOT_REFRESHING -> view?.onTranslationsLoadingCompleted()
                 }
             }
+        }
+        launch(Dispatchers.Main) {
+            val refreshRequest = translationInteractor.observeTranslationsLoadingRequest()
+            receiveChannels.add(refreshRequest)
+            refreshRequest.consumeEach { translationInteractor.reload(true) }
         }
     }
 
