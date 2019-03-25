@@ -29,11 +29,9 @@ import me.xizzhu.android.joshua.utils.MVPView
 
 enum class LoadingSpinnerState { IS_LOADING, NOT_LOADING }
 
-class LoadingSpinnerPresenter(private val loadingState: ReceiveChannel<LoadingSpinnerState>) : MVPPresenter<LoadingSpinnerView>() {
-    override fun onViewAttached() {
-        super.onViewAttached()
+class LoadingSpinnerPresenter(loadingState: ReceiveChannel<LoadingSpinnerState>) : MVPPresenter<LoadingSpinnerView>() {
+    init {
         launch(Dispatchers.Main) {
-            receiveChannels.add(loadingState)
             loadingState.consumeEach { state ->
                 when (state) {
                     LoadingSpinnerState.IS_LOADING -> view?.show()
