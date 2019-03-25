@@ -24,6 +24,7 @@ import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import java.util.*
 import kotlin.Comparator
@@ -79,11 +80,10 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         launch(Dispatchers.Main) {
             val translationLoadingState = translationInteractor.observeTranslationsLoadingState()
             receiveChannels.add(translationLoadingState)
-            translationLoadingState.consumeEach { loading ->
-                if (loading) {
-                    view?.onTranslationsLoadingStarted()
-                } else {
-                    view?.onTranslationsLoadingCompleted()
+            translationLoadingState.consumeEach { loadingState ->
+                when (loadingState) {
+                    LoadingSpinnerState.IS_LOADING -> view?.onTranslationsLoadingStarted()
+                    LoadingSpinnerState.NOT_LOADING -> view?.onTranslationsLoadingCompleted()
                 }
             }
         }

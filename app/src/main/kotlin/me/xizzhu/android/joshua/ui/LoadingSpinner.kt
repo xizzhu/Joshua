@@ -27,16 +27,17 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
 
-class LoadingSpinnerPresenter(private val loadingState: ReceiveChannel<Boolean>) : MVPPresenter<LoadingSpinnerView>() {
+enum class LoadingSpinnerState { IS_LOADING, NOT_LOADING }
+
+class LoadingSpinnerPresenter(private val loadingState: ReceiveChannel<LoadingSpinnerState>) : MVPPresenter<LoadingSpinnerView>() {
     override fun onViewAttached() {
         super.onViewAttached()
         launch(Dispatchers.Main) {
             receiveChannels.add(loadingState)
-            loadingState.consumeEach { loading ->
-                if (loading) {
-                    view?.show()
-                } else {
-                    view?.hide()
+            loadingState.consumeEach { state ->
+                when (state) {
+                    LoadingSpinnerState.IS_LOADING -> view?.show()
+                    LoadingSpinnerState.NOT_LOADING -> view?.hide()
                 }
             }
         }

@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -38,7 +39,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
     private lateinit var searchResultView: SearchResultView
     private lateinit var searchResultPresenter: SearchResultPresenter
     private lateinit var settingsChannel: BroadcastChannel<Settings>
-    private lateinit var searchStateChannel: BroadcastChannel<Boolean>
+    private lateinit var searchStateChannel: BroadcastChannel<LoadingSpinnerState>
     private lateinit var searchResultChannel: BroadcastChannel<Pair<String, List<Verse>>>
 
     @Before
@@ -48,7 +49,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
         settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
         `when`(searchInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-        searchStateChannel = ConflatedBroadcastChannel(false)
+        searchStateChannel = ConflatedBroadcastChannel(LoadingSpinnerState.NOT_LOADING)
         `when`(searchInteractor.observeSearchState()).thenReturn(searchStateChannel.openSubscription())
 
         searchResultChannel = ConflatedBroadcastChannel(Pair("", emptyList()))
@@ -95,11 +96,11 @@ class SearchResultPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSearchResultAndState() {
         runBlocking {
-            searchStateChannel.send(true)
+            searchStateChannel.send(LoadingSpinnerState.IS_LOADING)
             val query = "query"
             val verses: List<Verse> = listOf(MockContents.kjvVerses[0])
             searchResultChannel.send(Pair(query, verses))
-            searchStateChannel.send(false)
+            searchStateChannel.send(LoadingSpinnerState.NOT_LOADING)
 
             verify(searchResultView, times(1)).onSearchResultUpdated(verses.toSearchResult(query))
             verify(searchResultView, times(1)).onSearchStarted()

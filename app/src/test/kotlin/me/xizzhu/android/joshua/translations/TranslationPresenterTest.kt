@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -35,7 +36,7 @@ class TranslationPresenterTest : BaseUnitTest() {
     private lateinit var translationView: TranslationView
     private lateinit var translationPresenter: TranslationPresenter
     private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
-    private lateinit var translationLoadingStateChannel: ConflatedBroadcastChannel<Boolean>
+    private lateinit var translationLoadingStateChannel: ConflatedBroadcastChannel<LoadingSpinnerState>
     private lateinit var availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
     private lateinit var downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
     private lateinit var currentTranslationChannel: ConflatedBroadcastChannel<String>
@@ -47,7 +48,7 @@ class TranslationPresenterTest : BaseUnitTest() {
         settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
         `when`(translationInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-        translationLoadingStateChannel = ConflatedBroadcastChannel(true)
+        translationLoadingStateChannel = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
         `when`(translationInteractor.observeTranslationsLoadingState()).then { translationLoadingStateChannel.openSubscription() }
 
         availableTranslationsChannel = ConflatedBroadcastChannel(emptyList())
@@ -111,7 +112,7 @@ class TranslationPresenterTest : BaseUnitTest() {
             translationPresenter.attachView(translationView)
             verify(translationView, times(1)).onTranslationsLoadingStarted()
 
-            translationLoadingStateChannel.send(false)
+            translationLoadingStateChannel.send(LoadingSpinnerState.NOT_LOADING)
             verify(translationView, times(1)).onTranslationsLoadingCompleted()
 
             translationPresenter.detachView()

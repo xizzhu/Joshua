@@ -24,18 +24,19 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 
 class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager,
                                 private val bibleReadingManager: BibleReadingManager,
                                 settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val readingProgressLoadingState: BroadcastChannel<Boolean> = ConflatedBroadcastChannel(true)
+    private val readingProgressLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
 
-    fun observeReadingProgressLoadingState(): ReceiveChannel<Boolean> =
+    fun observeReadingProgressLoadingState(): ReceiveChannel<LoadingSpinnerState> =
             readingProgressLoadingState.openSubscription()
 
     suspend fun notifyLoadingFinished() {
-        readingProgressLoadingState.send(false)
+        readingProgressLoadingState.send(LoadingSpinnerState.NOT_LOADING)
     }
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()

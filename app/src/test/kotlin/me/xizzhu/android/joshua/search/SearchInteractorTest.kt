@@ -25,12 +25,12 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class SearchInteractorTest : BaseUnitTest() {
@@ -53,7 +53,7 @@ class SearchInteractorTest : BaseUnitTest() {
     @Test
     fun testDefaultSearchState() {
         runBlocking {
-            assertFalse(searchInteractor.observeSearchState().first())
+            assertEquals(LoadingSpinnerState.NOT_LOADING, searchInteractor.observeSearchState().first())
         }
     }
 
@@ -94,7 +94,7 @@ class SearchInteractorTest : BaseUnitTest() {
             `when`(bibleReadingManager.search(MockContents.kjvShortName, query)).thenReturn(MockContents.kjvVerses)
 
             searchInteractor.search(query)
-            assertFalse(searchInteractor.observeSearchState().first())
+            assertEquals(LoadingSpinnerState.NOT_LOADING, searchInteractor.observeSearchState().first())
 
             val (q, v) = searchInteractor.observeSearchResult().first()
             assertEquals(query, q)
