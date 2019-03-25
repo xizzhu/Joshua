@@ -22,7 +22,7 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
+import me.xizzhu.android.joshua.ui.SwipeRefresherState
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -51,7 +51,7 @@ class TranslationInteractorTest : BaseUnitTest() {
     @Test
     fun testInitialTranslationsLoadingState() {
         runBlocking {
-            assertEquals(LoadingSpinnerState.IS_LOADING, translationInteractor.observeTranslationsLoadingState().first())
+            assertEquals(SwipeRefresherState.IS_REFRESHING, translationInteractor.observeTranslationsLoadingState().first())
         }
     }
 
@@ -62,7 +62,7 @@ class TranslationInteractorTest : BaseUnitTest() {
             translationInteractor.reload(forceRefresh)
 
             verify(translationManager, times(1)).reload(forceRefresh)
-            assertEquals(LoadingSpinnerState.NOT_LOADING, translationInteractor.observeTranslationsLoadingState().first())
+            assertEquals(SwipeRefresherState.NOT_REFRESHING, translationInteractor.observeTranslationsLoadingState().first())
         }
     }
 }

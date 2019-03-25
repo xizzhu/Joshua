@@ -22,7 +22,7 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.SwipeRefresherPresenter
 
 @Module
 class TranslationManagementModule {
@@ -36,8 +36,9 @@ class TranslationManagementModule {
                     translationManager, settingsManager)
 
     @Provides
-    fun provideLoadingSpinnerPresenter(translationInteractor: TranslationInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(translationInteractor.observeTranslationsLoadingState())
+    fun provideSwipeRefresherPresenter(translationInteractor: TranslationInteractor): SwipeRefresherPresenter =
+            SwipeRefresherPresenter(translationInteractor.observeTranslationsLoadingState(),
+                    translationInteractor.translationsLoadingRequest)
 
     @Provides
     fun provideTranslationPresenter(translationInteractor: TranslationInteractor): TranslationPresenter =

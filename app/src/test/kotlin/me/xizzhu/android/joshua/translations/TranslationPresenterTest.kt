@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.translations
 
+import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
@@ -23,7 +24,7 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
+import me.xizzhu.android.joshua.ui.SwipeRefresherState
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -36,7 +37,8 @@ class TranslationPresenterTest : BaseUnitTest() {
     private lateinit var translationView: TranslationView
     private lateinit var translationPresenter: TranslationPresenter
     private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
-    private lateinit var translationLoadingStateChannel: ConflatedBroadcastChannel<LoadingSpinnerState>
+    private lateinit var translationLoadingStateChannel: ConflatedBroadcastChannel<SwipeRefresherState>
+    private lateinit var translationsLoadingRequest: BroadcastChannel<Unit>
     private lateinit var availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
     private lateinit var downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
     private lateinit var currentTranslationChannel: ConflatedBroadcastChannel<String>
@@ -48,8 +50,11 @@ class TranslationPresenterTest : BaseUnitTest() {
         settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
         `when`(translationInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-        translationLoadingStateChannel = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
+        translationLoadingStateChannel = ConflatedBroadcastChannel(SwipeRefresherState.IS_REFRESHING)
         `when`(translationInteractor.observeTranslationsLoadingState()).then { translationLoadingStateChannel.openSubscription() }
+
+        translationsLoadingRequest = ConflatedBroadcastChannel()
+        `when`(translationInteractor.observeTranslationsLoadingRequest()).then { translationsLoadingRequest.openSubscription() }
 
         availableTranslationsChannel = ConflatedBroadcastChannel(emptyList())
         `when`(translationInteractor.observeAvailableTranslations()).then { availableTranslationsChannel.openSubscription() }
@@ -112,8 +117,24 @@ class TranslationPresenterTest : BaseUnitTest() {
             translationPresenter.attachView(translationView)
             verify(translationView, times(1)).onTranslationsLoadingStarted()
 
-            translationLoadingStateChannel.send(LoadingSpinnerState.NOT_LOADING)
+            translationLoadingStateChannel.send(SwipeRefresherState.NOT_REFRESHING)
             verify(translationView, times(1)).onTranslationsLoadingCompleted()
+
+            translationPresenter.detachView()
+        }
+    }
+
+    @Test
+    fun testRefreshRequest() {
+        runBlocking {
+            translationPresenter.attachView(translationView)
+
+            verify(translationInteractor, never()).reload(true)
+            verify(translationInteractor, times(1)).reload(false)
+
+            translationsLoadingRequest.send(Unit)
+            verify(translationInteractor, times(1)).reload(true)
+            verify(translationInteractor, times(1)).reload(false)
 
             translationPresenter.detachView()
         }

@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.translations
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.LoadingSpinner
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.SwipeRefresher
+import me.xizzhu.android.joshua.ui.SwipeRefresherPresenter
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
@@ -28,19 +28,21 @@ class TranslationManagementActivity : BaseSettingsActivity() {
     lateinit var translationInteractor: TranslationInteractor
 
     @Inject
-    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
+    lateinit var swipeRefresherPresenter: SwipeRefresherPresenter
 
     @Inject
     lateinit var translationPresenter: TranslationPresenter
 
-    private lateinit var loadingSpinner: LoadingSpinner
+    private lateinit var swipeRefresher: SwipeRefresher
     private lateinit var translationListView: TranslationListView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_translation_management)
-        loadingSpinner = findViewById(R.id.loading_spinner)
+
+        swipeRefresher = findViewById(R.id.swipe_refresher)
+        swipeRefresher.setPresenter(swipeRefresherPresenter)
 
         translationListView = findViewById(R.id.translation_list)
         translationListView.setPresenter(translationPresenter)
@@ -51,12 +53,12 @@ class TranslationManagementActivity : BaseSettingsActivity() {
     override fun onStart() {
         super.onStart()
 
-        loadingSpinnerPresenter.attachView(loadingSpinner)
+        swipeRefresherPresenter.attachView(swipeRefresher)
         translationPresenter.attachView(translationListView)
     }
 
     override fun onStop() {
-        loadingSpinnerPresenter.detachView()
+        swipeRefresherPresenter.detachView()
         translationPresenter.detachView()
 
         super.onStop()
