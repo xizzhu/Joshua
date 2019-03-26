@@ -99,5 +99,6 @@ object Dependencies {
 
     object Mockito {
         const val mockito = "org.mockito:mockito-core:${Versions.mockito}"
+        const val android = "org.mockito:mockito-android:${Versions.mockito}"
     }
 }

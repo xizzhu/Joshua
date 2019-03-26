@@ -97,6 +97,10 @@ dependencies {
     testImplementation(Dependencies.Kotlin.coroutinesTest)
     testImplementation(Dependencies.Mockito.mockito)
 
+    androidTestImplementation(Dependencies.Kotlin.test)
+    androidTestImplementation(Dependencies.Kotlin.coroutinesTest)
     androidTestImplementation(Dependencies.AndroidX.testRunner)
     androidTestImplementation(Dependencies.AndroidX.testRules)
+    androidTestImplementation(Dependencies.Mockito.mockito)
+    androidTestImplementation(Dependencies.Mockito.android)
 }
