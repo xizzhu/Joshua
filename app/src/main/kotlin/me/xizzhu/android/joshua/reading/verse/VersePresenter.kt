@@ -47,7 +47,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.action_copy -> {
-                    readingInteractor.copyToClipBoard(selectedVerses)
+                    launch(Dispatchers.IO) { readingInteractor.copyToClipBoard(selectedVerses) }
                     view?.onVersesCopied()
                     mode.finish()
                     true

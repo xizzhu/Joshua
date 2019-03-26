@@ -20,6 +20,7 @@ import android.os.Looper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.*
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -27,7 +28,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class BaseActivityTest {
+class BaseActivityTest : BaseUnitTest() {
     private class BaseActivityStub : BaseActivity() {
         lateinit var myJob: Job
 
@@ -55,7 +56,8 @@ class BaseActivityTest {
     private lateinit var baseActivityStub: BaseActivityStub
 
     @Before
-    fun setup() {
+    override fun setup() {
+        super.setup()
         Looper.prepare()
         baseActivityStub = BaseActivityStub()
     }

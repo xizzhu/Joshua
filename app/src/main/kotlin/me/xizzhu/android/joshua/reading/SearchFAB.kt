@@ -20,6 +20,8 @@ import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.View
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.logger.Log
@@ -68,5 +70,48 @@ class SearchFloatingActionButton : FloatingActionButton, SearchButtonView, View.
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.openSearch()
                 })
+    }
+}
+
+class FloatingActionButtonScrollAwareBehavior : FloatingActionButton.Behavior {
+    private var isHiding: Boolean = false
+
+    constructor() : super()
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+
+    override fun onStartNestedScroll(coordinatorLayout: CoordinatorLayout, child: FloatingActionButton,
+                                     directTargetChild: View, target: View, axes: Int, type: Int): Boolean {
+        return axes == ViewCompat.SCROLL_AXIS_VERTICAL
+                || super.onStartNestedScroll(coordinatorLayout, child, directTargetChild, target, axes, type)
+    }
+
+    override fun onNestedPreScroll(coordinatorLayout: CoordinatorLayout, child: FloatingActionButton,
+                                   target: View, dx: Int, dy: Int, consumed: IntArray, type: Int) {
+        super.onNestedPreScroll(coordinatorLayout, child, target, dx, dy, consumed, type)
+
+        if (dy > 0) {
+            hide(child, coordinatorLayout)
+        } else if (dy < 0) {
+            show(child)
+        }
+    }
+
+    private fun hide(fab: FloatingActionButton, parent: CoordinatorLayout) {
+        if (isHiding) {
+            return
+        }
+        isHiding = true
+
+        fab.animate().cancel()
+        fab.animate().translationY(parent.height - fab.y)
+    }
+
+    private fun show(fab: FloatingActionButton) {
+        if (!isHiding) {
+            return
+        }
+        isHiding = false
+
+        fab.animate().translationY(0.0F)
     }
 }

@@ -27,6 +27,10 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import android.content.ComponentName
 import android.content.pm.LabeledIntent
+import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.os.Parcelable
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
@@ -133,42 +137,13 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         // I have to exclude their package from being shown.
         // Rants: it's a horrible way to force developers to use their SDK.
         // ref. https://developers.facebook.com/bugs/332619626816423
-        val chooseIntent = createChooserForSharing("com.facebook.katana", verses.toStringForSharing())
+        val chooseIntent = createChooserForSharing(readingActivity.packageManager, readingActivity.resources,
+                "com.facebook.katana", verses.toStringForSharing())
         if (chooseIntent != null) {
             readingActivity.startActivity(chooseIntent)
             return true
         }
         return false
-    }
-
-    private fun createChooserForSharing(packageToExclude: String, text: String): Intent? {
-        val sendIntent = Intent(Intent.ACTION_SEND).setType("text/plain")
-        val pm = readingActivity.packageManager
-        val resolveInfoList = pm.queryIntentActivities(sendIntent, 0)
-        if (resolveInfoList.isEmpty()) {
-            return null
-        }
-
-        val filteredIntents = ArrayList<Intent>(resolveInfoList.size)
-        for (resolveInfo in resolveInfoList) {
-            val packageName = resolveInfo.activityInfo.packageName
-            if (packageToExclude != packageName) {
-                val labeledIntent = LabeledIntent(packageName, resolveInfo.loadLabel(pm), resolveInfo.iconResource)
-                labeledIntent.setAction(Intent.ACTION_SEND).setPackage(packageName)
-                        .setComponent(ComponentName(packageName, resolveInfo.activityInfo.name))
-                        .setType("text/plain")
-                        .putExtra(Intent.EXTRA_TEXT, text)
-                filteredIntents.add(labeledIntent)
-            }
-        }
-
-        val chooserIntent = Intent.createChooser(filteredIntents.removeAt(0),
-                readingActivity.getText(R.string.text_share_with))
-        val extraIntents = filteredIntents.size
-        if (extraIntents > 0) {
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, filteredIntents.toArray())
-        }
-        return chooserIntent
     }
 
     suspend fun startTrackingReadingProgress() {
@@ -178,4 +153,36 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     suspend fun stopTrackingReadingProgress() {
         readingProgressManager.stopTracking()
     }
+}
+
+@VisibleForTesting
+fun createChooserForSharing(packageManager: PackageManager, resources: Resources,
+                            packageToExclude: String, text: String): Intent? {
+    val sendIntent = Intent(Intent.ACTION_SEND).setType("text/plain")
+    val resolveInfoList = packageManager.queryIntentActivities(sendIntent, 0)
+    if (resolveInfoList.isEmpty()) {
+        return null
+    }
+
+    val filteredIntents = ArrayList<Intent>(resolveInfoList.size)
+    for (resolveInfo in resolveInfoList) {
+        val packageName = resolveInfo.activityInfo.packageName
+        if (packageToExclude != packageName) {
+            val labeledIntent = LabeledIntent(packageName, resolveInfo.loadLabel(packageManager), resolveInfo.iconResource)
+            labeledIntent.setAction(Intent.ACTION_SEND).setPackage(packageName)
+                    .setComponent(ComponentName(packageName, resolveInfo.activityInfo.name))
+                    .setType("text/plain")
+                    .putExtra(Intent.EXTRA_TEXT, text)
+            filteredIntents.add(labeledIntent)
+        }
+    }
+    if (filteredIntents.isEmpty()) {
+        return null
+    }
+
+    val chooserIntent = Intent.createChooser(filteredIntents.removeAt(0),
+            resources.getText(R.string.text_share_with))
+    val array = arrayOfNulls<Parcelable>(filteredIntents.size)
+    chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, filteredIntents.toArray(array))
+    return chooserIntent
 }

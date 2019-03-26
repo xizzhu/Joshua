@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -28,7 +29,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class VerseForReadingTest {
+class VerseForReadingTest: BaseUnitTest() {
     @Test
     fun testGetIndexForDisplay() {
         assertEquals("1", VerseForReading(MockContents.kjvVerses[0], 9).getIndexForDisplay())

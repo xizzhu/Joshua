@@ -22,15 +22,17 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.annotation.CallSuper
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.After
 import org.junit.Before
 
-abstract class BaseSqliteTest {
+abstract class BaseSqliteTest : BaseUnitTest() {
     protected lateinit var androidDatabase: AndroidDatabase
 
     @Before
     @CallSuper
-    open fun setup() {
+    override fun setup() {
+        super.setup()
         clearLocalStorage()
         androidDatabase = AndroidDatabase(ApplicationProvider.getApplicationContext<Context>())
     }
@@ -41,9 +43,10 @@ abstract class BaseSqliteTest {
 
     @After
     @CallSuper
-    open fun tearDown() {
+    override fun tearDown() {
         androidDatabase.close()
         clearLocalStorage()
+        super.tearDown()
     }
 
     protected fun SQLiteDatabase.hasTable(name: String): Boolean {

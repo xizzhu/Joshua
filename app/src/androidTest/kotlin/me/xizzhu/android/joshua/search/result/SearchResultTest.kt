@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.search.result
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -26,7 +27,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class SearchResultTest {
+class SearchResultTest: BaseUnitTest() {
     @Test
     fun testToSearchResult() {
         val expected = listOf(SearchedVerse(MockContents.kjvVerses[0].verseIndex,
