@@ -18,11 +18,13 @@ package me.xizzhu.android.joshua.settings.widgets
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.annotation.Px
 import androidx.appcompat.widget.AppCompatSeekBar
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.setBackground
@@ -74,6 +76,11 @@ class SettingSeekBar : LinearLayout {
     fun setTextColor(@ColorInt titleColor: Int, @ColorInt valueColor: Int) {
         title.setTextColor(titleColor)
         value.setTextColor(valueColor)
+    }
+
+    fun setTextSize(@Px titleSize: Int, @Px valueSize: Int) {
+        title.setTextSize(TypedValue.COMPLEX_UNIT_PX, titleSize.toFloat())
+        value.setTextSize(TypedValue.COMPLEX_UNIT_PX, valueSize.toFloat())
     }
 
     fun setMax(max: Int) {

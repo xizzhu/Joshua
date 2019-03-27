@@ -16,6 +16,7 @@
             android:paddingTop="@dimen/padding_small">
 
             <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
+                android:id="@+id/display"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:settingSectionHeaderTitle="@string/settings_header_display" />
@@ -49,6 +50,7 @@
                 android:text="@string/settings_title_night_mode_on" />
 
             <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
+                android:id="@+id/about"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:settingSectionHeaderTitle="@string/settings_header_about" />
