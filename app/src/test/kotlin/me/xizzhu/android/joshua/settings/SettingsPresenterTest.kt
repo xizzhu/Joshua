@@ -78,6 +78,20 @@ class SettingsPresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testSetFontSizeScale() {
+        runBlocking {
+            currentSettings.send(Settings.DEFAULT)
+
+            settingsPresenter.setFontSizeScale(100)
+            verify(settingsManager, never()).saveSettings(any())
+
+            settingsPresenter.setFontSizeScale(50)
+            verify(settingsManager, times(1))
+                    .saveSettings(Settings.DEFAULT.toBuilder().fontSizeScale(50).build())
+        }
+    }
+
+    @Test
     fun testSetKeepScreenOn() {
         runBlocking {
             currentSettings.send(Settings.DEFAULT)

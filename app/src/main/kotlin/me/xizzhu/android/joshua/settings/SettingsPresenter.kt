@@ -59,6 +59,14 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
         }
     }
 
+    fun setFontSizeScale(fontSizeScale: Int) {
+        launch(Dispatchers.Main) {
+            if (fontSizeScale != settings.fontSizeScale) {
+                saveSettings(settings.toBuilder().fontSizeScale(fontSizeScale).build())
+            }
+        }
+    }
+
     fun setKeepScreenOn(keepScreenOn: Boolean) {
         launch(Dispatchers.Main) {
             if (keepScreenOn != settings.keepScreenOn) {
