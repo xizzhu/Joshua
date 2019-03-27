@@ -20,6 +20,14 @@
                 android:layout_height="wrap_content"
                 app:settingSectionHeaderTitle="@string/settings_header_display" />
 
+            <me.xizzhu.android.joshua.settings.widgets.SettingSeekBar
+                android:id="@+id/font_size"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/padding"
+                android:paddingEnd="@dimen/padding"
+                app:settingSeekBarTitle="@string/settings_title_font_size" />
+
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/keep_screen_on"
                 style="@style/Text.Body"

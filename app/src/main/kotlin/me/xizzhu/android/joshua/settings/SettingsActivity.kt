@@ -21,11 +21,13 @@ import android.animation.ValueAnimator
 import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.SeekBar
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.SwitchCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
+import me.xizzhu.android.joshua.settings.widgets.SettingSeekBar
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.getBackgroundColor
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
@@ -33,6 +35,7 @@ import me.xizzhu.android.joshua.ui.getSecondaryTextColor
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 interface SettingsView : MVPView {
     fun onVersionLoaded(version: String)
@@ -46,10 +49,12 @@ class SettingsActivity : BaseActivity(), SettingsView {
     @Inject
     lateinit var presenter: SettingsPresenter
 
+    private lateinit var fontSize: SettingSeekBar
     private lateinit var keepScreenOn: SwitchCompat
     private lateinit var nightModeOn: SwitchCompat
     private lateinit var version: SettingButton
 
+    private var shouldAnimateFontSize = false
     private var shouldAnimateColor = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,10 +62,25 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
         setContentView(R.layout.activity_settings)
         version = findViewById(R.id.version)
+
+        fontSize = findViewById(R.id.font_size)
+        fontSize.setMax(Settings.MAX_FONT_SIZE_SCALE)
+        fontSize.setListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                shouldAnimateFontSize = true
+                presenter.setFontSizeScale(seekBar.progress)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
         keepScreenOn = findViewById(R.id.keep_screen_on)
         keepScreenOn.setOnCheckedChangeListener { _, isChecked ->
             presenter.setKeepScreenOn(isChecked)
         }
+
         nightModeOn = findViewById(R.id.night_mode_on)
         nightModeOn.setOnCheckedChangeListener { _, isChecked ->
             shouldAnimateColor = true
@@ -84,7 +104,16 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
     override fun onSettingsUpdated(settings: Settings) {
         window.decorView.keepScreenOn = settings.keepScreenOn
+
+        if (shouldAnimateFontSize) {
+            shouldAnimateFontSize = false
+
+            // TODO
+        }
+
         if (shouldAnimateColor) {
+            shouldAnimateColor = false
+
             val fromBackgroundColor: Int
             val toBackgroundColor: Int
             val fromPrimaryTextColor: Int
@@ -118,6 +147,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
                     settings.getSecondaryTextColor(resources))
         }
 
+        fontSize.setValue(settings.fontSizeScale, "%.1f".format(2.0F * settings.fontSizeScale / Settings.MAX_FONT_SIZE_SCALE))
         keepScreenOn.isChecked = settings.keepScreenOn
         nightModeOn.isChecked = settings.nightModeOn
     }
@@ -141,6 +171,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
                             @ColorInt secondaryTextColor: Int) {
         window.decorView.setBackgroundColor(backgroundColor)
 
+        fontSize.setTextColor(primaryTextColor, secondaryTextColor)
         keepScreenOn.setTextColor(primaryTextColor)
         nightModeOn.setTextColor(primaryTextColor)
         version.setTextColor(primaryTextColor, secondaryTextColor)
