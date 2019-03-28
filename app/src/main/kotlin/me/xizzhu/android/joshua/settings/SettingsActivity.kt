@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.settings
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.DialogInterface
-import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
 import androidx.annotation.ColorInt
@@ -126,31 +125,9 @@ class SettingsActivity : BaseActivity(), SettingsView {
         if (shouldAnimateColor) {
             shouldAnimateColor = false
 
-            val fromBackgroundColor: Int
-            val toBackgroundColor: Int
-            val fromPrimaryTextColor: Int
-            val toPrimaryTextColor: Int
-            val fromSecondaryTextColor: Int
-            val toSecondaryTextColor: Int
-            if (settings.nightModeOn) {
-                fromBackgroundColor = Color.WHITE
-                toBackgroundColor = Color.BLACK
-
-                fromPrimaryTextColor = resources.getColor(R.color.text_dark_primary)
-                toPrimaryTextColor = resources.getColor(R.color.text_light_primary)
-                fromSecondaryTextColor = resources.getColor(R.color.text_dark_secondary)
-                toSecondaryTextColor = resources.getColor(R.color.text_light_secondary)
-            } else {
-                fromBackgroundColor = Color.BLACK
-                toBackgroundColor = Color.WHITE
-
-                fromPrimaryTextColor = resources.getColor(R.color.text_light_primary)
-                toPrimaryTextColor = resources.getColor(R.color.text_dark_primary)
-                fromSecondaryTextColor = resources.getColor(R.color.text_light_secondary)
-                toSecondaryTextColor = resources.getColor(R.color.text_dark_secondary)
-            }
-            animateColor(fromBackgroundColor, toBackgroundColor, fromPrimaryTextColor, toPrimaryTextColor,
-                    fromSecondaryTextColor, toSecondaryTextColor)
+            animateColor(originalSettings!!.getBackgroundColor(), settings.getBackgroundColor(),
+                    originalSettings!!.getPrimaryTextColor(resources), settings.getPrimaryTextColor(resources),
+                    originalSettings!!.getSecondaryTextColor(resources), settings.getSecondaryTextColor(resources))
         } else {
             updateColor(settings.getBackgroundColor(), settings.getPrimaryTextColor(resources),
                     settings.getSecondaryTextColor(resources))
