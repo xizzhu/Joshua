@@ -21,21 +21,28 @@ import android.content.DialogInterface
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 
-class DialogHelper {
-    companion object {
-        fun showDialog(context: Context, cancelable: Boolean, @StringRes message: Int,
-                       onPositive: DialogInterface.OnClickListener) {
-            showDialog(context, cancelable, message, onPositive, null)
-        }
+object DialogHelper {
+    fun showDialog(context: Context, @StringRes title: Int, items: Array<CharSequence>, selected: Int,
+                   onClicked: DialogInterface.OnClickListener) {
+        AlertDialog.Builder(context)
+                .setCancelable(true)
+                .setSingleChoiceItems(items, selected, onClicked)
+                .setTitle(title)
+                .show()
+    }
 
-        fun showDialog(context: Context, cancelable: Boolean, @StringRes message: Int,
-                       onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener?) {
-            AlertDialog.Builder(context)
-                    .setCancelable(cancelable)
-                    .setMessage(message)
-                    .setPositiveButton(android.R.string.yes, onPositive)
-                    .setNegativeButton(android.R.string.no, onNegative)
-                    .show()
-        }
+    fun showDialog(context: Context, cancelable: Boolean, @StringRes message: Int,
+                   onPositive: DialogInterface.OnClickListener) {
+        showDialog(context, cancelable, message, onPositive, null)
+    }
+
+    fun showDialog(context: Context, cancelable: Boolean, @StringRes message: Int,
+                   onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener?) {
+        AlertDialog.Builder(context)
+                .setCancelable(cancelable)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.yes, onPositive)
+                .setNegativeButton(android.R.string.no, onNegative)
+                .show()
     }
 }

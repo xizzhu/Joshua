@@ -48,6 +48,8 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
         }
     }
 
+    fun getSettings(): Settings = settings
+
     fun saveSettings(settings: Settings) {
         launch(Dispatchers.Main) {
             try {

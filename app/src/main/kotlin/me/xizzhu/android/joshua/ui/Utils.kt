@@ -61,8 +61,8 @@ fun Settings.getSecondaryTextColor(resources: Resources): Int =
 
 @Px
 fun Settings.getBodyTextSize(resources: Resources): Int =
-        (resources.getDimension(R.dimen.text_body) * 2.0F * fontSizeScale / Settings.MAX_FONT_SIZE_SCALE).roundToInt()
+        (resources.getDimension(R.dimen.text_body) * fontSizeScale / 2.0F).roundToInt()
 
 @Px
 fun Settings.getCaptionTextSize(resources: Resources): Int =
-        (resources.getDimension(R.dimen.text_caption) * 2.0F * fontSizeScale / Settings.MAX_FONT_SIZE_SCALE).roundToInt()
+        (resources.getDimension(R.dimen.text_caption) * fontSizeScale / 2.0F).roundToInt()

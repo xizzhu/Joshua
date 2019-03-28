@@ -22,14 +22,12 @@ import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
-import android.widget.SeekBar
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.SwitchCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
-import me.xizzhu.android.joshua.settings.widgets.SettingSeekBar
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
@@ -44,11 +42,13 @@ interface SettingsView : MVPView {
 }
 
 class SettingsActivity : BaseActivity(), SettingsView {
+    private val fontSizeTexts: Array<CharSequence> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
+
     @Inject
     lateinit var presenter: SettingsPresenter
 
     private lateinit var display: SettingSectionHeader
-    private lateinit var fontSize: SettingSeekBar
+    private lateinit var fontSize: SettingButton
     private lateinit var keepScreenOn: SwitchCompat
     private lateinit var nightModeOn: SwitchCompat
     private lateinit var about: SettingSectionHeader
@@ -64,16 +64,14 @@ class SettingsActivity : BaseActivity(), SettingsView {
         display = findViewById(R.id.display)
 
         fontSize = findViewById(R.id.font_size)
-        fontSize.setMax(Settings.MAX_FONT_SIZE_SCALE)
-        fontSize.setListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                presenter.setFontSizeScale(seekBar.progress)
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {}
-        })
+        fontSize.setOnClickListener {
+            DialogHelper.showDialog(this@SettingsActivity, R.string.settings_title_font_size,
+                    fontSizeTexts, presenter.getSettings().fontSizeScale - 1,
+                    DialogInterface.OnClickListener { dialog, which ->
+                        presenter.setFontSizeScale(which + 1)
+                        dialog.dismiss()
+                    })
+        }
 
         keepScreenOn = findViewById(R.id.keep_screen_on)
         keepScreenOn.setOnCheckedChangeListener { _, isChecked ->
@@ -141,7 +139,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
                     settings.getSecondaryTextColor(resources))
         }
 
-        fontSize.setValue(settings.fontSizeScale, "%.1f".format(2.0F * settings.fontSizeScale / Settings.MAX_FONT_SIZE_SCALE))
+        fontSize.setDescription(fontSizeTexts[settings.fontSizeScale - 1])
         keepScreenOn.isChecked = settings.keepScreenOn
         nightModeOn.isChecked = settings.nightModeOn
 

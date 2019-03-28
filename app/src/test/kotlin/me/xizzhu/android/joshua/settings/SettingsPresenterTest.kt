@@ -82,12 +82,12 @@ class SettingsPresenterTest : BaseUnitTest() {
         runBlocking {
             currentSettings.send(Settings.DEFAULT)
 
-            settingsPresenter.setFontSizeScale(100)
+            settingsPresenter.setFontSizeScale(2)
             verify(settingsManager, never()).saveSettings(any())
 
-            settingsPresenter.setFontSizeScale(50)
+            settingsPresenter.setFontSizeScale(4)
             verify(settingsManager, times(1))
-                    .saveSettings(Settings.DEFAULT.toBuilder().fontSizeScale(50).build())
+                    .saveSettings(Settings.DEFAULT.toBuilder().fontSizeScale(4).build())
         }
     }
 

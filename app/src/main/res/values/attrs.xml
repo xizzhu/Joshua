@@ -9,8 +9,4 @@
         <attr name="settingButtonTitle" format="string|reference" />
         <attr name="settingButtonDescription" format="string|reference" />
     </declare-styleable>
-
-    <declare-styleable name="SettingSeekBar">
-        <attr name="settingSeekBarTitle" format="string|reference" />
-    </declare-styleable>
 </resources>

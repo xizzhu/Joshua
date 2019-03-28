@@ -26,9 +26,9 @@ import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
 data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fontSizeScale: Int) {
     companion object {
-        val DEFAULT = Settings(true, false, 100)
+        val DEFAULT = Settings(true, false, 2)
 
-        const val MAX_FONT_SIZE_SCALE = 200
+        const val MAX_FONT_SIZE_SCALE = 6
         const val MIN_FONT_SIZE_SCALE = 1
     }
 
