@@ -165,7 +165,6 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
     private fun animateTextSize(@Px fromBodyTextSize: Int, @Px toBodyTextSize: Int,
                                 @Px fromCaptionTextSize: Int, @Px toCaptionTextSize: Int) {
-        val argbEvaluator = ArgbEvaluator()
         val textSizeAnimator = ValueAnimator.ofFloat(0.0F, 1.0F)
         textSizeAnimator.addUpdateListener { animator ->
             val fraction = animator.animatedValue as Float
