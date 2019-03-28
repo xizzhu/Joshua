@@ -23,6 +23,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
 import androidx.annotation.ColorInt
+import androidx.annotation.Px
 import androidx.appcompat.widget.SwitchCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
@@ -32,6 +33,7 @@ import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 interface SettingsView : MVPView {
     fun onVersionLoaded(version: String)
@@ -54,7 +56,9 @@ class SettingsActivity : BaseActivity(), SettingsView {
     private lateinit var about: SettingSectionHeader
     private lateinit var version: SettingButton
 
+    private var shouldAnimateFontSize = false
     private var shouldAnimateColor = false
+    private var originalSettings: Settings? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,7 +72,10 @@ class SettingsActivity : BaseActivity(), SettingsView {
             DialogHelper.showDialog(this@SettingsActivity, R.string.settings_title_font_size,
                     fontSizeTexts, presenter.getSettings().fontSizeScale - 1,
                     DialogInterface.OnClickListener { dialog, which ->
+                        originalSettings = presenter.getSettings()
+                        shouldAnimateFontSize = true
                         presenter.setFontSizeScale(which + 1)
+
                         dialog.dismiss()
                     })
         }
@@ -80,6 +87,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
         nightModeOn = findViewById(R.id.night_mode_on)
         nightModeOn.setOnCheckedChangeListener { _, isChecked ->
+            originalSettings = presenter.getSettings()
             shouldAnimateColor = true
             presenter.setNightModeOn(isChecked)
         }
@@ -106,6 +114,15 @@ class SettingsActivity : BaseActivity(), SettingsView {
         window.decorView.keepScreenOn = settings.keepScreenOn
 
         val resources = resources
+        if (shouldAnimateFontSize) {
+            shouldAnimateFontSize = false
+
+            animateTextSize(originalSettings!!.getBodyTextSize(resources), settings.getBodyTextSize(resources),
+                    originalSettings!!.getCaptionTextSize(resources), settings.getCaptionTextSize(resources))
+        } else {
+            updateTextSize(settings.getBodyTextSize(resources), settings.getCaptionTextSize(resources))
+        }
+
         if (shouldAnimateColor) {
             shouldAnimateColor = false
 
@@ -142,15 +159,6 @@ class SettingsActivity : BaseActivity(), SettingsView {
         fontSize.setDescription(fontSizeTexts[settings.fontSizeScale - 1])
         keepScreenOn.isChecked = settings.keepScreenOn
         nightModeOn.isChecked = settings.nightModeOn
-
-        val bodyTextSize = settings.getBodyTextSize(resources)
-        val captionTextSize = settings.getCaptionTextSize(resources)
-        display.setTextSize(bodyTextSize)
-        fontSize.setTextSize(bodyTextSize, captionTextSize)
-        keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
-        nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
-        about.setTextSize(bodyTextSize)
-        version.setTextSize(bodyTextSize, captionTextSize)
     }
 
     private fun animateColor(@ColorInt fromBackgroundColor: Int, @ColorInt toBackgroundColor: Int,
@@ -176,6 +184,28 @@ class SettingsActivity : BaseActivity(), SettingsView {
         keepScreenOn.setTextColor(primaryTextColor)
         nightModeOn.setTextColor(primaryTextColor)
         version.setTextColor(primaryTextColor, secondaryTextColor)
+    }
+
+    private fun animateTextSize(@Px fromBodyTextSize: Int, @Px toBodyTextSize: Int,
+                                @Px fromCaptionTextSize: Int, @Px toCaptionTextSize: Int) {
+        val argbEvaluator = ArgbEvaluator()
+        val textSizeAnimator = ValueAnimator.ofFloat(0.0F, 1.0F)
+        textSizeAnimator.addUpdateListener { animator ->
+            val fraction = animator.animatedValue as Float
+            val bodyTextSize = fromBodyTextSize + fraction * (toBodyTextSize - fromBodyTextSize)
+            val captionTextSize = fromCaptionTextSize + fraction * (toCaptionTextSize - fromCaptionTextSize)
+            updateTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+        }
+        textSizeAnimator.start()
+    }
+
+    private fun updateTextSize(@Px bodyTextSize: Int, @Px captionTextSize: Int) {
+        display.setTextSize(bodyTextSize)
+        fontSize.setTextSize(bodyTextSize, captionTextSize)
+        keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
+        nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
+        about.setTextSize(bodyTextSize)
+        version.setTextSize(bodyTextSize, captionTextSize)
     }
 
     override fun onSettingsUpdateFailed(settingsToUpdate: Settings) {
