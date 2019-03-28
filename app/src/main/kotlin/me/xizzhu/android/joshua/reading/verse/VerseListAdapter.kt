@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.reading.verse
 
 import android.content.Context
 import android.content.res.Resources
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 
 class VerseListAdapter(context: Context, private val inflater: LayoutInflater) : RecyclerView.Adapter<VerseItemViewHolder>() {
@@ -108,10 +110,13 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private v
         text.text = verse.getTextForDisplay()
 
         val textColor = settings.getPrimaryTextColor(resources)
+        val textSize = settings.getBodyTextSize(resources).toFloat()
         text.setTextColor(textColor)
+        text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
         if (verse.verse.parallel.isEmpty()) {
             index.text = verse.getIndexForDisplay()
             index.setTextColor(textColor)
+            index.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
             index.visibility = View.VISIBLE
             divider.visibility = View.GONE
         } else {

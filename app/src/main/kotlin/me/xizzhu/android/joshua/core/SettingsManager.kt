@@ -24,18 +24,27 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
-data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean) {
+data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fontSizeScale: Int) {
     companion object {
-        val DEFAULT = Settings(true, false)
+        val DEFAULT = Settings(true, false, 2)
+
+        const val MAX_FONT_SIZE_SCALE = 6
+        const val MIN_FONT_SIZE_SCALE = 1
     }
 
-    data class Builder(var keepScreenOn: Boolean, var nightModeOn: Boolean) {
+    data class Builder(var keepScreenOn: Boolean, var nightModeOn: Boolean, var fontSizeScale: Int) {
         fun keepScreenOn(keepScreenOn: Boolean) = apply { this.keepScreenOn = keepScreenOn }
+
         fun nightModeOn(nightModeOn: Boolean) = apply { this.nightModeOn = nightModeOn }
-        fun build() = Settings(keepScreenOn, nightModeOn)
+
+        fun fontSizeScale(fontSizeScale: Int) = apply {
+            this.fontSizeScale = Math.max(MIN_FONT_SIZE_SCALE, Math.min(MAX_FONT_SIZE_SCALE, fontSizeScale))
+        }
+
+        fun build() = Settings(keepScreenOn, nightModeOn, fontSizeScale)
     }
 
-    fun toBuilder(): Builder = Builder(keepScreenOn, nightModeOn)
+    fun toBuilder(): Builder = Builder(keepScreenOn, nightModeOn, fontSizeScale)
 }
 
 class SettingsManager(private val settingsRepository: SettingsRepository) {

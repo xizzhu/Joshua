@@ -48,6 +48,8 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
         }
     }
 
+    fun getSettings(): Settings = settings
+
     fun saveSettings(settings: Settings) {
         launch(Dispatchers.Main) {
             try {
@@ -55,6 +57,14 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to save settings")
                 view?.onSettingsUpdateFailed(settings)
+            }
+        }
+    }
+
+    fun setFontSizeScale(fontSizeScale: Int) {
+        launch(Dispatchers.Main) {
+            if (fontSizeScale != settings.fontSizeScale) {
+                saveSettings(settings.toBuilder().fontSizeScale(fontSizeScale).build())
             }
         }
     }

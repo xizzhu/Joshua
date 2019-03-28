@@ -18,8 +18,10 @@ package me.xizzhu.android.joshua.settings.widgets
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.annotation.Px
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.setText
 
@@ -51,5 +53,9 @@ class SettingSectionHeader : FrameLayout {
             title.setText(a, R.styleable.SettingSectionHeader_settingSectionHeaderTitle)
             a.recycle()
         }
+    }
+
+    fun setTextSize(@Px textSize: Int) {
+        title.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize.toFloat())
     }
 }

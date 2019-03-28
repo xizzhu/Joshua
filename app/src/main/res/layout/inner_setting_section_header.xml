@@ -9,7 +9,6 @@
         android:paddingStart="@dimen/padding"
         android:paddingEnd="@dimen/padding"
         android:textColor="@color/primary"
-        android:textSize="@dimen/text_body"
         android:textStyle="bold" />
 
     <View

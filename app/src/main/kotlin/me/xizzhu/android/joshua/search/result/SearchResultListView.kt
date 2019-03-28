@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.res.Resources
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,6 +33,7 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
@@ -150,6 +152,7 @@ private class SearchResultViewHolder(inflater: LayoutInflater, parent: ViewGroup
         currentVerse = verse
         text.text = verse.getTextForDisplay()
         text.setTextColor(settings.getPrimaryTextColor(resources))
+        text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
     }
 
     override fun onClick(v: View) {

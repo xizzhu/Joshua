@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.translations
 
 import android.content.Context
 import android.content.res.Resources
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +27,8 @@ import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.ui.getBodyTextSize
+import me.xizzhu.android.joshua.ui.getCaptionTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.getSecondaryTextColor
 import java.util.ArrayList
@@ -37,6 +40,7 @@ private class AvailableTranslationTitleViewHolder(inflater: LayoutInflater, pare
 
     init {
         title.setTextColor(settings.getSecondaryTextColor(resources))
+        title.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources).toFloat())
     }
 }
 
@@ -53,6 +57,7 @@ private class TranslationInfoViewHolder(private val listener: TranslationListAda
         itemView.setOnLongClickListener(this)
 
         textView.setTextColor(settings.getPrimaryTextColor(resources))
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
     }
 
     fun bind(translationInfo: TranslationInfo, currentTranslation: Boolean) {

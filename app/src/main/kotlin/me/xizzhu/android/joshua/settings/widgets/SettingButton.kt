@@ -18,9 +18,11 @@ package me.xizzhu.android.joshua.settings.widgets
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.annotation.Px
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.setBackground
 import me.xizzhu.android.joshua.ui.setText
@@ -68,5 +70,10 @@ class SettingButton : FrameLayout {
     fun setTextColor(@ColorInt titleColor: Int, @ColorInt descriptionColor: Int) {
         title.setTextColor(titleColor)
         description.setTextColor(descriptionColor)
+    }
+
+    fun setTextSize(@Px titleSize: Int, @Px descriptionSize: Int) {
+        title.setTextSize(TypedValue.COMPLEX_UNIT_PX, titleSize.toFloat())
+        description.setTextSize(TypedValue.COMPLEX_UNIT_PX, descriptionSize.toFloat())
     }
 }

@@ -18,12 +18,14 @@ package me.xizzhu.android.joshua.progress
 
 import android.content.Context
 import android.content.res.Resources
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.getSecondaryTextColor
 
@@ -90,18 +92,28 @@ private class ReadingProgressHeaderViewHolder(inflater: LayoutInflater, parent: 
 
     init {
         val primaryTextColor = settings.getPrimaryTextColor(resources)
-        val secondaryTextColor = settings.getSecondaryTextColor(resources)
+        val bodyTextSize = settings.getBodyTextSize(resources)
 
-        continuousReadingDaysTitle.setTextColor(secondaryTextColor)
+        continuousReadingDaysTitle.setTextColor(primaryTextColor)
+        continuousReadingDaysTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
         continuousReadingDays.setTextColor(primaryTextColor)
-        chaptersReadTitle.setTextColor(secondaryTextColor)
+        continuousReadingDays.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
+        chaptersReadTitle.setTextColor(primaryTextColor)
+        chaptersReadTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
         chaptersRead.setTextColor(primaryTextColor)
-        finishedBooksTitle.setTextColor(secondaryTextColor)
+        chaptersRead.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
+        finishedBooksTitle.setTextColor(primaryTextColor)
+        finishedBooksTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
         finishedBooks.setTextColor(primaryTextColor)
-        finishedOldTestamentTitle.setTextColor(secondaryTextColor)
+        finishedBooks.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
+        finishedOldTestamentTitle.setTextColor(primaryTextColor)
+        finishedOldTestamentTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
         finishedOldTestament.setTextColor(primaryTextColor)
-        finishedNewTestamentTitle.setTextColor(secondaryTextColor)
+        finishedOldTestament.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
+        finishedNewTestamentTitle.setTextColor(primaryTextColor)
+        finishedNewTestamentTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
         finishedNewTestament.setTextColor(primaryTextColor)
+        finishedNewTestament.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
     }
 
     fun bind(readingProgress: ReadingProgressForDisplay) {
@@ -121,6 +133,7 @@ private class ReadingProgressItemViewHolder(inflater: LayoutInflater, parent: Vi
 
     init {
         bookName.setTextColor(settings.getPrimaryTextColor(resources))
+        bookName.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
     }
 
     fun bind(bookReadingStatus: ReadingProgressForDisplay.BookReadingStatus) {

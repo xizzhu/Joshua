@@ -24,9 +24,11 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.annotation.Px
 import androidx.annotation.StyleableRes
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import kotlin.math.roundToInt
 
 fun TextView.setText(a: TypedArray, @StyleableRes index: Int) {
     val resourceId = a.getResourceId(index, -1)
@@ -56,3 +58,11 @@ fun Settings.getPrimaryTextColor(resources: Resources): Int =
 @ColorInt
 fun Settings.getSecondaryTextColor(resources: Resources): Int =
         resources.getColor(if (nightModeOn) R.color.text_light_secondary else R.color.text_dark_secondary)
+
+@Px
+fun Settings.getBodyTextSize(resources: Resources): Int =
+        (resources.getDimension(R.dimen.text_body) * fontSizeScale / 2.0F).roundToInt()
+
+@Px
+fun Settings.getCaptionTextSize(resources: Resources): Int =
+        (resources.getDimension(R.dimen.text_caption) * fontSizeScale / 2.0F).roundToInt()

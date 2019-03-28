@@ -19,7 +19,7 @@
 
     <TextView
         android:id="@+id/continuous_reading_days_title"
-        style="@style/Text.Caption"
+        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/continuous_reading_days_value"
@@ -38,7 +38,7 @@
 
     <TextView
         android:id="@+id/chapters_read_title"
-        style="@style/Text.Caption"
+        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/chapters_read_value"
@@ -57,7 +57,7 @@
 
     <TextView
         android:id="@+id/finished_books_title"
-        style="@style/Text.Caption"
+        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/finished_books_value"
@@ -75,7 +75,7 @@
 
     <TextView
         android:id="@+id/finished_old_testament_title"
-        style="@style/Text.Caption"
+        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/finished_old_testament_value"
@@ -94,7 +94,7 @@
 
     <TextView
         android:id="@+id/finished_new_testament_title"
-        style="@style/Text.Caption"
+        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/finished_new_testament_value"
