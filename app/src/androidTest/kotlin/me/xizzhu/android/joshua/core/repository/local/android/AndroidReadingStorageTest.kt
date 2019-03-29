@@ -95,6 +95,7 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     fun testReadBookNamesFromNonExistTranslation() {
         runBlocking {
             assertTrue(androidReadingStorage.readBookNames("not_exist").isEmpty())
+            assertTrue(androidReadingStorage.readBookShortNames("not_exist").isEmpty())
         }
     }
 
@@ -103,6 +104,7 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
         runBlocking {
             androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
             assertEquals(MockContents.kjvBookNames, androidReadingStorage.readBookNames(MockContents.kjvShortName))
+            assertEquals(MockContents.kjvBookShortNames, androidReadingStorage.readBookShortNames(MockContents.kjvShortName))
         }
     }
 
@@ -112,6 +114,7 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
             androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"), listOf("ok_3", "fine_4"))
             androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
             assertEquals(MockContents.kjvBookNames, androidReadingStorage.readBookNames(MockContents.kjvShortName))
+            assertEquals(MockContents.kjvBookShortNames, androidReadingStorage.readBookShortNames(MockContents.kjvShortName))
         }
     }
 

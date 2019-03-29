@@ -65,6 +65,12 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
         }
     }
 
+    override suspend fun readBookShortNames(translationShortName: String): List<String> {
+        return withContext(Dispatchers.IO) {
+            androidDatabase.bookNamesDao.readShortName(translationShortName)
+        }
+    }
+
     override suspend fun readVerses(translationShortName: String, bookIndex: Int,
                                     chapterIndex: Int, bookName: String): List<Verse> {
         return withContext(Dispatchers.IO) {

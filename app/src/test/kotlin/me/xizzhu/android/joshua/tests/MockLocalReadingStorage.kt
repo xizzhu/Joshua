@@ -48,6 +48,14 @@ class MockLocalReadingStorage : LocalReadingStorage {
         }
     }
 
+    override suspend fun readBookShortNames(translationShortName: String): List<String> {
+        return if (MockContents.kjvShortName == translationShortName) {
+            MockContents.kjvBookShortNames
+        } else {
+            emptyList()
+        }
+    }
+
     override suspend fun readVerses(translationShortName: String, bookIndex: Int,
                                     chapterIndex: Int, bookName: String): List<Verse> {
         return if (MockContents.kjvShortName == translationShortName && bookIndex == 0 && chapterIndex == 0) {
