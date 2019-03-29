@@ -93,6 +93,7 @@ class SearchResultListView : RecyclerView, SearchResultView {
                     Toast.LENGTH_SHORT).show()
         }
         adapter.setSearchResult(searchResult)
+        scrollToPosition(0)
     }
 
     override fun onVerseSelectionFailed(verseToSelect: VerseIndex) {
