@@ -32,7 +32,8 @@ class MockLocalTranslationStorage : LocalTranslationStorage {
         this.translations.addAll(translations)
     }
 
-    override suspend fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>, verses: Map<Pair<Int, Int>, List<String>>) {
+    override suspend fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>,
+                                         bookShortNames: List<String>, verses: Map<Pair<Int, Int>, List<String>>) {
         for (i in 0 until translations.size) {
             if (translations[i].shortName == translationInfo.shortName) {
                 translations[i] = translationInfo

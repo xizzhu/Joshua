@@ -36,7 +36,9 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
         }
     }
 
-    override suspend fun saveTranslation(translationInfo: TranslationInfo, bookNames: List<String>,
+    override suspend fun saveTranslation(translationInfo: TranslationInfo,
+                                         bookNames: List<String>,
+                                         bookShortNames: List<String>,
                                          verses: Map<Pair<Int, Int>, List<String>>) {
         withContext(Dispatchers.IO) {
             var db: SQLiteDatabase? = null
@@ -44,7 +46,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                 db = androidDatabase.writableDatabase
                 db.beginTransaction()
 
-                androidDatabase.bookNamesDao.save(translationInfo.shortName, bookNames)
+                androidDatabase.bookNamesDao.save(translationInfo.shortName, bookNames, bookShortNames)
                 if (translationInfo.downloaded) {
                     androidDatabase.translationInfoDao.save(translationInfo)
                 } else {

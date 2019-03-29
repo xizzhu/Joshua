@@ -101,7 +101,7 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenReadBookNames() {
         runBlocking {
-            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
             assertEquals(MockContents.kjvBookNames, androidReadingStorage.readBookNames(MockContents.kjvShortName))
         }
     }
@@ -109,8 +109,8 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveOverrideThenReadBookNames() {
         runBlocking {
-            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"))
-            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"), listOf("ok_3", "fine_4"))
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
             assertEquals(MockContents.kjvBookNames, androidReadingStorage.readBookNames(MockContents.kjvShortName))
         }
     }
@@ -151,11 +151,11 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenReadWithParallelTranslations() {
         runBlocking {
-            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
             androidDatabase.translationDao.createTable(MockContents.kjvShortName)
             androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
 
-            androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames)
+            androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
             androidDatabase.translationDao.createTable(MockContents.cuvShortName)
             androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
 
@@ -171,11 +171,11 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenReadByVerseIndex() {
         runBlocking {
-            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
+            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
             androidDatabase.translationDao.createTable(MockContents.kjvShortName)
             androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
 
-            androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames)
+            androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
             androidDatabase.translationDao.createTable(MockContents.cuvShortName)
             androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
 

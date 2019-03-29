@@ -31,6 +31,7 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_TRANSLATION_SHORT_NAME = "translationShortName"
         private const val COLUMN_BOOK_INDEX = "bookIndex"
         private const val COLUMN_BOOK_NAME = "bookName"
+        private const val COLUMN_BOOK_SHORT_NAME = "bookShortName"
 
         @WorkerThread
         fun createTable(db: SQLiteDatabase) {
@@ -38,6 +39,7 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
                     "$COLUMN_TRANSLATION_SHORT_NAME TEXT NOT NULL, " +
                     "$COLUMN_BOOK_INDEX INTEGER NOT NULL, " +
                     "$COLUMN_BOOK_NAME TEXT NOT NULL, " +
+                    "$COLUMN_BOOK_SHORT_NAME TEXT NOT NULL, " +
                     "PRIMARY KEY ($COLUMN_TRANSLATION_SHORT_NAME, $COLUMN_BOOK_INDEX));")
             db.execSQL("CREATE INDEX $INDEX_BOOK_NAMES ON $TABLE_BOOK_NAMES ($COLUMN_TRANSLATION_SHORT_NAME);")
         }
@@ -127,12 +129,13 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun save(translationShortName: String, bookNames: List<String>) {
+    fun save(translationShortName: String, bookNames: List<String>, bookShortNames: List<String>) {
         val values = ContentValues(3)
         values.put(COLUMN_TRANSLATION_SHORT_NAME, translationShortName)
         for ((bookIndex, bookName) in bookNames.withIndex()) {
             values.put(COLUMN_BOOK_INDEX, bookIndex)
             values.put(COLUMN_BOOK_NAME, bookName)
+            values.put(COLUMN_BOOK_SHORT_NAME, bookShortNames[bookIndex])
             db.insertWithOnConflict(TABLE_BOOK_NAMES, null, values, SQLiteDatabase.CONFLICT_REPLACE)
         }
     }
