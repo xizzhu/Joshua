@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.reading.toolbar
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
-import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Spinner
@@ -44,7 +43,7 @@ interface ToolbarView : MVPView {
 
     fun onCurrentVerseIndexUpdated(verseIndex: VerseIndex)
 
-    fun onBookNamesUpdated(bookNames: List<String>)
+    fun onBookShortNamesUpdated(bookNames: List<String>)
 
     fun onFailedToNavigateToTranslationManagement()
 
@@ -117,7 +116,7 @@ class ReadingToolbar : Toolbar, ToolbarView {
 
     private val titleBuilder = StringBuilder()
     private val downloadedTranslations = ArrayList<TranslationInfo>()
-    private val bookNames = ArrayList<String>()
+    private val bookShortNames = ArrayList<String>()
     private var currentTranslation = ""
     private var verseIndex = VerseIndex.INVALID
 
@@ -186,18 +185,18 @@ class ReadingToolbar : Toolbar, ToolbarView {
     }
 
     private fun updateTitle() {
-        if (bookNames.isEmpty() || !verseIndex.isValid()) {
+        if (bookShortNames.isEmpty() || !verseIndex.isValid()) {
             return
         }
 
         titleBuilder.setLength(0)
-        titleBuilder.append(bookNames[verseIndex.bookIndex]).append(", ").append(verseIndex.chapterIndex + 1)
+        titleBuilder.append(bookShortNames[verseIndex.bookIndex]).append(", ").append(verseIndex.chapterIndex + 1)
         title = titleBuilder.toString()
     }
 
-    override fun onBookNamesUpdated(bookNames: List<String>) {
-        this.bookNames.clear()
-        this.bookNames.addAll(bookNames)
+    override fun onBookShortNamesUpdated(bookNames: List<String>) {
+        this.bookShortNames.clear()
+        this.bookShortNames.addAll(bookNames)
         updateTitle()
     }
 

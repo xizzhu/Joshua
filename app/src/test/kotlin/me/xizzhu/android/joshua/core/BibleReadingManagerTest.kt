@@ -120,6 +120,13 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
+    fun testBookShortNames() {
+        val expected = ArrayList<String>(MockContents.kjvBookShortNames)
+        val actual = runBlocking { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) }
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun testVerses() {
         val expected = ArrayList<Verse>(MockContents.kjvVerses)
         val actual = runBlocking { bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0) }

@@ -34,7 +34,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
             currentTranslation.filter { it.isNotEmpty() }
                     .consumeEach {
                         view?.onCurrentTranslationUpdated(it)
-                        view?.onBookNamesUpdated(readingInteractor.readBookNames(it))
+                        view?.onBookShortNamesUpdated(readingInteractor.readBookShortNames(it))
                     }
         }
         launch(Dispatchers.Main) {

@@ -71,12 +71,12 @@ class ToolbarPresenterTest : BaseUnitTest() {
     fun testObserveCurrentTranslation() {
         runBlocking {
             verify(toolbarView, never()).onCurrentTranslationUpdated(any())
-            verify(toolbarView, never()).onBookNamesUpdated(any())
+            verify(toolbarView, never()).onBookShortNamesUpdated(any())
 
-            `when`(readingInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+            `when`(readingInteractor.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
             currentTranslationChannel.send(MockContents.kjvShortName)
             verify(toolbarView, times(1)).onCurrentTranslationUpdated(MockContents.kjvShortName)
-            verify(toolbarView, times(1)).onBookNamesUpdated(MockContents.kjvBookNames)
+            verify(toolbarView, times(1)).onBookShortNamesUpdated(MockContents.kjvBookShortNames)
         }
     }
 
