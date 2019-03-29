@@ -73,6 +73,7 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
     override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation {
         var inputStream: ZipInputStream? = null
         val bookNames = ArrayList<String>()
+        val bookShortNames = ArrayList<String>()
         val verses = HashMap<Pair<Int, Int>, List<String>>()
         try {
             val response = translationService.fetchTranslation(translationInfo.shortName).await()
@@ -89,7 +90,9 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
                 val bufferedSource = inputStream.source().buffer()
                 val entryName = zipEntry.name
                 if (entryName == "books.json") {
-                    bookNames.addAll(booksAdapter.fromJson(bufferedSource)!!.books)
+                    val books = booksAdapter.fromJson(bufferedSource)!!
+                    bookNames.addAll(books.bookNames)
+                    bookShortNames.addAll(books.bookShortNames)
                 } else {
                     val split = entryName.substring(0, entryName.length - 5).split("-")
                     verses[Pair(split[0].toInt(), split[1].toInt())] =
@@ -114,7 +117,7 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
             }
         }
 
-        return RemoteTranslation(translationInfo, bookNames, verses)
+        return RemoteTranslation(translationInfo, bookNames, bookShortNames, verses)
     }
 }
 
@@ -161,6 +164,7 @@ private data class TranslationList(@Json(name = "translations") val translations
 private data class Books(@Json(name = "shortName") val shortName: String,
                          @Json(name = "name") val name: String,
                          @Json(name = "language") val language: String,
-                         @Json(name = "books") val books: List<String>)
+                         @Json(name = "bookNames") val bookNames: List<String>,
+                         @Json(name = "bookShortNames") val bookShortNames: List<String>)
 
 private data class Chapter(@Json(name = "verses") val verses: List<String>)

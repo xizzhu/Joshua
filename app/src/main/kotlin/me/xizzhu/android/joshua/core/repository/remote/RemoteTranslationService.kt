@@ -35,6 +35,7 @@ data class RemoteTranslationInfo(val shortName: String,
 
 data class RemoteTranslation(val translationInfo: RemoteTranslationInfo,
                              val bookNames: List<String>,
+                             val bookShortNames: List<String>,
                              val verses: Map<Pair<Int, Int>, List<String>>)
 
 interface RemoteTranslationService {
