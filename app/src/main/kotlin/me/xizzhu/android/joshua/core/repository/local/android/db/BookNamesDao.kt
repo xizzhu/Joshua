@@ -65,6 +65,23 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun readShortName(translationShortName: String): List<String> {
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_SHORT_NAME),
+                    "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName), null, null,
+                    "$COLUMN_BOOK_INDEX ASC")
+            val bookNames = ArrayList<String>(Bible.BOOK_COUNT)
+            while (cursor.moveToNext()) {
+                bookNames.add(cursor.getString(0))
+            }
+            return bookNames
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    @WorkerThread
     fun read(translations: List<String>, bookIndex: Int): Map<String, String> {
         if (translations.isEmpty() || bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT) {
             return emptyMap()
