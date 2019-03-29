@@ -32,14 +32,20 @@ data class SearchedVerse(val verseIndex: VerseIndex, private val bookName: Strin
         // We don't expect users to change locale that frequently.
         @SuppressLint("ConstantLocale")
         private val DEFAULT_LOCALE = Locale.getDefault()
+
+        private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
+        private val KEYWORD_STYLE_SPAN = StyleSpan(Typeface.BOLD)
+        private val KEYWORD_SIZE_SPAN = RelativeSizeSpan(1.2F)
+        private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
     private var textForDisplay: CharSequence? = null
 
     fun getTextForDisplay(): CharSequence {
         if (textForDisplay == null) {
-            val builder = SpannableStringBuilder()
-            builder.append(bookName)
+            SPANNABLE_STRING_BUILDER.clear()
+            SPANNABLE_STRING_BUILDER.clearSpans()
+            SPANNABLE_STRING_BUILDER.append(bookName)
                     .append(' ')
                     .append((verseIndex.chapterIndex + 1).toString())
                     .append(':')
@@ -48,21 +54,26 @@ data class SearchedVerse(val verseIndex: VerseIndex, private val bookName: Strin
                     .append(text)
 
             // makes the book name & verse index smaller
-            val textStartIndex = builder.length - text.length
-            builder.setSpan(RelativeSizeSpan(0.95F), 0, textStartIndex, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            val textStartIndex = SPANNABLE_STRING_BUILDER.length - text.length
+            SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, textStartIndex, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
 
             // highlights the keywords
-            val lowerCase = builder.toString().toLowerCase(DEFAULT_LOCALE)
-            for (keyword in query.trim().replace("\\s+", " ").split(" ")) {
+            val lowerCase = SPANNABLE_STRING_BUILDER.toString().toLowerCase(DEFAULT_LOCALE)
+            for ((index, keyword) in query.trim().replace("\\s+", " ").split(" ").withIndex()) {
                 val start = lowerCase.indexOf(keyword.toLowerCase(DEFAULT_LOCALE), textStartIndex)
                 if (start > 0) {
                     val end = start + keyword.length
-                    builder.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                    builder.setSpan(RelativeSizeSpan(1.2F), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                    if (index == 0) {
+                        SPANNABLE_STRING_BUILDER.setSpan(KEYWORD_STYLE_SPAN, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                        SPANNABLE_STRING_BUILDER.setSpan(KEYWORD_SIZE_SPAN, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                    } else {
+                        SPANNABLE_STRING_BUILDER.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                        SPANNABLE_STRING_BUILDER.setSpan(RelativeSizeSpan(1.2F), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                    }
                 }
             }
 
-            textForDisplay = builder
+            textForDisplay = SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
         }
         return textForDisplay!!
     }
