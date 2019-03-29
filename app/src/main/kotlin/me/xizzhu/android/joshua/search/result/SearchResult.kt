@@ -47,10 +47,14 @@ data class SearchedVerse(val verseIndex: VerseIndex, private val bookName: Strin
                     .append('\n')
                     .append(text)
 
-            val startIndex = builder.length - text.length
+            // makes the book name & verse index smaller
+            val textStartIndex = builder.length - text.length
+            builder.setSpan(RelativeSizeSpan(0.95F), 0, textStartIndex, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+
+            // highlights the keywords
             val lowerCase = builder.toString().toLowerCase(DEFAULT_LOCALE)
             for (keyword in query.trim().replace("\\s+", " ").split(" ")) {
-                val start = lowerCase.indexOf(keyword.toLowerCase(DEFAULT_LOCALE), startIndex)
+                val start = lowerCase.indexOf(keyword.toLowerCase(DEFAULT_LOCALE), textStartIndex)
                 if (start > 0) {
                     val end = start + keyword.length
                     builder.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
