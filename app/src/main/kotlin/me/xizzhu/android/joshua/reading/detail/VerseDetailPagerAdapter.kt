@@ -24,7 +24,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.viewpager.widget.PagerAdapter
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Verse
 
 class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     companion object {
@@ -42,7 +41,7 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val view = inflater.inflate(R.layout.page_verse_detail, container, false)
         (view.findViewById(R.id.detail) as TextView).text = when (position) {
-            PAGE_VERSES -> verseDetail?.getStringForDisplay()
+            PAGE_VERSES -> verseDetail?.getTextForDisplay()
             else -> ""
         }
 

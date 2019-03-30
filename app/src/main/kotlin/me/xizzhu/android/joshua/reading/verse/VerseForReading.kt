@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -94,7 +95,7 @@ data class VerseForReading(val verse: Verse, private val totalVerseCount: Int) {
                 SPANNABLE_STRING_BUILDER.clearSpans()
                 SPANNABLE_STRING_BUILDER.append(STRING_BUILDER)
                 val length = SPANNABLE_STRING_BUILDER.length
-                SPANNABLE_STRING_BUILDER.setSpan(PARALLEL_VERSE_SIZE_SPAN, primaryTextLength, length, 0)
+                SPANNABLE_STRING_BUILDER.setSpan(PARALLEL_VERSE_SIZE_SPAN, primaryTextLength, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 SPANNABLE_STRING_BUILDER.subSequence(0, length)
             }
         }

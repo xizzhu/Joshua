@@ -16,36 +16,44 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.RelativeSizeSpan
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import java.lang.StringBuilder
 
 data class VerseDetail(val verse: Verse) {
     companion object {
-        private val STRING_BUILDER = StringBuilder()
+        private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
 
-        private fun buildVerseForDisplay(out: StringBuilder, verseIndex: VerseIndex, text: Verse.Text) {
+        private fun buildVerseForDisplay(out: SpannableStringBuilder, verseIndex: VerseIndex, text: Verse.Text) {
             if (out.isNotEmpty()) {
                 out.append('\n').append('\n')
             }
+
+            val startIndex = out.length
             out.append(text.translationShortName).append(", ").append(text.bookName).append(' ')
-                    .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                    .append('\n').append(text.text)
+                    .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
+            out.setSpan(RelativeSizeSpan(0.95F), startIndex, out.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+
+            out.append('\n').append(text.text)
         }
     }
 
-    private var stringForDisplay: String? = null
+    private var stringForDisplay: CharSequence? = null
 
-    fun getStringForDisplay(): String {
+    fun getTextForDisplay(): CharSequence {
         if (stringForDisplay == null) {
-            STRING_BUILDER.setLength(0)
+            SPANNABLE_STRING_BUILDER.clear()
+            SPANNABLE_STRING_BUILDER.clearSpans()
 
-            buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, verse.text)
+            buildVerseForDisplay(SPANNABLE_STRING_BUILDER, verse.verseIndex, verse.text)
             for (text in verse.parallel) {
-                buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, text)
+                buildVerseForDisplay(SPANNABLE_STRING_BUILDER, verse.verseIndex, text)
             }
 
-            stringForDisplay = STRING_BUILDER.toString()
+            stringForDisplay = SPANNABLE_STRING_BUILDER
         }
         return stringForDisplay!!
     }
