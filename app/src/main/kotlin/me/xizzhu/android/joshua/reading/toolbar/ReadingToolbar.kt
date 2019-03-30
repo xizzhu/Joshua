@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.getActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import java.lang.StringBuilder
 
@@ -125,7 +126,10 @@ class ReadingToolbar : Toolbar, ToolbarView {
     }
 
     override fun onNoTranslationsDownloaded() {
-        DialogHelper.showDialog(context, false, R.string.dialog_no_translation_downloaded,
+        // The toolbar is using own theme, so try to use the Activity context to make sure the dialog
+        // is consistent.
+        DialogHelper.showDialog(context.getActivity() ?: context,
+                false, R.string.dialog_no_translation_downloaded,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.openTranslationManagement()
                 },

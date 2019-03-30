@@ -24,6 +24,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.getActivity
 import me.xizzhu.android.joshua.utils.MVPView
 
 interface ToolbarView : MVPView {
@@ -81,7 +82,10 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
     override fun onQueryTextChange(newText: String): Boolean = false
 
     override fun onError(query: String) {
-        DialogHelper.showDialog(context, true, R.string.dialog_search_error,
+        // The toolbar is using own theme, so try to use the Activity context to make sure the dialog
+        // is consistent.
+        DialogHelper.showDialog(context.getActivity() ?: context,
+                true, R.string.dialog_search_error,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.search(query)
                 })
