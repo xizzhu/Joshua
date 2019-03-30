@@ -33,6 +33,16 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
             return length
         }
     }
+    private val bookShortNamesCache = object : LruCache<String, List<String>>((maxMemory / 16L).toInt()) {
+        override fun sizeOf(key: String, bookShortNames: List<String>): Int {
+            // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
+            var length = 0
+            for (bookName in bookShortNames) {
+                length += bookName.length * 4
+            }
+            return length
+        }
+    }
     private val versesCache = object : LruCache<String, List<Verse>>((maxMemory / 8L).toInt()) {
         override fun sizeOf(key: String, verses: List<Verse>): Int {
             // each Verse contains 3 integers and 2 strings (we don't cache parallel translations yet)
@@ -64,6 +74,15 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
             bookNamesCache.put(translationShortName, bookNames)
         }
         return bookNames
+    }
+
+    suspend fun readBookShortNames(translationShortName: String): List<String> {
+        var bookShortNames = bookShortNamesCache.get(translationShortName)
+        if (bookShortNames == null) {
+            bookShortNames = localReadingStorage.readBookShortNames(translationShortName)
+            bookShortNamesCache.put(translationShortName, bookShortNames)
+        }
+        return bookShortNames
     }
 
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {

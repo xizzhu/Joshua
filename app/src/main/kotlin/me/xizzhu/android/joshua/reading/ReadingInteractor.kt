@@ -99,6 +99,9 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)
 
+    suspend fun readBookShortNames(translationShortName: String): List<String> =
+            bibleReadingManager.readBookShortNames(translationShortName)
+
     fun openSearch() {
         navigator.navigate(readingActivity, Navigator.SCREEN_SEARCH)
     }

@@ -28,6 +28,6 @@ class MockRemoteTranslationService : RemoteTranslationService {
 
     override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation {
         return RemoteTranslation(RemoteTranslationInfo.fromTranslationInfo(MockContents.kjvTranslationInfo),
-                MockContents.kjvBookNames, MockContents.kjvVerses.toMap())
+                MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
     }
 }

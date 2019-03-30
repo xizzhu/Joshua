@@ -66,7 +66,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         channel.send(100)
 
         localTranslationStorage.saveTranslation(translation.translationInfo.toTranslationInfo(true),
-                translation.bookNames, translation.verses)
+                translation.bookNames, translation.bookShortNames, translation.verses)
     }
 
     suspend fun removeTranslation(translationInfo: TranslationInfo) {

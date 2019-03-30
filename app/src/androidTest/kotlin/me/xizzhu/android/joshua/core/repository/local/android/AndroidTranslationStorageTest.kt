@@ -72,7 +72,7 @@ class AndroidTranslationStorageTest : BaseSqliteTest() {
     fun testSaveTranslationThenRead() {
         runBlocking {
             androidTranslationStorage.saveTranslation(MockContents.kjvDownloadedTranslationInfo,
-                    MockContents.kjvBookNames, MockContents.kjvVerses.toMap())
+                    MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
 
             val actual = androidTranslationStorage.readTranslations()
             assertEquals(1, actual.size)
@@ -84,7 +84,7 @@ class AndroidTranslationStorageTest : BaseSqliteTest() {
     fun testSaveTranslationWithDownloadedFalseThenRead() {
         runBlocking {
             androidTranslationStorage.saveTranslation(MockContents.kjvTranslationInfo,
-                    MockContents.kjvBookNames, MockContents.kjvVerses.toMap())
+                    MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
 
             val actual = androidTranslationStorage.readTranslations()
             assertEquals(1, actual.size)
@@ -105,7 +105,7 @@ class AndroidTranslationStorageTest : BaseSqliteTest() {
     fun testRemoveTranslation() {
         runBlocking {
             androidTranslationStorage.saveTranslation(MockContents.kjvTranslationInfo,
-                    MockContents.kjvBookNames, MockContents.kjvVerses.toMap())
+                    MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
             assertTrue(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
             assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(MockContents.kjvShortName))
             assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(

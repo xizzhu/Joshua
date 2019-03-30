@@ -84,6 +84,9 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingRepository.readBookNames(translationShortName)
 
+    suspend fun readBookShortNames(translationShortName: String): List<String> =
+            bibleReadingRepository.readBookShortNames(translationShortName)
+
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingRepository.readVerses(translationShortName, bookIndex, chapterIndex)
 

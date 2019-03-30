@@ -32,6 +32,7 @@ class BookNamesDaoTest : BaseSqliteTest() {
     @Test
     fun testEmptyTable() {
         assertTrue(androidDatabase.bookNamesDao.read("not_exist").isEmpty())
+        assertTrue(androidDatabase.bookNamesDao.readShortName("not_exist").isEmpty())
 
         for (bookIndex in 0 until Bible.BOOK_COUNT) {
             assertTrue(androidDatabase.bookNamesDao.read(bookIndex).isEmpty())
@@ -41,22 +42,24 @@ class BookNamesDaoTest : BaseSqliteTest() {
     @Test
     fun testSaveThenRead() {
         val translationShortName = MockContents.kjvShortName
-        androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames)
+        androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
         assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(translationShortName))
+        assertEquals(MockContents.kjvBookShortNames, androidDatabase.bookNamesDao.readShortName(translationShortName))
     }
 
     @Test
     fun testSaveOverrideThenReadBookNames() {
         val translationShortName = MockContents.kjvShortName
-        androidDatabase.bookNamesDao.save(translationShortName, listOf("random_1", "whatever_2"))
-        androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames)
+        androidDatabase.bookNamesDao.save(translationShortName, listOf("random_1", "whatever_2"), listOf("ok_3", "fine_4"))
+        androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
         assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(translationShortName))
+        assertEquals(MockContents.kjvBookShortNames, androidDatabase.bookNamesDao.readShortName(translationShortName))
     }
 
     @Test
     fun testSaveThenReadParallel() {
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames)
+        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
+        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
         assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[1]),
                 Pair(MockContents.cuvShortName, MockContents.cuvBookNames[1])),
                 androidDatabase.bookNamesDao.read(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
@@ -64,10 +67,10 @@ class BookNamesDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveOverrideThenReadParallel() {
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"))
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, listOf("random_3", "whatever_4"))
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames)
+        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"), listOf("ok_3", "fine_4"))
+        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, listOf("random_3", "whatever_4"), listOf("ok_1", "fine_2"))
+        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
+        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
         assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[1]),
                 Pair(MockContents.cuvShortName, MockContents.cuvBookNames[1])),
                 androidDatabase.bookNamesDao.read(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
@@ -75,8 +78,8 @@ class BookNamesDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenReadByBookIndex() {
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames)
+        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
+        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
 
         val expected = mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[0]),
                 Pair(MockContents.cuvShortName, MockContents.cuvBookNames[0]))
@@ -86,10 +89,10 @@ class BookNamesDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveOverrideThenReadByBookIndex() {
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"))
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, listOf("random_3", "whatever_4"))
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames)
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames)
+        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"), listOf("ok_3", "fine_4"))
+        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, listOf("random_3", "whatever_4"), listOf("ok_2", "fine_1"))
+        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
+        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
 
         val expected = mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[0]),
                 Pair(MockContents.cuvShortName, MockContents.cuvBookNames[0]))
@@ -102,15 +105,18 @@ class BookNamesDaoTest : BaseSqliteTest() {
         val translationShortName = "not_exist"
         androidDatabase.bookNamesDao.remove(translationShortName)
         assertTrue(androidDatabase.bookNamesDao.read(translationShortName).isEmpty())
+        assertTrue(androidDatabase.bookNamesDao.readShortName(translationShortName).isEmpty())
     }
 
     @Test
     fun testSaveThenRemove() {
         val translationShortName = MockContents.kjvShortName
-        androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames)
+        androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
         assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(translationShortName))
+        assertEquals(MockContents.kjvBookShortNames, androidDatabase.bookNamesDao.readShortName(translationShortName))
 
         androidDatabase.bookNamesDao.remove(translationShortName)
         assertTrue(androidDatabase.bookNamesDao.read(translationShortName).isEmpty())
+        assertTrue(androidDatabase.bookNamesDao.readShortName(translationShortName).isEmpty())
     }
 }

@@ -26,6 +26,7 @@ object MockContents {
     val kjvTranslationInfo = TranslationInfo(kjvShortName, "Authorized King James", "en_gb", 1860978L, false)
     val kjvDownloadedTranslationInfo = TranslationInfo(kjvShortName, "Authorized King James", "en_gb", 1860978L, true)
     val kjvBookNames: List<String> = arrayListOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
+    val kjvBookShortNames: List<String> = arrayListOf("Gen.", "Ex.", "Lev.", "Num.", "Deut.")
     val kjvVerses: List<Verse> = arrayListOf(
             Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "Genesis", "In the beginning God created the heaven and the earth."), emptyList()),
             Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "Genesis", "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), emptyList()),
@@ -44,6 +45,7 @@ object MockContents {
     const val cuvShortName = "中文和合本"
     val cuvTranslationInfo = TranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L, false)
     val cuvBookNames: List<String> = arrayListOf("创世记", "出埃及记", "利未记", "民数记", "申命记")
+    val cuvBookShortNames: List<String> = arrayListOf("创", "出", "利", "民", "申")
     val cuvVerses: List<Verse> = arrayListOf(
             Verse(VerseIndex(0, 0, 0), Verse.Text(cuvShortName, "创世记", "起初神创造天地。"), emptyList()),
             Verse(VerseIndex(0, 0, 1), Verse.Text(cuvShortName, "创世记", "地是空虚混沌。渊面黑暗。神的灵运行在水面上。"), emptyList()),
