@@ -58,7 +58,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
 
-            proguardFile(getDefaultProguardFile("proguard-android-optimize.txt"))
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
