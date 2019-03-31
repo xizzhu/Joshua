@@ -24,6 +24,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
 
@@ -63,6 +64,7 @@ class SwipeRefresher : SwipeRefreshLayout, SwipeRefresherView {
     private lateinit var presenter: SwipeRefresherPresenter
 
     init {
+        setColorSchemeResources(R.color.primary_dark, R.color.primary, R.color.dark_cyan, R.color.dark_lime)
         setOnRefreshListener(onRefreshListener)
     }
 
