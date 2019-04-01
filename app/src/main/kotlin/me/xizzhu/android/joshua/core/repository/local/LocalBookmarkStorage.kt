@@ -22,7 +22,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 interface LocalBookmarkStorage {
     suspend fun read(): List<Bookmark>
 
-    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark>
+    suspend fun read(verseIndex: VerseIndex): Bookmark
 
     suspend fun save(bookmark: Bookmark)
 

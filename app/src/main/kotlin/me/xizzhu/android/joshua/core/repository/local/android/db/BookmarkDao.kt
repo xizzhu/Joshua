@@ -65,20 +65,18 @@ class BookmarkDao(private val sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
-    fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark> {
+    fun read(verseIndex: VerseIndex): Bookmark {
         var cursor: Cursor? = null
         try {
-            cursor = db.query(TABLE_BOOKMARK, arrayOf(COLUMN_VERSE_INDEX, COLUMN_TIMESTAMP),
-                    "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?", arrayOf(bookIndex.toString(), chapterIndex.toString()),
-                    null, null, "$COLUMN_VERSE_INDEX ASC")
-            val bookmarks = ArrayList<Bookmark>(cursor.count)
-            val verseIndex = cursor.getColumnIndex(COLUMN_VERSE_INDEX)
-            val timestamp = cursor.getColumnIndex(COLUMN_TIMESTAMP)
-            while (cursor.moveToNext()) {
-                bookmarks.add(Bookmark(VerseIndex(bookIndex, chapterIndex, cursor.getInt(verseIndex)),
-                        cursor.getLong(timestamp)))
+            cursor = db.query(TABLE_BOOKMARK, arrayOf(COLUMN_TIMESTAMP),
+                    "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
+                    arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
+                    null, null, null)
+            return if (cursor.moveToNext()) {
+                Bookmark(verseIndex, cursor.getLong(0))
+            } else {
+                Bookmark(verseIndex, -1L)
             }
-            return bookmarks
         } finally {
             cursor?.close()
         }

@@ -25,15 +25,8 @@ class MockBookmarkStorage : LocalBookmarkStorage {
 
     override suspend fun read(): List<Bookmark> = bookmarks.values.toList()
 
-    override suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark> {
-        val results = mutableListOf<Bookmark>()
-        for ((_, bookmark) in bookmarks) {
-            if (bookmark.verseIndex.bookIndex == bookIndex && bookmark.verseIndex.chapterIndex == chapterIndex) {
-                results.add(bookmark)
-            }
-        }
-        return results
-    }
+    override suspend fun read(verseIndex: VerseIndex): Bookmark =
+            bookmarks.getOrDefault(verseIndex, Bookmark(verseIndex, -1L))
 
     override suspend fun save(bookmark: Bookmark) {
         bookmarks[bookmark.verseIndex] = bookmark

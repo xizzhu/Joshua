@@ -18,13 +18,14 @@ package me.xizzhu.android.joshua.core
 
 import me.xizzhu.android.joshua.core.repository.BookmarkRepository
 
-data class Bookmark(val verseIndex: VerseIndex, val timestamp: Long)
+data class Bookmark(val verseIndex: VerseIndex, val timestamp: Long) {
+    fun isValid(): Boolean = timestamp > 0L
+}
 
 class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
     suspend fun read(): List<Bookmark> = bookmarkRepository.read()
 
-    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark> =
-            bookmarkRepository.read(bookIndex, chapterIndex)
+    suspend fun read(verseIndex: VerseIndex): Bookmark = bookmarkRepository.read(verseIndex)
 
     suspend fun save(bookmark: Bookmark) {
         bookmarkRepository.save(bookmark)
