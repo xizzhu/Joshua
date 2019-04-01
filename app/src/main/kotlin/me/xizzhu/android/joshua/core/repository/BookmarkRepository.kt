@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core
+package me.xizzhu.android.joshua.core.repository
 
-import me.xizzhu.android.joshua.core.repository.BookmarkRepository
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.repository.local.LocalBookmarkStorage
 
-data class Bookmark(val verseIndex: VerseIndex, val timestamp: Long)
-
-class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
-    suspend fun read(): List<Bookmark> = bookmarkRepository.read()
+class BookmarkRepository(private val localBookmarkStorage: LocalBookmarkStorage) {
+    suspend fun read(): List<Bookmark> = localBookmarkStorage.read()
 
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark> =
-            bookmarkRepository.read(bookIndex, chapterIndex)
+            localBookmarkStorage.read(bookIndex, chapterIndex)
 
     suspend fun save(bookmark: Bookmark) {
-        bookmarkRepository.save(bookmark)
+        localBookmarkStorage.save(bookmark)
     }
 
     suspend fun remove(verseIndex: VerseIndex) {
-        bookmarkRepository.remove(verseIndex)
+        localBookmarkStorage.remove(verseIndex)
     }
 }
