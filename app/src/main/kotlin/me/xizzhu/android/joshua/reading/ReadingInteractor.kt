@@ -39,6 +39,7 @@ import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val navigator: Navigator,
                         private val bibleReadingManager: BibleReadingManager,
+                        private val bookmarkManager: BookmarkManager,
                         private val readingProgressManager: ReadingProgressManager,
                         private val translationManager: TranslationManager,
                         settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
@@ -155,6 +156,16 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun stopTrackingReadingProgress() {
         readingProgressManager.stopTracking()
+    }
+
+    suspend fun readBookmark(verseIndex: VerseIndex): Bookmark = bookmarkManager.read(verseIndex)
+
+    suspend fun addBookmark(verseIndex: VerseIndex) {
+        bookmarkManager.save(Bookmark(verseIndex, System.currentTimeMillis()))
+    }
+
+    suspend fun removeBookmark(verseIndex: VerseIndex) {
+        bookmarkManager.remove(verseIndex)
     }
 }
 

@@ -17,13 +17,18 @@
 package me.xizzhu.android.joshua.reading.detail
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class VerseDetailPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<VerseDetailView>() {
+    private var verse: Verse? = null
+
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -34,10 +39,13 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor) : M
                 if (verseIndex.isValid()) {
                     view?.show()
 
-                    val verse = readingInteractor.readVerse(
-                            readingInteractor.observeCurrentTranslation().first(), verseIndex)
-                    val bookmarked = false // TODO
-                    view?.showVerse(VerseDetail(verse, bookmarked))
+                    val verse = async {
+                        readingInteractor.readVerse(
+                                readingInteractor.observeCurrentTranslation().first(), verseIndex)
+                    }
+                    val bookmarked = async { readingInteractor.readBookmark(verseIndex) }
+                    this@VerseDetailPresenter.verse = verse.await()
+                    view?.showVerse(VerseDetail(verse.await(), bookmarked.await().isValid()))
                 } else {
                     view?.hide()
                 }
@@ -47,5 +55,23 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor) : M
 
     fun hide() {
         launch(Dispatchers.Main) { readingInteractor.closeVerseDetail() }
+    }
+
+    fun addBookmark(verseIndex: VerseIndex) {
+        launch(Dispatchers.Main) {
+            if (verse != null) {
+                readingInteractor.addBookmark(verseIndex)
+                view?.showVerse(VerseDetail(verse!!, true))
+            }
+        }
+    }
+
+    fun removeBookmark(verseIndex: VerseIndex) {
+        launch(Dispatchers.Main) {
+            if (verse != null) {
+                readingInteractor.removeBookmark(verseIndex)
+                view?.showVerse(VerseDetail(verse!!, false))
+            }
+        }
     }
 }
