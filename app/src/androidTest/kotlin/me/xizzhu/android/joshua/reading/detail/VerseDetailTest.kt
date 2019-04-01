@@ -25,14 +25,14 @@ class VerseDetailTest : BaseUnitTest() {
     @Test
     fun testGetStringForDisplay() {
         val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = VerseDetail(MockContents.kjvVerses[0]).getTextForDisplay().toString()
+        val actual = VerseDetail(MockContents.kjvVerses[0], false).getTextForDisplay().toString()
         assertEquals(expected, actual)
     }
 
     @Test
     fun testGetStringForDisplayWithParallelTranslation() {
         val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth.\n\n中文和合本, 创世记 1:1\n起初神创造天地。"
-        val actual = VerseDetail(MockContents.kjvVersesWithCuvParallel[0]).getTextForDisplay().toString()
+        val actual = VerseDetail(MockContents.kjvVersesWithCuvParallel[0], false).getTextForDisplay().toString()
         assertEquals(expected, actual)
     }
 }

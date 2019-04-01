@@ -68,7 +68,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             verseDetailOpenState.send(verseIndex)
 
             verify(verseDetailView, times(1)).show()
-            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0]))
+            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], false))
             verify(verseDetailView, never()).hide()
         }
     }

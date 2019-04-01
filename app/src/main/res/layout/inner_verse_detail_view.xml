@@ -13,12 +13,27 @@
             android:layout_height="1dp"
             android:background="#EEEEEE" />
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tab_layout"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            app:tabMode="scrollable" />
+            android:orientation="horizontal">
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:tabMode="scrollable" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/bookmark"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackground"
+                android:padding="@dimen/padding_small"
+                android:src="@drawable/ic_bookmark" />
+        </LinearLayout>
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/view_pager"

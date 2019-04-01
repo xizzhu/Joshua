@@ -30,11 +30,14 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor) : M
         launch(Dispatchers.Main) {
             val verseDetailOpenState = readingInteractor.observeVerseDetailOpenState()
             receiveChannels.add(verseDetailOpenState)
-            verseDetailOpenState.consumeEach {
-                if (it.isValid()) {
+            verseDetailOpenState.consumeEach { verseIndex ->
+                if (verseIndex.isValid()) {
                     view?.show()
-                    view?.showVerse(VerseDetail(readingInteractor.readVerse(
-                            readingInteractor.observeCurrentTranslation().first(), it)))
+
+                    val verse = readingInteractor.readVerse(
+                            readingInteractor.observeCurrentTranslation().first(), verseIndex)
+                    val bookmarked = false // TODO
+                    view?.showVerse(VerseDetail(verse, bookmarked))
                 } else {
                     view?.hide()
                 }
