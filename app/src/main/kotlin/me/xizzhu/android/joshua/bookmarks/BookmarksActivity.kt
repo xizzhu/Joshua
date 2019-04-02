@@ -18,12 +18,47 @@ package me.xizzhu.android.joshua.bookmarks
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.ui.LoadingSpinner
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import javax.inject.Inject
 
 class BookmarksActivity : BaseSettingsActivity() {
+    @Inject
+    lateinit var bookmarksInteractor: BookmarksInteractor
+
+    @Inject
+    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
+
+    @Inject
+    lateinit var bookmarksPresenter: BookmarksPresenter
+
+    private lateinit var loadingSpinner: LoadingSpinner
+    private lateinit var bookmarksListView: BookmarksListView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_bookmarks)
+        loadingSpinner = findViewById(R.id.loading_spinner)
+
+        bookmarksListView = findViewById(R.id.bookmarks)
+        bookmarksListView.setPresenter(bookmarksPresenter)
+
+        observeSettings(bookmarksInteractor)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        loadingSpinnerPresenter.attachView(loadingSpinner)
+        bookmarksPresenter.attachView(bookmarksListView)
+    }
+
+    override fun onStop() {
+        loadingSpinnerPresenter.detachView()
+        bookmarksPresenter.detachView()
+
+        super.onStop()
     }
 }

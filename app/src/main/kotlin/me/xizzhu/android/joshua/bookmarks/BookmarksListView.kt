@@ -19,11 +19,24 @@ package me.xizzhu.android.joshua.bookmarks
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.RecyclerView
+import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.utils.BaseSettingsView
 
-class BookmarksListView : RecyclerView {
+interface BookmarksView : BaseSettingsView {}
+
+class BookmarksListView : RecyclerView, BookmarksView {
+    private lateinit var presenter: BookmarksPresenter
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    fun setPresenter(presenter: BookmarksPresenter) {
+        this.presenter = presenter
+    }
+
+    override fun onSettingsUpdated(settings: Settings) {
+    }
 }

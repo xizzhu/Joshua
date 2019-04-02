@@ -17,6 +17,28 @@
 package me.xizzhu.android.joshua.bookmarks
 
 import dagger.Module
+import dagger.Provides
+import me.xizzhu.android.joshua.ActivityScope
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.BookmarkManager
+import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 
 @Module
-class BookmarksModule {}
+class BookmarksModule {
+    @Provides
+    @ActivityScope
+    fun provideBookmarksInteractor(bookmarksActivity: BookmarksActivity,
+                                   bibleReadingManager: BibleReadingManager,
+                                   bookmarkManager: BookmarkManager,
+                                   settingsManager: SettingsManager): BookmarksInteractor =
+            BookmarksInteractor(bookmarksActivity, bibleReadingManager, bookmarkManager, settingsManager)
+
+    @Provides
+    fun provideLoadingSpinnerPresenter(bookmarksInteractor: BookmarksInteractor): LoadingSpinnerPresenter =
+            LoadingSpinnerPresenter(bookmarksInteractor.observeBookmarksLoadingState())
+
+    @Provides
+    fun provideBookmarksPresenter(bookmarksInteractor: BookmarksInteractor): BookmarksPresenter =
+            BookmarksPresenter(bookmarksInteractor)
+}
