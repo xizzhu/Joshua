@@ -70,6 +70,10 @@ class MockLocalReadingStorage : LocalReadingStorage {
         return readVerses(translationShortName, bookIndex, chapterIndex, "")
     }
 
+    override suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse {
+        return readVerses(translationShortName, verseIndex.bookIndex, verseIndex.chapterIndex, "")[verseIndex.verseIndex]
+    }
+
     override suspend fun readVerseWithParallel(translationShortName: String, verseIndex: VerseIndex): Verse {
         return readVerses(translationShortName, verseIndex.bookIndex, verseIndex.chapterIndex, "")[verseIndex.verseIndex]
     }

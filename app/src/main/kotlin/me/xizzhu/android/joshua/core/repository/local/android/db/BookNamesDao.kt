@@ -146,6 +146,24 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun read(translationShortName: String, bookIndex: Int): String {
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
+                    "$COLUMN_TRANSLATION_SHORT_NAME = ? AND $COLUMN_BOOK_INDEX = ?",
+                    arrayOf(translationShortName, bookIndex.toString()),
+                    null, null, null)
+            return if (cursor.moveToNext()) {
+                cursor.getString(0)
+            } else {
+                ""
+            }
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    @WorkerThread
     fun save(translationShortName: String, bookNames: List<String>, bookShortNames: List<String>) {
         val values = ContentValues(3)
         values.put(COLUMN_TRANSLATION_SHORT_NAME, translationShortName)

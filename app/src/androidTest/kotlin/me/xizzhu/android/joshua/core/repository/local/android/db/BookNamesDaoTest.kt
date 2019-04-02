@@ -45,6 +45,9 @@ class BookNamesDaoTest : BaseSqliteTest() {
         androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
         assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(translationShortName))
         assertEquals(MockContents.kjvBookShortNames, androidDatabase.bookNamesDao.readShortName(translationShortName))
+        for ((index, bookName) in MockContents.kjvBookNames.withIndex()) {
+            assertEquals(bookName, androidDatabase.bookNamesDao.read(translationShortName, index))
+        }
     }
 
     @Test
@@ -54,6 +57,9 @@ class BookNamesDaoTest : BaseSqliteTest() {
         androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
         assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(translationShortName))
         assertEquals(MockContents.kjvBookShortNames, androidDatabase.bookNamesDao.readShortName(translationShortName))
+        for ((index, bookName) in MockContents.kjvBookNames.withIndex()) {
+            assertEquals(bookName, androidDatabase.bookNamesDao.read(translationShortName, index))
+        }
     }
 
     @Test

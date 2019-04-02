@@ -117,6 +117,25 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
         }
     }
 
+    override suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse {
+        return withContext(Dispatchers.IO) {
+            val db = androidDatabase.readableDatabase
+            try {
+                db.beginTransaction()
+
+                val verse = androidDatabase.translationDao.read(translationShortName, verseIndex,
+                        androidDatabase.bookNamesDao.read(translationShortName, verseIndex.bookIndex))
+
+                db.setTransactionSuccessful()
+                return@withContext verse
+            } finally {
+                if (db.inTransaction()) {
+                    db.endTransaction()
+                }
+            }
+        }
+    }
+
     override suspend fun readVerseWithParallel(translationShortName: String, verseIndex: VerseIndex): Verse {
         return withContext(Dispatchers.IO) {
             val db = androidDatabase.readableDatabase
