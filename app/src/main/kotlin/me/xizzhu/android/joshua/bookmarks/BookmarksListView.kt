@@ -26,6 +26,8 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface BookmarksView : BaseSettingsView {
+    fun onBookmarksLoaded(bookmarks: Bookmarks)
+
     fun onBookmarksLoadFailed()
 }
 
@@ -43,6 +45,11 @@ class BookmarksListView : RecyclerView, BookmarksView {
     }
 
     override fun onSettingsUpdated(settings: Settings) {
+        // TODO
+    }
+
+    override fun onBookmarksLoaded(bookmarks: Bookmarks) {
+        // TODO
     }
 
     override fun onBookmarksLoadFailed() {

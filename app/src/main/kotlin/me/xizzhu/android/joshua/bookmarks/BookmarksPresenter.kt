@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.bookmarks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
@@ -32,10 +33,17 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor)
     fun loadBookmarks() {
         launch(Dispatchers.Main) {
             try {
-                val bookmarks = async { bookmarksInteractor.readBookmarks() }
-                val currentTranslation = async { bookmarksInteractor.readCurrentTranslation() }
-
-                // TODO loads the verses
+                view?.onBookmarksLoaded(withContext(Dispatchers.Default) {
+                    val bookmarksAsync = async { bookmarksInteractor.readBookmarks() }
+                    val currentTranslation = withContext(Dispatchers.Default) { bookmarksInteractor.readCurrentTranslation() }
+                    val bookmarks: ArrayList<BookmarkForDisplay> = ArrayList()
+                    for (bookmark in bookmarksAsync.await()) {
+                        bookmarks.add(BookmarkForDisplay(bookmark.verseIndex,
+                                bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
+                                bookmark.timestamp))
+                    }
+                    return@withContext bookmarks
+                })
 
                 bookmarksInteractor.notifyLoadingFinished()
             } catch (e: Exception) {
