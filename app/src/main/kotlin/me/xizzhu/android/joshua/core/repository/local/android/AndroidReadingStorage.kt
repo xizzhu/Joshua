@@ -117,7 +117,7 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
         }
     }
 
-    override suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse {
+    override suspend fun readVerseWithParallel(translationShortName: String, verseIndex: VerseIndex): Verse {
         return withContext(Dispatchers.IO) {
             val db = androidDatabase.readableDatabase
             try {
