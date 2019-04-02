@@ -50,6 +50,8 @@ interface ToolbarView : MVPView {
 
     fun onFailedToNavigateToReadingProgress()
 
+    fun onFailedToNavigateToBookmarks()
+
     fun onFailedToNavigateToSettings()
 }
 
@@ -94,6 +96,10 @@ class ReadingToolbar : Toolbar, ToolbarView {
         when (menuItem.itemId) {
             R.id.action_reading_progress -> {
                 presenter.openReadingProgress()
+                return@OnMenuItemClickListener true
+            }
+            R.id.action_bookmarks -> {
+                presenter.openBookmarks()
                 return@OnMenuItemClickListener true
             }
             R.id.action_settings -> {
@@ -215,6 +221,13 @@ class ReadingToolbar : Toolbar, ToolbarView {
         DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_reading_progress_error,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.openReadingProgress()
+                })
+    }
+
+    override fun onFailedToNavigateToBookmarks() {
+        DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_bookmarks_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.openBookmarks()
                 })
     }
 

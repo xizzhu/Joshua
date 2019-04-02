@@ -23,6 +23,8 @@ import dagger.Provides
 import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
+import me.xizzhu.android.joshua.bookmarks.BookmarksActivity
+import me.xizzhu.android.joshua.bookmarks.BookmarksModule
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.core.repository.*
 import me.xizzhu.android.joshua.core.repository.local.*
@@ -164,6 +166,10 @@ class RepositoryModule {
 
 @Module
 abstract class ActivityModule {
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [(BookmarksModule::class)])
+    abstract fun contributeBookmarksActivity(): BookmarksActivity
+
     @ActivityScope
     @ContributesAndroidInjector(modules = [(ReadingProgressModule::class)])
     abstract fun contributeReadingProgressActivity(): ReadingProgressActivity
