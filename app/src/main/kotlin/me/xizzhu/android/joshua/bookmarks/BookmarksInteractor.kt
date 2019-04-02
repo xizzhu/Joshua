@@ -19,7 +19,9 @@ package me.xizzhu.android.joshua.bookmarks
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.BookmarkManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
@@ -37,4 +39,8 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
     suspend fun notifyLoadingFinished() {
         bookmarksLoadingState.send(LoadingSpinnerState.NOT_LOADING)
     }
+
+    suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
+
+    suspend fun readBookmarks(): List<Bookmark> = bookmarkManager.read()
 }

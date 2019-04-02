@@ -17,12 +17,17 @@
 package me.xizzhu.android.joshua.bookmarks
 
 import android.content.Context
+import android.content.DialogInterface
 import android.util.AttributeSet
 import androidx.recyclerview.widget.RecyclerView
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
-interface BookmarksView : BaseSettingsView {}
+interface BookmarksView : BaseSettingsView {
+    fun onBookmarksLoadFailed()
+}
 
 class BookmarksListView : RecyclerView, BookmarksView {
     private lateinit var presenter: BookmarksPresenter
@@ -38,5 +43,12 @@ class BookmarksListView : RecyclerView, BookmarksView {
     }
 
     override fun onSettingsUpdated(settings: Settings) {
+    }
+
+    override fun onBookmarksLoadFailed() {
+        DialogHelper.showDialog(context, true, R.string.dialog_load_bookmarks_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.loadBookmarks()
+                })
     }
 }

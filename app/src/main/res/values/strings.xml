@@ -42,6 +42,7 @@
     <string name="dialog_navigate_to_reading_progress_error">Failed to open reading progress view, retry?</string>
     <string name="dialog_navigate_to_bookmarks_error">Failed to open bookmarks view, retry?</string>
     <string name="dialog_load_reading_progress_error">Failed to load reading progress, retry?</string>
+    <string name="dialog_load_bookmarks_error">Failed to load bookmarks, retry?</string>
     <string name="dialog_navigate_to_settings_error">Failed to open settings, retry?</string>
     <string name="dialog_update_settings_error">Failed to update settings, retry?</string>
 

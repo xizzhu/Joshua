@@ -16,7 +16,32 @@
 
 package me.xizzhu.android.joshua.bookmarks
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor)
-    : BaseSettingsPresenter<BookmarksView>(bookmarksInteractor) {}
+    : BaseSettingsPresenter<BookmarksView>(bookmarksInteractor) {
+    override fun onViewAttached() {
+        super.onViewAttached()
+        loadBookmarks()
+    }
+
+    fun loadBookmarks() {
+        launch(Dispatchers.Main) {
+            try {
+                val bookmarks = async { bookmarksInteractor.readBookmarks() }
+                val currentTranslation = async { bookmarksInteractor.readCurrentTranslation() }
+
+                // TODO loads the verses
+
+                bookmarksInteractor.notifyLoadingFinished()
+            } catch (e: Exception) {
+                Log.e(tag, e, "Failed to load bookmarks")
+                view?.onBookmarksLoadFailed()
+            }
+        }
+    }
+}
