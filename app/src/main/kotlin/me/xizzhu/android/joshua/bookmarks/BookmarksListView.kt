@@ -16,14 +16,14 @@
 
 package me.xizzhu.android.joshua.bookmarks
 
-import android.os.Bundle
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import android.content.Context
+import android.util.AttributeSet
+import androidx.recyclerview.widget.RecyclerView
 
-class BookmarksActivity : BaseSettingsActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+class BookmarksListView : RecyclerView {
+    constructor(context: Context) : super(context)
 
-        setContentView(R.layout.activity_bookmarks)
-    }
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 }
