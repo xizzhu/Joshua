@@ -12,7 +12,6 @@
         android:layout_marginTop="@dimen/padding_small"
         android:layout_marginEnd="@dimen/padding"
         android:layout_marginBottom="@dimen/padding_small"
-        android:background="@drawable/background_verse"
         android:orientation="horizontal">
 
         <TextView
