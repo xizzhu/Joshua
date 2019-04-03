@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
@@ -49,6 +50,18 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor)
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to load bookmarks")
                 view?.onBookmarksLoadFailed()
+            }
+        }
+    }
+
+    fun selectVerse(verseToSelect: VerseIndex) {
+        launch(Dispatchers.Main) {
+            try {
+                bookmarksInteractor.selectVerse(verseToSelect)
+                bookmarksInteractor.openReading()
+            } catch (e: Exception) {
+                Log.e(tag, e, "Failed to select verse and open reading activity")
+                view?.onVerseSelectionFailed(verseToSelect)
             }
         }
     }

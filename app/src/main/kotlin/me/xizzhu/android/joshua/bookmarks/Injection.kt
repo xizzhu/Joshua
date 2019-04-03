@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.bookmarks
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.BookmarkManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -31,8 +32,9 @@ class BookmarksModule {
     fun provideBookmarksInteractor(bookmarksActivity: BookmarksActivity,
                                    bibleReadingManager: BibleReadingManager,
                                    bookmarkManager: BookmarkManager,
+                                   navigator: Navigator,
                                    settingsManager: SettingsManager): BookmarksInteractor =
-            BookmarksInteractor(bookmarksActivity, bibleReadingManager, bookmarkManager, settingsManager)
+            BookmarksInteractor(bookmarksActivity, bibleReadingManager, bookmarkManager, navigator, settingsManager)
 
     @Provides
     fun provideLoadingSpinnerPresenter(bookmarksInteractor: BookmarksInteractor): LoadingSpinnerPresenter =

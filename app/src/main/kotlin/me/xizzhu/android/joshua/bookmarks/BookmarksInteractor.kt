@@ -20,6 +20,7 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.first
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
@@ -27,6 +28,7 @@ import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
                           private val bibleReadingManager: BibleReadingManager,
                           private val bookmarkManager: BookmarkManager,
+                          private val navigator: Navigator,
                           settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
     private val bookmarksLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
 
@@ -43,4 +45,12 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
 
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingManager.readVerse(translationShortName, verseIndex)
+
+    suspend fun selectVerse(verseIndex: VerseIndex) {
+        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
+    }
+
+    fun openReading() {
+        navigator.navigate(bookmarksActivity, Navigator.SCREEN_READING)
+    }
 }
