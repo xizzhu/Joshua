@@ -36,7 +36,30 @@ data class VerseIndex(val bookIndex: Int, val chapterIndex: Int, val verseIndex:
 }
 
 data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<Text>) {
-    data class Text(val translationShortName: String, val bookName: String, val text: String)
+    companion object {
+        val INVALID = Verse(VerseIndex.INVALID, Text.INVALID, emptyList())
+    }
+
+    fun isValid(): Boolean {
+        if (!verseIndex.isValid() || !text.isValid()) {
+            return false
+        }
+        for (p in parallel) {
+            if (!p.isValid()) {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    data class Text(val translationShortName: String, val bookName: String, val text: String) {
+        companion object {
+            val INVALID = Text("", "", "")
+        }
+
+        fun isValid(): Boolean = translationShortName.isNotEmpty() && bookName.isNotEmpty() // text can be empty
+    }
 }
 
 class BibleReadingManager(private val bibleReadingRepository: BibleReadingRepository) {
@@ -96,6 +119,9 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
 
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingRepository.readVerse(translationShortName, verseIndex)
+
+    suspend fun readVerseWithParallel(translationShortName: String, verseIndex: VerseIndex): Verse =
+            bibleReadingRepository.readVerseWithParallel(translationShortName, verseIndex)
 
     suspend fun search(translationShortName: String, query: String): List<Verse> =
             bibleReadingRepository.search(translationShortName, query)

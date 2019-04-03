@@ -94,11 +94,15 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
     }
 
     override fun onTranslationLongClicked(translationInfo: TranslationInfo) {
-        if (translationInfo.downloaded && translationInfo.shortName != currentTranslation) {
-            DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
-                    DialogInterface.OnClickListener { _, _ ->
-                        presenter.removeTranslation(translationInfo)
-                    })
+        if (translationInfo.downloaded) {
+            if (translationInfo.shortName != currentTranslation) {
+                DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
+                        DialogInterface.OnClickListener { _, _ ->
+                            presenter.removeTranslation(translationInfo)
+                        })
+            }
+        } else {
+            presenter.downloadTranslation(translationInfo)
         }
     }
 

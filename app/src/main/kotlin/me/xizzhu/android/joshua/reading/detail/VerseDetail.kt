@@ -23,7 +23,7 @@ import android.text.style.RelativeSizeSpan
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 
-data class VerseDetail(val verse: Verse) {
+data class VerseDetail(val verse: Verse, val bookmarked: Boolean) {
     companion object {
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
 

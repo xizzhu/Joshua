@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua
 import android.app.Activity
 import android.content.Intent
 import androidx.annotation.IntDef
+import me.xizzhu.android.joshua.bookmarks.BookmarksActivity
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.search.SearchActivity
@@ -31,9 +32,11 @@ class Navigator {
         const val SCREEN_SEARCH = 1
         const val SCREEN_TRANSLATION_MANAGEMENT = 2
         const val SCREEN_READING_PROGRESS = 3
-        const val SCREEN_SETTINGS = 4
+        const val SCREEN_BOOKMARKS = 4
+        const val SCREEN_SETTINGS = 5
 
-        @IntDef(SCREEN_READING, SCREEN_SEARCH, SCREEN_TRANSLATION_MANAGEMENT, SCREEN_READING_PROGRESS, SCREEN_SETTINGS)
+        @IntDef(SCREEN_READING, SCREEN_SEARCH, SCREEN_TRANSLATION_MANAGEMENT, SCREEN_READING_PROGRESS,
+                SCREEN_BOOKMARKS, SCREEN_SETTINGS)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Screen
     }
@@ -44,6 +47,7 @@ class Navigator {
             SCREEN_SEARCH -> Intent(activity, SearchActivity::class.java)
             SCREEN_TRANSLATION_MANAGEMENT -> Intent(activity, TranslationManagementActivity::class.java)
             SCREEN_READING_PROGRESS -> Intent(activity, ReadingProgressActivity::class.java)
+            SCREEN_BOOKMARKS -> Intent(activity, BookmarksActivity::class.java)
             SCREEN_SETTINGS -> Intent(activity, SettingsActivity::class.java)
             else -> throw IllegalArgumentException("Unknown screen - $screen")
         }

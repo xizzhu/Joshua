@@ -17,10 +17,14 @@
 package me.xizzhu.android.joshua.reading.detail
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
@@ -37,6 +41,11 @@ interface VerseDetailView : MVPView {
 }
 
 class VerseDetailViewLayout : FrameLayout, VerseDetailView {
+    companion object {
+        private val ON_COLOR_FILTER = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
+        private val OFF_COLOR_FILTER = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
+    }
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -52,6 +61,10 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
     private val adapter: VerseDetailPagerAdapter
     private val tabLayout: TabLayout
     private val viewPager: ViewPager
+
+    private val bookmark: ImageView
+
+    private var verseDetail: VerseDetail? = null
 
     init {
         View.inflate(context, R.layout.inner_verse_detail_view, this)
@@ -70,6 +83,17 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
                 translationY = height.toFloat()
             }
         })
+
+        bookmark = findViewById(R.id.bookmark)
+        bookmark.setOnClickListener {
+            if (verseDetail != null) {
+                if (verseDetail!!.bookmarked) {
+                    presenter.removeBookmark(verseDetail!!.verse.verseIndex)
+                } else {
+                    presenter.addBookmark(verseDetail!!.verse.verseIndex)
+                }
+            }
+        }
     }
 
     fun setPresenter(presenter: VerseDetailPresenter) {
@@ -77,7 +101,9 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
     }
 
     override fun showVerse(verseDetail: VerseDetail) {
+        this.verseDetail = verseDetail
         adapter.setVerse(verseDetail)
+        bookmark.colorFilter = if (verseDetail.bookmarked) ON_COLOR_FILTER else OFF_COLOR_FILTER
     }
 
     override fun show() {

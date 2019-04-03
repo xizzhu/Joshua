@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.detail
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -64,11 +65,12 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         runBlocking {
             val verseIndex = VerseIndex(0, 0, 0)
             `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
+            `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
 
             verseDetailOpenState.send(verseIndex)
 
             verify(verseDetailView, times(1)).show()
-            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0]))
+            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], false))
             verify(verseDetailView, never()).hide()
         }
     }
@@ -81,6 +83,38 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             verify(verseDetailView, never()).show()
             verify(verseDetailView, never()).showVerse(any())
             verify(verseDetailView, times(1)).hide()
+        }
+    }
+
+    @Test
+    fun testAddBookmark() {
+        runBlocking {
+            val verseIndex = VerseIndex(0, 0, 0)
+            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
+            `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
+
+            verseDetailOpenState.send(verseIndex)
+            verify(verseDetailView, never()).showVerse(VerseDetail(MockContents.kjvVerses[0], true))
+            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], false))
+
+            verseDetailPresenter.addBookmark(verseIndex)
+            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], true))
+        }
+    }
+
+    @Test
+    fun testRemoveBookmark() {
+        runBlocking {
+            val verseIndex = VerseIndex(0, 0, 0)
+            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
+            `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, 12345L))
+
+            verseDetailOpenState.send(verseIndex)
+            verify(verseDetailView, never()).showVerse(VerseDetail(MockContents.kjvVerses[0], false))
+            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], true))
+
+            verseDetailPresenter.removeBookmark(verseIndex)
+            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], false))
         }
     }
 }

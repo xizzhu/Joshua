@@ -123,6 +123,25 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
             try {
                 db.beginTransaction()
 
+                val verse = androidDatabase.translationDao.read(translationShortName, verseIndex,
+                        androidDatabase.bookNamesDao.read(translationShortName, verseIndex.bookIndex))
+
+                db.setTransactionSuccessful()
+                return@withContext verse
+            } finally {
+                if (db.inTransaction()) {
+                    db.endTransaction()
+                }
+            }
+        }
+    }
+
+    override suspend fun readVerseWithParallel(translationShortName: String, verseIndex: VerseIndex): Verse {
+        return withContext(Dispatchers.IO) {
+            val db = androidDatabase.readableDatabase
+            try {
+                db.beginTransaction()
+
                 val translationToBookNames = androidDatabase.bookNamesDao.read(verseIndex.bookIndex)
                 val translationToText = androidDatabase.translationDao.read(translationToBookNames, verseIndex).toMutableMap()
                 val primaryText = translationToText.remove(translationShortName)!!

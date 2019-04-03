@@ -39,6 +39,7 @@ import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val navigator: Navigator,
                         private val bibleReadingManager: BibleReadingManager,
+                        private val bookmarkManager: BookmarkManager,
                         private val readingProgressManager: ReadingProgressManager,
                         private val translationManager: TranslationManager,
                         settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
@@ -94,7 +95,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
             bibleReadingManager.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
 
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
-            bibleReadingManager.readVerse(translationShortName, verseIndex)
+            bibleReadingManager.readVerseWithParallel(translationShortName, verseIndex)
 
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)
@@ -112,6 +113,10 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     fun openReadingProgress() {
         navigator.navigate(readingActivity, Navigator.SCREEN_READING_PROGRESS)
+    }
+
+    fun openBookmarks() {
+        navigator.navigate(readingActivity, Navigator.SCREEN_BOOKMARKS)
     }
 
     fun openSettings() {
@@ -155,6 +160,16 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun stopTrackingReadingProgress() {
         readingProgressManager.stopTracking()
+    }
+
+    suspend fun readBookmark(verseIndex: VerseIndex): Bookmark = bookmarkManager.read(verseIndex)
+
+    suspend fun addBookmark(verseIndex: VerseIndex) {
+        bookmarkManager.save(Bookmark(verseIndex, System.currentTimeMillis()))
+    }
+
+    suspend fun removeBookmark(verseIndex: VerseIndex) {
+        bookmarkManager.remove(verseIndex)
     }
 }
 

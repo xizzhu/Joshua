@@ -98,6 +98,15 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         }
     }
 
+    fun openBookmarks() {
+        try {
+            readingInteractor.openBookmarks()
+        } catch (e: Exception) {
+            Log.e(tag, e, "Failed to open bookmarks activity")
+            view?.onFailedToNavigateToBookmarks()
+        }
+    }
+
     fun openSettings() {
         try {
             readingInteractor.openSettings()

@@ -26,6 +26,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         const val DATABASE_VERSION = 1
     }
 
+    val bookmarkDao = BookmarkDao(this)
     val bookNamesDao = BookNamesDao(this)
     val metadataDao = MetadataDao(this)
     val readingProgressDao = ReadingProgressDao(this)
@@ -35,6 +36,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     override fun onCreate(db: SQLiteDatabase) {
         db.beginTransaction()
         try {
+            BookmarkDao.createTable(db)
             BookNamesDao.createTable(db)
             MetadataDao.createTable(db)
             ReadingProgressDao.createTable(db)

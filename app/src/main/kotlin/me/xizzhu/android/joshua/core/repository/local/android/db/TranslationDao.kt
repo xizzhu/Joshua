@@ -156,6 +156,33 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun read(translationShortName: String, verseIndex: VerseIndex, bookName: String): Verse {
+        var cursor: Cursor? = null
+        db.beginTransaction()
+        try {
+            if (!db.hasTable(translationShortName) || !verseIndex.isValid() || bookName.isEmpty()) {
+                return Verse.INVALID
+            }
+
+            cursor = db.query(translationShortName, arrayOf(COLUMN_TEXT),
+                    "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
+                    arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
+                    null, null, null)
+            val verse = if (cursor.moveToNext()) {
+                Verse(verseIndex, Verse.Text(translationShortName, bookName, cursor.getString(0)), emptyList())
+            } else {
+                Verse.INVALID
+            }
+
+            db.setTransactionSuccessful()
+            return verse
+        } finally {
+            db.endTransaction()
+            cursor?.close()
+        }
+    }
+
+    @WorkerThread
     fun search(translationShortName: String, bookNames: List<String>, query: String): List<Verse> {
         var cursor: Cursor? = null
         try {

@@ -23,20 +23,13 @@ import dagger.Provides
 import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
+import me.xizzhu.android.joshua.bookmarks.BookmarksActivity
+import me.xizzhu.android.joshua.bookmarks.BookmarksModule
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
-import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
-import me.xizzhu.android.joshua.core.repository.SettingsRepository
-import me.xizzhu.android.joshua.core.repository.TranslationRepository
-import me.xizzhu.android.joshua.core.repository.local.LocalReadingProgressStorage
-import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
-import me.xizzhu.android.joshua.core.repository.local.LocalSettingsStorage
-import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
-import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingProgressStorage
+import me.xizzhu.android.joshua.core.repository.*
+import me.xizzhu.android.joshua.core.repository.local.*
+import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
-import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingStorage
-import me.xizzhu.android.joshua.core.repository.local.android.AndroidSettingsStorage
-import me.xizzhu.android.joshua.core.repository.local.android.AndroidTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
@@ -75,6 +68,11 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
+    fun provideBookmarkManager(bookmarkRepository: BookmarkRepository): BookmarkManager =
+            BookmarkManager(bookmarkRepository)
+
+    @Provides
+    @Singleton
     fun provideReadingProgressManager(bibleReadingManager: BibleReadingManager,
                                       readingProgressRepository: ReadingProgressRepository): ReadingProgressManager =
             ReadingProgressManager(bibleReadingManager, readingProgressRepository)
@@ -95,6 +93,11 @@ class RepositoryModule {
     @Provides
     @Singleton
     fun provideAndroidDatabase(app: App): AndroidDatabase = AndroidDatabase(app)
+
+    @Provides
+    @Singleton
+    fun provideLocalBookmarkStorage(androidDatabase: AndroidDatabase): LocalBookmarkStorage =
+            AndroidBookmarkStorage(androidDatabase)
 
     @Provides
     @Singleton
@@ -141,6 +144,11 @@ class RepositoryModule {
 
     @Provides
     @Singleton
+    fun provideBookmarkRepository(localBookmarkStorage: LocalBookmarkStorage): BookmarkRepository =
+            BookmarkRepository(localBookmarkStorage)
+
+    @Provides
+    @Singleton
     fun provideReadingProgressRepository(localReadingProgressStorage: LocalReadingProgressStorage): ReadingProgressRepository =
             ReadingProgressRepository(localReadingProgressStorage)
 
@@ -158,6 +166,10 @@ class RepositoryModule {
 
 @Module
 abstract class ActivityModule {
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [(BookmarksModule::class)])
+    abstract fun contributeBookmarksActivity(): BookmarksActivity
+
     @ActivityScope
     @ContributesAndroidInjector(modules = [(ReadingProgressModule::class)])
     abstract fun contributeReadingProgressActivity(): ReadingProgressActivity

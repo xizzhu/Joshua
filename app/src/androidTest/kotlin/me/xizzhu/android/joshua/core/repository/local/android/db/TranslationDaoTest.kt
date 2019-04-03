@@ -107,6 +107,9 @@ class TranslationDaoTest : BaseSqliteTest() {
                 else -> fail()
             }
         }
+
+        assertEquals(MockContents.kjvVerses[0], androidDatabase.translationDao.read(
+                MockContents.kjvShortName, VerseIndex(0, 0, 0), "Genesis"))
     }
 
     @Test
