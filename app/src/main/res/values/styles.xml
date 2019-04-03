@@ -40,7 +40,6 @@
 
     <style name="Text.Body">
         <item name="android:fontFamily">@string/font_family_regular</item>
-        <item name="android:textSize">@dimen/text_body</item>
     </style>
 
     <style name="Text.Body.Dark">
@@ -53,7 +52,6 @@
 
     <style name="Text.Caption">
         <item name="android:fontFamily">@string/font_family_medium</item>
-        <item name="android:textSize">@dimen/text_caption</item>
     </style>
 
     <style name="Text.Caption.Dark">
