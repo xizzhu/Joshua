@@ -48,22 +48,20 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
         var cursor: Cursor? = null
         try {
             cursor = db.query(TABLE_TRANSLATION_INFO, null, null, null, null, null, null, null)
-            val count = cursor.count
-            return if (count == 0) {
-                emptyList()
-            } else {
-                val shortName = cursor.getColumnIndex(COLUMN_SHORT_NAME)
-                val name = cursor.getColumnIndex(COLUMN_NAME)
-                val language = cursor.getColumnIndex(COLUMN_LANGUAGE)
-                val size = cursor.getColumnIndex(COLUMN_SIZE)
-                val downloaded = cursor.getColumnIndex(COLUMN_DOWNLOADED)
+            return with(cursor) {
                 val translations = ArrayList<TranslationInfo>(count)
-                while (cursor.moveToNext()) {
-                    translations.add(TranslationInfo(cursor.getString(shortName),
-                            cursor.getString(name), cursor.getString(language),
-                            cursor.getLong(size), cursor.getInt(downloaded) == 1))
+                if (count > 0) {
+                    val shortName = getColumnIndex(COLUMN_SHORT_NAME)
+                    val name = getColumnIndex(COLUMN_NAME)
+                    val language = getColumnIndex(COLUMN_LANGUAGE)
+                    val size = getColumnIndex(COLUMN_SIZE)
+                    val downloaded = getColumnIndex(COLUMN_DOWNLOADED)
+                    while (moveToNext()) {
+                        translations.add(TranslationInfo(getString(shortName), getString(name),
+                                getString(language), getLong(size), getInt(downloaded) == 1))
+                    }
                 }
-                translations
+                return@with translations
             }
         } finally {
             cursor?.close()
@@ -89,11 +87,13 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
     }
 
     private fun TranslationInfo.saveTo(`out`: ContentValues) {
-        `out`.put(COLUMN_SHORT_NAME, shortName)
-        `out`.put(COLUMN_NAME, name)
-        `out`.put(COLUMN_LANGUAGE, language)
-        `out`.put(COLUMN_SIZE, size)
-        `out`.put(COLUMN_DOWNLOADED, if (downloaded) 1 else 0)
+        with(`out`) {
+            put(COLUMN_SHORT_NAME, shortName)
+            put(COLUMN_NAME, name)
+            put(COLUMN_LANGUAGE, language)
+            put(COLUMN_SIZE, size)
+            put(COLUMN_DOWNLOADED, if (downloaded) 1 else 0)
+        }
     }
 
     @WorkerThread

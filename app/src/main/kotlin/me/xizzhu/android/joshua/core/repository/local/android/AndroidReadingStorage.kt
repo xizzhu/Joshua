@@ -27,9 +27,11 @@ import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : LocalReadingStorage {
     override suspend fun readCurrentVerseIndex(): VerseIndex {
         return withContext(Dispatchers.IO) {
-            val keys = listOf(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0"),
+            val keys = listOf(
+                    Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, "0"),
                     Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, "0"),
-                    Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0"))
+                    Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, "0")
+            )
             val values = androidDatabase.metadataDao.read(keys)
             VerseIndex(values.getValue(MetadataDao.KEY_CURRENT_BOOK_INDEX).toInt(),
                     values.getValue(MetadataDao.KEY_CURRENT_CHAPTER_INDEX).toInt(),
@@ -39,10 +41,11 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
 
     override suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         withContext(Dispatchers.IO) {
-            val entries = ArrayList<Pair<String, String>>(3)
-            entries.add(Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, verseIndex.bookIndex.toString()))
-            entries.add(Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, verseIndex.chapterIndex.toString()))
-            entries.add(Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, verseIndex.verseIndex.toString()))
+            val entries = listOf(
+                    Pair(MetadataDao.KEY_CURRENT_BOOK_INDEX, verseIndex.bookIndex.toString()),
+                    Pair(MetadataDao.KEY_CURRENT_CHAPTER_INDEX, verseIndex.chapterIndex.toString()),
+                    Pair(MetadataDao.KEY_CURRENT_VERSE_INDEX, verseIndex.verseIndex.toString())
+            )
             androidDatabase.metadataDao.save(entries)
         }
     }

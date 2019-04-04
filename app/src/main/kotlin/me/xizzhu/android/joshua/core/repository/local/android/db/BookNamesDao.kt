@@ -105,15 +105,17 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
         try {
             cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_NAME),
                     selection.toString(), selectionArgs, null, null, null)
-            val bookNames = HashMap<String, String>(translations.size)
-            if (cursor.count > 0) {
-                val translationShortName = cursor.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
-                val bookName = cursor.getColumnIndex(COLUMN_BOOK_NAME)
-                while (cursor.moveToNext()) {
-                    bookNames[cursor.getString(translationShortName)] = cursor.getString(bookName)
+            return with(cursor) {
+                val bookNames = HashMap<String, String>(count)
+                if (count > 0) {
+                    val translationShortName = getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
+                    val bookName = getColumnIndex(COLUMN_BOOK_NAME)
+                    while (moveToNext()) {
+                        bookNames[getString(translationShortName)] = getString(bookName)
+                    }
                 }
+                return@with bookNames
             }
-            return bookNames
         } finally {
             cursor?.close()
         }
@@ -129,17 +131,17 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
         try {
             cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_NAME),
                     "$COLUMN_BOOK_INDEX = ?", arrayOf(bookIndex.toString()), null, null, null)
-            val count = cursor.count
-            if (count > 0) {
+            return with(cursor) {
                 val bookNames = HashMap<String, String>(count)
-                val translationShortName = cursor.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
-                val bookName = cursor.getColumnIndex(COLUMN_BOOK_NAME)
-                while (cursor.moveToNext()) {
-                    bookNames[cursor.getString(translationShortName)] = cursor.getString(bookName)
+                if (count > 0) {
+                    val translationShortName = getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
+                    val bookName = getColumnIndex(COLUMN_BOOK_NAME)
+                    while (moveToNext()) {
+                        bookNames[getString(translationShortName)] = getString(bookName)
+                    }
                 }
-                return bookNames
+                return@with bookNames
             }
-            return emptyMap()
         } finally {
             cursor?.close()
         }
@@ -165,13 +167,15 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun save(translationShortName: String, bookNames: List<String>, bookShortNames: List<String>) {
-        val values = ContentValues(3)
-        values.put(COLUMN_TRANSLATION_SHORT_NAME, translationShortName)
-        for ((bookIndex, bookName) in bookNames.withIndex()) {
-            values.put(COLUMN_BOOK_INDEX, bookIndex)
-            values.put(COLUMN_BOOK_NAME, bookName)
-            values.put(COLUMN_BOOK_SHORT_NAME, bookShortNames[bookIndex])
-            db.insertWithOnConflict(TABLE_BOOK_NAMES, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+        val values = ContentValues(4)
+        with(values) {
+            put(COLUMN_TRANSLATION_SHORT_NAME, translationShortName)
+            for ((bookIndex, bookName) in bookNames.withIndex()) {
+                put(COLUMN_BOOK_INDEX, bookIndex)
+                put(COLUMN_BOOK_NAME, bookName)
+                put(COLUMN_BOOK_SHORT_NAME, bookShortNames[bookIndex])
+                db.insertWithOnConflict(TABLE_BOOK_NAMES, null, this, SQLiteDatabase.CONFLICT_REPLACE)
+            }
         }
     }
 
