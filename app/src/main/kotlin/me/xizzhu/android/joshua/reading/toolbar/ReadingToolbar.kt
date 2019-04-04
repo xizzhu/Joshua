@@ -116,9 +116,10 @@ class ReadingToolbar : Toolbar, ToolbarView {
         inflateMenu(R.menu.menu_bible_reading)
         setOnMenuItemClickListener(onMenuItemClickListener)
 
-        val translationSpinner = menu.findItem(R.id.action_translations).actionView as Spinner
-        translationSpinner.adapter = translationSpinnerAdapter
-        translationSpinner.onItemSelectedListener = translationSpinnerItemSelectedListener
+        (menu.findItem(R.id.action_translations).actionView as Spinner).apply {
+            adapter = translationSpinnerAdapter
+            onItemSelectedListener = translationSpinnerItemSelectedListener
+        }
     }
 
     private val titleBuilder = StringBuilder()

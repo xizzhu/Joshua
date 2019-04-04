@@ -59,18 +59,18 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor) : M
 
     fun addBookmark(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) {
-            if (verse != null) {
+            verse?.let { v ->
                 readingInteractor.addBookmark(verseIndex)
-                view?.showVerse(VerseDetail(verse!!, true))
+                view?.showVerse(VerseDetail(v, true))
             }
         }
     }
 
     fun removeBookmark(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) {
-            if (verse != null) {
+            verse?.let { v ->
                 readingInteractor.removeBookmark(verseIndex)
-                view?.showVerse(VerseDetail(verse!!, false))
+                view?.showVerse(VerseDetail(v, false))
             }
         }
     }

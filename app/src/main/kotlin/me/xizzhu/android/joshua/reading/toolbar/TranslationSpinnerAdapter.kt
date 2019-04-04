@@ -87,30 +87,31 @@ class TranslationSpinnerAdapter(context: Context, private val listener: Listener
             convertView.tag as DropDownViewHolder
         }
 
-        val translationShortName = translationShortNames[position]
-        viewHolder.title.text = translationShortName
+        return with(viewHolder) {
+            val translationShortName = translationShortNames[position]
+            title.text = translationShortName
 
-        viewHolder.checkBox.setOnCheckedChangeListener(null)
-        if (position < count - 1) {
-            if (currentTranslation == translationShortName) {
-                viewHolder.checkBox.isEnabled = false
-                viewHolder.checkBox.isChecked = true
+            checkBox.setOnCheckedChangeListener(null)
+            if (position < count - 1) {
+                if (currentTranslation == translationShortName) {
+                    checkBox.isEnabled = false
+                    checkBox.isChecked = true
+                } else {
+                    checkBox.isEnabled = true
+                    checkBox.isChecked = parallelTranslations.contains(translationShortName)
+                    checkBox.tag = translationShortName
+
+                    // Sets the listener after isChecked is updated, to avoid unwanted callback.
+                    checkBox.setOnCheckedChangeListener(checkBoxListener)
+                }
+
+                checkBox.visibility = View.VISIBLE
             } else {
-                viewHolder.checkBox.isEnabled = true
-                viewHolder.checkBox.isChecked = parallelTranslations.contains(translationShortName)
-                viewHolder.checkBox.tag = translationShortName
-
-                // Sets the listener after isChecked is updated, to avoid unwanted callback.
-                viewHolder.checkBox.setOnCheckedChangeListener(checkBoxListener)
+                // Hides the check box for last item ("More")
+                checkBox.visibility = View.INVISIBLE
             }
-
-            viewHolder.checkBox.visibility = View.VISIBLE
-        } else {
-            // Hides the check box for last item ("More")
-            viewHolder.checkBox.visibility = View.INVISIBLE
+            return@with rootView
         }
-
-        return viewHolder.rootView
     }
 }
 

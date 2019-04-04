@@ -86,11 +86,11 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
         bookmark = findViewById(R.id.bookmark)
         bookmark.setOnClickListener {
-            if (verseDetail != null) {
-                if (verseDetail!!.bookmarked) {
-                    presenter.removeBookmark(verseDetail!!.verse.verseIndex)
+            verseDetail?.let { detail ->
+                if (detail.bookmarked) {
+                    presenter.removeBookmark(detail.verse.verseIndex)
                 } else {
-                    presenter.addBookmark(verseDetail!!.verse.verseIndex)
+                    presenter.addBookmark(detail.verse.verseIndex)
                 }
             }
         }
