@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading.detail
 
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -30,10 +31,14 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPView
 
 interface VerseDetailView : MVPView {
-    fun showVerse(verseDetail: VerseDetail)
+    fun onVerseDetailLoaded(verseDetail: VerseDetail)
+
+    fun onVerseDetailLoadFailed(verseIndex: VerseIndex)
 
     fun show()
 
@@ -100,10 +105,17 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
         this.presenter = presenter
     }
 
-    override fun showVerse(verseDetail: VerseDetail) {
+    override fun onVerseDetailLoaded(verseDetail: VerseDetail) {
         this.verseDetail = verseDetail
         adapter.setVerse(verseDetail)
         bookmark.colorFilter = if (verseDetail.bookmarked) ON_COLOR_FILTER else OFF_COLOR_FILTER
+    }
+
+    override fun onVerseDetailLoadFailed(verseIndex: VerseIndex) {
+        DialogHelper.showDialog(context, true, R.string.dialog_load_verse_detail_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.loadVerseDetail(verseIndex)
+                })
     }
 
     override fun show() {
