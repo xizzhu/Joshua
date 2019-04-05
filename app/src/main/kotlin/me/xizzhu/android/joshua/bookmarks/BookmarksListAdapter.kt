@@ -80,8 +80,6 @@ private class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup
     }
 
     override fun onClick(v: View) {
-        if (currentBookmark != null) {
-            listener.onBookmarkClicked(currentBookmark!!.verseIndex)
-        }
+        currentBookmark?.let { bookmark -> listener.onBookmarkClicked(bookmark.verseIndex) }
     }
 }

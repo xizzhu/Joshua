@@ -49,17 +49,19 @@ class BookmarkDao(private val sqliteHelper: SQLiteOpenHelper) {
         var cursor: Cursor? = null
         try {
             cursor = db.query(TABLE_BOOKMARK, null, null, null, null, null, "$COLUMN_TIMESTAMP DESC")
-            val bookmarks = ArrayList<Bookmark>(cursor.count)
-            val bookIndex = cursor.getColumnIndex(COLUMN_BOOK_INDEX)
-            val chapterIndex = cursor.getColumnIndex(COLUMN_CHAPTER_INDEX)
-            val verseIndex = cursor.getColumnIndex(COLUMN_VERSE_INDEX)
-            val timestamp = cursor.getColumnIndex(COLUMN_TIMESTAMP)
-            while (cursor.moveToNext()) {
-                bookmarks.add(Bookmark(
-                        VerseIndex(cursor.getInt(bookIndex), cursor.getInt(chapterIndex), cursor.getInt(verseIndex)),
-                        cursor.getLong(timestamp)))
+            return with(cursor) {
+                val bookmarks = ArrayList<Bookmark>(count)
+                val bookIndex = getColumnIndex(COLUMN_BOOK_INDEX)
+                val chapterIndex = getColumnIndex(COLUMN_CHAPTER_INDEX)
+                val verseIndex = getColumnIndex(COLUMN_VERSE_INDEX)
+                val timestamp = getColumnIndex(COLUMN_TIMESTAMP)
+                while (moveToNext()) {
+                    bookmarks.add(
+                            Bookmark(VerseIndex(getInt(bookIndex), getInt(chapterIndex), getInt(verseIndex)),
+                                    getLong(timestamp)))
+                }
+                return@with bookmarks
             }
-            return bookmarks
         } finally {
             cursor?.close()
         }
@@ -84,10 +86,12 @@ class BookmarkDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     fun save(bookmark: Bookmark) {
         val values = ContentValues(4)
-        values.put(COLUMN_BOOK_INDEX, bookmark.verseIndex.bookIndex)
-        values.put(COLUMN_CHAPTER_INDEX, bookmark.verseIndex.chapterIndex)
-        values.put(COLUMN_VERSE_INDEX, bookmark.verseIndex.verseIndex)
-        values.put(COLUMN_TIMESTAMP, bookmark.timestamp)
+        with(values) {
+            put(COLUMN_BOOK_INDEX, bookmark.verseIndex.bookIndex)
+            put(COLUMN_CHAPTER_INDEX, bookmark.verseIndex.chapterIndex)
+            put(COLUMN_VERSE_INDEX, bookmark.verseIndex.verseIndex)
+            put(COLUMN_TIMESTAMP, bookmark.timestamp)
+        }
         db.insertWithOnConflict(TABLE_BOOKMARK, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 

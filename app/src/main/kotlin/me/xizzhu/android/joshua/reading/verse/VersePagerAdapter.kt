@@ -140,9 +140,7 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
     var settings: Settings? = null
         set(value) {
             field = value
-            if (value != null) {
-                adapter.setSettings(value)
-            }
+            value?.let { v -> adapter.setSettings(v) }
         }
 
     private val adapter = VerseListAdapter(context, inflater)

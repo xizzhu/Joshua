@@ -157,8 +157,6 @@ private class SearchResultViewHolder(inflater: LayoutInflater, parent: ViewGroup
     }
 
     override fun onClick(v: View) {
-        if (currentVerse != null) {
-            listener.onSearchResultClicked(currentVerse!!.verseIndex)
-        }
+        currentVerse?.let { verse -> listener.onSearchResultClicked(verse.verseIndex) }
     }
 }

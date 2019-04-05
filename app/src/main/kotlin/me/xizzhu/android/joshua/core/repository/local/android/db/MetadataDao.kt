@@ -87,11 +87,13 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
         try {
             cursor = db.query(TABLE_METADATA, arrayOf(COLUMN_KEY, COLUMN_VALUE),
                     selection.toString(), selectionArgs, null, null, null)
-            if (cursor.count > 0) {
-                val keyIndex = cursor.getColumnIndex(COLUMN_KEY)
-                val valueIndex = cursor.getColumnIndex(COLUMN_VALUE)
-                while (cursor.moveToNext()) {
-                    results[cursor.getString(keyIndex)] = cursor.getString(valueIndex)
+            with(cursor) {
+                if (count > 0) {
+                    val keyIndex = getColumnIndex(COLUMN_KEY)
+                    val valueIndex = getColumnIndex(COLUMN_VALUE)
+                    while (moveToNext()) {
+                        results[getString(keyIndex)] = getString(valueIndex)
+                    }
                 }
             }
             return results
@@ -103,8 +105,10 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
     @WorkerThread
     fun save(key: String, value: String) {
         val values = ContentValues(2)
-        values.put(COLUMN_KEY, key)
-        values.put(COLUMN_VALUE, value)
+        with(values) {
+            put(COLUMN_KEY, key)
+            put(COLUMN_VALUE, value)
+        }
         db.insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
@@ -114,8 +118,10 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
         try {
             val values = ContentValues(2)
             for (entry in entries) {
-                values.put(COLUMN_KEY, entry.first)
-                values.put(COLUMN_VALUE, entry.second)
+                with(values) {
+                    put(COLUMN_KEY, entry.first)
+                    put(COLUMN_VALUE, entry.second)
+                }
                 db.insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
 

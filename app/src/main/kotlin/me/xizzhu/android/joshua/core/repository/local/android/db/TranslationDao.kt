@@ -61,11 +61,14 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             cursor = db.query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?", arrayOf(bookIndex.toString(), chapterIndex.toString()),
                     null, null, "$COLUMN_VERSE_INDEX ASC")
-            val verses = ArrayList<Verse>(cursor.count)
-            var verseIndex = 0
-            while (cursor.moveToNext()) {
-                verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
-                        Verse.Text(translationShortName, bookName, cursor.getString(0)), emptyList()))
+            val verses = with(cursor) {
+                val verses = ArrayList<Verse>(count)
+                var verseIndex = 0
+                while (moveToNext()) {
+                    verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
+                            Verse.Text(translationShortName, bookName, getString(0)), emptyList()))
+                }
+                return@with verses
             }
 
             db.setTransactionSuccessful()
@@ -100,11 +103,13 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                             "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
                             arrayOf(bookIndex.toString(), chapterIndex.toString()),
                             null, null, "$COLUMN_VERSE_INDEX ASC")
-                    val texts = ArrayList<Verse.Text>(cursor.count)
-                    while (cursor.moveToNext()) {
-                        texts.add(Verse.Text(translation, bookName, cursor.getString(0)))
+                    results[translation] = with(cursor) {
+                        val texts = ArrayList<Verse.Text>(count)
+                        while (moveToNext()) {
+                            texts.add(Verse.Text(translation, bookName, getString(0)))
+                        }
+                        return@with texts
                     }
-                    results[translation] = texts
                 } finally {
                     cursor?.close()
                 }
@@ -212,16 +217,21 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                     arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX, COLUMN_TEXT),
                     selection.toString(), selectionArgs, null, null,
                     "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC")
-            val verses = ArrayList<Verse>(cursor.count)
-            val bookColumnIndex = cursor.getColumnIndex(COLUMN_BOOK_INDEX)
-            val chapterColumnIndex = cursor.getColumnIndex(COLUMN_CHAPTER_INDEX)
-            val verseColumnIndex = cursor.getColumnIndex(COLUMN_VERSE_INDEX)
-            val textColumnIndex = cursor.getColumnIndex(COLUMN_TEXT)
-            while (cursor.moveToNext()) {
-                val verseIndex = VerseIndex(cursor.getInt(bookColumnIndex),
-                        cursor.getInt(chapterColumnIndex), cursor.getInt(verseColumnIndex))
-                verses.add(Verse(verseIndex, Verse.Text(translationShortName,
-                        bookNames[verseIndex.bookIndex], cursor.getString(textColumnIndex)), emptyList()))
+            val verses = with(cursor) {
+                val verses = ArrayList<Verse>(count)
+                if (count > 0) {
+                    val bookColumnIndex = getColumnIndex(COLUMN_BOOK_INDEX)
+                    val chapterColumnIndex = getColumnIndex(COLUMN_CHAPTER_INDEX)
+                    val verseColumnIndex = getColumnIndex(COLUMN_VERSE_INDEX)
+                    val textColumnIndex = getColumnIndex(COLUMN_TEXT)
+                    while (moveToNext()) {
+                        val verseIndex = VerseIndex(getInt(bookColumnIndex),
+                                getInt(chapterColumnIndex), getInt(verseColumnIndex))
+                        verses.add(Verse(verseIndex, Verse.Text(translationShortName,
+                                bookNames[verseIndex.bookIndex], getString(textColumnIndex)), emptyList()))
+                    }
+                }
+                return@with verses
             }
 
             db.setTransactionSuccessful()
@@ -238,12 +248,14 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     fun save(translationShortName: String, verses: Map<Pair<Int, Int>, List<String>>) {
         val values = ContentValues(4)
         for (entry in verses) {
-            values.put(COLUMN_BOOK_INDEX, entry.key.first)
-            values.put(COLUMN_CHAPTER_INDEX, entry.key.second)
-            for ((verseIndex, verse) in entry.value.withIndex()) {
-                values.put(COLUMN_VERSE_INDEX, verseIndex)
-                values.put(COLUMN_TEXT, verse)
-                db.insertWithOnConflict(translationShortName, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+            with(values) {
+                put(COLUMN_BOOK_INDEX, entry.key.first)
+                put(COLUMN_CHAPTER_INDEX, entry.key.second)
+                for ((verseIndex, verse) in entry.value.withIndex()) {
+                    put(COLUMN_VERSE_INDEX, verseIndex)
+                    put(COLUMN_TEXT, verse)
+                    db.insertWithOnConflict(translationShortName, null, this, SQLiteDatabase.CONFLICT_REPLACE)
+                }
             }
         }
     }

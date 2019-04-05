@@ -45,13 +45,13 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
         setLogo(R.drawable.ic_toolbar)
 
         inflateMenu(R.menu.menu_search)
-        val searchMenuItem = menu.findItem(R.id.action_search)
-        searchMenuItem.expandActionView()
+        val searchMenuItem = menu.findItem(R.id.action_search).apply { expandActionView() }
 
-        searchView = searchMenuItem.actionView as SearchView
-        searchView.setOnQueryTextListener(this)
-        searchView.isQueryRefinementEnabled = true
-        searchView.isIconified = false
+        searchView = (searchMenuItem.actionView as SearchView).apply {
+            setOnQueryTextListener(this@SearchToolbar)
+            isQueryRefinementEnabled = true
+            isIconified = false
+        }
     }
 
     private lateinit var presenter: ToolbarPresenter
@@ -69,14 +69,12 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
         }
         currentQuery = query
 
-        val handled = presenter.search(query)
-        if (handled) {
+        return presenter.search(query).apply {
             if (hasFocus()) {
                 (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                         .hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
             }
         }
-        return handled
     }
 
     override fun onQueryTextChange(newText: String): Boolean = false

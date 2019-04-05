@@ -70,8 +70,36 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             verseDetailOpenState.send(verseIndex)
 
             verify(verseDetailView, times(1)).show()
-            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], false))
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false))
             verify(verseDetailView, never()).hide()
+        }
+    }
+
+    @Test
+    fun testLoadVerseDetail() {
+        runBlocking {
+            val verseIndex = VerseIndex(0, 0, 0)
+            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
+            `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
+
+            verseDetailPresenter.loadVerseDetail(verseIndex)
+
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false))
+            verify(verseDetailView, never()).onVerseDetailLoadFailed(verseIndex)
+        }
+    }
+
+    @Test
+    fun testLoadVerseDetailWithException() {
+        runBlocking {
+            val verseIndex = VerseIndex(0, 0, 0)
+            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenThrow(RuntimeException("Random exception"))
+            `when`(readingInteractor.readBookmark(verseIndex)).thenThrow(RuntimeException("Random exception"))
+
+            verseDetailPresenter.loadVerseDetail(verseIndex)
+
+            verify(verseDetailView, never()).onVerseDetailLoaded(any())
+            verify(verseDetailView, times(1)).onVerseDetailLoadFailed(verseIndex)
         }
     }
 
@@ -81,7 +109,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             verseDetailOpenState.send(VerseIndex.INVALID)
 
             verify(verseDetailView, never()).show()
-            verify(verseDetailView, never()).showVerse(any())
+            verify(verseDetailView, never()).onVerseDetailLoaded(any())
             verify(verseDetailView, times(1)).hide()
         }
     }
@@ -94,11 +122,11 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
 
             verseDetailOpenState.send(verseIndex)
-            verify(verseDetailView, never()).showVerse(VerseDetail(MockContents.kjvVerses[0], true))
-            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], false))
+            verify(verseDetailView, never()).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], true))
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false))
 
             verseDetailPresenter.addBookmark(verseIndex)
-            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], true))
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], true))
         }
     }
 
@@ -110,11 +138,11 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, 12345L))
 
             verseDetailOpenState.send(verseIndex)
-            verify(verseDetailView, never()).showVerse(VerseDetail(MockContents.kjvVerses[0], false))
-            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], true))
+            verify(verseDetailView, never()).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false))
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], true))
 
             verseDetailPresenter.removeBookmark(verseIndex)
-            verify(verseDetailView, times(1)).showVerse(VerseDetail(MockContents.kjvVerses[0], false))
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false))
         }
     }
 }

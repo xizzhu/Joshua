@@ -20,9 +20,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
@@ -38,17 +40,30 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor) : M
             verseDetailOpenState.consumeEach { verseIndex ->
                 if (verseIndex.isValid()) {
                     view?.show()
-
-                    val verse = async {
-                        readingInteractor.readVerse(
-                                readingInteractor.observeCurrentTranslation().first(), verseIndex)
-                    }
-                    val bookmarked = async { readingInteractor.readBookmark(verseIndex) }
-                    this@VerseDetailPresenter.verse = verse.await()
-                    view?.showVerse(VerseDetail(verse.await(), bookmarked.await().isValid()))
+                    loadVerseDetail(verseIndex)
                 } else {
                     view?.hide()
                 }
+            }
+        }
+    }
+
+    fun loadVerseDetail(verseIndex: VerseIndex) {
+        launch(Dispatchers.Main) {
+            try {
+                val verseDetail = coroutineScope {
+                    val verseAsync = async {
+                        readingInteractor.readVerse(readingInteractor.observeCurrentTranslation().first(), verseIndex)
+                    }
+                    val bookmarkAsync = async { readingInteractor.readBookmark(verseIndex) }
+                    verse = verseAsync.await()
+                    return@coroutineScope VerseDetail(verse!!, bookmarkAsync.await().isValid())
+                }
+
+                view?.onVerseDetailLoaded(verseDetail)
+            } catch (e: Exception) {
+                Log.e(tag, e, "Failed to load verse detail")
+                view?.onVerseDetailLoadFailed(verseIndex)
             }
         }
     }
@@ -59,18 +74,18 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor) : M
 
     fun addBookmark(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) {
-            if (verse != null) {
+            verse?.let { v ->
                 readingInteractor.addBookmark(verseIndex)
-                view?.showVerse(VerseDetail(verse!!, true))
+                view?.onVerseDetailLoaded(VerseDetail(v, true))
             }
         }
     }
 
     fun removeBookmark(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) {
-            if (verse != null) {
+            verse?.let { v ->
                 readingInteractor.removeBookmark(verseIndex)
-                view?.showVerse(VerseDetail(verse!!, false))
+                view?.onVerseDetailLoaded(VerseDetail(v, false))
             }
         }
     }
