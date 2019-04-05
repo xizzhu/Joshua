@@ -48,10 +48,11 @@ class SettingSectionHeader : FrameLayout {
         inflate(context, R.layout.inner_setting_section_header, this)
         title = findViewById(R.id.title)
 
-        if (attrs != null) {
-            val a = context.obtainStyledAttributes(attrs, R.styleable.SettingSectionHeader)
-            title.setText(a, R.styleable.SettingSectionHeader_settingSectionHeaderTitle)
-            a.recycle()
+        attrs?.let {
+            context.obtainStyledAttributes(it, R.styleable.SettingSectionHeader).run {
+                title.setText(this, R.styleable.SettingSectionHeader_settingSectionHeaderTitle)
+                recycle()
+            }
         }
     }
 
