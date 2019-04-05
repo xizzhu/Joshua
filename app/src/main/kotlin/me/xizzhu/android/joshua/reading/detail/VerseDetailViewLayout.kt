@@ -30,12 +30,14 @@ import android.widget.TextView
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.utils.BaseSettingsView
 import me.xizzhu.android.joshua.utils.MVPView
 
-interface VerseDetailView : MVPView {
+interface VerseDetailView : BaseSettingsView {
     fun onVerseDetailLoaded(verseDetail: VerseDetail)
 
     fun onVerseDetailLoadFailed(verseIndex: VerseIndex)
@@ -103,6 +105,10 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     fun setPresenter(presenter: VerseDetailPresenter) {
         this.presenter = presenter
+    }
+
+    override fun onSettingsUpdated(settings: Settings) {
+        adapter.setSettings(settings)
     }
 
     override fun onVerseDetailLoaded(verseDetail: VerseDetail) {

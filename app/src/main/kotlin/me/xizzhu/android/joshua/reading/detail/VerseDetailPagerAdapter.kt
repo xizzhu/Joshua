@@ -18,12 +18,15 @@ package me.xizzhu.android.joshua.reading.detail
 
 import android.content.Context
 import android.content.res.Resources
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.viewpager.widget.PagerAdapter
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.ui.getBodyTextSize
 
 class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     companion object {
@@ -32,17 +35,23 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
 
     private val resources: Resources = context.resources
     private val inflater: LayoutInflater = LayoutInflater.from(context)
+
+    private var settings: Settings? = null
     private var verseDetail: VerseDetail? = null
 
     override fun getCount(): Int {
-        return if (verseDetail != null) 1 else 0
+        return if (verseDetail != null && settings != null) 1 else 0
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val view = inflater.inflate(R.layout.page_verse_detail, container, false)
-        (view.findViewById(R.id.detail) as TextView).text = when (position) {
-            PAGE_VERSES -> verseDetail?.getTextForDisplay()
-            else -> ""
+        with(view.findViewById(R.id.detail) as TextView) {
+            setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    settings!!.getBodyTextSize(this@VerseDetailPagerAdapter.resources).toFloat())
+            text = when (position) {
+                PAGE_VERSES -> verseDetail!!.getTextForDisplay()
+                else -> ""
+            }
         }
 
         container.addView(view)
@@ -65,6 +74,11 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     }
 
     override fun getItemPosition(obj: Any): Int = POSITION_NONE
+
+    fun setSettings(settings: Settings) {
+        this.settings = settings
+        notifyDataSetChanged()
+    }
 
     fun setVerse(verseDetail: VerseDetail) {
         this.verseDetail = verseDetail

@@ -26,9 +26,10 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
-import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
-class VerseDetailPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<VerseDetailView>() {
+class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
+    : BaseSettingsPresenter<VerseDetailView>(readingInteractor) {
     private var verse: Verse? = null
 
     override fun onViewAttached() {
