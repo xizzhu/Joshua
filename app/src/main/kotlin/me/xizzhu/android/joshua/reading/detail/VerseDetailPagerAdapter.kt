@@ -24,6 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.viewpager.widget.PagerAdapter
+import com.google.android.material.textfield.TextInputEditText
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.getBodyTextSize
@@ -75,7 +76,11 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
 
     private fun createNoteView(container: ViewGroup): View {
         return inflater.inflate(R.layout.page_verse_detail_note, container, false).apply {
-            // TODO
+            with(findViewById<TextInputEditText>(R.id.note)) {
+                setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                        settings!!.getBodyTextSize(this@VerseDetailPagerAdapter.resources).toFloat())
+                setText(verseDetail!!.note)
+            }
         }
     }
 

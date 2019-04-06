@@ -22,7 +22,6 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -30,7 +29,7 @@ import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     : BaseSettingsPresenter<VerseDetailView>(readingInteractor) {
-    private var verse: Verse? = null
+    private var verseDetail: VerseDetail? = null
 
     override fun onViewAttached() {
         super.onViewAttached()
@@ -57,8 +56,9 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                         readingInteractor.readVerse(readingInteractor.observeCurrentTranslation().first(), verseIndex)
                     }
                     val bookmarkAsync = async { readingInteractor.readBookmark(verseIndex) }
-                    verse = verseAsync.await()
-                    return@coroutineScope VerseDetail(verse!!, bookmarkAsync.await().isValid())
+                    val noteAsync = async { readingInteractor.readNote(verseIndex) }
+                    verseDetail = VerseDetail(verseAsync.await(), bookmarkAsync.await().isValid(), noteAsync.await().note)
+                    return@coroutineScope verseDetail!!
                 }
 
                 view?.onVerseDetailLoaded(verseDetail)
@@ -75,18 +75,18 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
     fun addBookmark(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) {
-            verse?.let { v ->
+            verseDetail?.let { detail ->
                 readingInteractor.addBookmark(verseIndex)
-                view?.onVerseDetailLoaded(VerseDetail(v, true))
+                view?.onVerseDetailLoaded(detail.toBuilder().bookmarked(true).build())
             }
         }
     }
 
     fun removeBookmark(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) {
-            verse?.let { v ->
+            verseDetail?.let { detail ->
                 readingInteractor.removeBookmark(verseIndex)
-                view?.onVerseDetailLoaded(VerseDetail(v, false))
+                view?.onVerseDetailLoaded(detail.toBuilder().bookmarked(false).build())
             }
         }
     }

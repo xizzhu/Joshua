@@ -16,14 +16,13 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
-import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 
-data class VerseDetail(val verse: Verse, val bookmarked: Boolean) {
+data class VerseDetail(val verse: Verse, val bookmarked: Boolean, val note: String) {
     companion object {
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
 
@@ -56,5 +55,14 @@ data class VerseDetail(val verse: Verse, val bookmarked: Boolean) {
             stringForDisplay = SPANNABLE_STRING_BUILDER
         }
         return stringForDisplay!!
+    }
+
+    fun toBuilder(): Builder = Builder(verse, bookmarked, note)
+
+    data class Builder(var verse: Verse, var bookmarked: Boolean, var note: String) {
+        fun verse(verse: Verse) = apply { this.verse = verse }
+        fun bookmarked(bookmarked: Boolean) = apply { this.bookmarked = bookmarked }
+        fun note(note: String) = apply { this.note = note }
+        fun build() = VerseDetail(verse, bookmarked, note)
     }
 }
