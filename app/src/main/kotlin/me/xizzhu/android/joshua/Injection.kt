@@ -73,6 +73,11 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
+    fun provideNoteManager(noteRepository: NoteRepository): NoteManager =
+            NoteManager(noteRepository)
+
+    @Provides
+    @Singleton
     fun provideReadingProgressManager(bibleReadingManager: BibleReadingManager,
                                       readingProgressRepository: ReadingProgressRepository): ReadingProgressManager =
             ReadingProgressManager(bibleReadingManager, readingProgressRepository)
@@ -98,6 +103,11 @@ class RepositoryModule {
     @Singleton
     fun provideLocalBookmarkStorage(androidDatabase: AndroidDatabase): LocalBookmarkStorage =
             AndroidBookmarkStorage(androidDatabase)
+
+    @Provides
+    @Singleton
+    fun provideLocalNoteStorage(androidDatabase: AndroidDatabase): LocalNoteStorage =
+            AndroidNoteStorage(androidDatabase)
 
     @Provides
     @Singleton
@@ -146,6 +156,11 @@ class RepositoryModule {
     @Singleton
     fun provideBookmarkRepository(localBookmarkStorage: LocalBookmarkStorage): BookmarkRepository =
             BookmarkRepository(localBookmarkStorage)
+
+    @Provides
+    @Singleton
+    fun provideNoteRepository(localNoteStorage: LocalNoteStorage): NoteRepository =
+            NoteRepository(localNoteStorage)
 
     @Provides
     @Singleton

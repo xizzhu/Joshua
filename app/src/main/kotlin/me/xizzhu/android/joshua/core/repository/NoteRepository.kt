@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core
+package me.xizzhu.android.joshua.core.repository
 
-import me.xizzhu.android.joshua.core.repository.NoteRepository
+import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.repository.local.LocalNoteStorage
 
-data class Note(val verseIndex: VerseIndex, val note: String, val timestamp: Long) {
-    fun isValid(): Boolean = timestamp > 0L
-}
+class NoteRepository(private val localNoteStorage: LocalNoteStorage) {
+    suspend fun read(): List<Note> = localNoteStorage.read()
 
-class NoteManager(private val noteRepository: NoteRepository) {
-    suspend fun read(): List<Note> = noteRepository.read()
-
-    suspend fun read(verseIndex: VerseIndex): Note = noteRepository.read(verseIndex)
+    suspend fun read(verseIndex: VerseIndex): Note = localNoteStorage.read(verseIndex)
 
     suspend fun save(note: Note) {
-        noteRepository.save(note)
+        localNoteStorage.save(note)
     }
 
     suspend fun remove(verseIndex: VerseIndex) {
-        noteRepository.remove(verseIndex)
+        localNoteStorage.remove(verseIndex)
     }
 }
