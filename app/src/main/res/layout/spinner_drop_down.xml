@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
     android:minHeight="@dimen/item_height"
-    android:orientation="horizontal"
     android:paddingStart="@dimen/padding"
     android:paddingEnd="@dimen/padding">
 
@@ -13,6 +11,7 @@
         android:id="@+id/checkbox"
         android:layout_width="40dp"
         android:layout_height="48dp"
+        android:layout_gravity="center_vertical"
         android:focusable="false"
         android:theme="@style/AppCheckBoxStyle" />
 
@@ -20,5 +19,8 @@
         android:id="@+id/title"
         style="@style/Text.Body.Dark"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="40dp"
+        android:textSize="@dimen/text_body" />
+</FrameLayout>

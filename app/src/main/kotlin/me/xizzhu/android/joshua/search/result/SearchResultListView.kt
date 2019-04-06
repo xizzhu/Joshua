@@ -151,9 +151,11 @@ private class SearchResultViewHolder(inflater: LayoutInflater, parent: ViewGroup
 
     fun bind(verse: SearchedVerse, settings: Settings) {
         currentVerse = verse
-        text.text = verse.getTextForDisplay()
-        text.setTextColor(settings.getPrimaryTextColor(resources))
-        text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
+        with(text) {
+            text = verse.getTextForDisplay()
+            setTextColor(settings.getPrimaryTextColor(resources))
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
+        }
     }
 
     override fun onClick(v: View) {

@@ -55,11 +55,12 @@ class SettingButton : FrameLayout {
         title = findViewById(R.id.title)
         description = findViewById(R.id.description)
 
-        if (attrs != null) {
-            val a = context.obtainStyledAttributes(attrs, R.styleable.SettingButton)
-            title.setText(a, R.styleable.SettingButton_settingButtonTitle)
-            description.setText(a, R.styleable.SettingButton_settingButtonDescription)
-            a.recycle()
+        attrs?.let {
+            context.obtainStyledAttributes(it, R.styleable.SettingButton).run {
+                title.setText(this, R.styleable.SettingButton_settingButtonTitle)
+                description.setText(this, R.styleable.SettingButton_settingButtonDescription)
+                recycle()
+            }
         }
     }
 

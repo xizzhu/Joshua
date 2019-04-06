@@ -200,9 +200,11 @@ class ReadingToolbar : Toolbar, ToolbarView {
             return
         }
 
-        titleBuilder.setLength(0)
-        titleBuilder.append(bookShortNames[verseIndex.bookIndex]).append(", ").append(verseIndex.chapterIndex + 1)
-        title = titleBuilder.toString()
+        title = with(titleBuilder) {
+            setLength(0)
+            append(bookShortNames[verseIndex.bookIndex]).append(", ").append(verseIndex.chapterIndex + 1)
+            return@with toString()
+        }
     }
 
     override fun onBookShortNamesUpdated(bookNames: List<String>) {

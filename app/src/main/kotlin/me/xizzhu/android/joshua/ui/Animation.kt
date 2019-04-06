@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.ui
 
 import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.view.View
 
 private const val ANIMATION_DURATION = 300L
@@ -38,19 +39,10 @@ fun View.fadeOut() {
 
     alpha = 1.0F
     animate().alpha(0.0F).setDuration(ANIMATION_DURATION)
-            .setListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator) {
-                }
-
+            .setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     visibility = View.GONE
                     alpha = 1.0F
-                }
-
-                override fun onAnimationCancel(animation: Animator) {
-                }
-
-                override fun onAnimationStart(animation: Animator) {
                 }
             })
 }

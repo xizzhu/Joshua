@@ -186,10 +186,10 @@ private class ChapterListAdapter(context: Context, private val onClickListener: 
             linearLayout = inflater.inflate(R.layout.item_chapter_row, parent, false) as LinearLayout
 
             val textViews = Array(ROW_CHILD_COUNT) {
-                val textView = linearLayout.getChildAt(it) as TextView
-                textView.setOnClickListener(onClickListener)
-                textView.tag = ChapterTag(-1, -1)
-                textView
+                return@Array (linearLayout.getChildAt(it) as TextView).apply {
+                    setOnClickListener(onClickListener)
+                    tag = ChapterTag(-1, -1)
+                }
             }
             viewTag = ViewTag(textViews)
             linearLayout.tag = viewTag
@@ -201,18 +201,20 @@ private class ChapterListAdapter(context: Context, private val onClickListener: 
         val chapterCount = Bible.getChapterCount(groupPosition)
         for (i in 0 until ROW_CHILD_COUNT) {
             val chapter = childPosition * ROW_CHILD_COUNT + i
-            val textView = viewTag.textViews[i]
-            if (chapter >= chapterCount) {
-                textView.visibility = View.GONE
-            } else {
-                textView.visibility = View.VISIBLE
-                textView.isSelected = groupPosition == currentVerseIndex.bookIndex
-                        && chapter == currentVerseIndex.chapterIndex
-                textView.text = (chapter + 1).toString()
+            with(viewTag.textViews[i]) {
+                if (chapter >= chapterCount) {
+                    visibility = View.GONE
+                } else {
+                    visibility = View.VISIBLE
+                    isSelected = groupPosition == currentVerseIndex.bookIndex
+                            && chapter == currentVerseIndex.chapterIndex
+                    text = (chapter + 1).toString()
 
-                val chapterTag = textView.tag as ChapterTag
-                chapterTag.bookIndex = groupPosition
-                chapterTag.chapterIndex = chapter
+                    (tag as ChapterTag).apply {
+                        bookIndex = groupPosition
+                        chapterIndex = chapter
+                    }
+                }
             }
         }
 

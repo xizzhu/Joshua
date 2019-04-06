@@ -66,29 +66,32 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
         display = findViewById(R.id.display)
 
-        fontSize = findViewById(R.id.font_size)
-        fontSize.setOnClickListener {
-            DialogHelper.showDialog(this@SettingsActivity, R.string.settings_title_font_size,
-                    fontSizeTexts, presenter.getSettings().fontSizeScale - 1,
-                    DialogInterface.OnClickListener { dialog, which ->
-                        originalSettings = presenter.getSettings()
-                        shouldAnimateFontSize = true
-                        presenter.setFontSizeScale(which + 1)
+        fontSize = findViewById<SettingButton>(R.id.font_size).apply {
+            setOnClickListener {
+                DialogHelper.showDialog(this@SettingsActivity, R.string.settings_title_font_size,
+                        fontSizeTexts, presenter.getSettings().fontSizeScale - 1,
+                        DialogInterface.OnClickListener { dialog, which ->
+                            originalSettings = presenter.getSettings()
+                            shouldAnimateFontSize = true
+                            presenter.setFontSizeScale(which + 1)
 
-                        dialog.dismiss()
-                    })
+                            dialog.dismiss()
+                        })
+            }
         }
 
-        keepScreenOn = findViewById(R.id.keep_screen_on)
-        keepScreenOn.setOnCheckedChangeListener { _, isChecked ->
-            presenter.setKeepScreenOn(isChecked)
+        keepScreenOn = findViewById<SwitchCompat>(R.id.keep_screen_on).apply {
+            setOnCheckedChangeListener { _, isChecked ->
+                presenter.setKeepScreenOn(isChecked)
+            }
         }
 
-        nightModeOn = findViewById(R.id.night_mode_on)
-        nightModeOn.setOnCheckedChangeListener { _, isChecked ->
-            originalSettings = presenter.getSettings()
-            shouldAnimateColor = true
-            presenter.setNightModeOn(isChecked)
+        nightModeOn = findViewById<SwitchCompat>(R.id.night_mode_on).apply {
+            setOnCheckedChangeListener { _, isChecked ->
+                originalSettings = presenter.getSettings()
+                shouldAnimateColor = true
+                presenter.setNightModeOn(isChecked)
+            }
         }
 
         about = findViewById(R.id.about)

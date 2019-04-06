@@ -20,6 +20,7 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -35,6 +36,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     private lateinit var readingInteractor: ReadingInteractor
     @Mock
     private lateinit var verseDetailView: VerseDetailView
+    private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
     private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<VerseIndex>
     private lateinit var currentTranslationShortName: BroadcastChannel<String>
     private lateinit var verseDetailPresenter: VerseDetailPresenter
@@ -42,6 +44,9 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Before
     override fun setup() {
         super.setup()
+
+        settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+        `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
         verseDetailOpenState = ConflatedBroadcastChannel()
         `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())

@@ -26,16 +26,15 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.joshua.utils.BaseSettingsView
 
-interface VerseDetailView : MVPView {
+interface VerseDetailView : BaseSettingsView {
     fun onVerseDetailLoaded(verseDetail: VerseDetail)
 
     fun onVerseDetailLoadFailed(verseIndex: VerseIndex)
@@ -89,13 +88,14 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
             }
         })
 
-        bookmark = findViewById(R.id.bookmark)
-        bookmark.setOnClickListener {
-            verseDetail?.let { detail ->
-                if (detail.bookmarked) {
-                    presenter.removeBookmark(detail.verse.verseIndex)
-                } else {
-                    presenter.addBookmark(detail.verse.verseIndex)
+        bookmark = findViewById<ImageView>(R.id.bookmark).apply {
+            setOnClickListener {
+                verseDetail?.let { detail ->
+                    if (detail.bookmarked) {
+                        presenter.removeBookmark(detail.verse.verseIndex)
+                    } else {
+                        presenter.addBookmark(detail.verse.verseIndex)
+                    }
                 }
             }
         }
@@ -103,6 +103,10 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     fun setPresenter(presenter: VerseDetailPresenter) {
         this.presenter = presenter
+    }
+
+    override fun onSettingsUpdated(settings: Settings) {
+        adapter.setSettings(settings)
     }
 
     override fun onVerseDetailLoaded(verseDetail: VerseDetail) {
