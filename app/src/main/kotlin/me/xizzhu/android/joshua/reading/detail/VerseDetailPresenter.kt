@@ -79,7 +79,8 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
         launch(Dispatchers.Main) {
             verseDetail?.let { detail ->
                 readingInteractor.addBookmark(verseIndex)
-                view?.onVerseDetailLoaded(detail.toBuilder().bookmarked(true).build())
+                verseDetail = detail.toBuilder().bookmarked(true).build()
+                view?.onVerseDetailLoaded(verseDetail!!)
             }
         }
     }
@@ -88,7 +89,8 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
         launch(Dispatchers.Main) {
             verseDetail?.let { detail ->
                 readingInteractor.removeBookmark(verseIndex)
-                view?.onVerseDetailLoaded(detail.toBuilder().bookmarked(false).build())
+                verseDetail = detail.toBuilder().bookmarked(false).build()
+                view?.onVerseDetailLoaded(verseDetail!!)
             }
         }
     }
@@ -101,6 +103,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                 } else {
                     readingInteractor.saveNote(detail.verse.verseIndex, note)
                 }
+                verseDetail = detail.toBuilder().note(note).build()
             }
         }
     }
