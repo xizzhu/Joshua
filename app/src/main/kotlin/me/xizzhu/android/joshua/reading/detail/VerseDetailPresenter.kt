@@ -59,7 +59,11 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                     }
                     val bookmarkAsync = async { readingInteractor.readBookmark(verseIndex) }
                     val noteAsync = async { readingInteractor.readNote(verseIndex) }
-                    verseDetail = VerseDetail(verseAsync.await(), bookmarkAsync.await().isValid(), noteAsync.await().note)
+                    verseDetail = VerseDetail.Builder()
+                            .verse(verseAsync.await())
+                            .bookmarked(bookmarkAsync.await().isValid())
+                            .note(noteAsync.await().note)
+                            .build()
                     return@coroutineScope verseDetail!!
                 }
 

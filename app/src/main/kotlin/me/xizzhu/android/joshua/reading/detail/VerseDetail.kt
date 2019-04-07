@@ -59,7 +59,7 @@ data class VerseDetail(val verse: Verse, val bookmarked: Boolean, val note: Stri
 
     fun toBuilder(): Builder = Builder(verse, bookmarked, note)
 
-    data class Builder(var verse: Verse, var bookmarked: Boolean, var note: String) {
+    data class Builder(var verse: Verse = Verse.INVALID, var bookmarked: Boolean = false, var note: String = "") {
         fun verse(verse: Verse) = apply { this.verse = verse }
         fun bookmarked(bookmarked: Boolean) = apply { this.bookmarked = bookmarked }
         fun note(note: String) = apply { this.note = note }
