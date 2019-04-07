@@ -155,4 +155,15 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false, ""))
         }
     }
+
+    @Test
+    fun testUpdateNote() {
+        runBlocking {
+            verseDetailPresenter.verseDetail = VerseDetail(MockContents.kjvVerses[0], false, "")
+
+            verseDetailPresenter.updateNote("")
+            verify(readingInteractor, times(1)).removeNote(VerseIndex(0, 0, 0))
+            verify(readingInteractor, never()).saveNote(any(), anyString())
+        }
+    }
 }

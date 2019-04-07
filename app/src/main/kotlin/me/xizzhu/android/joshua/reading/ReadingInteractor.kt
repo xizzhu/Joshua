@@ -174,6 +174,14 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     }
 
     suspend fun readNote(verseIndex: VerseIndex): Note = noteManager.read(verseIndex)
+
+    suspend fun saveNote(verseIndex: VerseIndex, note: String) {
+        noteManager.save(Note(verseIndex, note, System.currentTimeMillis()))
+    }
+
+    suspend fun removeNote(verseIndex: VerseIndex) {
+        noteManager.remove(verseIndex)
+    }
 }
 
 @VisibleForTesting

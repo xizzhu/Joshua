@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.consumeEach
@@ -29,7 +30,8 @@ import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     : BaseSettingsPresenter<VerseDetailView>(readingInteractor) {
-    private var verseDetail: VerseDetail? = null
+    @VisibleForTesting
+    var verseDetail: VerseDetail? = null
 
     override fun onViewAttached() {
         super.onViewAttached()
@@ -87,6 +89,18 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
             verseDetail?.let { detail ->
                 readingInteractor.removeBookmark(verseIndex)
                 view?.onVerseDetailLoaded(detail.toBuilder().bookmarked(false).build())
+            }
+        }
+    }
+
+    fun updateNote(note: String) {
+        launch(Dispatchers.Main) {
+            verseDetail?.let { detail ->
+                if (note.isEmpty()) {
+                    readingInteractor.removeNote(detail.verse.verseIndex)
+                } else {
+                    readingInteractor.saveNote(detail.verse.verseIndex, note)
+                }
             }
         }
     }

@@ -75,7 +75,11 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
         tabLayout = findViewById(R.id.tab_layout)
         viewPager = findViewById(R.id.view_pager)
 
-        adapter = VerseDetailPagerAdapter(context)
+        adapter = VerseDetailPagerAdapter(context, object : VerseDetailPagerAdapter.Listener {
+            override fun onNoteUpdated(note: String) {
+                presenter.updateNote(note)
+            }
+        })
         viewPager.adapter = adapter
         tabLayout.setupWithViewPager(viewPager)
 
