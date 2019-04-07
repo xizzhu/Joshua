@@ -68,8 +68,6 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     private val bookmark: ImageView
 
-    private var verseDetail: VerseDetail? = null
-
     init {
         View.inflate(context, R.layout.inner_verse_detail_view, this)
         tabLayout = findViewById(R.id.tab_layout)
@@ -94,13 +92,7 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
         bookmark = findViewById<ImageView>(R.id.bookmark).apply {
             setOnClickListener {
-                verseDetail?.let { detail ->
-                    if (detail.bookmarked) {
-                        presenter.removeBookmark(detail.verse.verseIndex)
-                    } else {
-                        presenter.addBookmark(detail.verse.verseIndex)
-                    }
-                }
+                presenter.updateBookmark()
             }
         }
     }
@@ -114,7 +106,6 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
     }
 
     override fun onVerseDetailLoaded(verseDetail: VerseDetail) {
-        this.verseDetail = verseDetail
         adapter.setVerse(verseDetail)
         bookmark.colorFilter = if (verseDetail.bookmarked) ON_COLOR_FILTER else OFF_COLOR_FILTER
     }

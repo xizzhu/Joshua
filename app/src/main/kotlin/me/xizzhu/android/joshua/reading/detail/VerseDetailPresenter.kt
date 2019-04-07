@@ -29,6 +29,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     : BaseSettingsPresenter<VerseDetailView>(readingInteractor) {
     @VisibleForTesting
     var verseDetail: VerseDetail? = null
+    private var updateBookmarkJob: Job? = null
     private var updateNoteJob: Job? = null
 
     override fun onViewAttached() {
@@ -77,22 +78,20 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
         launch(Dispatchers.Main) { readingInteractor.closeVerseDetail() }
     }
 
-    fun addBookmark(verseIndex: VerseIndex) {
-        launch(Dispatchers.Main) {
+    fun updateBookmark() {
+        updateBookmarkJob?.cancel()
+        updateBookmarkJob = launch(Dispatchers.Main) {
             verseDetail?.let { detail ->
-                readingInteractor.addBookmark(verseIndex)
-                verseDetail = detail.toBuilder().bookmarked(true).build()
+                if (detail.bookmarked) {
+                    readingInteractor.removeBookmark(detail.verse.verseIndex)
+                    verseDetail = detail.toBuilder().bookmarked(false).build()
+                } else {
+                    readingInteractor.addBookmark(detail.verse.verseIndex)
+                    verseDetail = detail.toBuilder().bookmarked(true).build()
+                }
                 view?.onVerseDetailLoaded(verseDetail!!)
-            }
-        }
-    }
 
-    fun removeBookmark(verseIndex: VerseIndex) {
-        launch(Dispatchers.Main) {
-            verseDetail?.let { detail ->
-                readingInteractor.removeBookmark(verseIndex)
-                verseDetail = detail.toBuilder().bookmarked(false).build()
-                view?.onVerseDetailLoaded(verseDetail!!)
+                updateBookmarkJob = null
             }
         }
     }
@@ -107,6 +106,8 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                     readingInteractor.saveNote(detail.verse.verseIndex, note)
                 }
                 verseDetail = detail.toBuilder().note(note).build()
+
+                updateNoteJob = null
             }
         }
     }

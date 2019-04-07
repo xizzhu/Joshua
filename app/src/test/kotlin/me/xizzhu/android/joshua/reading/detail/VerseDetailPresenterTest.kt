@@ -128,7 +128,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         runBlocking {
             verseDetailPresenter.verseDetail = VerseDetail(MockContents.kjvVerses[0], false, "")
 
-            verseDetailPresenter.addBookmark(VerseIndex(0, 0, 0))
+            verseDetailPresenter.updateBookmark()
 
             val expected = VerseDetail(MockContents.kjvVerses[0], true, "")
             verify(verseDetailView, times(1)).onVerseDetailLoaded(expected)
@@ -139,9 +139,9 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testRemoveBookmark() {
         runBlocking {
-            verseDetailPresenter.verseDetail = VerseDetail(MockContents.kjvVerses[0], false, "")
+            verseDetailPresenter.verseDetail = VerseDetail(MockContents.kjvVerses[0], true, "")
 
-            verseDetailPresenter.removeBookmark(VerseIndex(0, 0, 0))
+            verseDetailPresenter.updateBookmark()
 
             val expected = VerseDetail(MockContents.kjvVerses[0], false, "")
             verify(verseDetailView, times(1)).onVerseDetailLoaded(expected)
