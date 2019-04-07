@@ -125,16 +125,9 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testAddBookmark() {
         runBlocking {
-            val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
-            `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
-            `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
+            verseDetailPresenter.verseDetail = VerseDetail(MockContents.kjvVerses[0], false, "")
 
-            verseDetailOpenState.send(verseIndex)
-            verify(verseDetailView, never()).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], true, ""))
-            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false, ""))
-
-            verseDetailPresenter.addBookmark(verseIndex)
+            verseDetailPresenter.addBookmark(VerseIndex(0, 0, 0))
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], true, ""))
         }
     }
@@ -142,16 +135,9 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testRemoveBookmark() {
         runBlocking {
-            val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
-            `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, 12345L))
-            `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
+            verseDetailPresenter.verseDetail = VerseDetail(MockContents.kjvVerses[0], false, "")
 
-            verseDetailOpenState.send(verseIndex)
-            verify(verseDetailView, never()).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false, ""))
-            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], true, ""))
-
-            verseDetailPresenter.removeBookmark(verseIndex)
+            verseDetailPresenter.removeBookmark(VerseIndex(0, 0, 0))
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false, ""))
         }
     }
