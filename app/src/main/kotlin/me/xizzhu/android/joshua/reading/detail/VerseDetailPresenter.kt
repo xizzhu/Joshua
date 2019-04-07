@@ -17,12 +17,9 @@
 package me.xizzhu.android.joshua.reading.detail
 
 import androidx.annotation.VisibleForTesting
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -32,6 +29,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     : BaseSettingsPresenter<VerseDetailView>(readingInteractor) {
     @VisibleForTesting
     var verseDetail: VerseDetail? = null
+    private var updateNoteJob: Job? = null
 
     override fun onViewAttached() {
         super.onViewAttached()
@@ -100,7 +98,8 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     }
 
     fun updateNote(note: String) {
-        launch(Dispatchers.Main) {
+        updateNoteJob?.cancel()
+        updateNoteJob = launch(Dispatchers.Main) {
             verseDetail?.let { detail ->
                 if (note.isEmpty()) {
                     readingInteractor.removeNote(detail.verse.verseIndex)
