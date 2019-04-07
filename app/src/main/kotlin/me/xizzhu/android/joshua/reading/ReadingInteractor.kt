@@ -120,6 +120,10 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         navigator.navigate(readingActivity, Navigator.SCREEN_BOOKMARKS)
     }
 
+    fun openNotes() {
+        navigator.navigate(readingActivity, Navigator.SCREEN_NOTES)
+    }
+
     fun openSettings() {
         navigator.navigate(readingActivity, Navigator.SCREEN_SETTINGS)
     }
