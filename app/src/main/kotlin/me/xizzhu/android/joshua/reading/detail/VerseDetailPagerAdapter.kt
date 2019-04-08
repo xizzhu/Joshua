@@ -45,67 +45,43 @@ class VerseDetailPagerAdapter(context: Context, private val listener: Listener) 
     private val resources: Resources = context.resources
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 
+    private val pages: Array<Page?> = arrayOfNulls(PAGE_COUNT)
     private var settings: Settings? = null
-    private var verseDetail: VerseDetail? = null
+    private var verseDetail: VerseDetail = VerseDetail.INVALID
 
     fun setSettings(settings: Settings) {
         this.settings = settings
         notifyDataSetChanged()
     }
 
-    fun setVerse(verseDetail: VerseDetail) {
+    fun setVerseDetail(verseDetail: VerseDetail) {
         this.verseDetail = verseDetail
         notifyDataSetChanged()
     }
 
-    override fun getCount(): Int = if (settings != null && verseDetail != null) PAGE_COUNT else 0
+    override fun getCount(): Int = if (settings != null) PAGE_COUNT else 0
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val view = when (position) {
-            PAGE_VERSES -> createVerseDetailView(container)
-            PAGE_NOTE -> createNoteView(container)
-            else -> throw IllegalArgumentException("Unsupported position: $position")
-        }
-        container.addView(view)
-        return view
-    }
-
-    private fun createVerseDetailView(container: ViewGroup): View {
-        return inflater.inflate(R.layout.page_verse_detail_verses, container, false).apply {
-            with(findViewById<TextView>(R.id.detail)) {
-                setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                        settings!!.getBodyTextSize(this@VerseDetailPagerAdapter.resources).toFloat())
-                text = verseDetail!!.getTextForDisplay()
+        var page = pages[position]
+        if (page == null) {
+            page = when (position) {
+                PAGE_VERSES -> VersesPage(resources, inflater, container, settings!!)
+                PAGE_NOTE -> NotePage(resources, inflater, container, settings!!, listener)
+                else -> throw IllegalArgumentException("Unsupported position: $position")
             }
         }
-    }
+        page.bind(verseDetail)
 
-    private fun createNoteView(container: ViewGroup): View {
-        return inflater.inflate(R.layout.page_verse_detail_note, container, false).apply {
-            with(findViewById<TextInputEditText>(R.id.note)) {
-                addTextChangedListener(object : TextWatcher {
-                    override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-
-                    override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-
-                    override fun afterTextChanged(s: Editable) {
-                        listener.onNoteUpdated(s.toString())
-                    }
-                })
-
-                setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                        settings!!.getBodyTextSize(this@VerseDetailPagerAdapter.resources).toFloat())
-                setText(verseDetail!!.note)
-            }
-        }
+        container.addView(page.view)
+        return page
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, obj: Any) {
-        container.removeView(obj as View)
+        container.removeView((obj as Page).view)
     }
 
     override fun isViewFromObject(view: View, obj: Any): Boolean {
-        return view == obj
+        return view == (obj as Page).view
     }
 
     override fun getPageTitle(position: Int): CharSequence {
@@ -117,4 +93,46 @@ class VerseDetailPagerAdapter(context: Context, private val listener: Listener) 
     }
 
     override fun getItemPosition(obj: Any): Int = POSITION_NONE
+}
+
+private abstract class Page(val view: View) {
+    abstract fun bind(verseDetail: VerseDetail)
+}
+
+private class VersesPage(resources: Resources, inflater: LayoutInflater, container: ViewGroup, settings: Settings)
+    : Page(inflater.inflate(R.layout.page_verse_detail_verses, container, false)) {
+    private val detail: TextView = view.findViewById<TextView>(R.id.detail).apply {
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
+    }
+
+    override fun bind(verseDetail: VerseDetail) {
+        detail.text = verseDetail.getTextForDisplay()
+    }
+}
+
+private class NotePage(resources: Resources, inflater: LayoutInflater, container: ViewGroup,
+                       settings: Settings, listener: VerseDetailPagerAdapter.Listener)
+    : Page(inflater.inflate(R.layout.page_verse_detail_note, container, false)) {
+    private val textWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+
+        override fun afterTextChanged(s: Editable) {
+            listener.onNoteUpdated(s.toString())
+        }
+    }
+
+    private val note: TextInputEditText = view.findViewById<TextInputEditText>(R.id.note).apply {
+        addTextChangedListener(textWatcher)
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
+    }
+
+    override fun bind(verseDetail: VerseDetail) {
+        with(note) {
+            removeTextChangedListener(textWatcher)
+            setText(verseDetail.note)
+            addTextChangedListener(textWatcher)
+        }
+    }
 }

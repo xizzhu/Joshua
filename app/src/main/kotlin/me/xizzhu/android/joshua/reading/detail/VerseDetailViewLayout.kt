@@ -106,7 +106,7 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
     }
 
     override fun onVerseDetailLoaded(verseDetail: VerseDetail) {
-        adapter.setVerse(verseDetail)
+        adapter.setVerseDetail(verseDetail)
         bookmark.colorFilter = if (verseDetail.bookmarked) ON_COLOR_FILTER else OFF_COLOR_FILTER
     }
 

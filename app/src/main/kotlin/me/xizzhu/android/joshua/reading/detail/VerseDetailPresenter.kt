@@ -51,6 +51,8 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
     fun loadVerseDetail(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) {
+            view?.onVerseDetailLoaded(VerseDetail.INVALID)
+
             try {
                 val verseDetail = coroutineScope {
                     val verseAsync = async {

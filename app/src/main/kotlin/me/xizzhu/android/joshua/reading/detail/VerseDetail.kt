@@ -24,6 +24,8 @@ import me.xizzhu.android.joshua.core.VerseIndex
 
 data class VerseDetail(val verse: Verse, val bookmarked: Boolean, val note: String) {
     companion object {
+        val INVALID: VerseDetail = VerseDetail(Verse.INVALID, false, "")
+
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
 
         private fun buildVerseForDisplay(out: SpannableStringBuilder, verseIndex: VerseIndex, text: Verse.Text) {
@@ -43,6 +45,10 @@ data class VerseDetail(val verse: Verse, val bookmarked: Boolean, val note: Stri
     private var stringForDisplay: CharSequence? = null
 
     fun getTextForDisplay(): CharSequence {
+        if (!isValid()) {
+            return ""
+        }
+
         if (stringForDisplay == null) {
             SPANNABLE_STRING_BUILDER.clear()
             SPANNABLE_STRING_BUILDER.clearSpans()
@@ -56,6 +62,8 @@ data class VerseDetail(val verse: Verse, val bookmarked: Boolean, val note: Stri
         }
         return stringForDisplay!!
     }
+
+    fun isValid(): Boolean = verse.isValid()
 
     fun toBuilder(): Builder = Builder(verse, bookmarked, note)
 

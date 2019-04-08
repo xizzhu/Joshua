@@ -78,6 +78,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             verseDetailOpenState.send(verseIndex)
 
             verify(verseDetailView, times(1)).show()
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false, ""))
             verify(verseDetailView, never()).hide()
         }
@@ -93,6 +94,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
             verseDetailPresenter.loadVerseDetail(verseIndex)
 
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false, ""))
             verify(verseDetailView, never()).onVerseDetailLoadFailed(verseIndex)
         }
@@ -107,7 +109,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
             verseDetailPresenter.loadVerseDetail(verseIndex)
 
-            verify(verseDetailView, never()).onVerseDetailLoaded(any())
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
             verify(verseDetailView, times(1)).onVerseDetailLoadFailed(verseIndex)
         }
     }
