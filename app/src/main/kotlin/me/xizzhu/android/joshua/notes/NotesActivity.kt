@@ -16,6 +16,47 @@
 
 package me.xizzhu.android.joshua.notes
 
-import android.app.Activity
+import android.os.Bundle
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.ui.LoadingSpinner
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import javax.inject.Inject
 
-class NotesActivity : Activity()
+class NotesActivity : BaseSettingsActivity() {
+    @Inject
+    lateinit var notesInteractor: NotesInteractor
+
+    @Inject
+    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
+
+    @Inject
+    lateinit var notesPresenter: NotesPresenter
+
+    private lateinit var loadingSpinner: LoadingSpinner
+    private lateinit var notesListView: NotesListView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.activity_notes)
+        loadingSpinner = findViewById(R.id.loading_spinner)
+        notesListView = findViewById<NotesListView>(R.id.notes).apply { setPresenter(notesPresenter) }
+
+        observeSettings(notesInteractor)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        loadingSpinnerPresenter.attachView(loadingSpinner)
+        notesPresenter.attachView(notesListView)
+    }
+
+    override fun onStop() {
+        loadingSpinnerPresenter.detachView()
+        notesPresenter.detachView()
+
+        super.onStop()
+    }
+}
