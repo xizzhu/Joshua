@@ -48,13 +48,8 @@ class SearchActivity : BaseSettingsActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_search)
-
-        toolbar = findViewById(R.id.toolbar)
-        toolbar.setPresenter(toolbarPresenter)
-
-        searchResultList = findViewById(R.id.search_result)
-        searchResultList.setPresenter(searchResultPresenter)
-
+        toolbar = findViewById<SearchToolbar>(R.id.toolbar).apply { setPresenter(toolbarPresenter) }
+        searchResultList = findViewById<SearchResultListView>(R.id.search_result).apply { setPresenter(searchResultPresenter) }
         loadingSpinner = findViewById(R.id.loading_spinner)
 
         observeSettings(searchInteractor)

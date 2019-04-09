@@ -62,24 +62,22 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     private val onClickListener = View.OnClickListener { presenter.hide() }
 
-    private val adapter: VerseDetailPagerAdapter
+    private val adapter = VerseDetailPagerAdapter(context, object : VerseDetailPagerAdapter.Listener {
+        override fun onNoteUpdated(note: String) {
+            presenter.updateNote(note)
+        }
+    })
     private val tabLayout: TabLayout
     private val viewPager: ViewPager
-
     private val bookmark: ImageView
 
     init {
         View.inflate(context, R.layout.inner_verse_detail_view, this)
-        tabLayout = findViewById(R.id.tab_layout)
-        viewPager = findViewById(R.id.view_pager)
-
-        adapter = VerseDetailPagerAdapter(context, object : VerseDetailPagerAdapter.Listener {
-            override fun onNoteUpdated(note: String) {
-                presenter.updateNote(note)
-            }
-        })
-        viewPager.adapter = adapter
-        tabLayout.setupWithViewPager(viewPager)
+        viewPager = findViewById<ViewPager>(R.id.view_pager).apply { adapter = this@VerseDetailViewLayout.adapter }
+        tabLayout = findViewById<TabLayout>(R.id.tab_layout).apply { setupWithViewPager(viewPager) }
+        bookmark = findViewById<ImageView>(R.id.bookmark).apply {
+            setOnClickListener { presenter.updateBookmark() }
+        }
 
         setOnClickListener(onClickListener)
 
@@ -89,12 +87,6 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
                 translationY = height.toFloat()
             }
         })
-
-        bookmark = findViewById<ImageView>(R.id.bookmark).apply {
-            setOnClickListener {
-                presenter.updateBookmark()
-            }
-        }
     }
 
     fun setPresenter(presenter: VerseDetailPresenter) {
