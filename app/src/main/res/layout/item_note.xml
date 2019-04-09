@@ -11,16 +11,16 @@
     android:paddingBottom="@dimen/padding_small">
 
     <TextView
-        android:id="@+id/text"
-        style="@style/Text.Body"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
         android:id="@+id/verse"
-        style="@style/Text.Caption"
+        style="@style/Text.Body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="1" />
+
+    <TextView
+        android:id="@+id/text"
+        style="@style/Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </LinearLayout>

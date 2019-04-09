@@ -65,8 +65,8 @@ class NotesListAdapter(context: Context, private val listener: Listener) : Recyc
 private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup,
                                  private val resources: Resources, private val listener: NotesListAdapter.Listener)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_note, parent, false)), View.OnClickListener {
-    private val text: TextView = itemView.findViewById(R.id.text)
     private val verse: TextView = itemView.findViewById(R.id.verse)
+    private val text: TextView = itemView.findViewById(R.id.text)
     private var currentNote: NoteForDisplay? = null
 
     init {
@@ -77,15 +77,15 @@ private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup,
         currentNote = note
 
         val textColor = settings.getPrimaryTextColor(resources)
-        with(text) {
-            setTextColor(textColor)
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
-            text = note.getTextForDisplay()
-        }
         with(verse) {
             setTextColor(textColor)
             setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources).toFloat())
-            text = note.text.text
+            text = note.getVerseForDisplay()
+        }
+        with(text) {
+            setTextColor(textColor)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
+            text = note.note
         }
     }
 
