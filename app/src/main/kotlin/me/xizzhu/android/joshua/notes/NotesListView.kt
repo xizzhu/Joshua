@@ -28,7 +28,7 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface NotesView : BaseSettingsView {
-    fun onNotesLoaded(notes: Notes)
+    fun onNotesLoaded(notes: List<NoteForDisplay>)
 
     fun onNotesLoadFailed()
 
@@ -64,7 +64,7 @@ class NotesListView : RecyclerView, NotesView {
         adapter.setSettings(settings)
     }
 
-    override fun onNotesLoaded(notes: Notes) {
+    override fun onNotesLoaded(notes: List<NoteForDisplay>) {
         adapter.setNotes(notes)
     }
 

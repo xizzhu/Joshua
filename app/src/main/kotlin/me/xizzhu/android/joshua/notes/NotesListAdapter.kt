@@ -39,11 +39,12 @@ class NotesListAdapter(context: Context, private val listener: Listener) : Recyc
     private val inflater = LayoutInflater.from(context)
     private val resources = context.resources
 
-    private var notes: Notes? = null
+    private val notes: ArrayList<NoteForDisplay> = ArrayList()
     private var settings: Settings? = null
 
-    fun setNotes(notes: Notes) {
-        this.notes = notes
+    fun setNotes(notes: List<NoteForDisplay>) {
+        this.notes.clear()
+        this.notes.addAll(notes)
         notifyDataSetChanged()
     }
 
@@ -52,13 +53,13 @@ class NotesListAdapter(context: Context, private val listener: Listener) : Recyc
         notifyDataSetChanged()
     }
 
-    override fun getItemCount(): Int = if (notes == null || settings == null) 0 else notes!!.size
+    override fun getItemCount(): Int = if (settings == null) 0 else notes.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
             NoteItemViewHolder(inflater, parent, resources, listener)
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as NoteItemViewHolder).bind(notes!![position], settings!!)
+        (holder as NoteItemViewHolder).bind(notes[position], settings!!)
     }
 }
 

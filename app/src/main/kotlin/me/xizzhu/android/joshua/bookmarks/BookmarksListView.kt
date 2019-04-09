@@ -28,7 +28,7 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface BookmarksView : BaseSettingsView {
-    fun onBookmarksLoaded(bookmarks: Bookmarks)
+    fun onBookmarksLoaded(bookmarks: List<BookmarkForDisplay>)
 
     fun onBookmarksLoadFailed()
 
@@ -64,7 +64,7 @@ class BookmarksListView : RecyclerView, BookmarksView {
         adapter.setSettings(settings)
     }
 
-    override fun onBookmarksLoaded(bookmarks: Bookmarks) {
+    override fun onBookmarksLoaded(bookmarks: List<BookmarkForDisplay>) {
         adapter.setBookmarks(bookmarks)
     }
 

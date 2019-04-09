@@ -50,5 +50,3 @@ data class BookmarkForDisplay(val verseIndex: VerseIndex, val text: Verse.Text, 
         return textForDisplay!!
     }
 }
-
-typealias Bookmarks = List<BookmarkForDisplay>

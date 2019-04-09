@@ -38,11 +38,12 @@ class BookmarksListAdapter(context: Context, private val listener: Listener) : R
     private val inflater = LayoutInflater.from(context)
     private val resources = context.resources
 
-    private var bookmarks: Bookmarks? = null
+    private val bookmarks: ArrayList<BookmarkForDisplay> = ArrayList()
     private var settings: Settings? = null
 
-    fun setBookmarks(bookmarks: Bookmarks) {
-        this.bookmarks = bookmarks
+    fun setBookmarks(bookmarks: List<BookmarkForDisplay>) {
+        this.bookmarks.clear()
+        this.bookmarks.addAll(bookmarks)
         notifyDataSetChanged()
     }
 
@@ -51,13 +52,13 @@ class BookmarksListAdapter(context: Context, private val listener: Listener) : R
         notifyDataSetChanged()
     }
 
-    override fun getItemCount(): Int = if (bookmarks == null || settings == null) 0 else bookmarks!!.size
+    override fun getItemCount(): Int = if (settings == null) 0 else bookmarks.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
             BookmarkItemViewHolder(inflater, parent, resources, listener)
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as BookmarkItemViewHolder).bind(bookmarks!![position], settings!!)
+        (holder as BookmarkItemViewHolder).bind(bookmarks[position], settings!!)
     }
 }
 
