@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading.detail
+package me.xizzhu.android.joshua.notes
 
-import me.xizzhu.android.joshua.core.Note
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class VerseDetailTest : BaseUnitTest() {
+class NotesTest : BaseUnitTest() {
     @Test
-    fun testGetStringForDisplay() {
-        val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = VerseDetail(MockContents.kjvVerses[0], false, "").getTextForDisplay().toString()
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testGetStringForDisplayWithParallelTranslation() {
-        val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth.\n\n中文和合本, 创世记 1:1\n起初神创造天地。"
-        val actual = VerseDetail(MockContents.kjvVersesWithCuvParallel[0], false, "").getTextForDisplay().toString()
+    fun testGetVerseForDisplay() {
+        val expected = "Genesis 1:1 In the beginning God created the heaven and the earth."
+        val actual = NoteForDisplay(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, "", 12345678L).getVerseForDisplay().toString()
         assertEquals(expected, actual)
     }
 }

@@ -40,6 +40,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val navigator: Navigator,
                         private val bibleReadingManager: BibleReadingManager,
                         private val bookmarkManager: BookmarkManager,
+                        private val noteManager: NoteManager,
                         private val readingProgressManager: ReadingProgressManager,
                         private val translationManager: TranslationManager,
                         settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
@@ -119,6 +120,10 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         navigator.navigate(readingActivity, Navigator.SCREEN_BOOKMARKS)
     }
 
+    fun openNotes() {
+        navigator.navigate(readingActivity, Navigator.SCREEN_NOTES)
+    }
+
     fun openSettings() {
         navigator.navigate(readingActivity, Navigator.SCREEN_SETTINGS)
     }
@@ -170,6 +175,16 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun removeBookmark(verseIndex: VerseIndex) {
         bookmarkManager.remove(verseIndex)
+    }
+
+    suspend fun readNote(verseIndex: VerseIndex): Note = noteManager.read(verseIndex)
+
+    suspend fun saveNote(verseIndex: VerseIndex, note: String) {
+        noteManager.save(Note(verseIndex, note, System.currentTimeMillis()))
+    }
+
+    suspend fun removeNote(verseIndex: VerseIndex) {
+        noteManager.remove(verseIndex)
     }
 }
 

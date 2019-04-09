@@ -34,11 +34,12 @@ class ReadingModule {
                                      navigator: Navigator,
                                      bibleReadingManager: BibleReadingManager,
                                      bookmarkManager: BookmarkManager,
+                                     noteManager: NoteManager,
                                      readingProgressManager: ReadingProgressManager,
                                      translationManager: TranslationManager,
                                      settingsManager: SettingsManager): ReadingInteractor =
             ReadingInteractor(readingActivity, navigator, bibleReadingManager, bookmarkManager,
-                    readingProgressManager, translationManager, settingsManager)
+                    noteManager, readingProgressManager, translationManager, settingsManager)
 
     @Provides
     fun provideReadingDrawerPresenter(readingInteractor: ReadingInteractor): ReadingDrawerPresenter =

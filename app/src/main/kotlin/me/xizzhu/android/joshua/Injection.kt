@@ -32,6 +32,8 @@ import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
+import me.xizzhu.android.joshua.notes.NotesActivity
+import me.xizzhu.android.joshua.notes.NotesModule
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
 import me.xizzhu.android.joshua.progress.ReadingProgressModule
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -73,6 +75,11 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
+    fun provideNoteManager(noteRepository: NoteRepository): NoteManager =
+            NoteManager(noteRepository)
+
+    @Provides
+    @Singleton
     fun provideReadingProgressManager(bibleReadingManager: BibleReadingManager,
                                       readingProgressRepository: ReadingProgressRepository): ReadingProgressManager =
             ReadingProgressManager(bibleReadingManager, readingProgressRepository)
@@ -98,6 +105,11 @@ class RepositoryModule {
     @Singleton
     fun provideLocalBookmarkStorage(androidDatabase: AndroidDatabase): LocalBookmarkStorage =
             AndroidBookmarkStorage(androidDatabase)
+
+    @Provides
+    @Singleton
+    fun provideLocalNoteStorage(androidDatabase: AndroidDatabase): LocalNoteStorage =
+            AndroidNoteStorage(androidDatabase)
 
     @Provides
     @Singleton
@@ -149,6 +161,11 @@ class RepositoryModule {
 
     @Provides
     @Singleton
+    fun provideNoteRepository(localNoteStorage: LocalNoteStorage): NoteRepository =
+            NoteRepository(localNoteStorage)
+
+    @Provides
+    @Singleton
     fun provideReadingProgressRepository(localReadingProgressStorage: LocalReadingProgressStorage): ReadingProgressRepository =
             ReadingProgressRepository(localReadingProgressStorage)
 
@@ -169,6 +186,10 @@ abstract class ActivityModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = [(BookmarksModule::class)])
     abstract fun contributeBookmarksActivity(): BookmarksActivity
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [(NotesModule::class)])
+    abstract fun contributeNotesActivity(): NotesActivity
 
     @ActivityScope
     @ContributesAndroidInjector(modules = [(ReadingProgressModule::class)])

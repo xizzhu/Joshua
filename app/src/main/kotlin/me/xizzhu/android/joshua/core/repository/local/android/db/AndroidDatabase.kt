@@ -29,6 +29,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     val bookmarkDao = BookmarkDao(this)
     val bookNamesDao = BookNamesDao(this)
     val metadataDao = MetadataDao(this)
+    val noteDao = NoteDao(this)
     val readingProgressDao = ReadingProgressDao(this)
     val translationDao = TranslationDao(this)
     val translationInfoDao = TranslationInfoDao(this)
@@ -39,6 +40,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             BookmarkDao.createTable(db)
             BookNamesDao.createTable(db)
             MetadataDao.createTable(db)
+            NoteDao.createTable(db)
             ReadingProgressDao.createTable(db)
             TranslationInfoDao.createTable(db)
 

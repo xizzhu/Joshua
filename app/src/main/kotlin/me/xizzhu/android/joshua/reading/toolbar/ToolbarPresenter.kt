@@ -107,6 +107,15 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         }
     }
 
+    fun openNotes() {
+        try {
+            readingInteractor.openNotes()
+        } catch (e: Exception) {
+            Log.e(tag, e, "Failed to open notes activity")
+            view?.onFailedToNavigateToNotes()
+        }
+    }
+
     fun openSettings() {
         try {
             readingInteractor.openSettings()

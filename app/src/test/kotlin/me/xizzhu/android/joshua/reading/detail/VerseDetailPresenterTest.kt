@@ -20,6 +20,7 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -30,6 +31,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
+import kotlin.test.assertEquals
 
 class VerseDetailPresenterTest : BaseUnitTest() {
     @Mock
@@ -71,11 +73,13 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             val verseIndex = VerseIndex(0, 0, 0)
             `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
+            `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
 
             verseDetailOpenState.send(verseIndex)
 
             verify(verseDetailView, times(1)).show()
-            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false))
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false, ""))
             verify(verseDetailView, never()).hide()
         }
     }
@@ -86,10 +90,12 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             val verseIndex = VerseIndex(0, 0, 0)
             `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
+            `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
 
             verseDetailPresenter.loadVerseDetail(verseIndex)
 
-            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false))
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false, ""))
             verify(verseDetailView, never()).onVerseDetailLoadFailed(verseIndex)
         }
     }
@@ -103,7 +109,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
             verseDetailPresenter.loadVerseDetail(verseIndex)
 
-            verify(verseDetailView, never()).onVerseDetailLoaded(any())
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
             verify(verseDetailView, times(1)).onVerseDetailLoadFailed(verseIndex)
         }
     }
@@ -122,32 +128,50 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testAddBookmark() {
         runBlocking {
-            val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
-            `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
+            verseDetailPresenter.verseDetail = VerseDetail(MockContents.kjvVerses[0], false, "")
 
-            verseDetailOpenState.send(verseIndex)
-            verify(verseDetailView, never()).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], true))
-            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false))
+            verseDetailPresenter.updateBookmark()
 
-            verseDetailPresenter.addBookmark(verseIndex)
-            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], true))
+            val expected = VerseDetail(MockContents.kjvVerses[0], true, "")
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(expected)
+            assertEquals(expected, verseDetailPresenter.verseDetail)
         }
     }
 
     @Test
     fun testRemoveBookmark() {
         runBlocking {
-            val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
-            `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, 12345L))
+            verseDetailPresenter.verseDetail = VerseDetail(MockContents.kjvVerses[0], true, "")
 
-            verseDetailOpenState.send(verseIndex)
-            verify(verseDetailView, never()).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false))
-            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], true))
+            verseDetailPresenter.updateBookmark()
 
-            verseDetailPresenter.removeBookmark(verseIndex)
-            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false))
+            val expected = VerseDetail(MockContents.kjvVerses[0], false, "")
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(expected)
+            assertEquals(expected, verseDetailPresenter.verseDetail)
+        }
+    }
+
+    @Test
+    fun testUpdateNote() {
+        runBlocking {
+            verseDetailPresenter.verseDetail = VerseDetail(MockContents.kjvVerses[0], false, "")
+
+            verseDetailPresenter.updateNote("Random")
+            verify(readingInteractor, never()).removeNote(VerseIndex(0, 0, 0))
+            verify(readingInteractor, times(1)).saveNote(VerseIndex(0, 0, 0), "Random")
+            assertEquals(VerseDetail(MockContents.kjvVerses[0], false, "Random"), verseDetailPresenter.verseDetail)
+        }
+    }
+
+    @Test
+    fun testUpdateEmptyNote() {
+        runBlocking {
+            verseDetailPresenter.verseDetail = VerseDetail(MockContents.kjvVerses[0], false, "")
+
+            verseDetailPresenter.updateNote("")
+            verify(readingInteractor, times(1)).removeNote(VerseIndex(0, 0, 0))
+            verify(readingInteractor, never()).saveNote(any(), anyString())
+            assertEquals(VerseDetail(MockContents.kjvVerses[0], false, ""), verseDetailPresenter.verseDetail)
         }
     }
 }

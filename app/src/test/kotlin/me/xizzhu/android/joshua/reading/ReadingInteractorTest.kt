@@ -38,6 +38,8 @@ class ReadingInteractorTest : BaseUnitTest() {
     @Mock
     private lateinit var bookmarkManager: BookmarkManager
     @Mock
+    private lateinit var noteManager: NoteManager
+    @Mock
     private lateinit var readingProgressManager: ReadingProgressManager
     @Mock
     private lateinit var translationManager: TranslationManager
@@ -50,7 +52,7 @@ class ReadingInteractorTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
         readingInteractor = ReadingInteractor(readingActivity, navigator, bibleReadingManager,
-                bookmarkManager, readingProgressManager, translationManager, settingsManager)
+                bookmarkManager, noteManager, readingProgressManager, translationManager, settingsManager)
     }
 
     @Test
