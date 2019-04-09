@@ -44,7 +44,7 @@ data class BookmarkForDisplay(val verseIndex: VerseIndex, val text: Verse.Text, 
 
             SPANNABLE_STRING_BUILDER.append('\n').append(text.text)
 
-            textForDisplay = SPANNABLE_STRING_BUILDER
+            textForDisplay = SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
         }
 
         return textForDisplay!!

@@ -58,7 +58,7 @@ data class VerseDetail(val verse: Verse, val bookmarked: Boolean, val note: Stri
                 buildVerseForDisplay(SPANNABLE_STRING_BUILDER, verse.verseIndex, text)
             }
 
-            stringForDisplay = SPANNABLE_STRING_BUILDER
+            stringForDisplay = SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
         }
         return stringForDisplay!!
     }

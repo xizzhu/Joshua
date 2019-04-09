@@ -26,25 +26,25 @@ import me.xizzhu.android.joshua.core.VerseIndex
 data class NoteForDisplay(val verseIndex: VerseIndex, val text: Verse.Text, val note: String, val timestamp: Long) {
     companion object {
         private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
-        private val STRING_BUILDER = SpannableStringBuilder()
+        private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
     private var textForDisplay: CharSequence? = null
 
     fun getVerseForDisplay(): CharSequence {
         if (textForDisplay == null) {
-            STRING_BUILDER.clear()
-            STRING_BUILDER.clearSpans()
+            SPANNABLE_STRING_BUILDER.clear()
+            SPANNABLE_STRING_BUILDER.clearSpans()
 
             // format:
             // <book name> <chapter index>:<verse index> <verse text>
-            STRING_BUILDER.append(text.bookName).append(' ')
+            SPANNABLE_STRING_BUILDER.append(text.bookName).append(' ')
                     .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
-            STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+            SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
 
-            STRING_BUILDER.append(' ').append(text.text)
+            SPANNABLE_STRING_BUILDER.append(' ').append(text.text)
 
-            textForDisplay = STRING_BUILDER
+            textForDisplay = SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
         }
 
         return textForDisplay!!
