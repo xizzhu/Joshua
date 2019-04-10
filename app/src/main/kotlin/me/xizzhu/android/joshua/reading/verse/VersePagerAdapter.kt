@@ -99,22 +99,13 @@ class VersePagerAdapter(private val context: Context, private val listener: List
             (obj as Page).rootView == view
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        var page: Page? = null
-        for (p in pages) {
-            if (!p.inUse) {
-                page = p
-                break
-            }
-        }
-        if (page == null) {
-            page = Page(context, inflater, container, listener)
-            pages.add(page)
-        }
-
+        val page: Page = (pages.firstOrNull { p -> !p.inUse }
+                ?: Page(context, inflater, container, listener).apply { pages.add(this) })
+                .also { page ->
+                    page.bind(currentTranslation, parallelTranslations,
+                            position.toBookIndex(), position.toChapterIndex(), settings!!)
+                }
         container.addView(page.rootView, 0)
-        page.bind(currentTranslation, parallelTranslations, position.toBookIndex(), position.toChapterIndex())
-        page.settings = settings
-
         return page
     }
 
@@ -142,10 +133,7 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
     var inUse = false
         private set
     var settings: Settings? = null
-        set(value) {
-            field = value
-            value?.let { v -> adapter.setSettings(v) }
-        }
+        private set
 
     private val adapter = VerseListAdapter(context, inflater)
     private var verses: List<VerseForReading>? = null
@@ -164,11 +152,13 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         })
     }
 
-    fun bind(currentTranslation: String, parallelTranslations: List<String>, bookIndex: Int, chapterIndex: Int) {
+    fun bind(currentTranslation: String, parallelTranslations: List<String>, bookIndex: Int, chapterIndex: Int, settings: Settings) {
         this.currentTranslation = currentTranslation
         this.parallelTranslations = parallelTranslations
         this.bookIndex = bookIndex
         this.chapterIndex = chapterIndex
+        this.settings = settings.also { adapter.setSettings(it) }
+
         listener.onChapterRequested(bookIndex, chapterIndex)
 
         verseList.visibility = View.GONE
