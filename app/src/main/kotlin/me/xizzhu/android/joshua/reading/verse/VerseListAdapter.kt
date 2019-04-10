@@ -61,6 +61,8 @@ class VerseListAdapter(context: Context, private val inflater: LayoutInflater) :
         notifyDataSetChanged()
     }
 
+    fun getVerse(position: Int): VerseForReading? = verses.getOrNull(position)
+
     fun setSettings(settings: Settings) {
         this.settings = settings
         notifyDataSetChanged()

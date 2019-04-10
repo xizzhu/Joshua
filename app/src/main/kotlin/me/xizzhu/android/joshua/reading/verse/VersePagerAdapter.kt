@@ -136,7 +136,6 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         private set
 
     private val adapter = VerseListAdapter(context, inflater)
-    private var verses: List<VerseForReading>? = null
 
     init {
         verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
@@ -174,7 +173,6 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 
-        this.verses = verses
         adapter.setVerses(verses)
 
         if (currentVerseIndex.verseIndex > 0
@@ -208,22 +206,16 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
     }
 
     override fun onClick(v: View) {
-        val position = verseList.getChildAdapterPosition(v)
-        if (position == RecyclerView.NO_POSITION || verses == null) {
-            return
+        adapter.getVerse(verseList.getChildAdapterPosition(v))?.let {
+            listener.onVerseClicked(it)
         }
-
-        listener.onVerseClicked(verses!![position])
     }
 
     override fun onLongClick(v: View): Boolean {
-        val position = verseList.getChildAdapterPosition(v)
-        if (position == RecyclerView.NO_POSITION || verses == null) {
-            return false
+        adapter.getVerse(verseList.getChildAdapterPosition(v))?.let {
+            listener.onVerseLongClicked(it)
+            return@onLongClick true
         }
-
-        listener.onVerseLongClicked(verses!![position])
-
-        return true
+        return false
     }
 }
