@@ -42,7 +42,7 @@ object Versions {
     const val recyclerView = "1.0.0"
     const val viewPager = "1.0.0"
 
-    const val dagger = "2.21"
+    const val dagger = "2.22.1"
 
     const val retrofit = "2.5.0"
     const val okhttp = "3.14.0"
