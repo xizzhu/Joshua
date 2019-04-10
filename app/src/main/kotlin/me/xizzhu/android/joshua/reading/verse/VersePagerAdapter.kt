@@ -118,10 +118,6 @@ class VersePagerAdapter(private val context: Context, private val listener: List
 
 private class Page(context: Context, inflater: LayoutInflater, container: ViewGroup, private val listener: VersePagerAdapter.Listener)
     : RecyclerView.OnChildAttachStateChangeListener, View.OnClickListener, View.OnLongClickListener {
-    val rootView: View = inflater.inflate(R.layout.page_verse, container, false)
-    private val verseList = rootView.findViewById(R.id.verse_list) as RecyclerView
-    private val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
-
     var currentTranslation = ""
         private set
     var parallelTranslations = emptyList<String>()
@@ -137,11 +133,13 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
 
     private val adapter = VerseListAdapter(context, inflater)
 
-    init {
-        verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
-        verseList.adapter = adapter
-        verseList.addOnChildAttachStateChangeListener(this)
-        verseList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+    val rootView: View = inflater.inflate(R.layout.page_verse, container, false)
+    private val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
+    private val verseList = rootView.findViewById<RecyclerView>(R.id.verse_list).apply {
+        layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        adapter = this@Page.adapter
+        addOnChildAttachStateChangeListener(this@Page)
+        addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (inUse && newState == RecyclerView.SCROLL_STATE_IDLE) {
                     listener.onCurrentVerseUpdated(bookIndex, chapterIndex,
