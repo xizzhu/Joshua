@@ -91,7 +91,7 @@ class VerseListAdapter(context: Context, private val inflater: LayoutInflater) :
             return
         }
 
-        for (payload in payloads) {
+        payloads.forEach { payload ->
             when (payload as Int) {
                 VERSE_SELECTED -> holder.setSelected(true)
                 VERSE_DESELECTED -> holder.setSelected(false)
