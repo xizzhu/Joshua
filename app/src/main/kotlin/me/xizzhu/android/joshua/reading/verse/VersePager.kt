@@ -97,14 +97,12 @@ class VerseViewPager : ViewPager, VerseView {
     private var currentVerseIndex = VerseIndex.INVALID
     private var currentTranslation = ""
     private var parallelTranslations = emptyList<String>()
-    private var settings: Settings? = null
 
     fun setPresenter(presenter: VersePresenter) {
         this.presenter = presenter
     }
 
     override fun onSettingsUpdated(settings: Settings) {
-        this.settings = settings
         adapter.settings = settings
     }
 
@@ -117,7 +115,7 @@ class VerseViewPager : ViewPager, VerseView {
     }
 
     private fun refreshUi() {
-        if (currentTranslation.isEmpty() || !currentVerseIndex.isValid() || settings == null) {
+        if (currentTranslation.isEmpty() || !currentVerseIndex.isValid()) {
             return
         }
 

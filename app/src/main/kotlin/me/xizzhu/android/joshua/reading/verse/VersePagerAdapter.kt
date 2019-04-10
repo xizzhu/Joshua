@@ -50,11 +50,8 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     var parallelTranslations = emptyList<String>()
     var settings: Settings? = null
         set(value) {
-            val shouldRefresh = field != null
             field = value
-            if (shouldRefresh) {
-                notifyDataSetChanged()
-            }
+            notifyDataSetChanged()
         }
 
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<VerseForReading>) {
