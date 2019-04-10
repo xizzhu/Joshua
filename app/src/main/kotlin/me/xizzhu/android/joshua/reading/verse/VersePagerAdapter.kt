@@ -66,7 +66,7 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     }
 
     private fun findPage(bookIndex: Int, chapterIndex: Int): Page? {
-        for (page in pages) {
+        pages.forEach { page ->
             if (page.bookIndex == bookIndex && page.chapterIndex == chapterIndex) {
                 return page
             }
