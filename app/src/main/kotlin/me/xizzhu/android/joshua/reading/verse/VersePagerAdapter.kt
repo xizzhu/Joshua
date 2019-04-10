@@ -45,14 +45,21 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     private val inflater = LayoutInflater.from(context)
     private val pages = ArrayList<Page>()
 
-    var currentVerseIndex = VerseIndex.INVALID
-    var currentTranslation = ""
-    var parallelTranslations = emptyList<String>()
+    private var currentVerseIndex = VerseIndex.INVALID
+    private var currentTranslation = ""
+    private var parallelTranslations = emptyList<String>()
     var settings: Settings? = null
         set(value) {
             field = value
             notifyDataSetChanged()
         }
+
+    fun setCurrent(currentVerseIndex: VerseIndex, currentTranslation: String, parallelTranslations: List<String>) {
+        this.currentVerseIndex = currentVerseIndex
+        this.currentTranslation = currentTranslation
+        this.parallelTranslations = parallelTranslations
+        notifyDataSetChanged()
+    }
 
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<VerseForReading>) {
         findPage(bookIndex, chapterIndex)?.setVerses(verses, currentVerseIndex)

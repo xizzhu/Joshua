@@ -119,10 +119,7 @@ class VerseViewPager : ViewPager, VerseView {
             return
         }
 
-        adapter.currentVerseIndex = currentVerseIndex
-        adapter.currentTranslation = currentTranslation
-        adapter.parallelTranslations = parallelTranslations
-        adapter.notifyDataSetChanged()
+        adapter.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
         setCurrentItem(currentVerseIndex.toPagePosition(), false)
     }
 
