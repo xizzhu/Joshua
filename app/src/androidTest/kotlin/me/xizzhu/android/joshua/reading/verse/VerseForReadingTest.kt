@@ -29,36 +29,36 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class VerseForReadingTest: BaseUnitTest() {
+class VerseForReadingTest : BaseUnitTest() {
     @Test
     fun testGetIndexForDisplay() {
-        assertEquals("1", VerseForReading(MockContents.kjvVerses[0], 9).getIndexForDisplay())
+        assertEquals("1", VerseForReading(MockContents.kjvVerses[0], 9).indexForDisplay)
 
-        assertEquals(" 1", VerseForReading(MockContents.kjvVerses[0], 10).getIndexForDisplay())
-        assertEquals("10", VerseForReading(MockContents.kjvVerses[9], 10).getIndexForDisplay())
-        assertEquals("99", VerseForReading(Verse(VerseIndex(1, 2, 98), Verse.Text("", "", ""), emptyList()), 99).getIndexForDisplay())
+        assertEquals(" 1", VerseForReading(MockContents.kjvVerses[0], 10).indexForDisplay)
+        assertEquals("10", VerseForReading(MockContents.kjvVerses[9], 10).indexForDisplay)
+        assertEquals("99", VerseForReading(Verse(VerseIndex(1, 2, 98), Verse.Text("", "", ""), emptyList()), 99).indexForDisplay)
 
-        assertEquals("  1", VerseForReading(MockContents.kjvVerses[0], 100).getIndexForDisplay())
-        assertEquals(" 10", VerseForReading(MockContents.kjvVerses[9], 100).getIndexForDisplay())
-        assertEquals("100", VerseForReading(Verse(VerseIndex(1, 2, 99), Verse.Text("", "", ""), emptyList()), 100).getIndexForDisplay())
+        assertEquals("  1", VerseForReading(MockContents.kjvVerses[0], 100).indexForDisplay)
+        assertEquals(" 10", VerseForReading(MockContents.kjvVerses[9], 100).indexForDisplay)
+        assertEquals("100", VerseForReading(Verse(VerseIndex(1, 2, 99), Verse.Text("", "", ""), emptyList()), 100).indexForDisplay)
     }
 
     @Test
     fun testGetIndexForDisplayWithParallelTranslations() {
-        assertTrue(VerseForReading(MockContents.kjvVersesWithCuvParallel[0], 1).getIndexForDisplay().isEmpty())
+        assertTrue(VerseForReading(MockContents.kjvVersesWithCuvParallel[0], 1).indexForDisplay.isEmpty())
     }
 
     @Test
     fun testGetTextForDisplay() {
         val expected = "In the beginning God created the heaven and the earth."
-        val actual = VerseForReading(MockContents.kjvVerses[0], 1).getTextForDisplay().toString()
+        val actual = VerseForReading(MockContents.kjvVerses[0], 1).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 
     @Test
     fun testGetTextForDisplayWithParallelTranslations() {
         val expected = "KJV 1:1\nIn the beginning God created the heaven and the earth.\n\n中文和合本 1:1\n起初神创造天地。"
-        val actual = VerseForReading(MockContents.kjvVersesWithCuvParallel[0], 1).getTextForDisplay().toString()
+        val actual = VerseForReading(MockContents.kjvVersesWithCuvParallel[0], 1).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

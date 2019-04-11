@@ -68,32 +68,22 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
     }
 
     suspend fun readBookNames(translationShortName: String): List<String> {
-        var bookNames = bookNamesCache.get(translationShortName)
-        if (bookNames == null) {
-            bookNames = localReadingStorage.readBookNames(translationShortName)
-            bookNamesCache.put(translationShortName, bookNames)
-        }
-        return bookNames
+        return bookNamesCache.get(translationShortName)
+                ?: localReadingStorage.readBookNames(translationShortName)
+                        .also { bookNamesCache.put(translationShortName, it) }
     }
 
     suspend fun readBookShortNames(translationShortName: String): List<String> {
-        var bookShortNames = bookShortNamesCache.get(translationShortName)
-        if (bookShortNames == null) {
-            bookShortNames = localReadingStorage.readBookShortNames(translationShortName)
-            bookShortNamesCache.put(translationShortName, bookShortNames)
-        }
-        return bookShortNames
+        return bookShortNamesCache.get(translationShortName)
+                ?: localReadingStorage.readBookShortNames(translationShortName)
+                        .also { bookShortNamesCache.put(translationShortName, it) }
     }
 
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
         val key = "$translationShortName-$bookIndex-$chapterIndex"
-        var verses = versesCache.get(key)
-        if (verses == null) {
-            verses = localReadingStorage.readVerses(
-                    translationShortName, bookIndex, chapterIndex, readBookNames(translationShortName)[bookIndex])
-            versesCache.put(key, verses)
-        }
-        return verses
+        return versesCache.get(key) ?: localReadingStorage.readVerses(
+                translationShortName, bookIndex, chapterIndex, readBookNames(translationShortName)[bookIndex])
+                .also { versesCache.put(key, it) }
     }
 
     suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,

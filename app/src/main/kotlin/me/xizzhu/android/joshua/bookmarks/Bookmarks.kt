@@ -28,25 +28,19 @@ data class BookmarkForDisplay(val verseIndex: VerseIndex, val text: Verse.Text, 
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
-    private var textForDisplay: CharSequence? = null
+    val textForDisplay: CharSequence by lazy {
+        SPANNABLE_STRING_BUILDER.clear()
+        SPANNABLE_STRING_BUILDER.clearSpans()
 
-    fun getTextForDisplay(): CharSequence {
-        if (textForDisplay == null) {
-            SPANNABLE_STRING_BUILDER.clear()
-            SPANNABLE_STRING_BUILDER.clearSpans()
+        // format:
+        // <book name> <chapter verseIndex>:<verse verseIndex>
+        // <verse text>
+        SPANNABLE_STRING_BUILDER.append(text.bookName).append(' ')
+                .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
+        SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
 
-            // format:
-            // <book name> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-            SPANNABLE_STRING_BUILDER.append(text.bookName).append(' ')
-                    .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
-            SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+        SPANNABLE_STRING_BUILDER.append('\n').append(text.text)
 
-            SPANNABLE_STRING_BUILDER.append('\n').append(text.text)
-
-            textForDisplay = SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
-        }
-
-        return textForDisplay!!
+        return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }
 }

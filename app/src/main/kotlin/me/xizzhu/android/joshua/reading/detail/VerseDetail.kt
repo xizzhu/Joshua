@@ -42,25 +42,20 @@ data class VerseDetail(val verse: Verse, val bookmarked: Boolean, val note: Stri
         }
     }
 
-    private var stringForDisplay: CharSequence? = null
-
-    fun getTextForDisplay(): CharSequence {
+    val textForDisplay: CharSequence by lazy {
         if (!isValid()) {
-            return ""
+            return@lazy ""
         }
 
-        if (stringForDisplay == null) {
-            SPANNABLE_STRING_BUILDER.clear()
-            SPANNABLE_STRING_BUILDER.clearSpans()
+        SPANNABLE_STRING_BUILDER.clear()
+        SPANNABLE_STRING_BUILDER.clearSpans()
 
-            buildVerseForDisplay(SPANNABLE_STRING_BUILDER, verse.verseIndex, verse.text)
-            for (text in verse.parallel) {
-                buildVerseForDisplay(SPANNABLE_STRING_BUILDER, verse.verseIndex, text)
-            }
-
-            stringForDisplay = SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
+        buildVerseForDisplay(SPANNABLE_STRING_BUILDER, verse.verseIndex, verse.text)
+        for (text in verse.parallel) {
+            buildVerseForDisplay(SPANNABLE_STRING_BUILDER, verse.verseIndex, text)
         }
-        return stringForDisplay!!
+
+        return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }
 
     fun isValid(): Boolean = verse.isValid()
