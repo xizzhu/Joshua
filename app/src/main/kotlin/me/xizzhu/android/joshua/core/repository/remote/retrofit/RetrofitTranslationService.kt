@@ -127,13 +127,8 @@ private suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine { cont 
     enqueue(object : Callback<T> {
         override fun onResponse(call: Call<T>, response: Response<T>) {
             if (response.isSuccessful) {
-                val body = response.body()
-                if (body != null) {
-                    cont.resume(body)
-                } else {
-                    cont.resumeWithException(
-                            KotlinNullPointerException("Missing response body from ${call.request()}"))
-                }
+                response.body()?.let { cont.resume(it) }
+                        ?: cont.resumeWithException(KotlinNullPointerException("Missing response body from ${call.request()}"))
             } else {
                 cont.resumeWithException(HttpException(response))
             }
