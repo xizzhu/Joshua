@@ -45,24 +45,28 @@ class VersePagerAdapter(private val context: Context, private val listener: List
     private val inflater = LayoutInflater.from(context)
     private val pages = ArrayList<Page>()
 
-    var currentVerseIndex = VerseIndex.INVALID
-    var currentTranslation = ""
-    var parallelTranslations = emptyList<String>()
+    private var currentVerseIndex = VerseIndex.INVALID
+    private var currentTranslation = ""
+    private var parallelTranslations = emptyList<String>()
     var settings: Settings? = null
         set(value) {
-            val shouldRefresh = field != null
             field = value
-            if (shouldRefresh) {
-                notifyDataSetChanged()
-            }
+            notifyDataSetChanged()
         }
+
+    fun setCurrent(currentVerseIndex: VerseIndex, currentTranslation: String, parallelTranslations: List<String>) {
+        this.currentVerseIndex = currentVerseIndex
+        this.currentTranslation = currentTranslation
+        this.parallelTranslations = parallelTranslations
+        notifyDataSetChanged()
+    }
 
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<VerseForReading>) {
         findPage(bookIndex, chapterIndex)?.setVerses(verses, currentVerseIndex)
     }
 
     private fun findPage(bookIndex: Int, chapterIndex: Int): Page? {
-        for (page in pages) {
+        pages.forEach { page ->
             if (page.bookIndex == bookIndex && page.chapterIndex == chapterIndex) {
                 return page
             }
@@ -95,22 +99,13 @@ class VersePagerAdapter(private val context: Context, private val listener: List
             (obj as Page).rootView == view
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        var page: Page? = null
-        for (p in pages) {
-            if (!p.inUse) {
-                page = p
-                break
-            }
-        }
-        if (page == null) {
-            page = Page(context, inflater, container, listener)
-            pages.add(page)
-        }
-
+        val page: Page = (pages.firstOrNull { p -> !p.inUse }
+                ?: Page(context, inflater, container, listener).apply { pages.add(this) })
+                .also { page ->
+                    page.bind(currentTranslation, parallelTranslations,
+                            position.toBookIndex(), position.toChapterIndex(), settings!!)
+                }
         container.addView(page.rootView, 0)
-        page.bind(currentTranslation, parallelTranslations, position.toBookIndex(), position.toChapterIndex())
-        page.settings = settings
-
         return page
     }
 
@@ -123,10 +118,6 @@ class VersePagerAdapter(private val context: Context, private val listener: List
 
 private class Page(context: Context, inflater: LayoutInflater, container: ViewGroup, private val listener: VersePagerAdapter.Listener)
     : RecyclerView.OnChildAttachStateChangeListener, View.OnClickListener, View.OnLongClickListener {
-    val rootView: View = inflater.inflate(R.layout.page_verse, container, false)
-    private val verseList = rootView.findViewById(R.id.verse_list) as RecyclerView
-    private val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
-
     var currentTranslation = ""
         private set
     var parallelTranslations = emptyList<String>()
@@ -138,19 +129,17 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
     var inUse = false
         private set
     var settings: Settings? = null
-        set(value) {
-            field = value
-            value?.let { v -> adapter.setSettings(v) }
-        }
+        private set
 
     private val adapter = VerseListAdapter(context, inflater)
-    private var verses: List<VerseForReading>? = null
 
-    init {
-        verseList.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
-        verseList.adapter = adapter
-        verseList.addOnChildAttachStateChangeListener(this)
-        verseList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+    val rootView: View = inflater.inflate(R.layout.page_verse, container, false)
+    private val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
+    private val verseList = rootView.findViewById<RecyclerView>(R.id.verse_list).apply {
+        layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        adapter = this@Page.adapter
+        addOnChildAttachStateChangeListener(this@Page)
+        addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (inUse && newState == RecyclerView.SCROLL_STATE_IDLE) {
                     listener.onCurrentVerseUpdated(bookIndex, chapterIndex,
@@ -160,11 +149,13 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         })
     }
 
-    fun bind(currentTranslation: String, parallelTranslations: List<String>, bookIndex: Int, chapterIndex: Int) {
+    fun bind(currentTranslation: String, parallelTranslations: List<String>, bookIndex: Int, chapterIndex: Int, settings: Settings) {
         this.currentTranslation = currentTranslation
         this.parallelTranslations = parallelTranslations
         this.bookIndex = bookIndex
         this.chapterIndex = chapterIndex
+        this.settings = settings.also { adapter.setSettings(it) }
+
         listener.onChapterRequested(bookIndex, chapterIndex)
 
         verseList.visibility = View.GONE
@@ -180,7 +171,6 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 
-        this.verses = verses
         adapter.setVerses(verses)
 
         if (currentVerseIndex.verseIndex > 0
@@ -214,22 +204,16 @@ private class Page(context: Context, inflater: LayoutInflater, container: ViewGr
     }
 
     override fun onClick(v: View) {
-        val position = verseList.getChildAdapterPosition(v)
-        if (position == RecyclerView.NO_POSITION || verses == null) {
-            return
+        adapter.getVerse(verseList.getChildAdapterPosition(v))?.let {
+            listener.onVerseClicked(it)
         }
-
-        listener.onVerseClicked(verses!![position])
     }
 
     override fun onLongClick(v: View): Boolean {
-        val position = verseList.getChildAdapterPosition(v)
-        if (position == RecyclerView.NO_POSITION || verses == null) {
-            return false
+        adapter.getVerse(verseList.getChildAdapterPosition(v))?.let {
+            listener.onVerseLongClicked(it)
+            return@onLongClick true
         }
-
-        listener.onVerseLongClicked(verses!![position])
-
-        return true
+        return false
     }
 }

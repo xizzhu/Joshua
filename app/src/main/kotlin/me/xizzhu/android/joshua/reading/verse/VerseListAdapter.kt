@@ -61,6 +61,8 @@ class VerseListAdapter(context: Context, private val inflater: LayoutInflater) :
         notifyDataSetChanged()
     }
 
+    fun getVerse(position: Int): VerseForReading? = verses.getOrNull(position)
+
     fun setSettings(settings: Settings) {
         this.settings = settings
         notifyDataSetChanged()
@@ -91,7 +93,7 @@ class VerseListAdapter(context: Context, private val inflater: LayoutInflater) :
             return
         }
 
-        for (payload in payloads) {
+        payloads.forEach { payload ->
             when (payload as Int) {
                 VERSE_SELECTED -> holder.setSelected(true)
                 VERSE_DESELECTED -> holder.setSelected(false)

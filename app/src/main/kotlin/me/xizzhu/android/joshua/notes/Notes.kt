@@ -50,5 +50,3 @@ data class NoteForDisplay(val verseIndex: VerseIndex, val text: Verse.Text, val 
         return textForDisplay!!
     }
 }
-
-typealias Notes = List<NoteForDisplay>

@@ -41,9 +41,7 @@ class BookmarksActivity : BaseSettingsActivity() {
 
         setContentView(R.layout.activity_bookmarks)
         loadingSpinner = findViewById(R.id.loading_spinner)
-
-        bookmarksListView = findViewById(R.id.bookmarks)
-        bookmarksListView.setPresenter(bookmarksPresenter)
+        bookmarksListView = findViewById<BookmarksListView>(R.id.bookmarks).apply { setPresenter(bookmarksPresenter) }
 
         observeSettings(bookmarksInteractor)
     }

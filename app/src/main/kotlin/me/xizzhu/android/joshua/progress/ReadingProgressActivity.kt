@@ -41,9 +41,9 @@ class ReadingProgressActivity : BaseSettingsActivity() {
 
         setContentView(R.layout.activity_reading_progress)
         loadingSpinner = findViewById(R.id.loading_spinner)
-
-        readingProgressListView = findViewById(R.id.reading_progress_list)
-        readingProgressListView.setPresenter(readingProgressPresenter)
+        readingProgressListView = findViewById<ReadingProgressListView>(R.id.reading_progress_list).apply {
+            setPresenter(readingProgressPresenter)
+        }
 
         observeSettings(readingProgressInteractor)
     }

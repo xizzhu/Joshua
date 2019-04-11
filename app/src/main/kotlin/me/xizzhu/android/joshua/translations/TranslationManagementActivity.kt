@@ -40,12 +40,8 @@ class TranslationManagementActivity : BaseSettingsActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_translation_management)
-
-        swipeRefresher = findViewById(R.id.swipe_refresher)
-        swipeRefresher.setPresenter(swipeRefresherPresenter)
-
-        translationListView = findViewById(R.id.translation_list)
-        translationListView.setPresenter(translationPresenter)
+        swipeRefresher = findViewById<SwipeRefresher>(R.id.swipe_refresher).apply { setPresenter(swipeRefresherPresenter) }
+        translationListView = findViewById<TranslationListView>(R.id.translation_list).apply { setPresenter(translationPresenter) }
 
         observeSettings(translationInteractor)
     }

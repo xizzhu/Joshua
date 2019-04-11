@@ -68,24 +68,14 @@ class ReadingActivity : BaseSettingsActivity() {
 
         setContentView(R.layout.activity_reading)
         drawerLayout = findViewById(R.id.drawer_layout)
-
-        toolbar = findViewById(R.id.toolbar)
-        toolbar.setPresenter(toolbarPresenter)
-
-        chapterListView = findViewById(R.id.chapter_list_view)
-        chapterListView.setPresenter(chapterListPresenter)
-
-        verseViewPager = findViewById(R.id.verse_view_pager)
-        verseViewPager.setPresenter(versePresenter)
-
-        verseDetailView = findViewById(R.id.verse_detail_view)
-        verseDetailView.setPresenter(verseDetailPresenter)
+        toolbar = findViewById<ReadingToolbar>(R.id.toolbar).apply { setPresenter(toolbarPresenter) }
+        chapterListView = findViewById<ChapterListView>(R.id.chapter_list_view).apply { setPresenter(chapterListPresenter) }
+        verseViewPager = findViewById<VerseViewPager>(R.id.verse_view_pager).apply { setPresenter(versePresenter) }
+        verseDetailView = findViewById<VerseDetailViewLayout>(R.id.verse_detail_view).apply { setPresenter(verseDetailPresenter) }
+        search = findViewById<SearchFloatingActionButton>(R.id.search).apply { setPresenter(searchButtonPresenter) }
 
         drawerToggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, 0, 0)
         drawerLayout.addDrawerListener(drawerToggle)
-
-        search = findViewById(R.id.search)
-        search.setPresenter(searchButtonPresenter)
 
         observeSettings(readingInteractor)
     }
