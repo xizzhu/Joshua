@@ -30,6 +30,7 @@ import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewPager
+import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
@@ -55,26 +56,23 @@ class ReadingActivity : BaseSettingsActivity() {
     @Inject
     lateinit var searchButtonPresenter: SearchButtonPresenter
 
-    private lateinit var drawerToggle: ActionBarDrawerToggle
-    private lateinit var drawerLayout: ReadingDrawerLayout
-    private lateinit var toolbar: ReadingToolbar
-    private lateinit var chapterListView: ChapterListView
-    private lateinit var verseViewPager: VerseViewPager
-    private lateinit var verseDetailView: VerseDetailViewLayout
-    private lateinit var search: SearchFloatingActionButton
+    private val drawerToggle: ActionBarDrawerToggle by lazy { ActionBarDrawerToggle(this, drawerLayout, toolbar, 0, 0) }
+    private val drawerLayout: ReadingDrawerLayout by bindView(R.id.drawer_layout)
+    private val toolbar: ReadingToolbar by bindView(R.id.toolbar)
+    private val chapterListView: ChapterListView by bindView(R.id.chapter_list_view)
+    private val verseViewPager: VerseViewPager by bindView(R.id.verse_view_pager)
+    private val verseDetailView: VerseDetailViewLayout by bindView(R.id.verse_detail_view)
+    private val search: SearchFloatingActionButton by bindView(R.id.search)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_reading)
-        drawerLayout = findViewById(R.id.drawer_layout)
-        toolbar = findViewById<ReadingToolbar>(R.id.toolbar).apply { setPresenter(toolbarPresenter) }
-        chapterListView = findViewById<ChapterListView>(R.id.chapter_list_view).apply { setPresenter(chapterListPresenter) }
-        verseViewPager = findViewById<VerseViewPager>(R.id.verse_view_pager).apply { setPresenter(versePresenter) }
-        verseDetailView = findViewById<VerseDetailViewLayout>(R.id.verse_detail_view).apply { setPresenter(verseDetailPresenter) }
-        search = findViewById<SearchFloatingActionButton>(R.id.search).apply { setPresenter(searchButtonPresenter) }
-
-        drawerToggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, 0, 0)
+        toolbar.setPresenter(toolbarPresenter)
+        chapterListView.setPresenter(chapterListPresenter)
+        verseViewPager.setPresenter(versePresenter)
+        verseDetailView.setPresenter(verseDetailPresenter)
+        search.setPresenter(searchButtonPresenter)
         drawerLayout.addDrawerListener(drawerToggle)
 
         observeSettings(readingInteractor)

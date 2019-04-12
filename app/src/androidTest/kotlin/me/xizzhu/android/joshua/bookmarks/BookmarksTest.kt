@@ -23,9 +23,9 @@ import kotlin.test.assertEquals
 
 class BookmarksTest : BaseUnitTest() {
     @Test
-    fun testGetTextForDisplay() {
+    fun testTextForDisplay() {
         val expected = "Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = BookmarkForDisplay(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, 12345678L).getTextForDisplay().toString()
+        val actual = BookmarkForDisplay(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, 12345678L).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

@@ -20,6 +20,7 @@ import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.SwipeRefresher
 import me.xizzhu.android.joshua.ui.SwipeRefresherPresenter
+import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
@@ -33,15 +34,15 @@ class TranslationManagementActivity : BaseSettingsActivity() {
     @Inject
     lateinit var translationPresenter: TranslationPresenter
 
-    private lateinit var swipeRefresher: SwipeRefresher
-    private lateinit var translationListView: TranslationListView
+    private val swipeRefresher: SwipeRefresher by bindView(R.id.swipe_refresher)
+    private val translationListView: TranslationListView by bindView(R.id.translation_list)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_translation_management)
-        swipeRefresher = findViewById<SwipeRefresher>(R.id.swipe_refresher).apply { setPresenter(swipeRefresherPresenter) }
-        translationListView = findViewById<TranslationListView>(R.id.translation_list).apply { setPresenter(translationPresenter) }
+        swipeRefresher.setPresenter(swipeRefresherPresenter)
+        translationListView.setPresenter(translationPresenter)
 
         observeSettings(translationInteractor)
     }

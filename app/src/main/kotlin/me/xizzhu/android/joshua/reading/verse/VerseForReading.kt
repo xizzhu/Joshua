@@ -39,67 +39,57 @@ data class VerseForReading(val verse: Verse, private val totalVerseCount: Int) {
         }
     }
 
-    private var indexForDisplay: CharSequence? = null
-    private var textForDisplay: CharSequence? = null
-
-    fun getIndexForDisplay(): CharSequence {
-        if (indexForDisplay == null) {
-            indexForDisplay = if (verse.parallel.isEmpty()) {
-                STRING_BUILDER.setLength(0)
-                val verseIndex = verse.verseIndex.verseIndex
-                if (totalVerseCount >= 10) {
-                    if (totalVerseCount < 100) {
-                        if (verseIndex + 1 < 10) {
-                            STRING_BUILDER.append(' ')
-                        }
-                    } else {
-                        if (verseIndex + 1 < 10) {
-                            STRING_BUILDER.append("  ")
-                        } else if (verseIndex + 1 < 100) {
-                            STRING_BUILDER.append(" ")
-                        }
+    val indexForDisplay: CharSequence by lazy {
+        if (verse.parallel.isEmpty()) {
+            STRING_BUILDER.setLength(0)
+            val verseIndex = verse.verseIndex.verseIndex
+            if (totalVerseCount >= 10) {
+                if (totalVerseCount < 100) {
+                    if (verseIndex + 1 < 10) {
+                        STRING_BUILDER.append(' ')
+                    }
+                } else {
+                    if (verseIndex + 1 < 10) {
+                        STRING_BUILDER.append("  ")
+                    } else if (verseIndex + 1 < 100) {
+                        STRING_BUILDER.append(" ")
                     }
                 }
-                STRING_BUILDER.append(verseIndex + 1)
-                STRING_BUILDER.toString()
-            } else {
-                ""
             }
+            STRING_BUILDER.append(verseIndex + 1)
+            return@lazy STRING_BUILDER.toString()
+        } else {
+            return@lazy ""
         }
-        return indexForDisplay!!
     }
 
-    fun getTextForDisplay(): CharSequence {
-        if (textForDisplay == null) {
-            textForDisplay = if (verse.parallel.isEmpty()) {
-                verse.text.text
-            } else {
-                // format:
-                // <primary translation> <chapter verseIndex>:<verse verseIndex>
-                // <verse text>
-                // <empty line>
-                // <parallel translation 1> <chapter verseIndex>:<verse verseIndex>
-                // <verse text>
-                // <parallel translation 2> <chapter verseIndex>:<verse verseIndex>
-                // <verse text>
+    val textForDisplay: CharSequence by lazy {
+        if (verse.parallel.isEmpty()) {
+            return@lazy verse.text.text
+        } else {
+            // format:
+            // <primary translation> <chapter verseIndex>:<verse verseIndex>
+            // <verse text>
+            // <empty line>
+            // <parallel translation 1> <chapter verseIndex>:<verse verseIndex>
+            // <verse text>
+            // <parallel translation 2> <chapter verseIndex>:<verse verseIndex>
+            // <verse text>
 
-                STRING_BUILDER.setLength(0)
-                buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, verse.text)
-                val primaryTextLength = STRING_BUILDER.length
+            STRING_BUILDER.setLength(0)
+            buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, verse.text)
+            val primaryTextLength = STRING_BUILDER.length
 
-                for (text in verse.parallel) {
-                    buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, text)
-                }
-
-                SPANNABLE_STRING_BUILDER.clear()
-                SPANNABLE_STRING_BUILDER.clearSpans()
-                SPANNABLE_STRING_BUILDER.append(STRING_BUILDER)
-                val length = SPANNABLE_STRING_BUILDER.length
-                SPANNABLE_STRING_BUILDER.setSpan(PARALLEL_VERSE_SIZE_SPAN, primaryTextLength, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                SPANNABLE_STRING_BUILDER.subSequence(0, length)
+            for (text in verse.parallel) {
+                buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, text)
             }
-        }
 
-        return textForDisplay!!
+            SPANNABLE_STRING_BUILDER.clear()
+            SPANNABLE_STRING_BUILDER.clearSpans()
+            SPANNABLE_STRING_BUILDER.append(STRING_BUILDER)
+            val length = SPANNABLE_STRING_BUILDER.length
+            SPANNABLE_STRING_BUILDER.setSpan(PARALLEL_VERSE_SIZE_SPAN, primaryTextLength, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, length)
+        }
     }
 }

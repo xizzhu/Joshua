@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.search.result.SearchResultPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultListView
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
@@ -40,17 +41,16 @@ class SearchActivity : BaseSettingsActivity() {
     @Inject
     lateinit var searchResultPresenter: SearchResultPresenter
 
-    private lateinit var toolbar: SearchToolbar
-    private lateinit var searchResultList: SearchResultListView
-    private lateinit var loadingSpinner: LoadingSpinner
+    private val toolbar: SearchToolbar by bindView(R.id.toolbar)
+    private val searchResultList: SearchResultListView by bindView(R.id.search_result)
+    private val loadingSpinner: LoadingSpinner by bindView(R.id.loading_spinner)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_search)
-        toolbar = findViewById<SearchToolbar>(R.id.toolbar).apply { setPresenter(toolbarPresenter) }
-        searchResultList = findViewById<SearchResultListView>(R.id.search_result).apply { setPresenter(searchResultPresenter) }
-        loadingSpinner = findViewById(R.id.loading_spinner)
+        toolbar.setPresenter(toolbarPresenter)
+        searchResultList.setPresenter(searchResultPresenter)
 
         observeSettings(searchInteractor)
     }

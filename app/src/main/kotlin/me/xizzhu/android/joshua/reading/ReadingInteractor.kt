@@ -152,11 +152,10 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         // ref. https://developers.facebook.com/bugs/332619626816423
         val chooseIntent = createChooserForSharing(readingActivity.packageManager, readingActivity.resources,
                 "com.facebook.katana", verses.toStringForSharing())
-        if (chooseIntent != null) {
-            readingActivity.startActivity(chooseIntent)
-            return true
-        }
-        return false
+        return chooseIntent?.let {
+            readingActivity.startActivity(it)
+            true
+        } ?: false
     }
 
     suspend fun startTrackingReadingProgress() {

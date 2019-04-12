@@ -152,7 +152,7 @@ private class SearchResultViewHolder(inflater: LayoutInflater, parent: ViewGroup
     fun bind(verse: SearchedVerse, settings: Settings) {
         currentVerse = verse
         with(text) {
-            text = verse.getTextForDisplay()
+            text = verse.textForDisplay
             setTextColor(settings.getPrimaryTextColor(resources))
             setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
         }

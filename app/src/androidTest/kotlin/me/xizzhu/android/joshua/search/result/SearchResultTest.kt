@@ -27,7 +27,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class SearchResultTest: BaseUnitTest() {
+class SearchResultTest : BaseUnitTest() {
     @Test
     fun testToSearchResult() {
         val expected = listOf(SearchedVerse(MockContents.kjvVerses[0].verseIndex,
@@ -37,12 +37,12 @@ class SearchResultTest: BaseUnitTest() {
     }
 
     @Test
-    fun testGetTextForDisplay() {
+    fun testTextForDisplay() {
         val verseIndex = VerseIndex(1, 2, 3)
         val bookName = MockContents.kjvVerses[0].text.bookName
         val text = MockContents.kjvVerses[0].text.text
         val expected = "$bookName ${verseIndex.chapterIndex + 1}:${verseIndex.verseIndex + 1}\n$text"
-        val actual = SearchedVerse(verseIndex, bookName, text, "").getTextForDisplay().toString()
+        val actual = SearchedVerse(verseIndex, bookName, text, "").textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

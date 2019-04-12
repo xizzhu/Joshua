@@ -24,9 +24,11 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import kotlin.properties.Delegates
 
 class SettingsPresenter(private val app: App, private val settingsManager: SettingsManager) : MVPPresenter<SettingsView>() {
-    private var settings: Settings = Settings.DEFAULT
+    var settings: Settings by Delegates.observable(Settings.DEFAULT) { _, _, new -> view?.onSettingsUpdated(new) }
+        private set
 
     override fun onViewAttached() {
         super.onViewAttached()
@@ -34,10 +36,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
         launch(Dispatchers.Main) {
             val currentSettings = settingsManager.observeSettings()
             receiveChannels.add(currentSettings)
-            currentSettings.consumeEach {
-                settings = it
-                view?.onSettingsUpdated(it)
-            }
+            currentSettings.consumeEach { settings = it }
         }
 
         try {
@@ -47,8 +46,6 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
             Log.e(tag, e, "Failed to load app version")
         }
     }
-
-    fun getSettings(): Settings = settings
 
     fun saveSettings(settings: Settings) {
         launch(Dispatchers.Main) {

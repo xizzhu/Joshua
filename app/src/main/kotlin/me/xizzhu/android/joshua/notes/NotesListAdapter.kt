@@ -81,7 +81,7 @@ private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup,
         with(verse) {
             setTextColor(textColor)
             setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources).toFloat())
-            text = note.getVerseForDisplay()
+            text = note.textForDisplay
         }
         with(text) {
             setTextColor(textColor)

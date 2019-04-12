@@ -79,14 +79,9 @@ class TranslationSpinnerAdapter(context: Context, private val listener: Listener
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val viewHolder = if (convertView == null) {
-            val holder = DropDownViewHolder(inflater.inflate(R.layout.spinner_drop_down, parent, false))
-            holder.rootView.tag = holder
-            holder
-        } else {
-            convertView.tag as DropDownViewHolder
-        }
-
+        val viewHolder = convertView?.let { it.tag as DropDownViewHolder }
+                ?: DropDownViewHolder(inflater.inflate(R.layout.spinner_drop_down, parent, false))
+                        .apply { rootView.tag = this }
         return with(viewHolder) {
             val translationShortName = translationShortNames[position]
             title.text = translationShortName

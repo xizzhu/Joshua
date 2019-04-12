@@ -77,7 +77,7 @@ private class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup
 
         text.setTextColor(settings.getPrimaryTextColor(resources))
         text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
-        text.text = bookmark.getTextForDisplay()
+        text.text = bookmark.textForDisplay
     }
 
     override fun onClick(v: View) {

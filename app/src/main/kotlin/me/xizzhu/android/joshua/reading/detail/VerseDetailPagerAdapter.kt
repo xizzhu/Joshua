@@ -62,18 +62,14 @@ class VerseDetailPagerAdapter(context: Context, private val listener: Listener) 
     override fun getCount(): Int = if (settings != null) PAGE_COUNT else 0
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        var page = pages[position]
-        if (page == null) {
-            page = when (position) {
-                PAGE_VERSES -> VersesPage(resources, inflater, container, settings!!)
-                PAGE_NOTE -> NotePage(resources, inflater, container, settings!!, listener)
-                else -> throw IllegalArgumentException("Unsupported position: $position")
-            }
+        return pages[position] ?: when (position) {
+            PAGE_VERSES -> VersesPage(resources, inflater, container, settings!!)
+            PAGE_NOTE -> NotePage(resources, inflater, container, settings!!, listener)
+            else -> throw IllegalArgumentException("Unsupported position: $position")
+        }.apply {
+            bind(verseDetail)
+            container.addView(view)
         }
-        page.bind(verseDetail)
-
-        container.addView(page.view)
-        return page
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, obj: Any) {
@@ -106,7 +102,7 @@ private class VersesPage(resources: Resources, inflater: LayoutInflater, contain
     }
 
     override fun bind(verseDetail: VerseDetail) {
-        detail.text = verseDetail.getTextForDisplay()
+        detail.text = verseDetail.textForDisplay
     }
 }
 

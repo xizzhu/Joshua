@@ -87,6 +87,7 @@ class ReadingInteractorTest : BaseUnitTest() {
         assertNotNull(intent)
         assertEquals(Intent.ACTION_SEND, intent.action)
         assertEquals("text/plain", intent.type)
+        assertEquals(expectedName, intent.component.className)
         assertEquals(expectedPackageName, intent.`package`)
     }
 }

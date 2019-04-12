@@ -109,14 +109,14 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private v
     private val divider = itemView.findViewById(R.id.divider) as View
 
     fun bind(verse: VerseForReading, selected: Boolean, settings: Settings) {
-        text.text = verse.getTextForDisplay()
+        text.text = verse.textForDisplay
 
         val textColor = settings.getPrimaryTextColor(resources)
         val textSize = settings.getBodyTextSize(resources).toFloat()
         text.setTextColor(textColor)
         text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
         if (verse.verse.parallel.isEmpty()) {
-            index.text = verse.getIndexForDisplay()
+            index.text = verse.indexForDisplay
             index.setTextColor(textColor)
             index.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
             index.visibility = View.VISIBLE
