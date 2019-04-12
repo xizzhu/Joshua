@@ -66,9 +66,9 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
         fontSize.setOnClickListener {
             DialogHelper.showDialog(this@SettingsActivity, R.string.settings_title_font_size,
-                    fontSizeTexts, presenter.getSettings().fontSizeScale - 1,
+                    fontSizeTexts, presenter.settings.fontSizeScale - 1,
                     DialogInterface.OnClickListener { dialog, which ->
-                        originalSettings = presenter.getSettings()
+                        originalSettings = presenter.settings
                         shouldAnimateFontSize = true
                         presenter.setFontSizeScale(which + 1)
 
@@ -81,7 +81,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
         }
 
         nightModeOn.setOnCheckedChangeListener { _, isChecked ->
-            originalSettings = presenter.getSettings()
+            originalSettings = presenter.settings
             shouldAnimateColor = true
             presenter.setNightModeOn(isChecked)
         }
