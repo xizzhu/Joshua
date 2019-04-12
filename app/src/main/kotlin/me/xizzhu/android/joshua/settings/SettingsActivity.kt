@@ -48,12 +48,12 @@ class SettingsActivity : BaseActivity(), SettingsView {
     @Inject
     lateinit var presenter: SettingsPresenter
 
-    private lateinit var display: SettingSectionHeader
-    private lateinit var fontSize: SettingButton
-    private lateinit var keepScreenOn: SwitchCompat
-    private lateinit var nightModeOn: SwitchCompat
-    private lateinit var about: SettingSectionHeader
-    private lateinit var version: SettingButton
+    private val display: SettingSectionHeader by bindView(R.id.display)
+    private val fontSize: SettingButton by bindView(R.id.font_size)
+    private val keepScreenOn: SwitchCompat by bindView(R.id.keep_screen_on)
+    private val nightModeOn: SwitchCompat by bindView(R.id.night_mode_on)
+    private val about: SettingSectionHeader by bindView(R.id.about)
+    private val version: SettingButton by bindView(R.id.version)
 
     private var shouldAnimateFontSize = false
     private var shouldAnimateColor = false
@@ -64,38 +64,27 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
         setContentView(R.layout.activity_settings)
 
-        display = findViewById(R.id.display)
+        fontSize.setOnClickListener {
+            DialogHelper.showDialog(this@SettingsActivity, R.string.settings_title_font_size,
+                    fontSizeTexts, presenter.getSettings().fontSizeScale - 1,
+                    DialogInterface.OnClickListener { dialog, which ->
+                        originalSettings = presenter.getSettings()
+                        shouldAnimateFontSize = true
+                        presenter.setFontSizeScale(which + 1)
 
-        fontSize = findViewById<SettingButton>(R.id.font_size).apply {
-            setOnClickListener {
-                DialogHelper.showDialog(this@SettingsActivity, R.string.settings_title_font_size,
-                        fontSizeTexts, presenter.getSettings().fontSizeScale - 1,
-                        DialogInterface.OnClickListener { dialog, which ->
-                            originalSettings = presenter.getSettings()
-                            shouldAnimateFontSize = true
-                            presenter.setFontSizeScale(which + 1)
-
-                            dialog.dismiss()
-                        })
-            }
+                        dialog.dismiss()
+                    })
         }
 
-        keepScreenOn = findViewById<SwitchCompat>(R.id.keep_screen_on).apply {
-            setOnCheckedChangeListener { _, isChecked ->
-                presenter.setKeepScreenOn(isChecked)
-            }
+        keepScreenOn.setOnCheckedChangeListener { _, isChecked ->
+            presenter.setKeepScreenOn(isChecked)
         }
 
-        nightModeOn = findViewById<SwitchCompat>(R.id.night_mode_on).apply {
-            setOnCheckedChangeListener { _, isChecked ->
-                originalSettings = presenter.getSettings()
-                shouldAnimateColor = true
-                presenter.setNightModeOn(isChecked)
-            }
+        nightModeOn.setOnCheckedChangeListener { _, isChecked ->
+            originalSettings = presenter.getSettings()
+            shouldAnimateColor = true
+            presenter.setNightModeOn(isChecked)
         }
-
-        about = findViewById(R.id.about)
-        version = findViewById(R.id.version)
     }
 
     override fun onStart() {

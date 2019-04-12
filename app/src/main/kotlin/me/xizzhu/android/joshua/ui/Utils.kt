@@ -27,6 +27,7 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.annotation.IdRes
 import androidx.annotation.Px
 import androidx.annotation.StyleableRes
 import me.xizzhu.android.joshua.R
@@ -61,6 +62,8 @@ fun Context.getActivity(): Activity? {
     }
     return null
 }
+
+fun <V : View> Activity.bindView(@IdRes viewId: Int) = lazy { findViewById<V>(viewId) }
 
 @ColorInt
 fun Settings.getBackgroundColor(): Int = if (nightModeOn) Color.BLACK else Color.WHITE

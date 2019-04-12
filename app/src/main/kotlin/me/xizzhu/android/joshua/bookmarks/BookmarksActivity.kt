@@ -20,6 +20,7 @@ import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
@@ -33,15 +34,14 @@ class BookmarksActivity : BaseSettingsActivity() {
     @Inject
     lateinit var bookmarksPresenter: BookmarksPresenter
 
-    private lateinit var loadingSpinner: LoadingSpinner
-    private lateinit var bookmarksListView: BookmarksListView
+    private val loadingSpinner: LoadingSpinner by bindView(R.id.loading_spinner)
+    private val bookmarksListView: BookmarksListView by bindView(R.id.bookmarks)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_bookmarks)
-        loadingSpinner = findViewById(R.id.loading_spinner)
-        bookmarksListView = findViewById<BookmarksListView>(R.id.bookmarks).apply { setPresenter(bookmarksPresenter) }
+        bookmarksListView.setPresenter(bookmarksPresenter)
 
         observeSettings(bookmarksInteractor)
     }

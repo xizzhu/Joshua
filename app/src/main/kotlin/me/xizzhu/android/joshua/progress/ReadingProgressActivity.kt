@@ -20,6 +20,7 @@ import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
@@ -33,17 +34,14 @@ class ReadingProgressActivity : BaseSettingsActivity() {
     @Inject
     lateinit var readingProgressPresenter: ReadingProgressPresenter
 
-    private lateinit var loadingSpinner: LoadingSpinner
-    private lateinit var readingProgressListView: ReadingProgressListView
+    private val loadingSpinner: LoadingSpinner by bindView(R.id.loading_spinner)
+    private val readingProgressListView: ReadingProgressListView by bindView(R.id.reading_progress_list)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_reading_progress)
-        loadingSpinner = findViewById(R.id.loading_spinner)
-        readingProgressListView = findViewById<ReadingProgressListView>(R.id.reading_progress_list).apply {
-            setPresenter(readingProgressPresenter)
-        }
+        readingProgressListView.setPresenter(readingProgressPresenter)
 
         observeSettings(readingProgressInteractor)
     }

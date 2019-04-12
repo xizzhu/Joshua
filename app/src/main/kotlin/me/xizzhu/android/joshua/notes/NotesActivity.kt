@@ -20,6 +20,7 @@ import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
@@ -33,15 +34,14 @@ class NotesActivity : BaseSettingsActivity() {
     @Inject
     lateinit var notesPresenter: NotesPresenter
 
-    private lateinit var loadingSpinner: LoadingSpinner
-    private lateinit var notesListView: NotesListView
+    private val loadingSpinner: LoadingSpinner by bindView(R.id.loading_spinner)
+    private val notesListView: NotesListView by bindView(R.id.notes)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_notes)
-        loadingSpinner = findViewById(R.id.loading_spinner)
-        notesListView = findViewById<NotesListView>(R.id.notes).apply { setPresenter(notesPresenter) }
+        notesListView.setPresenter(notesPresenter)
 
         observeSettings(notesInteractor)
     }
