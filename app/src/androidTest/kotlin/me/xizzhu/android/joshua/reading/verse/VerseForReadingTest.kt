@@ -31,7 +31,7 @@ import org.junit.runner.RunWith
 @SmallTest
 class VerseForReadingTest : BaseUnitTest() {
     @Test
-    fun testGetIndexForDisplay() {
+    fun testIndexForDisplay() {
         assertEquals("1", VerseForReading(MockContents.kjvVerses[0], 9).indexForDisplay)
 
         assertEquals(" 1", VerseForReading(MockContents.kjvVerses[0], 10).indexForDisplay)
@@ -44,19 +44,19 @@ class VerseForReadingTest : BaseUnitTest() {
     }
 
     @Test
-    fun testGetIndexForDisplayWithParallelTranslations() {
+    fun testIndexForDisplayWithParallelTranslations() {
         assertTrue(VerseForReading(MockContents.kjvVersesWithCuvParallel[0], 1).indexForDisplay.isEmpty())
     }
 
     @Test
-    fun testGetTextForDisplay() {
+    fun testTextForDisplay() {
         val expected = "In the beginning God created the heaven and the earth."
         val actual = VerseForReading(MockContents.kjvVerses[0], 1).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 
     @Test
-    fun testGetTextForDisplayWithParallelTranslations() {
+    fun testTextForDisplayWithParallelTranslations() {
         val expected = "KJV 1:1\nIn the beginning God created the heaven and the earth.\n\n中文和合本 1:1\n起初神创造天地。"
         val actual = VerseForReading(MockContents.kjvVersesWithCuvParallel[0], 1).textForDisplay.toString()
         assertEquals(expected, actual)

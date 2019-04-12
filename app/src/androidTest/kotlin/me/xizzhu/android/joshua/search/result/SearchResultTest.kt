@@ -37,7 +37,7 @@ class SearchResultTest : BaseUnitTest() {
     }
 
     @Test
-    fun testGetTextForDisplay() {
+    fun testTextForDisplay() {
         val verseIndex = VerseIndex(1, 2, 3)
         val bookName = MockContents.kjvVerses[0].text.bookName
         val text = MockContents.kjvVerses[0].text.text
