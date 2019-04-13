@@ -22,8 +22,19 @@ import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 
 class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : LocalTranslationStorage {
+    override suspend fun readTranslationListRefreshTimestamp(): Long = withContext(Dispatchers.IO) {
+        androidDatabase.metadataDao.read(MetadataDao.KEY_TRANSLATION_LIST_REFRESH_TIMESTAMP, "0").toLong()
+    }
+
+    override suspend fun saveTranslationListRefreshTimestamp(timestamp: Long) {
+        withContext(Dispatchers.IO) {
+            androidDatabase.metadataDao.save(MetadataDao.KEY_TRANSLATION_LIST_REFRESH_TIMESTAMP, timestamp.toString())
+        }
+    }
+
     override suspend fun readTranslations(): List<TranslationInfo> {
         return withContext(Dispatchers.IO) {
             androidDatabase.translationInfoDao.read()

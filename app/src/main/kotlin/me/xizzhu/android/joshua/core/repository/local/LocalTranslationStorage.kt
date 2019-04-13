@@ -19,6 +19,10 @@ package me.xizzhu.android.joshua.core.repository.local
 import me.xizzhu.android.joshua.core.TranslationInfo
 
 interface LocalTranslationStorage {
+    suspend fun readTranslationListRefreshTimestamp(): Long
+
+    suspend fun saveTranslationListRefreshTimestamp(timestamp: Long)
+
     suspend fun readTranslations(): List<TranslationInfo>
 
     suspend fun replaceTranslations(translations: List<TranslationInfo>)
