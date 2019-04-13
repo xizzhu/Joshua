@@ -16,8 +16,10 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
@@ -25,6 +27,7 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 class TranslationRepository(private val localTranslationStorage: LocalTranslationStorage,
                             private val remoteTranslationService: RemoteTranslationService) {
     companion object {
+        private val TAG = TranslationRepository::class.java.simpleName
         private const val TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS = 7L * 24L * 3600L * 1000L // 7 day
     }
 
@@ -33,10 +36,9 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
             readTranslationsFromBackend()
         } else if (translationListTooOld()) {
             try {
-                readTranslationsFromBackend().also {
-                    localTranslationStorage.saveTranslationListRefreshTimestamp(System.currentTimeMillis())
-                }
+                readTranslationsFromBackend()
             } catch (e: Exception) {
+                Log.e(TAG, e, "Failed to read translation list from backend")
                 readTranslationsFromLocal()
             }
         } else {
@@ -44,16 +46,19 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
             if (translations.isNotEmpty()) {
                 translations
             } else {
+                Log.w(TAG, "Have fresh but empty local translation list")
                 readTranslationsFromBackend()
             }
         }
     }
 
-    private suspend fun translationListTooOld(): Boolean =
+    @VisibleForTesting
+    suspend fun translationListTooOld(): Boolean =
             System.currentTimeMillis() - localTranslationStorage.readTranslationListRefreshTimestamp() >=
                     TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
 
-    private suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
+    @VisibleForTesting
+    suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
         val fetchedTranslations = remoteTranslationService.fetchTranslations()
         val localTranslations = readTranslationsFromLocal()
 
@@ -70,6 +75,15 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         }
 
         localTranslationStorage.replaceTranslations(translations)
+
+        try {
+            if (translations.isNotEmpty()) {
+                localTranslationStorage.saveTranslationListRefreshTimestamp(
+                        System.currentTimeMillis())
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, e, "Failed to save translation list refresh timestamp")
+        }
 
         return translations
     }
