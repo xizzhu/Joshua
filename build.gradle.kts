@@ -21,8 +21,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:${Versions.androidGradle}")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}")
+        classpath("com.android.tools.build:gradle:${Versions.Sdk.gradle}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.Kotlin.gradle}")
         classpath("org.kt3k.gradle.plugin:coveralls-gradle-plugin:${Versions.coverallsGradle}")
     }
 }
