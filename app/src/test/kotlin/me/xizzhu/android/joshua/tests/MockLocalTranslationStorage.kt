@@ -22,6 +22,13 @@ import java.util.*
 
 class MockLocalTranslationStorage : LocalTranslationStorage {
     private val translations: ArrayList<TranslationInfo> = ArrayList()
+    private var translationListRefreshTimestamp: Long = 0L
+
+    override suspend fun readTranslationListRefreshTimestamp(): Long = translationListRefreshTimestamp
+
+    override suspend fun saveTranslationListRefreshTimestamp(timestamp: Long) {
+        translationListRefreshTimestamp = timestamp
+    }
 
     override suspend fun readTranslations(): List<TranslationInfo> {
         return Collections.unmodifiableList(translations)

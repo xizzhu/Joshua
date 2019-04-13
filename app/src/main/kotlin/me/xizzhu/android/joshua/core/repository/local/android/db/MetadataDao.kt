@@ -37,6 +37,7 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
         const val KEY_SCREEN_ON = "screenOn"
         const val KEY_NIGHT_MODE_ON = "nightModeOn"
         const val KEY_FONT_SIZE_SCALE = "fontSizeScale"
+        const val KEY_TRANSLATION_LIST_REFRESH_TIMESTAMP = "translationListRefreshTimestamp"
 
         @WorkerThread
         fun createTable(db: SQLiteDatabase) {

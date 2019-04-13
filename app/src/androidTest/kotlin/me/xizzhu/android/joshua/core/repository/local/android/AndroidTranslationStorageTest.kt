@@ -42,6 +42,15 @@ class AndroidTranslationStorageTest : BaseSqliteTest() {
     fun testReadEmpty() {
         runBlocking {
             assertTrue(androidTranslationStorage.readTranslations().isEmpty())
+            assertEquals(0L, androidTranslationStorage.readTranslationListRefreshTimestamp())
+        }
+    }
+
+    @Test
+    fun testTranslationListRefreshTimestamp() {
+        runBlocking {
+            androidTranslationStorage.saveTranslationListRefreshTimestamp(12345678L)
+            assertEquals(12345678L, androidTranslationStorage.readTranslationListRefreshTimestamp())
         }
     }
 
