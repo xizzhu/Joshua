@@ -24,9 +24,21 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 
 class TranslationRepository(private val localTranslationStorage: LocalTranslationStorage,
                             private val remoteTranslationService: RemoteTranslationService) {
+    companion object {
+        private const val TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS = 7L * 24L * 3600L * 1000L // 7 day
+    }
+
     suspend fun reload(forceRefresh: Boolean): List<TranslationInfo> {
         return if (forceRefresh) {
             readTranslationsFromBackend()
+        } else if (translationListTooOld()) {
+            try {
+                readTranslationsFromBackend().also {
+                    localTranslationStorage.saveTranslationListRefreshTimestamp(System.currentTimeMillis())
+                }
+            } catch (e: Exception) {
+                readTranslationsFromLocal()
+            }
         } else {
             val translations = readTranslationsFromLocal()
             if (translations.isNotEmpty()) {
@@ -36,6 +48,10 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
             }
         }
     }
+
+    private suspend fun translationListTooOld(): Boolean =
+            System.currentTimeMillis() - localTranslationStorage.readTranslationListRefreshTimestamp() >=
+                    TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
 
     private suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
         val fetchedTranslations = remoteTranslationService.fetchTranslations()
