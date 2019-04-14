@@ -16,58 +16,84 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.tests.MockLocalReadingStorage
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BibleReadingManagerTest : BaseUnitTest() {
+    @Mock
+    private lateinit var bibleReadingRepository: BibleReadingRepository
+
     private lateinit var bibleReadingManager: BibleReadingManager
 
     @Before
     override fun setup() {
         super.setup()
-        bibleReadingManager = BibleReadingManager(BibleReadingRepository(MockLocalReadingStorage()))
+
+        runBlocking {
+            `when`(bibleReadingRepository.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
+            `when`(bibleReadingRepository.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
+            bibleReadingManager = BibleReadingManager(bibleReadingRepository)
+        }
     }
 
     @Test
-    fun testDefaultCurrentVerseIndex() {
-        val expected = VerseIndex.INVALID
-        val actual = runBlocking { bibleReadingManager.observeCurrentVerseIndex().first() }
-        assertEquals(expected, actual)
+    fun testObserveCurrentVerseIndex() {
+        runBlocking {
+            val observer = bibleReadingManager.observeCurrentVerseIndex()
+            observer.consumeEach {
+                if (it == VerseIndex(1, 2, 3)) {
+                    observer.cancel()
+                }
+            }
+        }
     }
 
     @Test
     fun testCurrentVerseIndex() {
-        val expected = VerseIndex(1, 2, 3)
-        val actual = runBlocking {
-            bibleReadingManager.saveCurrentVerseIndex(VerseIndex(1, 2, 3))
-            bibleReadingManager.observeCurrentVerseIndex().first()
+        runBlocking {
+            bibleReadingManager.saveCurrentVerseIndex(VerseIndex(4, 5, 6))
+            val observer = bibleReadingManager.observeCurrentVerseIndex()
+            observer.consumeEach {
+                if (it == VerseIndex(4, 5, 6)) {
+                    observer.cancel()
+                }
+            }
         }
-        assertEquals(expected, actual)
     }
 
     @Test
-    fun testDefaultCurrentTranslation() {
-        val expected = ""
-        val actual = runBlocking { bibleReadingManager.observeCurrentTranslation().first() }
-        assertEquals(expected, actual)
+    fun testObserveCurrentTranslation() {
+        runBlocking {
+            val observer = bibleReadingManager.observeCurrentTranslation()
+            observer.consumeEach {
+                if (it == MockContents.kjvShortName) {
+                    observer.cancel()
+                }
+            }
+        }
     }
 
     @Test
     fun testCurrentTranslation() {
-        val expected = "KJV"
-        val actual = runBlocking {
-            bibleReadingManager.saveCurrentTranslation("KJV")
-            bibleReadingManager.observeCurrentTranslation().first()
+        runBlocking {
+            bibleReadingManager.saveCurrentTranslation(MockContents.cuvShortName)
+            val observer = bibleReadingManager.observeCurrentTranslation()
+            observer.consumeEach {
+                if (it == MockContents.cuvShortName) {
+                    observer.cancel()
+                }
+            }
         }
-        assertEquals(expected, actual)
     }
 
     @Test
@@ -110,33 +136,5 @@ class BibleReadingManagerTest : BaseUnitTest() {
             assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),
                     bibleReadingManager.observeParallelTranslations().first().toSet())
         }
-    }
-
-    @Test
-    fun testBookNames() {
-        val expected = ArrayList<String>(MockContents.kjvBookNames)
-        val actual = runBlocking { bibleReadingManager.readBookNames(MockContents.kjvShortName) }
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testBookShortNames() {
-        val expected = ArrayList<String>(MockContents.kjvBookShortNames)
-        val actual = runBlocking { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) }
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testVerses() {
-        val expected = ArrayList<Verse>(MockContents.kjvVerses)
-        val actual = runBlocking { bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0) }
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testSearch() {
-        val expected = ArrayList<Verse>(MockContents.kjvVerses)
-        val actual = runBlocking { bibleReadingManager.search(MockContents.kjvShortName, "God") }
-        assertEquals(expected, actual)
     }
 }
