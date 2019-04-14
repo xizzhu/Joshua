@@ -19,12 +19,15 @@ buildscript {
         google()
         mavenCentral()
         jcenter()
+
+        maven(uri("https://maven.fabric.io/public"))
     }
     dependencies {
         classpath(Dependencies.Sdk.classpath)
         classpath(Dependencies.Kotlin.classpath)
         classpath(Dependencies.Coveralls.classpath)
         classpath(Dependencies.Firebase.classpath)
+        classpath(Dependencies.Firebase.Crashlytics.classpath)
     }
 }
 

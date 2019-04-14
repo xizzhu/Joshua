@@ -66,6 +66,11 @@ object Versions {
         const val classpath = "4.2.0"
         const val core = "16.0.8"
         const val analytics = "16.4.0"
+
+        object Crashlytics {
+            const val classpath = "1.28.1"
+            const val crashlytics = "2.9.9"
+        }
     }
 
     const val dagger = "2.22.1"
@@ -120,6 +125,11 @@ object Dependencies {
         const val classpath = "com.google.gms:google-services:${Versions.Firebase.classpath}"
         const val core = "com.google.firebase:firebase-core:${Versions.Firebase.core}"
         const val analytics = "com.google.firebase:firebase-analytics:${Versions.Firebase.analytics}"
+
+        object Crashlytics {
+            const val classpath = "io.fabric.tools:gradle:${Versions.Firebase.Crashlytics.classpath}"
+            const val crashlytics = "com.crashlytics.sdk.android:crashlytics:${Versions.Firebase.Crashlytics.crashlytics}"
+        }
     }
 
     object Dagger {

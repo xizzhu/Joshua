@@ -21,6 +21,9 @@ plugins {
     kotlin("android")
     kotlin("kapt")
 }
+apply {
+    plugin("io.fabric")
+}
 apply("$rootDir/scripts/coverage.gradle.kts")
 
 android {
@@ -99,6 +102,7 @@ dependencies {
 
     implementation(Dependencies.Firebase.core)
     implementation(Dependencies.Firebase.analytics)
+    implementation(Dependencies.Firebase.Crashlytics.crashlytics)
 
     implementation(Dependencies.Dagger.dagger)
     implementation(Dependencies.Dagger.android)
