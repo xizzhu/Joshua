@@ -86,6 +86,10 @@ android {
             isTestCoverageEnabled = true
         }
     }
+
+    packagingOptions {
+        exclude("META-INF/atomicfu.kotlin_module")
+    }
 }
 
 dependencies {
