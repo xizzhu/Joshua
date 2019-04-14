@@ -16,29 +16,19 @@
 
 package me.xizzhu.android.joshua.core.logger.android
 
+import com.crashlytics.android.Crashlytics
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.logger.Logger
 
-class LogcatLogger : Logger {
+class CrashlyticsLogger : Logger {
+    private val crashlyticsCore = Crashlytics.getInstance().core
+
     override fun log(@Log.Level level: Int, tag: String, msg: String) {
-        when (level) {
-            Log.VERBOSE -> android.util.Log.v(tag, msg)
-            Log.DEBUG -> android.util.Log.d(tag, msg)
-            Log.INFO -> android.util.Log.i(tag, msg)
-            Log.WARN -> android.util.Log.w(tag, msg)
-            Log.ERROR -> android.util.Log.e(tag, msg)
-            Log.FATAL -> android.util.Log.wtf(tag, msg)
-        }
+        // do nothing
     }
 
     override fun log(@Log.Level level: Int, tag: String, e: Throwable, msg: String) {
-        when (level) {
-            Log.VERBOSE -> android.util.Log.v(tag, msg, e)
-            Log.DEBUG -> android.util.Log.d(tag, msg, e)
-            Log.INFO -> android.util.Log.i(tag, msg, e)
-            Log.WARN -> android.util.Log.w(tag, msg, e)
-            Log.ERROR -> android.util.Log.e(tag, msg, e)
-            Log.FATAL -> android.util.Log.wtf(tag, msg, e)
-        }
+        crashlyticsCore.log(level, tag, msg)
+        crashlyticsCore.logException(e)
     }
 }
