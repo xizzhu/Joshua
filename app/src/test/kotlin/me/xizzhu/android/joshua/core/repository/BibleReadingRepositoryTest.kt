@@ -19,81 +19,81 @@ package me.xizzhu.android.joshua.core.repository
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.tests.MockLocalReadingStorage
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.anyString
 import kotlin.test.assertEquals
 
 class BibleReadingRepositoryTest : BaseUnitTest() {
+    @Mock
+    private lateinit var localReadingStorage: LocalReadingStorage
+
     private lateinit var bibleReadingRepository: BibleReadingRepository
 
     @Before
     override fun setup() {
         super.setup()
-        bibleReadingRepository = BibleReadingRepository(MockLocalReadingStorage())
+        bibleReadingRepository = BibleReadingRepository(localReadingStorage)
     }
 
     @Test
-    fun testDefaultCurrentTranslation() {
-        val expected = ""
-        val actual = runBlocking { bibleReadingRepository.readCurrentTranslation() }
-        assertEquals(expected, actual)
-    }
+    fun testReadBookNames() {
+        runBlocking {
+            // no cache yet, read from LocalReadingStorage
+            `when`(localReadingStorage.readBookNames(MockContents.kjvShortName))
+                    .thenReturn(MockContents.kjvBookNames)
+            assertEquals(MockContents.kjvBookNames,
+                    bibleReadingRepository.readBookNames(MockContents.kjvShortName))
 
-    @Test
-    fun testCurrentTranslation() {
-        val expected = "KJV"
-        val actual = runBlocking {
-            bibleReadingRepository.saveCurrentTranslation("KJV")
-            bibleReadingRepository.readCurrentTranslation()
+            // has cache now, read from there
+            `when`(localReadingStorage.readBookNames(anyString()))
+                    .thenThrow(IllegalStateException("Should read from in-memory cache"))
+            assertEquals(MockContents.kjvBookNames,
+                    bibleReadingRepository.readBookNames(MockContents.kjvShortName))
         }
-        assertEquals(expected, actual)
     }
 
     @Test
-    fun testDefaultCurrentVerseIndex() {
-        val expected = VerseIndex.INVALID
-        val actual = runBlocking { bibleReadingRepository.readCurrentVerseIndex() }
-        assertEquals(expected, actual)
-    }
+    fun testReadBookShortNames() {
+        runBlocking {
+            // no cache yet, read from LocalReadingStorage
+            `when`(localReadingStorage.readBookShortNames(MockContents.kjvShortName))
+                    .thenReturn(MockContents.kjvBookShortNames)
+            assertEquals(MockContents.kjvBookShortNames,
+                    bibleReadingRepository.readBookShortNames(MockContents.kjvShortName))
 
-    @Test
-    fun testCurrentVerseIndex() {
-        val expected = VerseIndex(1, 2, 3)
-        val actual = runBlocking {
-            bibleReadingRepository.saveCurrentVerseIndex(VerseIndex(1, 2, 3))
-            bibleReadingRepository.readCurrentVerseIndex()
+            // has cache now, read from there
+            `when`(localReadingStorage.readBookShortNames(anyString()))
+                    .thenThrow(IllegalStateException("Should read from in-memory cache"))
+            assertEquals(MockContents.kjvBookShortNames,
+                    bibleReadingRepository.readBookShortNames(MockContents.kjvShortName))
         }
-        assertEquals(expected, actual)
     }
 
     @Test
-    fun testBookNames() {
-        val expected = ArrayList<String>(MockContents.kjvBookNames)
-        val actual = runBlocking { bibleReadingRepository.readBookNames(MockContents.kjvShortName) }
-        assertEquals(expected, actual)
-    }
+    fun testReadVerses() {
+        runBlocking {
+            // no cache yet, read from LocalReadingStorage
+            `when`(localReadingStorage.readBookNames(MockContents.kjvShortName))
+                    .thenReturn(MockContents.kjvBookNames)
+            `when`(localReadingStorage.readVerses(MockContents.kjvShortName, 0, 0, MockContents.kjvBookNames[0]))
+                    .thenReturn(MockContents.kjvVerses)
+            assertEquals(MockContents.kjvVerses,
+                    bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0))
 
-    @Test
-    fun testBookShortNames() {
-        val expected = ArrayList<String>(MockContents.kjvBookShortNames)
-        val actual = runBlocking { bibleReadingRepository.readBookShortNames(MockContents.kjvShortName) }
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testVerses() {
-        val expected = ArrayList<Verse>(MockContents.kjvVerses)
-        val actual = runBlocking { bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0) }
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testSearch() {
-        val expected = ArrayList<Verse>(MockContents.kjvVerses)
-        val actual = runBlocking { bibleReadingRepository.search(MockContents.kjvShortName, "God") }
-        assertEquals(expected, actual)
+            // has cache now, read from there
+            `when`(localReadingStorage.readBookNames(anyString()))
+                    .thenThrow(IllegalStateException("Should read from in-memory cache"))
+            `when`(localReadingStorage.readVerses(anyString(), anyInt(), anyInt(), anyString()))
+                    .thenThrow(IllegalStateException("Should read from in-memory cache"))
+            assertEquals(MockContents.kjvVerses,
+                    bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0))
+        }
     }
 }

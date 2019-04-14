@@ -81,9 +81,9 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
 
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
         val key = "$translationShortName-$bookIndex-$chapterIndex"
-        return versesCache.get(key) ?: localReadingStorage.readVerses(
-                translationShortName, bookIndex, chapterIndex, readBookNames(translationShortName)[bookIndex])
-                .also { versesCache.put(key, it) }
+        return versesCache.get(key)
+                ?: localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex, readBookNames(translationShortName)[bookIndex])
+                        .also { versesCache.put(key, it) }
     }
 
     suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
