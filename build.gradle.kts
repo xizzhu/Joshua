@@ -21,9 +21,10 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:${Versions.Sdk.gradle}")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.Kotlin.gradle}")
-        classpath("org.kt3k.gradle.plugin:coveralls-gradle-plugin:${Versions.coverallsGradle}")
+        classpath(Dependencies.Sdk.classpath)
+        classpath(Dependencies.Kotlin.classpath)
+        classpath(Dependencies.Coveralls.classpath)
+        classpath(Dependencies.Firebase.classpath)
     }
 }
 

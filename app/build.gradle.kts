@@ -97,6 +97,9 @@ dependencies {
     implementation(Dependencies.AndroidX.recyclerView)
     implementation(Dependencies.AndroidX.viewPager)
 
+    implementation(Dependencies.Firebase.core)
+    implementation(Dependencies.Firebase.analytics)
+
     implementation(Dependencies.Dagger.dagger)
     implementation(Dependencies.Dagger.android)
     implementation(Dependencies.Dagger.androidSupport)
@@ -121,4 +124,8 @@ dependencies {
     androidTestImplementation(Dependencies.AndroidX.Test.rules)
     androidTestImplementation(Dependencies.Mockito.mockito)
     androidTestImplementation(Dependencies.Mockito.android)
+}
+
+apply {
+    plugin("com.google.gms.google-services")
 }

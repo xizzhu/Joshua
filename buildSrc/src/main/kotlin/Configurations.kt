@@ -27,10 +27,12 @@ object Versions {
         const val name = "0.1.0"
     }
 
-    const val coverallsGradle = "2.8.2"
+    object Coveralls {
+        const val classpath = "2.8.2"
+    }
 
     object Sdk {
-        const val gradle = "3.3.2"
+        const val classpath = "3.3.2"
         const val buildTools = "28.0.3"
         const val compile = 28
         const val min = 21
@@ -40,7 +42,7 @@ object Versions {
     val java = JavaVersion.VERSION_1_8
 
     object Kotlin {
-        const val gradle = "1.3.30"
+        const val classpath = "1.3.30"
         const val core = "1.3.30"
         const val coroutines = "1.1.1"
     }
@@ -60,6 +62,12 @@ object Versions {
         }
     }
 
+    object Firebase {
+        const val classpath = "4.2.0"
+        const val core = "16.0.8"
+        const val analytics = "16.4.0"
+    }
+
     const val dagger = "2.22.1"
 
     object Retrofit {
@@ -75,7 +83,16 @@ object Versions {
 }
 
 object Dependencies {
+    object Sdk {
+        const val classpath = "com.android.tools.build:gradle:${Versions.Sdk.classpath}"
+    }
+
+    object Coveralls {
+        const val classpath = "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${Versions.Coveralls.classpath}"
+    }
+
     object Kotlin {
+        const val classpath = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.Kotlin.classpath}"
         const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.Kotlin.core}"
         const val coroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.Kotlin.coroutines}"
         const val test = "org.jetbrains.kotlin:kotlin-test-junit:${Versions.Kotlin.core}"
@@ -97,6 +114,12 @@ object Dependencies {
 
             const val runner = "androidx.test.runner.AndroidJUnitRunner"
         }
+    }
+
+    object Firebase {
+        const val classpath = "com.google.gms:google-services:${Versions.Firebase.classpath}"
+        const val core = "com.google.firebase:firebase-core:${Versions.Firebase.core}"
+        const val analytics = "com.google.firebase:firebase-analytics:${Versions.Firebase.analytics}"
     }
 
     object Dagger {
