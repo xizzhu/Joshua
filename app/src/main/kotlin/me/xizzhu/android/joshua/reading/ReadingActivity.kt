@@ -100,7 +100,7 @@ class ReadingActivity : BaseSettingsActivity() {
     }
 
     override fun onPause() {
-        launch(Dispatchers.Unconfined) { readingInteractor.stopTrackingReadingProgress() }
+        launch(Dispatchers.Main.immediate) { readingInteractor.stopTrackingReadingProgress() }
         super.onPause()
     }
 
