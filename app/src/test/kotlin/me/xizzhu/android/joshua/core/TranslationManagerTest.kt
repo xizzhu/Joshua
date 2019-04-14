@@ -23,154 +23,26 @@ import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.tests.MockLocalTranslationStorage
-import me.xizzhu.android.joshua.tests.MockRemoteTranslationService
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TranslationManagerTest : BaseUnitTest() {
+    @Mock
+    private lateinit var translationRepository: TranslationRepository
+
     private lateinit var translationManager: TranslationManager
 
     @Before
     override fun setup() {
         super.setup()
-        translationManager = TranslationManager(TranslationRepository(
-                MockLocalTranslationStorage(), MockRemoteTranslationService()))
-    }
 
-    @Test
-    fun testDefaultAvailableTranslations() {
-        val expected = emptyList<TranslationInfo>()
-        val actual = runBlocking { translationManager.observeAvailableTranslations().first() }
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testDefaultDownloadedTranslations() {
-        val expected = emptyList<TranslationInfo>()
-        val actual = runBlocking { translationManager.observeDownloadedTranslations().first() }
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testReload() {
         runBlocking {
-            val expectedAvailable = listOf(MockContents.kjvTranslationInfo)
-            val expectedDownloaded = emptyList<TranslationInfo>()
-
-            translationManager.reload(false)
-            val actualAvailable = translationManager.observeAvailableTranslations().first()
-            val actualDownloaded = translationManager.observeDownloadedTranslations().first()
-
-            assertEquals(expectedAvailable, actualAvailable)
-            assertEquals(expectedDownloaded, actualDownloaded)
-        }
-    }
-
-    @Test
-    fun testReloadThenDownload() {
-        runBlocking {
-            translationManager.reload(false)
-            assertEquals(listOf(MockContents.kjvTranslationInfo), translationManager.observeAvailableTranslations().first())
-            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
-
-            val channel = Channel<Int>(Channel.UNLIMITED)
-            translationManager.downloadTranslation(channel, MockContents.kjvDownloadedTranslationInfo)
-            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
-            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationManager.observeDownloadedTranslations().first())
-        }
-    }
-
-    @Test
-    fun testDownloadTranslation() {
-        runBlocking {
-            val expectedAvailable = emptyList<TranslationInfo>()
-            val expectedDownloaded = listOf(MockContents.kjvDownloadedTranslationInfo)
-
-            val channel = Channel<Int>()
-            launch {
-                translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
-            }
-            var called = false
-            channel.consumeEach { called = true }
-            assertTrue(called)
-
-            val actualAvailable = translationManager.observeAvailableTranslations().first()
-            val actualDownloaded = translationManager.observeDownloadedTranslations().first()
-
-            assertEquals(expectedAvailable, actualAvailable)
-            assertEquals(expectedDownloaded, actualDownloaded)
-        }
-    }
-
-    @Test
-    fun testDownloadTranslationThenReload() {
-        runBlocking {
-            val expectedAvailable = emptyList<TranslationInfo>()
-            val expectedDownloaded = listOf(MockContents.kjvDownloadedTranslationInfo)
-
-            val channel = Channel<Int>()
-            launch {
-                translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
-            }
-            var called = false
-            channel.consumeEach { called = true }
-            assertTrue(called)
-
-            translationManager.reload(false)
-            val actualAvailable = translationManager.observeAvailableTranslations().first()
-            val actualDownloaded = translationManager.observeDownloadedTranslations().first()
-
-            assertEquals(expectedAvailable, actualAvailable)
-            assertEquals(expectedDownloaded, actualDownloaded)
-        }
-    }
-
-    @Test
-    fun testDownloadTranslationThenReloadWithForceRefresh() {
-        runBlocking {
-            val expectedAvailable = emptyList<TranslationInfo>()
-            val expectedDownloaded = listOf(MockContents.kjvDownloadedTranslationInfo)
-
-            val channel = Channel<Int>()
-            launch {
-                translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
-            }
-            var called = false
-            channel.consumeEach { called = true }
-            assertTrue(called)
-
-            translationManager.reload(true)
-            val actualAvailable = translationManager.observeAvailableTranslations().first()
-            val actualDownloaded = translationManager.observeDownloadedTranslations().first()
-
-            assertEquals(expectedAvailable, actualAvailable)
-            assertEquals(expectedDownloaded, actualDownloaded)
-        }
-    }
-
-    @Test
-    fun testRemoveNonExistTranslation() {
-        runBlocking {
-            translationManager.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, false))
-            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
-            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
-        }
-    }
-
-    @Test
-    fun testDownloadThenRemove() {
-        runBlocking {
-            val channel = Channel<Int>(Channel.UNLIMITED)
-            translationManager.downloadTranslation(channel, MockContents.kjvTranslationInfo)
-            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
-            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationManager.observeDownloadedTranslations().first())
-
-            translationManager.removeTranslation(MockContents.kjvTranslationInfo)
-            assertEquals(listOf(MockContents.kjvTranslationInfo), translationManager.observeAvailableTranslations().first())
-            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+            `when`(translationRepository.readTranslationsFromLocal()).thenReturn(emptyList())
+            translationManager = TranslationManager(translationRepository)
         }
     }
 
@@ -227,6 +99,55 @@ class TranslationManagerTest : BaseUnitTest() {
                 availableJob.join()
                 downloadedJob.join()
             }
+        }
+    }
+
+    @Test
+    fun testDefaultAvailableTranslations() {
+        runBlocking {
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+        }
+    }
+
+    @Test
+    fun testDefaultDownloadedTranslations() {
+        runBlocking {
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+        }
+    }
+
+    @Test
+    fun testDownloadTranslation() {
+        runBlocking {
+            translationManager.updateTranslations(listOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo))
+
+            translationManager.downloadTranslation(Channel(), MockContents.kjvTranslationInfo)
+
+            assertEquals(listOf(MockContents.cuvTranslationInfo),
+                    translationManager.observeAvailableTranslations().first())
+            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo),
+                    translationManager.observeDownloadedTranslations().first())
+        }
+    }
+
+    @Test
+    fun testRemoveNonExistTranslation() {
+        runBlocking {
+            translationManager.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, false))
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+        }
+    }
+
+    @Test
+    fun testRemoveTranslation() {
+        runBlocking {
+            translationManager.updateTranslations(listOf(MockContents.cuvTranslationInfo, MockContents.kjvDownloadedTranslationInfo))
+
+            translationManager.removeTranslation(MockContents.kjvDownloadedTranslationInfo)
+            assertEquals(setOf(MockContents.kjvTranslationInfo, MockContents.cuvTranslationInfo),
+                    translationManager.observeAvailableTranslations().first().toSet())
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
         }
     }
 }
