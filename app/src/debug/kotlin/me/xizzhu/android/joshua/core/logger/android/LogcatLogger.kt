@@ -31,7 +31,7 @@ class LogcatLogger : Logger {
         }
     }
 
-    override fun log(level: Int, tag: String, e: Throwable, msg: String) {
+    override fun log(@Log.Level level: Int, tag: String, e: Throwable, msg: String) {
         when (level) {
             Log.VERBOSE -> android.util.Log.v(tag, msg, e)
             Log.DEBUG -> android.util.Log.d(tag, msg, e)

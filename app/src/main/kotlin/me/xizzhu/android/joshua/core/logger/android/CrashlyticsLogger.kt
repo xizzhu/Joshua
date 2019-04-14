@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter()
+package me.xizzhu.android.joshua.core.logger.android
 
-        maven(uri("https://maven.fabric.io/public"))
-    }
-    dependencies {
-        classpath(Dependencies.Sdk.classpath)
-        classpath(Dependencies.Kotlin.classpath)
-        classpath(Dependencies.Coveralls.classpath)
-        classpath(Dependencies.Firebase.classpath)
-        classpath(Dependencies.Firebase.Crashlytics.classpath)
-    }
-}
+import com.crashlytics.android.Crashlytics
+import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.core.logger.Logger
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter()
+class CrashlyticsLogger : Logger {
+    private val crashlyticsCore = Crashlytics.getInstance().core
+
+    override fun log(@Log.Level level: Int, tag: String, msg: String) {
+        // do nothing
+    }
+
+    override fun log(@Log.Level level: Int, tag: String, e: Throwable, msg: String) {
+        crashlyticsCore.log(level, tag, msg)
+        crashlyticsCore.logException(e)
     }
 }

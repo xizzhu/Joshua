@@ -21,6 +21,9 @@ plugins {
     kotlin("android")
     kotlin("kapt")
 }
+apply {
+    plugin("io.fabric")
+}
 apply("$rootDir/scripts/coverage.gradle.kts")
 
 android {
@@ -29,21 +32,21 @@ android {
         targetCompatibility = Versions.java
     }
 
-    compileSdkVersion(Versions.compileSdk)
-    buildToolsVersion(Versions.buildTools)
+    buildToolsVersion(Versions.Sdk.buildTools)
+    compileSdkVersion(Versions.Sdk.compile)
 
     defaultConfig {
-        applicationId = "me.xizzhu.android.joshua"
+        applicationId = Configurations.applicationId
 
-        minSdkVersion(Versions.minSdk)
-        targetSdkVersion(Versions.targetSdk)
+        minSdkVersion(Versions.Sdk.min)
+        targetSdkVersion(Versions.Sdk.target)
 
-        versionCode = Versions.versionCode
-        versionName = Versions.versionName
+        versionCode = Versions.App.code
+        versionName = Versions.App.name
 
-        resConfigs(Versions.supportedLocales)
+        resConfigs(Configurations.supportedLocales)
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = Dependencies.AndroidX.Test.runner
     }
 
     sourceSets {
@@ -97,6 +100,10 @@ dependencies {
     implementation(Dependencies.AndroidX.recyclerView)
     implementation(Dependencies.AndroidX.viewPager)
 
+    implementation(Dependencies.Firebase.core)
+    implementation(Dependencies.Firebase.analytics)
+    implementation(Dependencies.Firebase.Crashlytics.crashlytics)
+
     implementation(Dependencies.Dagger.dagger)
     implementation(Dependencies.Dagger.android)
     implementation(Dependencies.Dagger.androidSupport)
@@ -117,8 +124,12 @@ dependencies {
 
     androidTestImplementation(Dependencies.Kotlin.test)
     androidTestImplementation(Dependencies.Kotlin.coroutinesTest)
-    androidTestImplementation(Dependencies.AndroidX.testRunner)
-    androidTestImplementation(Dependencies.AndroidX.testRules)
+    androidTestImplementation(Dependencies.AndroidX.Test.junit)
+    androidTestImplementation(Dependencies.AndroidX.Test.rules)
     androidTestImplementation(Dependencies.Mockito.mockito)
     androidTestImplementation(Dependencies.Mockito.android)
+}
+
+apply {
+    plugin("com.google.gms.google-services")
 }
