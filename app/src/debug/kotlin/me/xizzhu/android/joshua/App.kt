@@ -20,6 +20,8 @@ import android.app.Application
 import android.os.StrictMode
 import androidx.annotation.CallSuper
 import com.facebook.stetho.Stetho
+import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.core.logger.android.LogcatLogger
 
 abstract class BaseApp : Application() {
     @CallSuper
@@ -28,5 +30,7 @@ abstract class BaseApp : Application() {
 
         Stetho.initializeWithDefaults(this)
         StrictMode.enableDefaults()
+
+        Log.addLogger(LogcatLogger())
     }
 }
