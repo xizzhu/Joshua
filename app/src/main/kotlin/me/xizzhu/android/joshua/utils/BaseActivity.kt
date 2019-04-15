@@ -28,7 +28,7 @@ import me.xizzhu.android.joshua.core.logger.Log
 import kotlin.coroutines.CoroutineContext
 
 abstract class BaseActivity : AppCompatActivity(), CoroutineScope {
-    private val tag = javaClass.simpleName
+    private val tag: String = javaClass.simpleName
 
     private val job: Job = Job()
     override val coroutineContext: CoroutineContext

@@ -27,7 +27,7 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 class TranslationRepository(private val localTranslationStorage: LocalTranslationStorage,
                             private val remoteTranslationService: RemoteTranslationService) {
     companion object {
-        private val TAG = TranslationRepository::class.java.simpleName
+        private val TAG: String = TranslationRepository::class.java.simpleName
         private const val TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS = 7L * 24L * 3600L * 1000L // 7 day
     }
 
