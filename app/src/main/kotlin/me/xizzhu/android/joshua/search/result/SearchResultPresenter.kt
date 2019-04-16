@@ -31,14 +31,12 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val searchResult = searchInteractor.observeSearchResult()
-            receiveChannels.add(searchResult)
-            searchResult.consumeEach { (query, verses) -> view?.onSearchResultUpdated(verses.toSearchResult(query)) }
+            searchInteractor.observeSearchResult().consumeEach { (query, verses) ->
+                view?.onSearchResultUpdated(verses.toSearchResult(query))
+            }
         }
         launch(Dispatchers.Main) {
-            val searchState = searchInteractor.observeSearchState()
-            receiveChannels.add(searchState)
-            searchState.consumeEach { loadingState ->
+            searchInteractor.observeSearchState().consumeEach { loadingState ->
                 when (loadingState) {
                     LoadingSpinnerState.IS_LOADING -> view?.onSearchStarted()
                     LoadingSpinnerState.NOT_LOADING -> view?.onSearchCompleted()

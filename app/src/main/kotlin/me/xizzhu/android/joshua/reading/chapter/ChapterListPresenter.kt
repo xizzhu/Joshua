@@ -30,15 +30,11 @@ class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : M
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = readingInteractor.observeCurrentTranslation()
-            receiveChannels.add(currentTranslation)
-            currentTranslation.filter { it.isNotEmpty() }
+            readingInteractor.observeCurrentTranslation().filter { it.isNotEmpty() }
                     .consumeEach { view?.onBookNamesUpdated(readingInteractor.readBookNames(it)) }
         }
         launch(Dispatchers.Main) {
-            val currentVerseIndex = readingInteractor.observeCurrentVerseIndex()
-            receiveChannels.add(currentVerseIndex)
-            currentVerseIndex.filter { it.isValid() }
+            readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
                     .consumeEach { view?.onCurrentVerseIndexUpdated(it) }
         }
     }

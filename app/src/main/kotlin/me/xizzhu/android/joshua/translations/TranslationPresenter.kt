@@ -60,27 +60,23 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = translationInteractor.observeCurrentTranslation()
-            receiveChannels.add(currentTranslation)
-            currentTranslation.consumeEach { view?.onCurrentTranslationUpdated(it) }
+            translationInteractor.observeCurrentTranslation().consumeEach { view?.onCurrentTranslationUpdated(it) }
         }
         launch(Dispatchers.Main) {
-            val availableTranslations = translationInteractor.observeAvailableTranslations()
-            receiveChannels.add(availableTranslations)
-            availableTranslations.consumeEach { view?.onAvailableTranslationsUpdated(it.sortedWith(translationComparator)) }
+            translationInteractor.observeAvailableTranslations().consumeEach {
+                view?.onAvailableTranslationsUpdated(it.sortedWith(translationComparator))
+            }
         }
         launch(Dispatchers.Main) {
-            val downloadedTranslations = translationInteractor.observeDownloadedTranslations()
-            receiveChannels.add(downloadedTranslations)
-            downloadedTranslations.consumeEach { view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator)) }
+            translationInteractor.observeDownloadedTranslations().consumeEach {
+                view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
+            }
         }
         launch(Dispatchers.Main) {
             translationInteractor.reload(false)
         }
         launch(Dispatchers.Main) {
-            val translationLoadingState = translationInteractor.observeTranslationsLoadingState()
-            receiveChannels.add(translationLoadingState)
-            translationLoadingState.consumeEach { loadingState ->
+            translationInteractor.observeTranslationsLoadingState().consumeEach { loadingState ->
                 when (loadingState) {
                     SwipeRefresherState.IS_REFRESHING -> view?.onTranslationsLoadingStarted()
                     SwipeRefresherState.NOT_REFRESHING -> view?.onTranslationsLoadingCompleted()
@@ -88,9 +84,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
             }
         }
         launch(Dispatchers.Main) {
-            val refreshRequest = translationInteractor.observeTranslationsLoadingRequest()
-            receiveChannels.add(refreshRequest)
-            refreshRequest.consumeEach { translationInteractor.reload(true) }
+            translationInteractor.observeTranslationsLoadingRequest().consumeEach { translationInteractor.reload(true) }
         }
     }
 

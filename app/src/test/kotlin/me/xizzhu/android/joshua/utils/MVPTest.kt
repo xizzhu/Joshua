@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.utils
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertFalse
@@ -29,13 +28,11 @@ class MVPTest {
         var onViewAttachedCalled = false
         var onViewDetachedCalled = false
 
-        val receiveChannel = Channel<Int>()
         lateinit var job: Job
 
         override fun onViewAttached() {
             super.onViewAttached()
             onViewAttachedCalled = true
-            receiveChannels.add(receiveChannel)
             job = launch(Dispatchers.Default) {
                 while (isActive) {
                     delay(1L)
@@ -87,15 +84,6 @@ class MVPTest {
         mvpPresenterStub.detachView()
         assertTrue(mvpPresenterStub.onViewAttachedCalled)
         assertTrue(mvpPresenterStub.onViewDetachedCalled)
-    }
-
-    @Test
-    fun testReceiveChannelCloseOnDetach() {
-        mvpPresenterStub.attachView(mvpViewStub)
-        assertFalse(mvpPresenterStub.receiveChannel.isClosedForReceive)
-
-        mvpPresenterStub.detachView()
-        assertTrue(mvpPresenterStub.receiveChannel.isClosedForReceive)
     }
 
     @Test

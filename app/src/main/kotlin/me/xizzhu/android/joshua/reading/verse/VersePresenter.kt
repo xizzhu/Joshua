@@ -80,27 +80,21 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = readingInteractor.observeCurrentTranslation()
-            receiveChannels.add(currentTranslation)
-            currentTranslation.filter { it.isNotEmpty() }
+            readingInteractor.observeCurrentTranslation().filter { it.isNotEmpty() }
                     .consumeEach {
                         this@VersePresenter.currentTranslation = it
                         view?.onCurrentTranslationUpdated(it)
                     }
         }
         launch(Dispatchers.Main) {
-            val currentVerseIndex = readingInteractor.observeCurrentVerseIndex()
-            receiveChannels.add(currentVerseIndex)
-            currentVerseIndex.filter { it.isValid() }
+            readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
                     .consumeEach {
                         actionMode?.finish()
                         view?.onCurrentVerseIndexUpdated(it)
                     }
         }
         launch(Dispatchers.Main) {
-            val parallelTranslations = readingInteractor.observeParallelTranslations()
-            receiveChannels.add(parallelTranslations)
-            parallelTranslations.consumeEach {
+            readingInteractor.observeParallelTranslations().consumeEach {
                 this@VersePresenter.parallelTranslations = it
                 view?.onParallelTranslationsUpdated(it)
             }

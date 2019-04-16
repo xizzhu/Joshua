@@ -32,9 +32,7 @@ class ReadingDrawerPresenter(private val readingInteractor: ReadingInteractor) :
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentVerseIndex = readingInteractor.observeCurrentVerseIndex()
-            receiveChannels.add(currentVerseIndex)
-            currentVerseIndex.filter { it.isValid() }
+            readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
                     .consumeEach { view?.hide() }
         }
     }

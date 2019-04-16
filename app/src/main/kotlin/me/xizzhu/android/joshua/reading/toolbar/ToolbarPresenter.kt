@@ -29,24 +29,18 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = readingInteractor.observeCurrentTranslation()
-            receiveChannels.add(currentTranslation)
-            currentTranslation.filter { it.isNotEmpty() }
+            readingInteractor.observeCurrentTranslation().filter { it.isNotEmpty() }
                     .consumeEach {
                         view?.onCurrentTranslationUpdated(it)
                         view?.onBookShortNamesUpdated(readingInteractor.readBookShortNames(it))
                     }
         }
         launch(Dispatchers.Main) {
-            val currentVerseIndex = readingInteractor.observeCurrentVerseIndex()
-            receiveChannels.add(currentVerseIndex)
-            currentVerseIndex.filter { it.isValid() }
+            readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
                     .consumeEach { view?.onCurrentVerseIndexUpdated(it) }
         }
         launch(Dispatchers.Main) {
-            val downloadedTranslations = readingInteractor.observeDownloadedTranslations()
-            receiveChannels.add(downloadedTranslations)
-            downloadedTranslations.consumeEach {
+            readingInteractor.observeDownloadedTranslations().consumeEach {
                 if (it.isEmpty()) {
                     view?.onNoTranslationsDownloaded()
                 } else {
@@ -55,9 +49,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
             }
         }
         launch(Dispatchers.Main) {
-            val parallelTranslations = readingInteractor.observeParallelTranslations()
-            receiveChannels.add(parallelTranslations)
-            parallelTranslations.consumeEach { view?.onParallelTranslationsUpdated(it) }
+            readingInteractor.observeParallelTranslations().consumeEach { view?.onParallelTranslationsUpdated(it) }
         }
     }
 
