@@ -34,9 +34,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentSettings = settingsManager.observeSettings()
-            receiveChannels.add(currentSettings)
-            currentSettings.consumeEach { settings = it }
+            settingsManager.observeSettings().consumeEach { settings = it }
         }
 
         try {

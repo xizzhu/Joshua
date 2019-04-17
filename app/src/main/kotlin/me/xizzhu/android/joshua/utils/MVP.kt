@@ -21,19 +21,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.channels.ReceiveChannel
 import kotlin.coroutines.CoroutineContext
 
 interface MVPView
 
 abstract class MVPPresenter<V : MVPView> : CoroutineScope {
-    protected val tag = javaClass.simpleName
+    protected val tag: String = javaClass.simpleName
 
     private val job: Job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
-
-    protected val receiveChannels = ArrayList<ReceiveChannel<*>>()
 
     protected var view: V? = null
         private set
@@ -51,11 +48,6 @@ abstract class MVPPresenter<V : MVPView> : CoroutineScope {
         onViewDetached()
 
         job.cancelChildren()
-
-        for (r in receiveChannels) {
-            r.cancel()
-        }
-        receiveChannels.clear()
 
         view = null
     }

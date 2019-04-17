@@ -30,6 +30,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import kotlin.properties.Delegates
 
 class VersePresenter(private val readingInteractor: ReadingInteractor)
     : BaseSettingsPresenter<VerseView>(readingInteractor) {
@@ -73,37 +74,30 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
     }
 
-    private var currentTranslation = ""
-    private var parallelTranslations = emptyList<String>()
+    private var currentTranslation: String by Delegates.observable("") { _, _, new ->
+        if (new.isNotEmpty()) {
+            view?.onCurrentTranslationUpdated(new)
+        }
+    }
+    private var parallelTranslations: List<String> by Delegates.observable(emptyList()) { _, _, new ->
+        view?.onParallelTranslationsUpdated(new)
+    }
 
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentTranslation = readingInteractor.observeCurrentTranslation()
-            receiveChannels.add(currentTranslation)
-            currentTranslation.filter { it.isNotEmpty() }
-                    .consumeEach {
-                        this@VersePresenter.currentTranslation = it
-                        view?.onCurrentTranslationUpdated(it)
-                    }
+            readingInteractor.observeCurrentTranslation().consumeEach { currentTranslation = it }
         }
         launch(Dispatchers.Main) {
-            val currentVerseIndex = readingInteractor.observeCurrentVerseIndex()
-            receiveChannels.add(currentVerseIndex)
-            currentVerseIndex.filter { it.isValid() }
+            readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
                     .consumeEach {
                         actionMode?.finish()
                         view?.onCurrentVerseIndexUpdated(it)
                     }
         }
         launch(Dispatchers.Main) {
-            val parallelTranslations = readingInteractor.observeParallelTranslations()
-            receiveChannels.add(parallelTranslations)
-            parallelTranslations.consumeEach {
-                this@VersePresenter.parallelTranslations = it
-                view?.onParallelTranslationsUpdated(it)
-            }
+            readingInteractor.observeParallelTranslations().consumeEach { parallelTranslations = it }
         }
     }
 

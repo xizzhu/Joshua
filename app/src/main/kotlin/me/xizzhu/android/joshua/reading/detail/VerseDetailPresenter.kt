@@ -36,9 +36,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val verseDetailOpenState = readingInteractor.observeVerseDetailOpenState()
-            receiveChannels.add(verseDetailOpenState)
-            verseDetailOpenState.consumeEach { verseIndex ->
+            readingInteractor.observeVerseDetailOpenState().consumeEach { verseIndex ->
                 if (verseIndex.isValid()) {
                     view?.show()
                     loadVerseDetail(verseIndex)

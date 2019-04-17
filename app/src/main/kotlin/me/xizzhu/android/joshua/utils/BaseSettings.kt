@@ -28,9 +28,7 @@ import me.xizzhu.android.joshua.ui.getBackgroundColor
 abstract class BaseSettingsActivity : BaseActivity() {
     protected fun observeSettings(baseSettingsInteractor: BaseSettingsInteractor) {
         launch(Dispatchers.Main) {
-            val currentSettings = baseSettingsInteractor.observeSettings()
-            receiveChannels.add(currentSettings)
-            currentSettings.consumeEach { onSettingsUpdated(it) }
+            baseSettingsInteractor.observeSettings().consumeEach { onSettingsUpdated(it) }
         }
     }
 
@@ -56,9 +54,7 @@ abstract class BaseSettingsPresenter<V : BaseSettingsView>(private val baseSetti
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            val currentSettings = baseSettingsInteractor.observeSettings()
-            receiveChannels.add(currentSettings)
-            currentSettings.consumeEach { view?.onSettingsUpdated(it) }
+            baseSettingsInteractor.observeSettings().consumeEach { view?.onSettingsUpdated(it) }
         }
     }
 }
