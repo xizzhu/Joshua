@@ -37,4 +37,6 @@ tasks {
         reports.xml.destination = file("$buildDir/reports/jacoco/test/jacocoTestReport.xml")
         reports.html.isEnabled = true
     }
+
+    getByName("coveralls").dependsOn(debugCoverageReport)
 }
