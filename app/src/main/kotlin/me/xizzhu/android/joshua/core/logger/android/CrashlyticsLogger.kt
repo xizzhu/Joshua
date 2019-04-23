@@ -24,7 +24,9 @@ class CrashlyticsLogger : Logger {
     private val crashlyticsCore = Crashlytics.getInstance().core
 
     override fun log(@Log.Level level: Int, tag: String, msg: String) {
-        // do nothing
+        if (level > Log.INFO) {
+            crashlyticsCore.log(level, tag, msg)
+        }
     }
 
     override fun log(@Log.Level level: Int, tag: String, e: Throwable, msg: String) {
