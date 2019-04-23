@@ -71,6 +71,8 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
     }
 
     override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation {
+        Log.i(TAG, "Start fetching translation - ${translationInfo.shortName}")
+
         var inputStream: ZipInputStream? = null
         val bookNames = ArrayList<String>()
         val bookShortNames = ArrayList<String>()
