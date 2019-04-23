@@ -57,6 +57,11 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         launch(Dispatchers.Main) {
             try {
                 readingInteractor.saveCurrentTranslation(translationShortName)
+                try {
+                    readingInteractor.clearParallelTranslation()
+                } catch (e: Exception) {
+                    Log.w(tag, e, "Failed to clear parallel translation")
+                }
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to update current translation")
                 view?.onCurrentTranslationUpdateFailed(translationShortName)

@@ -137,4 +137,17 @@ class BibleReadingManagerTest : BaseUnitTest() {
                     bibleReadingManager.observeParallelTranslations().first().toSet())
         }
     }
+
+    @Test
+    fun testClearParallelTranslations() {
+        runBlocking {
+            bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
+            bibleReadingManager.requestParallelTranslation(MockContents.cuvShortName)
+            assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),
+                    bibleReadingManager.observeParallelTranslations().first().toSet())
+
+            bibleReadingManager.clearParallelTranslation()
+            assertTrue(bibleReadingManager.observeParallelTranslations().first().isEmpty())
+        }
+    }
 }

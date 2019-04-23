@@ -104,6 +104,10 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
         }
     }
 
+    suspend fun clearParallelTranslation() {
+        parallelTranslations.send(emptyList())
+    }
+
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingRepository.readBookNames(translationShortName)
 

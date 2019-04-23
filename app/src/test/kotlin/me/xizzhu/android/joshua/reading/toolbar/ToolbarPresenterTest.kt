@@ -126,6 +126,20 @@ class ToolbarPresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testUpdateCurrentTranslationWithExceptionFromClearParallel() {
+        runBlocking {
+            `when`(readingInteractor.saveCurrentTranslation(MockContents.kjvShortName))
+                    .then { runBlocking { currentTranslationChannel.send(MockContents.kjvShortName) } }
+            `when`(readingInteractor.clearParallelTranslation())
+                    .thenThrow(RuntimeException("Random exception"))
+
+            toolbarPresenter.updateCurrentTranslation(MockContents.kjvShortName)
+            verify(toolbarView, times(1)).onCurrentTranslationUpdated(MockContents.kjvShortName)
+            verify(toolbarView, never()).onCurrentTranslationUpdateFailed(MockContents.kjvShortName)
+        }
+    }
+
+    @Test
     fun testOpenTranslation() {
         toolbarPresenter.openTranslationManagement()
         verify(toolbarView, never()).onFailedToNavigateToTranslationManagement()
