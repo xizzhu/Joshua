@@ -1,12 +1,14 @@
-Joshua
-======
-
 [![Build Status](https://img.shields.io/travis/xizzhu/Joshua.svg)](https://travis-ci.org/xizzhu/Joshua)
 [![Coverage Status](https://img.shields.io/coveralls/github/xizzhu/Joshua.svg)](https://coveralls.io/github/xizzhu/Joshua)
 [![API](https://img.shields.io/badge/API-21%2B-green.svg?style=flat)](https://developer.android.com/about/versions/android-5.0.html)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 
-Joshua 1:8 This book of the law shall not depart out of thy mouth; but thou shalt meditate therein day and night, that thou mayest observe to do according to all that is written therein: for then thou shalt make thy way prosperous, and then thou shalt have good success.
+Joshua
+======
+
+A simple and easy-to-use Bible reader for your Android device. It supports offline reading, multi-versions, and full-text search.
+
+You can download the APK from [Play Store](https://play.google.com/store/apps/details?id=me.xizzhu.android.joshua) or [here](https://github.com/xizzhu/Joshua/releases). Recent changes are listed at [CHANGELOG.md](CHANGELOG.md).
 
 License
 -------
