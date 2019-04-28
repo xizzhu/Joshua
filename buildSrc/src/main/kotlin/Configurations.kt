@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import org.gradle.api.JavaVersion
 
 object Configurations {
@@ -24,7 +26,10 @@ object Configurations {
 object Versions {
     object App {
         const val code = 100
-        const val name = "0.1.0"
+        val name: String by lazy {
+            "${code / 10000}.${(code % 10000) / 100}.${code % 100} " +
+                    "(${LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))})"
+        }
     }
 
     object Coveralls {
