@@ -83,6 +83,7 @@ android {
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
+            versionNameSuffix = " debug"
             isTestCoverageEnabled = project.hasProperty("coverage")
         }
     }
