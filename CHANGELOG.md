@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.1.1 (2019-04-28)
 - Fixes
   - Fixed crash when closing fectching translation stream
 - Updated dependencies
