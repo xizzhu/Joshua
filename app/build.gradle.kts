@@ -46,6 +46,8 @@ android {
 
         resConfigs(Configurations.supportedLocales)
 
+        buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString() + "L")
+
         testInstrumentationRunner = Dependencies.AndroidX.Test.runner
     }
 
@@ -83,6 +85,7 @@ android {
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
+            versionNameSuffix = " debug"
             isTestCoverageEnabled = project.hasProperty("coverage")
         }
     }
