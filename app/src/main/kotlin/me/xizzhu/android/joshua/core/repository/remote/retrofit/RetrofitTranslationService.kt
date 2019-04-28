@@ -19,8 +19,10 @@ package me.xizzhu.android.joshua.core.repository.remote.retrofit
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslation
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
@@ -71,55 +73,57 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
     }
 
     override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation {
-        Log.i(TAG, "Start fetching translation - ${translationInfo.shortName}")
+        return withContext(Dispatchers.IO) {
+            Log.i(TAG, "Start fetching translation - ${translationInfo.shortName}")
 
-        var inputStream: ZipInputStream? = null
-        val bookNames = ArrayList<String>()
-        val bookShortNames = ArrayList<String>()
-        val verses = HashMap<Pair<Int, Int>, List<String>>()
-        try {
-            val response = translationService.fetchTranslation(translationInfo.shortName).await()
-            inputStream = ZipInputStream(response.byteStream())
-            var zipEntry: ZipEntry?
-            var downloaded = 0
-            var progress = -1
-            while (true) {
-                zipEntry = inputStream.nextEntry
-                if (zipEntry == null) {
-                    break
-                }
-
-                val bufferedSource = inputStream.source().buffer()
-                val entryName = zipEntry.name
-                if (entryName == "books.json") {
-                    val books = booksAdapter.fromJson(bufferedSource)!!
-                    bookNames.addAll(books.bookNames)
-                    bookShortNames.addAll(books.bookShortNames)
-                } else {
-                    val split = entryName.substring(0, entryName.length - 5).split("-")
-                    verses[Pair(split[0].toInt(), split[1].toInt())] =
-                            chapterAdapter.fromJson(bufferedSource)!!.verses
-                }
-
-                // only emits if the progress is actually changed
-                val currentProgress = ++downloaded / 12
-                if (currentProgress > progress) {
-                    progress = currentProgress
-                    channel.send(progress)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, e, "Failed to fetch translation")
-            channel.close(e)
-        } finally {
+            var inputStream: ZipInputStream? = null
+            val bookNames = ArrayList<String>()
+            val bookShortNames = ArrayList<String>()
+            val verses = HashMap<Pair<Int, Int>, List<String>>()
             try {
-                inputStream?.close()
-            } catch (e: IOException) {
-                Log.w(TAG, e, "Failed to close input stream")
-            }
-        }
+                val response = translationService.fetchTranslation(translationInfo.shortName).await()
+                inputStream = ZipInputStream(response.byteStream())
+                var zipEntry: ZipEntry?
+                var downloaded = 0
+                var progress = -1
+                while (true) {
+                    zipEntry = inputStream.nextEntry
+                    if (zipEntry == null) {
+                        break
+                    }
 
-        return RemoteTranslation(translationInfo, bookNames, bookShortNames, verses)
+                    val bufferedSource = inputStream.source().buffer()
+                    val entryName = zipEntry.name
+                    if (entryName == "books.json") {
+                        val books = booksAdapter.fromJson(bufferedSource)!!
+                        bookNames.addAll(books.bookNames)
+                        bookShortNames.addAll(books.bookShortNames)
+                    } else {
+                        val split = entryName.substring(0, entryName.length - 5).split("-")
+                        verses[Pair(split[0].toInt(), split[1].toInt())] =
+                                chapterAdapter.fromJson(bufferedSource)!!.verses
+                    }
+
+                    // only emits if the progress is actually changed
+                    val currentProgress = ++downloaded / 12
+                    if (currentProgress > progress) {
+                        progress = currentProgress
+                        channel.send(progress)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, e, "Failed to fetch translation")
+                channel.close(e)
+            } finally {
+                try {
+                    inputStream?.close()
+                } catch (e: IOException) {
+                    Log.w(TAG, e, "Failed to close input stream")
+                }
+            }
+
+            return@withContext RemoteTranslation(translationInfo, bookNames, bookShortNames, verses)
+        }
     }
 }
 
