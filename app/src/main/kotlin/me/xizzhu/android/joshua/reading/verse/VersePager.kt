@@ -41,9 +41,9 @@ interface VerseView : BaseSettingsView {
 
     fun onVersesLoadFailed(bookIndex: Int, chapterIndex: Int)
 
-    fun onVerseSelected(verse: Verse)
+    fun onVerseSelected(verseIndex: VerseIndex)
 
-    fun onVerseDeselected(verse: Verse)
+    fun onVerseDeselected(verseIndex: VerseIndex)
 
     fun onVersesCopied()
 
@@ -157,12 +157,12 @@ class VerseViewPager : ViewPager, VerseView {
                 })
     }
 
-    override fun onVerseSelected(verse: Verse) {
-        adapter.selectVerse(verse)
+    override fun onVerseSelected(verseIndex: VerseIndex) {
+        adapter.selectVerse(verseIndex)
     }
 
-    override fun onVerseDeselected(verse: Verse) {
-        adapter.deselectVerse(verse)
+    override fun onVerseDeselected(verseIndex: VerseIndex) {
+        adapter.deselectVerse(verseIndex)
     }
 
     override fun onVersesCopied() {

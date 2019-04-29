@@ -30,6 +30,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class VersePresenterTest : BaseUnitTest() {
@@ -43,6 +44,7 @@ class VersePresenterTest : BaseUnitTest() {
     private lateinit var currentTranslationChannel: ConflatedBroadcastChannel<String>
     private lateinit var currentVerseIndexChannel: ConflatedBroadcastChannel<VerseIndex>
     private lateinit var parallelTranslationsChannel: ConflatedBroadcastChannel<List<String>>
+    private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<VerseIndex>
 
     @Before
     override fun setup() {
@@ -59,6 +61,9 @@ class VersePresenterTest : BaseUnitTest() {
 
         parallelTranslationsChannel = ConflatedBroadcastChannel(emptyList())
         `when`(readingInteractor.observeParallelTranslations()).then { parallelTranslationsChannel.openSubscription() }
+
+        verseDetailOpenState = ConflatedBroadcastChannel()
+        `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
 
         versePresenter = VersePresenter(readingInteractor)
         versePresenter.attachView(verseView)
@@ -187,8 +192,22 @@ class VersePresenterTest : BaseUnitTest() {
         val verse = MockContents.kjvVerses[0]
         versePresenter.onVerseClicked(VerseForReading(verse, 1))
         assertTrue(versePresenter.selectedVerses.isEmpty())
-        verify(verseView, never()).onVerseDeselected(verse)
-        verify(verseView, never()).onVerseSelected(verse)
+        verify(verseView, never()).onVerseDeselected(any())
+        verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
+    }
+
+    @Test
+    fun testOnVerseDetailClosed() {
+        runBlocking {
+            val verseIndex = VerseIndex(0, 0, 0)
+            versePresenter.selectedVerse = verseIndex
+
+            verseDetailOpenState.send(VerseIndex.INVALID)
+
+            assertFalse(versePresenter.selectedVerse.isValid())
+            verify(verseView, times(1)).onVerseDeselected(verseIndex)
+            verify(verseView, never()).onVerseSelected(any())
+        }
     }
 
     @Test
@@ -200,20 +219,20 @@ class VersePresenterTest : BaseUnitTest() {
         versePresenter.onVerseLongClicked(VerseForReading(verse, 1))
         assertEquals(1, versePresenter.selectedVerses.size)
         verify(readingInteractor, times(1)).startActionMode(any())
-        verify(verseView, times(1)).onVerseSelected(verse)
+        verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
 
         val anotherVerse = MockContents.kjvVerses[5]
         versePresenter.onVerseLongClicked(VerseForReading(anotherVerse, 1))
         assertEquals(2, versePresenter.selectedVerses.size)
-        verify(verseView, times(1)).onVerseSelected(anotherVerse)
+        verify(verseView, times(1)).onVerseSelected(anotherVerse.verseIndex)
 
         versePresenter.onVerseClicked(VerseForReading(anotherVerse, 1))
         assertEquals(1, versePresenter.selectedVerses.size)
-        verify(verseView, times(1)).onVerseDeselected(anotherVerse)
+        verify(verseView, times(1)).onVerseDeselected(anotherVerse.verseIndex)
 
         versePresenter.onVerseClicked(VerseForReading(verse, 1))
         assertTrue(versePresenter.selectedVerses.isEmpty())
-        verify(verseView, times(1)).onVerseDeselected(verse)
+        verify(verseView, times(1)).onVerseDeselected(verse.verseIndex)
         verify(actionMode, times(1)).finish()
     }
 }
