@@ -71,7 +71,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     fun testShow() {
         runBlocking {
             val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
+            `when`(readingInteractor.readVerseWithParallel(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
             `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
 
@@ -88,7 +88,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     fun testLoadVerseDetail() {
         runBlocking {
             val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
+            `when`(readingInteractor.readVerseWithParallel(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
             `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
 
@@ -104,7 +104,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     fun testLoadVerseDetailWithException() {
         runBlocking {
             val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerse(MockContents.kjvShortName, verseIndex)).thenThrow(RuntimeException("Random exception"))
+            `when`(readingInteractor.readVerseWithParallel(MockContents.kjvShortName, verseIndex)).thenThrow(RuntimeException("Random exception"))
             `when`(readingInteractor.readBookmark(verseIndex)).thenThrow(RuntimeException("Random exception"))
 
             verseDetailPresenter.loadVerseDetail(verseIndex)

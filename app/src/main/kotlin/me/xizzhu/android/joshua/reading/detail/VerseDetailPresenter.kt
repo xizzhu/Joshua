@@ -54,7 +54,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
             try {
                 val verseDetail = coroutineScope {
                     val verseAsync = async {
-                        readingInteractor.readVerse(readingInteractor.observeCurrentTranslation().first(), verseIndex)
+                        readingInteractor.readVerseWithParallel(readingInteractor.observeCurrentTranslation().first(), verseIndex)
                     }
                     val bookmarkAsync = async { readingInteractor.readBookmark(verseIndex) }
                     val noteAsync = async { readingInteractor.readNote(verseIndex) }
