@@ -148,7 +148,8 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
                 val translationToBookNames = androidDatabase.bookNamesDao.read(verseIndex.bookIndex)
                 val translationToText = androidDatabase.translationDao.read(translationToBookNames, verseIndex).toMutableMap()
                 val primaryText = translationToText.remove(translationShortName)!!
-                val verse = Verse(verseIndex, primaryText, translationToText.values.toList())
+                val verse = Verse(verseIndex, primaryText,
+                        translationToText.values.sortedBy { it.translationShortName })
 
                 db.setTransactionSuccessful()
                 return@withContext verse
