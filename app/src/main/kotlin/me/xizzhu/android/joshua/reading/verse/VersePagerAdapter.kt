@@ -74,12 +74,12 @@ class VersePagerAdapter(private val context: Context, private val listener: List
         return null
     }
 
-    fun selectVerse(verse: Verse) {
-        findPage(verse.verseIndex.bookIndex, verse.verseIndex.chapterIndex)?.selectVerse(verse.verseIndex)
+    fun selectVerse(verseIndex: VerseIndex) {
+        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.selectVerse(verseIndex)
     }
 
-    fun deselectVerse(verse: Verse) {
-        findPage(verse.verseIndex.bookIndex, verse.verseIndex.chapterIndex)?.deselectVerse(verse.verseIndex)
+    fun deselectVerse(verseIndex: VerseIndex) {
+        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.deselectVerse(verseIndex)
     }
 
     override fun getCount(): Int = if (currentTranslation.isNotEmpty() && settings != null) Bible.TOTAL_CHAPTER_COUNT else 0

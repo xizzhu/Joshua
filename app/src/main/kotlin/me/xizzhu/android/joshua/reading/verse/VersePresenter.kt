@@ -35,6 +35,8 @@ import kotlin.properties.Delegates
 class VersePresenter(private val readingInteractor: ReadingInteractor)
     : BaseSettingsPresenter<VerseView>(readingInteractor) {
     @VisibleForTesting
+    var selectedVerse: VerseIndex = VerseIndex.INVALID
+    @VisibleForTesting
     val selectedVerses: HashSet<Verse> = HashSet()
     private var actionMode: ActionMode? = null
     private val actionModeCallback = object : ActionMode.Callback {
@@ -66,7 +68,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
 
         override fun onDestroyActionMode(mode: ActionMode) {
             for (verse in selectedVerses) {
-                view?.onVerseDeselected(verse)
+                view?.onVerseDeselected(verse.verseIndex)
             }
             selectedVerses.clear()
 
@@ -98,6 +100,15 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
         launch(Dispatchers.Main) {
             readingInteractor.observeParallelTranslations().consumeEach { parallelTranslations = it }
+        }
+        launch(Dispatchers.Main) {
+            readingInteractor.observeVerseDetailOpenState().filter { !it.isValid() }
+                    .consumeEach {
+                        if (selectedVerse.isValid()) {
+                            view?.onVerseDeselected(selectedVerse)
+                            selectedVerse = VerseIndex.INVALID
+                        }
+                    }
         }
     }
 
@@ -142,7 +153,9 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     fun onVerseClicked(verseForReading: VerseForReading) {
         val verse = verseForReading.verse
         if (actionMode == null) {
-            launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex) }
+            selectedVerse = verse.verseIndex
+            launch(Dispatchers.Main) { readingInteractor.openVerseDetail(selectedVerse) }
+            view?.onVerseSelected(selectedVerse)
             return
         }
 
@@ -153,12 +166,12 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                 actionMode?.finish()
             }
 
-            view?.onVerseDeselected(verse)
+            view?.onVerseDeselected(verse.verseIndex)
         } else {
             // select the verse
             selectedVerses.add(verse)
 
-            view?.onVerseSelected(verse)
+            view?.onVerseSelected(verse.verseIndex)
         }
     }
 

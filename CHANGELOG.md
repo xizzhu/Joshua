@@ -2,6 +2,9 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Improved verse detail
+  - Highlight current selected verse when showing verse detail
+  - Sorted verses by translation short name
 
 #### v0.1.1 (2019-04-28)
 - Fixes
