@@ -42,7 +42,6 @@ interface BookmarksView : BaseSettingsView {
 class BookmarksListView : RecyclerView, BookmarksView {
     private lateinit var presenter: BookmarksPresenter
     private val adapter: CommonAdapter = CommonAdapter(context)
-
     private val onClickListener = OnClickListener { view ->
         ((getChildViewHolder(view) as BookmarkItemViewHolder).item)?.let {
             presenter.selectVerse(it.verseIndex)

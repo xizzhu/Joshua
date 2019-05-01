@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.notes
+package me.xizzhu.android.joshua.ui.recyclerview
 
+import android.content.res.Resources
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
+import android.util.TypedValue
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.TextView
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.getBodyTextSize
+import me.xizzhu.android.joshua.ui.getCaptionTextSize
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 
-data class NoteForDisplay(val verseIndex: VerseIndex, val text: Verse.Text, val note: String, val timestamp: Long) {
+data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: String, val timestamp: Long) : BaseItem {
     companion object {
         private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
@@ -42,5 +52,29 @@ data class NoteForDisplay(val verseIndex: VerseIndex, val text: Verse.Text, val 
         SPANNABLE_STRING_BUILDER.append(' ').append(text.text)
 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
+    }
+
+    override fun getItemViewType(): Int = BaseItem.NOTE_ITEM
+}
+
+class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val resources: Resources)
+    : BaseViewHolder<NoteItem>(inflater.inflate(R.layout.item_note, parent, false)) {
+    private val verse: TextView = itemView.findViewById(R.id.verse)
+    private val text: TextView = itemView.findViewById(R.id.text)
+
+    override fun bind(settings: Settings, item: NoteItem) {
+        this.item = item
+
+        val textColor = settings.getPrimaryTextColor(resources)
+        with(verse) {
+            setTextColor(textColor)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(this@NoteItemViewHolder.resources).toFloat())
+            text = item.textForDisplay
+        }
+        with(text) {
+            setTextColor(textColor)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@NoteItemViewHolder.resources).toFloat())
+            text = item.note
+        }
     }
 }

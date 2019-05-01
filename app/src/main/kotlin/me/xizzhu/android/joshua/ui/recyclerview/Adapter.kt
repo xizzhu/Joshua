@@ -29,8 +29,9 @@ interface BaseItem {
     companion object {
         const val SEARCH_ITEM = 0
         const val BOOKMARK_ITEM = 1
+        const val NOTE_ITEM = 2
 
-        @IntDef(SEARCH_ITEM, BOOKMARK_ITEM)
+        @IntDef(SEARCH_ITEM, BOOKMARK_ITEM, NOTE_ITEM)
         @Retention(AnnotationRetention.SOURCE)
         annotation class ItemViewType
     }
@@ -78,6 +79,7 @@ class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<Base
             when (viewType) {
                 BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent, resources)
                 BaseItem.BOOKMARK_ITEM -> BookmarkItemViewHolder(inflater, parent, resources)
+                BaseItem.NOTE_ITEM -> NoteItemViewHolder(inflater, parent, resources)
                 else -> throw IllegalStateException("Unknown view type - $viewType")
             } as BaseViewHolder<BaseItem>
 
