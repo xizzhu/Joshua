@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -92,7 +93,7 @@ fun List<Verse>.toSearchItems(query: String): List<SearchItem> {
     return searchResult
 }
 
-class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val resources: Resources)
     : BaseViewHolder<SearchItem>(inflater.inflate(R.layout.item_search_result, parent, false)) {
     private val text = itemView as TextView
 
@@ -100,8 +101,8 @@ class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
         this.item = item
         with(text) {
             text = item.textForDisplay
-            setTextColor(settings.getPrimaryTextColor(resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
+            setTextColor(settings.getPrimaryTextColor(this@SearchItemViewHolder.resources))
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@SearchItemViewHolder.resources).toFloat())
         }
     }
 }

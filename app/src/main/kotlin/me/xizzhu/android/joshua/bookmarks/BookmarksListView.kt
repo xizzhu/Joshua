@@ -19,16 +19,20 @@ package me.xizzhu.android.joshua.bookmarks
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
+import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItemViewHolder
+import me.xizzhu.android.joshua.ui.recyclerview.CommonAdapter
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface BookmarksView : BaseSettingsView {
-    fun onBookmarksLoaded(bookmarks: List<BookmarkForDisplay>)
+    fun onBookmarksLoaded(bookmarks: List<BookmarkItem>)
 
     fun onBookmarksLoadFailed()
 
@@ -37,7 +41,13 @@ interface BookmarksView : BaseSettingsView {
 
 class BookmarksListView : RecyclerView, BookmarksView {
     private lateinit var presenter: BookmarksPresenter
-    private val adapter: BookmarksListAdapter
+    private val adapter: CommonAdapter = CommonAdapter(context)
+
+    private val onClickListener = OnClickListener { view ->
+        ((getChildViewHolder(view) as BookmarkItemViewHolder).item)?.let {
+            presenter.selectVerse(it.verseIndex)
+        }
+    }
 
     constructor(context: Context) : super(context)
 
@@ -47,12 +57,6 @@ class BookmarksListView : RecyclerView, BookmarksView {
 
     init {
         layoutManager = LinearLayoutManager(context, VERTICAL, false)
-
-        adapter = BookmarksListAdapter(context, object : BookmarksListAdapter.Listener {
-            override fun onBookmarkClicked(verseIndex: VerseIndex) {
-                presenter.selectVerse(verseIndex)
-            }
-        })
         setAdapter(adapter)
     }
 
@@ -60,12 +64,22 @@ class BookmarksListView : RecyclerView, BookmarksView {
         this.presenter = presenter
     }
 
+    override fun onChildAttachedToWindow(child: View) {
+        super.onChildAttachedToWindow(child)
+        child.setOnClickListener(onClickListener)
+    }
+
+    override fun onChildDetachedFromWindow(child: View) {
+        super.onChildDetachedFromWindow(child)
+        child.setOnClickListener(null)
+    }
+
     override fun onSettingsUpdated(settings: Settings) {
         adapter.setSettings(settings)
     }
 
-    override fun onBookmarksLoaded(bookmarks: List<BookmarkForDisplay>) {
-        adapter.setBookmarks(bookmarks)
+    override fun onBookmarksLoaded(bookmarks: List<BookmarkItem>) {
+        adapter.setItems(bookmarks)
     }
 
     override fun onBookmarksLoadFailed() {

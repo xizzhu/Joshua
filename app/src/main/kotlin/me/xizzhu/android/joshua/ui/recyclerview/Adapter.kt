@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.content.Context
+import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,8 +28,9 @@ import me.xizzhu.android.joshua.core.Settings
 interface BaseItem {
     companion object {
         const val SEARCH_ITEM = 0
+        const val BOOKMARK_ITEM = 1
 
-        @IntDef(SEARCH_ITEM)
+        @IntDef(SEARCH_ITEM, BOOKMARK_ITEM)
         @Retention(AnnotationRetention.SOURCE)
         annotation class ItemViewType
     }
@@ -50,6 +52,7 @@ abstract class BaseViewHolder<T : BaseItem>(itemView: View) : RecyclerView.ViewH
 
 class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<BaseItem>>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
+    private val resources: Resources = context.resources
     private val items: ArrayList<BaseItem> = ArrayList()
     private var settings: Settings? = null
 
@@ -73,7 +76,8 @@ class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<Base
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
             when (viewType) {
-                BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent)
+                BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent, resources)
+                BaseItem.BOOKMARK_ITEM -> BookmarkItemViewHolder(inflater, parent, resources)
                 else -> throw IllegalStateException("Unknown view type - $viewType")
             } as BaseViewHolder<BaseItem>
 

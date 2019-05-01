@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor)
@@ -33,9 +34,9 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor)
         launch(Dispatchers.Main) {
             try {
                 val currentTranslation = bookmarksInteractor.readCurrentTranslation()
-                val bookmarks: ArrayList<BookmarkForDisplay> = ArrayList()
+                val bookmarks: ArrayList<BookmarkItem> = ArrayList()
                 for (bookmark in bookmarksInteractor.readBookmarks()) {
-                    bookmarks.add(BookmarkForDisplay(bookmark.verseIndex,
+                    bookmarks.add(BookmarkItem(bookmark.verseIndex,
                             bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
                             bookmark.timestamp))
                 }

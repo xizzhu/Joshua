@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.bookmarks
+package me.xizzhu.android.joshua.ui.recyclerview
 
+import android.content.res.Resources
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.RelativeSizeSpan
+import android.util.TypedValue
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.TextView
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.getBodyTextSize
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 
-data class BookmarkForDisplay(val verseIndex: VerseIndex, val text: Verse.Text, val timestamp: Long) {
+data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val timestamp: Long) : BaseItem {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
@@ -42,5 +51,22 @@ data class BookmarkForDisplay(val verseIndex: VerseIndex, val text: Verse.Text, 
         SPANNABLE_STRING_BUILDER.append('\n').append(text.text)
 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
+    }
+
+    override fun getItemViewType(): Int = BaseItem.BOOKMARK_ITEM
+}
+
+class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val resources: Resources)
+    : BaseViewHolder<BookmarkItem>(inflater.inflate(R.layout.item_bookmarks, parent, false)) {
+    private val text: TextView = itemView.findViewById(R.id.text)
+
+    override fun bind(settings: Settings, item: BookmarkItem) {
+        this.item = item
+
+        with(text) {
+            setTextColor(settings.getPrimaryTextColor(this@BookmarkItemViewHolder.resources))
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@BookmarkItemViewHolder.resources).toFloat())
+            text = item.textForDisplay
+        }
     }
 }
