@@ -16,6 +16,8 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
+import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IntDef
@@ -23,15 +25,22 @@ import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.core.Settings
 
 interface BaseItem {
-    @IntDef()
-    @Retention(AnnotationRetention.SOURCE)
-    annotation class ItemViewType
+    companion object {
+        const val SEARCH_ITEM = 0
+
+        @IntDef(SEARCH_ITEM)
+        @Retention(AnnotationRetention.SOURCE)
+        annotation class ItemViewType
+    }
 
     @ItemViewType
     fun getItemViewType(): Int
 }
 
 abstract class BaseViewHolder<T : BaseItem>(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    var item: T? = null
+        protected set
+
     abstract fun bind(settings: Settings, item: T)
 
     open fun bind(settings: Settings, item: T, payloads: MutableList<Any>) {
@@ -39,7 +48,8 @@ abstract class BaseViewHolder<T : BaseItem>(itemView: View) : RecyclerView.ViewH
     }
 }
 
-class Adapter : RecyclerView.Adapter<BaseViewHolder<BaseItem>>() {
+class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<BaseItem>>() {
+    private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val items: ArrayList<BaseItem> = ArrayList()
     private var settings: Settings? = null
 
@@ -62,9 +72,10 @@ class Adapter : RecyclerView.Adapter<BaseViewHolder<BaseItem>>() {
     override fun getItemViewType(position: Int): Int = items[position].getItemViewType()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
-            return when (viewType) {
+            when (viewType) {
+                BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent)
                 else -> throw IllegalStateException("Unknown view type - $viewType")
-            }
+            } as BaseViewHolder<BaseItem>
 
     override fun onBindViewHolder(holder: BaseViewHolder<BaseItem>, position: Int) {
         holder.bind(settings!!, items[position])

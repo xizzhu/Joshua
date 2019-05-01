@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.result
+package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.annotation.SuppressLint
 import android.graphics.Typeface
@@ -22,12 +22,20 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
+import android.util.TypedValue
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.TextView
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.getBodyTextSize
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import java.util.*
 
-data class SearchedVerse(val verseIndex: VerseIndex, private val bookName: String,
-                         private val text: String, private val query: String) {
+data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
+                      private val text: String, private val query: String) : BaseItem {
     companion object {
         // We don't expect users to change locale that frequently.
         @SuppressLint("ConstantLocale")
@@ -72,14 +80,28 @@ data class SearchedVerse(val verseIndex: VerseIndex, private val bookName: Strin
 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }
+
+    override fun getItemViewType(): Int = BaseItem.SEARCH_ITEM
 }
 
-typealias SearchResult = List<SearchedVerse>
-
-fun List<Verse>.toSearchResult(query: String): SearchResult {
-    val searchResult: ArrayList<SearchedVerse> = ArrayList(size)
+fun List<Verse>.toSearchItems(query: String): List<SearchItem> {
+    val searchResult: ArrayList<SearchItem> = ArrayList(size)
     for (verse in this) {
-        searchResult.add(SearchedVerse(verse.verseIndex, verse.text.bookName, verse.text.text, query))
+        searchResult.add(SearchItem(verse.verseIndex, verse.text.bookName, verse.text.text, query))
     }
     return searchResult
+}
+
+class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+    : BaseViewHolder<SearchItem>(inflater.inflate(R.layout.item_search_result, parent, false)) {
+    private val text = itemView as TextView
+
+    override fun bind(settings: Settings, item: SearchItem) {
+        this.item = item
+        with(text) {
+            text = item.textForDisplay
+            setTextColor(settings.getPrimaryTextColor(resources))
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
+        }
+    }
 }

@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
+import me.xizzhu.android.joshua.ui.recyclerview.toSearchItems
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -102,7 +103,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
             searchResultChannel.send(Pair(query, verses))
             searchStateChannel.send(LoadingSpinnerState.NOT_LOADING)
 
-            verify(searchResultView, times(1)).onSearchResultUpdated(verses.toSearchResult(query))
+            verify(searchResultView, times(1)).onSearchResultUpdated(verses.toSearchItems(query))
             verify(searchResultView, times(1)).onSearchStarted()
 
             // once from initial state, and second time when search finishes
