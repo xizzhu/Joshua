@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Properly catch exception if thrown when downloading translations
 
 #### v0.1.2 (2019-04-30)
 - Improved verse detail
