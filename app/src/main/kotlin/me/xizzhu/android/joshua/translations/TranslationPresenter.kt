@@ -18,9 +18,11 @@ package me.xizzhu.android.joshua.translations
 
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.logger.Log
@@ -89,7 +91,12 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     }
 
     fun downloadTranslation(translationInfo: TranslationInfo) {
-        downloadTranslation(translationInfo, Channel())
+        val channel: Channel<Int> = Channel()
+        try {
+            downloadTranslation(translationInfo, channel)
+        } finally {
+            channel.close()
+        }
     }
 
     @VisibleForTesting
@@ -98,12 +105,17 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
 
         launch(Dispatchers.Main) {
             try {
-                launch(Dispatchers.Main) {
-                    translationInteractor.downloadTranslation(downloadProgressChannel, translationToDelete)
+                // unfortunately, any failure inside async() will cancel its parent
+                // ref. https://github.com/Kotlin/kotlinx.coroutines/issues/763
+                val deferred = coroutineScope {
+                    async(Dispatchers.Main) {
+                        translationInteractor.downloadTranslation(downloadProgressChannel, translationToDelete)
+                    }
                 }
                 downloadProgressChannel.consumeEach { progress ->
                     view?.onTranslationDownloadProgressed(progress)
                 }
+                deferred.await() // uncaught exceptions inside async() is consumed here
 
                 if (translationInteractor.observeCurrentTranslation().first().isEmpty()) {
                     translationInteractor.saveCurrentTranslation(translationToDelete.shortName)
