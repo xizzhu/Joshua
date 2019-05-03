@@ -18,11 +18,9 @@ package me.xizzhu.android.joshua.translations
 
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.logger.Log
@@ -90,33 +88,22 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
     }
 
-    fun downloadTranslation(translationInfo: TranslationInfo) {
-        val channel: Channel<Int> = Channel()
-        try {
-            downloadTranslation(translationInfo, channel)
-        } finally {
-            channel.close()
-        }
-    }
-
-    @VisibleForTesting
-    fun downloadTranslation(translationToDelete: TranslationInfo, downloadProgressChannel: Channel<Int>) {
+    fun downloadTranslation(translationToDelete: TranslationInfo, downloadProgressChannel: Channel<Int> = Channel()) {
         view?.onTranslationDownloadStarted()
 
         launch(Dispatchers.Main) {
-            try {
-                // unfortunately, any failure inside async() will cancel its parent
-                // ref. https://github.com/Kotlin/kotlinx.coroutines/issues/763
-                val deferred = coroutineScope {
-                    async(Dispatchers.Main) {
-                        translationInteractor.downloadTranslation(downloadProgressChannel, translationToDelete)
-                    }
-                }
-                downloadProgressChannel.consumeEach { progress ->
+            downloadProgressChannel.consumeEach { progress ->
+                try {
                     view?.onTranslationDownloadProgressed(progress)
+                } catch (e: Exception) {
+                    Log.e(tag, e, "Error when download progress is updated")
                 }
-                deferred.await() // uncaught exceptions inside async() is consumed here
+            }
+        }
 
+        launch(Dispatchers.Main) {
+            try {
+                translationInteractor.downloadTranslation(downloadProgressChannel, translationToDelete)
                 if (translationInteractor.observeCurrentTranslation().first().isEmpty()) {
                     translationInteractor.saveCurrentTranslation(translationToDelete.shortName)
                 }
