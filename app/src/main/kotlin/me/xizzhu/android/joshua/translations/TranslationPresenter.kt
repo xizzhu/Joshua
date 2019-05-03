@@ -91,12 +91,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     }
 
     fun downloadTranslation(translationInfo: TranslationInfo) {
-        val channel: Channel<Int> = Channel()
-        try {
-            downloadTranslation(translationInfo, channel)
-        } finally {
-            channel.close()
-        }
+        downloadTranslation(translationInfo, Channel())
     }
 
     @VisibleForTesting
