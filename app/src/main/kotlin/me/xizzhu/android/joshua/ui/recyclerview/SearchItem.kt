@@ -97,8 +97,7 @@ class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private 
     : BaseViewHolder<SearchItem>(inflater.inflate(R.layout.item_search_result, parent, false)) {
     private val text = itemView as TextView
 
-    override fun bind(settings: Settings, item: SearchItem) {
-        this.item = item
+    override fun bind(settings: Settings, item: SearchItem, payloads: List<Any>) {
         with(text) {
             text = item.textForDisplay
             setTextColor(settings.getPrimaryTextColor(this@SearchItemViewHolder.resources))

@@ -43,9 +43,7 @@ class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, pri
     : BaseViewHolder<TranslationItem>(inflater.inflate(R.layout.item_translation, parent, false)) {
     private val textView = itemView as TextView
 
-    override fun bind(settings: Settings, item: TranslationItem) {
-        this.item = item
-
+    override fun bind(settings: Settings, item: TranslationItem, payloads: List<Any>) {
         with(textView) {
             setTextColor(settings.getPrimaryTextColor(this@TranslationItemViewHolder.resources))
             setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@TranslationItemViewHolder.resources).toFloat())

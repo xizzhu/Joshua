@@ -21,6 +21,7 @@ import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.CallSuper
 import androidx.annotation.IntDef
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.core.Settings
@@ -44,13 +45,14 @@ interface BaseItem {
 
 abstract class BaseViewHolder<T : BaseItem>(itemView: View) : RecyclerView.ViewHolder(itemView) {
     var item: T? = null
-        protected set
+        private set
 
-    abstract fun bind(settings: Settings, item: T)
-
-    open fun bind(settings: Settings, item: T, payloads: MutableList<Any>) {
-        bind(settings, item)
+    fun bindData(settings: Settings, item: T, payloads: List<Any> = emptyList()) {
+        this.item = item
+        bind(settings, item, payloads)
     }
+
+    protected abstract fun bind(settings: Settings, item: T, payloads: List<Any>)
 }
 
 class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<BaseItem>>() {
@@ -88,10 +90,10 @@ class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<Base
             } as BaseViewHolder<BaseItem>
 
     override fun onBindViewHolder(holder: BaseViewHolder<BaseItem>, position: Int) {
-        holder.bind(settings!!, items[position])
+        holder.bindData(settings!!, items[position])
     }
 
     override fun onBindViewHolder(holder: BaseViewHolder<BaseItem>, position: Int, payloads: MutableList<Any>) {
-        holder.bind(settings!!, items[position], payloads)
+        holder.bindData(settings!!, items[position], payloads)
     }
 }

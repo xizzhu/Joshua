@@ -62,9 +62,7 @@ class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private va
     private val verse: TextView = itemView.findViewById(R.id.verse)
     private val text: TextView = itemView.findViewById(R.id.text)
 
-    override fun bind(settings: Settings, item: NoteItem) {
-        this.item = item
-
+    override fun bind(settings: Settings, item: NoteItem, payloads: List<Any>) {
         val textColor = settings.getPrimaryTextColor(resources)
         with(verse) {
             setTextColor(textColor)
