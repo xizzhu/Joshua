@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.progress
+package me.xizzhu.android.joshua.ui.recyclerview
 
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
@@ -22,9 +22,9 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class ReadingProgressForDisplayTest : BaseUnitTest() {
+class ReadingProgressItemTest : BaseUnitTest() {
     @Test
-    fun testToReadingProgressForDisplay() {
+    fun testToReadingProgressItems() {
         val readingProgress = ReadingProgress(1, 23456L,
                 listOf(ReadingProgress.ChapterReadingStatus(0, 1, 1, 500L, 23456L),
                         ReadingProgress.ChapterReadingStatus(0, 2, 2, 600L, 23457L),
@@ -35,33 +35,37 @@ class ReadingProgressForDisplayTest : BaseUnitTest() {
                         ReadingProgress.ChapterReadingStatus(7, 3, 4, 700L, 23458L),
                         ReadingProgress.ChapterReadingStatus(63, 0, 1, 700L, 23458L),
                         ReadingProgress.ChapterReadingStatus(64, 0, 1, 700L, 23458L)))
-        val actual = readingProgress.toReadingProgressForDisplay(Array(Bible.BOOK_COUNT) { "" }.toList())
+        val actual = readingProgress.toReadingProgressItems(Array(Bible.BOOK_COUNT) { "" }.toList())
 
-        assertEquals(1, actual.continuousReadingDays)
-        assertEquals(9, actual.chaptersRead)
-        assertEquals(3, actual.finishedBooks)
-        assertEquals(1, actual.finishedOldTestament)
-        assertEquals(2, actual.finishedNewTestament)
-        assertEquals(Bible.BOOK_COUNT, actual.bookReadingStatus.size)
-        for ((i, bookReadingStatus) in actual.bookReadingStatus.withIndex()) {
-            when (i) {
+        val actualSummaryItem = actual[0] as ReadingProgressSummaryItem
+        assertEquals(1, actualSummaryItem.continuousReadingDays)
+        assertEquals(9, actualSummaryItem.chaptersRead)
+        assertEquals(3, actualSummaryItem.finishedBooks)
+        assertEquals(1, actualSummaryItem.finishedOldTestament)
+        assertEquals(2, actualSummaryItem.finishedNewTestament)
+
+        assertEquals(Bible.BOOK_COUNT, actual.size - 1)
+        for ((i, item) in actual.withIndex()) {
+            if (i == 0) continue
+
+            when (i - 1) {
                 0 -> {
-                    assertEquals(2, bookReadingStatus.chaptersRead)
+                    assertEquals(2, (item as ReadingProgressDetailItem).chaptersRead)
                 }
                 2 -> {
-                    assertEquals(1, bookReadingStatus.chaptersRead)
+                    assertEquals(1, (item as ReadingProgressDetailItem).chaptersRead)
                 }
                 7 -> {
-                    assertEquals(4, bookReadingStatus.chaptersRead)
+                    assertEquals(4, (item as ReadingProgressDetailItem).chaptersRead)
                 }
                 63 -> {
-                    assertEquals(1, bookReadingStatus.chaptersRead)
+                    assertEquals(1, (item as ReadingProgressDetailItem).chaptersRead)
                 }
                 64 -> {
-                    assertEquals(1, bookReadingStatus.chaptersRead)
+                    assertEquals(1, (item as ReadingProgressDetailItem).chaptersRead)
                 }
                 else -> {
-                    assertEquals(0, bookReadingStatus.chaptersRead)
+                    assertEquals(0, (item as ReadingProgressDetailItem).chaptersRead)
                 }
             }
         }
