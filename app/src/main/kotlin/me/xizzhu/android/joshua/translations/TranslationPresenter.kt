@@ -90,12 +90,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
     }
 
-    fun downloadTranslation(translationInfo: TranslationInfo) {
-        downloadTranslation(translationInfo, Channel())
-    }
-
-    @VisibleForTesting
-    fun downloadTranslation(translationToDelete: TranslationInfo, downloadProgressChannel: Channel<Int>) {
+    fun downloadTranslation(translationToDelete: TranslationInfo, downloadProgressChannel: Channel<Int> = Channel()) {
         view?.onTranslationDownloadStarted()
 
         launch(Dispatchers.Main) {
