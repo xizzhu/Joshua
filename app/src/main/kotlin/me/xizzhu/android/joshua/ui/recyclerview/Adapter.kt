@@ -27,11 +27,13 @@ import me.xizzhu.android.joshua.core.Settings
 
 interface BaseItem {
     companion object {
-        const val SEARCH_ITEM = 0
-        const val BOOKMARK_ITEM = 1
-        const val NOTE_ITEM = 2
+        const val TITLE_ITEM = 0
+        const val SEARCH_ITEM = 1
+        const val BOOKMARK_ITEM = 2
+        const val NOTE_ITEM = 3
+        const val TRANSLATION_ITEM = 4
 
-        @IntDef(SEARCH_ITEM, BOOKMARK_ITEM, NOTE_ITEM)
+        @IntDef(TITLE_ITEM, SEARCH_ITEM, BOOKMARK_ITEM, NOTE_ITEM, TRANSLATION_ITEM)
         @Retention(AnnotationRetention.SOURCE)
         annotation class ItemViewType
     }
@@ -77,9 +79,11 @@ class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<Base
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
             when (viewType) {
+                BaseItem.TITLE_ITEM -> TitleItemViewHolder(inflater, parent, resources)
                 BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent, resources)
                 BaseItem.BOOKMARK_ITEM -> BookmarkItemViewHolder(inflater, parent, resources)
                 BaseItem.NOTE_ITEM -> NoteItemViewHolder(inflater, parent, resources)
+                BaseItem.TRANSLATION_ITEM -> TranslationItemViewHolder(inflater, parent, resources)
                 else -> throw IllegalStateException("Unknown view type - $viewType")
             } as BaseViewHolder<BaseItem>
 

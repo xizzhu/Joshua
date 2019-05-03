@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.translations
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
+import android.view.View
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,6 +29,7 @@ import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.recyclerview.*
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface TranslationView : BaseSettingsView {
@@ -58,7 +60,7 @@ interface TranslationView : BaseSettingsView {
     fun onTranslationDeleteFailed(translationToDelete: TranslationInfo)
 }
 
-class TranslationListView : RecyclerView, TranslationListAdapter.Listener, TranslationView {
+class TranslationListView : RecyclerView, TranslationView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -67,7 +69,7 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
 
     private lateinit var presenter: TranslationPresenter
 
-    private val adapter: TranslationListAdapter = TranslationListAdapter(context, this)
+    private val adapter: CommonAdapter = CommonAdapter(context)
 
     private var currentTranslation: String? = null
     private var availableTranslations: List<TranslationInfo>? = null
@@ -75,6 +77,30 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
 
     private var downloadProgressDialog: ProgressDialog? = null
     private var deleteProgressDialog: ProgressDialog? = null
+    private val onClickListener = OnClickListener { view ->
+        ((getChildViewHolder(view) as TranslationItemViewHolder).item)?.let { translationItem ->
+            if (translationItem.translationInfo.downloaded) {
+                presenter.updateCurrentTranslation(translationItem.translationInfo.shortName)
+            } else {
+                presenter.downloadTranslation(translationItem.translationInfo)
+            }
+        }
+    }
+    private val onLongClickListener = OnLongClickListener { view ->
+        ((getChildViewHolder(view) as TranslationItemViewHolder).item)?.let { translationItem ->
+            if (translationItem.translationInfo.downloaded) {
+                if (translationItem.translationInfo.shortName != currentTranslation) {
+                    DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
+                            DialogInterface.OnClickListener { _, _ ->
+                                presenter.removeTranslation(translationItem.translationInfo)
+                            })
+                }
+            } else {
+                presenter.downloadTranslation(translationItem.translationInfo)
+            }
+        }
+        return@OnLongClickListener true
+    }
 
     init {
         layoutManager = LinearLayoutManager(context, VERTICAL, false)
@@ -85,25 +111,18 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
         this.presenter = presenter
     }
 
-    override fun onTranslationClicked(translationInfo: TranslationInfo) {
-        if (translationInfo.downloaded) {
-            presenter.updateCurrentTranslation(translationInfo.shortName)
-        } else {
-            presenter.downloadTranslation(translationInfo)
+    override fun onChildAttachedToWindow(child: View) {
+        super.onChildAttachedToWindow(child)
+        if (getChildViewHolder(child) is TranslationItemViewHolder) {
+            child.setOnClickListener(onClickListener)
+            child.setOnLongClickListener(onLongClickListener)
         }
     }
 
-    override fun onTranslationLongClicked(translationInfo: TranslationInfo) {
-        if (translationInfo.downloaded) {
-            if (translationInfo.shortName != currentTranslation) {
-                DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
-                        DialogInterface.OnClickListener { _, _ ->
-                            presenter.removeTranslation(translationInfo)
-                        })
-            }
-        } else {
-            presenter.downloadTranslation(translationInfo)
-        }
+    override fun onChildDetachedFromWindow(child: View) {
+        super.onChildDetachedFromWindow(child)
+        child.setOnClickListener(null)
+        child.setOnLongClickListener(null)
     }
 
     override fun onSettingsUpdated(settings: Settings) {
@@ -120,7 +139,14 @@ class TranslationListView : RecyclerView, TranslationListAdapter.Listener, Trans
             return
         }
 
-        adapter.setTranslations(downloadedTranslations!!, availableTranslations!!, currentTranslation!!)
+        val items: ArrayList<BaseItem> = ArrayList()
+        items.addAll(downloadedTranslations!!.toTranslationItems(currentTranslation!!))
+        if (availableTranslations!!.isNotEmpty()) {
+            items.add(TitleItem(context.getString(R.string.header_available_translations)))
+        }
+        items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!))
+
+        adapter.setItems(items)
     }
 
     override fun onCurrentTranslationUpdateFailed(translationShortName: String) {
