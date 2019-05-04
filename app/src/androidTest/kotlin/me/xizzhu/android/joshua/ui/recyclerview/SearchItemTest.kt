@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.result
+package me.xizzhu.android.joshua.ui.recyclerview
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -27,12 +27,12 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class SearchResultTest : BaseUnitTest() {
+class SearchItemTest : BaseUnitTest() {
     @Test
-    fun testToSearchResult() {
-        val expected = listOf(SearchedVerse(MockContents.kjvVerses[0].verseIndex,
+    fun testToSearchItems() {
+        val expected = listOf(SearchItem(MockContents.kjvVerses[0].verseIndex,
                 MockContents.kjvVerses[0].text.bookName, MockContents.kjvVerses[0].text.text, ""))
-        val actual = listOf(MockContents.kjvVerses[0]).toSearchResult("")
+        val actual = listOf(MockContents.kjvVerses[0]).toSearchItems("")
         assertEquals(expected, actual)
     }
 
@@ -42,7 +42,7 @@ class SearchResultTest : BaseUnitTest() {
         val bookName = MockContents.kjvVerses[0].text.bookName
         val text = MockContents.kjvVerses[0].text.text
         val expected = "$bookName ${verseIndex.chapterIndex + 1}:${verseIndex.verseIndex + 1}\n$text"
-        val actual = SearchedVerse(verseIndex, bookName, text, "").textForDisplay.toString()
+        val actual = SearchItem(verseIndex, bookName, text, "").textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

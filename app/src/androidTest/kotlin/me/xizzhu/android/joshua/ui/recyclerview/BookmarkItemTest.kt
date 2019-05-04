@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.bookmarks
+package me.xizzhu.android.joshua.ui.recyclerview
 
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class BookmarksTest : BaseUnitTest() {
+class BookmarkItemTest : BaseUnitTest() {
     @Test
     fun testTextForDisplay() {
         val expected = "Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = BookmarkForDisplay(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, 12345678L).textForDisplay.toString()
+        val actual = BookmarkItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, 12345678L).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

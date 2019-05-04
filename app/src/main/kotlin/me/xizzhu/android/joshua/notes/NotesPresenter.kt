@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class NotesPresenter(private val notesInteractor: NotesInteractor)
@@ -33,9 +34,9 @@ class NotesPresenter(private val notesInteractor: NotesInteractor)
         launch(Dispatchers.Main) {
             try {
                 val currentTranslation = notesInteractor.readCurrentTranslation()
-                val notes: ArrayList<NoteForDisplay> = ArrayList()
+                val notes: ArrayList<NoteItem> = ArrayList()
                 for (note in notesInteractor.readNotes()) {
-                    notes.add(NoteForDisplay(note.verseIndex,
+                    notes.add(NoteItem(note.verseIndex,
                             notesInteractor.readVerse(currentTranslation, note.verseIndex).text,
                             note.note, note.timestamp))
                 }

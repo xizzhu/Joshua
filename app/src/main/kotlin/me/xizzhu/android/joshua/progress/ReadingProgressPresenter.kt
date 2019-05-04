@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.progress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.ui.recyclerview.toReadingProgressItems
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class ReadingProgressPresenter(private val readingProgressInteractor: ReadingProgressInteractor)
@@ -34,7 +35,7 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
                 val currentTranslation = readingProgressInteractor.readCurrentTranslation()
                 val bookNames = readingProgressInteractor.readBookNames(currentTranslation)
                 val readingProgress = readingProgressInteractor.readReadingProgress()
-                        .toReadingProgressForDisplay(bookNames)
+                        .toReadingProgressItems(bookNames)
                 view?.onReadingProgressLoaded(readingProgress)
 
                 readingProgressInteractor.notifyLoadingFinished()

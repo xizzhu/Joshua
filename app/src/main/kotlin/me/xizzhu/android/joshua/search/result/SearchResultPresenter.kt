@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
+import me.xizzhu.android.joshua.ui.recyclerview.toSearchItems
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class SearchResultPresenter(private val searchInteractor: SearchInteractor)
@@ -32,7 +33,7 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
 
         launch(Dispatchers.Main) {
             searchInteractor.observeSearchResult().consumeEach { (query, verses) ->
-                view?.onSearchResultUpdated(verses.toSearchResult(query))
+                view?.onSearchResultUpdated(verses.toSearchItems(query))
             }
         }
         launch(Dispatchers.Main) {

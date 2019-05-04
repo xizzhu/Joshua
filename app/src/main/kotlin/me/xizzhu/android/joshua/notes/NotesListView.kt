@@ -19,25 +19,30 @@ package me.xizzhu.android.joshua.notes
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import android.view.View
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
+import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
+import me.xizzhu.android.joshua.ui.recyclerview.NoteItemViewHolder
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface NotesView : BaseSettingsView {
-    fun onNotesLoaded(notes: List<NoteForDisplay>)
+    fun onNotesLoaded(notes: List<NoteItem>)
 
     fun onNotesLoadFailed()
 
     fun onVerseSelectionFailed(verseToSelect: VerseIndex)
 }
 
-class NotesListView : RecyclerView, NotesView {
+class NotesListView : BaseRecyclerView, NotesView {
     private lateinit var presenter: NotesPresenter
-    private val adapter: NotesListAdapter
+    private val onClickListener = OnClickListener { view ->
+        ((getChildViewHolder(view) as NoteItemViewHolder).item)?.let {
+            presenter.selectVerse(it.verseIndex)
+        }
+    }
 
     constructor(context: Context) : super(context)
 
@@ -45,27 +50,22 @@ class NotesListView : RecyclerView, NotesView {
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    init {
-        layoutManager = LinearLayoutManager(context, VERTICAL, false)
-
-        adapter = NotesListAdapter(context, object : NotesListAdapter.Listener {
-            override fun onNoteClicked(verseIndex: VerseIndex) {
-                presenter.selectVerse(verseIndex)
-            }
-        })
-        setAdapter(adapter)
-    }
-
     fun setPresenter(presenter: NotesPresenter) {
         this.presenter = presenter
     }
 
-    override fun onSettingsUpdated(settings: Settings) {
-        adapter.setSettings(settings)
+    override fun onChildAttachedToWindow(child: View) {
+        super.onChildAttachedToWindow(child)
+        child.setOnClickListener(onClickListener)
     }
 
-    override fun onNotesLoaded(notes: List<NoteForDisplay>) {
-        adapter.setNotes(notes)
+    override fun onChildDetachedFromWindow(child: View) {
+        super.onChildDetachedFromWindow(child)
+        child.setOnClickListener(null)
+    }
+
+    override fun onNotesLoaded(notes: List<NoteItem>) {
+        setItems(notes)
     }
 
     override fun onNotesLoadFailed() {
