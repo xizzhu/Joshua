@@ -18,13 +18,15 @@ package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.content.Context
 import android.content.res.Resources
+import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.CallSuper
 import androidx.annotation.IntDef
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface BaseItem {
     companion object {
@@ -58,7 +60,7 @@ abstract class BaseViewHolder<T : BaseItem>(itemView: View) : RecyclerView.ViewH
     protected abstract fun bind(settings: Settings, item: T, payloads: List<Any>)
 }
 
-class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<BaseItem>>() {
+private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<BaseItem>>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val resources: Resources = context.resources
     private val items: ArrayList<BaseItem> = ArrayList()
@@ -100,5 +102,27 @@ class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<Base
 
     override fun onBindViewHolder(holder: BaseViewHolder<BaseItem>, position: Int, payloads: MutableList<Any>) {
         holder.bindData(settings!!, items[position], payloads)
+    }
+}
+
+abstract class BaseRecyclerView : RecyclerView, BaseSettingsView {
+    private val adapter: CommonAdapter = CommonAdapter(context).apply { setAdapter(this) }
+
+    constructor(context: Context) : super(context)
+
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    init {
+        layoutManager = LinearLayoutManager(context, VERTICAL, false)
+    }
+
+    override fun onSettingsUpdated(settings: Settings) {
+        adapter.setSettings(settings)
+    }
+
+    protected fun setItems(items: Collection<BaseItem>) {
+        adapter.setItems(items)
     }
 }

@@ -22,9 +22,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.ProgressDialog
@@ -60,7 +58,7 @@ interface TranslationView : BaseSettingsView {
     fun onTranslationDeleteFailed(translationToDelete: TranslationInfo)
 }
 
-class TranslationListView : RecyclerView, TranslationView {
+class TranslationListView : BaseRecyclerView, TranslationView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -68,8 +66,6 @@ class TranslationListView : RecyclerView, TranslationView {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private lateinit var presenter: TranslationPresenter
-
-    private val adapter: CommonAdapter = CommonAdapter(context)
 
     private var currentTranslation: String? = null
     private var availableTranslations: List<TranslationInfo>? = null
@@ -125,10 +121,6 @@ class TranslationListView : RecyclerView, TranslationView {
         child.setOnLongClickListener(null)
     }
 
-    override fun onSettingsUpdated(settings: Settings) {
-        adapter.setSettings(settings)
-    }
-
     override fun onCurrentTranslationUpdated(currentTranslation: String) {
         this.currentTranslation = currentTranslation
         updateTranslationList()
@@ -146,7 +138,7 @@ class TranslationListView : RecyclerView, TranslationView {
         }
         items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!))
 
-        adapter.setItems(items)
+        setItems(items)
     }
 
     override fun onCurrentTranslationUpdateFailed(translationShortName: String) {

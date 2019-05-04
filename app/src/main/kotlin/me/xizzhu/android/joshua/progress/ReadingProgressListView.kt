@@ -19,13 +19,10 @@ package me.xizzhu.android.joshua.progress
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.ui.recyclerview.CommonAdapter
+import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface ReadingProgressView : BaseSettingsView {
@@ -34,7 +31,7 @@ interface ReadingProgressView : BaseSettingsView {
     fun onReadingProgressLoadFailed()
 }
 
-class ReadingProgressListView : RecyclerView, ReadingProgressView {
+class ReadingProgressListView : BaseRecyclerView, ReadingProgressView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -42,23 +39,13 @@ class ReadingProgressListView : RecyclerView, ReadingProgressView {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private lateinit var presenter: ReadingProgressPresenter
-    private val adapter: CommonAdapter = CommonAdapter(context)
-
-    init {
-        layoutManager = LinearLayoutManager(context, VERTICAL, false)
-        setAdapter(adapter)
-    }
 
     fun setPresenter(presenter: ReadingProgressPresenter) {
         this.presenter = presenter
     }
 
-    override fun onSettingsUpdated(settings: Settings) {
-        adapter.setSettings(settings)
-    }
-
     override fun onReadingProgressLoaded(readingProgressItems: List<BaseItem>) {
-        adapter.setItems(readingProgressItems)
+        setItems(readingProgressItems)
     }
 
     override fun onReadingProgressLoadFailed() {

@@ -21,14 +21,11 @@ import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.View
 import android.widget.Toast
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
-import me.xizzhu.android.joshua.ui.recyclerview.CommonAdapter
+import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.SearchItem
 import me.xizzhu.android.joshua.ui.recyclerview.SearchItemViewHolder
 import me.xizzhu.android.joshua.utils.BaseSettingsView
@@ -43,7 +40,7 @@ interface SearchResultView : BaseSettingsView {
     fun onVerseSelectionFailed(verseToSelect: VerseIndex)
 }
 
-class SearchResultListView : RecyclerView, SearchResultView {
+class SearchResultListView : BaseRecyclerView, SearchResultView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -57,13 +54,7 @@ class SearchResultListView : RecyclerView, SearchResultView {
             presenter.selectVerse(it.verseIndex)
         }
     }
-    private val adapter: CommonAdapter = CommonAdapter(context)
     private var hasSearchStarted = false
-
-    init {
-        layoutManager = LinearLayoutManager(context, VERTICAL, false)
-        setAdapter(adapter)
-    }
 
     fun setPresenter(presenter: SearchResultPresenter) {
         this.presenter = presenter
@@ -77,10 +68,6 @@ class SearchResultListView : RecyclerView, SearchResultView {
     override fun onChildDetachedFromWindow(child: View) {
         super.onChildDetachedFromWindow(child)
         child.setOnClickListener(null)
-    }
-
-    override fun onSettingsUpdated(settings: Settings) {
-        adapter.setSettings(settings)
     }
 
     override fun onSearchStarted() {
@@ -98,7 +85,7 @@ class SearchResultListView : RecyclerView, SearchResultView {
             Toast.makeText(context, resources.getString(R.string.toast_verses_searched, searchItems.size),
                     Toast.LENGTH_SHORT).show()
         }
-        adapter.setItems(searchItems)
+        setItems(searchItems)
         scrollToPosition(0)
     }
 

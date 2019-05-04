@@ -20,15 +20,12 @@ import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.View
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
 import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItemViewHolder
-import me.xizzhu.android.joshua.ui.recyclerview.CommonAdapter
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface BookmarksView : BaseSettingsView {
@@ -39,9 +36,8 @@ interface BookmarksView : BaseSettingsView {
     fun onVerseSelectionFailed(verseToSelect: VerseIndex)
 }
 
-class BookmarksListView : RecyclerView, BookmarksView {
+class BookmarksListView : BaseRecyclerView, BookmarksView {
     private lateinit var presenter: BookmarksPresenter
-    private val adapter: CommonAdapter = CommonAdapter(context)
     private val onClickListener = OnClickListener { view ->
         ((getChildViewHolder(view) as BookmarkItemViewHolder).item)?.let {
             presenter.selectVerse(it.verseIndex)
@@ -53,11 +49,6 @@ class BookmarksListView : RecyclerView, BookmarksView {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
-    init {
-        layoutManager = LinearLayoutManager(context, VERTICAL, false)
-        setAdapter(adapter)
-    }
 
     fun setPresenter(presenter: BookmarksPresenter) {
         this.presenter = presenter
@@ -73,12 +64,8 @@ class BookmarksListView : RecyclerView, BookmarksView {
         child.setOnClickListener(null)
     }
 
-    override fun onSettingsUpdated(settings: Settings) {
-        adapter.setSettings(settings)
-    }
-
     override fun onBookmarksLoaded(bookmarks: List<BookmarkItem>) {
-        adapter.setItems(bookmarks)
+        setItems(bookmarks)
     }
 
     override fun onBookmarksLoadFailed() {
