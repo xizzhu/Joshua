@@ -26,13 +26,9 @@ import android.text.TextUtils
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
-import androidx.annotation.ColorInt
-import androidx.annotation.IdRes
-import androidx.annotation.Px
-import androidx.annotation.StyleableRes
+import androidx.annotation.*
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import kotlin.math.roundToInt
 
 fun TextView.setText(a: TypedArray, @StyleableRes index: Int) {
     val resourceId = a.getResourceId(index, -1)
@@ -70,16 +66,39 @@ fun Settings.getBackgroundColor(): Int = if (nightModeOn) Color.BLACK else Color
 
 @ColorInt
 fun Settings.getPrimaryTextColor(resources: Resources): Int =
-        resources.getColor(if (nightModeOn) R.color.text_light_primary else R.color.text_dark_primary)
+        getTextColor(resources, nightModeOn, R.color.text_light_primary, R.color.text_dark_primary)
+
+private val textColors = mutableMapOf<Int, Int>()
+
+@ColorInt
+private fun getTextColor(resources: Resources, nightModeOn: Boolean,
+                         @ColorRes nightModeColor: Int, @ColorRes dayModeColor: Int): Int {
+    val key = if (nightModeOn) nightModeColor else dayModeColor
+    return textColors.getOrPut(key, { resources.getColor(key) })
+}
 
 @ColorInt
 fun Settings.getSecondaryTextColor(resources: Resources): Int =
-        resources.getColor(if (nightModeOn) R.color.text_light_secondary else R.color.text_dark_secondary)
+        getTextColor(resources, nightModeOn, R.color.text_light_secondary, R.color.text_dark_secondary)
 
-@Px
-fun Settings.getBodyTextSize(resources: Resources): Int =
-        (resources.getDimension(R.dimen.text_body) * fontSizeScale / 2.0F).roundToInt()
+fun Settings.getBodyTextSize(resources: Resources): Float =
+        getTextSize(resources, R.dimen.text_body) * fontSizeScale
 
-@Px
-fun Settings.getCaptionTextSize(resources: Resources): Int =
-        (resources.getDimension(R.dimen.text_caption) * fontSizeScale / 2.0F).roundToInt()
+private val textSizes = mutableMapOf<Int, Float>()
+
+private fun getTextSize(resources: Resources, @DimenRes fontSize: Int): Float {
+    return textSizes.getOrPut(fontSize, { resources.getDimension(fontSize) / 2.0F })
+}
+
+fun Settings.getCaptionTextSize(resources: Resources): Float =
+        getTextSize(resources, R.dimen.text_caption) * fontSizeScale
+
+fun TextView.updateSettingsWithPrimaryText(settings: Settings) {
+    setTextColor(settings.getPrimaryTextColor(resources))
+    setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+}
+
+fun TextView.updateSettingsWithSecondaryText(settings: Settings) {
+    setTextColor(settings.getSecondaryTextColor(resources))
+    setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
+}

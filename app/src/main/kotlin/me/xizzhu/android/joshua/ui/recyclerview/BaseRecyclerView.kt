@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.content.Context
-import android.content.res.Resources
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -62,7 +61,6 @@ abstract class BaseViewHolder<T : BaseItem>(itemView: View) : RecyclerView.ViewH
 
 private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<BaseItem>>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
-    private val resources: Resources = context.resources
     private val items: ArrayList<BaseItem> = ArrayList()
     private var settings: Settings? = null
 
@@ -86,13 +84,13 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
             when (viewType) {
-                BaseItem.TITLE_ITEM -> TitleItemViewHolder(inflater, parent, resources)
-                BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent, resources)
-                BaseItem.BOOKMARK_ITEM -> BookmarkItemViewHolder(inflater, parent, resources)
-                BaseItem.NOTE_ITEM -> NoteItemViewHolder(inflater, parent, resources)
-                BaseItem.TRANSLATION_ITEM -> TranslationItemViewHolder(inflater, parent, resources)
-                BaseItem.READING_PROGRESS_SUMMARY_ITEM -> ReadingProgressSummaryItemViewHolder(inflater, parent, resources)
-                BaseItem.READING_PROGRESS_DETAIL_ITEM -> ReadingProgressDetailItemViewHolder(inflater, parent, resources)
+                BaseItem.TITLE_ITEM -> TitleItemViewHolder(inflater, parent)
+                BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent)
+                BaseItem.BOOKMARK_ITEM -> BookmarkItemViewHolder(inflater, parent)
+                BaseItem.NOTE_ITEM -> NoteItemViewHolder(inflater, parent)
+                BaseItem.TRANSLATION_ITEM -> TranslationItemViewHolder(inflater, parent)
+                BaseItem.READING_PROGRESS_SUMMARY_ITEM -> ReadingProgressSummaryItemViewHolder(inflater, parent)
+                BaseItem.READING_PROGRESS_DETAIL_ITEM -> ReadingProgressDetailItemViewHolder(inflater, parent)
                 else -> throw IllegalStateException("Unknown view type - $viewType")
             } as BaseViewHolder<BaseItem>
 

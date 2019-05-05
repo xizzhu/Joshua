@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
-import android.content.res.Resources
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -29,9 +28,9 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getCaptionTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: String, val timestamp: Long) : BaseItem {
     companion object {
@@ -57,21 +56,19 @@ data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: 
     override fun getItemViewType(): Int = BaseItem.NOTE_ITEM
 }
 
-class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val resources: Resources)
+class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<NoteItem>(inflater.inflate(R.layout.item_note, parent, false)) {
     private val verse: TextView = itemView.findViewById(R.id.verse)
     private val text: TextView = itemView.findViewById(R.id.text)
 
     override fun bind(settings: Settings, item: NoteItem, payloads: List<Any>) {
-        val textColor = settings.getPrimaryTextColor(resources)
         with(verse) {
-            setTextColor(textColor)
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(this@NoteItemViewHolder.resources).toFloat())
+            setTextColor(settings.getPrimaryTextColor(resources))
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
             text = item.textForDisplay
         }
         with(text) {
-            setTextColor(textColor)
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@NoteItemViewHolder.resources).toFloat())
+            updateSettingsWithPrimaryText(settings)
             text = item.note
         }
     }

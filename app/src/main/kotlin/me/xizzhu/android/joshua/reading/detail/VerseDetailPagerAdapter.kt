@@ -98,7 +98,7 @@ private abstract class Page(val view: View) {
 private class VersesPage(resources: Resources, inflater: LayoutInflater, container: ViewGroup, settings: Settings)
     : Page(inflater.inflate(R.layout.page_verse_detail_verses, container, false)) {
     private val detail: TextView = view.findViewById<TextView>(R.id.detail).apply {
-        setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
     }
 
     override fun bind(verseDetail: VerseDetail) {
@@ -121,7 +121,7 @@ private class NotePage(resources: Resources, inflater: LayoutInflater, container
 
     private val note: TextInputEditText = view.findViewById<TextInputEditText>(R.id.note).apply {
         addTextChangedListener(textWatcher)
-        setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
     }
 
     override fun bind(verseDetail: VerseDetail) {

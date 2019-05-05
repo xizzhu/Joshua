@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
-import android.content.res.Resources
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -26,8 +24,7 @@ import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.progress.ReadingProgressBar
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class ReadingProgressSummaryItem(val continuousReadingDays: Int, val chaptersRead: Int,
                                       val finishedBooks: Int, val finishedOldTestament: Int,
@@ -35,8 +32,7 @@ data class ReadingProgressSummaryItem(val continuousReadingDays: Int, val chapte
     override fun getItemViewType(): Int = BaseItem.READING_PROGRESS_SUMMARY_ITEM
 }
 
-class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: ViewGroup,
-                                           private val resources: Resources)
+class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressSummaryItem>(inflater.inflate(R.layout.item_reading_progress_header, parent, false)) {
     private val continuousReadingDaysTitle: TextView = itemView.findViewById(R.id.continuous_reading_days_title)
     private val continuousReadingDays: TextView = itemView.findViewById(R.id.continuous_reading_days_value)
@@ -50,31 +46,18 @@ class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: Vie
     private val finishedNewTestament: TextView = itemView.findViewById(R.id.finished_new_testament_value)
 
     override fun bind(settings: Settings, item: ReadingProgressSummaryItem, payloads: List<Any>) {
-        val primaryTextColor = settings.getPrimaryTextColor(resources)
-        val bodyTextSize = settings.getBodyTextSize(resources).toFloat()
+        continuousReadingDaysTitle.updateSettingsWithPrimaryText(settings)
+        continuousReadingDays.updateSettingsWithPrimaryText(settings)
+        chaptersReadTitle.updateSettingsWithPrimaryText(settings)
+        chaptersRead.updateSettingsWithPrimaryText(settings)
+        finishedBooksTitle.updateSettingsWithPrimaryText(settings)
+        finishedBooks.updateSettingsWithPrimaryText(settings)
+        finishedOldTestamentTitle.updateSettingsWithPrimaryText(settings)
+        finishedOldTestament.updateSettingsWithPrimaryText(settings)
+        finishedNewTestamentTitle.updateSettingsWithPrimaryText(settings)
+        finishedNewTestament.updateSettingsWithPrimaryText(settings)
 
-        continuousReadingDaysTitle.setTextColor(primaryTextColor)
-        continuousReadingDaysTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        continuousReadingDays.setTextColor(primaryTextColor)
-        continuousReadingDays.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        chaptersReadTitle.setTextColor(primaryTextColor)
-        chaptersReadTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        chaptersRead.setTextColor(primaryTextColor)
-        chaptersRead.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedBooksTitle.setTextColor(primaryTextColor)
-        finishedBooksTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedBooks.setTextColor(primaryTextColor)
-        finishedBooks.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedOldTestamentTitle.setTextColor(primaryTextColor)
-        finishedOldTestamentTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedOldTestament.setTextColor(primaryTextColor)
-        finishedOldTestament.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedNewTestamentTitle.setTextColor(primaryTextColor)
-        finishedNewTestamentTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedNewTestament.setTextColor(primaryTextColor)
-        finishedNewTestament.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-
-        continuousReadingDays.text = resources.getString(R.string.text_continuous_reading_count, item.continuousReadingDays)
+        continuousReadingDays.text = continuousReadingDays.resources.getString(R.string.text_continuous_reading_count, item.continuousReadingDays)
         chaptersRead.text = item.chaptersRead.toString()
         finishedBooks.text = item.finishedBooks.toString()
         finishedOldTestament.text = item.finishedOldTestament.toString()
@@ -87,16 +70,16 @@ data class ReadingProgressDetailItem(val bookName: String, val chaptersRead: Int
     override fun getItemViewType(): Int = BaseItem.READING_PROGRESS_DETAIL_ITEM
 }
 
-class ReadingProgressDetailItemViewHolder(inflater: LayoutInflater, parent: ViewGroup,
-                                          private val resources: Resources)
+class ReadingProgressDetailItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressDetailItem>(inflater.inflate(R.layout.item_reading_progress, parent, false)) {
     private val bookName: TextView = itemView.findViewById(R.id.book_name)
     private val readingProgressBar: ReadingProgressBar = itemView.findViewById(R.id.reading_progress_bar)
 
     override fun bind(settings: Settings, item: ReadingProgressDetailItem, payloads: List<Any>) {
-        bookName.setTextColor(settings.getPrimaryTextColor(resources))
-        bookName.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
-        bookName.text = item.bookName
+        with(bookName) {
+            updateSettingsWithPrimaryText(settings)
+            text = item.bookName
+        }
         readingProgressBar.progress = item.chaptersRead * readingProgressBar.maxProgress / item.chaptersCount
         readingProgressBar.text = "${item.chaptersRead} / ${item.chaptersCount}"
     }

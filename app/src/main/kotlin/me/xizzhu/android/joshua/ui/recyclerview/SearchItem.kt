@@ -17,13 +17,11 @@
 package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.annotation.SuppressLint
-import android.content.res.Resources
 import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -31,8 +29,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.util.*
 
 data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
@@ -93,15 +90,14 @@ fun List<Verse>.toSearchItems(query: String): List<SearchItem> {
     return searchResult
 }
 
-class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val resources: Resources)
+class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<SearchItem>(inflater.inflate(R.layout.item_search_result, parent, false)) {
     private val text = itemView as TextView
 
     override fun bind(settings: Settings, item: SearchItem, payloads: List<Any>) {
         with(text) {
+            updateSettingsWithPrimaryText(settings)
             text = item.textForDisplay
-            setTextColor(settings.getPrimaryTextColor(this@SearchItemViewHolder.resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@SearchItemViewHolder.resources).toFloat())
         }
     }
 }

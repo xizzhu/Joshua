@@ -16,16 +16,13 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
-import android.content.res.Resources
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean) : BaseItem {
     override fun getItemViewType(): Int = BaseItem.TRANSLATION_ITEM
@@ -39,15 +36,13 @@ fun List<TranslationInfo>.toTranslationItems(currentTranslation: String): List<T
     }
 }
 
-class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val resources: Resources)
+class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<TranslationItem>(inflater.inflate(R.layout.item_translation, parent, false)) {
     private val textView = itemView as TextView
 
     override fun bind(settings: Settings, item: TranslationItem, payloads: List<Any>) {
         with(textView) {
-            setTextColor(settings.getPrimaryTextColor(this@TranslationItemViewHolder.resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@TranslationItemViewHolder.resources).toFloat())
-
+            updateSettingsWithPrimaryText(settings)
             text = item.translationInfo.name
             setCompoundDrawablesWithIntrinsicBounds(0, 0,
                     if (item.isCurrentTranslation) R.drawable.ic_check else 0, 0)

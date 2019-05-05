@@ -22,7 +22,6 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.util.TypedValue
 import androidx.annotation.ColorInt
-import androidx.annotation.Px
 import androidx.appcompat.widget.SwitchCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
@@ -155,25 +154,25 @@ class SettingsActivity : BaseActivity(), SettingsView {
         version.setTextColor(primaryTextColor, secondaryTextColor)
     }
 
-    private fun animateTextSize(@Px fromBodyTextSize: Int, @Px toBodyTextSize: Int,
-                                @Px fromCaptionTextSize: Int, @Px toCaptionTextSize: Int) {
+    private fun animateTextSize(fromBodyTextSize: Float, toBodyTextSize: Float,
+                                fromCaptionTextSize: Float, toCaptionTextSize: Float) {
         val textSizeAnimator = ValueAnimator.ofFloat(0.0F, 1.0F)
         textSizeAnimator.addUpdateListener { animator ->
             val fraction = animator.animatedValue as Float
             val bodyTextSize = fromBodyTextSize + fraction * (toBodyTextSize - fromBodyTextSize)
             val captionTextSize = fromCaptionTextSize + fraction * (toCaptionTextSize - fromCaptionTextSize)
-            updateTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+            updateTextSize(bodyTextSize, captionTextSize)
         }
         textSizeAnimator.start()
     }
 
-    private fun updateTextSize(@Px bodyTextSize: Int, @Px captionTextSize: Int) {
-        display.setTextSize(bodyTextSize)
-        fontSize.setTextSize(bodyTextSize, captionTextSize)
-        keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
-        nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize.toFloat())
-        about.setTextSize(bodyTextSize)
-        version.setTextSize(bodyTextSize, captionTextSize)
+    private fun updateTextSize(bodyTextSize: Float, captionTextSize: Float) {
+        display.setTextSize(bodyTextSize.roundToInt())
+        fontSize.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+        keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+        nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+        about.setTextSize(bodyTextSize.roundToInt())
+        version.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
     }
 
     override fun onSettingsUpdateFailed(settingsToUpdate: Settings) {

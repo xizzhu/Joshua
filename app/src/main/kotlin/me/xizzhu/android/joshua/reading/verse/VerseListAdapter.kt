@@ -112,7 +112,7 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private v
         text.text = verse.textForDisplay
 
         val textColor = settings.getPrimaryTextColor(resources)
-        val textSize = settings.getBodyTextSize(resources).toFloat()
+        val textSize = settings.getBodyTextSize(resources)
         text.setTextColor(textColor)
         text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
         if (verse.verse.parallel.isEmpty()) {
