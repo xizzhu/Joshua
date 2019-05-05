@@ -16,14 +16,12 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.ui.getCaptionTextSize
-import me.xizzhu.android.joshua.ui.getSecondaryTextColor
+import me.xizzhu.android.joshua.ui.updateSettingsWithSecondaryText
 
 data class TitleItem(val title: CharSequence) : BaseItem {
     override fun getItemViewType(): Int = BaseItem.TITLE_ITEM
@@ -35,8 +33,7 @@ class TitleItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
 
     override fun bind(settings: Settings, item: TitleItem, payloads: List<Any>) {
         with(title) {
-            setTextColor(settings.getSecondaryTextColor(resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
+            updateSettingsWithSecondaryText(settings)
             text = item.title
         }
     }

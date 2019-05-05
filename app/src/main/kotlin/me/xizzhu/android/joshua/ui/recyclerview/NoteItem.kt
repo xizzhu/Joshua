@@ -28,9 +28,9 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getCaptionTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: String, val timestamp: Long) : BaseItem {
     companion object {
@@ -68,8 +68,7 @@ class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
             text = item.textForDisplay
         }
         with(text) {
-            setTextColor(settings.getPrimaryTextColor(resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+            updateSettingsWithPrimaryText(settings)
             text = item.note
         }
     }

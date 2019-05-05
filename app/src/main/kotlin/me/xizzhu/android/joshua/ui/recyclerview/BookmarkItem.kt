@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.ui.recyclerview
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.RelativeSizeSpan
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -27,8 +26,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val timestamp: Long) : BaseItem {
     companion object {
@@ -61,8 +59,7 @@ class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
 
     override fun bind(settings: Settings, item: BookmarkItem, payloads: List<Any>) {
         with(text) {
-            setTextColor(settings.getPrimaryTextColor(resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+            updateSettingsWithPrimaryText(settings)
             text = item.textForDisplay
         }
     }

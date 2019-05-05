@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.content.res.Resources
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -26,8 +25,7 @@ import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.progress.ReadingProgressBar
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class ReadingProgressSummaryItem(val continuousReadingDays: Int, val chaptersRead: Int,
                                       val finishedBooks: Int, val finishedOldTestament: Int,
@@ -50,29 +48,16 @@ class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: Vie
     private val finishedNewTestament: TextView = itemView.findViewById(R.id.finished_new_testament_value)
 
     override fun bind(settings: Settings, item: ReadingProgressSummaryItem, payloads: List<Any>) {
-        val primaryTextColor = settings.getPrimaryTextColor(resources)
-        val bodyTextSize = settings.getBodyTextSize(resources)
-
-        continuousReadingDaysTitle.setTextColor(primaryTextColor)
-        continuousReadingDaysTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        continuousReadingDays.setTextColor(primaryTextColor)
-        continuousReadingDays.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        chaptersReadTitle.setTextColor(primaryTextColor)
-        chaptersReadTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        chaptersRead.setTextColor(primaryTextColor)
-        chaptersRead.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedBooksTitle.setTextColor(primaryTextColor)
-        finishedBooksTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedBooks.setTextColor(primaryTextColor)
-        finishedBooks.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedOldTestamentTitle.setTextColor(primaryTextColor)
-        finishedOldTestamentTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedOldTestament.setTextColor(primaryTextColor)
-        finishedOldTestament.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedNewTestamentTitle.setTextColor(primaryTextColor)
-        finishedNewTestamentTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-        finishedNewTestament.setTextColor(primaryTextColor)
-        finishedNewTestament.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+        continuousReadingDaysTitle.updateSettingsWithPrimaryText(settings)
+        continuousReadingDays.updateSettingsWithPrimaryText(settings)
+        chaptersReadTitle.updateSettingsWithPrimaryText(settings)
+        chaptersRead.updateSettingsWithPrimaryText(settings)
+        finishedBooksTitle.updateSettingsWithPrimaryText(settings)
+        finishedBooks.updateSettingsWithPrimaryText(settings)
+        finishedOldTestamentTitle.updateSettingsWithPrimaryText(settings)
+        finishedOldTestament.updateSettingsWithPrimaryText(settings)
+        finishedNewTestamentTitle.updateSettingsWithPrimaryText(settings)
+        finishedNewTestament.updateSettingsWithPrimaryText(settings)
 
         continuousReadingDays.text = resources.getString(R.string.text_continuous_reading_count, item.continuousReadingDays)
         chaptersRead.text = item.chaptersRead.toString()
@@ -94,9 +79,8 @@ class ReadingProgressDetailItemViewHolder(inflater: LayoutInflater, parent: View
 
     override fun bind(settings: Settings, item: ReadingProgressDetailItem, payloads: List<Any>) {
         with(bookName) {
-            bookName.setTextColor(settings.getPrimaryTextColor(resources))
-            bookName.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
-            bookName.text = item.bookName
+            updateSettingsWithPrimaryText(settings)
+            text = item.bookName
         }
         readingProgressBar.progress = item.chaptersRead * readingProgressBar.maxProgress / item.chaptersCount
         readingProgressBar.text = "${item.chaptersRead} / ${item.chaptersCount}"

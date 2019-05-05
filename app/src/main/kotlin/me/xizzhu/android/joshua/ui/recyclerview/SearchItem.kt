@@ -22,7 +22,6 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -30,8 +29,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.util.*
 
 data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
@@ -98,9 +96,8 @@ class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
 
     override fun bind(settings: Settings, item: SearchItem, payloads: List<Any>) {
         with(text) {
+            updateSettingsWithPrimaryText(settings)
             text = item.textForDisplay
-            setTextColor(settings.getPrimaryTextColor(resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
         }
     }
 }
