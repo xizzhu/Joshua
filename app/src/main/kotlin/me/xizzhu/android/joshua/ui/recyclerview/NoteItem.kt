@@ -66,12 +66,12 @@ class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private va
         val textColor = settings.getPrimaryTextColor(resources)
         with(verse) {
             setTextColor(textColor)
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(this@NoteItemViewHolder.resources).toFloat())
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(this@NoteItemViewHolder.resources))
             text = item.textForDisplay
         }
         with(text) {
             setTextColor(textColor)
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@NoteItemViewHolder.resources).toFloat())
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@NoteItemViewHolder.resources))
             text = item.note
         }
     }

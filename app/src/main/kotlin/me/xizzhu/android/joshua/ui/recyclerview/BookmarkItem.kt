@@ -63,7 +63,7 @@ class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, privat
     override fun bind(settings: Settings, item: BookmarkItem, payloads: List<Any>) {
         with(text) {
             setTextColor(settings.getPrimaryTextColor(this@BookmarkItemViewHolder.resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@BookmarkItemViewHolder.resources).toFloat())
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@BookmarkItemViewHolder.resources))
             text = item.textForDisplay
         }
     }

@@ -46,7 +46,7 @@ class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, pri
     override fun bind(settings: Settings, item: TranslationItem, payloads: List<Any>) {
         with(textView) {
             setTextColor(settings.getPrimaryTextColor(this@TranslationItemViewHolder.resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@TranslationItemViewHolder.resources).toFloat())
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@TranslationItemViewHolder.resources))
 
             text = item.translationInfo.name
             setCompoundDrawablesWithIntrinsicBounds(0, 0,

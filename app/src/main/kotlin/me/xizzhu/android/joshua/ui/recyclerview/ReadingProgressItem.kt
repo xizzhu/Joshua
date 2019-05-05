@@ -51,7 +51,7 @@ class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: Vie
 
     override fun bind(settings: Settings, item: ReadingProgressSummaryItem, payloads: List<Any>) {
         val primaryTextColor = settings.getPrimaryTextColor(resources)
-        val bodyTextSize = settings.getBodyTextSize(resources).toFloat()
+        val bodyTextSize = settings.getBodyTextSize(resources)
 
         continuousReadingDaysTitle.setTextColor(primaryTextColor)
         continuousReadingDaysTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
@@ -95,7 +95,7 @@ class ReadingProgressDetailItemViewHolder(inflater: LayoutInflater, parent: View
 
     override fun bind(settings: Settings, item: ReadingProgressDetailItem, payloads: List<Any>) {
         bookName.setTextColor(settings.getPrimaryTextColor(resources))
-        bookName.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources).toFloat())
+        bookName.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
         bookName.text = item.bookName
         readingProgressBar.progress = item.chaptersRead * readingProgressBar.maxProgress / item.chaptersCount
         readingProgressBar.text = "${item.chaptersRead} / ${item.chaptersCount}"

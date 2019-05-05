@@ -101,7 +101,7 @@ class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private 
         with(text) {
             text = item.textForDisplay
             setTextColor(settings.getPrimaryTextColor(this@SearchItemViewHolder.resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@SearchItemViewHolder.resources).toFloat())
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@SearchItemViewHolder.resources))
         }
     }
 }

@@ -29,7 +29,6 @@ import android.widget.TextView
 import androidx.annotation.*
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import kotlin.math.roundToInt
 
 fun TextView.setText(a: TypedArray, @StyleableRes index: Int) {
     val resourceId = a.getResourceId(index, -1)
@@ -82,10 +81,14 @@ private fun getTextColor(resources: Resources, nightModeOn: Boolean,
 fun Settings.getSecondaryTextColor(resources: Resources): Int =
         getTextColor(resources, nightModeOn, R.color.text_light_secondary, R.color.text_dark_secondary)
 
-@Px
-fun Settings.getBodyTextSize(resources: Resources): Int =
-        (resources.getDimension(R.dimen.text_body) * fontSizeScale / 2.0F).roundToInt()
+fun Settings.getBodyTextSize(resources: Resources): Float =
+        getTextSize(resources, R.dimen.text_body) * fontSizeScale
 
-@Px
-fun Settings.getCaptionTextSize(resources: Resources): Int =
-        (resources.getDimension(R.dimen.text_caption) * fontSizeScale / 2.0F).roundToInt()
+private val textSizes = mutableMapOf<Int, Float>()
+
+private fun getTextSize(resources: Resources, @DimenRes fontSize: Int): Float {
+    return textSizes.getOrPut(fontSize, { resources.getDimension(fontSize) / 2.0F })
+}
+
+fun Settings.getCaptionTextSize(resources: Resources): Float =
+        getTextSize(resources, R.dimen.text_caption) * fontSizeScale

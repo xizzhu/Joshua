@@ -37,7 +37,7 @@ class TitleItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private v
     override fun bind(settings: Settings, item: TitleItem, payloads: List<Any>) {
         with(title) {
             setTextColor(settings.getSecondaryTextColor(this@TitleItemViewHolder.resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(this@TitleItemViewHolder.resources).toFloat())
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(this@TitleItemViewHolder.resources))
             text = item.title
         }
     }
