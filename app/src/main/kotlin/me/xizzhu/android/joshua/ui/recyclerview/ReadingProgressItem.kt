@@ -87,16 +87,17 @@ data class ReadingProgressDetailItem(val bookName: String, val chaptersRead: Int
     override fun getItemViewType(): Int = BaseItem.READING_PROGRESS_DETAIL_ITEM
 }
 
-class ReadingProgressDetailItemViewHolder(inflater: LayoutInflater, parent: ViewGroup,
-                                          private val resources: Resources)
+class ReadingProgressDetailItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressDetailItem>(inflater.inflate(R.layout.item_reading_progress, parent, false)) {
     private val bookName: TextView = itemView.findViewById(R.id.book_name)
     private val readingProgressBar: ReadingProgressBar = itemView.findViewById(R.id.reading_progress_bar)
 
     override fun bind(settings: Settings, item: ReadingProgressDetailItem, payloads: List<Any>) {
-        bookName.setTextColor(settings.getPrimaryTextColor(resources))
-        bookName.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
-        bookName.text = item.bookName
+        with(bookName) {
+            bookName.setTextColor(settings.getPrimaryTextColor(resources))
+            bookName.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+            bookName.text = item.bookName
+        }
         readingProgressBar.progress = item.chaptersRead * readingProgressBar.maxProgress / item.chaptersCount
         readingProgressBar.text = "${item.chaptersRead} / ${item.chaptersCount}"
     }

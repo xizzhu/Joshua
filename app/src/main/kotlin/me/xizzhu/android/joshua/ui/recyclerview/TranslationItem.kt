@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
-import android.content.res.Resources
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -39,14 +38,14 @@ fun List<TranslationInfo>.toTranslationItems(currentTranslation: String): List<T
     }
 }
 
-class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val resources: Resources)
+class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<TranslationItem>(inflater.inflate(R.layout.item_translation, parent, false)) {
     private val textView = itemView as TextView
 
     override fun bind(settings: Settings, item: TranslationItem, payloads: List<Any>) {
         with(textView) {
-            setTextColor(settings.getPrimaryTextColor(this@TranslationItemViewHolder.resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@TranslationItemViewHolder.resources))
+            setTextColor(settings.getPrimaryTextColor(resources))
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
 
             text = item.translationInfo.name
             setCompoundDrawablesWithIntrinsicBounds(0, 0,

@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
-import android.content.res.Resources
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.RelativeSizeSpan
@@ -56,14 +55,14 @@ data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val ti
     override fun getItemViewType(): Int = BaseItem.BOOKMARK_ITEM
 }
 
-class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val resources: Resources)
+class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<BookmarkItem>(inflater.inflate(R.layout.item_bookmarks, parent, false)) {
     private val text: TextView = itemView.findViewById(R.id.text)
 
     override fun bind(settings: Settings, item: BookmarkItem, payloads: List<Any>) {
         with(text) {
-            setTextColor(settings.getPrimaryTextColor(this@BookmarkItemViewHolder.resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(this@BookmarkItemViewHolder.resources))
+            setTextColor(settings.getPrimaryTextColor(resources))
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
             text = item.textForDisplay
         }
     }
