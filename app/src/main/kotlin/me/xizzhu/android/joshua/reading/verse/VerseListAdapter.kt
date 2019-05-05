@@ -31,7 +31,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 
-class VerseListAdapter(context: Context, private val inflater: LayoutInflater) : RecyclerView.Adapter<VerseItemViewHolder>() {
+class VerseListAdapter(context: Context) : RecyclerView.Adapter<VerseItemViewHolder>() {
     companion object {
         const val VERSE_SELECTED = 1
         const val VERSE_DESELECTED = 2
@@ -41,6 +41,7 @@ class VerseListAdapter(context: Context, private val inflater: LayoutInflater) :
         annotation class Payload
     }
 
+    private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val resources = context.resources
     private val verses = ArrayList<VerseForReading>()
     private val selected = ArrayList<Boolean>()
