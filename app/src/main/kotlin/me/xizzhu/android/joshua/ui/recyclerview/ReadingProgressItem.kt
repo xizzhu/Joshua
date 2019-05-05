@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
-import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -33,8 +32,7 @@ data class ReadingProgressSummaryItem(val continuousReadingDays: Int, val chapte
     override fun getItemViewType(): Int = BaseItem.READING_PROGRESS_SUMMARY_ITEM
 }
 
-class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: ViewGroup,
-                                           private val resources: Resources)
+class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressSummaryItem>(inflater.inflate(R.layout.item_reading_progress_header, parent, false)) {
     private val continuousReadingDaysTitle: TextView = itemView.findViewById(R.id.continuous_reading_days_title)
     private val continuousReadingDays: TextView = itemView.findViewById(R.id.continuous_reading_days_value)
@@ -59,7 +57,7 @@ class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: Vie
         finishedNewTestamentTitle.updateSettingsWithPrimaryText(settings)
         finishedNewTestament.updateSettingsWithPrimaryText(settings)
 
-        continuousReadingDays.text = resources.getString(R.string.text_continuous_reading_count, item.continuousReadingDays)
+        continuousReadingDays.text = continuousReadingDays.resources.getString(R.string.text_continuous_reading_count, item.continuousReadingDays)
         chaptersRead.text = item.chaptersRead.toString()
         finishedBooks.text = item.finishedBooks.toString()
         finishedOldTestament.text = item.finishedOldTestament.toString()
