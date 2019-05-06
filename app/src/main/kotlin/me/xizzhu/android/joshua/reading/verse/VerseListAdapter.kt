@@ -40,20 +40,11 @@ class VerseListAdapter(context: Context) : RecyclerView.Adapter<VerseItemViewHol
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val verses = ArrayList<VerseForReading>()
-    private val selected = ArrayList<Boolean>()
     private var settings: Settings? = null
 
     fun setVerses(verses: List<VerseForReading>) {
         this.verses.clear()
         this.verses.addAll(verses)
-
-        selected.ensureCapacity(verses.size)
-        for (i in 0 until selected.size) {
-            selected[i] = false
-        }
-        for (i in selected.size until verses.size) {
-            selected.add(false)
-        }
 
         notifyDataSetChanged()
     }
@@ -66,12 +57,12 @@ class VerseListAdapter(context: Context) : RecyclerView.Adapter<VerseItemViewHol
     }
 
     fun selectVerse(verseIndex: VerseIndex) {
-        selected[verseIndex.verseIndex] = true
+        verses[verseIndex.verseIndex].selected = true
         notifyItemChanged(verseIndex.verseIndex, VERSE_SELECTED)
     }
 
     fun deselectVerse(verseIndex: VerseIndex) {
-        selected[verseIndex.verseIndex] = false
+        verses[verseIndex.verseIndex].selected = false
         notifyItemChanged(verseIndex.verseIndex, VERSE_DESELECTED)
     }
 
@@ -81,7 +72,7 @@ class VerseListAdapter(context: Context) : RecyclerView.Adapter<VerseItemViewHol
             VerseItemViewHolder(inflater, parent)
 
     override fun onBindViewHolder(holder: VerseItemViewHolder, position: Int) {
-        holder.bind(verses[position], selected[position], settings!!)
+        holder.bind(verses[position], settings!!)
     }
 
     override fun onBindViewHolder(holder: VerseItemViewHolder, position: Int, payloads: MutableList<Any>) {
@@ -105,7 +96,7 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     private val text = itemView.findViewById(R.id.text) as TextView
     private val divider = itemView.findViewById(R.id.divider) as View
 
-    fun bind(verse: VerseForReading, selected: Boolean, settings: Settings) {
+    fun bind(verse: VerseForReading, settings: Settings) {
         text.updateSettingsWithPrimaryText(settings)
         text.text = verse.textForDisplay
 
@@ -119,7 +110,7 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
             divider.visibility = View.VISIBLE
         }
 
-        setSelected(selected)
+        setSelected(verse.selected)
     }
 
     fun setSelected(selected: Boolean) {

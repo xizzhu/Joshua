@@ -92,4 +92,6 @@ data class VerseForReading(val verse: Verse, private val totalVerseCount: Int) {
             return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, length)
         }
     }
+
+    var selected: Boolean = false
 }
