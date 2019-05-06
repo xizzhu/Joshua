@@ -25,7 +25,6 @@ import androidx.annotation.IntDef
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 class VerseListAdapter(context: Context) : RecyclerView.Adapter<VerseItemViewHolder>() {
@@ -54,16 +53,6 @@ class VerseListAdapter(context: Context) : RecyclerView.Adapter<VerseItemViewHol
     fun setSettings(settings: Settings) {
         this.settings = settings
         notifyDataSetChanged()
-    }
-
-    fun selectVerse(verseIndex: VerseIndex) {
-        verses[verseIndex.verseIndex].selected = true
-        notifyItemChanged(verseIndex.verseIndex, VERSE_SELECTED)
-    }
-
-    fun deselectVerse(verseIndex: VerseIndex) {
-        verses[verseIndex.verseIndex].selected = false
-        notifyItemChanged(verseIndex.verseIndex, VERSE_DESELECTED)
     }
 
     override fun getItemCount(): Int = if (settings != null) verses.size else 0

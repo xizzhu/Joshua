@@ -57,11 +57,17 @@ class VerseListView : RecyclerView {
     }
 
     fun selectVerse(verseIndex: VerseIndex) {
-        adapter.selectVerse(verseIndex)
+        adapter.getVerse(verseIndex.verseIndex)?.let {
+            it.selected = true
+            adapter.notifyItemChanged(verseIndex.verseIndex, VerseListAdapter.VERSE_SELECTED)
+        }
     }
 
     fun deselectVerse(verseIndex: VerseIndex) {
-        adapter.deselectVerse(verseIndex)
+        adapter.getVerse(verseIndex.verseIndex)?.let {
+            it.selected = false
+            adapter.notifyItemChanged(verseIndex.verseIndex, VerseListAdapter.VERSE_DESELECTED)
+        }
     }
 
     fun setSettings(settings: Settings) {
