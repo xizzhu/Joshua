@@ -19,26 +19,24 @@ package me.xizzhu.android.joshua.reading.verse
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
 
-class VerseListView : RecyclerView {
-    private val adapter = VerseListAdapter(context)
+class VerseListView : BaseRecyclerView {
     private lateinit var listener: VersePagerAdapter.Listener
 
     private val onClickListener = OnClickListener { view ->
-        adapter.getVerse(getChildAdapterPosition(view))?.let {
+        ((getChildViewHolder(view) as VerseItemViewHolder).item)?.let {
             listener.onVerseClicked(it)
         }
     }
     private val onLongClickListener = OnLongClickListener { view ->
-        adapter.getVerse(getChildAdapterPosition(view))?.let {
+        ((getChildViewHolder(view) as VerseItemViewHolder).item)?.let {
             listener.onVerseLongClicked(it)
-            return@OnLongClickListener true
         }
-        return@OnLongClickListener false
+        return@OnLongClickListener true
     }
 
     constructor(context: Context) : super(context)
@@ -47,35 +45,20 @@ class VerseListView : RecyclerView {
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    init {
-        layoutManager = LinearLayoutManager(context, VERTICAL, false)
-        setAdapter(adapter)
-    }
-
     fun setListener(listener: VersePagerAdapter.Listener) {
         this.listener = listener
     }
 
     fun selectVerse(verseIndex: VerseIndex) {
-        adapter.getVerse(verseIndex.verseIndex)?.let {
-            it.selected = true
-            adapter.notifyItemChanged(verseIndex.verseIndex, VerseListAdapter.VERSE_SELECTED)
-        }
+        adapter?.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_SELECTED)
     }
 
     fun deselectVerse(verseIndex: VerseIndex) {
-        adapter.getVerse(verseIndex.verseIndex)?.let {
-            it.selected = false
-            adapter.notifyItemChanged(verseIndex.verseIndex, VerseListAdapter.VERSE_DESELECTED)
-        }
+        adapter?.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_DESELECTED)
     }
 
-    fun setSettings(settings: Settings) {
-        adapter.setSettings(settings)
-    }
-
-    fun setVerses(verses: List<VerseForReading>) {
-        adapter.setVerses(verses)
+    fun setVerses(verses: List<VerseItem>) {
+        setItems(verses)
     }
 
     override fun onChildAttachedToWindow(child: View) {

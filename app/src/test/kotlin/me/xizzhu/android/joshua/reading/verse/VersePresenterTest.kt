@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -128,7 +129,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseForReading(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -142,7 +143,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseForReading(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -162,7 +163,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseForReading(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -182,7 +183,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseForReading(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -190,7 +191,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testOnVerseClickedWithoutActionMode() {
         val verse = MockContents.kjvVerses[0]
-        versePresenter.onVerseClicked(VerseForReading(verse, 1))
+        versePresenter.onVerseClicked(VerseItem(verse, 1))
         assertTrue(versePresenter.selectedVerses.isEmpty())
         verify(verseView, never()).onVerseDeselected(any())
         verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
@@ -216,21 +217,21 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(readingInteractor.startActionMode(any())).thenReturn(actionMode)
 
         val verse = MockContents.kjvVerses[0]
-        versePresenter.onVerseLongClicked(VerseForReading(verse, 1))
+        versePresenter.onVerseLongClicked(VerseItem(verse, 1))
         assertEquals(1, versePresenter.selectedVerses.size)
         verify(readingInteractor, times(1)).startActionMode(any())
         verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
 
         val anotherVerse = MockContents.kjvVerses[5]
-        versePresenter.onVerseLongClicked(VerseForReading(anotherVerse, 1))
+        versePresenter.onVerseLongClicked(VerseItem(anotherVerse, 1))
         assertEquals(2, versePresenter.selectedVerses.size)
         verify(verseView, times(1)).onVerseSelected(anotherVerse.verseIndex)
 
-        versePresenter.onVerseClicked(VerseForReading(anotherVerse, 1))
+        versePresenter.onVerseClicked(VerseItem(anotherVerse, 1))
         assertEquals(1, versePresenter.selectedVerses.size)
         verify(verseView, times(1)).onVerseDeselected(anotherVerse.verseIndex)
 
-        versePresenter.onVerseClicked(VerseForReading(verse, 1))
+        versePresenter.onVerseClicked(VerseItem(verse, 1))
         assertTrue(versePresenter.selectedVerses.isEmpty())
         verify(verseView, times(1)).onVerseDeselected(verse.verseIndex)
         verify(actionMode, times(1)).finish()

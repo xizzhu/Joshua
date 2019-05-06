@@ -29,16 +29,17 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 
-class VersePagerAdapter(private val context: Context, private val listener: Listener) : PagerAdapter() {
+class VersePagerAdapter(context: Context, private val listener: Listener) : PagerAdapter() {
     interface Listener {
         fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
 
         fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int)
 
-        fun onVerseClicked(verse: VerseForReading)
+        fun onVerseClicked(verse: VerseItem)
 
-        fun onVerseLongClicked(verse: VerseForReading)
+        fun onVerseLongClicked(verse: VerseItem)
     }
 
     private val inflater = LayoutInflater.from(context)
@@ -60,7 +61,7 @@ class VersePagerAdapter(private val context: Context, private val listener: List
         notifyDataSetChanged()
     }
 
-    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<VerseForReading>) {
+    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<VerseItem>) {
         findPage(bookIndex, chapterIndex)?.setVerses(verses, currentVerseIndex)
     }
 
@@ -148,7 +149,7 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         this.parallelTranslations = parallelTranslations
         this.bookIndex = bookIndex
         this.chapterIndex = chapterIndex
-        this.settings = settings.also { verseList.setSettings(it) }
+        this.settings = settings.also { verseList.onSettingsUpdated(it) }
 
         listener.onChapterRequested(bookIndex, chapterIndex)
 
@@ -161,7 +162,7 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         inUse = false
     }
 
-    fun setVerses(verses: List<VerseForReading>, currentVerseIndex: VerseIndex) {
+    fun setVerses(verses: List<VerseItem>, currentVerseIndex: VerseIndex) {
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 
