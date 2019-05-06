@@ -17,8 +17,6 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.content.Context
-import android.content.res.Resources
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,8 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 class VerseListAdapter(context: Context) : RecyclerView.Adapter<VerseItemViewHolder>() {
     companion object {
@@ -42,7 +39,6 @@ class VerseListAdapter(context: Context) : RecyclerView.Adapter<VerseItemViewHol
     }
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
-    private val resources = context.resources
     private val verses = ArrayList<VerseForReading>()
     private val selected = ArrayList<Boolean>()
     private var settings: Settings? = null
@@ -82,7 +78,7 @@ class VerseListAdapter(context: Context) : RecyclerView.Adapter<VerseItemViewHol
     override fun getItemCount(): Int = if (settings != null) verses.size else 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerseItemViewHolder =
-            VerseItemViewHolder(inflater, parent, resources)
+            VerseItemViewHolder(inflater, parent)
 
     override fun onBindViewHolder(holder: VerseItemViewHolder, position: Int) {
         holder.bind(verses[position], selected[position], settings!!)
@@ -103,23 +99,19 @@ class VerseListAdapter(context: Context) : RecyclerView.Adapter<VerseItemViewHol
     }
 }
 
-class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup, private val resources: Resources)
+class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : RecyclerView.ViewHolder(inflater.inflate(R.layout.item_verse, parent, false)) {
     private val index = itemView.findViewById(R.id.index) as TextView
     private val text = itemView.findViewById(R.id.text) as TextView
     private val divider = itemView.findViewById(R.id.divider) as View
 
     fun bind(verse: VerseForReading, selected: Boolean, settings: Settings) {
+        text.updateSettingsWithPrimaryText(settings)
         text.text = verse.textForDisplay
 
-        val textColor = settings.getPrimaryTextColor(resources)
-        val textSize = settings.getBodyTextSize(resources)
-        text.setTextColor(textColor)
-        text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
         if (verse.verse.parallel.isEmpty()) {
+            index.updateSettingsWithPrimaryText(settings)
             index.text = verse.indexForDisplay
-            index.setTextColor(textColor)
-            index.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
             index.visibility = View.VISIBLE
             divider.visibility = View.GONE
         } else {
