@@ -82,6 +82,17 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             view?.onCurrentTranslationUpdated(new)
         }
     }
+    private var currentVerseIndex: VerseIndex by Delegates.observable(VerseIndex.INVALID) { _, old, new ->
+        if (!new.isValid()) {
+            return@observable
+        }
+        actionMode?.let {
+            if (old.bookIndex != new.bookIndex || old.chapterIndex != new.chapterIndex) {
+                it.finish()
+            }
+        }
+        view?.onCurrentVerseIndexUpdated(new)
+    }
     private var parallelTranslations: List<String> by Delegates.observable(emptyList()) { _, _, new ->
         view?.onParallelTranslationsUpdated(new)
     }
@@ -93,11 +104,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             readingInteractor.observeCurrentTranslation().consumeEach { currentTranslation = it }
         }
         launch(Dispatchers.Main) {
-            readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
-                    .consumeEach {
-                        actionMode?.finish()
-                        view?.onCurrentVerseIndexUpdated(it)
-                    }
+            readingInteractor.observeCurrentVerseIndex().consumeEach { currentVerseIndex = it }
         }
         launch(Dispatchers.Main) {
             readingInteractor.observeParallelTranslations().consumeEach { parallelTranslations = it }

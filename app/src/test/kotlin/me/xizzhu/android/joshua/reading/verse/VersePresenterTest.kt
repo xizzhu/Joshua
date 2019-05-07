@@ -236,4 +236,26 @@ class VersePresenterTest : BaseUnitTest() {
         verify(verseView, times(1)).onVerseDeselected(verse.verseIndex)
         verify(actionMode, times(1)).finish()
     }
+
+    @Test
+    fun testVerseSelectionAndUpdateCurrentVerseIndex() {
+        runBlocking {
+            val actionMode = mock(ActionMode::class.java)
+            `when`(readingInteractor.startActionMode(any())).thenReturn(actionMode)
+
+            currentVerseIndexChannel.send(VerseIndex(0, 0, 0))
+
+            val verse = MockContents.kjvVerses[0]
+            versePresenter.onVerseLongClicked(VerseItem(verse, 1))
+            assertEquals(1, versePresenter.selectedVerses.size)
+            verify(readingInteractor, times(1)).startActionMode(any())
+            verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
+
+            currentVerseIndexChannel.send(VerseIndex(0, 0, 5))
+            verify(actionMode, never()).finish()
+
+            currentVerseIndexChannel.send(VerseIndex(0, 1, 5))
+            verify(actionMode, times(1)).finish()
+        }
+    }
 }
