@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <me.xizzhu.android.joshua.reading.verse.VerseListView
         android:id="@+id/verse_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -23,9 +23,9 @@ import android.widget.Toast
 import androidx.viewpager.widget.ViewPager
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface VerseView : BaseSettingsView {
@@ -37,7 +37,7 @@ interface VerseView : BaseSettingsView {
 
     fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int)
 
-    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<VerseForReading>)
+    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<VerseItem>)
 
     fun onVersesLoadFailed(bookIndex: Int, chapterIndex: Int)
 
@@ -69,11 +69,11 @@ class VerseViewPager : ViewPager, VerseView {
             presenter.saveCurrentVerseIndex(updatedVerseIndex)
         }
 
-        override fun onVerseClicked(verse: VerseForReading) {
+        override fun onVerseClicked(verse: VerseItem) {
             presenter.onVerseClicked(verse)
         }
 
-        override fun onVerseLongClicked(verse: VerseForReading) {
+        override fun onVerseLongClicked(verse: VerseItem) {
             presenter.onVerseLongClicked(verse)
         }
     }
@@ -146,7 +146,7 @@ class VerseViewPager : ViewPager, VerseView {
                 })
     }
 
-    override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<VerseForReading>) {
+    override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<VerseItem>) {
         adapter.setVerses(bookIndex, chapterIndex, verses)
     }
 

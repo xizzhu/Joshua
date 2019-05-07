@@ -29,6 +29,7 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import kotlin.properties.Delegates
 
@@ -81,6 +82,17 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             view?.onCurrentTranslationUpdated(new)
         }
     }
+    private var currentVerseIndex: VerseIndex by Delegates.observable(VerseIndex.INVALID) { _, old, new ->
+        if (!new.isValid()) {
+            return@observable
+        }
+        actionMode?.let {
+            if (old.bookIndex != new.bookIndex || old.chapterIndex != new.chapterIndex) {
+                it.finish()
+            }
+        }
+        view?.onCurrentVerseIndexUpdated(new)
+    }
     private var parallelTranslations: List<String> by Delegates.observable(emptyList()) { _, _, new ->
         view?.onParallelTranslationsUpdated(new)
     }
@@ -92,11 +104,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             readingInteractor.observeCurrentTranslation().consumeEach { currentTranslation = it }
         }
         launch(Dispatchers.Main) {
-            readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
-                    .consumeEach {
-                        actionMode?.finish()
-                        view?.onCurrentVerseIndexUpdated(it)
-                    }
+            readingInteractor.observeCurrentVerseIndex().consumeEach { currentVerseIndex = it }
         }
         launch(Dispatchers.Main) {
             readingInteractor.observeParallelTranslations().consumeEach { parallelTranslations = it }
@@ -142,7 +150,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                     readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
                 }
                 val totalVerseCount = verses.size
-                view?.onVersesLoaded(bookIndex, chapterIndex, verses.map { VerseForReading(it, totalVerseCount) })
+                view?.onVersesLoaded(bookIndex, chapterIndex, verses.map { VerseItem(it, totalVerseCount) })
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to load verses")
                 view?.onVersesLoadFailed(bookIndex, chapterIndex)
@@ -150,7 +158,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
     }
 
-    fun onVerseClicked(verseForReading: VerseForReading) {
+    fun onVerseClicked(verseForReading: VerseItem) {
         val verse = verseForReading.verse
         if (actionMode == null) {
             selectedVerse = verse.verseIndex
@@ -175,7 +183,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
     }
 
-    fun onVerseLongClicked(verseForReading: VerseForReading) {
+    fun onVerseLongClicked(verseForReading: VerseItem) {
         if (actionMode == null) {
             actionMode = readingInteractor.startActionMode(actionModeCallback)
         }

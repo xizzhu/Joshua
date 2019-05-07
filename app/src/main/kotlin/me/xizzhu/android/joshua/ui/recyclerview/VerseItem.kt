@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading.verse
+package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.lang.StringBuilder
 
-data class VerseForReading(val verse: Verse, private val totalVerseCount: Int) {
+data class VerseItem(val verse: Verse, private val totalVerseCount: Int) : BaseItem {
     companion object {
         private val STRING_BUILDER = StringBuilder()
         private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
@@ -90,6 +97,54 @@ data class VerseForReading(val verse: Verse, private val totalVerseCount: Int) {
             val length = SPANNABLE_STRING_BUILDER.length
             SPANNABLE_STRING_BUILDER.setSpan(PARALLEL_VERSE_SIZE_SPAN, primaryTextLength, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
             return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, length)
+        }
+    }
+
+    var selected: Boolean = false
+
+    override fun getItemViewType(): Int = BaseItem.VERSE_ITEM
+}
+
+class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+    : BaseViewHolder<VerseItem>(inflater.inflate(R.layout.item_verse, parent, false)) {
+    companion object {
+        const val VERSE_SELECTED = 1
+        const val VERSE_DESELECTED = 2
+    }
+
+    private val index = itemView.findViewById(R.id.index) as TextView
+    private val text = itemView.findViewById(R.id.text) as TextView
+    private val divider = itemView.findViewById(R.id.divider) as View
+
+    override fun bind(settings: Settings, item: VerseItem, payloads: List<Any>) {
+        if (payloads.isEmpty()) {
+            text.updateSettingsWithPrimaryText(settings)
+            text.text = item.textForDisplay
+
+            if (item.verse.parallel.isEmpty()) {
+                index.updateSettingsWithPrimaryText(settings)
+                index.text = item.indexForDisplay
+                index.visibility = View.VISIBLE
+                divider.visibility = View.GONE
+            } else {
+                index.visibility = View.GONE
+                divider.visibility = View.VISIBLE
+            }
+
+            itemView.isSelected = item.selected
+        } else {
+            payloads.forEach { payload ->
+                when (payload as Int) {
+                    VERSE_SELECTED -> {
+                        item.selected = true
+                        itemView.isSelected = true
+                    }
+                    VERSE_DESELECTED -> {
+                        item.selected = false
+                        itemView.isSelected = false
+                    }
+                }
+            }
         }
     }
 }
