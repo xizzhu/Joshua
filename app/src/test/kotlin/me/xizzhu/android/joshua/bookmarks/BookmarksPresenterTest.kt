@@ -19,7 +19,9 @@ package me.xizzhu.android.joshua.bookmarks
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.After
@@ -61,9 +63,15 @@ class BookmarksPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadBookmarks() {
         runBlocking {
-            // loadBookmarks() is called by onViewAttached(), so no need to call from here
-            verify(bookmarksView, times(1)).onBookmarksLoaded(emptyList())
+            // loadBookmarks() is called by onViewAttached()
+            verify(bookmarksView, times(1)).onNoBookmarksAvailable()
+            verify(bookmarksView, never()).onBookmarksLoaded(any())
             verify(bookmarksView, never()).onBookmarksLoadFailed()
+
+            `when`(bookmarksInteractor.readBookmarks()).thenReturn(listOf(Bookmark(VerseIndex(0, 0, 0), 45678L)))
+            `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 0))).thenReturn(MockContents.kjvVerses[0])
+            bookmarksPresenter.loadBookmarks()
+            verify(bookmarksView, times(1)).onBookmarksLoaded(any())
         }
     }
 
@@ -73,8 +81,8 @@ class BookmarksPresenterTest : BaseUnitTest() {
             `when`(bookmarksInteractor.readBookmarks()).thenThrow(RuntimeException("Random exception"))
             bookmarksPresenter.loadBookmarks()
 
-            // loadBookmarks() is called by onViewAttached(), so onBookmarksLoaded() is called once
-            verify(bookmarksView, times(1)).onBookmarksLoaded(emptyList())
+            // loadBookmarks() is called by onViewAttached(), so onNoBookmarksAvailable() is called once
+            verify(bookmarksView, times(1)).onNoBookmarksAvailable()
             verify(bookmarksView, times(1)).onBookmarksLoadFailed()
         }
     }

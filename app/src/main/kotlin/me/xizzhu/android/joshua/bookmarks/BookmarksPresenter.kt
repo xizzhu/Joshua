@@ -33,14 +33,19 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor)
     fun loadBookmarks() {
         launch(Dispatchers.Main) {
             try {
-                val currentTranslation = bookmarksInteractor.readCurrentTranslation()
-                val bookmarks: ArrayList<BookmarkItem> = ArrayList()
-                for (bookmark in bookmarksInteractor.readBookmarks()) {
-                    bookmarks.add(BookmarkItem(bookmark.verseIndex,
-                            bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
-                            bookmark.timestamp))
+                val bookmarks = bookmarksInteractor.readBookmarks()
+                if (bookmarks.isEmpty()) {
+                    view?.onNoBookmarksAvailable()
+                } else {
+                    val currentTranslation = bookmarksInteractor.readCurrentTranslation()
+                    val bookmarkItems: ArrayList<BookmarkItem> = ArrayList(bookmarks.size)
+                    for (bookmark in bookmarks) {
+                        bookmarkItems.add(BookmarkItem(bookmark.verseIndex,
+                                bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
+                                bookmark.timestamp))
+                    }
+                    view?.onBookmarksLoaded(bookmarkItems)
                 }
-                view?.onBookmarksLoaded(bookmarks)
 
                 bookmarksInteractor.notifyLoadingFinished()
             } catch (e: Exception) {

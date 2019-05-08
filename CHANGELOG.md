@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Added "no bookmark" item
 - Properly catch exception if thrown when downloading translations
 - Refactored to introduce a common adapter
 - Should keep action mode when user scrolls
