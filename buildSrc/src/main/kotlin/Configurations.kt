@@ -69,8 +69,8 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.2.0"
-        const val core = "16.0.8"
-        const val analytics = "16.4.0"
+        const val core = "16.0.9"
+        const val analytics = "16.5.0"
 
         object Crashlytics {
             const val classpath = "1.28.1"
