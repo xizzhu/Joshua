@@ -33,14 +33,19 @@ class NotesPresenter(private val notesInteractor: NotesInteractor)
     fun loadNotes() {
         launch(Dispatchers.Main) {
             try {
-                val currentTranslation = notesInteractor.readCurrentTranslation()
-                val notes: ArrayList<NoteItem> = ArrayList()
-                for (note in notesInteractor.readNotes()) {
-                    notes.add(NoteItem(note.verseIndex,
-                            notesInteractor.readVerse(currentTranslation, note.verseIndex).text,
-                            note.note, note.timestamp))
+                val notes = notesInteractor.readNotes()
+                if (notes.isEmpty()) {
+                    view?.onNoNotesAvailable()
+                } else {
+                    val currentTranslation = notesInteractor.readCurrentTranslation()
+                    val noteItems: ArrayList<NoteItem> = ArrayList(notes.size)
+                    for (note in notes) {
+                        noteItems.add(NoteItem(note.verseIndex,
+                                notesInteractor.readVerse(currentTranslation, note.verseIndex).text,
+                                note.note, note.timestamp))
+                    }
+                    view?.onNotesLoaded(noteItems)
                 }
-                view?.onNotesLoaded(notes)
 
                 notesInteractor.notifyLoadingFinished()
             } catch (e: Exception) {

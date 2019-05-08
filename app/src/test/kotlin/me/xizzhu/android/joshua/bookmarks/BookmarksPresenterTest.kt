@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -71,7 +72,9 @@ class BookmarksPresenterTest : BaseUnitTest() {
             `when`(bookmarksInteractor.readBookmarks()).thenReturn(listOf(Bookmark(VerseIndex(0, 0, 0), 45678L)))
             `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 0))).thenReturn(MockContents.kjvVerses[0])
             bookmarksPresenter.loadBookmarks()
-            verify(bookmarksView, times(1)).onBookmarksLoaded(any())
+            verify(bookmarksView, times(1))
+                    .onBookmarksLoaded(listOf(BookmarkItem(VerseIndex(0, 0, 0), MockContents.kjvVerses[0].text, 45678L)))
+            verify(bookmarksView, never()).onBookmarksLoadFailed()
         }
     }
 
