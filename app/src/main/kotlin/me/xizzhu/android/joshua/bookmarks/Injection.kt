@@ -41,6 +41,7 @@ class BookmarksModule {
             LoadingSpinnerPresenter(bookmarksInteractor.observeBookmarksLoadingState())
 
     @Provides
-    fun provideBookmarksPresenter(bookmarksInteractor: BookmarksInteractor): BookmarksPresenter =
-            BookmarksPresenter(bookmarksInteractor)
+    fun provideBookmarksPresenter(bookmarksActivity: BookmarksActivity,
+                                  bookmarksInteractor: BookmarksInteractor): BookmarksPresenter =
+            BookmarksPresenter(bookmarksInteractor, bookmarksActivity.resources)
 }

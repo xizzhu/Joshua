@@ -16,14 +16,21 @@
 
 package me.xizzhu.android.joshua.bookmarks
 
+import android.content.res.Resources
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.ui.formatDate
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import java.util.*
+import kotlin.collections.ArrayList
 
-class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor)
+class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, private val resources: Resources)
     : BaseSettingsPresenter<BookmarksView>(bookmarksInteractor) {
     override fun onViewAttached() {
         super.onViewAttached()
@@ -35,16 +42,30 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor)
             try {
                 val bookmarks = bookmarksInteractor.readBookmarks()
                 if (bookmarks.isEmpty()) {
-                    view?.onNoBookmarksAvailable()
+                    view?.onBookmarksLoaded(listOf(TitleItem(resources.getString(R.string.text_no_bookmark))))
                 } else {
+                    val calendar = Calendar.getInstance()
+                    var previousYear = -1
+                    var previousDayOfYear = -1
+
                     val currentTranslation = bookmarksInteractor.readCurrentTranslation()
-                    val bookmarkItems: ArrayList<BookmarkItem> = ArrayList(bookmarks.size)
+                    val items: ArrayList<BaseItem> = ArrayList()
                     for (bookmark in bookmarks) {
-                        bookmarkItems.add(BookmarkItem(bookmark.verseIndex,
+                        calendar.timeInMillis = bookmark.timestamp
+                        val currentYear = calendar.get(Calendar.YEAR)
+                        val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+                        if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
+                            items.add(TitleItem(bookmark.timestamp.formatDate(resources)))
+
+                            previousYear = currentYear
+                            previousDayOfYear = currentDayOfYear
+                        }
+
+                        items.add(BookmarkItem(bookmark.verseIndex,
                                 bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
                                 bookmark.timestamp))
                     }
-                    view?.onBookmarksLoaded(bookmarkItems)
+                    view?.onBookmarksLoaded(items)
                 }
 
                 bookmarksInteractor.notifyLoadingFinished()
