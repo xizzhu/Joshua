@@ -19,9 +19,12 @@ package me.xizzhu.android.joshua.notes
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -61,8 +64,16 @@ class NotesPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadNotes() {
         runBlocking {
-            // loadNotes() is called by onViewAttached(), so no need to call from here
-            verify(notesView, times(1)).onNotesLoaded(emptyList())
+            // loadNotes() is called by onViewAttached()
+            verify(notesView, times(1)).onNoNotesAvailable()
+            verify(notesView, never()).onNotesLoaded(emptyList())
+            verify(notesView, never()).onNotesLoadFailed()
+
+            `when`(notesInteractor.readNotes()).thenReturn(listOf(Note(VerseIndex(0, 0, 0), "Note", 12345L)))
+            `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 0))).thenReturn(MockContents.kjvVerses[0])
+            notesPresenter.loadNotes()
+            verify(notesView, times(1))
+                    .onNotesLoaded(listOf(NoteItem(VerseIndex(0, 0, 0), MockContents.kjvVerses[0].text, "Note", 12345L)))
             verify(notesView, never()).onNotesLoadFailed()
         }
     }
@@ -73,8 +84,9 @@ class NotesPresenterTest : BaseUnitTest() {
             `when`(notesInteractor.readNotes()).thenThrow(RuntimeException("Random exception"))
             notesPresenter.loadNotes()
 
-            // loadBookmarks() is called by onViewAttached(), so onNotesLoadFailed() is called once
-            verify(notesView, times(1)).onNotesLoaded(emptyList())
+            // loadBookmarks() is called by onViewAttached(), so onNoNotesAvailable() is called once
+            verify(notesView, times(1)).onNoNotesAvailable()
+            verify(notesView, never()).onNotesLoaded(emptyList())
             verify(notesView, times(1)).onNotesLoadFailed()
         }
     }

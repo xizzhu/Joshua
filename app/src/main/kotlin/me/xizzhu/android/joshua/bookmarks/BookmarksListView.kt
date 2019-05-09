@@ -26,10 +26,13 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
 import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItemViewHolder
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface BookmarksView : BaseSettingsView {
     fun onBookmarksLoaded(bookmarks: List<BookmarkItem>)
+
+    fun onNoBookmarksAvailable()
 
     fun onBookmarksLoadFailed()
 
@@ -56,7 +59,9 @@ class BookmarksListView : BaseRecyclerView, BookmarksView {
 
     override fun onChildAttachedToWindow(child: View) {
         super.onChildAttachedToWindow(child)
-        child.setOnClickListener(onClickListener)
+        if (getChildViewHolder(child) is BookmarkItemViewHolder) {
+            child.setOnClickListener(onClickListener)
+        }
     }
 
     override fun onChildDetachedFromWindow(child: View) {
@@ -66,6 +71,10 @@ class BookmarksListView : BaseRecyclerView, BookmarksView {
 
     override fun onBookmarksLoaded(bookmarks: List<BookmarkItem>) {
         setItems(bookmarks)
+    }
+
+    override fun onNoBookmarksAvailable() {
+        setItems(listOf(TitleItem(resources.getString(R.string.text_no_bookmark))))
     }
 
     override fun onBookmarksLoadFailed() {
