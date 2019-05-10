@@ -24,6 +24,13 @@ import kotlin.test.assertEquals
 
 class ReadingProgressItemTest : BaseUnitTest() {
     @Test
+    fun testItemViewType() {
+        assertEquals(BaseItem.READING_PROGRESS_SUMMARY_ITEM,
+                ReadingProgressSummaryItem(0, 0, 0, 0, 0).getItemViewType())
+        assertEquals(BaseItem.READING_PROGRESS_DETAIL_ITEM, ReadingProgressDetailItem("", 0, 0).getItemViewType())
+    }
+
+    @Test
     fun testToReadingProgressItems() {
         val readingProgress = ReadingProgress(1, 23456L,
                 listOf(ReadingProgress.ChapterReadingStatus(0, 1, 1, 500L, 23456L),

@@ -31,6 +31,11 @@ import org.junit.runner.RunWith
 @SmallTest
 class VerseItemTest : BaseUnitTest() {
     @Test
+    fun testItemViewType() {
+        assertEquals(BaseItem.VERSE_ITEM, VerseItem(Verse.INVALID, 0).getItemViewType())
+    }
+
+    @Test
     fun testIndexForDisplay() {
         assertEquals("1", VerseItem(MockContents.kjvVerses[0], 9).indexForDisplay)
 
