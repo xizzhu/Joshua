@@ -16,12 +16,19 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
+import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class NoteItemTest : BaseUnitTest() {
+    @Test
+    fun testItemViewType() {
+        assertEquals(BaseItem.NOTE_ITEM, NoteItem(VerseIndex.INVALID, Verse.Text.INVALID, "", 0L).getItemViewType())
+    }
+
     @Test
     fun testTextForDisplay() {
         val expected = "Genesis 1:1 In the beginning God created the heaven and the earth."
