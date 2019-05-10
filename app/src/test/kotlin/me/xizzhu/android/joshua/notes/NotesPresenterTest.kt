@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.notes
 
+import android.content.res.Resources
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
@@ -25,6 +26,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -36,6 +38,8 @@ class NotesPresenterTest : BaseUnitTest() {
     private lateinit var notesInteractor: NotesInteractor
     @Mock
     private lateinit var notesView: NotesView
+    @Mock
+    private lateinit var resources: Resources
 
     private lateinit var settingsChannel: BroadcastChannel<Settings>
     private lateinit var notesPresenter: NotesPresenter
@@ -49,8 +53,9 @@ class NotesPresenterTest : BaseUnitTest() {
             `when`(notesInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
             `when`(notesInteractor.readNotes()).thenReturn(emptyList())
             `when`(notesInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
+            `when`(resources.getString(anyInt())).thenReturn("")
 
-            notesPresenter = NotesPresenter(notesInteractor)
+            notesPresenter = NotesPresenter(notesInteractor, resources)
             notesPresenter.attachView(notesView)
         }
     }
@@ -62,18 +67,10 @@ class NotesPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadNotes() {
+    fun testLoadEmptyNotes() {
         runBlocking {
             // loadNotes() is called by onViewAttached()
-            verify(notesView, times(1)).onNoNotesAvailable()
-            verify(notesView, never()).onNotesLoaded(emptyList())
-            verify(notesView, never()).onNotesLoadFailed()
-
-            `when`(notesInteractor.readNotes()).thenReturn(listOf(Note(VerseIndex(0, 0, 0), "Note", 12345L)))
-            `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 0))).thenReturn(MockContents.kjvVerses[0])
-            notesPresenter.loadNotes()
-            verify(notesView, times(1))
-                    .onNotesLoaded(listOf(NoteItem(VerseIndex(0, 0, 0), MockContents.kjvVerses[0].text, "Note", 12345L)))
+            verify(notesView, times(1)).onNotesLoaded(listOf(TitleItem("")))
             verify(notesView, never()).onNotesLoadFailed()
         }
     }
@@ -85,8 +82,7 @@ class NotesPresenterTest : BaseUnitTest() {
             notesPresenter.loadNotes()
 
             // loadBookmarks() is called by onViewAttached(), so onNoNotesAvailable() is called once
-            verify(notesView, times(1)).onNoNotesAvailable()
-            verify(notesView, never()).onNotesLoaded(emptyList())
+            verify(notesView, times(1)).onNotesLoaded(listOf(TitleItem("")))
             verify(notesView, times(1)).onNotesLoadFailed()
         }
     }

@@ -16,15 +16,14 @@
 
 package me.xizzhu.android.joshua.bookmarks
 
+import android.content.res.Resources
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -36,6 +35,8 @@ class BookmarksPresenterTest : BaseUnitTest() {
     private lateinit var bookmarksInteractor: BookmarksInteractor
     @Mock
     private lateinit var bookmarksView: BookmarksView
+    @Mock
+    private lateinit var resources: Resources
 
     private lateinit var settingsChannel: BroadcastChannel<Settings>
     private lateinit var bookmarksPresenter: BookmarksPresenter
@@ -49,8 +50,9 @@ class BookmarksPresenterTest : BaseUnitTest() {
             `when`(bookmarksInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
             `when`(bookmarksInteractor.readBookmarks()).thenReturn(emptyList())
             `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
+            `when`(resources.getString(anyInt())).thenReturn("")
 
-            bookmarksPresenter = BookmarksPresenter(bookmarksInteractor)
+            bookmarksPresenter = BookmarksPresenter(bookmarksInteractor, resources)
             bookmarksPresenter.attachView(bookmarksView)
         }
     }
@@ -62,18 +64,10 @@ class BookmarksPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadBookmarks() {
+    fun testLoadEmptyBookmarks() {
         runBlocking {
             // loadBookmarks() is called by onViewAttached()
-            verify(bookmarksView, times(1)).onNoBookmarksAvailable()
-            verify(bookmarksView, never()).onBookmarksLoaded(any())
-            verify(bookmarksView, never()).onBookmarksLoadFailed()
-
-            `when`(bookmarksInteractor.readBookmarks()).thenReturn(listOf(Bookmark(VerseIndex(0, 0, 0), 45678L)))
-            `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 0))).thenReturn(MockContents.kjvVerses[0])
-            bookmarksPresenter.loadBookmarks()
-            verify(bookmarksView, times(1))
-                    .onBookmarksLoaded(listOf(BookmarkItem(VerseIndex(0, 0, 0), MockContents.kjvVerses[0].text, 45678L)))
+            verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(TitleItem("")))
             verify(bookmarksView, never()).onBookmarksLoadFailed()
         }
     }
@@ -84,8 +78,8 @@ class BookmarksPresenterTest : BaseUnitTest() {
             `when`(bookmarksInteractor.readBookmarks()).thenThrow(RuntimeException("Random exception"))
             bookmarksPresenter.loadBookmarks()
 
-            // loadBookmarks() is called by onViewAttached(), so onNoBookmarksAvailable() is called once
-            verify(bookmarksView, times(1)).onNoBookmarksAvailable()
+            // loadBookmarks() is called by onViewAttached(), so onBookmarksLoaded() is called once
+            verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(TitleItem("")))
             verify(bookmarksView, times(1)).onBookmarksLoadFailed()
         }
     }

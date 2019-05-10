@@ -23,16 +23,11 @@ import android.view.View
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
-import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItemViewHolder
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import me.xizzhu.android.joshua.ui.recyclerview.*
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface BookmarksView : BaseSettingsView {
-    fun onBookmarksLoaded(bookmarks: List<BookmarkItem>)
-
-    fun onNoBookmarksAvailable()
+    fun onBookmarksLoaded(bookmarks: List<BaseItem>)
 
     fun onBookmarksLoadFailed()
 
@@ -69,12 +64,8 @@ class BookmarksListView : BaseRecyclerView, BookmarksView {
         child.setOnClickListener(null)
     }
 
-    override fun onBookmarksLoaded(bookmarks: List<BookmarkItem>) {
+    override fun onBookmarksLoaded(bookmarks: List<BaseItem>) {
         setItems(bookmarks)
-    }
-
-    override fun onNoBookmarksAvailable() {
-        setItems(listOf(TitleItem(resources.getString(R.string.text_no_bookmark))))
     }
 
     override fun onBookmarksLoadFailed() {

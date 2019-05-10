@@ -23,16 +23,11 @@ import android.view.View
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
-import me.xizzhu.android.joshua.ui.recyclerview.NoteItemViewHolder
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import me.xizzhu.android.joshua.ui.recyclerview.*
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface NotesView : BaseSettingsView {
-    fun onNotesLoaded(notes: List<NoteItem>)
-
-    fun onNoNotesAvailable()
+    fun onNotesLoaded(notes: List<BaseItem>)
 
     fun onNotesLoadFailed()
 
@@ -69,12 +64,8 @@ class NotesListView : BaseRecyclerView, NotesView {
         child.setOnClickListener(null)
     }
 
-    override fun onNotesLoaded(notes: List<NoteItem>) {
+    override fun onNotesLoaded(notes: List<BaseItem>) {
         setItems(notes)
-    }
-
-    override fun onNoNotesAvailable() {
-        setItems(listOf(TitleItem(resources.getString(R.string.text_no_note))))
     }
 
     override fun onNotesLoadFailed() {

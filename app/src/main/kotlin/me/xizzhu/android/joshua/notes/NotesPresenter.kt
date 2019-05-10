@@ -16,14 +16,21 @@
 
 package me.xizzhu.android.joshua.notes
 
+import android.content.res.Resources
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.ui.formatDate
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import java.util.*
+import kotlin.collections.ArrayList
 
-class NotesPresenter(private val notesInteractor: NotesInteractor)
+class NotesPresenter(private val notesInteractor: NotesInteractor, private val resources: Resources)
     : BaseSettingsPresenter<NotesView>(notesInteractor) {
     override fun onViewAttached() {
         super.onViewAttached()
@@ -35,16 +42,30 @@ class NotesPresenter(private val notesInteractor: NotesInteractor)
             try {
                 val notes = notesInteractor.readNotes()
                 if (notes.isEmpty()) {
-                    view?.onNoNotesAvailable()
+                    view?.onNotesLoaded(listOf(TitleItem(resources.getString(R.string.text_no_note))))
                 } else {
+                    val calendar = Calendar.getInstance()
+                    var previousYear = -1
+                    var previousDayOfYear = -1
+
                     val currentTranslation = notesInteractor.readCurrentTranslation()
-                    val noteItems: ArrayList<NoteItem> = ArrayList(notes.size)
+                    val items: ArrayList<BaseItem> = ArrayList(notes.size)
                     for (note in notes) {
-                        noteItems.add(NoteItem(note.verseIndex,
+                        calendar.timeInMillis = note.timestamp
+                        val currentYear = calendar.get(Calendar.YEAR)
+                        val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+                        if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
+                            items.add(TitleItem(note.timestamp.formatDate(resources)))
+
+                            previousYear = currentYear
+                            previousDayOfYear = currentDayOfYear
+                        }
+
+                        items.add(NoteItem(note.verseIndex,
                                 notesInteractor.readVerse(currentTranslation, note.verseIndex).text,
                                 note.note, note.timestamp))
                     }
-                    view?.onNotesLoaded(noteItems)
+                    view?.onNotesLoaded(items)
                 }
 
                 notesInteractor.notifyLoadingFinished()
