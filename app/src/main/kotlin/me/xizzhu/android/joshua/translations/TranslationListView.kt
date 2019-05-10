@@ -30,17 +30,13 @@ import me.xizzhu.android.joshua.ui.recyclerview.*
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface TranslationView : BaseSettingsView {
-    fun onCurrentTranslationUpdated(currentTranslation: String)
-
     fun onCurrentTranslationUpdateFailed(translationShortName: String)
 
     fun onTranslationsLoadingStarted()
 
     fun onTranslationsLoadingCompleted()
 
-    fun onAvailableTranslationsUpdated(available: List<TranslationInfo>)
-
-    fun onDownloadedTranslationsUpdated(downloaded: List<TranslationInfo>)
+    fun onTranslationsUpdated(translations: List<BaseItem>)
 
     fun onTranslationDownloadStarted()
 
@@ -65,10 +61,6 @@ class TranslationListView : BaseRecyclerView, TranslationView {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private lateinit var presenter: TranslationPresenter
-
-    private var currentTranslation: String? = null
-    private var availableTranslations: List<TranslationInfo>? = null
-    private var downloadedTranslations: List<TranslationInfo>? = null
 
     private var downloadProgressDialog: ProgressDialog? = null
     private var deleteProgressDialog: ProgressDialog? = null
@@ -115,26 +107,6 @@ class TranslationListView : BaseRecyclerView, TranslationView {
         child.setOnLongClickListener(null)
     }
 
-    override fun onCurrentTranslationUpdated(currentTranslation: String) {
-        this.currentTranslation = currentTranslation
-        updateTranslationList()
-    }
-
-    private fun updateTranslationList() {
-        if (currentTranslation == null || availableTranslations == null || downloadedTranslations == null) {
-            return
-        }
-
-        val items: ArrayList<BaseItem> = ArrayList()
-        items.addAll(downloadedTranslations!!.toTranslationItems(currentTranslation!!))
-        if (availableTranslations!!.isNotEmpty()) {
-            items.add(TitleItem(context.getString(R.string.header_available_translations)))
-        }
-        items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!))
-
-        setItems(items)
-    }
-
     override fun onCurrentTranslationUpdateFailed(translationShortName: String) {
         DialogHelper.showDialog(context, true, R.string.dialog_update_translation_error,
                 DialogInterface.OnClickListener { _, _ ->
@@ -150,14 +122,8 @@ class TranslationListView : BaseRecyclerView, TranslationView {
         fadeIn()
     }
 
-    override fun onAvailableTranslationsUpdated(available: List<TranslationInfo>) {
-        this.availableTranslations = available
-        updateTranslationList()
-    }
-
-    override fun onDownloadedTranslationsUpdated(downloaded: List<TranslationInfo>) {
-        this.downloadedTranslations = downloaded
-        updateTranslationList()
+    override fun onTranslationsUpdated(translations: List<BaseItem>) {
+        setItems(translations)
     }
 
     override fun onTranslationDownloadStarted() {

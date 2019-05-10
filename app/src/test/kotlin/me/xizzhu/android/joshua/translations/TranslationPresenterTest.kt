@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.translations
 
+import android.content.Context
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -25,6 +26,8 @@ import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.SwipeRefresherState
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import me.xizzhu.android.joshua.ui.recyclerview.TranslationItem
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -35,6 +38,9 @@ class TranslationPresenterTest : BaseUnitTest() {
     private lateinit var translationInteractor: TranslationInteractor
     @Mock
     private lateinit var translationView: TranslationView
+    @Mock
+    private lateinit var context: Context
+
     private lateinit var translationPresenter: TranslationPresenter
     private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
     private lateinit var translationLoadingStateChannel: ConflatedBroadcastChannel<SwipeRefresherState>
@@ -65,47 +71,26 @@ class TranslationPresenterTest : BaseUnitTest() {
         currentTranslationChannel = ConflatedBroadcastChannel("")
         `when`(translationInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
 
-        translationPresenter = TranslationPresenter(translationInteractor)
+        `when`(context.getString(anyInt())).thenReturn("")
+
+        translationPresenter = TranslationPresenter(translationInteractor, context)
     }
 
     @Test
-    fun testObserveCurrentTranslation() {
+    fun testObserveTranslations() {
         runBlocking {
             translationPresenter.attachView(translationView)
-            verify(translationView, times(1)).onCurrentTranslationUpdated("")
 
             currentTranslationChannel.send(MockContents.kjvShortName)
-            verify(translationView, times(1)).onCurrentTranslationUpdated(MockContents.kjvShortName)
+            availableTranslationsChannel.send(listOf(MockContents.cuvTranslationInfo))
+            downloadedTranslationsChannel.send(listOf(MockContents.kjvDownloadedTranslationInfo))
 
-            translationPresenter.detachView()
-        }
-    }
-
-    @Test
-    fun testObserveAvailableTranslations() {
-        runBlocking {
-            `when`(translationInteractor.reload(false)).then {
-                runBlocking { availableTranslationsChannel.send(listOf(MockContents.cuvTranslationInfo)) }
-            }
-
-            translationPresenter.attachView(translationView)
-            verify(translationView, times(1)).onAvailableTranslationsUpdated(emptyList())
-            verify(translationView, times(1)).onAvailableTranslationsUpdated(listOf(MockContents.cuvTranslationInfo))
-
-            translationPresenter.detachView()
-        }
-    }
-
-    @Test
-    fun testObserveDownloadedTranslations() {
-        runBlocking {
-            `when`(translationInteractor.reload(false)).then {
-                runBlocking { downloadedTranslationsChannel.send(listOf(MockContents.kjvDownloadedTranslationInfo)) }
-            }
-
-            translationPresenter.attachView(translationView)
-            verify(translationView, times(1)).onDownloadedTranslationsUpdated(emptyList())
-            verify(translationView, times(1)).onDownloadedTranslationsUpdated(listOf(MockContents.kjvDownloadedTranslationInfo))
+            val expected = listOf(
+                    TranslationItem(MockContents.kjvDownloadedTranslationInfo, true),
+                    TitleItem(""),
+                    TranslationItem(MockContents.cuvTranslationInfo, false)
+            )
+            verify(translationView, times(1)).onTranslationsUpdated(expected)
 
             translationPresenter.detachView()
         }

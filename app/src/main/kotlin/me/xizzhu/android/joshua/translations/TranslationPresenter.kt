@@ -16,15 +16,20 @@
 
 package me.xizzhu.android.joshua.translations
 
+import android.content.Context
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.SwipeRefresherState
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import me.xizzhu.android.joshua.ui.recyclerview.toTranslationItems
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import java.util.*
 import kotlin.Comparator
@@ -53,23 +58,33 @@ class TranslationInfoComparator : Comparator<TranslationInfo> {
     }
 }
 
-class TranslationPresenter(private val translationInteractor: TranslationInteractor) : BaseSettingsPresenter<TranslationView>(translationInteractor) {
+class TranslationPresenter(private val translationInteractor: TranslationInteractor,
+                           private val context: Context) : BaseSettingsPresenter<TranslationView>(translationInteractor) {
     private val translationComparator = TranslationInfoComparator()
+
+    private var currentTranslation: String? = null
+    private var availableTranslations: List<TranslationInfo>? = null
+    private var downloadedTranslations: List<TranslationInfo>? = null
 
     override fun onViewAttached() {
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            translationInteractor.observeCurrentTranslation().consumeEach { view?.onCurrentTranslationUpdated(it) }
+            translationInteractor.observeCurrentTranslation().consumeEach {
+                currentTranslation = it
+                updateTranslations()
+            }
         }
         launch(Dispatchers.Main) {
             translationInteractor.observeAvailableTranslations().consumeEach {
-                view?.onAvailableTranslationsUpdated(it.sortedWith(translationComparator))
+                availableTranslations = it.sortedWith(translationComparator)
+                updateTranslations()
             }
         }
         launch(Dispatchers.Main) {
             translationInteractor.observeDownloadedTranslations().consumeEach {
-                view?.onDownloadedTranslationsUpdated(it.sortedWith(translationComparator))
+                downloadedTranslations = it.sortedWith(translationComparator)
+                updateTranslations()
             }
         }
         launch(Dispatchers.Main) {
@@ -86,6 +101,21 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         launch(Dispatchers.Main) {
             translationInteractor.observeTranslationsLoadingRequest().consumeEach { translationInteractor.reload(true) }
         }
+    }
+
+    private fun updateTranslations() {
+        if (currentTranslation == null || availableTranslations == null || downloadedTranslations == null) {
+            return
+        }
+
+        val items: ArrayList<BaseItem> = ArrayList()
+        items.addAll(downloadedTranslations!!.toTranslationItems(currentTranslation!!))
+        if (availableTranslations!!.isNotEmpty()) {
+            items.add(TitleItem(context.getString(R.string.header_available_translations)))
+        }
+        items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!))
+
+        view?.onTranslationsUpdated(items)
     }
 
     fun downloadTranslation(translationToDelete: TranslationInfo, downloadProgressChannel: Channel<Int> = Channel()) {
