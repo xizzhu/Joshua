@@ -21,7 +21,6 @@ import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.View
 import android.widget.Toast
-import androidx.recyclerview.widget.LinearLayoutManager
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.DialogHelper
@@ -85,7 +84,7 @@ class TranslationListView : BaseRecyclerView, TranslationView {
     private val onLongClickListener = OnLongClickListener { view ->
         ((getChildViewHolder(view) as TranslationItemViewHolder).item)?.let { translationItem ->
             if (translationItem.translationInfo.downloaded) {
-                if (translationItem.translationInfo.shortName != currentTranslation) {
+                if (!translationItem.isCurrentTranslation) {
                     DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
                             DialogInterface.OnClickListener { _, _ ->
                                 presenter.removeTranslation(translationItem.translationInfo)
@@ -96,11 +95,6 @@ class TranslationListView : BaseRecyclerView, TranslationView {
             }
         }
         return@OnLongClickListener true
-    }
-
-    init {
-        layoutManager = LinearLayoutManager(context, VERTICAL, false)
-        setAdapter(adapter)
     }
 
     fun setPresenter(presenter: TranslationPresenter) {
