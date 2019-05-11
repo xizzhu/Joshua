@@ -31,8 +31,11 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 
 
@@ -44,6 +47,10 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val readingProgressManager: ReadingProgressManager,
                         private val translationManager: TranslationManager,
                         settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
+    companion object {
+        private val TAG = ReadingInteractor::class.java.simpleName
+    }
+
     private val verseDetailOpenState: ConflatedBroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
@@ -139,14 +146,20 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     fun startActionMode(callback: ActionMode.Callback): ActionMode? =
             readingActivity.startSupportActionMode(callback)
 
-    fun copyToClipBoard(verses: Collection<Verse>) {
+    suspend fun copyToClipBoard(verses: Collection<Verse>): Boolean = withContext(Dispatchers.IO) {
         if (verses.isEmpty()) {
-            return
+            return@withContext false
         }
 
-        val verse = verses.first()
-        (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).primaryClip =
-                ClipData.newPlainText(verse.text.translationShortName + " " + verse.text.bookName, verses.toStringForSharing())
+        try {
+            val verse = verses.first()
+            (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).primaryClip =
+                    ClipData.newPlainText(verse.text.translationShortName + " " + verse.text.bookName, verses.toStringForSharing())
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e(TAG, e, "Failed to copy")
+            return@withContext false
+        }
     }
 
     fun share(verses: Collection<Verse>): Boolean {
