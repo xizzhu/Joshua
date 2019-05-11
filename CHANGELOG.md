@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.2.0 (2019-05-10)
 - Added "no bookmark" and "no note" item
 - Grouped bookmarks and notes by date
 - Properly catch exception if thrown when downloading translations
