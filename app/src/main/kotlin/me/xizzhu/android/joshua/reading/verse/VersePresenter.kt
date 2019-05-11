@@ -40,7 +40,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     @VisibleForTesting
     val selectedVerses: HashSet<Verse> = HashSet()
     private var actionMode: ActionMode? = null
-    private val actionModeCallback = object : ActionMode.Callback {
+    @VisibleForTesting
+    val actionModeCallback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.menuInflater.inflate(R.menu.menu_verse_selection, menu)
             return true
