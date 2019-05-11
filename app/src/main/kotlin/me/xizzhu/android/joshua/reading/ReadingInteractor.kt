@@ -163,16 +163,25 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     }
 
     fun share(verses: Collection<Verse>): Boolean {
+        if (verses.isEmpty()) {
+            return false
+        }
+
         // Facebook doesn't want us to pre-fill the message, but still captures ACTION_SEND. Therefore,
         // I have to exclude their package from being shown.
         // Rants: it's a horrible way to force developers to use their SDK.
         // ref. https://developers.facebook.com/bugs/332619626816423
-        val chooseIntent = createChooserForSharing(readingActivity.packageManager, readingActivity.resources,
-                "com.facebook.katana", verses.toStringForSharing())
-        return chooseIntent?.let {
-            readingActivity.startActivity(it)
-            true
-        } ?: false
+        try {
+            val chooseIntent = createChooserForSharing(readingActivity.packageManager, readingActivity.resources,
+                    "com.facebook.katana", verses.toStringForSharing())
+            return chooseIntent?.let {
+                readingActivity.startActivity(it)
+                true
+            } ?: false
+        } catch (e: Exception) {
+            Log.e(TAG, e, "Failed to share")
+            return false
+        }
     }
 
     suspend fun startTrackingReadingProgress() {
