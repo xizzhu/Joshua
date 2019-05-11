@@ -16,23 +16,13 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
-import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class BookmarkItemTest : BaseUnitTest() {
+class TitleItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.BOOKMARK_ITEM, BookmarkItem(VerseIndex.INVALID, Verse.Text.INVALID, 0L).getItemViewType())
-    }
-
-    @Test
-    fun testTextForDisplay() {
-        val expected = "Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = BookmarkItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, 12345678L).textForDisplay.toString()
-        assertEquals(expected, actual)
+        assertEquals(BaseItem.TITLE_ITEM, TitleItem("").getItemViewType())
     }
 }

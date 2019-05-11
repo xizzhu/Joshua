@@ -41,6 +41,7 @@ class TranslationManagementModule {
                     translationInteractor.translationsLoadingRequest)
 
     @Provides
-    fun provideTranslationPresenter(translationInteractor: TranslationInteractor): TranslationPresenter =
-            TranslationPresenter(translationInteractor)
+    fun provideTranslationPresenter(translationManagementActivity: TranslationManagementActivity,
+                                    translationInteractor: TranslationInteractor): TranslationPresenter =
+            TranslationPresenter(translationInteractor, translationManagementActivity)
 }

@@ -25,6 +25,8 @@ import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean) : BaseItem {
+    val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0
+
     override fun getItemViewType(): Int = BaseItem.TRANSLATION_ITEM
 }
 
@@ -44,8 +46,7 @@ class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
         with(textView) {
             updateSettingsWithPrimaryText(settings)
             text = item.translationInfo.name
-            setCompoundDrawablesWithIntrinsicBounds(0, 0,
-                    if (item.isCurrentTranslation) R.drawable.ic_check else 0, 0)
+            setCompoundDrawablesWithIntrinsicBounds(0, 0, item.rightDrawable, 0)
         }
     }
 }

@@ -95,6 +95,10 @@ android {
     }
 }
 
+tasks.withType(Test::class.java) {
+    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+}
+
 dependencies {
     implementation(Dependencies.Kotlin.stdlib)
     implementation(Dependencies.Kotlin.coroutinesAndroid)

@@ -29,6 +29,11 @@ import org.junit.runner.RunWith
 @SmallTest
 class SearchItemTest : BaseUnitTest() {
     @Test
+    fun testItemViewType() {
+        assertEquals(BaseItem.SEARCH_ITEM, SearchItem(VerseIndex.INVALID, "", "", "").getItemViewType())
+    }
+
+    @Test
     fun testToSearchItems() {
         val expected = listOf(SearchItem(MockContents.kjvVerses[0].verseIndex,
                 MockContents.kjvVerses[0].text.bookName, MockContents.kjvVerses[0].text.text, ""))

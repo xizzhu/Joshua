@@ -16,23 +16,30 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
-import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class BookmarkItemTest : BaseUnitTest() {
+class TranslationItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.BOOKMARK_ITEM, BookmarkItem(VerseIndex.INVALID, Verse.Text.INVALID, 0L).getItemViewType())
+        assertEquals(BaseItem.TRANSLATION_ITEM, TranslationItem(MockContents.kjvTranslationInfo, true).getItemViewType())
     }
 
     @Test
-    fun testTextForDisplay() {
-        val expected = "Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = BookmarkItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, 12345678L).textForDisplay.toString()
+    fun testRightDrawable() {
+        assertEquals(0, TranslationItem(MockContents.kjvTranslationInfo, false).rightDrawable)
+        assertEquals(R.drawable.ic_check, TranslationItem(MockContents.kjvTranslationInfo, true).rightDrawable)
+    }
+
+    @Test
+    fun testToTranslationItems() {
+        val expected = listOf(TranslationItem(MockContents.kjvDownloadedTranslationInfo, true),
+                TranslationItem(MockContents.cuvTranslationInfo, false))
+        val actual = listOf(MockContents.kjvDownloadedTranslationInfo, MockContents.cuvTranslationInfo)
+                .toTranslationItems(MockContents.kjvShortName)
         assertEquals(expected, actual)
     }
 }
