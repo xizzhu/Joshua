@@ -16,9 +16,11 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -39,6 +41,10 @@ class VersePresenterTest : BaseUnitTest() {
     private lateinit var readingInteractor: ReadingInteractor
     @Mock
     private lateinit var verseView: VerseView
+    @Mock
+    private lateinit var actionMode: ActionMode
+    @Mock
+    private lateinit var item: MenuItem
 
     private lateinit var versePresenter: VersePresenter
     private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
@@ -74,6 +80,56 @@ class VersePresenterTest : BaseUnitTest() {
     override fun tearDown() {
         versePresenter.detachView()
         super.tearDown()
+    }
+
+    @Test
+    fun testOnActionCopyItemClickedSuccess() {
+        runBlocking {
+            `when`(item.itemId).thenReturn(R.id.action_copy)
+            `when`(readingInteractor.copyToClipBoard(any())).thenReturn(true)
+            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            verify(verseView, times(1)).onVersesCopied()
+            verify(verseView, never()).onVersesCopyShareFailed()
+            verify(actionMode, times(1)).finish()
+        }
+    }
+
+    @Test
+    fun testOnActionCopyItemClickedFailure() {
+        runBlocking {
+            `when`(item.itemId).thenReturn(R.id.action_copy)
+            `when`(readingInteractor.copyToClipBoard(any())).thenReturn(false)
+            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            verify(verseView, never()).onVersesCopied()
+            verify(verseView, times(1)).onVersesCopyShareFailed()
+            verify(actionMode, times(1)).finish()
+        }
+    }
+
+    @Test
+    fun testOnActionShareItemClickedSuccess() {
+        `when`(item.itemId).thenReturn(R.id.action_share)
+        `when`(readingInteractor.share(any())).thenReturn(true)
+        assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+        verify(verseView, never()).onVersesCopyShareFailed()
+        verify(actionMode, times(1)).finish()
+    }
+
+    @Test
+    fun testOnActionShareItemClickedFailure() {
+        `when`(item.itemId).thenReturn(R.id.action_share)
+        `when`(readingInteractor.share(any())).thenReturn(false)
+        assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+        verify(verseView, times(1)).onVersesCopyShareFailed()
+        verify(actionMode, times(1)).finish()
+    }
+
+    @Test
+    fun testDestroyActionMode() {
+        versePresenter.selectedVerses.add(MockContents.kjvVerses[0])
+        versePresenter.actionModeCallback.onDestroyActionMode(actionMode)
+        verify(verseView, times(1)).onVerseDeselected(MockContents.kjvVerses[0].verseIndex)
+        assertTrue(versePresenter.selectedVerses.isEmpty())
     }
 
     @Test

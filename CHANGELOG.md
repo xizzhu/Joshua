@@ -7,6 +7,7 @@ CHANGELOG
 - Properly catch exception if thrown when downloading translations
 - Refactored to introduce a common adapter
 - Should keep action mode when user scrolls
+- Fixed potential crash when failed to copy verses to clipboard
 - Updated Firebase Core to 16.0.9 and Analytics to 16.5.0
 
 #### v0.1.2 (2019-04-30)

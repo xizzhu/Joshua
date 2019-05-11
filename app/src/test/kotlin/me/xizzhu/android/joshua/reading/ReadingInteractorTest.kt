@@ -16,15 +16,18 @@
 
 package me.xizzhu.android.joshua.reading
 
+import android.content.Context
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
+import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import org.mockito.Mockito.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
@@ -68,6 +71,36 @@ class ReadingInteractorTest : BaseUnitTest() {
 
             assertEquals(verseIndex, readingInteractor.observeVerseDetailOpenState().first())
             assertTrue(readingInteractor.closeVerseDetail())
+        }
+    }
+
+    @Test
+    fun testCopyToClipBoardWithEmptyVerses() {
+        runBlocking {
+            assertFalse(readingInteractor.copyToClipBoard(emptyList()))
+        }
+    }
+
+    @Test
+    fun testCopyToClipBoardWithException() {
+        runBlocking {
+            `when`(readingActivity.getSystemService(Context.CLIPBOARD_SERVICE)).thenThrow(RuntimeException("Random exception"))
+
+            assertFalse(readingInteractor.copyToClipBoard(MockContents.kjvVerses))
+        }
+    }
+
+    @Test
+    fun testShareWithEmptyVerses() {
+        runBlocking {
+            assertFalse(readingInteractor.share(emptyList()))
+        }
+    }
+
+    @Test
+    fun testShareWithException() {
+        runBlocking {
+            assertFalse(readingInteractor.share(MockContents.kjvVerses))
         }
     }
 }

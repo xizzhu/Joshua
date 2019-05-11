@@ -40,7 +40,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     @VisibleForTesting
     val selectedVerses: HashSet<Verse> = HashSet()
     private var actionMode: ActionMode? = null
-    private val actionModeCallback = object : ActionMode.Callback {
+    @VisibleForTesting
+    val actionModeCallback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.menuInflater.inflate(R.menu.menu_verse_selection, menu)
             return true
@@ -51,14 +52,19 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.action_copy -> {
-                    launch(Dispatchers.IO) { readingInteractor.copyToClipBoard(selectedVerses) }
-                    view?.onVersesCopied()
+                    launch(Dispatchers.Main) {
+                        if (readingInteractor.copyToClipBoard(selectedVerses)) {
+                            view?.onVersesCopied()
+                        } else {
+                            view?.onVersesCopyShareFailed()
+                        }
+                    }
                     mode.finish()
                     true
                 }
                 R.id.action_share -> {
                     if (!readingInteractor.share(selectedVerses)) {
-                        view?.onVersesSharedFailed()
+                        view?.onVersesCopyShareFailed()
                     }
                     mode.finish()
                     true

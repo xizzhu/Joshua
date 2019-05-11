@@ -47,7 +47,7 @@ interface VerseView : BaseSettingsView {
 
     fun onVersesCopied()
 
-    fun onVersesSharedFailed()
+    fun onVersesCopyShareFailed()
 }
 
 class VerseViewPager : ViewPager, VerseView {
@@ -169,7 +169,7 @@ class VerseViewPager : ViewPager, VerseView {
         Toast.makeText(context, R.string.toast_verses_copied, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onVersesSharedFailed() {
+    override fun onVersesCopyShareFailed() {
         Toast.makeText(context, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
     }
 }
