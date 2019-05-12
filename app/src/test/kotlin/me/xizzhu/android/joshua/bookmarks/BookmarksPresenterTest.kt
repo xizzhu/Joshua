@@ -23,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.After
 import org.junit.Before
@@ -67,7 +68,7 @@ class BookmarksPresenterTest : BaseUnitTest() {
     fun testLoadEmptyBookmarks() {
         runBlocking {
             // loadBookmarks() is called by onViewAttached()
-            verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(TitleItem("")))
+            verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(TextItem("")))
             verify(bookmarksView, never()).onBookmarksLoadFailed()
         }
     }

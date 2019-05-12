@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
+import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.After
 import org.junit.Before
@@ -70,7 +71,7 @@ class NotesPresenterTest : BaseUnitTest() {
     fun testLoadEmptyNotes() {
         runBlocking {
             // loadNotes() is called by onViewAttached()
-            verify(notesView, times(1)).onNotesLoaded(listOf(TitleItem("")))
+            verify(notesView, times(1)).onNotesLoaded(listOf(TextItem("")))
             verify(notesView, never()).onNotesLoadFailed()
         }
     }

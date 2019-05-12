@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.formatDate
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
+import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import java.util.*
@@ -42,7 +43,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
             try {
                 val bookmarks = bookmarksInteractor.readBookmarks()
                 if (bookmarks.isEmpty()) {
-                    view?.onBookmarksLoaded(listOf(TitleItem(resources.getString(R.string.text_no_bookmark))))
+                    view?.onBookmarksLoaded(listOf(TextItem(resources.getString(R.string.text_no_bookmark))))
                 } else {
                     val calendar = Calendar.getInstance()
                     var previousYear = -1

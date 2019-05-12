@@ -16,25 +16,24 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.ui.getCaptionTextSize
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class TitleItem(val title: CharSequence) : BaseItem {
-    override fun getItemViewType(): Int = BaseItem.TITLE_ITEM
+data class TextItem(val title: CharSequence) : BaseItem {
+    override fun getItemViewType(): Int = BaseItem.TEXT_ITEM
 }
 
-class TitleItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<TitleItem>(inflater.inflate(R.layout.item_title, parent, false)) {
+class TextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+    : BaseViewHolder<TextItem>(inflater.inflate(R.layout.item_text, parent, false)) {
     private val title: TextView = itemView.findViewById(R.id.title)
 
-    override fun bind(settings: Settings, item: TitleItem, payloads: List<Any>) {
+    override fun bind(settings: Settings, item: TextItem, payloads: List<Any>) {
         with(title) {
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
+            updateSettingsWithPrimaryText(settings)
             text = item.title
         }
     }

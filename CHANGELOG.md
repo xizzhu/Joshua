@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Aligned title item UI with setting section header
 
 #### v0.2.0 (2019-05-10)
 - Added "no bookmark" and "no note" item
