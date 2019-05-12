@@ -20,14 +20,10 @@ import android.content.res.Resources
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -83,7 +79,7 @@ class NotesPresenterTest : BaseUnitTest() {
             notesPresenter.loadNotes()
 
             // loadBookmarks() is called by onViewAttached(), so onNoNotesAvailable() is called once
-            verify(notesView, times(1)).onNotesLoaded(listOf(TitleItem("")))
+            verify(notesView, times(1)).onNotesLoaded(listOf(TextItem("")))
             verify(notesView, times(1)).onNotesLoadFailed()
         }
     }
