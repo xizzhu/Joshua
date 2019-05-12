@@ -1,10 +1,12 @@
-Bible (Offline, Multi-Version, Full-Text Search)
+# Bible (Offline, Multi-Version, Full-Text Search)
 
+### Short Description
 Multi-Version Bible, supporting offline reading, and full-text search.
 
+### Description
 A simple and easy-to-use Bible reader with offline reading, multi-versions support, and full text search.
 
-MAIN FEATURES
+#### MAIN FEATURES
 - Download it for fee
 - Read without network connection
 - Full-text search
@@ -13,7 +15,7 @@ MAIN FEATURES
 - Customize font size
 - Day / night mode
 
-AVAILABLE BIBLE VERSIONS
+#### AVAILABLE BIBLE VERSIONS
 - Authorized King James (KJV)
 - Bible in Basic English (BBE)
 - English Standard Version (ESV)
