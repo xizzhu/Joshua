@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Should first try to close drawer
 - Aligned title item UI with setting section header
 
 #### v0.2.0 (2019-05-10)
