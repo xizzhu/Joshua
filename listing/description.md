@@ -16,6 +16,8 @@ A simple and easy-to-use Bible reader with offline reading, multi-versions suppo
 - Day / night mode
 
 #### AVAILABLE BIBLE VERSIONS
+- American King James Version (AKJV)
+- American Standard Version (ASV)
 - Authorized King James (KJV)
 - Bible in Basic English (BBE)
 - English Standard Version (ESV)
