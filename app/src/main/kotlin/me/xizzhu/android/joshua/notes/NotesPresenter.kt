@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.formatDate
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
+import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import java.util.*
@@ -42,7 +43,7 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
             try {
                 val notes = notesInteractor.readNotes()
                 if (notes.isEmpty()) {
-                    view?.onNotesLoaded(listOf(TitleItem(resources.getString(R.string.text_no_note))))
+                    view?.onNotesLoaded(listOf(TextItem(resources.getString(R.string.text_no_note))))
                 } else {
                     val calendar = Calendar.getInstance()
                     var previousYear = -1

@@ -39,7 +39,7 @@ class ReadingDrawerPresenter(private val readingInteractor: ReadingInteractor) :
 }
 
 interface ReadingDrawerView : MVPView {
-    fun hide()
+    fun hide(): Boolean
 }
 
 class ReadingDrawerLayout : DrawerLayout, ReadingDrawerView {
@@ -49,7 +49,14 @@ class ReadingDrawerLayout : DrawerLayout, ReadingDrawerView {
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    override fun hide() {
-        closeDrawer(GravityCompat.START)
+    /**
+     * @return true if drawer was open, or false otherwise
+     * */
+    override fun hide(): Boolean {
+        if (isDrawerOpen(GravityCompat.START)) {
+            closeDrawer(GravityCompat.START)
+            return true
+        }
+        return false
     }
 }

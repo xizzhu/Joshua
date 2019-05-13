@@ -122,7 +122,7 @@ class ReadingActivity : BaseSettingsActivity() {
 
     override fun onBackPressed() {
         launch(Dispatchers.Main) {
-            if (!readingInteractor.closeVerseDetail()) {
+            if (!readingInteractor.closeVerseDetail() && !drawerLayout.hide()) {
                 super.onBackPressed()
             }
         }
