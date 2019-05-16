@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Tracked translation download and installation time
 - Should first try to close drawer
 - Aligned title item UI with setting section header
 - Updated Android Gradle plugin to 3.4.1
