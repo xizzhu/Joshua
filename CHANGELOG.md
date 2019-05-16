@@ -4,6 +4,7 @@ CHANGELOG
 #### Next Release
 - Should first try to close drawer
 - Aligned title item UI with setting section header
+- Updated Android Gradle plugin to 3.4.1
 
 #### v0.2.0 (2019-05-10)
 - Added "no bookmark" and "no note" item
