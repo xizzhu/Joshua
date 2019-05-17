@@ -39,7 +39,7 @@ interface VerseDetailView : BaseSettingsView {
 
     fun onVerseDetailLoadFailed(verseIndex: VerseIndex)
 
-    fun show()
+    fun show(page: Int)
 
     fun hide()
 }
@@ -60,8 +60,6 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     private lateinit var presenter: VerseDetailPresenter
 
-    private val onClickListener = View.OnClickListener { presenter.hide() }
-
     private val adapter = VerseDetailPagerAdapter(context, object : VerseDetailPagerAdapter.Listener {
         override fun onNoteUpdated(note: String) {
             presenter.updateNote(note)
@@ -79,7 +77,7 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
             setOnClickListener { presenter.updateBookmark() }
         }
 
-        setOnClickListener(onClickListener)
+        setOnClickListener { presenter.hide() }
 
         viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
@@ -109,8 +107,9 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
                 })
     }
 
-    override fun show() {
+    override fun show(page: Int) {
         animate().translationY(0.0F)
+        viewPager.currentItem = page
     }
 
     override fun hide() {

@@ -37,8 +37,8 @@ class VerseDetailPagerAdapter(context: Context, private val listener: Listener) 
     }
 
     companion object {
-        private const val PAGE_VERSES = 0
-        private const val PAGE_NOTE = 1
+        const val PAGE_VERSES = 0
+        const val PAGE_NOTE = 1
         private const val PAGE_COUNT = 2
     }
 

@@ -51,7 +51,7 @@ class VersePresenterTest : BaseUnitTest() {
     private lateinit var currentTranslationChannel: ConflatedBroadcastChannel<String>
     private lateinit var currentVerseIndexChannel: ConflatedBroadcastChannel<VerseIndex>
     private lateinit var parallelTranslationsChannel: ConflatedBroadcastChannel<List<String>>
-    private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<VerseIndex>
+    private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>>
 
     @Before
     override fun setup() {
@@ -259,7 +259,7 @@ class VersePresenterTest : BaseUnitTest() {
             val verseIndex = VerseIndex(0, 0, 0)
             versePresenter.selectedVerse = verseIndex
 
-            verseDetailOpenState.send(VerseIndex.INVALID)
+            verseDetailOpenState.send(Pair(VerseIndex.INVALID, 0))
 
             assertFalse(versePresenter.selectedVerse.isValid())
             verify(verseView, times(1)).onVerseDeselected(verseIndex)

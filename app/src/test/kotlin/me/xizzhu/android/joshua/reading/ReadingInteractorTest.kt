@@ -67,9 +67,9 @@ class ReadingInteractorTest : BaseUnitTest() {
     fun testOpenThenCloseVerseDetail() {
         runBlocking {
             val verseIndex = VerseIndex(1, 2, 3)
-            readingInteractor.openVerseDetail(verseIndex)
+            readingInteractor.openVerseDetail(verseIndex, 0)
 
-            assertEquals(verseIndex, readingInteractor.observeVerseDetailOpenState().first())
+            assertEquals(verseIndex, readingInteractor.observeVerseDetailOpenState().first().first)
             assertTrue(readingInteractor.closeVerseDetail())
         }
     }

@@ -36,10 +36,10 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            readingInteractor.observeVerseDetailOpenState().consumeEach { verseIndex ->
-                if (verseIndex.isValid()) {
-                    view?.show()
-                    loadVerseDetail(verseIndex)
+            readingInteractor.observeVerseDetailOpenState().consumeEach {
+                if (it.first.isValid()) {
+                    view?.show(it.second)
+                    loadVerseDetail(it.first)
                 } else {
                     view?.hide()
                 }

@@ -39,7 +39,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var verseDetailView: VerseDetailView
     private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
-    private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<VerseIndex>
+    private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>>
     private lateinit var currentTranslationShortName: BroadcastChannel<String>
     private lateinit var verseDetailPresenter: VerseDetailPresenter
 
@@ -75,9 +75,9 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
             `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
 
-            verseDetailOpenState.send(verseIndex)
+            verseDetailOpenState.send(Pair(verseIndex, 0))
 
-            verify(verseDetailView, times(1)).show()
+            verify(verseDetailView, times(1)).show(0)
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail(MockContents.kjvVerses[0], false, ""))
             verify(verseDetailView, never()).hide()
@@ -117,9 +117,9 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testHide() {
         runBlocking {
-            verseDetailOpenState.send(VerseIndex.INVALID)
+            verseDetailOpenState.send(Pair(VerseIndex.INVALID, 0))
 
-            verify(verseDetailView, never()).show()
+            verify(verseDetailView, never()).show(0)
             verify(verseDetailView, never()).onVerseDetailLoaded(any())
             verify(verseDetailView, times(1)).hide()
         }

@@ -5,6 +5,7 @@ CHANGELOG
 - Added event tracking
   - Tracked translation download and installation time
   - Tracked search
+- Open note when user opens reading activity from note list
 - Should first try to close drawer
 - Aligned title item UI with setting section header
 - Lazy initialize Crashlytics

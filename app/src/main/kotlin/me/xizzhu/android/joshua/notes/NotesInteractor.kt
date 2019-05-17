@@ -22,6 +22,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 
@@ -45,11 +46,8 @@ class NotesInteractor(private val notesActivity: NotesActivity,
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingManager.readVerse(translationShortName, verseIndex)
 
-    suspend fun selectVerse(verseIndex: VerseIndex) {
+    suspend fun openReading(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-    }
-
-    fun openReading() {
-        navigator.navigate(notesActivity, Navigator.SCREEN_READING)
+        navigator.navigate(notesActivity, Navigator.SCREEN_READING, ReadingActivity.bundleForOpenNote())
     }
 }

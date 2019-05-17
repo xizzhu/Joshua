@@ -29,6 +29,7 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
+import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import kotlin.properties.Delegates
@@ -116,7 +117,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             readingInteractor.observeParallelTranslations().consumeEach { parallelTranslations = it }
         }
         launch(Dispatchers.Main) {
-            readingInteractor.observeVerseDetailOpenState().filter { !it.isValid() }
+            readingInteractor.observeVerseDetailOpenState().filter { !it.first.isValid() }
                     .consumeEach {
                         if (selectedVerse.isValid()) {
                             view?.onVerseDeselected(selectedVerse)
@@ -168,7 +169,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         val verse = verseForReading.verse
         if (actionMode == null) {
             selectedVerse = verse.verseIndex
-            launch(Dispatchers.Main) { readingInteractor.openVerseDetail(selectedVerse) }
+            launch(Dispatchers.Main) { readingInteractor.openVerseDetail(selectedVerse, VerseDetailPagerAdapter.PAGE_VERSES) }
             view?.onVerseSelected(selectedVerse)
             return
         }

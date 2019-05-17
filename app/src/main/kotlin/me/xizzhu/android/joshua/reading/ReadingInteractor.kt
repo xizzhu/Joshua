@@ -51,7 +51,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         private val TAG = ReadingInteractor::class.java.simpleName
     }
 
-    private val verseDetailOpenState: ConflatedBroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
+    private val verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>> = ConflatedBroadcastChannel()
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
@@ -64,19 +64,21 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     fun observeParallelTranslations(): ReceiveChannel<List<String>> = bibleReadingManager.observeParallelTranslations()
 
-    fun observeVerseDetailOpenState(): ReceiveChannel<VerseIndex> = verseDetailOpenState.openSubscription()
+    fun observeVerseDetailOpenState(): ReceiveChannel<Pair<VerseIndex, Int>> = verseDetailOpenState.openSubscription()
 
-    suspend fun openVerseDetail(verseIndex: VerseIndex) {
-        verseDetailOpenState.send(verseIndex)
+    suspend fun openVerseDetail(verseIndex: VerseIndex, page: Int) {
+        verseDetailOpenState.send(Pair(verseIndex, page))
     }
 
     /**
      * @return true if verse detail view was open, or false otherwise
      * */
     suspend fun closeVerseDetail(): Boolean {
-        if (verseDetailOpenState.valueOrNull?.isValid() == true) {
-            verseDetailOpenState.send(VerseIndex.INVALID)
-            return true
+        verseDetailOpenState.valueOrNull?.let {
+            if (it.first.isValid()) {
+                verseDetailOpenState.send(Pair(VerseIndex.INVALID, 0))
+                return true
+            }
         }
         return false
     }

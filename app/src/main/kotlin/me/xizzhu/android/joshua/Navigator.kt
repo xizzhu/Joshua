@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Bundle
 import androidx.annotation.IntDef
 import me.xizzhu.android.joshua.bookmarks.BookmarksActivity
 import me.xizzhu.android.joshua.notes.NotesActivity
@@ -43,7 +44,7 @@ class Navigator {
         annotation class Screen
     }
 
-    fun navigate(activity: Activity, @Screen screen: Int) {
+    fun navigate(activity: Activity, @Screen screen: Int, extras: Bundle? = null) {
         val intent = when (screen) {
             SCREEN_READING -> Intent(activity, ReadingActivity::class.java)
             SCREEN_SEARCH -> Intent(activity, SearchActivity::class.java)
@@ -54,6 +55,7 @@ class Navigator {
             SCREEN_SETTINGS -> Intent(activity, SettingsActivity::class.java)
             else -> throw IllegalArgumentException("Unknown screen - $screen")
         }
+        extras?.let { intent.putExtras(it) }
         activity.startActivity(intent)
     }
 }

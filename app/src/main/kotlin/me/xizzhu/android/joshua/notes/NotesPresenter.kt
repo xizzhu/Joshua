@@ -80,8 +80,7 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
     fun selectVerse(verseToSelect: VerseIndex) {
         launch(Dispatchers.Main) {
             try {
-                notesInteractor.selectVerse(verseToSelect)
-                notesInteractor.openReading()
+                notesInteractor.openReading(verseToSelect)
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to select verse and open reading activity")
                 view?.onVerseSelectionFailed(verseToSelect)

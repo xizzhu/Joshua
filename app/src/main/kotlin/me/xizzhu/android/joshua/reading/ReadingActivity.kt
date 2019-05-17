@@ -20,10 +20,13 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.ActionBarDrawerToggle
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.firstOrNull
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.chapter.ChapterListView
+import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPresenter
 import me.xizzhu.android.joshua.reading.detail.VerseDetailViewLayout
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
@@ -35,6 +38,12 @@ import me.xizzhu.android.joshua.utils.BaseSettingsActivity
 import javax.inject.Inject
 
 class ReadingActivity : BaseSettingsActivity() {
+    companion object {
+        private const val KEY_OPEN_NOTE = "me.xizzhu.android.joshua.KEY_OPEN_NOTE"
+
+        fun bundleForOpenNote(): Bundle = Bundle().apply { putBoolean(KEY_OPEN_NOTE, true) }
+    }
+
     @Inject
     lateinit var readingInteractor: ReadingInteractor
 
@@ -76,6 +85,17 @@ class ReadingActivity : BaseSettingsActivity() {
         drawerLayout.addDrawerListener(drawerToggle)
 
         observeSettings(readingInteractor)
+        openNoteIfNeeded()
+    }
+
+    private fun openNoteIfNeeded() {
+        if (intent.getBooleanExtra(KEY_OPEN_NOTE, false)) {
+            launch(Dispatchers.Main) {
+                readingInteractor.observeCurrentVerseIndex().firstOrNull()?.let {
+                    readingInteractor.openVerseDetail(it, VerseDetailPagerAdapter.PAGE_NOTE)
+                }
+            }
+        }
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
