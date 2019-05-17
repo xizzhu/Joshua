@@ -16,9 +16,12 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import android.os.Bundle
+import android.os.SystemClock
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.core.analytics.Analytics
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
@@ -86,12 +89,29 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
     suspend fun readTranslationsFromLocal(): List<TranslationInfo> = localTranslationStorage.readTranslations()
 
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
+        val start = elapsedRealtime()
         val translation = remoteTranslationService.fetchTranslation(
                 channel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))
         channel.send(100)
+        val downloadFinished = elapsedRealtime()
 
         localTranslationStorage.saveTranslation(translation.translationInfo.toTranslationInfo(true),
                 translation.bookNames, translation.bookShortNames, translation.verses)
+        val installFinished = elapsedRealtime()
+
+        Analytics.track(Analytics.EVENT_DOWNLOAD_TRANSLATION,
+                buildParams(translationInfo, start, downloadFinished, installFinished))
+    }
+
+    @VisibleForTesting
+    fun elapsedRealtime(): Long = SystemClock.elapsedRealtime()
+
+    @VisibleForTesting
+    fun buildParams(translationInfo: TranslationInfo, start: Long,
+                    downloadFinished: Long, installFinished: Long): Bundle = Bundle().apply {
+        putString(Analytics.PARAM_ITEM_ID, translationInfo.shortName)
+        putLong(Analytics.PARAM_DOWNLOAD_TIME, downloadFinished - start)
+        putLong(Analytics.PARAM_INSTALL_TIME, installFinished - downloadFinished)
     }
 
     suspend fun removeTranslation(translationInfo: TranslationInfo) {

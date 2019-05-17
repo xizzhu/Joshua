@@ -2,6 +2,9 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Added event tracking
+  - Tracked translation download and installation time
+  - Tracked search
 - Should first try to close drawer
 - Aligned title item UI with setting section header
 - Updated Android Gradle plugin to 3.4.1
