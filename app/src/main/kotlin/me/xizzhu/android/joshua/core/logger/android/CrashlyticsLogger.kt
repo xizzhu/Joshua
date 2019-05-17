@@ -21,7 +21,7 @@ import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.logger.Logger
 
 class CrashlyticsLogger : Logger {
-    private val crashlyticsCore = Crashlytics.getInstance().core
+    private val crashlyticsCore by lazy { Crashlytics.getInstance().core }
 
     override fun log(@Log.Level level: Int, tag: String, msg: String) {
         if (level > Log.INFO) {

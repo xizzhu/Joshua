@@ -7,6 +7,7 @@ CHANGELOG
   - Tracked search
 - Should first try to close drawer
 - Aligned title item UI with setting section header
+- Lazy initialize Crashlytics
 - Updated Android Gradle plugin to 3.4.1
 
 #### v0.2.0 (2019-05-10)
