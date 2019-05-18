@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.3.0 (2019-05-17)
 - Added event tracking
   - Tracked translation download and installation time
   - Tracked search
