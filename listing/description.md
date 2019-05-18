@@ -9,6 +9,7 @@ A simple and easy-to-use Bible reader with offline reading, multi-versions suppo
 #### MAIN FEATURES
 - Download it for fee
 - Read without network connection
+- Small download and installation size
 - Full-text search
 - Add your own notes and bookmarks
 - Share verses with friends through your favorite social media, email, SMS, etc.
@@ -21,9 +22,12 @@ A simple and easy-to-use Bible reader with offline reading, multi-versions suppo
 - Authorized King James (KJV)
 - Bible in Basic English (BBE)
 - English Standard Version (ESV)
+- GOD'S WORD to the Nations (GodsWord)
+- Green's Literal Translation (LITV)
 - New International Version (NIV)
 - New Living Translation (NLT)
 - Updated King James Version (UKJV)
+- World English Bible (WEB)
 - Young's Literal Translation (YLT)
 - 中文和合本（简体）
 - 中文新译本（简体）
