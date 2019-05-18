@@ -37,7 +37,6 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Streaming
 import java.io.IOException
-import java.lang.Exception
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import kotlin.coroutines.resume
@@ -111,9 +110,8 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
                         channel.send(progress)
                     }
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to fetch translation")
-                channel.close(e)
+
+                Log.i(TAG, "Translation downloaded")
             } finally {
                 try {
                     inputStream?.close()
