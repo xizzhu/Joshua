@@ -117,13 +117,16 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             readingInteractor.observeParallelTranslations().consumeEach { parallelTranslations = it }
         }
         launch(Dispatchers.Main) {
-            readingInteractor.observeVerseDetailOpenState().filter { !it.first.isValid() }
-                    .consumeEach {
-                        if (selectedVerse.isValid()) {
-                            view?.onVerseDeselected(selectedVerse)
-                            selectedVerse = VerseIndex.INVALID
-                        }
-                    }
+            readingInteractor.observeVerseDetailOpenState().consumeEach {
+                if (selectedVerse.isValid()) {
+                    view?.onVerseDeselected(selectedVerse)
+                    selectedVerse = VerseIndex.INVALID
+                }
+                if (it.first.isValid()) {
+                    selectedVerse = it.first
+                    view?.onVerseSelected(selectedVerse)
+                }
+            }
         }
     }
 
@@ -168,9 +171,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     fun onVerseClicked(verseForReading: VerseItem) {
         val verse = verseForReading.verse
         if (actionMode == null) {
-            selectedVerse = verse.verseIndex
-            launch(Dispatchers.Main) { readingInteractor.openVerseDetail(selectedVerse, VerseDetailPagerAdapter.PAGE_VERSES) }
-            view?.onVerseSelected(selectedVerse)
+            launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES) }
             return
         }
 

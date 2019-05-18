@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Should highlight selected verse when opening from notes
 
 #### v0.3.0 (2019-05-17)
 - Added event tracking

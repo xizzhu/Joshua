@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.content.Context
+import android.os.Handler
 import android.util.AttributeSet
 import android.view.View
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -50,7 +51,22 @@ class VerseListView : BaseRecyclerView {
     }
 
     fun selectVerse(verseIndex: VerseIndex) {
-        adapter?.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_SELECTED)
+        adapter?.let { adapter ->
+            if (adapter.itemCount == 0) {
+                // this is the case when reading activity is opened from notes list, and this is likely
+                // called before adapter is updated
+                adapter.registerAdapterDataObserver(object : AdapterDataObserver() {
+                    override fun onChanged() {
+                        adapter.unregisterAdapterDataObserver(this)
+                        Handler().post {
+                            adapter.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_SELECTED)
+                        }
+                    }
+                })
+            } else {
+                adapter.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_SELECTED)
+            }
+        }
     }
 
     fun deselectVerse(verseIndex: VerseIndex) {

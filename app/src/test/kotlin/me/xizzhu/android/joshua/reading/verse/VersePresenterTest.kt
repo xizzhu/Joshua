@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
+import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
@@ -246,11 +247,38 @@ class VersePresenterTest : BaseUnitTest() {
 
     @Test
     fun testOnVerseClickedWithoutActionMode() {
-        val verse = MockContents.kjvVerses[0]
-        versePresenter.onVerseClicked(VerseItem(verse, 1))
-        assertTrue(versePresenter.selectedVerses.isEmpty())
-        verify(verseView, never()).onVerseDeselected(any())
-        verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
+        runBlocking {
+            val verse = MockContents.kjvVerses[0]
+            versePresenter.onVerseClicked(VerseItem(verse, 1))
+            assertTrue(versePresenter.selectedVerses.isEmpty())
+            verify(verseView, never()).onVerseDeselected(any())
+            verify(readingInteractor, times(1)).openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES)
+        }
+    }
+
+    @Test
+    fun testOnVerseDetailOpened() {
+        runBlocking {
+            val verseIndex = VerseIndex(0, 0, 0)
+            verseDetailOpenState.send(Pair(verseIndex, 0))
+
+            assertEquals(verseIndex, versePresenter.selectedVerse)
+            verify(verseView, never()).onVerseDeselected(any())
+            verify(verseView, times(1)).onVerseSelected(verseIndex)
+        }
+    }
+
+    @Test
+    fun testOnVerseDetailOpenedWithAnotherVerseSelected() {
+        runBlocking {
+            versePresenter.selectedVerse = VerseIndex(1, 1, 1)
+            val verseIndex = VerseIndex(0, 0, 0)
+            verseDetailOpenState.send(Pair(verseIndex, 0))
+
+            assertEquals(verseIndex, versePresenter.selectedVerse)
+            verify(verseView, times(1)).onVerseDeselected(VerseIndex(1, 1, 1))
+            verify(verseView, times(1)).onVerseSelected(verseIndex)
+        }
     }
 
     @Test
