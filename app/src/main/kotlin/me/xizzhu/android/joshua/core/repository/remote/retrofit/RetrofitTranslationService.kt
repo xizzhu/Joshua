@@ -63,11 +63,13 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
     private val chapterAdapter: JsonAdapter<Chapter> by lazy { moshi.adapter(Chapter::class.java) }
 
     override suspend fun fetchTranslations(): List<RemoteTranslationInfo> {
+        Log.i(TAG, "Start fetching translation list")
         val backendTranslations = translationService.fetchTranslationList().await().translations
         val translations = ArrayList<RemoteTranslationInfo>(backendTranslations.size)
         for (backend in backendTranslations) {
             translations.add(RemoteTranslationInfo(backend.shortName, backend.name, backend.language, backend.size))
         }
+        Log.i(TAG, "Translation list downloaded")
         return translations
     }
 
