@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Should highlight selected verse when opening from notes
+- Added INFO level logs to Crashlytics
 - Fixed crash when downloading translation
 
 #### v0.3.0 (2019-05-17)
