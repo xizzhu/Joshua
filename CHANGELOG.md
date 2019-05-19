@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Fixed padding for search result
 
 #### v0.3.1 (2019-05-18)
 - Should highlight selected verse when opening from notes
