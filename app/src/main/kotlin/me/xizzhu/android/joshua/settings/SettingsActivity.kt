@@ -19,12 +19,16 @@ package me.xizzhu.android.joshua.settings
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.DialogInterface
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
+import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.SwitchCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
 import me.xizzhu.android.joshua.ui.*
@@ -52,6 +56,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
     private val keepScreenOn: SwitchCompat by bindView(R.id.keep_screen_on)
     private val nightModeOn: SwitchCompat by bindView(R.id.night_mode_on)
     private val about: SettingSectionHeader by bindView(R.id.about)
+    private val rate: SettingButton by bindView(R.id.rate)
     private val version: SettingButton by bindView(R.id.version)
 
     private var shouldAnimateFontSize = false
@@ -83,6 +88,16 @@ class SettingsActivity : BaseActivity(), SettingsView {
             originalSettings = presenter.settings
             shouldAnimateColor = true
             presenter.setNightModeOn(isChecked)
+        }
+
+        rate.setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW)
+                        .setData(Uri.parse("market://details?id=me.xizzhu.android.joshua")))
+            } catch (e: Exception) {
+                Log.e(tag, e, "Failed to start activity to rate app")
+                Toast.makeText(this@SettingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -152,6 +167,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
         keepScreenOn.setTextColor(primaryTextColor)
         nightModeOn.setTextColor(primaryTextColor)
         version.setTextColor(primaryTextColor, secondaryTextColor)
+        rate.setTextColor(primaryTextColor, secondaryTextColor)
     }
 
     private fun animateTextSize(fromBodyTextSize: Float, toBodyTextSize: Float,
@@ -173,6 +189,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
         nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
         about.setTextSize(bodyTextSize.roundToInt())
         version.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+        rate.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
     }
 
     override fun onSettingsUpdateFailed(settingsToUpdate: Settings) {

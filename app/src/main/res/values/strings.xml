@@ -90,5 +90,6 @@
     <string name="settings_title_keep_screen_on">Keep screen on</string>
     <string name="settings_title_night_mode_on">Night mode</string>
     <string name="settings_header_about">About</string>
+    <string name="settings_title_rate">Rate me on Google Play</string>
     <string name="settings_title_version">Version</string>
 </resources>

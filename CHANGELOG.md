@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Added link to rate app on Play Store
 - Fixed padding for search result
 
 #### v0.3.1 (2019-05-18)
