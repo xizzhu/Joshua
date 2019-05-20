@@ -21,8 +21,11 @@ import android.view.MenuItem
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -30,6 +33,7 @@ import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItem
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import kotlin.properties.Delegates
 
@@ -153,18 +157,30 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     fun loadVerses(bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
             try {
-                val verses = if (parallelTranslations.isEmpty()) {
-                    readingInteractor.readVerses(currentTranslation, bookIndex, chapterIndex)
+                val items = if (readingInteractor.observeSettings().first().simpleReadingModeOn) {
+                    val verses = readVerses(bookIndex, chapterIndex)
+                    val totalVerseCount = verses.size
+                    verses.map { SimpleVerseItem(it, totalVerseCount) }
                 } else {
-                    readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+                    withContext(Dispatchers.Default) {
+                        // TODO bookmarks & notes
+                        val versesAsync = async { readVerses(bookIndex, chapterIndex) }
+                        val verses = versesAsync.await()
+                        verses.map { VerseItem(it, true, false) }
+                    }
                 }
-                val totalVerseCount = verses.size
-                view?.onVersesLoaded(bookIndex, chapterIndex, verses.map { SimpleVerseItem(it, totalVerseCount) })
+                view?.onVersesLoaded(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to load verses")
                 view?.onVersesLoadFailed(bookIndex, chapterIndex)
             }
         }
+    }
+
+    private suspend fun readVerses(bookIndex: Int, chapterIndex: Int) = if (parallelTranslations.isEmpty()) {
+        readingInteractor.readVerses(currentTranslation, bookIndex, chapterIndex)
+    } else {
+        readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
     }
 
     fun onVerseClicked(verse: Verse) {

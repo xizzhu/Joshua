@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItemViewHolder
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
 
 class VerseListView : BaseRecyclerView {
     private lateinit var listener: VersePagerAdapter.Listener
@@ -32,11 +33,15 @@ class VerseListView : BaseRecyclerView {
         val viewHolder = getChildViewHolder(view)
         if (viewHolder is SimpleVerseItemViewHolder) {
             viewHolder.item?.let { listener.onVerseClicked(it.verse) }
+        } else if (viewHolder is VerseItemViewHolder) {
+            viewHolder.item?.let { listener.onVerseClicked(it.verse) }
         }
     }
     private val onLongClickListener = OnLongClickListener { view ->
         val viewHolder = getChildViewHolder(view)
         if (viewHolder is SimpleVerseItemViewHolder) {
+            viewHolder.item?.let { listener.onVerseLongClicked(it.verse) }
+        } else if (viewHolder is VerseItemViewHolder) {
             viewHolder.item?.let { listener.onVerseLongClicked(it.verse) }
         }
         return@OnLongClickListener true

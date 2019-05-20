@@ -38,9 +38,10 @@ interface BaseItem {
         const val READING_PROGRESS_SUMMARY_ITEM = 6
         const val READING_PROGRESS_DETAIL_ITEM = 7
         const val SIMPLE_VERSE_ITEM = 8
+        const val VERSE_ITEM = 9
 
         @IntDef(TITLE_ITEM, TEXT_ITEM, SEARCH_ITEM, BOOKMARK_ITEM, NOTE_ITEM, TRANSLATION_ITEM,
-                READING_PROGRESS_SUMMARY_ITEM, READING_PROGRESS_DETAIL_ITEM, SIMPLE_VERSE_ITEM)
+                READING_PROGRESS_SUMMARY_ITEM, READING_PROGRESS_DETAIL_ITEM, SIMPLE_VERSE_ITEM, VERSE_ITEM)
         @Retention(AnnotationRetention.SOURCE)
         annotation class ItemViewType
     }
@@ -95,6 +96,7 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
                 BaseItem.READING_PROGRESS_SUMMARY_ITEM -> ReadingProgressSummaryItemViewHolder(inflater, parent)
                 BaseItem.READING_PROGRESS_DETAIL_ITEM -> ReadingProgressDetailItemViewHolder(inflater, parent)
                 BaseItem.SIMPLE_VERSE_ITEM -> SimpleVerseItemViewHolder(inflater, parent)
+                BaseItem.VERSE_ITEM -> VerseItemViewHolder(inflater, parent)
                 else -> throw IllegalStateException("Unknown view type - $viewType")
             } as BaseViewHolder<BaseItem>
 

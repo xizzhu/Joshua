@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.verse
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
@@ -180,6 +181,9 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVerses() {
         runBlocking {
+            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+
             val bookIndex = 1
             val chapterIndex = 2
             `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
@@ -194,6 +198,9 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVersesWithExceptions() {
         runBlocking {
+            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+
             val bookIndex = 1
             val chapterIndex = 2
             `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenThrow(RuntimeException("Random exception"))
@@ -208,6 +215,9 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVersesWithParallelTranslations() {
         runBlocking {
+            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+
             val translationShortName = MockContents.kjvShortName
             val parallelTranslations = listOf(MockContents.cuvShortName)
             val bookIndex = 1
@@ -228,6 +238,9 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVersesWithParallelTranslationsWithException() {
         runBlocking {
+            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+
             val translationShortName = MockContents.kjvShortName
             val parallelTranslations = listOf(MockContents.cuvShortName)
             val bookIndex = 1
