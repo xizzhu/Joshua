@@ -27,7 +27,7 @@ import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
+import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -186,7 +186,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -200,7 +200,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -220,7 +220,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -240,7 +240,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }

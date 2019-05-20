@@ -22,7 +22,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
@@ -30,7 +29,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
+import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import kotlin.properties.Delegates
 
@@ -160,7 +159,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                     readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
                 }
                 val totalVerseCount = verses.size
-                view?.onVersesLoaded(bookIndex, chapterIndex, verses.map { VerseItem(it, totalVerseCount) })
+                view?.onVersesLoaded(bookIndex, chapterIndex, verses.map { SimpleVerseItem(it, totalVerseCount) })
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to load verses")
                 view?.onVersesLoadFailed(bookIndex, chapterIndex)

@@ -23,20 +23,20 @@ import android.view.View
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
+import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItemViewHolder
 
 class VerseListView : BaseRecyclerView {
     private lateinit var listener: VersePagerAdapter.Listener
 
     private val onClickListener = OnClickListener { view ->
         val viewHolder = getChildViewHolder(view)
-        if (viewHolder is VerseItemViewHolder) {
+        if (viewHolder is SimpleVerseItemViewHolder) {
             viewHolder.item?.let { listener.onVerseClicked(it.verse) }
         }
     }
     private val onLongClickListener = OnLongClickListener { view ->
         val viewHolder = getChildViewHolder(view)
-        if (viewHolder is VerseItemViewHolder) {
+        if (viewHolder is SimpleVerseItemViewHolder) {
             viewHolder.item?.let { listener.onVerseLongClicked(it.verse) }
         }
         return@OnLongClickListener true
@@ -61,18 +61,18 @@ class VerseListView : BaseRecyclerView {
                     override fun onChanged() {
                         adapter.unregisterAdapterDataObserver(this)
                         Handler().post {
-                            adapter.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_SELECTED)
+                            adapter.notifyItemChanged(verseIndex.verseIndex, SimpleVerseItemViewHolder.VERSE_SELECTED)
                         }
                     }
                 })
             } else {
-                adapter.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_SELECTED)
+                adapter.notifyItemChanged(verseIndex.verseIndex, SimpleVerseItemViewHolder.VERSE_SELECTED)
             }
         }
     }
 
     fun deselectVerse(verseIndex: VerseIndex) {
-        adapter?.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_DESELECTED)
+        adapter?.notifyItemChanged(verseIndex.verseIndex, SimpleVerseItemViewHolder.VERSE_DESELECTED)
     }
 
     fun setVerses(verses: List<BaseItem>) {

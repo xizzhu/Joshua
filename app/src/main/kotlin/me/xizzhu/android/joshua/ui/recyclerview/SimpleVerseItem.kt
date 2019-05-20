@@ -30,7 +30,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.lang.StringBuilder
 
-data class VerseItem(val verse: Verse, private val totalVerseCount: Int) : BaseItem {
+data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int) : BaseItem {
     companion object {
         private val STRING_BUILDER = StringBuilder()
         private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
@@ -102,11 +102,11 @@ data class VerseItem(val verse: Verse, private val totalVerseCount: Int) : BaseI
 
     var selected: Boolean = false
 
-    override fun getItemViewType(): Int = BaseItem.VERSE_ITEM
+    override fun getItemViewType(): Int = BaseItem.SIMPLE_VERSE_ITEM
 }
 
-class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<VerseItem>(inflater.inflate(R.layout.item_verse, parent, false)) {
+class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+    : BaseViewHolder<SimpleVerseItem>(inflater.inflate(R.layout.item_simple_verse, parent, false)) {
     companion object {
         const val VERSE_SELECTED = 1
         const val VERSE_DESELECTED = 2
@@ -116,7 +116,7 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     private val text = itemView.findViewById(R.id.text) as TextView
     private val divider = itemView.findViewById(R.id.divider) as View
 
-    override fun bind(settings: Settings, item: VerseItem, payloads: List<Any>) {
+    override fun bind(settings: Settings, item: SimpleVerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {
             text.updateSettingsWithPrimaryText(settings)
             text.text = item.textForDisplay
