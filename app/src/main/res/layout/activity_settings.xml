@@ -48,6 +48,22 @@
                 android:text="@string/settings_title_night_mode_on" />
 
             <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
+                android:id="@+id/reading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingSectionHeaderTitle="@string/settings_header_reading" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/simple_reading_mode"
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/item_height"
+                android:paddingStart="@dimen/padding"
+                android:paddingEnd="@dimen/padding"
+                android:text="@string/settings_title_simple_reading" />
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
                 android:id="@+id/about"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
