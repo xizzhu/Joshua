@@ -168,8 +168,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
     }
 
-    fun onVerseClicked(verseForReading: VerseItem) {
-        val verse = verseForReading.verse
+    fun onVerseClicked(verse: Verse) {
         if (actionMode == null) {
             launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES) }
             return
@@ -191,11 +190,11 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
     }
 
-    fun onVerseLongClicked(verseForReading: VerseItem) {
+    fun onVerseLongClicked(verse: Verse) {
         if (actionMode == null) {
             actionMode = readingInteractor.startActionMode(actionModeCallback)
         }
 
-        onVerseClicked(verseForReading)
+        onVerseClicked(verse)
     }
 }

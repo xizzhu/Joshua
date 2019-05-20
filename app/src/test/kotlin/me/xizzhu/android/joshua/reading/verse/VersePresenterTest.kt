@@ -249,7 +249,7 @@ class VersePresenterTest : BaseUnitTest() {
     fun testOnVerseClickedWithoutActionMode() {
         runBlocking {
             val verse = MockContents.kjvVerses[0]
-            versePresenter.onVerseClicked(VerseItem(verse, 1))
+            versePresenter.onVerseClicked(verse)
             assertTrue(versePresenter.selectedVerses.isEmpty())
             verify(verseView, never()).onVerseDeselected(any())
             verify(readingInteractor, times(1)).openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES)
@@ -301,21 +301,21 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(readingInteractor.startActionMode(any())).thenReturn(actionMode)
 
         val verse = MockContents.kjvVerses[0]
-        versePresenter.onVerseLongClicked(VerseItem(verse, 1))
+        versePresenter.onVerseLongClicked(verse)
         assertEquals(1, versePresenter.selectedVerses.size)
         verify(readingInteractor, times(1)).startActionMode(any())
         verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
 
         val anotherVerse = MockContents.kjvVerses[5]
-        versePresenter.onVerseLongClicked(VerseItem(anotherVerse, 1))
+        versePresenter.onVerseLongClicked(anotherVerse)
         assertEquals(2, versePresenter.selectedVerses.size)
         verify(verseView, times(1)).onVerseSelected(anotherVerse.verseIndex)
 
-        versePresenter.onVerseClicked(VerseItem(anotherVerse, 1))
+        versePresenter.onVerseClicked(anotherVerse)
         assertEquals(1, versePresenter.selectedVerses.size)
         verify(verseView, times(1)).onVerseDeselected(anotherVerse.verseIndex)
 
-        versePresenter.onVerseClicked(VerseItem(verse, 1))
+        versePresenter.onVerseClicked(verse)
         assertTrue(versePresenter.selectedVerses.isEmpty())
         verify(verseView, times(1)).onVerseDeselected(verse.verseIndex)
         verify(actionMode, times(1)).finish()
@@ -330,7 +330,7 @@ class VersePresenterTest : BaseUnitTest() {
             currentVerseIndexChannel.send(VerseIndex(0, 0, 0))
 
             val verse = MockContents.kjvVerses[0]
-            versePresenter.onVerseLongClicked(VerseItem(verse, 1))
+            versePresenter.onVerseLongClicked(verse)
             assertEquals(1, versePresenter.selectedVerses.size)
             verify(readingInteractor, times(1)).startActionMode(any())
             verify(verseView, times(1)).onVerseSelected(verse.verseIndex)

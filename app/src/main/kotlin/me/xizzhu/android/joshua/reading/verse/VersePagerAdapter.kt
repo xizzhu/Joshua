@@ -26,10 +26,11 @@ import androidx.viewpager.widget.PagerAdapter
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
 class VersePagerAdapter(context: Context, private val listener: Listener) : PagerAdapter() {
     interface Listener {
@@ -37,9 +38,9 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
 
         fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int)
 
-        fun onVerseClicked(verse: VerseItem)
+        fun onVerseClicked(verse: Verse)
 
-        fun onVerseLongClicked(verse: VerseItem)
+        fun onVerseLongClicked(verse: Verse)
     }
 
     private val inflater = LayoutInflater.from(context)
@@ -61,7 +62,7 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
         notifyDataSetChanged()
     }
 
-    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<VerseItem>) {
+    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<BaseItem>) {
         findPage(bookIndex, chapterIndex)?.setVerses(verses, currentVerseIndex)
     }
 
@@ -162,7 +163,7 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         inUse = false
     }
 
-    fun setVerses(verses: List<VerseItem>, currentVerseIndex: VerseIndex) {
+    fun setVerses(verses: List<BaseItem>, currentVerseIndex: VerseIndex) {
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 

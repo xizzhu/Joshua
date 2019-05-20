@@ -21,21 +21,23 @@ import android.os.Handler
 import android.util.AttributeSet
 import android.view.View
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
 
 class VerseListView : BaseRecyclerView {
     private lateinit var listener: VersePagerAdapter.Listener
 
     private val onClickListener = OnClickListener { view ->
-        ((getChildViewHolder(view) as VerseItemViewHolder).item)?.let {
-            listener.onVerseClicked(it)
+        val viewHolder = getChildViewHolder(view)
+        if (viewHolder is VerseItemViewHolder) {
+            viewHolder.item?.let { listener.onVerseClicked(it.verse) }
         }
     }
     private val onLongClickListener = OnLongClickListener { view ->
-        ((getChildViewHolder(view) as VerseItemViewHolder).item)?.let {
-            listener.onVerseLongClicked(it)
+        val viewHolder = getChildViewHolder(view)
+        if (viewHolder is VerseItemViewHolder) {
+            viewHolder.item?.let { listener.onVerseLongClicked(it.verse) }
         }
         return@OnLongClickListener true
     }
@@ -73,7 +75,7 @@ class VerseListView : BaseRecyclerView {
         adapter?.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_DESELECTED)
     }
 
-    fun setVerses(verses: List<VerseItem>) {
+    fun setVerses(verses: List<BaseItem>) {
         setItems(verses)
     }
 
