@@ -45,8 +45,8 @@ class SettingsManagerTest : BaseUnitTest() {
         runBlocking {
             assertEquals(Settings.DEFAULT, settingsManager.observeSettings().first())
 
-            settingsManager.saveSettings(Settings(false, true, 3))
-            assertEquals(Settings(false, true, 3), settingsManager.observeSettings().first())
+            settingsManager.saveSettings(Settings(false, true, 3, false))
+            assertEquals(Settings(false, true, 3, false), settingsManager.observeSettings().first())
         }
     }
 }

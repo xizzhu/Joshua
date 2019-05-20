@@ -79,4 +79,12 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
             }
         }
     }
+
+    fun setSimpleReadingModeOn(simpleReadingModeOn: Boolean) {
+        launch(Dispatchers.Main) {
+            if (simpleReadingModeOn != settings.simpleReadingModeOn) {
+                saveSettings(settings.toBuilder().simpleReadingModeOn(simpleReadingModeOn).build())
+            }
+        }
+    }
 }

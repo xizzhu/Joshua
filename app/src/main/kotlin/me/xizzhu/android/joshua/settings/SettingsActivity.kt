@@ -82,15 +82,15 @@ class SettingsActivity : BaseActivity(), SettingsView {
                     })
         }
 
-        keepScreenOn.setOnCheckedChangeListener { _, isChecked ->
-            presenter.setKeepScreenOn(isChecked)
-        }
+        keepScreenOn.setOnCheckedChangeListener { _, isChecked -> presenter.setKeepScreenOn(isChecked) }
 
         nightModeOn.setOnCheckedChangeListener { _, isChecked ->
             originalSettings = presenter.settings
             shouldAnimateColor = true
             presenter.setNightModeOn(isChecked)
         }
+
+        simpleReadingMode.setOnCheckedChangeListener { _, isChecked -> presenter.setSimpleReadingModeOn(isChecked) }
 
         rate.setOnClickListener {
             try {
@@ -144,6 +144,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
         fontSize.setDescription(fontSizeTexts[settings.fontSizeScale - 1])
         keepScreenOn.isChecked = settings.keepScreenOn
         nightModeOn.isChecked = settings.nightModeOn
+        simpleReadingMode.isChecked = settings.simpleReadingModeOn
     }
 
     private fun animateColor(@ColorInt fromBackgroundColor: Int, @ColorInt toBackgroundColor: Int,

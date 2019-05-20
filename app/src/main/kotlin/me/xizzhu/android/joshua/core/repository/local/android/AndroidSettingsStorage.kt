@@ -29,11 +29,14 @@ class AndroidSettingsStorage(private val androidDatabase: AndroidDatabase) : Loc
             val values = androidDatabase.metadataDao.read(listOf(
                     Pair(MetadataDao.KEY_SCREEN_ON, Settings.DEFAULT.keepScreenOn.toString()),
                     Pair(MetadataDao.KEY_NIGHT_MODE_ON, Settings.DEFAULT.nightModeOn.toString()),
-                    Pair(MetadataDao.KEY_FONT_SIZE_SCALE, Settings.DEFAULT.fontSizeScale.toString())
+                    Pair(MetadataDao.KEY_FONT_SIZE_SCALE, Settings.DEFAULT.fontSizeScale.toString()),
+                    Pair(MetadataDao.KEY_SIMPLE_READING_MODE_ON, Settings.DEFAULT.simpleReadingModeOn.toString())
             ))
             return@withContext Settings(values.getValue(MetadataDao.KEY_SCREEN_ON).toBoolean(),
                     values.getValue(MetadataDao.KEY_NIGHT_MODE_ON).toBoolean(),
-                    values.getValue(MetadataDao.KEY_FONT_SIZE_SCALE).toInt())
+                    values.getValue(MetadataDao.KEY_FONT_SIZE_SCALE).toInt(),
+                    values.getValue(MetadataDao.KEY_SIMPLE_READING_MODE_ON).toBoolean()
+            )
         }
     }
 
@@ -42,7 +45,8 @@ class AndroidSettingsStorage(private val androidDatabase: AndroidDatabase) : Loc
             androidDatabase.metadataDao.save(listOf(
                     Pair(MetadataDao.KEY_SCREEN_ON, settings.keepScreenOn.toString()),
                     Pair(MetadataDao.KEY_NIGHT_MODE_ON, settings.nightModeOn.toString()),
-                    Pair(MetadataDao.KEY_FONT_SIZE_SCALE, settings.fontSizeScale.toString())
+                    Pair(MetadataDao.KEY_FONT_SIZE_SCALE, settings.fontSizeScale.toString()),
+                    Pair(MetadataDao.KEY_SIMPLE_READING_MODE_ON, settings.simpleReadingModeOn.toString())
             ))
         }
     }
