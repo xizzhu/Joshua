@@ -24,16 +24,21 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean) : BaseItem {
+data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean,
+                           val onClicked: (TranslationInfo) -> Unit,
+                           val onLongClicked: (TranslationInfo, Boolean) -> Unit) : BaseItem {
     val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0
 
     override fun getItemViewType(): Int = BaseItem.TRANSLATION_ITEM
 }
 
-fun List<TranslationInfo>.toTranslationItems(currentTranslation: String): List<TranslationItem> {
+fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, onClicked: (TranslationInfo) -> Unit,
+                                             onLongClicked: (TranslationInfo, Boolean) -> Unit): List<TranslationItem> {
     return ArrayList<TranslationItem>(size).apply {
         for (translationInfo in this@toTranslationItems) {
-            add(TranslationItem(translationInfo, translationInfo.downloaded && translationInfo.shortName == currentTranslation))
+            add(TranslationItem(translationInfo,
+                    translationInfo.downloaded && translationInfo.shortName == currentTranslation,
+                    onClicked, onLongClicked))
         }
     }
 }
@@ -41,6 +46,14 @@ fun List<TranslationInfo>.toTranslationItems(currentTranslation: String): List<T
 class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<TranslationItem>(inflater.inflate(R.layout.item_translation, parent, false)) {
     private val textView = itemView as TextView
+
+    init {
+        itemView.setOnClickListener { item?.let { it.onClicked(it.translationInfo) } }
+        itemView.setOnLongClickListener {
+            item?.let { it.onLongClicked(it.translationInfo, it.isCurrentTranslation) }
+            return@setOnLongClickListener true
+        }
+    }
 
     override fun bind(settings: Settings, item: TranslationItem, payloads: List<Any>) {
         with(textView) {

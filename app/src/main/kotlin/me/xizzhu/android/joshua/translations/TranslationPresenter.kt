@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.translations
 
 import android.content.Context
+import android.content.DialogInterface
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -26,6 +27,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.SwipeRefresherState
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -108,11 +110,11 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
 
         val items: ArrayList<BaseItem> = ArrayList()
-        items.addAll(downloadedTranslations!!.toTranslationItems(currentTranslation!!))
+        items.addAll(downloadedTranslations!!.toTranslationItems(currentTranslation!!, this::onTranslationClicked, this::onTranslationLongClicked))
         if (availableTranslations!!.isNotEmpty()) {
             items.add(TitleItem(context.getString(R.string.header_available_translations)))
         }
-        items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!))
+        items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!, this::onTranslationClicked, this::onTranslationLongClicked))
 
         view?.onTranslationsUpdated(items)
     }
@@ -125,6 +127,29 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 Log.e(tag, e, "Failed to load translation list")
                 view?.onTranslationsLoadingFailed(forceRefresh)
             }
+        }
+    }
+
+    @VisibleForTesting
+    fun onTranslationClicked(translationInfo: TranslationInfo) {
+        if (translationInfo.downloaded) {
+            updateCurrentTranslation(translationInfo.shortName)
+        } else {
+            downloadTranslation(translationInfo)
+        }
+    }
+
+    @VisibleForTesting
+    fun onTranslationLongClicked(translationInfo: TranslationInfo, isCurrentTranslation: Boolean) {
+        if (translationInfo.downloaded) {
+            if (!isCurrentTranslation) {
+                DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
+                        DialogInterface.OnClickListener { _, _ ->
+                            removeTranslation(translationInfo)
+                        })
+            }
+        } else {
+            downloadTranslation(translationInfo)
         }
     }
 

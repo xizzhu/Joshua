@@ -37,10 +37,6 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
         fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
 
         fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int)
-
-        fun onVerseClicked(verse: Verse)
-
-        fun onVerseLongClicked(verse: Verse)
     }
 
     private val inflater = LayoutInflater.from(context)
@@ -134,7 +130,6 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
     val rootView: View = inflater.inflate(R.layout.page_verse, container, false)
     private val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
     private val verseList = rootView.findViewById<VerseListView>(R.id.verse_list).apply {
-        setListener(listener)
         addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (inUse && newState == RecyclerView.SCROLL_STATE_IDLE) {

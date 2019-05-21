@@ -64,7 +64,7 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
 
                         items.add(NoteItem(note.verseIndex,
                                 notesInteractor.readVerse(currentTranslation, note.verseIndex).text,
-                                note.note, note.timestamp))
+                                note.note, note.timestamp, this@NotesPresenter::selectVerse))
                     }
                     view?.onNotesLoaded(items)
                 }

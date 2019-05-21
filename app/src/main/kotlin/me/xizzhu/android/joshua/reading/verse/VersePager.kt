@@ -23,7 +23,6 @@ import android.widget.Toast
 import androidx.viewpager.widget.ViewPager
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -68,14 +67,6 @@ class VerseViewPager : ViewPager, VerseView {
             }
             currentVerseIndex = updatedVerseIndex
             presenter.saveCurrentVerseIndex(updatedVerseIndex)
-        }
-
-        override fun onVerseClicked(verse: Verse) {
-            presenter.onVerseClicked(verse)
-        }
-
-        override fun onVerseLongClicked(verse: Verse) {
-            presenter.onVerseLongClicked(verse)
         }
     }
     private val adapter = VersePagerAdapter(context, versePagerAdapterListener)

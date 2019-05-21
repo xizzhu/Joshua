@@ -34,7 +34,9 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Color
 
 
-data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Boolean, var selected: Boolean = false) : BaseItem {
+data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Boolean,
+                     val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
+                     var selected: Boolean = false) : BaseItem {
     companion object {
         private val STRING_BUILDER = StringBuilder()
         private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
@@ -103,6 +105,14 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     private val text = itemView.findViewById<TextView>(R.id.text)
     private val bookmark = itemView.findViewById<ImageView>(R.id.bookmark)
     private val note = itemView.findViewById<ImageView>(R.id.note)
+
+    init {
+        itemView.setOnClickListener { item?.let { it.onClicked(it.verse) } }
+        itemView.setOnLongClickListener {
+            item?.let { it.onLongClicked(it.verse) }
+            return@setOnLongClickListener true
+        }
+    }
 
     override fun bind(settings: Settings, item: VerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {

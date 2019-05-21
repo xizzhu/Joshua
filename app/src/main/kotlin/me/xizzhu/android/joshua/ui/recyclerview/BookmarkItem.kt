@@ -28,7 +28,8 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val timestamp: Long) : BaseItem {
+data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val timestamp: Long,
+                        val onClick: (VerseIndex) -> Unit) : BaseItem {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
@@ -56,6 +57,10 @@ data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val ti
 class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<BookmarkItem>(inflater.inflate(R.layout.item_bookmarks, parent, false)) {
     private val text: TextView = itemView.findViewById(R.id.text)
+
+    init {
+        itemView.setOnClickListener { item?.let { it.onClick(it.verseIndex) } }
+    }
 
     override fun bind(settings: Settings, item: BookmarkItem, payloads: List<Any>) {
         with(text) {

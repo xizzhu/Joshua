@@ -32,7 +32,8 @@ import me.xizzhu.android.joshua.ui.getCaptionTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: String, val timestamp: Long) : BaseItem {
+data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: String,
+                    val timestamp: Long, val onClicked: (VerseIndex) -> Unit) : BaseItem {
     companion object {
         private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
@@ -60,6 +61,10 @@ class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<NoteItem>(inflater.inflate(R.layout.item_note, parent, false)) {
     private val verse: TextView = itemView.findViewById(R.id.verse)
     private val text: TextView = itemView.findViewById(R.id.text)
+
+    init {
+        itemView.setOnClickListener { item?.let { it.onClicked(it.verseIndex) } }
+    }
 
     override fun bind(settings: Settings, item: NoteItem, payloads: List<Any>) {
         with(verse) {

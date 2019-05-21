@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.bookmarks
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
-import android.view.View
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
@@ -36,11 +35,6 @@ interface BookmarksView : BaseSettingsView {
 
 class BookmarksListView : BaseRecyclerView, BookmarksView {
     private lateinit var presenter: BookmarksPresenter
-    private val onClickListener = OnClickListener { view ->
-        ((getChildViewHolder(view) as BookmarkItemViewHolder).item)?.let {
-            presenter.selectVerse(it.verseIndex)
-        }
-    }
 
     constructor(context: Context) : super(context)
 
@@ -50,18 +44,6 @@ class BookmarksListView : BaseRecyclerView, BookmarksView {
 
     fun setPresenter(presenter: BookmarksPresenter) {
         this.presenter = presenter
-    }
-
-    override fun onChildAttachedToWindow(child: View) {
-        super.onChildAttachedToWindow(child)
-        if (getChildViewHolder(child) is BookmarkItemViewHolder) {
-            child.setOnClickListener(onClickListener)
-        }
-    }
-
-    override fun onChildDetachedFromWindow(child: View) {
-        super.onChildDetachedFromWindow(child)
-        child.setOnClickListener(null)
     }
 
     override fun onBookmarksLoaded(bookmarks: List<BaseItem>) {

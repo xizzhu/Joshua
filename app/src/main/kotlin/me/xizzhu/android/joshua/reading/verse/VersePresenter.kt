@@ -213,11 +213,13 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
 
             verseItems.add(VerseItem(verse,
                     bookmark?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
-                    note?.let { it.verseIndex.verseIndex == verseIndex } ?: false))
+                    note?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
+                    this::onVerseClicked, this::onVerseLongClicked))
         }
         return verseItems
     }
 
+    @VisibleForTesting
     fun onVerseClicked(verse: Verse) {
         if (actionMode == null) {
             launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES) }
@@ -240,6 +242,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
     }
 
+    @VisibleForTesting
     fun onVerseLongClicked(verse: Verse) {
         if (actionMode == null) {
             actionMode = readingInteractor.startActionMode(actionModeCallback)

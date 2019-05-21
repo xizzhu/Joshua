@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.ui.recyclerview
 
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import kotlin.test.Test
@@ -25,21 +26,23 @@ import kotlin.test.assertEquals
 class TranslationItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.TRANSLATION_ITEM, TranslationItem(MockContents.kjvTranslationInfo, true).getItemViewType())
+        assertEquals(BaseItem.TRANSLATION_ITEM, TranslationItem(MockContents.kjvTranslationInfo, true, {}, { _, _ -> }).getItemViewType())
     }
 
     @Test
     fun testRightDrawable() {
-        assertEquals(0, TranslationItem(MockContents.kjvTranslationInfo, false).rightDrawable)
-        assertEquals(R.drawable.ic_check, TranslationItem(MockContents.kjvTranslationInfo, true).rightDrawable)
+        assertEquals(0, TranslationItem(MockContents.kjvTranslationInfo, false, {}, { _, _ -> }).rightDrawable)
+        assertEquals(R.drawable.ic_check, TranslationItem(MockContents.kjvTranslationInfo, true, {}, { _, _ -> }).rightDrawable)
     }
 
     @Test
     fun testToTranslationItems() {
-        val expected = listOf(TranslationItem(MockContents.kjvDownloadedTranslationInfo, true),
-                TranslationItem(MockContents.cuvTranslationInfo, false))
+        val onClicked: (TranslationInfo) -> Unit = {}
+        val onLongClicked: (TranslationInfo, Boolean) -> Unit = { _, _ -> }
+        val expected = listOf(TranslationItem(MockContents.kjvDownloadedTranslationInfo, true, onClicked, onLongClicked),
+                TranslationItem(MockContents.cuvTranslationInfo, false, onClicked, onLongClicked))
         val actual = listOf(MockContents.kjvDownloadedTranslationInfo, MockContents.cuvTranslationInfo)
-                .toTranslationItems(MockContents.kjvShortName)
+                .toTranslationItems(MockContents.kjvShortName, onClicked, onLongClicked)
         assertEquals(expected, actual)
     }
 }

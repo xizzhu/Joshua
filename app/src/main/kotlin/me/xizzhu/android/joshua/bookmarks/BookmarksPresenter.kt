@@ -64,7 +64,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
 
                         items.add(BookmarkItem(bookmark.verseIndex,
                                 bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
-                                bookmark.timestamp))
+                                bookmark.timestamp, this@BookmarksPresenter::selectVerse))
                     }
                     view?.onBookmarksLoaded(items)
                 }
