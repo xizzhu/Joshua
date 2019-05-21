@@ -46,6 +46,7 @@ class AndroidBookmarkStorageTest : BaseSqliteTest() {
             assertTrue(androidBookmarkStorage.read().isEmpty())
             for (bookIndex in 0 until Bible.BOOK_COUNT) {
                 for (chapterIndex in 0 until Bible.getChapterCount(bookIndex)) {
+                    assertTrue(androidBookmarkStorage.read(bookIndex, chapterIndex).isEmpty())
                     assertFalse(androidBookmarkStorage.read(VerseIndex(bookIndex, chapterIndex, 0)).isValid())
                 }
             }
@@ -64,6 +65,8 @@ class AndroidBookmarkStorageTest : BaseSqliteTest() {
             androidBookmarkStorage.save(bookmark3)
 
             assertEquals(listOf(bookmark3, bookmark2, bookmark1), androidBookmarkStorage.read())
+            assertEquals(listOf(bookmark1, bookmark2), androidBookmarkStorage.read(1, 2))
+            assertEquals(listOf(bookmark3), androidBookmarkStorage.read(1, 4))
             assertEquals(bookmark1, androidBookmarkStorage.read(VerseIndex(1, 2, 3)))
             assertEquals(bookmark2, androidBookmarkStorage.read(VerseIndex(1, 2, 4)))
             assertEquals(bookmark3, androidBookmarkStorage.read(VerseIndex(1, 4, 3)))
@@ -85,6 +88,8 @@ class AndroidBookmarkStorageTest : BaseSqliteTest() {
             androidBookmarkStorage.save(bookmark3)
 
             assertEquals(listOf(bookmark3, bookmark2, bookmark1), androidBookmarkStorage.read())
+            assertEquals(listOf(bookmark1, bookmark2), androidBookmarkStorage.read(1, 2))
+            assertEquals(listOf(bookmark3), androidBookmarkStorage.read(1, 4))
             assertEquals(bookmark1, androidBookmarkStorage.read(VerseIndex(1, 2, 3)))
             assertEquals(bookmark2, androidBookmarkStorage.read(VerseIndex(1, 2, 4)))
             assertEquals(bookmark3, androidBookmarkStorage.read(VerseIndex(1, 4, 3)))
@@ -96,6 +101,7 @@ class AndroidBookmarkStorageTest : BaseSqliteTest() {
         runBlocking {
             androidBookmarkStorage.remove(VerseIndex(1, 2, 3))
             assertTrue(androidBookmarkStorage.read().isEmpty())
+            assertTrue(androidBookmarkStorage.read(1, 2).isEmpty())
             assertFalse(androidBookmarkStorage.read(VerseIndex(1, 2, 3)).isValid())
         }
     }
@@ -106,9 +112,11 @@ class AndroidBookmarkStorageTest : BaseSqliteTest() {
             val bookmark = Bookmark(VerseIndex(1, 2, 3), 45678L)
             androidBookmarkStorage.save(bookmark)
             assertEquals(listOf(bookmark), androidBookmarkStorage.read())
+            assertEquals(listOf(bookmark), androidBookmarkStorage.read(1, 2))
 
             androidBookmarkStorage.remove(bookmark.verseIndex)
             assertTrue(androidBookmarkStorage.read().isEmpty())
+            assertTrue(androidBookmarkStorage.read(1, 2).isEmpty())
         }
     }
 }

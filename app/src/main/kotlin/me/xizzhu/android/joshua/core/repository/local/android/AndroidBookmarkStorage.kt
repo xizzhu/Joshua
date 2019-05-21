@@ -26,6 +26,9 @@ import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 class AndroidBookmarkStorage(private val androidDatabase: AndroidDatabase) : LocalBookmarkStorage {
     override suspend fun read(): List<Bookmark> = withContext(Dispatchers.IO) { androidDatabase.bookmarkDao.read() }
 
+    override suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark> =
+            withContext(Dispatchers.IO) { androidDatabase.bookmarkDao.read(bookIndex, chapterIndex) }
+
     override suspend fun read(verseIndex: VerseIndex): Bookmark =
             withContext(Dispatchers.IO) { androidDatabase.bookmarkDao.read(verseIndex) }
 

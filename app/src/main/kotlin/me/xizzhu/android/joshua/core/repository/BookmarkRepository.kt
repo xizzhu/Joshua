@@ -23,6 +23,8 @@ import me.xizzhu.android.joshua.core.repository.local.LocalBookmarkStorage
 class BookmarkRepository(private val localBookmarkStorage: LocalBookmarkStorage) {
     suspend fun read(): List<Bookmark> = localBookmarkStorage.read()
 
+    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark> = localBookmarkStorage.read(bookIndex, chapterIndex)
+
     suspend fun read(verseIndex: VerseIndex): Bookmark = localBookmarkStorage.read(verseIndex)
 
     suspend fun save(bookmark: Bookmark) {
