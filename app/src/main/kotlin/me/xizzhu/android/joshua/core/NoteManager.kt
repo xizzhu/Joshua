@@ -25,6 +25,8 @@ data class Note(val verseIndex: VerseIndex, val note: String, val timestamp: Lon
 class NoteManager(private val noteRepository: NoteRepository) {
     suspend fun read(): List<Note> = noteRepository.read()
 
+    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Note> = noteRepository.read(bookIndex, chapterIndex)
+
     suspend fun read(verseIndex: VerseIndex): Note = noteRepository.read(verseIndex)
 
     suspend fun save(note: Note) {

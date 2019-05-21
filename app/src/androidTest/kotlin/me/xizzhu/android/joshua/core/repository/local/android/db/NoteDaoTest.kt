@@ -36,6 +36,7 @@ class NoteDaoTest : BaseSqliteTest() {
         assertTrue(androidDatabase.noteDao.read().isEmpty())
         for (bookIndex in 0 until Bible.BOOK_COUNT) {
             for (chapterIndex in 0 until Bible.getChapterCount(bookIndex)) {
+                assertTrue(androidDatabase.noteDao.read(bookIndex, chapterIndex).isEmpty())
                 assertFalse(androidDatabase.noteDao.read(VerseIndex(bookIndex, chapterIndex, 0)).isValid())
             }
         }
@@ -52,6 +53,8 @@ class NoteDaoTest : BaseSqliteTest() {
         androidDatabase.noteDao.save(note3)
 
         assertEquals(listOf(note3, note2, note1), androidDatabase.noteDao.read())
+        assertEquals(listOf(note1, note2), androidDatabase.noteDao.read(1, 2))
+        assertEquals(listOf(note3), androidDatabase.noteDao.read(1, 4))
         assertEquals(note1, androidDatabase.noteDao.read(VerseIndex(1, 2, 3)))
         assertEquals(note2, androidDatabase.noteDao.read(VerseIndex(1, 2, 4)))
         assertEquals(note3, androidDatabase.noteDao.read(VerseIndex(1, 4, 3)))
@@ -71,6 +74,8 @@ class NoteDaoTest : BaseSqliteTest() {
         androidDatabase.noteDao.save(note3)
 
         assertEquals(listOf(note3, note2, note1), androidDatabase.noteDao.read())
+        assertEquals(listOf(note1, note2), androidDatabase.noteDao.read(1, 2))
+        assertEquals(listOf(note3), androidDatabase.noteDao.read(1, 4))
         assertEquals(note1, androidDatabase.noteDao.read(VerseIndex(1, 2, 3)))
         assertEquals(note2, androidDatabase.noteDao.read(VerseIndex(1, 2, 4)))
         assertEquals(note3, androidDatabase.noteDao.read(VerseIndex(1, 4, 3)))
@@ -80,6 +85,7 @@ class NoteDaoTest : BaseSqliteTest() {
     fun testRemoveNonExist() {
         androidDatabase.noteDao.remove(VerseIndex(1, 2, 3))
         assertTrue(androidDatabase.noteDao.read().isEmpty())
+        assertTrue(androidDatabase.noteDao.read(1, 2).isEmpty())
         assertFalse(androidDatabase.noteDao.read(VerseIndex(1, 2, 3)).isValid())
     }
 
@@ -88,8 +94,10 @@ class NoteDaoTest : BaseSqliteTest() {
         val note = Note(VerseIndex(1, 2, 3), "note 1", 45678L)
         androidDatabase.noteDao.save(note)
         assertEquals(listOf(note), androidDatabase.noteDao.read())
+        assertEquals(listOf(note), androidDatabase.noteDao.read(1, 2))
 
         androidDatabase.noteDao.remove(note.verseIndex)
         assertTrue(androidDatabase.noteDao.read().isEmpty())
+        assertTrue(androidDatabase.noteDao.read(1, 2).isEmpty())
     }
 }

@@ -26,6 +26,9 @@ import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 class AndroidNoteStorage(private val androidDatabase: AndroidDatabase) : LocalNoteStorage {
     override suspend fun read(): List<Note> = withContext(Dispatchers.IO) { androidDatabase.noteDao.read() }
 
+    override suspend fun read(bookIndex: Int, chapterIndex: Int): List<Note> =
+            withContext(Dispatchers.IO) { androidDatabase.noteDao.read(bookIndex, chapterIndex) }
+
     override suspend fun read(verseIndex: VerseIndex): Note =
             withContext(Dispatchers.IO) { androidDatabase.noteDao.read(verseIndex) }
 

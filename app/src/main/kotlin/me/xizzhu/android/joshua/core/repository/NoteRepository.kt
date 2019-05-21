@@ -23,6 +23,8 @@ import me.xizzhu.android.joshua.core.repository.local.LocalNoteStorage
 class NoteRepository(private val localNoteStorage: LocalNoteStorage) {
     suspend fun read(): List<Note> = localNoteStorage.read()
 
+    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Note> = localNoteStorage.read(bookIndex, chapterIndex)
+
     suspend fun read(verseIndex: VerseIndex): Note = localNoteStorage.read(verseIndex)
 
     suspend fun save(note: Note) {
