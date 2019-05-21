@@ -194,6 +194,8 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         readingProgressManager.stopTracking()
     }
 
+    suspend fun readBookmarks(bookIndex: Int, chapterIndex: Int): List<Bookmark> = bookmarkManager.read(bookIndex, chapterIndex)
+
     suspend fun readBookmark(verseIndex: VerseIndex): Bookmark = bookmarkManager.read(verseIndex)
 
     suspend fun addBookmark(verseIndex: VerseIndex) {
@@ -203,6 +205,8 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     suspend fun removeBookmark(verseIndex: VerseIndex) {
         bookmarkManager.remove(verseIndex)
     }
+
+    suspend fun readNotes(bookIndex: Int, chapterIndex: Int): List<Note> = noteManager.read(bookIndex, chapterIndex)
 
     suspend fun readNote(verseIndex: VerseIndex): Note = noteManager.read(verseIndex)
 

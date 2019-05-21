@@ -27,6 +27,8 @@ import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
@@ -163,10 +165,10 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                     verses.map { SimpleVerseItem(it, totalVerseCount) }
                 } else {
                     withContext(Dispatchers.Default) {
-                        // TODO bookmarks & notes
                         val versesAsync = async { readVerses(bookIndex, chapterIndex) }
-                        val verses = versesAsync.await()
-                        verses.map { VerseItem(it, true, false) }
+                        val bookmarksAsync = async { readingInteractor.readBookmarks(bookIndex, chapterIndex) }
+                        val notesAsync = async { readingInteractor.readNotes(bookIndex, chapterIndex) }
+                        toVerseItems(versesAsync.await(), bookmarksAsync.await(), notesAsync.await())
                     }
                 }
                 view?.onVersesLoaded(bookIndex, chapterIndex, items)
@@ -181,6 +183,39 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         readingInteractor.readVerses(currentTranslation, bookIndex, chapterIndex)
     } else {
         readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+    }
+
+    @VisibleForTesting
+    fun toVerseItems(verses: List<Verse>, bookmarks: List<Bookmark>, notes: List<Note>): List<VerseItem> {
+        val verseItems = ArrayList<VerseItem>(verses.size)
+        val bookmarkIterator = bookmarks.iterator()
+        var bookmark: Bookmark? = null
+        val noteIterator = notes.iterator()
+        var note: Note? = null
+        verses.forEach { verse ->
+            val verseIndex = verse.verseIndex.verseIndex
+            if (bookmark == null || bookmark!!.verseIndex.verseIndex < verseIndex) {
+                while (bookmarkIterator.hasNext()) {
+                    bookmark = bookmarkIterator.next()
+                    if (bookmark!!.verseIndex.verseIndex >= verseIndex) {
+                        break
+                    }
+                }
+            }
+            if (note == null || note!!.verseIndex.verseIndex < verseIndex) {
+                while (noteIterator.hasNext()) {
+                    note = noteIterator.next()
+                    if (note!!.verseIndex.verseIndex >= verseIndex) {
+                        break
+                    }
+                }
+            }
+
+            verseItems.add(VerseItem(verse,
+                    bookmark?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
+                    note?.let { it.verseIndex.verseIndex == verseIndex } ?: false))
+        }
+        return verseItems
     }
 
     fun onVerseClicked(verse: Verse) {

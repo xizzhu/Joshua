@@ -22,6 +22,8 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -175,6 +177,40 @@ class VersePresenterTest : BaseUnitTest() {
             val chapterIndex = 2
             versePresenter.selectChapter(bookIndex, chapterIndex)
             verify(verseView, times(1)).onChapterSelectionFailed(bookIndex, chapterIndex)
+        }
+    }
+
+    @Test
+    fun testToVerseItemsWithNoBookmarksNorNotes() {
+        val verses = MockContents.kjvVerses
+        val verseItems = versePresenter.toVerseItems(verses, emptyList(), emptyList())
+        assertEquals(verses.size, verseItems.size)
+        verseItems.forEachIndexed { index, verseItem ->
+            assertEquals(verses[index], verseItem.verse)
+            assertFalse(verseItem.hasBookmark)
+            assertFalse(verseItem.hasNote)
+        }
+    }
+
+    @Test
+    fun testToVerseItems() {
+        val verses = MockContents.kjvVerses
+        val verseItems = versePresenter.toVerseItems(verses,
+                listOf(
+                        Bookmark(VerseIndex(0, 0, 0), 0L),
+                        Bookmark(VerseIndex(0, 0, 5), 0L),
+                        Bookmark(VerseIndex(0, 0, 10), 0L)
+                ),
+                listOf(
+                        Note(VerseIndex(0, 0, 0), "", 0L),
+                        Note(VerseIndex(0, 0, 7), "", 0L),
+                        Note(VerseIndex(0, 0, 10), "", 0L)
+                ))
+        assertEquals(verses.size, verseItems.size)
+        verseItems.forEachIndexed { index, verseItem ->
+            assertEquals(verses[index], verseItem.verse)
+            assertTrue(if (index == 0 || index == 5) verseItem.hasBookmark else !verseItem.hasBookmark)
+            assertTrue(if (index == 0 || index == 7) verseItem.hasNote else !verseItem.hasNote)
         }
     }
 
