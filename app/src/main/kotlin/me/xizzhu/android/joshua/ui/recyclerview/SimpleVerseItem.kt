@@ -30,7 +30,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.lang.StringBuilder
 
-data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int) : BaseItem {
+data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int, var selected: Boolean = false) : BaseItem {
     companion object {
         private val STRING_BUILDER = StringBuilder()
         private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
@@ -99,8 +99,6 @@ data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int) :
             return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, length)
         }
     }
-
-    var selected: Boolean = false
 
     override fun getItemViewType(): Int = BaseItem.SIMPLE_VERSE_ITEM
 }

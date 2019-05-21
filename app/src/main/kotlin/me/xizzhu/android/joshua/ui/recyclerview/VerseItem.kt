@@ -34,7 +34,7 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Color
 
 
-data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Boolean) : BaseItem {
+data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Boolean, var selected: Boolean = false) : BaseItem {
     companion object {
         private val STRING_BUILDER = StringBuilder()
         private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
@@ -86,8 +86,6 @@ data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Bo
             return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, length)
         }
     }
-
-    var selected: Boolean = false
 
     override fun getItemViewType(): Int = BaseItem.VERSE_ITEM
 }
