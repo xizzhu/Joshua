@@ -88,9 +88,6 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
             }
         }
         launch(Dispatchers.Main) {
-            translationInteractor.reload(false)
-        }
-        launch(Dispatchers.Main) {
             translationInteractor.observeTranslationsLoadingState().consumeEach { loadingState ->
                 when (loadingState) {
                     SwipeRefresherState.IS_REFRESHING -> view?.onTranslationsLoadingStarted()
@@ -99,8 +96,10 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
             }
         }
         launch(Dispatchers.Main) {
-            translationInteractor.observeTranslationsLoadingRequest().consumeEach { translationInteractor.reload(true) }
+            translationInteractor.observeTranslationsLoadingRequest().consumeEach { loadTranslationList(true) }
         }
+
+        loadTranslationList(false)
     }
 
     private fun updateTranslations() {
@@ -115,7 +114,22 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
         items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!))
 
-        view?.onTranslationsUpdated(items)
+        if (items.isEmpty()) {
+            view?.onNoTranslationsAvailable()
+        } else {
+            view?.onTranslationsUpdated(items)
+        }
+    }
+
+    fun loadTranslationList(forceRefresh: Boolean) {
+        launch(Dispatchers.Main) {
+            try {
+                translationInteractor.reload(forceRefresh)
+            } catch (e: Exception) {
+                Log.e(tag, e, "Failed to load translation list")
+                view?.onTranslationsLoadingFailed(forceRefresh)
+            }
+        }
     }
 
     fun downloadTranslation(translationToDelete: TranslationInfo, downloadProgressChannel: Channel<Int> = Channel()) {
@@ -169,5 +183,9 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 view?.onCurrentTranslationUpdateFailed(translationShortName)
             }
         }
+    }
+
+    fun finish() {
+        translationInteractor.finish()
     }
 }

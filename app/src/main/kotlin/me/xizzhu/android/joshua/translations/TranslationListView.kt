@@ -36,6 +36,10 @@ interface TranslationView : BaseSettingsView {
 
     fun onTranslationsLoadingCompleted()
 
+    fun onTranslationsLoadingFailed(forceRefresh: Boolean)
+
+    fun onNoTranslationsAvailable()
+
     fun onTranslationsUpdated(translations: List<BaseItem>)
 
     fun onTranslationDownloadStarted()
@@ -120,6 +124,26 @@ class TranslationListView : BaseRecyclerView, TranslationView {
 
     override fun onTranslationsLoadingCompleted() {
         fadeIn()
+    }
+
+    override fun onTranslationsLoadingFailed(forceRefresh: Boolean) {
+        DialogHelper.showDialog(context, false, R.string.dialog_load_translation_list_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.loadTranslationList(forceRefresh)
+                },
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.finish()
+                })
+    }
+
+    override fun onNoTranslationsAvailable() {
+        DialogHelper.showDialog(context, false, R.string.dialog_empty_translation_list_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.loadTranslationList(true)
+                },
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.finish()
+                })
     }
 
     override fun onTranslationsUpdated(translations: List<BaseItem>) {

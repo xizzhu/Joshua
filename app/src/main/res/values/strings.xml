@@ -32,6 +32,8 @@
     <string name="dialog_installing_translation">Installing…</string>
     <string name="dialog_deleting_translation">Deleting…</string>
 
+    <string name="dialog_empty_translation_list_error">No translation is loaded, retry?</string>
+    <string name="dialog_load_translation_list_error">Failed to load translation list, retry?</string>
     <string name="dialog_download_error">Failed to download, retry?</string>
     <string name="dialog_delete_error">Failed to delete, retry?</string>
     <string name="dialog_update_translation_error">Failed to select the translation, retry?</string>

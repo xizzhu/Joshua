@@ -51,8 +51,11 @@ class TranslationInteractor(private val translationManagementActivity: Translati
 
     suspend fun reload(forceRefresh: Boolean) {
         translationsLoadingState.send(SwipeRefresherState.IS_REFRESHING)
-        translationManager.reload(forceRefresh)
-        translationsLoadingState.send(SwipeRefresherState.NOT_REFRESHING)
+        try {
+            translationManager.reload(forceRefresh)
+        } finally {
+            translationsLoadingState.send(SwipeRefresherState.NOT_REFRESHING)
+        }
     }
 
     suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
