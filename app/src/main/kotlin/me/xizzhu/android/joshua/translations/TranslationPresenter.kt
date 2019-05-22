@@ -114,11 +114,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
         items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!))
 
-        if (items.isEmpty()) {
-            view?.onNoTranslationsAvailable()
-        } else {
-            view?.onTranslationsUpdated(items)
-        }
+        view?.onTranslationsUpdated(items)
     }
 
     fun loadTranslationList(forceRefresh: Boolean) {
