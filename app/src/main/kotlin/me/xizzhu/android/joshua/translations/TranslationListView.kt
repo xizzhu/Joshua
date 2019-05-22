@@ -125,9 +125,12 @@ class TranslationListView : BaseRecyclerView, TranslationView {
     }
 
     override fun onTranslationsLoadingFailed(forceRefresh: Boolean) {
-        DialogHelper.showDialog(context, true, R.string.dialog_load_translation_list_error,
+        DialogHelper.showDialog(context, false, R.string.dialog_load_translation_list_error,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.loadTranslationList(forceRefresh)
+                },
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.finish()
                 })
     }
 

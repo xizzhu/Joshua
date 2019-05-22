@@ -180,4 +180,8 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
             }
         }
     }
+
+    fun finish() {
+        translationInteractor.finish()
+    }
 }

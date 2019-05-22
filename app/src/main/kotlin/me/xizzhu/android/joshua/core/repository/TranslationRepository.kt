@@ -35,19 +35,23 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
     }
 
     suspend fun reload(forceRefresh: Boolean): List<TranslationInfo> {
-        if (forceRefresh || translationListTooOld()) {
+        val translations = if (forceRefresh || translationListTooOld()) {
             try {
-                return readTranslationsFromBackend()
+                readTranslationsFromBackend()
             } catch (e: Exception) {
                 Log.e(TAG, e, "Failed to read translation list from backend")
-                return readTranslationsFromLocal()
+                readTranslationsFromLocal()
             }
         } else {
-            return readTranslationsFromLocal().ifEmpty {
+            readTranslationsFromLocal().ifEmpty {
                 Log.w(TAG, "Have fresh but empty local translation list")
-                return@ifEmpty readTranslationsFromBackend()
+                readTranslationsFromBackend()
             }
         }
+        if (translations.isEmpty()) {
+            throw IllegalStateException("Empty translation list")
+        }
+        return translations
     }
 
     @VisibleForTesting
