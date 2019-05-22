@@ -4,6 +4,7 @@ CHANGELOG
 #### Next Release
 - Added link to rate app on Play Store
 - Fixed padding for search result
+- Fixed crash when failed to load translation list
 
 #### v0.3.1 (2019-05-18)
 - Should highlight selected verse when opening from notes

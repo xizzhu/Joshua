@@ -126,6 +126,35 @@ class TranslationPresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testLoadTranslationList() {
+        runBlocking {
+            translationPresenter.attachView(translationView)
+
+            verify(translationInteractor, never()).reload(true)
+            verify(translationInteractor, times(1)).reload(false)
+            verify(translationView, never()).onTranslationsLoadingFailed(anyBoolean())
+
+            translationPresenter.detachView()
+        }
+    }
+
+    @Test
+    fun testLoadTranslationListWithException() {
+        runBlocking {
+            `when`(translationInteractor.reload(anyBoolean())).thenThrow(RuntimeException("Random exception"))
+
+            translationPresenter.attachView(translationView)
+
+            verify(translationInteractor, never()).reload(true)
+            verify(translationInteractor, times(1)).reload(false)
+            verify(translationView, times(1)).onTranslationsLoadingFailed(false)
+            verify(translationView, never()).onTranslationsLoadingFailed(true)
+
+            translationPresenter.detachView()
+        }
+    }
+
+    @Test
     fun testDownloadTranslation() {
         runBlocking {
             translationPresenter.attachView(translationView)
