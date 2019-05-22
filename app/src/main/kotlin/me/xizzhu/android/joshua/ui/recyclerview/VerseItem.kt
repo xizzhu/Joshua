@@ -36,6 +36,7 @@ import android.graphics.Color
 
 data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Boolean,
                      val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
+                     val onNoteClicked: (Verse) -> Unit,
                      var selected: Boolean = false) : BaseItem {
     companion object {
         private val STRING_BUILDER = StringBuilder()
@@ -112,6 +113,7 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
             item?.let { it.onLongClicked(it.verse) }
             return@setOnLongClickListener true
         }
+        note.setOnClickListener { item?.let { it.onNoteClicked(it.verse) } }
     }
 
     override fun bind(settings: Settings, item: VerseItem, payloads: List<Any>) {
