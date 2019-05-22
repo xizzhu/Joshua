@@ -105,11 +105,6 @@ data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int, v
 
 class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<SimpleVerseItem>(inflater.inflate(R.layout.item_simple_verse, parent, false)) {
-    companion object {
-        const val VERSE_SELECTED = 1
-        const val VERSE_DESELECTED = 2
-    }
-
     private val index = itemView.findViewById(R.id.index) as TextView
     private val text = itemView.findViewById(R.id.text) as TextView
     private val divider = itemView.findViewById(R.id.divider) as View
@@ -133,11 +128,11 @@ class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
         } else {
             payloads.forEach { payload ->
                 when (payload as Int) {
-                    VERSE_SELECTED -> {
+                    VerseItemViewHolder.VERSE_SELECTED -> {
                         item.selected = true
                         itemView.isSelected = true
                     }
-                    VERSE_DESELECTED -> {
+                    VerseItemViewHolder.VERSE_DESELECTED -> {
                         item.selected = false
                         itemView.isSelected = false
                     }

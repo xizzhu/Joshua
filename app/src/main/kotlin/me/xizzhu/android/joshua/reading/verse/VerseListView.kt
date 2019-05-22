@@ -22,7 +22,7 @@ import android.util.AttributeSet
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItemViewHolder
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
 
 class VerseListView : BaseRecyclerView {
     constructor(context: Context) : super(context)
@@ -40,18 +40,18 @@ class VerseListView : BaseRecyclerView {
                     override fun onChanged() {
                         adapter.unregisterAdapterDataObserver(this)
                         Handler().post {
-                            adapter.notifyItemChanged(verseIndex.verseIndex, SimpleVerseItemViewHolder.VERSE_SELECTED)
+                            adapter.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_SELECTED)
                         }
                     }
                 })
             } else {
-                adapter.notifyItemChanged(verseIndex.verseIndex, SimpleVerseItemViewHolder.VERSE_SELECTED)
+                adapter.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_SELECTED)
             }
         }
     }
 
     fun deselectVerse(verseIndex: VerseIndex) {
-        adapter?.notifyItemChanged(verseIndex.verseIndex, SimpleVerseItemViewHolder.VERSE_DESELECTED)
+        adapter?.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_DESELECTED)
     }
 
     fun setVerses(verses: List<BaseItem>) {
