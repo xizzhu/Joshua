@@ -114,7 +114,11 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
         items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!))
 
-        view?.onTranslationsUpdated(items)
+        if (items.isEmpty()) {
+            view?.onNoTranslationsAvailable()
+        } else {
+            view?.onTranslationsUpdated(items)
+        }
     }
 
     fun loadTranslationList(forceRefresh: Boolean) {
@@ -179,5 +183,9 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 view?.onCurrentTranslationUpdateFailed(translationShortName)
             }
         }
+    }
+
+    fun finish() {
+        translationInteractor.finish()
     }
 }

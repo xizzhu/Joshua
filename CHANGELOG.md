@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Added link to rate app on Play Store
+- Notify user when loaded translation list is empty
 - Fixed padding for search result
 - Fixed crash when failed to load translation list
 
