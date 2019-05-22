@@ -56,6 +56,7 @@ class VersePresenterTest : BaseUnitTest() {
     private lateinit var currentVerseIndexChannel: ConflatedBroadcastChannel<VerseIndex>
     private lateinit var parallelTranslationsChannel: ConflatedBroadcastChannel<List<String>>
     private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>>
+    private lateinit var verseState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>>
 
     @Before
     override fun setup() {
@@ -75,6 +76,9 @@ class VersePresenterTest : BaseUnitTest() {
 
         verseDetailOpenState = ConflatedBroadcastChannel()
         `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
+
+        verseState = ConflatedBroadcastChannel()
+        `when`(readingInteractor.observeVerseState()).thenReturn(verseDetailOpenState.openSubscription())
 
         versePresenter = VersePresenter(readingInteractor)
         versePresenter.attachView(verseView)
