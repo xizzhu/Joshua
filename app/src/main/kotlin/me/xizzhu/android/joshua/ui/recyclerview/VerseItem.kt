@@ -98,6 +98,8 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     companion object {
         const val VERSE_SELECTED = 1
         const val VERSE_DESELECTED = 2
+        const val NOTE_ADDED = 3
+        const val NOTE_REMOVED = 4
 
         private val ON = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
         private val OFF = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
@@ -135,6 +137,14 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
                     VERSE_DESELECTED -> {
                         item.selected = false
                         itemView.isSelected = false
+                    }
+                    NOTE_ADDED -> {
+                        item.hasNote = true
+                        note.colorFilter = ON
+                    }
+                    NOTE_REMOVED -> {
+                        item.hasNote = false
+                        note.colorFilter = OFF
                     }
                 }
             }

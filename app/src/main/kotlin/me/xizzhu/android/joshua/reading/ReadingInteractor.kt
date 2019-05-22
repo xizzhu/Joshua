@@ -32,10 +32,12 @@ import android.content.res.Resources
 import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 
 
@@ -52,6 +54,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     }
 
     private val verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>> = ConflatedBroadcastChannel()
+    private val verseState: BroadcastChannel<Pair<VerseIndex, Int>> = ConflatedBroadcastChannel()
 
     fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
@@ -82,6 +85,8 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         }
         return false
     }
+
+    fun observeVerseState(): ReceiveChannel<Pair<VerseIndex, Int>> = verseState.openSubscription()
 
     suspend fun requestParallelTranslation(translationShortName: String) {
         bibleReadingManager.requestParallelTranslation(translationShortName)
@@ -212,10 +217,12 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun saveNote(verseIndex: VerseIndex, note: String) {
         noteManager.save(Note(verseIndex, note, System.currentTimeMillis()))
+        verseState.send(Pair(verseIndex, VerseItemViewHolder.NOTE_ADDED))
     }
 
     suspend fun removeNote(verseIndex: VerseIndex) {
         noteManager.remove(verseIndex)
+        verseState.send(Pair(verseIndex, VerseItemViewHolder.NOTE_REMOVED))
     }
 }
 

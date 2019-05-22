@@ -36,6 +36,7 @@ import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItem
 import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
+import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import kotlin.properties.Delegates
 
@@ -130,6 +131,14 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                 if (it.first.isValid()) {
                     selectedVerse = it.first
                     view?.onVerseSelected(selectedVerse)
+                }
+            }
+        }
+        launch(Dispatchers.Main) {
+            readingInteractor.observeVerseState().consumeEach { (verseIndex, operation) ->
+                when (operation) {
+                    VerseItemViewHolder.NOTE_ADDED -> view?.onNoteAdded(verseIndex)
+                    VerseItemViewHolder.NOTE_REMOVED -> view?.onNoteRemoved(verseIndex)
                 }
             }
         }

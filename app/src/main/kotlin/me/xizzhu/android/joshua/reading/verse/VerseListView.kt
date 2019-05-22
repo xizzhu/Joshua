@@ -54,6 +54,14 @@ class VerseListView : BaseRecyclerView {
         adapter?.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_DESELECTED)
     }
 
+    fun notifyNoteAdded(verseIndex: VerseIndex) {
+        adapter?.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.NOTE_ADDED)
+    }
+
+    fun notifyNoteRemoved(verseIndex: VerseIndex) {
+        adapter?.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.NOTE_REMOVED)
+    }
+
     fun setVerses(verses: List<BaseItem>) {
         setItems(verses)
     }
