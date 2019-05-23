@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface VerseView : BaseSettingsView {
@@ -37,7 +37,7 @@ interface VerseView : BaseSettingsView {
 
     fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int)
 
-    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<VerseItem>)
+    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<BaseItem>)
 
     fun onVersesLoadFailed(bookIndex: Int, chapterIndex: Int)
 
@@ -48,6 +48,8 @@ interface VerseView : BaseSettingsView {
     fun onVersesCopied()
 
     fun onVersesCopyShareFailed()
+
+    fun onVerseUpdated(verseIndex: VerseIndex, operation: Int)
 }
 
 class VerseViewPager : ViewPager, VerseView {
@@ -67,14 +69,6 @@ class VerseViewPager : ViewPager, VerseView {
             }
             currentVerseIndex = updatedVerseIndex
             presenter.saveCurrentVerseIndex(updatedVerseIndex)
-        }
-
-        override fun onVerseClicked(verse: VerseItem) {
-            presenter.onVerseClicked(verse)
-        }
-
-        override fun onVerseLongClicked(verse: VerseItem) {
-            presenter.onVerseLongClicked(verse)
         }
     }
     private val adapter = VersePagerAdapter(context, versePagerAdapterListener)
@@ -146,7 +140,7 @@ class VerseViewPager : ViewPager, VerseView {
                 })
     }
 
-    override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<VerseItem>) {
+    override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<BaseItem>) {
         adapter.setVerses(bookIndex, chapterIndex, verses)
     }
 
@@ -171,5 +165,9 @@ class VerseViewPager : ViewPager, VerseView {
 
     override fun onVersesCopyShareFailed() {
         Toast.makeText(context, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onVerseUpdated(verseIndex: VerseIndex, operation: Int) {
+        adapter.notifyVerseUpdate(verseIndex, operation)
     }
 }

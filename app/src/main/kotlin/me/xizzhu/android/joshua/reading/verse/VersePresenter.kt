@@ -21,15 +21,20 @@ import android.view.MenuItem
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.filter
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
+import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItem
 import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import kotlin.properties.Delegates
@@ -128,6 +133,11 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                 }
             }
         }
+        launch(Dispatchers.Main) {
+            readingInteractor.observeVerseState().consumeEach { (verseIndex, operation) ->
+                view?.onVerseUpdated(verseIndex, operation)
+            }
+        }
     }
 
     fun selectChapter(bookIndex: Int, chapterIndex: Int) {
@@ -154,13 +164,19 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     fun loadVerses(bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
             try {
-                val verses = if (parallelTranslations.isEmpty()) {
-                    readingInteractor.readVerses(currentTranslation, bookIndex, chapterIndex)
+                val items = if (readingInteractor.observeSettings().first().simpleReadingModeOn) {
+                    val verses = readVerses(bookIndex, chapterIndex)
+                    val totalVerseCount = verses.size
+                    verses.map { SimpleVerseItem(it, totalVerseCount) }
                 } else {
-                    readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+                    withContext(Dispatchers.Default) {
+                        val versesAsync = async { readVerses(bookIndex, chapterIndex) }
+                        val bookmarksAsync = async { readingInteractor.readBookmarks(bookIndex, chapterIndex) }
+                        val notesAsync = async { readingInteractor.readNotes(bookIndex, chapterIndex) }
+                        toVerseItems(versesAsync.await(), bookmarksAsync.await(), notesAsync.await())
+                    }
                 }
-                val totalVerseCount = verses.size
-                view?.onVersesLoaded(bookIndex, chapterIndex, verses.map { VerseItem(it, totalVerseCount) })
+                view?.onVersesLoaded(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to load verses")
                 view?.onVersesLoadFailed(bookIndex, chapterIndex)
@@ -168,8 +184,48 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
     }
 
-    fun onVerseClicked(verseForReading: VerseItem) {
-        val verse = verseForReading.verse
+    private suspend fun readVerses(bookIndex: Int, chapterIndex: Int) = if (parallelTranslations.isEmpty()) {
+        readingInteractor.readVerses(currentTranslation, bookIndex, chapterIndex)
+    } else {
+        readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+    }
+
+    @VisibleForTesting
+    fun toVerseItems(verses: List<Verse>, bookmarks: List<Bookmark>, notes: List<Note>): List<VerseItem> {
+        val verseItems = ArrayList<VerseItem>(verses.size)
+        val bookmarkIterator = bookmarks.iterator()
+        var bookmark: Bookmark? = null
+        val noteIterator = notes.iterator()
+        var note: Note? = null
+        verses.forEach { verse ->
+            val verseIndex = verse.verseIndex.verseIndex
+            if (bookmark == null || bookmark!!.verseIndex.verseIndex < verseIndex) {
+                while (bookmarkIterator.hasNext()) {
+                    bookmark = bookmarkIterator.next()
+                    if (bookmark!!.verseIndex.verseIndex >= verseIndex) {
+                        break
+                    }
+                }
+            }
+            if (note == null || note!!.verseIndex.verseIndex < verseIndex) {
+                while (noteIterator.hasNext()) {
+                    note = noteIterator.next()
+                    if (note!!.verseIndex.verseIndex >= verseIndex) {
+                        break
+                    }
+                }
+            }
+
+            verseItems.add(VerseItem(verse,
+                    bookmark?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
+                    note?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
+                    this::onVerseClicked, this::onVerseLongClicked, this::onNoteClicked, this::onBookmarkClicked))
+        }
+        return verseItems
+    }
+
+    @VisibleForTesting
+    fun onVerseClicked(verse: Verse) {
         if (actionMode == null) {
             launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES) }
             return
@@ -191,11 +247,28 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
     }
 
-    fun onVerseLongClicked(verseForReading: VerseItem) {
+    @VisibleForTesting
+    fun onVerseLongClicked(verse: Verse) {
         if (actionMode == null) {
             actionMode = readingInteractor.startActionMode(actionModeCallback)
         }
 
-        onVerseClicked(verseForReading)
+        onVerseClicked(verse)
+    }
+
+    @VisibleForTesting
+    fun onNoteClicked(verseIndex: VerseIndex) {
+        launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE) }
+    }
+
+    @VisibleForTesting
+    fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
+        launch(Dispatchers.Main) {
+            if (hasBookmark) {
+                readingInteractor.removeBookmark(verseIndex)
+            } else {
+                readingInteractor.addBookmark(verseIndex)
+            }
+        }
     }
 }

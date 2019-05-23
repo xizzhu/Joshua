@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.search.result
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
-import android.view.View
 import android.widget.Toast
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -27,7 +26,6 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.SearchItem
-import me.xizzhu.android.joshua.ui.recyclerview.SearchItemViewHolder
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface SearchResultView : BaseSettingsView {
@@ -49,25 +47,10 @@ class SearchResultListView : BaseRecyclerView, SearchResultView {
 
     private lateinit var presenter: SearchResultPresenter
 
-    private val onClickListener = OnClickListener { view ->
-        ((getChildViewHolder(view) as SearchItemViewHolder).item)?.let {
-            presenter.selectVerse(it.verseIndex)
-        }
-    }
     private var hasSearchStarted = false
 
     fun setPresenter(presenter: SearchResultPresenter) {
         this.presenter = presenter
-    }
-
-    override fun onChildAttachedToWindow(child: View) {
-        super.onChildAttachedToWindow(child)
-        child.setOnClickListener(onClickListener)
-    }
-
-    override fun onChildDetachedFromWindow(child: View) {
-        super.onChildDetachedFromWindow(child)
-        child.setOnClickListener(null)
     }
 
     override fun onSearchStarted() {

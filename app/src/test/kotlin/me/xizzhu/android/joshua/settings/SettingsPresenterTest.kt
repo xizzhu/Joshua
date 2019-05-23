@@ -118,4 +118,18 @@ class SettingsPresenterTest : BaseUnitTest() {
                     .saveSettings(Settings.DEFAULT.toBuilder().nightModeOn(true).build())
         }
     }
+
+    @Test
+    fun testSetSimpleReadingModeOn() {
+        runBlocking {
+            currentSettings.send(Settings.DEFAULT)
+
+            settingsPresenter.setSimpleReadingModeOn(false)
+            verify(settingsManager, never()).saveSettings(any())
+
+            settingsPresenter.setSimpleReadingModeOn(true)
+            verify(settingsManager, times(1))
+                    .saveSettings(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+        }
+    }
 }

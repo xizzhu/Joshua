@@ -19,15 +19,18 @@ package me.xizzhu.android.joshua.reading.verse
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
+import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -53,6 +56,7 @@ class VersePresenterTest : BaseUnitTest() {
     private lateinit var currentVerseIndexChannel: ConflatedBroadcastChannel<VerseIndex>
     private lateinit var parallelTranslationsChannel: ConflatedBroadcastChannel<List<String>>
     private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>>
+    private lateinit var verseState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>>
 
     @Before
     override fun setup() {
@@ -72,6 +76,9 @@ class VersePresenterTest : BaseUnitTest() {
 
         verseDetailOpenState = ConflatedBroadcastChannel()
         `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
+
+        verseState = ConflatedBroadcastChannel()
+        `when`(readingInteractor.observeVerseState()).thenReturn(verseDetailOpenState.openSubscription())
 
         versePresenter = VersePresenter(readingInteractor)
         versePresenter.attachView(verseView)
@@ -178,15 +185,52 @@ class VersePresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testToVerseItemsWithNoBookmarksNorNotes() {
+        val verses = MockContents.kjvVerses
+        val verseItems = versePresenter.toVerseItems(verses, emptyList(), emptyList())
+        assertEquals(verses.size, verseItems.size)
+        verseItems.forEachIndexed { index, verseItem ->
+            assertEquals(verses[index], verseItem.verse)
+            assertFalse(verseItem.hasBookmark)
+            assertFalse(verseItem.hasNote)
+        }
+    }
+
+    @Test
+    fun testToVerseItems() {
+        val verses = MockContents.kjvVerses
+        val verseItems = versePresenter.toVerseItems(verses,
+                listOf(
+                        Bookmark(VerseIndex(0, 0, 0), 0L),
+                        Bookmark(VerseIndex(0, 0, 5), 0L),
+                        Bookmark(VerseIndex(0, 0, 10), 0L)
+                ),
+                listOf(
+                        Note(VerseIndex(0, 0, 0), "", 0L),
+                        Note(VerseIndex(0, 0, 7), "", 0L),
+                        Note(VerseIndex(0, 0, 10), "", 0L)
+                ))
+        assertEquals(verses.size, verseItems.size)
+        verseItems.forEachIndexed { index, verseItem ->
+            assertEquals(verses[index], verseItem.verse)
+            assertTrue(if (index == 0 || index == 5) verseItem.hasBookmark else !verseItem.hasBookmark)
+            assertTrue(if (index == 0 || index == 7) verseItem.hasNote else !verseItem.hasNote)
+        }
+    }
+
+    @Test
     fun testLoadVerses() {
         runBlocking {
+            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+
             val bookIndex = 1
             val chapterIndex = 2
             `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -194,13 +238,16 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVersesWithExceptions() {
         runBlocking {
+            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+
             val bookIndex = 1
             val chapterIndex = 2
             `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenThrow(RuntimeException("Random exception"))
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -208,6 +255,9 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVersesWithParallelTranslations() {
         runBlocking {
+            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+
             val translationShortName = MockContents.kjvShortName
             val parallelTranslations = listOf(MockContents.cuvShortName)
             val bookIndex = 1
@@ -220,7 +270,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -228,6 +278,9 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVersesWithParallelTranslationsWithException() {
         runBlocking {
+            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+
             val translationShortName = MockContents.kjvShortName
             val parallelTranslations = listOf(MockContents.cuvShortName)
             val bookIndex = 1
@@ -240,7 +293,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { VerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -249,7 +302,7 @@ class VersePresenterTest : BaseUnitTest() {
     fun testOnVerseClickedWithoutActionMode() {
         runBlocking {
             val verse = MockContents.kjvVerses[0]
-            versePresenter.onVerseClicked(VerseItem(verse, 1))
+            versePresenter.onVerseClicked(verse)
             assertTrue(versePresenter.selectedVerses.isEmpty())
             verify(verseView, never()).onVerseDeselected(any())
             verify(readingInteractor, times(1)).openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES)
@@ -301,21 +354,21 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(readingInteractor.startActionMode(any())).thenReturn(actionMode)
 
         val verse = MockContents.kjvVerses[0]
-        versePresenter.onVerseLongClicked(VerseItem(verse, 1))
+        versePresenter.onVerseLongClicked(verse)
         assertEquals(1, versePresenter.selectedVerses.size)
         verify(readingInteractor, times(1)).startActionMode(any())
         verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
 
         val anotherVerse = MockContents.kjvVerses[5]
-        versePresenter.onVerseLongClicked(VerseItem(anotherVerse, 1))
+        versePresenter.onVerseLongClicked(anotherVerse)
         assertEquals(2, versePresenter.selectedVerses.size)
         verify(verseView, times(1)).onVerseSelected(anotherVerse.verseIndex)
 
-        versePresenter.onVerseClicked(VerseItem(anotherVerse, 1))
+        versePresenter.onVerseClicked(anotherVerse)
         assertEquals(1, versePresenter.selectedVerses.size)
         verify(verseView, times(1)).onVerseDeselected(anotherVerse.verseIndex)
 
-        versePresenter.onVerseClicked(VerseItem(verse, 1))
+        versePresenter.onVerseClicked(verse)
         assertTrue(versePresenter.selectedVerses.isEmpty())
         verify(verseView, times(1)).onVerseDeselected(verse.verseIndex)
         verify(actionMode, times(1)).finish()
@@ -330,7 +383,7 @@ class VersePresenterTest : BaseUnitTest() {
             currentVerseIndexChannel.send(VerseIndex(0, 0, 0))
 
             val verse = MockContents.kjvVerses[0]
-            versePresenter.onVerseLongClicked(VerseItem(verse, 1))
+            versePresenter.onVerseLongClicked(verse)
             assertEquals(1, versePresenter.selectedVerses.size)
             verify(readingInteractor, times(1)).startActionMode(any())
             verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
@@ -340,6 +393,33 @@ class VersePresenterTest : BaseUnitTest() {
 
             currentVerseIndexChannel.send(VerseIndex(0, 1, 5))
             verify(actionMode, times(1)).finish()
+        }
+    }
+
+    @Test
+    fun testOnNoteClicked() {
+        runBlocking {
+            versePresenter.onNoteClicked(VerseIndex(1, 2, 3))
+            verify(readingInteractor, times(1))
+                    .openVerseDetail(VerseIndex(1, 2, 3), VerseDetailPagerAdapter.PAGE_NOTE)
+        }
+    }
+
+    @Test
+    fun testOnBookmarkClickedWithBookmark() {
+        runBlocking {
+            versePresenter.onBookmarkClicked(VerseIndex(1, 2, 3), true)
+            verify(readingInteractor, times(1)).removeBookmark(VerseIndex(1, 2, 3))
+            verify(readingInteractor, never()).addBookmark(any())
+        }
+    }
+
+    @Test
+    fun testOnBookmarkClickedWithoutBookmark() {
+        runBlocking {
+            versePresenter.onBookmarkClicked(VerseIndex(1, 2, 3), false)
+            verify(readingInteractor, times(1)).addBookmark(VerseIndex(1, 2, 3))
+            verify(readingInteractor, never()).removeBookmark(any())
         }
     }
 }

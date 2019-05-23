@@ -30,14 +30,15 @@ import org.junit.runner.RunWith
 class SearchItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.SEARCH_ITEM, SearchItem(VerseIndex.INVALID, "", "", "").getItemViewType())
+        assertEquals(BaseItem.SEARCH_ITEM, SearchItem(VerseIndex.INVALID, "", "", "", {}).getItemViewType())
     }
 
     @Test
     fun testToSearchItems() {
+        val onClicked: (VerseIndex) -> Unit = {}
         val expected = listOf(SearchItem(MockContents.kjvVerses[0].verseIndex,
-                MockContents.kjvVerses[0].text.bookName, MockContents.kjvVerses[0].text.text, ""))
-        val actual = listOf(MockContents.kjvVerses[0]).toSearchItems("")
+                MockContents.kjvVerses[0].text.bookName, MockContents.kjvVerses[0].text.text, "", onClicked))
+        val actual = listOf(MockContents.kjvVerses[0]).toSearchItems("", onClicked)
         assertEquals(expected, actual)
     }
 
@@ -47,7 +48,7 @@ class SearchItemTest : BaseUnitTest() {
         val bookName = MockContents.kjvVerses[0].text.bookName
         val text = MockContents.kjvVerses[0].text.text
         val expected = "$bookName ${verseIndex.chapterIndex + 1}:${verseIndex.verseIndex + 1}\n$text"
-        val actual = SearchItem(verseIndex, bookName, text, "").textForDisplay.toString()
+        val actual = SearchItem(verseIndex, bookName, text, "", {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

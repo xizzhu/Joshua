@@ -19,36 +19,17 @@ package me.xizzhu.android.joshua.reading.verse
 import android.content.Context
 import android.os.Handler
 import android.util.AttributeSet
-import android.view.View
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
 
 class VerseListView : BaseRecyclerView {
-    private lateinit var listener: VersePagerAdapter.Listener
-
-    private val onClickListener = OnClickListener { view ->
-        ((getChildViewHolder(view) as VerseItemViewHolder).item)?.let {
-            listener.onVerseClicked(it)
-        }
-    }
-    private val onLongClickListener = OnLongClickListener { view ->
-        ((getChildViewHolder(view) as VerseItemViewHolder).item)?.let {
-            listener.onVerseLongClicked(it)
-        }
-        return@OnLongClickListener true
-    }
-
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
-    fun setListener(listener: VersePagerAdapter.Listener) {
-        this.listener = listener
-    }
 
     fun selectVerse(verseIndex: VerseIndex) {
         adapter?.let { adapter ->
@@ -73,19 +54,11 @@ class VerseListView : BaseRecyclerView {
         adapter?.notifyItemChanged(verseIndex.verseIndex, VerseItemViewHolder.VERSE_DESELECTED)
     }
 
-    fun setVerses(verses: List<VerseItem>) {
+    fun notifyVerseUpdate(verseIndex: VerseIndex, operation: Int) {
+        adapter?.notifyItemChanged(verseIndex.verseIndex, operation)
+    }
+
+    fun setVerses(verses: List<BaseItem>) {
         setItems(verses)
-    }
-
-    override fun onChildAttachedToWindow(child: View) {
-        super.onChildAttachedToWindow(child)
-        child.setOnClickListener(onClickListener)
-        child.setOnLongClickListener(onLongClickListener)
-    }
-
-    override fun onChildDetachedFromWindow(child: View) {
-        super.onChildDetachedFromWindow(child)
-        child.setOnClickListener(null)
-        child.setOnLongClickListener(null)
     }
 }

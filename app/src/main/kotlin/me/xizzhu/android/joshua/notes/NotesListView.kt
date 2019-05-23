@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.notes
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
-import android.view.View
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
@@ -36,11 +35,6 @@ interface NotesView : BaseSettingsView {
 
 class NotesListView : BaseRecyclerView, NotesView {
     private lateinit var presenter: NotesPresenter
-    private val onClickListener = OnClickListener { view ->
-        ((getChildViewHolder(view) as NoteItemViewHolder).item)?.let {
-            presenter.selectVerse(it.verseIndex)
-        }
-    }
 
     constructor(context: Context) : super(context)
 
@@ -50,18 +44,6 @@ class NotesListView : BaseRecyclerView, NotesView {
 
     fun setPresenter(presenter: NotesPresenter) {
         this.presenter = presenter
-    }
-
-    override fun onChildAttachedToWindow(child: View) {
-        super.onChildAttachedToWindow(child)
-        if (getChildViewHolder(child) is NoteItemViewHolder) {
-            child.setOnClickListener(onClickListener)
-        }
-    }
-
-    override fun onChildDetachedFromWindow(child: View) {
-        super.onChildDetachedFromWindow(child)
-        child.setOnClickListener(null)
     }
 
     override fun onNotesLoaded(notes: List<BaseItem>) {

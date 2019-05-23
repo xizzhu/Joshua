@@ -55,6 +55,8 @@ class SettingsActivity : BaseActivity(), SettingsView {
     private val fontSize: SettingButton by bindView(R.id.font_size)
     private val keepScreenOn: SwitchCompat by bindView(R.id.keep_screen_on)
     private val nightModeOn: SwitchCompat by bindView(R.id.night_mode_on)
+    private val reading: SettingSectionHeader by bindView(R.id.reading)
+    private val simpleReadingMode: SwitchCompat by bindView(R.id.simple_reading_mode)
     private val about: SettingSectionHeader by bindView(R.id.about)
     private val rate: SettingButton by bindView(R.id.rate)
     private val version: SettingButton by bindView(R.id.version)
@@ -80,15 +82,15 @@ class SettingsActivity : BaseActivity(), SettingsView {
                     })
         }
 
-        keepScreenOn.setOnCheckedChangeListener { _, isChecked ->
-            presenter.setKeepScreenOn(isChecked)
-        }
+        keepScreenOn.setOnCheckedChangeListener { _, isChecked -> presenter.setKeepScreenOn(isChecked) }
 
         nightModeOn.setOnCheckedChangeListener { _, isChecked ->
             originalSettings = presenter.settings
             shouldAnimateColor = true
             presenter.setNightModeOn(isChecked)
         }
+
+        simpleReadingMode.setOnCheckedChangeListener { _, isChecked -> presenter.setSimpleReadingModeOn(isChecked) }
 
         rate.setOnClickListener {
             try {
@@ -142,6 +144,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
         fontSize.setDescription(fontSizeTexts[settings.fontSizeScale - 1])
         keepScreenOn.isChecked = settings.keepScreenOn
         nightModeOn.isChecked = settings.nightModeOn
+        simpleReadingMode.isChecked = settings.simpleReadingModeOn
     }
 
     private fun animateColor(@ColorInt fromBackgroundColor: Int, @ColorInt toBackgroundColor: Int,
@@ -166,8 +169,9 @@ class SettingsActivity : BaseActivity(), SettingsView {
         fontSize.setTextColor(primaryTextColor, secondaryTextColor)
         keepScreenOn.setTextColor(primaryTextColor)
         nightModeOn.setTextColor(primaryTextColor)
-        version.setTextColor(primaryTextColor, secondaryTextColor)
+        simpleReadingMode.setTextColor(primaryTextColor)
         rate.setTextColor(primaryTextColor, secondaryTextColor)
+        version.setTextColor(primaryTextColor, secondaryTextColor)
     }
 
     private fun animateTextSize(fromBodyTextSize: Float, toBodyTextSize: Float,
@@ -187,9 +191,11 @@ class SettingsActivity : BaseActivity(), SettingsView {
         fontSize.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
         nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+        reading.setTextSize(bodyTextSize.roundToInt())
+        simpleReadingMode.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
         about.setTextSize(bodyTextSize.roundToInt())
-        version.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         rate.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+        version.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
     }
 
     override fun onSettingsUpdateFailed(settingsToUpdate: Settings) {

@@ -5,30 +5,40 @@
     android:background="@drawable/background_verse"
     android:orientation="vertical">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/text"
+        style="@style/Text.Body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/padding"
         android:layout_marginTop="@dimen/padding_small"
         android:layout_marginEnd="@dimen/padding"
-        android:layout_marginBottom="@dimen/padding_small"
+        android:layout_marginBottom="@dimen/padding_small" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/index"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/note"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/padding"
-            android:textColor="@color/text_dark_primary"
-            android:textSize="@dimen/text_body"
-            android:typeface="monospace" />
+            android:layout_gravity="end"
+            android:layout_marginEnd="56dp"
+            android:background="@drawable/background_touchable_round"
+            android:padding="@dimen/padding"
+            android:src="@drawable/ic_note" />
 
-        <TextView
-            android:id="@+id/text"
-            style="@style/Text.Body"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/bookmark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:background="@drawable/background_touchable_round"
+            android:padding="@dimen/padding"
+            android:src="@drawable/ic_bookmark" />
+    </FrameLayout>
 
     <View
         android:id="@+id/divider"

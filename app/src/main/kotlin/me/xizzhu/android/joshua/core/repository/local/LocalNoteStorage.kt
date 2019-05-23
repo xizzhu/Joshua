@@ -22,6 +22,8 @@ import me.xizzhu.android.joshua.core.VerseIndex
 interface LocalNoteStorage {
     suspend fun read(): List<Note>
 
+    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Note>
+
     suspend fun read(verseIndex: VerseIndex): Note
 
     suspend fun save(note: Note)

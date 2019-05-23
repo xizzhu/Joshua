@@ -103,7 +103,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
             searchResultChannel.send(Pair(query, verses))
             searchStateChannel.send(LoadingSpinnerState.NOT_LOADING)
 
-            verify(searchResultView, times(1)).onSearchResultUpdated(verses.toSearchItems(query))
+            verify(searchResultView, times(1)).onSearchResultUpdated(verses.toSearchItems(query, searchResultPresenter::selectVerse))
             verify(searchResultView, times(1)).onSearchStarted()
 
             // once from initial state, and second time when search finishes

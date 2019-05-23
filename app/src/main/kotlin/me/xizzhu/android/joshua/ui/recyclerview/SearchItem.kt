@@ -33,7 +33,8 @@ import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.util.*
 
 data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
-                      private val text: String, private val query: String) : BaseItem {
+                      private val text: String, private val query: String,
+                      val onClicked: (VerseIndex) -> Unit) : BaseItem {
     companion object {
         // We don't expect users to change locale that frequently.
         @SuppressLint("ConstantLocale")
@@ -82,10 +83,10 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
     override fun getItemViewType(): Int = BaseItem.SEARCH_ITEM
 }
 
-fun List<Verse>.toSearchItems(query: String): List<SearchItem> {
+fun List<Verse>.toSearchItems(query: String, onClicked: (VerseIndex) -> Unit): List<SearchItem> {
     val searchResult: ArrayList<SearchItem> = ArrayList(size)
     for (verse in this) {
-        searchResult.add(SearchItem(verse.verseIndex, verse.text.bookName, verse.text.text, query))
+        searchResult.add(SearchItem(verse.verseIndex, verse.text.bookName, verse.text.text, query, onClicked))
     }
     return searchResult
 }
@@ -93,6 +94,10 @@ fun List<Verse>.toSearchItems(query: String): List<SearchItem> {
 class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<SearchItem>(inflater.inflate(R.layout.item_search_result, parent, false)) {
     private val text = itemView as TextView
+
+    init {
+        itemView.setOnClickListener { item?.let { it.onClicked(it.verseIndex) } }
+    }
 
     override fun bind(settings: Settings, item: SearchItem, payloads: List<Any>) {
         with(text) {

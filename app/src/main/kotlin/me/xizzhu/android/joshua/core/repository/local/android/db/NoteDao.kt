@@ -69,6 +69,29 @@ class NoteDao(private val sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    fun read(bookIndex: Int, chapterIndex: Int): List<Note> {
+        var cursor: Cursor? = null
+        try {
+            cursor = db.query(TABLE_NOTE, arrayOf(COLUMN_NOTE, COLUMN_VERSE_INDEX, COLUMN_TIMESTAMP),
+                    "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
+                    arrayOf(bookIndex.toString(), chapterIndex.toString()),
+                    null, null, "$COLUMN_VERSE_INDEX ASC")
+            return with(cursor) {
+                val notes = ArrayList<Note>(count)
+                val verseIndex = getColumnIndex(COLUMN_VERSE_INDEX)
+                val note = getColumnIndex(COLUMN_NOTE)
+                val timestamp = getColumnIndex(COLUMN_TIMESTAMP)
+                while (moveToNext()) {
+                    notes.add(Note(VerseIndex(bookIndex, chapterIndex, getInt(verseIndex)),
+                            getString(note), getLong(timestamp)))
+                }
+                return@with notes
+            }
+        } finally {
+            cursor?.close()
+        }
+    }
+
     fun read(verseIndex: VerseIndex): Note {
         var cursor: Cursor? = null
         try {

@@ -29,17 +29,13 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
 class VersePagerAdapter(context: Context, private val listener: Listener) : PagerAdapter() {
     interface Listener {
         fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
 
         fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int)
-
-        fun onVerseClicked(verse: VerseItem)
-
-        fun onVerseLongClicked(verse: VerseItem)
     }
 
     private val inflater = LayoutInflater.from(context)
@@ -61,7 +57,7 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
         notifyDataSetChanged()
     }
 
-    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<VerseItem>) {
+    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<BaseItem>) {
         findPage(bookIndex, chapterIndex)?.setVerses(verses, currentVerseIndex)
     }
 
@@ -80,6 +76,10 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
 
     fun deselectVerse(verseIndex: VerseIndex) {
         findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.deselectVerse(verseIndex)
+    }
+
+    fun notifyVerseUpdate(verseIndex: VerseIndex, operation: Int) {
+        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.notifyVerseUpdate(verseIndex, operation)
     }
 
     override fun getCount(): Int = if (currentTranslation.isNotEmpty() && settings != null) Bible.TOTAL_CHAPTER_COUNT else 0
@@ -133,7 +133,6 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
     val rootView: View = inflater.inflate(R.layout.page_verse, container, false)
     private val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
     private val verseList = rootView.findViewById<VerseListView>(R.id.verse_list).apply {
-        setListener(listener)
         addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (inUse && newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -162,7 +161,7 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         inUse = false
     }
 
-    fun setVerses(verses: List<VerseItem>, currentVerseIndex: VerseIndex) {
+    fun setVerses(verses: List<BaseItem>, currentVerseIndex: VerseIndex) {
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 
@@ -186,5 +185,9 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
 
     fun deselectVerse(verseIndex: VerseIndex) {
         verseList.deselectVerse(verseIndex)
+    }
+
+    fun notifyVerseUpdate(verseIndex: VerseIndex, operation: Int) {
+        verseList.notifyVerseUpdate(verseIndex, operation)
     }
 }

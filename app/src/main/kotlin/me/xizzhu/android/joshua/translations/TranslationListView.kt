@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.translations
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
-import android.view.View
 import android.widget.Toast
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
@@ -66,47 +65,9 @@ class TranslationListView : BaseRecyclerView, TranslationView {
 
     private var downloadProgressDialog: ProgressDialog? = null
     private var deleteProgressDialog: ProgressDialog? = null
-    private val onClickListener = OnClickListener { view ->
-        ((getChildViewHolder(view) as TranslationItemViewHolder).item)?.let { translationItem ->
-            if (translationItem.translationInfo.downloaded) {
-                presenter.updateCurrentTranslation(translationItem.translationInfo.shortName)
-            } else {
-                presenter.downloadTranslation(translationItem.translationInfo)
-            }
-        }
-    }
-    private val onLongClickListener = OnLongClickListener { view ->
-        ((getChildViewHolder(view) as TranslationItemViewHolder).item)?.let { translationItem ->
-            if (translationItem.translationInfo.downloaded) {
-                if (!translationItem.isCurrentTranslation) {
-                    DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
-                            DialogInterface.OnClickListener { _, _ ->
-                                presenter.removeTranslation(translationItem.translationInfo)
-                            })
-                }
-            } else {
-                presenter.downloadTranslation(translationItem.translationInfo)
-            }
-        }
-        return@OnLongClickListener true
-    }
 
     fun setPresenter(presenter: TranslationPresenter) {
         this.presenter = presenter
-    }
-
-    override fun onChildAttachedToWindow(child: View) {
-        super.onChildAttachedToWindow(child)
-        if (getChildViewHolder(child) is TranslationItemViewHolder) {
-            child.setOnClickListener(onClickListener)
-            child.setOnLongClickListener(onLongClickListener)
-        }
-    }
-
-    override fun onChildDetachedFromWindow(child: View) {
-        super.onChildDetachedFromWindow(child)
-        child.setOnClickListener(null)
-        child.setOnLongClickListener(null)
     }
 
     override fun onCurrentTranslationUpdateFailed(translationShortName: String) {

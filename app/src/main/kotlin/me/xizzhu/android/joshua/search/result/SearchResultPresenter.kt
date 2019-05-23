@@ -33,7 +33,7 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
 
         launch(Dispatchers.Main) {
             searchInteractor.observeSearchResult().consumeEach { (query, verses) ->
-                view?.onSearchResultUpdated(verses.toSearchItems(query))
+                view?.onSearchResultUpdated(verses.toSearchItems(query, this@SearchResultPresenter::selectVerse))
             }
         }
         launch(Dispatchers.Main) {
