@@ -36,7 +36,6 @@ import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItem
 import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import kotlin.properties.Delegates
 
@@ -136,10 +135,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
         launch(Dispatchers.Main) {
             readingInteractor.observeVerseState().consumeEach { (verseIndex, operation) ->
-                when (operation) {
-                    VerseItemViewHolder.NOTE_ADDED -> view?.onNoteAdded(verseIndex)
-                    VerseItemViewHolder.NOTE_REMOVED -> view?.onNoteRemoved(verseIndex)
-                }
+                view?.onVerseUpdated(verseIndex, operation)
             }
         }
     }
@@ -223,7 +219,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             verseItems.add(VerseItem(verse,
                     bookmark?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
                     note?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
-                    this::onVerseClicked, this::onVerseLongClicked, this::onNoteClicked))
+                    this::onVerseClicked, this::onVerseLongClicked, this::onNoteClicked, this::onBookmarkClicked))
         }
         return verseItems
     }
@@ -260,7 +256,17 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         onVerseClicked(verse)
     }
 
-    private fun onNoteClicked(verse: Verse) {
-        launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_NOTE) }
+    private fun onNoteClicked(verseIndex: VerseIndex) {
+        launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE) }
+    }
+
+    private fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
+        launch(Dispatchers.Main) {
+            if (hasBookmark) {
+                readingInteractor.removeBookmark(verseIndex)
+            } else {
+                readingInteractor.addBookmark(verseIndex)
+            }
+        }
     }
 }

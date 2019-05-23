@@ -78,12 +78,8 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
         findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.deselectVerse(verseIndex)
     }
 
-    fun notifyNoteAdded(verseIndex: VerseIndex) {
-        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.notifyNoteAdded(verseIndex)
-    }
-
-    fun notifyNoteRemoved(verseIndex: VerseIndex) {
-        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.notifyNoteRemoved(verseIndex)
+    fun notifyVerseUpdate(verseIndex: VerseIndex, operation: Int) {
+        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.notifyVerseUpdate(verseIndex, operation)
     }
 
     override fun getCount(): Int = if (currentTranslation.isNotEmpty() && settings != null) Bible.TOTAL_CHAPTER_COUNT else 0
@@ -191,11 +187,7 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         verseList.deselectVerse(verseIndex)
     }
 
-    fun notifyNoteAdded(verseIndex: VerseIndex) {
-        verseList.notifyNoteAdded(verseIndex)
-    }
-
-    fun notifyNoteRemoved(verseIndex: VerseIndex) {
-        verseList.notifyNoteRemoved(verseIndex)
+    fun notifyVerseUpdate(verseIndex: VerseIndex, operation: Int) {
+        verseList.notifyVerseUpdate(verseIndex, operation)
     }
 }

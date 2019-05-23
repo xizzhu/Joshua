@@ -36,7 +36,7 @@ import android.graphics.Color
 
 data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Boolean,
                      val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
-                     val onNoteClicked: (Verse) -> Unit,
+                     val onNoteClicked: (VerseIndex) -> Unit, val onBookmarkClicked: (VerseIndex, Boolean) -> Unit,
                      var selected: Boolean = false) : BaseItem {
     companion object {
         private val STRING_BUILDER = StringBuilder()
@@ -100,6 +100,8 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
         const val VERSE_DESELECTED = 2
         const val NOTE_ADDED = 3
         const val NOTE_REMOVED = 4
+        const val BOOKMARK_ADDED = 5
+        const val BOOKMARK_REMOVED = 6
 
         private val ON = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
         private val OFF = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
@@ -115,7 +117,8 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
             item?.let { it.onLongClicked(it.verse) }
             return@setOnLongClickListener true
         }
-        note.setOnClickListener { item?.let { it.onNoteClicked(it.verse) } }
+        note.setOnClickListener { item?.let { it.onNoteClicked(it.verse.verseIndex) } }
+        bookmark.setOnClickListener { item?.let { it.onBookmarkClicked(it.verse.verseIndex, it.hasBookmark) } }
     }
 
     override fun bind(settings: Settings, item: VerseItem, payloads: List<Any>) {
@@ -145,6 +148,14 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
                     NOTE_REMOVED -> {
                         item.hasNote = false
                         note.colorFilter = OFF
+                    }
+                    BOOKMARK_ADDED -> {
+                        item.hasBookmark = true
+                        bookmark.colorFilter = ON
+                    }
+                    BOOKMARK_REMOVED -> {
+                        item.hasBookmark = false
+                        bookmark.colorFilter = OFF
                     }
                 }
             }

@@ -49,9 +49,7 @@ interface VerseView : BaseSettingsView {
 
     fun onVersesCopyShareFailed()
 
-    fun onNoteAdded(verseIndex: VerseIndex)
-
-    fun onNoteRemoved(verseIndex: VerseIndex)
+    fun onVerseUpdated(verseIndex: VerseIndex, operation: Int)
 }
 
 class VerseViewPager : ViewPager, VerseView {
@@ -169,11 +167,7 @@ class VerseViewPager : ViewPager, VerseView {
         Toast.makeText(context, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onNoteAdded(verseIndex: VerseIndex) {
-        adapter.notifyNoteAdded(verseIndex)
-    }
-
-    override fun onNoteRemoved(verseIndex: VerseIndex) {
-        adapter.notifyNoteRemoved(verseIndex)
+    override fun onVerseUpdated(verseIndex: VerseIndex, operation: Int) {
+        adapter.notifyVerseUpdate(verseIndex, operation)
     }
 }

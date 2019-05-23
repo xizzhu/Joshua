@@ -205,10 +205,12 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun addBookmark(verseIndex: VerseIndex) {
         bookmarkManager.save(Bookmark(verseIndex, System.currentTimeMillis()))
+        verseState.send(Pair(verseIndex, VerseItemViewHolder.BOOKMARK_ADDED))
     }
 
     suspend fun removeBookmark(verseIndex: VerseIndex) {
         bookmarkManager.remove(verseIndex)
+        verseState.send(Pair(verseIndex, VerseItemViewHolder.BOOKMARK_REMOVED))
     }
 
     suspend fun readNotes(bookIndex: Int, chapterIndex: Int): List<Note> = noteManager.read(bookIndex, chapterIndex)
