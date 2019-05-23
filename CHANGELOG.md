@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.4.0 (2019-05-22)
 - Added "complex" reading mode to show bookmark & note with verse
 - Added link to rate app on Play Store
 - Notified user if translation lisst is empty
