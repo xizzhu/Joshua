@@ -256,11 +256,13 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         onVerseClicked(verse)
     }
 
-    private fun onNoteClicked(verseIndex: VerseIndex) {
+    @VisibleForTesting
+    fun onNoteClicked(verseIndex: VerseIndex) {
         launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE) }
     }
 
-    private fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
+    @VisibleForTesting
+    fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
         launch(Dispatchers.Main) {
             if (hasBookmark) {
                 readingInteractor.removeBookmark(verseIndex)

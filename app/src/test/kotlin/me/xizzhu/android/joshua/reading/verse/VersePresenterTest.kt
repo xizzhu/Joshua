@@ -395,4 +395,31 @@ class VersePresenterTest : BaseUnitTest() {
             verify(actionMode, times(1)).finish()
         }
     }
+
+    @Test
+    fun testOnNoteClicked() {
+        runBlocking {
+            versePresenter.onNoteClicked(VerseIndex(1, 2, 3))
+            verify(readingInteractor, times(1))
+                    .openVerseDetail(VerseIndex(1, 2, 3), VerseDetailPagerAdapter.PAGE_NOTE)
+        }
+    }
+
+    @Test
+    fun testOnBookmarkClickedWithBookmark() {
+        runBlocking {
+            versePresenter.onBookmarkClicked(VerseIndex(1, 2, 3), true)
+            verify(readingInteractor, times(1)).removeBookmark(VerseIndex(1, 2, 3))
+            verify(readingInteractor, never()).addBookmark(any())
+        }
+    }
+
+    @Test
+    fun testOnBookmarkClickedWithoutBookmark() {
+        runBlocking {
+            versePresenter.onBookmarkClicked(VerseIndex(1, 2, 3), false)
+            verify(readingInteractor, times(1)).addBookmark(VerseIndex(1, 2, 3))
+            verify(readingInteractor, never()).removeBookmark(any())
+        }
+    }
 }
