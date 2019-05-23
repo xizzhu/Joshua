@@ -30,7 +30,9 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.lang.StringBuilder
 
-data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int, var selected: Boolean = false) : BaseItem {
+data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int,
+                           val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
+                           var selected: Boolean = false) : BaseItem {
     companion object {
         private val STRING_BUILDER = StringBuilder()
         private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
@@ -108,6 +110,14 @@ class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     private val index = itemView.findViewById(R.id.index) as TextView
     private val text = itemView.findViewById(R.id.text) as TextView
     private val divider = itemView.findViewById(R.id.divider) as View
+
+    init {
+        itemView.setOnClickListener { item?.let { it.onClicked(it.verse) } }
+        itemView.setOnLongClickListener {
+            item?.let { it.onLongClicked(it.verse) }
+            return@setOnLongClickListener true
+        }
+    }
 
     override fun bind(settings: Settings, item: SimpleVerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {

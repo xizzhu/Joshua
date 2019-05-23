@@ -230,7 +230,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -247,7 +247,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -270,7 +270,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -293,7 +293,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }

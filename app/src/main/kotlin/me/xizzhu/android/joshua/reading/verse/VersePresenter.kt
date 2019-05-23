@@ -167,7 +167,10 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                 val items = if (readingInteractor.observeSettings().first().simpleReadingModeOn) {
                     val verses = readVerses(bookIndex, chapterIndex)
                     val totalVerseCount = verses.size
-                    verses.map { SimpleVerseItem(it, totalVerseCount) }
+                    verses.map {
+                        SimpleVerseItem(it, totalVerseCount,
+                                this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
+                    }
                 } else {
                     withContext(Dispatchers.Default) {
                         val versesAsync = async { readVerses(bookIndex, chapterIndex) }
