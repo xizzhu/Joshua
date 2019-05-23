@@ -87,7 +87,7 @@ class SettingsPresenterTest : BaseUnitTest() {
 
             settingsPresenter.setFontSizeScale(4)
             verify(settingsManager, times(1))
-                    .saveSettings(Settings.DEFAULT.toBuilder().fontSizeScale(4).build())
+                    .saveSettings(Settings.DEFAULT.copy(fontSizeScale = 4))
         }
     }
 
@@ -101,7 +101,7 @@ class SettingsPresenterTest : BaseUnitTest() {
 
             settingsPresenter.setKeepScreenOn(false)
             verify(settingsManager, times(1))
-                    .saveSettings(Settings.DEFAULT.toBuilder().keepScreenOn(false).build())
+                    .saveSettings(Settings.DEFAULT.copy(keepScreenOn = false))
         }
     }
 
@@ -115,7 +115,7 @@ class SettingsPresenterTest : BaseUnitTest() {
 
             settingsPresenter.setNightModeOn(true)
             verify(settingsManager, times(1))
-                    .saveSettings(Settings.DEFAULT.toBuilder().nightModeOn(true).build())
+                    .saveSettings(Settings.DEFAULT.copy(nightModeOn = true))
         }
     }
 
@@ -129,7 +129,7 @@ class SettingsPresenterTest : BaseUnitTest() {
 
             settingsPresenter.setSimpleReadingModeOn(true)
             verify(settingsManager, times(1))
-                    .saveSettings(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+                    .saveSettings(Settings.DEFAULT.copy(simpleReadingModeOn = true))
         }
     }
 }

@@ -28,27 +28,7 @@ data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fon
                     val simpleReadingModeOn: Boolean) {
     companion object {
         val DEFAULT = Settings(true, false, 2, false)
-
-        const val MAX_FONT_SIZE_SCALE = 6
-        const val MIN_FONT_SIZE_SCALE = 1
     }
-
-    data class Builder(var keepScreenOn: Boolean, var nightModeOn: Boolean, var fontSizeScale: Int,
-                       var simpleReadingModeOn: Boolean) {
-        fun keepScreenOn(keepScreenOn: Boolean) = apply { this.keepScreenOn = keepScreenOn }
-
-        fun nightModeOn(nightModeOn: Boolean) = apply { this.nightModeOn = nightModeOn }
-
-        fun fontSizeScale(fontSizeScale: Int) = apply {
-            this.fontSizeScale = Math.max(MIN_FONT_SIZE_SCALE, Math.min(MAX_FONT_SIZE_SCALE, fontSizeScale))
-        }
-
-        fun simpleReadingModeOn(simpleReadingModeOn: Boolean) = apply { this.simpleReadingModeOn = simpleReadingModeOn }
-
-        fun build() = Settings(keepScreenOn, nightModeOn, fontSizeScale, simpleReadingModeOn)
-    }
-
-    fun toBuilder(): Builder = Builder(keepScreenOn, nightModeOn, fontSizeScale, simpleReadingModeOn)
 }
 
 class SettingsManager(private val settingsRepository: SettingsRepository) {

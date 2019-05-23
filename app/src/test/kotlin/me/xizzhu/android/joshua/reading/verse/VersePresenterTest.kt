@@ -221,7 +221,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVerses() {
         runBlocking {
-            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = true))
             `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
             val bookIndex = 1
@@ -238,7 +238,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVersesWithExceptions() {
         runBlocking {
-            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = true))
             `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
             val bookIndex = 1
@@ -255,7 +255,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVersesWithParallelTranslations() {
         runBlocking {
-            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = true))
             `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
             val translationShortName = MockContents.kjvShortName
@@ -278,7 +278,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVersesWithParallelTranslationsWithException() {
         runBlocking {
-            settingsChannel.send(Settings.DEFAULT.toBuilder().simpleReadingModeOn(true).build())
+            settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = true))
             `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
             val translationShortName = MockContents.kjvShortName

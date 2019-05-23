@@ -59,7 +59,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     fun setFontSizeScale(fontSizeScale: Int) {
         launch(Dispatchers.Main) {
             if (fontSizeScale != settings.fontSizeScale) {
-                saveSettings(settings.toBuilder().fontSizeScale(fontSizeScale).build())
+                saveSettings(settings.copy(fontSizeScale = fontSizeScale))
             }
         }
     }
@@ -67,7 +67,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     fun setKeepScreenOn(keepScreenOn: Boolean) {
         launch(Dispatchers.Main) {
             if (keepScreenOn != settings.keepScreenOn) {
-                saveSettings(settings.toBuilder().keepScreenOn(keepScreenOn).build())
+                saveSettings(settings.copy(keepScreenOn = keepScreenOn))
             }
         }
     }
@@ -75,7 +75,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     fun setNightModeOn(nightModeOn: Boolean) {
         launch(Dispatchers.Main) {
             if (nightModeOn != settings.nightModeOn) {
-                saveSettings(settings.toBuilder().nightModeOn(nightModeOn).build())
+                saveSettings(settings.copy(nightModeOn = nightModeOn))
             }
         }
     }
@@ -83,7 +83,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     fun setSimpleReadingModeOn(simpleReadingModeOn: Boolean) {
         launch(Dispatchers.Main) {
             if (simpleReadingModeOn != settings.simpleReadingModeOn) {
-                saveSettings(settings.toBuilder().simpleReadingModeOn(simpleReadingModeOn).build())
+                saveSettings(settings.copy(simpleReadingModeOn = simpleReadingModeOn))
             }
         }
     }

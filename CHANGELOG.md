@@ -7,6 +7,7 @@ CHANGELOG
 - Notified user if translation lisst is empty
 - Fixed padding for search result
 - Fixed crash when failed to load translation list
+- Removed Builder of Settings
 
 #### v0.3.1 (2019-05-18)
 - Should highlight selected verse when opening from notes
