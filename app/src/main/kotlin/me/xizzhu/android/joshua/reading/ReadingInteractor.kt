@@ -153,19 +153,20 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     fun startActionMode(callback: ActionMode.Callback): ActionMode? =
             readingActivity.startSupportActionMode(callback)
 
-    suspend fun copyToClipBoard(verses: Collection<Verse>): Boolean = withContext(Dispatchers.IO) {
+    fun copyToClipBoard(verses: Collection<Verse>): Boolean {
         if (verses.isEmpty()) {
-            return@withContext false
+            return false
         }
 
         try {
             val verse = verses.first()
+            // On older devices, this only works on the threads with loopers.
             (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).primaryClip =
                     ClipData.newPlainText(verse.text.translationShortName + " " + verse.text.bookName, verses.toStringForSharing())
-            return@withContext true
+            return true
         } catch (e: Exception) {
             Log.e(TAG, e, "Failed to copy")
-            return@withContext false
+            return false
         }
     }
 

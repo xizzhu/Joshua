@@ -58,14 +58,12 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.action_copy -> {
-                    launch(Dispatchers.Main) {
-                        if (readingInteractor.copyToClipBoard(selectedVerses)) {
-                            view?.onVersesCopied()
-                        } else {
-                            view?.onVersesCopyShareFailed()
-                        }
-                        mode.finish()
+                    if (readingInteractor.copyToClipBoard(selectedVerses)) {
+                        view?.onVersesCopied()
+                    } else {
+                        view?.onVersesCopyShareFailed()
                     }
+                    mode.finish()
                     true
                 }
                 R.id.action_share -> {

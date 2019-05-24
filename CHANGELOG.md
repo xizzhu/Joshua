@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Added missing on click listener for simple reading mode
+- Fixed copying on older devices where it only works on threads with looper
 
 #### v0.4.0 (2019-05-22)
 - Added "complex" reading mode to show bookmark & note with verse
