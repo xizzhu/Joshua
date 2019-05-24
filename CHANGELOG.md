@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.4.1 (2019-05-23)
 - Added missing on click listener for simple reading mode
 - Fixed copying on older devices where it only works on threads with looper
 
