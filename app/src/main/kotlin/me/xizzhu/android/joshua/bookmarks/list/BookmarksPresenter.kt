@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.bookmarks
+package me.xizzhu.android.joshua.bookmarks.list
 
 import android.content.res.Resources
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.bookmarks.BookmarksInteractor
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.formatDate

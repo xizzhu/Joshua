@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.bookmarks
+package me.xizzhu.android.joshua.bookmarks.list
 
 import android.content.Context
 import android.content.DialogInterface

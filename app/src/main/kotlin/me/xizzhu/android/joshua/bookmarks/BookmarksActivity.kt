@@ -18,6 +18,8 @@ package me.xizzhu.android.joshua.bookmarks
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.bookmarks.list.BookmarksListView
+import me.xizzhu.android.joshua.bookmarks.list.BookmarksPresenter
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView
