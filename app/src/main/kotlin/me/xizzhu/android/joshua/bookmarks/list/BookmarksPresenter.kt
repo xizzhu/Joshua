@@ -17,11 +17,13 @@
 package me.xizzhu.android.joshua.bookmarks.list
 
 import android.content.res.Resources
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.bookmarks.BookmarksInteractor
+import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
@@ -54,28 +56,10 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                 if (bookmarks.isEmpty()) {
                     view?.onBookmarksLoaded(listOf(TextItem(resources.getString(R.string.text_no_bookmark))))
                 } else {
-                    // TODO handles sort order
-
-                    val calendar = Calendar.getInstance()
-                    var previousYear = -1
-                    var previousDayOfYear = -1
-
-                    val currentTranslation = bookmarksInteractor.readCurrentTranslation()
-                    val items: ArrayList<BaseItem> = ArrayList()
-                    for (bookmark in bookmarks) {
-                        calendar.timeInMillis = bookmark.timestamp
-                        val currentYear = calendar.get(Calendar.YEAR)
-                        val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
-                        if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
-                            items.add(TitleItem(bookmark.timestamp.formatDate(resources)))
-
-                            previousYear = currentYear
-                            previousDayOfYear = currentDayOfYear
-                        }
-
-                        items.add(BookmarkItem(bookmark.verseIndex,
-                                bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
-                                bookmark.timestamp, this@BookmarksPresenter::selectVerse))
+                    val items = when (sortOrder) {
+                        Constants.SORT_BY_DATE -> bookmarks.toBaseItemsByDate()
+                        Constants.SORT_BY_BOOK -> bookmarks.toBaseItemsByBook()
+                        else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
                     }
                     view?.onBookmarksLoaded(items)
                 }
@@ -87,6 +71,44 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                 view?.onBookmarksLoadFailed(sortOrder)
             }
         }
+    }
+
+    @VisibleForTesting
+    suspend fun List<Bookmark>.toBaseItemsByDate(): List<BaseItem> {
+        val calendar = Calendar.getInstance()
+        var previousYear = -1
+        var previousDayOfYear = -1
+
+        val currentTranslation = bookmarksInteractor.readCurrentTranslation()
+        val items: ArrayList<BaseItem> = ArrayList()
+        for (bookmark in this) {
+            calendar.timeInMillis = bookmark.timestamp
+            val currentYear = calendar.get(Calendar.YEAR)
+            val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+            if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
+                items.add(TitleItem(bookmark.timestamp.formatDate(resources)))
+
+                previousYear = currentYear
+                previousDayOfYear = currentDayOfYear
+            }
+
+            items.add(BookmarkItem(bookmark.verseIndex,
+                    bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
+                    bookmark.timestamp, this@BookmarksPresenter::selectVerse))
+        }
+        return items
+    }
+
+    @VisibleForTesting
+    suspend fun List<Bookmark>.toBaseItemsByBook(): List<BaseItem> {
+        val currentTranslation = bookmarksInteractor.readCurrentTranslation()
+        val items: ArrayList<BaseItem> = ArrayList()
+        for (bookmark in this) {
+            items.add(BookmarkItem(bookmark.verseIndex,
+                    bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
+                    bookmark.timestamp, this@BookmarksPresenter::selectVerse))
+        }
+        return items
     }
 
     fun selectVerse(verseToSelect: VerseIndex) {

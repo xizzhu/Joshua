@@ -21,12 +21,15 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.bookmarks.BookmarksInteractor
+import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
-import org.junit.After
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -53,27 +56,84 @@ class BookmarksPresenterTest : BaseUnitTest() {
             bookmarksSortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
             `when`(bookmarksInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
             `when`(bookmarksInteractor.observeBookmarksSortOrder()).thenReturn(bookmarksSortOrder.openSubscription())
-            `when`(bookmarksInteractor.readBookmarks(Constants.SORT_BY_DATE)).thenReturn(emptyList())
             `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
+            `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
+            `when`(resources.getStringArray(anyInt())).thenReturn(Array(12) { "" })
 
-            bookmarksPresenter = BookmarksPresenter(bookmarksInteractor, resources)
-            bookmarksPresenter.attachView(bookmarksView)
+            bookmarksPresenter = spy(BookmarksPresenter(bookmarksInteractor, resources))
         }
-    }
-
-    @After
-    override fun tearDown() {
-        bookmarksPresenter.detachView()
-        super.tearDown()
     }
 
     @Test
     fun testLoadEmptyBookmarks() {
         runBlocking {
-            // loadBookmarks() is called by onViewAttached()
+            `when`(bookmarksInteractor.readBookmarks(Constants.SORT_BY_DATE)).thenReturn(emptyList())
+
+            // loadBookmarks() is called by onViewAttached(), so no need to call again
+            bookmarksPresenter.attachView(bookmarksView)
             verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(TextItem("")))
-            verify(bookmarksView, never()).onBookmarksLoadFailed(Constants.SORT_BY_DATE)
+            verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
+
+            bookmarksPresenter.detachView()
+        }
+    }
+
+    @Test
+    fun testLoadBookmarksSortByDate() {
+        runBlocking {
+            `when`(bookmarksInteractor.readBookmarks(Constants.SORT_BY_DATE)).thenReturn(listOf(
+                    Bookmark(VerseIndex(0, 0, 4), 2L * 365L * 24L * 3600L * 1000L),
+                    Bookmark(VerseIndex(0, 0, 1), 36L * 3600L * 1000L),
+                    Bookmark(VerseIndex(0, 0, 3), 36L * 3600L * 1000L - 1000L),
+                    Bookmark(VerseIndex(0, 0, 2), 0L)
+            ))
+            `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
+            `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 1)))
+                    .thenReturn(MockContents.kjvVerses[1])
+            `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 2)))
+                    .thenReturn(MockContents.kjvVerses[2])
+            `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 3)))
+                    .thenReturn(MockContents.kjvVerses[3])
+            `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 4)))
+                    .thenReturn(MockContents.kjvVerses[4])
+
+            // loadBookmarks() is called by onViewAttached(), so no need to call again
+            bookmarksPresenter.attachView(bookmarksView)
+
+            verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(
+                    TitleItem(""),
+                    BookmarkItem(VerseIndex(0, 0, 4), MockContents.kjvVerses[4].text, 2L * 365L * 24L * 3600L * 1000L, bookmarksPresenter::selectVerse),
+                    TitleItem(""),
+                    BookmarkItem(VerseIndex(0, 0, 1), MockContents.kjvVerses[1].text, 36L * 3600L * 1000L, bookmarksPresenter::selectVerse),
+                    BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, 36L * 3600L * 1000L - 1000L, bookmarksPresenter::selectVerse),
+                    TitleItem(""),
+                    BookmarkItem(VerseIndex(0, 0, 2), MockContents.kjvVerses[2].text, 0L, bookmarksPresenter::selectVerse)
+            ))
+            verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
+
+            bookmarksPresenter.detachView()
+        }
+    }
+
+    @Test
+    fun testLoadBookmarksSortByBook() {
+        runBlocking {
+            bookmarksSortOrder.send(Constants.SORT_BY_BOOK)
+            `when`(bookmarksInteractor.readBookmarks(Constants.SORT_BY_BOOK))
+                    .thenReturn(listOf(Bookmark(VerseIndex(0, 0, 3), 4567890L)))
+            `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
+            `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 3)))
+                    .thenReturn(MockContents.kjvVerses[3])
+
+            // loadBookmarks() is called by onViewAttached(), so no need to call again
+            bookmarksPresenter.attachView(bookmarksView)
+
+            verify(bookmarksView, times(1))
+                    .onBookmarksLoaded(listOf(BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, 4567890L, bookmarksPresenter::selectVerse)))
+            verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
+
+            bookmarksPresenter.detachView()
         }
     }
 
@@ -81,11 +141,14 @@ class BookmarksPresenterTest : BaseUnitTest() {
     fun testLoadBookmarksWithException() {
         runBlocking {
             `when`(bookmarksInteractor.readBookmarks(Constants.SORT_BY_DATE)).thenThrow(RuntimeException("Random exception"))
-            bookmarksPresenter.loadBookmarks(Constants.SORT_BY_DATE)
 
-            // loadBookmarks() is called by onViewAttached(), so onBookmarksLoaded() is called once
-            verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(TextItem("")))
+            // loadBookmarks() is called by onViewAttached(), so no need to call again
+            bookmarksPresenter.attachView(bookmarksView)
+
+            verify(bookmarksView, never()).onBookmarksLoaded(any())
             verify(bookmarksView, times(1)).onBookmarksLoadFailed(Constants.SORT_BY_DATE)
+
+            bookmarksPresenter.detachView()
         }
     }
 }
