@@ -24,12 +24,14 @@ import android.widget.BaseAdapter
 import android.widget.CheckBox
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Constants
 
 class BookmarksSpinnerAdapter(context: Context) : BaseAdapter() {
     private val inflater = LayoutInflater.from(context)
     private val items: Array<String>
 
-    var selected = ToolbarPresenter.SORT_BY_DATE
+    @Constants.SortOrder
+    var sortOrder = Constants.DEFAULT_SORT_ORDER
 
     init {
         val resources = context.resources
@@ -37,7 +39,7 @@ class BookmarksSpinnerAdapter(context: Context) : BaseAdapter() {
                 resources.getString(R.string.bookmark_spinner_sort_by_book))
     }
 
-    override fun getCount(): Int = ToolbarPresenter.SORT_COUNT
+    override fun getCount(): Int = Constants.SORT_ORDER_COUNT
 
     override fun getItem(position: Int): String = items[position]
 
@@ -51,6 +53,10 @@ class BookmarksSpinnerAdapter(context: Context) : BaseAdapter() {
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+        if (position >= Constants.SORT_ORDER_COUNT) {
+            throw IllegalArgumentException("Unsupported sort order, position = $position")
+        }
+
         val viewHolder = convertView?.let { it.tag as DropDownViewHolder }
                 ?: DropDownViewHolder(inflater.inflate(R.layout.spinner_drop_down, parent, false))
                         .apply {
@@ -58,7 +64,7 @@ class BookmarksSpinnerAdapter(context: Context) : BaseAdapter() {
                             checkBox.isEnabled = false
                         }
         viewHolder.title.text = getItem(position)
-        viewHolder.checkBox.isChecked = position == selected
+        viewHolder.checkBox.isChecked = position == sortOrder
         return viewHolder.rootView
     }
 }

@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -33,7 +34,7 @@ interface BookmarksView : BaseSettingsView {
 
     fun onBookmarksLoaded(bookmarks: List<BaseItem>)
 
-    fun onBookmarksLoadFailed(sort: Int)
+    fun onBookmarksLoadFailed(@Constants.SortOrder sortOrder: Int)
 
     fun onVerseSelectionFailed(verseToSelect: VerseIndex)
 }
@@ -63,10 +64,10 @@ class BookmarksListView : BaseRecyclerView, BookmarksView {
         setItems(bookmarks)
     }
 
-    override fun onBookmarksLoadFailed(sort: Int) {
+    override fun onBookmarksLoadFailed(@Constants.SortOrder sortOrder: Int) {
         DialogHelper.showDialog(context, true, R.string.dialog_load_bookmarks_error,
                 DialogInterface.OnClickListener { _, _ ->
-                    presenter.loadBookmarks(sort)
+                    presenter.loadBookmarks(sortOrder)
                 })
     }
 

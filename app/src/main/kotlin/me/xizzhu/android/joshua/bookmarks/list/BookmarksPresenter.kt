@@ -22,6 +22,7 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.bookmarks.BookmarksInteractor
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.formatDate
@@ -39,11 +40,11 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
         super.onViewAttached()
 
         launch(Dispatchers.Main) {
-            bookmarksInteractor.observeBookmarksSortMethod().consumeEach { loadBookmarks(it) }
+            bookmarksInteractor.observeBookmarksSortOrder().consumeEach { loadBookmarks(it) }
         }
     }
 
-    fun loadBookmarks(sortOrder: Int) {
+    fun loadBookmarks(@Constants.SortOrder sortOrder: Int) {
         launch(Dispatchers.Main) {
             try {
                 bookmarksInteractor.notifyLoadingStarted()

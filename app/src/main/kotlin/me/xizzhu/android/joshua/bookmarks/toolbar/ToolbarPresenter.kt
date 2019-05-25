@@ -19,20 +19,15 @@ package me.xizzhu.android.joshua.bookmarks.toolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.bookmarks.BookmarksInteractor
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.MVPPresenter
 
 class ToolbarPresenter(private val bookmarksInteractor: BookmarksInteractor) : MVPPresenter<ToolbarView>() {
-    companion object {
-        const val SORT_BY_DATE = 0
-        const val SORT_BY_BOOK = 1
-        const val SORT_COUNT = 2
-    }
-
-    fun updateBookmarksSortMethod(sort: Int) {
+    fun updateBookmarksSortOrder(@Constants.SortOrder sortOrder: Int) {
         launch(Dispatchers.Main) {
             try {
-                bookmarksInteractor.updateBookmarksSortMethod(sort)
+                bookmarksInteractor.updateBookmarksSortOrder(sortOrder)
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to update sort method")
                 // TODO

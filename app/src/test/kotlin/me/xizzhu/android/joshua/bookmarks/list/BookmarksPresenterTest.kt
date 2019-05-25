@@ -21,6 +21,7 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.bookmarks.BookmarksInteractor
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -40,6 +41,7 @@ class BookmarksPresenterTest : BaseUnitTest() {
     private lateinit var resources: Resources
 
     private lateinit var settingsChannel: BroadcastChannel<Settings>
+    private lateinit var bookmarksSortOrder: BroadcastChannel<Int>
     private lateinit var bookmarksPresenter: BookmarksPresenter
 
     @Before
@@ -48,8 +50,10 @@ class BookmarksPresenterTest : BaseUnitTest() {
 
         runBlocking {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+            bookmarksSortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
             `when`(bookmarksInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-            `when`(bookmarksInteractor.readBookmarks()).thenReturn(emptyList())
+            `when`(bookmarksInteractor.observeBookmarksSortOrder()).thenReturn(bookmarksSortOrder.openSubscription())
+            `when`(bookmarksInteractor.readBookmarks(Constants.SORT_BY_DATE)).thenReturn(emptyList())
             `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
 
@@ -69,19 +73,19 @@ class BookmarksPresenterTest : BaseUnitTest() {
         runBlocking {
             // loadBookmarks() is called by onViewAttached()
             verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(TextItem("")))
-            verify(bookmarksView, never()).onBookmarksLoadFailed()
+            verify(bookmarksView, never()).onBookmarksLoadFailed(Constants.SORT_BY_DATE)
         }
     }
 
     @Test
     fun testLoadBookmarksWithException() {
         runBlocking {
-            `when`(bookmarksInteractor.readBookmarks()).thenThrow(RuntimeException("Random exception"))
-            bookmarksPresenter.loadBookmarks()
+            `when`(bookmarksInteractor.readBookmarks(Constants.SORT_BY_DATE)).thenThrow(RuntimeException("Random exception"))
+            bookmarksPresenter.loadBookmarks(Constants.SORT_BY_DATE)
 
             // loadBookmarks() is called by onViewAttached(), so onBookmarksLoaded() is called once
             verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(TextItem("")))
-            verify(bookmarksView, times(1)).onBookmarksLoadFailed()
+            verify(bookmarksView, times(1)).onBookmarksLoadFailed(Constants.SORT_BY_DATE)
         }
     }
 }

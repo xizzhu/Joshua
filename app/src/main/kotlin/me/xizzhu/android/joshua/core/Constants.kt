@@ -21,6 +21,8 @@ import androidx.annotation.IntDef
 object Constants {
     const val SORT_BY_DATE = 0
     const val SORT_BY_BOOK = 1
+    const val SORT_ORDER_COUNT = 2
+    const val DEFAULT_SORT_ORDER = SORT_BY_DATE
 
     @IntDef(SORT_BY_DATE, SORT_BY_BOOK)
     @Retention(AnnotationRetention.SOURCE)

@@ -23,6 +23,7 @@ import android.widget.AdapterView
 import android.widget.Spinner
 import androidx.appcompat.widget.Toolbar
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.utils.MVPView
 
 interface ToolbarView : MVPView
@@ -38,8 +39,12 @@ class BookmarksToolbar : Toolbar, ToolbarView {
 
     private val bookmarksSpinnerItemSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            translationSpinnerAdapter.selected = position
-            presenter.updateBookmarksSortMethod(position)
+            if (position >= Constants.SORT_ORDER_COUNT) {
+                throw IllegalArgumentException("Unsupported sort order, position = $position")
+            }
+
+            translationSpinnerAdapter.sortOrder = position
+            presenter.updateBookmarksSortOrder(position)
         }
 
         override fun onNothingSelected(parent: AdapterView<*>?) {
