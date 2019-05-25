@@ -30,10 +30,21 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
                           private val bookmarkManager: BookmarkManager,
                           private val navigator: Navigator,
                           settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
+    private val bookmarksSortMethod: BroadcastChannel<Int> = ConflatedBroadcastChannel()
     private val bookmarksLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
+
+    fun observeBookmarksSortMethod(): ReceiveChannel<Int> = bookmarksSortMethod.openSubscription()
+
+    suspend fun updateBookmarksSortMethod(sort: Int) {
+        bookmarksSortMethod.send(sort)
+    }
 
     fun observeBookmarksLoadingState(): ReceiveChannel<LoadingSpinnerState> =
             bookmarksLoadingState.openSubscription()
+
+    suspend fun notifyLoadingStarted() {
+        bookmarksLoadingState.send(LoadingSpinnerState.IS_LOADING)
+    }
 
     suspend fun notifyLoadingFinished() {
         bookmarksLoadingState.send(LoadingSpinnerState.NOT_LOADING)

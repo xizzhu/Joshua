@@ -22,13 +22,18 @@ import android.util.AttributeSet
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.*
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface BookmarksView : BaseSettingsView {
+    fun onBookmarksLoadingStarted()
+
+    fun onBookmarksLoadingCompleted()
+
     fun onBookmarksLoaded(bookmarks: List<BaseItem>)
 
-    fun onBookmarksLoadFailed()
+    fun onBookmarksLoadFailed(sort: Int)
 
     fun onVerseSelectionFailed(verseToSelect: VerseIndex)
 }
@@ -46,14 +51,22 @@ class BookmarksListView : BaseRecyclerView, BookmarksView {
         this.presenter = presenter
     }
 
+    override fun onBookmarksLoadingStarted() {
+        visibility = GONE
+    }
+
+    override fun onBookmarksLoadingCompleted() {
+        fadeIn()
+    }
+
     override fun onBookmarksLoaded(bookmarks: List<BaseItem>) {
         setItems(bookmarks)
     }
 
-    override fun onBookmarksLoadFailed() {
+    override fun onBookmarksLoadFailed(sort: Int) {
         DialogHelper.showDialog(context, true, R.string.dialog_load_bookmarks_error,
                 DialogInterface.OnClickListener { _, _ ->
-                    presenter.loadBookmarks()
+                    presenter.loadBookmarks(sort)
                 })
     }
 

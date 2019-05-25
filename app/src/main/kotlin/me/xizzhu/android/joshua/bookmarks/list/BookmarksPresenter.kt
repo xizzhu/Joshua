@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.bookmarks.list
 
 import android.content.res.Resources
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.bookmarks.BookmarksInteractor
@@ -36,16 +37,24 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
     : BaseSettingsPresenter<BookmarksView>(bookmarksInteractor) {
     override fun onViewAttached() {
         super.onViewAttached()
-        loadBookmarks()
+
+        launch(Dispatchers.Main) {
+            bookmarksInteractor.observeBookmarksSortMethod().consumeEach { loadBookmarks(it) }
+        }
     }
 
-    fun loadBookmarks() {
+    fun loadBookmarks(sort: Int) {
         launch(Dispatchers.Main) {
             try {
+                bookmarksInteractor.notifyLoadingStarted()
+                view?.onBookmarksLoadingStarted()
+
                 val bookmarks = bookmarksInteractor.readBookmarks()
                 if (bookmarks.isEmpty()) {
                     view?.onBookmarksLoaded(listOf(TextItem(resources.getString(R.string.text_no_bookmark))))
                 } else {
+                    // TODO handles sort order
+
                     val calendar = Calendar.getInstance()
                     var previousYear = -1
                     var previousDayOfYear = -1
@@ -71,9 +80,10 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                 }
 
                 bookmarksInteractor.notifyLoadingFinished()
+                view?.onBookmarksLoadingCompleted()
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to load bookmarks")
-                view?.onBookmarksLoadFailed()
+                view?.onBookmarksLoadFailed(sort)
             }
         }
     }
