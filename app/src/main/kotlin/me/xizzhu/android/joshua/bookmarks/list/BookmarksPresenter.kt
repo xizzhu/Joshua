@@ -103,10 +103,15 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
     suspend fun List<Bookmark>.toBaseItemsByBook(): List<BaseItem> {
         val currentTranslation = bookmarksInteractor.readCurrentTranslation()
         val items: ArrayList<BaseItem> = ArrayList()
+        var currentBookIndex = -1
         for (bookmark in this) {
-            items.add(BookmarkItem(bookmark.verseIndex,
-                    bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
-                    bookmark.timestamp, this@BookmarksPresenter::selectVerse))
+            val verse = bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex)
+            if (bookmark.verseIndex.bookIndex != currentBookIndex) {
+                items.add(TitleItem(verse.text.bookName))
+                currentBookIndex = bookmark.verseIndex.bookIndex
+            }
+
+            items.add(BookmarkItem(bookmark.verseIndex, verse.text, bookmark.timestamp, this@BookmarksPresenter::selectVerse))
         }
         return items
     }

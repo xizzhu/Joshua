@@ -120,8 +120,9 @@ class BookmarksPresenterTest : BaseUnitTest() {
     fun testLoadBookmarksSortByBook() {
         runBlocking {
             bookmarksSortOrder.send(Constants.SORT_BY_BOOK)
-            `when`(bookmarksInteractor.readBookmarks(Constants.SORT_BY_BOOK))
-                    .thenReturn(listOf(Bookmark(VerseIndex(0, 0, 3), 4567890L)))
+            `when`(bookmarksInteractor.readBookmarks(Constants.SORT_BY_BOOK)).thenReturn(listOf(
+                    Bookmark(VerseIndex(0, 0, 3), 0L)
+            ))
             `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 3)))
                     .thenReturn(MockContents.kjvVerses[3])
@@ -129,8 +130,10 @@ class BookmarksPresenterTest : BaseUnitTest() {
             // loadBookmarks() is called by onViewAttached(), so no need to call again
             bookmarksPresenter.attachView(bookmarksView)
 
-            verify(bookmarksView, times(1))
-                    .onBookmarksLoaded(listOf(BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, 4567890L, bookmarksPresenter::selectVerse)))
+            verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(
+                    TitleItem(MockContents.kjvVerses[3].text.bookName),
+                    BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, 0L, bookmarksPresenter::selectVerse)
+            ))
             verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
 
             bookmarksPresenter.detachView()
