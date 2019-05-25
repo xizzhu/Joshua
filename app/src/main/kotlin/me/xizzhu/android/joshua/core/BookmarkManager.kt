@@ -23,7 +23,7 @@ data class Bookmark(val verseIndex: VerseIndex, val timestamp: Long) {
 }
 
 class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
-    suspend fun read(): List<Bookmark> = bookmarkRepository.read()
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Bookmark> = bookmarkRepository.read(sortOrder)
 
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark> = bookmarkRepository.read(bookIndex, chapterIndex)
 

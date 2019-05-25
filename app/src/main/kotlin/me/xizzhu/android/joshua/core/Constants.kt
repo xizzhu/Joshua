@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.repository.local
+package me.xizzhu.android.joshua.core
 
-import me.xizzhu.android.joshua.core.Bookmark
-import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.VerseIndex
+import androidx.annotation.IntDef
 
-interface LocalBookmarkStorage {
-    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Bookmark>
+object Constants {
+    const val SORT_BY_DATE = 0
+    const val SORT_BY_BOOK = 1
 
-    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark>
-
-    suspend fun read(verseIndex: VerseIndex): Bookmark
-
-    suspend fun save(bookmark: Bookmark)
-
-    suspend fun remove(verseIndex: VerseIndex)
+    @IntDef(SORT_BY_DATE, SORT_BY_BOOK)
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class SortOrder
 }

@@ -52,7 +52,7 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
 
-    suspend fun readBookmarks(): List<Bookmark> = bookmarkManager.read()
+    suspend fun readBookmarks(@Constants.SortOrder sortOrder: Int): List<Bookmark> = bookmarkManager.read(sortOrder)
 
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingManager.readVerse(translationShortName, verseIndex)

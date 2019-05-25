@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import org.junit.Assert.assertFalse
@@ -33,7 +34,8 @@ import kotlin.test.assertEquals
 class BookmarkDaoTest : BaseSqliteTest() {
     @Test
     fun testEmptyTable() {
-        assertTrue(androidDatabase.bookmarkDao.read().isEmpty())
+        assertTrue(androidDatabase.bookmarkDao.read(Constants.SORT_BY_DATE).isEmpty())
+        assertTrue(androidDatabase.bookmarkDao.read(Constants.SORT_BY_BOOK).isEmpty())
         for (bookIndex in 0 until Bible.BOOK_COUNT) {
             for (chapterIndex in 0 until Bible.getChapterCount(bookIndex)) {
                 assertTrue(androidDatabase.bookmarkDao.read(bookIndex, chapterIndex).isEmpty())
@@ -52,7 +54,8 @@ class BookmarkDaoTest : BaseSqliteTest() {
         androidDatabase.bookmarkDao.save(bookmark2)
         androidDatabase.bookmarkDao.save(bookmark3)
 
-        assertEquals(listOf(bookmark3, bookmark2, bookmark1), androidDatabase.bookmarkDao.read())
+        assertEquals(listOf(bookmark3, bookmark2, bookmark1), androidDatabase.bookmarkDao.read(Constants.SORT_BY_DATE))
+        assertEquals(listOf(bookmark1, bookmark2, bookmark3), androidDatabase.bookmarkDao.read(Constants.SORT_BY_BOOK))
         assertEquals(listOf(bookmark1, bookmark2), androidDatabase.bookmarkDao.read(1, 2))
         assertEquals(listOf(bookmark3), androidDatabase.bookmarkDao.read(1, 4))
         assertEquals(bookmark1, androidDatabase.bookmarkDao.read(VerseIndex(1, 2, 3)))
@@ -73,7 +76,8 @@ class BookmarkDaoTest : BaseSqliteTest() {
         androidDatabase.bookmarkDao.save(bookmark2)
         androidDatabase.bookmarkDao.save(bookmark3)
 
-        assertEquals(listOf(bookmark3, bookmark2, bookmark1), androidDatabase.bookmarkDao.read())
+        assertEquals(listOf(bookmark3, bookmark2, bookmark1), androidDatabase.bookmarkDao.read(Constants.SORT_BY_DATE))
+        assertEquals(listOf(bookmark1, bookmark2, bookmark3), androidDatabase.bookmarkDao.read(Constants.SORT_BY_BOOK))
         assertEquals(listOf(bookmark1, bookmark2), androidDatabase.bookmarkDao.read(1, 2))
         assertEquals(listOf(bookmark3), androidDatabase.bookmarkDao.read(1, 4))
         assertEquals(bookmark1, androidDatabase.bookmarkDao.read(VerseIndex(1, 2, 3)))
@@ -84,7 +88,7 @@ class BookmarkDaoTest : BaseSqliteTest() {
     @Test
     fun testRemoveNonExist() {
         androidDatabase.bookmarkDao.remove(VerseIndex(1, 2, 3))
-        assertTrue(androidDatabase.bookmarkDao.read().isEmpty())
+        assertTrue(androidDatabase.bookmarkDao.read(Constants.SORT_BY_DATE).isEmpty())
         assertTrue(androidDatabase.bookmarkDao.read(1, 2).isEmpty())
         assertFalse(androidDatabase.bookmarkDao.read(VerseIndex(1, 2, 3)).isValid())
     }
@@ -93,11 +97,11 @@ class BookmarkDaoTest : BaseSqliteTest() {
     fun testSaveThenRemove() {
         val bookmark = Bookmark(VerseIndex(1, 2, 3), 45678L)
         androidDatabase.bookmarkDao.save(bookmark)
-        assertEquals(listOf(bookmark), androidDatabase.bookmarkDao.read())
+        assertEquals(listOf(bookmark), androidDatabase.bookmarkDao.read(Constants.SORT_BY_DATE))
         assertEquals(listOf(bookmark), androidDatabase.bookmarkDao.read(1, 2))
 
         androidDatabase.bookmarkDao.remove(bookmark.verseIndex)
-        assertTrue(androidDatabase.bookmarkDao.read().isEmpty())
+        assertTrue(androidDatabase.bookmarkDao.read(Constants.SORT_BY_DATE).isEmpty())
         assertTrue(androidDatabase.bookmarkDao.read(1, 2).isEmpty())
     }
 }

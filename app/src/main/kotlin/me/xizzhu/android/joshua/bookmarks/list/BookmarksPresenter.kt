@@ -43,13 +43,13 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
         }
     }
 
-    fun loadBookmarks(sort: Int) {
+    fun loadBookmarks(sortOrder: Int) {
         launch(Dispatchers.Main) {
             try {
                 bookmarksInteractor.notifyLoadingStarted()
                 view?.onBookmarksLoadingStarted()
 
-                val bookmarks = bookmarksInteractor.readBookmarks()
+                val bookmarks = bookmarksInteractor.readBookmarks(sortOrder)
                 if (bookmarks.isEmpty()) {
                     view?.onBookmarksLoaded(listOf(TextItem(resources.getString(R.string.text_no_bookmark))))
                 } else {
@@ -83,7 +83,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                 view?.onBookmarksLoadingCompleted()
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to load bookmarks")
-                view?.onBookmarksLoadFailed(sort)
+                view?.onBookmarksLoadFailed(sortOrder)
             }
         }
     }
