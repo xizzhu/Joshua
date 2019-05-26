@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.NoteManager
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.notes.list.NotesPresenter
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 
 @Module

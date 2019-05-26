@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <me.xizzhu.android.joshua.notes.NotesListView
+    <me.xizzhu.android.joshua.notes.list.NotesListView
         android:id="@+id/notes"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

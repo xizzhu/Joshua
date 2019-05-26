@@ -18,6 +18,8 @@ package me.xizzhu.android.joshua.notes
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.notes.list.NotesListView
+import me.xizzhu.android.joshua.notes.list.NotesPresenter
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView

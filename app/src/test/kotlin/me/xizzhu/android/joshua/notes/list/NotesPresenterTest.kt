@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.notes
+package me.xizzhu.android.joshua.notes.list
 
 import android.content.res.Resources
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.notes.NotesInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.notes
+package me.xizzhu.android.joshua.notes.list
 
 import android.content.Context
 import android.content.DialogInterface
