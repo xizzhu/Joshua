@@ -32,8 +32,18 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
                           settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
     private val bookmarksLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
 
+    fun observeBookmarksSortOrder(): ReceiveChannel<Int> = bookmarkManager.observeBookmarksSortOrder()
+
+    suspend fun saveBookmarksSortOrder(@Constants.SortOrder sortOrder: Int) {
+        bookmarkManager.saveSortOrder(sortOrder)
+    }
+
     fun observeBookmarksLoadingState(): ReceiveChannel<LoadingSpinnerState> =
             bookmarksLoadingState.openSubscription()
+
+    suspend fun notifyLoadingStarted() {
+        bookmarksLoadingState.send(LoadingSpinnerState.IS_LOADING)
+    }
 
     suspend fun notifyLoadingFinished() {
         bookmarksLoadingState.send(LoadingSpinnerState.NOT_LOADING)
@@ -41,16 +51,13 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
 
-    suspend fun readBookmarks(): List<Bookmark> = bookmarkManager.read()
+    suspend fun readBookmarks(@Constants.SortOrder sortOrder: Int): List<Bookmark> = bookmarkManager.read(sortOrder)
 
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingManager.readVerse(translationShortName, verseIndex)
 
-    suspend fun selectVerse(verseIndex: VerseIndex) {
+    suspend fun openReading(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-    }
-
-    fun openReading() {
         navigator.navigate(bookmarksActivity, Navigator.SCREEN_READING)
     }
 }

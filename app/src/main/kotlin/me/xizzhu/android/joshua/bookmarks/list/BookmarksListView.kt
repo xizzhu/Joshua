@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.bookmarks
+package me.xizzhu.android.joshua.bookmarks.list
 
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.*
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface BookmarksView : BaseSettingsView {
+    fun onBookmarksLoadingStarted()
+
+    fun onBookmarksLoadingCompleted()
+
     fun onBookmarksLoaded(bookmarks: List<BaseItem>)
 
-    fun onBookmarksLoadFailed()
+    fun onBookmarksLoadFailed(@Constants.SortOrder sortOrder: Int)
 
     fun onVerseSelectionFailed(verseToSelect: VerseIndex)
 }
@@ -46,14 +52,22 @@ class BookmarksListView : BaseRecyclerView, BookmarksView {
         this.presenter = presenter
     }
 
+    override fun onBookmarksLoadingStarted() {
+        visibility = GONE
+    }
+
+    override fun onBookmarksLoadingCompleted() {
+        fadeIn()
+    }
+
     override fun onBookmarksLoaded(bookmarks: List<BaseItem>) {
         setItems(bookmarks)
     }
 
-    override fun onBookmarksLoadFailed() {
+    override fun onBookmarksLoadFailed(@Constants.SortOrder sortOrder: Int) {
         DialogHelper.showDialog(context, true, R.string.dialog_load_bookmarks_error,
                 DialogInterface.OnClickListener { _, _ ->
-                    presenter.loadBookmarks()
+                    presenter.loadBookmarks(sortOrder)
                 })
     }
 

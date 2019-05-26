@@ -20,6 +20,8 @@ import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.bookmarks.list.BookmarksPresenter
+import me.xizzhu.android.joshua.bookmarks.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.BookmarkManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -39,6 +41,10 @@ class BookmarksModule {
     @Provides
     fun provideLoadingSpinnerPresenter(bookmarksInteractor: BookmarksInteractor): LoadingSpinnerPresenter =
             LoadingSpinnerPresenter(bookmarksInteractor.observeBookmarksLoadingState())
+
+    @Provides
+    fun provideToolbarPresenter(bookmarksInteractor: BookmarksInteractor): ToolbarPresenter =
+            ToolbarPresenter(bookmarksInteractor)
 
     @Provides
     fun provideBookmarksPresenter(bookmarksActivity: BookmarksActivity,

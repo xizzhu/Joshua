@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <me.xizzhu.android.joshua.bookmarks.BookmarksListView
+    <me.xizzhu.android.joshua.bookmarks.list.BookmarksListView
         android:id="@+id/bookmarks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -21,11 +21,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.appcompat.widget.Toolbar
+        <me.xizzhu.android.joshua.bookmarks.toolbar.BookmarksToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:title="@string/title_bookmarks" />
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
     </com.google.android.material.appbar.AppBarLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

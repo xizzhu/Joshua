@@ -17,10 +17,15 @@
 package me.xizzhu.android.joshua.core.repository.local
 
 import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 
 interface LocalBookmarkStorage {
-    suspend fun read(): List<Bookmark>
+    suspend fun readSortOrder(): Int
+
+    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int)
+
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Bookmark>
 
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark>
 

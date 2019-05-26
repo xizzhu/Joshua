@@ -39,6 +39,7 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
         const val KEY_SIMPLE_READING_MODE_ON = "simpleReadingModeOn"
         const val KEY_FONT_SIZE_SCALE = "fontSizeScale"
         const val KEY_TRANSLATION_LIST_REFRESH_TIMESTAMP = "translationListRefreshTimestamp"
+        const val KEY_BOOKMARKS_SORT_ORDER = "bookmarksSortOrder"
 
         @WorkerThread
         fun createTable(db: SQLiteDatabase) {
