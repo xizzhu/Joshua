@@ -2,7 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
-- Supported sorting bookmarks by book
+- Supported sorting bookmarks and notes by book
 
 #### v0.4.1 (2019-05-23)
 - Added missing on click listener for simple reading mode
