@@ -56,11 +56,8 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingManager.readVerse(translationShortName, verseIndex)
 
-    suspend fun selectVerse(verseIndex: VerseIndex) {
+    suspend fun openReading(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-    }
-
-    fun openReading() {
         navigator.navigate(bookmarksActivity, Navigator.SCREEN_READING)
     }
 }

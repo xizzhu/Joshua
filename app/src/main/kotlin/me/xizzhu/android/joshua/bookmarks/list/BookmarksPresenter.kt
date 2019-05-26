@@ -119,8 +119,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
     fun selectVerse(verseToSelect: VerseIndex) {
         launch(Dispatchers.Main) {
             try {
-                bookmarksInteractor.selectVerse(verseToSelect)
-                bookmarksInteractor.openReading()
+                bookmarksInteractor.openReading(verseToSelect)
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to select verse and open reading activity")
                 view?.onVerseSelectionFailed(verseToSelect)
