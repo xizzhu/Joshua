@@ -20,12 +20,16 @@ import android.content.res.Resources
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.notes.NotesInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
-import org.junit.After
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -40,6 +44,7 @@ class NotesPresenterTest : BaseUnitTest() {
     private lateinit var resources: Resources
 
     private lateinit var settingsChannel: BroadcastChannel<Settings>
+    private lateinit var notesSortOrder: BroadcastChannel<Int>
     private lateinit var notesPresenter: NotesPresenter
 
     @Before
@@ -48,40 +53,104 @@ class NotesPresenterTest : BaseUnitTest() {
 
         runBlocking {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+            notesSortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
             `when`(notesInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-            `when`(notesInteractor.readNotes()).thenReturn(emptyList())
+            `when`(notesInteractor.observeNotesSortOrder()).thenReturn(notesSortOrder.openSubscription())
             `when`(notesInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
+            `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
+            `when`(resources.getStringArray(anyInt())).thenReturn(Array(12) { "" })
 
             notesPresenter = NotesPresenter(notesInteractor, resources)
-            notesPresenter.attachView(notesView)
         }
-    }
-
-    @After
-    override fun tearDown() {
-        notesPresenter.detachView()
-        super.tearDown()
     }
 
     @Test
     fun testLoadEmptyNotes() {
         runBlocking {
+            `when`(notesInteractor.readNotes(Constants.SORT_BY_DATE)).thenReturn(emptyList())
+
             // loadNotes() is called by onViewAttached()
+            notesPresenter.attachView(notesView)
             verify(notesView, times(1)).onNotesLoaded(listOf(TextItem("")))
-            verify(notesView, never()).onNotesLoadFailed()
+            verify(notesView, never()).onNotesLoadFailed(Constants.SORT_BY_DATE)
+
+            notesPresenter.detachView()
+        }
+    }
+
+    @Test
+    fun testLoadNotesSortByDate() {
+        runBlocking {
+            `when`(notesInteractor.readNotes(Constants.SORT_BY_DATE)).thenReturn(listOf(
+                    Note(VerseIndex(0, 0, 4), "Note1", 2L * 365L * 24L * 3600L * 1000L),
+                    Note(VerseIndex(0, 0, 1), "Note2", 36L * 3600L * 1000L),
+                    Note(VerseIndex(0, 0, 3), "Note3", 36L * 3600L * 1000L - 1000L),
+                    Note(VerseIndex(0, 0, 2), "Note4", 0L)
+            ))
+            `when`(notesInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
+            `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 1)))
+                    .thenReturn(MockContents.kjvVerses[1])
+            `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 2)))
+                    .thenReturn(MockContents.kjvVerses[2])
+            `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 3)))
+                    .thenReturn(MockContents.kjvVerses[3])
+            `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 4)))
+                    .thenReturn(MockContents.kjvVerses[4])
+
+            // loadBookmarks() is called by onViewAttached(), so no need to call again
+            notesPresenter.attachView(notesView)
+
+            verify(notesView, times(1)).onNotesLoaded(listOf(
+                    TitleItem(""),
+                    NoteItem(VerseIndex(0, 0, 4), MockContents.kjvVerses[4].text, "Note1", 2L * 365L * 24L * 3600L * 1000L, notesPresenter::selectVerse),
+                    TitleItem(""),
+                    NoteItem(VerseIndex(0, 0, 1), MockContents.kjvVerses[1].text, "Note2", 36L * 3600L * 1000L, notesPresenter::selectVerse),
+                    NoteItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, "Note3", 36L * 3600L * 1000L - 1000L, notesPresenter::selectVerse),
+                    TitleItem(""),
+                    NoteItem(VerseIndex(0, 0, 2), MockContents.kjvVerses[2].text, "Note4", 0L, notesPresenter::selectVerse)
+            ))
+            verify(notesView, never()).onNotesLoadFailed(anyInt())
+
+            notesPresenter.detachView()
+        }
+    }
+
+    @Test
+    fun testLoadNotesSortByBook() {
+        runBlocking {
+            notesSortOrder.send(Constants.SORT_BY_BOOK)
+            `when`(notesInteractor.readNotes(Constants.SORT_BY_BOOK)).thenReturn(listOf(
+                    Note(VerseIndex(0, 0, 3), "Note", 0L)
+            ))
+            `when`(notesInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
+            `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 3)))
+                    .thenReturn(MockContents.kjvVerses[3])
+
+            // loadBookmarks() is called by onViewAttached(), so no need to call again
+            notesPresenter.attachView(notesView)
+
+            verify(notesView, times(1)).onNotesLoaded(listOf(
+                    TitleItem(MockContents.kjvVerses[3].text.bookName),
+                    NoteItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, "Note", 0L, notesPresenter::selectVerse)
+            ))
+            verify(notesView, never()).onNotesLoadFailed(anyInt())
+
+            notesPresenter.detachView()
         }
     }
 
     @Test
     fun testLoadBookmarksWithException() {
         runBlocking {
-            `when`(notesInteractor.readNotes()).thenThrow(RuntimeException("Random exception"))
-            notesPresenter.loadNotes()
+            `when`(notesInteractor.readNotes(Constants.SORT_BY_DATE)).thenThrow(RuntimeException("Random exception"))
 
-            // loadBookmarks() is called by onViewAttached(), so onNoNotesAvailable() is called once
-            verify(notesView, times(1)).onNotesLoaded(listOf(TextItem("")))
-            verify(notesView, times(1)).onNotesLoadFailed()
+            // loadNotes() is called by onViewAttached()
+            notesPresenter.attachView(notesView)
+            verify(notesView, never()).onNotesLoaded(any())
+            verify(notesView, times(1)).onNotesLoadFailed(Constants.SORT_BY_DATE)
+
+            notesPresenter.detachView()
         }
     }
 }

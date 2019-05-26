@@ -20,15 +20,21 @@ import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.*
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface NotesView : BaseSettingsView {
+    fun onNotesLoadingStarted()
+
+    fun onNotesLoadingCompleted()
+
     fun onNotesLoaded(notes: List<BaseItem>)
 
-    fun onNotesLoadFailed()
+    fun onNotesLoadFailed(@Constants.SortOrder sortOrder: Int)
 
     fun onVerseSelectionFailed(verseToSelect: VerseIndex)
 }
@@ -46,14 +52,22 @@ class NotesListView : BaseRecyclerView, NotesView {
         this.presenter = presenter
     }
 
+    override fun onNotesLoadingStarted() {
+        visibility = GONE
+    }
+
+    override fun onNotesLoadingCompleted() {
+        fadeIn()
+    }
+
     override fun onNotesLoaded(notes: List<BaseItem>) {
         setItems(notes)
     }
 
-    override fun onNotesLoadFailed() {
+    override fun onNotesLoadFailed(@Constants.SortOrder sortOrder: Int) {
         DialogHelper.showDialog(context, true, R.string.dialog_load_notes_error,
                 DialogInterface.OnClickListener { _, _ ->
-                    presenter.loadNotes()
+                    presenter.loadNotes(sortOrder)
                 })
     }
 

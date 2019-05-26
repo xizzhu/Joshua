@@ -17,9 +17,13 @@
 package me.xizzhu.android.joshua.notes.list
 
 import android.content.res.Resources
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.notes.NotesInteractor
@@ -36,46 +40,80 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
     : BaseSettingsPresenter<NotesView>(notesInteractor) {
     override fun onViewAttached() {
         super.onViewAttached()
-        loadNotes()
+
+        launch(Dispatchers.Main) {
+            notesInteractor.observeNotesSortOrder().consumeEach { loadNotes(it) }
+        }
     }
 
-    fun loadNotes() {
+    fun loadNotes(@Constants.SortOrder sortOrder: Int) {
         launch(Dispatchers.Main) {
             try {
-                val notes = notesInteractor.readNotes()
+                notesInteractor.notifyLoadingStarted()
+                view?.onNotesLoadingStarted()
+
+                val notes = notesInteractor.readNotes(sortOrder)
                 if (notes.isEmpty()) {
                     view?.onNotesLoaded(listOf(TextItem(resources.getString(R.string.text_no_note))))
                 } else {
-                    val calendar = Calendar.getInstance()
-                    var previousYear = -1
-                    var previousDayOfYear = -1
-
-                    val currentTranslation = notesInteractor.readCurrentTranslation()
-                    val items: ArrayList<BaseItem> = ArrayList(notes.size)
-                    for (note in notes) {
-                        calendar.timeInMillis = note.timestamp
-                        val currentYear = calendar.get(Calendar.YEAR)
-                        val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
-                        if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
-                            items.add(TitleItem(note.timestamp.formatDate(resources)))
-
-                            previousYear = currentYear
-                            previousDayOfYear = currentDayOfYear
-                        }
-
-                        items.add(NoteItem(note.verseIndex,
-                                notesInteractor.readVerse(currentTranslation, note.verseIndex).text,
-                                note.note, note.timestamp, this@NotesPresenter::selectVerse))
+                    val items = when (sortOrder) {
+                        Constants.SORT_BY_DATE -> notes.toBaseItemsByDate()
+                        Constants.SORT_BY_BOOK -> notes.toBaseItemsByBook()
+                        else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
                     }
                     view?.onNotesLoaded(items)
                 }
 
                 notesInteractor.notifyLoadingFinished()
+                view?.onNotesLoadingCompleted()
             } catch (e: Exception) {
                 Log.e(tag, e, "Failed to load notes")
-                view?.onNotesLoadFailed()
+                view?.onNotesLoadFailed(sortOrder)
             }
         }
+    }
+
+    @VisibleForTesting
+    suspend fun List<Note>.toBaseItemsByDate(): List<BaseItem> {
+        val calendar = Calendar.getInstance()
+        var previousYear = -1
+        var previousDayOfYear = -1
+
+        val currentTranslation = notesInteractor.readCurrentTranslation()
+        val items: ArrayList<BaseItem> = ArrayList()
+        for (note in this) {
+            calendar.timeInMillis = note.timestamp
+            val currentYear = calendar.get(Calendar.YEAR)
+            val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+            if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
+                items.add(TitleItem(note.timestamp.formatDate(resources)))
+
+                previousYear = currentYear
+                previousDayOfYear = currentDayOfYear
+            }
+
+            items.add(NoteItem(note.verseIndex,
+                    notesInteractor.readVerse(currentTranslation, note.verseIndex).text,
+                    note.note, note.timestamp, this@NotesPresenter::selectVerse))
+        }
+        return items
+    }
+
+    @VisibleForTesting
+    suspend fun List<Note>.toBaseItemsByBook(): List<BaseItem> {
+        val currentTranslation = notesInteractor.readCurrentTranslation()
+        val items: ArrayList<BaseItem> = ArrayList()
+        var currentBookIndex = -1
+        for (note in this) {
+            val verse = notesInteractor.readVerse(currentTranslation, note.verseIndex)
+            if (note.verseIndex.bookIndex != currentBookIndex) {
+                items.add(TitleItem(verse.text.bookName))
+                currentBookIndex = note.verseIndex.bookIndex
+            }
+
+            items.add(NoteItem(note.verseIndex, verse.text, note.note, note.timestamp, this@NotesPresenter::selectVerse))
+        }
+        return items
     }
 
     fun selectVerse(verseToSelect: VerseIndex) {

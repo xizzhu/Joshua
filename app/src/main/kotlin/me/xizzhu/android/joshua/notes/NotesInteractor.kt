@@ -33,7 +33,17 @@ class NotesInteractor(private val notesActivity: NotesActivity,
                       settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
     private val notesLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
 
+    fun observeNotesSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
+
+    suspend fun saveNotesSortOrder(@Constants.SortOrder sortOrder: Int) {
+        noteManager.saveSortOrder(sortOrder)
+    }
+
     fun observeNotesLoadingState(): ReceiveChannel<LoadingSpinnerState> = notesLoadingState.openSubscription()
+
+    suspend fun notifyLoadingStarted() {
+        notesLoadingState.send(LoadingSpinnerState.IS_LOADING)
+    }
 
     suspend fun notifyLoadingFinished() {
         notesLoadingState.send(LoadingSpinnerState.NOT_LOADING)
@@ -41,7 +51,7 @@ class NotesInteractor(private val notesActivity: NotesActivity,
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
 
-    suspend fun readNotes(): List<Note> = noteManager.read(Constants.DEFAULT_SORT_ORDER)
+    suspend fun readNotes(@Constants.SortOrder sortOrder: Int): List<Note> = noteManager.read(sortOrder)
 
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingManager.readVerse(translationShortName, verseIndex)
