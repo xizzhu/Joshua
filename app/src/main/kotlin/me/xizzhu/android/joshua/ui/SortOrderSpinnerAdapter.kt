@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.bookmarks.toolbar
+package me.xizzhu.android.joshua.ui
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -26,18 +26,12 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 
-class BookmarksSpinnerAdapter(context: Context) : BaseAdapter() {
+class SortOrderSpinnerAdapter(context: Context) : BaseAdapter() {
     private val inflater = LayoutInflater.from(context)
-    private val items: Array<String>
+    private val items: Array<String> = context.resources.getStringArray(R.array.text_sort_order)
 
     @Constants.SortOrder
     var sortOrder = Constants.DEFAULT_SORT_ORDER
-
-    init {
-        val resources = context.resources
-        items = arrayOf(resources.getString(R.string.bookmark_spinner_sort_by_date),
-                resources.getString(R.string.bookmark_spinner_sort_by_book))
-    }
 
     override fun getCount(): Int = Constants.SORT_ORDER_COUNT
 

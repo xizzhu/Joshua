@@ -24,6 +24,7 @@ import android.widget.Spinner
 import androidx.appcompat.widget.Toolbar
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.ui.SortOrderSpinnerAdapter
 import me.xizzhu.android.joshua.utils.MVPView
 
 interface ToolbarView : MVPView {
@@ -53,7 +54,7 @@ class BookmarksToolbar : Toolbar, ToolbarView {
             // do nothing
         }
     }
-    private val translationSpinnerAdapter = BookmarksSpinnerAdapter(context)
+    private val translationSpinnerAdapter = SortOrderSpinnerAdapter(context)
 
     init {
         setTitle(R.string.title_bookmarks)

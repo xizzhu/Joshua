@@ -96,6 +96,8 @@
     <string name="settings_title_rate">Rate me on Google Play</string>
     <string name="settings_title_version">Version</string>
 
-    <string name="bookmark_spinner_sort_by_date">By date</string>
-    <string name="bookmark_spinner_sort_by_book">By book</string>
+    <string-array name="text_sort_order">
+        <item>By date</item>
+        <item>By book</item>
+    </string-array>
 </resources>
