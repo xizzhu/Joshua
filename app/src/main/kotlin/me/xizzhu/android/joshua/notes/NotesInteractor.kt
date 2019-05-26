@@ -41,7 +41,7 @@ class NotesInteractor(private val notesActivity: NotesActivity,
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
 
-    suspend fun readNotes(): List<Note> = noteManager.read()
+    suspend fun readNotes(): List<Note> = noteManager.read(Constants.DEFAULT_SORT_ORDER)
 
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingManager.readVerse(translationShortName, verseIndex)

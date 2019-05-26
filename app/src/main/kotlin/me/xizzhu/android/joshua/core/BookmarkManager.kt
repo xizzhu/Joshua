@@ -37,7 +37,7 @@ class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
         }
     }
 
-    fun observeBookmarksSortOrder(): ReceiveChannel<Int> = bookmarksSortOrder.openSubscription()
+    fun observeSortOrder(): ReceiveChannel<Int> = bookmarksSortOrder.openSubscription()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         bookmarkRepository.saveSortOrder(sortOrder)

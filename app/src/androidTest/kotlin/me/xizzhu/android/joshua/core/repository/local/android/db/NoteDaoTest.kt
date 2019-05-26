@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
@@ -33,7 +34,8 @@ import kotlin.test.assertEquals
 class NoteDaoTest : BaseSqliteTest() {
     @Test
     fun testEmptyTable() {
-        assertTrue(androidDatabase.noteDao.read().isEmpty())
+        assertTrue(androidDatabase.noteDao.read(Constants.SORT_BY_DATE).isEmpty())
+        assertTrue(androidDatabase.noteDao.read(Constants.SORT_BY_BOOK).isEmpty())
         for (bookIndex in 0 until Bible.BOOK_COUNT) {
             for (chapterIndex in 0 until Bible.getChapterCount(bookIndex)) {
                 assertTrue(androidDatabase.noteDao.read(bookIndex, chapterIndex).isEmpty())
@@ -52,7 +54,8 @@ class NoteDaoTest : BaseSqliteTest() {
         androidDatabase.noteDao.save(note2)
         androidDatabase.noteDao.save(note3)
 
-        assertEquals(listOf(note3, note2, note1), androidDatabase.noteDao.read())
+        assertEquals(listOf(note3, note2, note1), androidDatabase.noteDao.read(Constants.SORT_BY_DATE))
+        assertEquals(listOf(note1, note2, note3), androidDatabase.noteDao.read(Constants.SORT_BY_BOOK))
         assertEquals(listOf(note1, note2), androidDatabase.noteDao.read(1, 2))
         assertEquals(listOf(note3), androidDatabase.noteDao.read(1, 4))
         assertEquals(note1, androidDatabase.noteDao.read(VerseIndex(1, 2, 3)))
@@ -73,7 +76,8 @@ class NoteDaoTest : BaseSqliteTest() {
         androidDatabase.noteDao.save(note2)
         androidDatabase.noteDao.save(note3)
 
-        assertEquals(listOf(note3, note2, note1), androidDatabase.noteDao.read())
+        assertEquals(listOf(note3, note2, note1), androidDatabase.noteDao.read(Constants.SORT_BY_DATE))
+        assertEquals(listOf(note1, note2, note3), androidDatabase.noteDao.read(Constants.SORT_BY_BOOK))
         assertEquals(listOf(note1, note2), androidDatabase.noteDao.read(1, 2))
         assertEquals(listOf(note3), androidDatabase.noteDao.read(1, 4))
         assertEquals(note1, androidDatabase.noteDao.read(VerseIndex(1, 2, 3)))
@@ -84,7 +88,7 @@ class NoteDaoTest : BaseSqliteTest() {
     @Test
     fun testRemoveNonExist() {
         androidDatabase.noteDao.remove(VerseIndex(1, 2, 3))
-        assertTrue(androidDatabase.noteDao.read().isEmpty())
+        assertTrue(androidDatabase.noteDao.read(Constants.SORT_BY_DATE).isEmpty())
         assertTrue(androidDatabase.noteDao.read(1, 2).isEmpty())
         assertFalse(androidDatabase.noteDao.read(VerseIndex(1, 2, 3)).isValid())
     }
@@ -93,11 +97,11 @@ class NoteDaoTest : BaseSqliteTest() {
     fun testSaveThenRemove() {
         val note = Note(VerseIndex(1, 2, 3), "note 1", 45678L)
         androidDatabase.noteDao.save(note)
-        assertEquals(listOf(note), androidDatabase.noteDao.read())
+        assertEquals(listOf(note), androidDatabase.noteDao.read(Constants.SORT_BY_DATE))
         assertEquals(listOf(note), androidDatabase.noteDao.read(1, 2))
 
         androidDatabase.noteDao.remove(note.verseIndex)
-        assertTrue(androidDatabase.noteDao.read().isEmpty())
+        assertTrue(androidDatabase.noteDao.read(Constants.SORT_BY_DATE).isEmpty())
         assertTrue(androidDatabase.noteDao.read(1, 2).isEmpty())
     }
 }

@@ -16,11 +16,16 @@
 
 package me.xizzhu.android.joshua.core.repository.local
 
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
 
 interface LocalNoteStorage {
-    suspend fun read(): List<Note>
+    suspend fun readSortOrder(): Int
+
+    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int)
+
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Note>
 
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Note>
 

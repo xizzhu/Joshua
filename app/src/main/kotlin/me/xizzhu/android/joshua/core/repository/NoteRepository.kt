@@ -16,12 +16,19 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalNoteStorage
 
 class NoteRepository(private val localNoteStorage: LocalNoteStorage) {
-    suspend fun read(): List<Note> = localNoteStorage.read()
+    suspend fun readSortOrder(): Int = localNoteStorage.readSortOrder()
+
+    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        localNoteStorage.saveSortOrder(sortOrder)
+    }
+
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Note> = localNoteStorage.read(sortOrder)
 
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Note> = localNoteStorage.read(bookIndex, chapterIndex)
 
