@@ -16,6 +16,12 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.BookmarkRepository
 
 data class Bookmark(val verseIndex: VerseIndex, val timestamp: Long) {
@@ -23,6 +29,21 @@ data class Bookmark(val verseIndex: VerseIndex, val timestamp: Long) {
 }
 
 class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
+    private val bookmarksSortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
+
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            bookmarksSortOrder.send(bookmarkRepository.readSortOrder())
+        }
+    }
+
+    fun observeBookmarksSortOrder(): ReceiveChannel<Int> = bookmarksSortOrder.openSubscription()
+
+    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        bookmarkRepository.saveSortOrder(sortOrder)
+        bookmarksSortOrder.send(sortOrder)
+    }
+
     suspend fun read(@Constants.SortOrder sortOrder: Int): List<Bookmark> = bookmarkRepository.read(sortOrder)
 
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark> = bookmarkRepository.read(bookIndex, chapterIndex)

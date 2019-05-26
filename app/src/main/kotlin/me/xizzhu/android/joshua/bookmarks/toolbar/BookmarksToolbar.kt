@@ -26,7 +26,9 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.utils.MVPView
 
-interface ToolbarView : MVPView
+interface ToolbarView : MVPView {
+    fun onBookmarkSortOrderLoaded(@Constants.SortOrder sortOrder: Int)
+}
 
 class BookmarksToolbar : Toolbar, ToolbarView {
     constructor(context: Context) : super(context)
@@ -58,12 +60,19 @@ class BookmarksToolbar : Toolbar, ToolbarView {
 
         inflateMenu(R.menu.menu_bookmarks)
         (menu.findItem(R.id.action_sort).actionView as Spinner).apply {
-            adapter = translationSpinnerAdapter
             onItemSelectedListener = bookmarksSpinnerItemSelectedListener
         }
     }
 
     fun setPresenter(presenter: ToolbarPresenter) {
         this.presenter = presenter
+    }
+
+
+    override fun onBookmarkSortOrderLoaded(@Constants.SortOrder sortOrder: Int) {
+        (menu.findItem(R.id.action_sort).actionView as Spinner).apply {
+            adapter = translationSpinnerAdapter
+            setSelection(sortOrder)
+        }
     }
 }

@@ -22,6 +22,12 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalBookmarkStorage
 
 class BookmarkRepository(private val localBookmarkStorage: LocalBookmarkStorage) {
+    suspend fun readSortOrder(): Int = localBookmarkStorage.readSortOrder()
+
+    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        localBookmarkStorage.saveSortOrder(sortOrder)
+    }
+
     suspend fun read(@Constants.SortOrder sortOrder: Int): List<Bookmark> = localBookmarkStorage.read(sortOrder)
 
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark> = localBookmarkStorage.read(bookIndex, chapterIndex)
