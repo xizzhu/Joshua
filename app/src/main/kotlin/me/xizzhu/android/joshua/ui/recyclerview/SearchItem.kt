@@ -27,7 +27,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.util.*
@@ -81,14 +80,6 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
     }
 
     override fun getItemViewType(): Int = BaseItem.SEARCH_ITEM
-}
-
-fun List<Verse>.toSearchItems(query: String, onClicked: (VerseIndex) -> Unit): List<SearchItem> {
-    val searchResult: ArrayList<SearchItem> = ArrayList(size)
-    for (verse in this) {
-        searchResult.add(SearchItem(verse.verseIndex, verse.text.bookName, verse.text.text, query, onClicked))
-    }
-    return searchResult
 }
 
 class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)

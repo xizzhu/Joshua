@@ -34,15 +34,6 @@ class SearchItemTest : BaseUnitTest() {
     }
 
     @Test
-    fun testToSearchItems() {
-        val onClicked: (VerseIndex) -> Unit = {}
-        val expected = listOf(SearchItem(MockContents.kjvVerses[0].verseIndex,
-                MockContents.kjvVerses[0].text.bookName, MockContents.kjvVerses[0].text.text, "", onClicked))
-        val actual = listOf(MockContents.kjvVerses[0]).toSearchItems("", onClicked)
-        assertEquals(expected, actual)
-    }
-
-    @Test
     fun testTextForDisplay() {
         val verseIndex = VerseIndex(1, 2, 3)
         val bookName = MockContents.kjvVerses[0].text.bookName
