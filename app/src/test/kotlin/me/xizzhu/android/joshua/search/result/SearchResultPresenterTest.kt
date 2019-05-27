@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import me.xizzhu.android.joshua.ui.recyclerview.SearchItem
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -99,12 +100,15 @@ class SearchResultPresenterTest : BaseUnitTest() {
         runBlocking {
             searchStateChannel.send(LoadingSpinnerState.IS_LOADING)
             val query = "query"
-            val verses: List<Verse> = listOf(MockContents.kjvVerses[0])
+            val verses: List<Verse> = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2])
             searchResultChannel.send(Pair(query, verses))
             searchStateChannel.send(LoadingSpinnerState.NOT_LOADING)
 
             verify(searchResultView, times(1)).onSearchResultUpdated(listOf(
-                    SearchItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text.bookName, MockContents.kjvVerses[0].text.text, query, searchResultPresenter::selectVerse)
+                    TitleItem(MockContents.kjvVerses[0].text.bookName),
+                    SearchItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text.bookName, MockContents.kjvVerses[0].text.text, query, searchResultPresenter::selectVerse),
+                    SearchItem(MockContents.kjvVerses[1].verseIndex, MockContents.kjvVerses[1].text.bookName, MockContents.kjvVerses[1].text.text, query, searchResultPresenter::selectVerse),
+                    SearchItem(MockContents.kjvVerses[2].verseIndex, MockContents.kjvVerses[2].text.bookName, MockContents.kjvVerses[2].text.text, query, searchResultPresenter::selectVerse)
             ))
             verify(searchResultView, times(1)).onSearchStarted()
 

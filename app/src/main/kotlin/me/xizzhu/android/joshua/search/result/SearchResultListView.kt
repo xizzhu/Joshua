@@ -24,8 +24,8 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.ui.recyclerview.SearchItem
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface SearchResultView : BaseSettingsView {
@@ -33,7 +33,7 @@ interface SearchResultView : BaseSettingsView {
 
     fun onSearchCompleted()
 
-    fun onSearchResultUpdated(searchItems: List<SearchItem>)
+    fun onSearchResultUpdated(searchItems: List<BaseItem>)
 
     fun onVerseSelectionFailed(verseToSelect: VerseIndex)
 }
@@ -62,7 +62,7 @@ class SearchResultListView : BaseRecyclerView, SearchResultView {
         fadeIn()
     }
 
-    override fun onSearchResultUpdated(searchItems: List<SearchItem>) {
+    override fun onSearchResultUpdated(searchItems: List<BaseItem>) {
         if (hasSearchStarted) {
             hasSearchStarted = false
             Toast.makeText(context, resources.getString(R.string.toast_verses_searched, searchItems.size),
