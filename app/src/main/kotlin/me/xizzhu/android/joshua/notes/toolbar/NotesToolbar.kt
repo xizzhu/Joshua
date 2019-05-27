@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.bookmarks.toolbar
+package me.xizzhu.android.joshua.notes.toolbar
 
 import android.content.Context
 import android.util.AttributeSet
@@ -28,10 +28,10 @@ import me.xizzhu.android.joshua.ui.SortOrderSpinnerAdapter
 import me.xizzhu.android.joshua.utils.MVPView
 
 interface ToolbarView : MVPView {
-    fun onBookmarkSortOrderLoaded(@Constants.SortOrder sortOrder: Int)
+    fun onNotesSortOrderLoaded(@Constants.SortOrder sortOrder: Int)
 }
 
-class BookmarksToolbar : Toolbar, ToolbarView {
+class NotesToolbar : Toolbar, ToolbarView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -40,14 +40,14 @@ class BookmarksToolbar : Toolbar, ToolbarView {
 
     private lateinit var presenter: ToolbarPresenter
 
-    private val bookmarksSpinnerItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+    private val sortOrderSpinnerItemSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
             if (position >= Constants.SORT_ORDER_COUNT) {
                 throw IllegalArgumentException("Unsupported sort order, position = $position")
             }
 
             translationSpinnerAdapter.sortOrder = position
-            presenter.updateBookmarksSortOrder(position)
+            presenter.updateNotesSortOrder(position)
         }
 
         override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -57,11 +57,11 @@ class BookmarksToolbar : Toolbar, ToolbarView {
     private val translationSpinnerAdapter = SortOrderSpinnerAdapter(context)
 
     init {
-        setTitle(R.string.title_bookmarks)
+        setTitle(R.string.title_notes)
 
-        inflateMenu(R.menu.menu_bookmarks)
+        inflateMenu(R.menu.menu_notes)
         (menu.findItem(R.id.action_sort).actionView as Spinner).apply {
-            onItemSelectedListener = bookmarksSpinnerItemSelectedListener
+            onItemSelectedListener = sortOrderSpinnerItemSelectedListener
         }
     }
 
@@ -70,7 +70,7 @@ class BookmarksToolbar : Toolbar, ToolbarView {
     }
 
 
-    override fun onBookmarkSortOrderLoaded(@Constants.SortOrder sortOrder: Int) {
+    override fun onNotesSortOrderLoaded(@Constants.SortOrder sortOrder: Int) {
         (menu.findItem(R.id.action_sort).actionView as Spinner).apply {
             adapter = translationSpinnerAdapter
             setSelection(sortOrder)

@@ -18,6 +18,10 @@ package me.xizzhu.android.joshua.notes
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.notes.list.NotesListView
+import me.xizzhu.android.joshua.notes.list.NotesPresenter
+import me.xizzhu.android.joshua.notes.toolbar.NotesToolbar
+import me.xizzhu.android.joshua.notes.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView
@@ -32,15 +36,20 @@ class NotesActivity : BaseSettingsActivity() {
     lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
     @Inject
+    lateinit var toolbarPresenter: ToolbarPresenter
+
+    @Inject
     lateinit var notesPresenter: NotesPresenter
 
     private val loadingSpinner: LoadingSpinner by bindView(R.id.loading_spinner)
+    private val toolbar: NotesToolbar by bindView(R.id.toolbar)
     private val notesListView: NotesListView by bindView(R.id.notes)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_notes)
+        toolbar.setPresenter(toolbarPresenter)
         notesListView.setPresenter(notesPresenter)
 
         observeSettings(notesInteractor)
@@ -50,11 +59,13 @@ class NotesActivity : BaseSettingsActivity() {
         super.onStart()
 
         loadingSpinnerPresenter.attachView(loadingSpinner)
+        toolbarPresenter.attachView(toolbar)
         notesPresenter.attachView(notesListView)
     }
 
     override fun onStop() {
         loadingSpinnerPresenter.detachView()
+        toolbarPresenter.detachView()
         notesPresenter.detachView()
 
         super.onStop()

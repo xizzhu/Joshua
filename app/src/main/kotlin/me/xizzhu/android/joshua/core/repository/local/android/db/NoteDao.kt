@@ -21,6 +21,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
 
@@ -47,10 +48,15 @@ class NoteDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     private val db by lazy { sqliteHelper.writableDatabase }
 
-    fun read(): List<Note> {
+    fun read(@Constants.SortOrder sortOrder: Int): List<Note> {
         var cursor: Cursor? = null
         try {
-            cursor = db.query(TABLE_NOTE, null, null, null, null, null, "$COLUMN_TIMESTAMP DESC")
+            val orderBy = when (sortOrder) {
+                Constants.SORT_BY_DATE -> "$COLUMN_TIMESTAMP DESC"
+                Constants.SORT_BY_BOOK -> "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC"
+                else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
+            }
+            cursor = db.query(TABLE_NOTE, null, null, null, null, null, orderBy)
             return with(cursor) {
                 val notes = ArrayList<Note>(count)
                 val bookIndex = getColumnIndex(COLUMN_BOOK_INDEX)

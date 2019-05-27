@@ -23,6 +23,8 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.NoteManager
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.notes.list.NotesPresenter
+import me.xizzhu.android.joshua.notes.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 
 @Module
@@ -39,6 +41,10 @@ class NotesModule {
     @Provides
     fun provideLoadingSpinnerPresenter(notesInteractor: NotesInteractor): LoadingSpinnerPresenter =
             LoadingSpinnerPresenter(notesInteractor.observeNotesLoadingState())
+
+    @Provides
+    fun provideToolbarPresenter(notesInteractor: NotesInteractor): ToolbarPresenter =
+            ToolbarPresenter(notesInteractor)
 
     @Provides
     fun provideNotesPresenter(notesActivity: NotesActivity,
