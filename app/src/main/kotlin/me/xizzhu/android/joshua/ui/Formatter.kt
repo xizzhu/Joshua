@@ -20,8 +20,8 @@ import android.content.res.Resources
 import me.xizzhu.android.joshua.R
 import java.util.*
 
-fun Long.formatDate(resources: Resources): String {
-    val calendar = Calendar.getInstance()
+fun Long.formatDate(resources: Resources, calendar: Calendar): String {
+    calendar.timeInMillis = System.currentTimeMillis()
     val currentYear = calendar.get(Calendar.YEAR)
 
     calendar.timeInMillis = this

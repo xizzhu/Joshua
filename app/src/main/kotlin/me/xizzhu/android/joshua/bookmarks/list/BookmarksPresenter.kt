@@ -86,7 +86,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
             val currentYear = calendar.get(Calendar.YEAR)
             val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
             if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
-                items.add(TitleItem(bookmark.timestamp.formatDate(resources)))
+                items.add(TitleItem(bookmark.timestamp.formatDate(resources, calendar)))
 
                 previousYear = currentYear
                 previousDayOfYear = currentDayOfYear

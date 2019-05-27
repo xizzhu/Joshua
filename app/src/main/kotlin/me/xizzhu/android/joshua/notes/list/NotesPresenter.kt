@@ -86,7 +86,7 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
             val currentYear = calendar.get(Calendar.YEAR)
             val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
             if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
-                items.add(TitleItem(note.timestamp.formatDate(resources)))
+                items.add(TitleItem(note.timestamp.formatDate(resources, calendar)))
 
                 previousYear = currentYear
                 previousDayOfYear = currentDayOfYear
