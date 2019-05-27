@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Supported sorting bookmarks and notes by book
+- Supported adaptive icons
 
 #### v0.4.1 (2019-05-23)
 - Added missing on click listener for simple reading mode
