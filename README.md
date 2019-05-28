@@ -6,7 +6,7 @@
 Joshua
 ======
 
-A simple and easy-to-use Bible reader for your Android device. It supports offline reading, multi-versions, and full-text search.
+A simple and easy-to-use Bible reader for your Android device. It supports offline reading, multi-versions, full-text search, and many other features, while maintaining a small download and install size.
 
 You can download the APK from [Play Store](https://play.google.com/store/apps/details?id=me.xizzhu.android.joshua) or [here](https://github.com/xizzhu/Joshua/releases). Recent changes are listed at [CHANGELOG.md](CHANGELOG.md).
 
