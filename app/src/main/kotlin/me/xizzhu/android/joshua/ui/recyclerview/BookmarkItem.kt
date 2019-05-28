@@ -16,21 +16,25 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
+import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val timestamp: Long,
-                        val onClick: (VerseIndex) -> Unit) : BaseItem {
+                        @Constants.SortOrder private val sortOrder: Int, val onClick: (VerseIndex) -> Unit) : BaseItem {
     companion object {
+        private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
         private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
@@ -39,14 +43,25 @@ data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val ti
         SPANNABLE_STRING_BUILDER.clear()
         SPANNABLE_STRING_BUILDER.clearSpans()
 
-        // format:
-        // <book name> <chapter verseIndex>:<verse verseIndex>
-        // <verse text>
-        SPANNABLE_STRING_BUILDER.append(text.bookName).append(' ')
-                .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
-        SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+        if (sortOrder == Constants.SORT_BY_BOOK) {
+            // format:
+            // <book short name> <chapter verseIndex>:<verse verseIndex> <verse text>
+            SPANNABLE_STRING_BUILDER.append(text.bookShortName).append(' ')
+                    .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
+            SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+            SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
 
-        SPANNABLE_STRING_BUILDER.append('\n').append(text.text)
+            SPANNABLE_STRING_BUILDER.append(' ').append(text.text)
+        } else {
+            // format:
+            // <book name> <chapter verseIndex>:<verse verseIndex>
+            // <verse text>
+            SPANNABLE_STRING_BUILDER.append(text.bookName).append(' ')
+                    .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
+            SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+
+            SPANNABLE_STRING_BUILDER.append('\n').append(text.text)
+        }
 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }

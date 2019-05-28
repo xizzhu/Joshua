@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -26,13 +27,20 @@ import kotlin.test.assertEquals
 class BookmarkItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.BOOKMARK_ITEM, BookmarkItem(VerseIndex.INVALID, Verse.Text.INVALID, 0L, {}).getItemViewType())
+        assertEquals(BaseItem.BOOKMARK_ITEM, BookmarkItem(VerseIndex.INVALID, Verse.Text.INVALID, 0L, Constants.DEFAULT_SORT_ORDER, {}).getItemViewType())
     }
 
     @Test
-    fun testTextForDisplay() {
+    fun testTextForDisplaySortByDate() {
         val expected = "Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = BookmarkItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, 12345678L, {}).textForDisplay.toString()
+        val actual = BookmarkItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, 12345678L, Constants.SORT_BY_DATE, {}).textForDisplay.toString()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testTextForDisplaySortByBook() {
+        val expected = "Gen. 1:1 In the beginning God created the heaven and the earth."
+        val actual = BookmarkItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, 12345678L, Constants.SORT_BY_BOOK, {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }
