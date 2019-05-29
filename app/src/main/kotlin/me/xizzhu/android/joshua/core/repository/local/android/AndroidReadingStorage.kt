@@ -75,9 +75,9 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
     }
 
     override suspend fun readVerses(translationShortName: String, bookIndex: Int,
-                                    chapterIndex: Int, bookName: String): List<Verse> {
+                                    chapterIndex: Int, bookName: String, bookShortName: String): List<Verse> {
         return withContext(Dispatchers.IO) {
-            androidDatabase.translationDao.read(translationShortName, bookIndex, chapterIndex, bookName)
+            androidDatabase.translationDao.read(translationShortName, bookIndex, chapterIndex, bookName, bookShortName)
         }
     }
 
@@ -91,7 +91,9 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
                 val translations = mutableListOf(translationShortName)
                 translations.addAll(parallelTranslations)
                 val translationToBookNames = androidDatabase.bookNamesDao.read(translations, bookIndex)
-                val translationToTexts = androidDatabase.translationDao.read(translationToBookNames, bookIndex, chapterIndex)
+                val translationToBookShortNames = androidDatabase.bookNamesDao.readShortName(translations, bookIndex)
+                val translationToTexts = androidDatabase.translationDao.read(
+                        translationToBookNames, translationToBookShortNames, bookIndex, chapterIndex)
                 val primaryTexts = translationToTexts.getValue(translationShortName)
                 val verses = ArrayList<Verse>(primaryTexts.size)
                 for ((i, primaryText) in primaryTexts.withIndex()) {
@@ -103,7 +105,8 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
                         parallel.add(if (texts.size > i) {
                             texts[i]
                         } else {
-                            Verse.Text(translation, translationToBookNames.getValue(translation), "")
+                            Verse.Text(translation, translationToBookNames.getValue(translation),
+                                    translationToBookShortNames.getValue(translation), "")
                         })
                     }
 
@@ -127,7 +130,8 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
                 db.beginTransaction()
 
                 val verse = androidDatabase.translationDao.read(translationShortName, verseIndex,
-                        androidDatabase.bookNamesDao.read(translationShortName, verseIndex.bookIndex))
+                        androidDatabase.bookNamesDao.read(translationShortName, verseIndex.bookIndex),
+                        androidDatabase.bookNamesDao.readShortName(translationShortName, verseIndex.bookIndex))
 
                 db.setTransactionSuccessful()
                 return@withContext verse
@@ -146,7 +150,9 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
                 db.beginTransaction()
 
                 val translationToBookNames = androidDatabase.bookNamesDao.read(verseIndex.bookIndex)
-                val translationToText = androidDatabase.translationDao.read(translationToBookNames, verseIndex).toMutableMap()
+                val translationToBookShortNames = androidDatabase.bookNamesDao.readShortName(verseIndex.bookIndex)
+                val translationToText = androidDatabase.translationDao.read(
+                        translationToBookNames, translationToBookShortNames, verseIndex).toMutableMap()
                 val primaryText = translationToText.remove(translationShortName)!!
                 val verse = Verse(verseIndex, primaryText,
                         translationToText.values.sortedBy { it.translationShortName })
@@ -161,9 +167,10 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
         }
     }
 
-    override suspend fun search(translationShortName: String, bookNames: List<String>, query: String): List<Verse> {
+    override suspend fun search(translationShortName: String, bookNames: List<String>,
+                                bookShortNames: List<String>, query: String): List<Verse> {
         return withContext(Dispatchers.IO) {
-            androidDatabase.translationDao.search(translationShortName, bookNames, query)
+            androidDatabase.translationDao.search(translationShortName, bookNames, bookShortNames, query)
         }
     }
 }

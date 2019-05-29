@@ -17,8 +17,6 @@
 package me.xizzhu.android.joshua.core.repository
 
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -82,7 +80,9 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
             // no cache yet, read from LocalReadingStorage
             `when`(localReadingStorage.readBookNames(MockContents.kjvShortName))
                     .thenReturn(MockContents.kjvBookNames)
-            `when`(localReadingStorage.readVerses(MockContents.kjvShortName, 0, 0, MockContents.kjvBookNames[0]))
+            `when`(localReadingStorage.readBookShortNames(MockContents.kjvShortName))
+                    .thenReturn(MockContents.kjvBookShortNames)
+            `when`(localReadingStorage.readVerses(MockContents.kjvShortName, 0, 0, MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0]))
                     .thenReturn(MockContents.kjvVerses)
             assertEquals(MockContents.kjvVerses,
                     bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0))
@@ -90,7 +90,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
             // has cache now, read from there
             `when`(localReadingStorage.readBookNames(anyString()))
                     .thenThrow(IllegalStateException("Should read from in-memory cache"))
-            `when`(localReadingStorage.readVerses(anyString(), anyInt(), anyInt(), anyString()))
+            `when`(localReadingStorage.readVerses(anyString(), anyInt(), anyInt(), anyString(), anyString()))
                     .thenThrow(IllegalStateException("Should read from in-memory cache"))
             assertEquals(MockContents.kjvVerses,
                     bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0))

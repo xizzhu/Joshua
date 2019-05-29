@@ -41,11 +41,11 @@ class SimpleVerseItemTest : BaseUnitTest() {
 
         assertEquals(" 1", SimpleVerseItem(MockContents.kjvVerses[0], 10, {}, {}).indexForDisplay)
         assertEquals("10", SimpleVerseItem(MockContents.kjvVerses[9], 10, {}, {}).indexForDisplay)
-        assertEquals("99", SimpleVerseItem(Verse(VerseIndex(1, 2, 98), Verse.Text("", "", ""), emptyList()), 99, {}, {}).indexForDisplay)
+        assertEquals("99", SimpleVerseItem(Verse(VerseIndex(1, 2, 98), Verse.Text("", "", "", ""), emptyList()), 99, {}, {}).indexForDisplay)
 
         assertEquals("  1", SimpleVerseItem(MockContents.kjvVerses[0], 100, {}, {}).indexForDisplay)
         assertEquals(" 10", SimpleVerseItem(MockContents.kjvVerses[9], 100, {}, {}).indexForDisplay)
-        assertEquals("100", SimpleVerseItem(Verse(VerseIndex(1, 2, 99), Verse.Text("", "", ""), emptyList()), 100, {}, {}).indexForDisplay)
+        assertEquals("100", SimpleVerseItem(Verse(VerseIndex(1, 2, 99), Verse.Text("", "", "", ""), emptyList()), 100, {}, {}).indexForDisplay)
     }
 
     @Test
