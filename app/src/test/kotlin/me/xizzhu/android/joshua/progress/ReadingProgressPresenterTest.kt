@@ -42,10 +42,12 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-        `when`(readingProgressInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+        runBlocking {
+            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+            `when`(readingProgressInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-        presenter = ReadingProgressPresenter(readingProgressInteractor)
+            presenter = ReadingProgressPresenter(readingProgressInteractor)
+        }
     }
 
     @Test

@@ -16,12 +16,10 @@
 
 package me.xizzhu.android.joshua.core
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
 data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fontSizeScale: Int,
@@ -32,13 +30,24 @@ data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fon
 }
 
 class SettingsManager(private val settingsRepository: SettingsRepository) {
-    private val currentSettings: BroadcastChannel<Settings> = ConflatedBroadcastChannel()
-
-    init {
-        GlobalScope.launch(Dispatchers.IO) { currentSettings.send(settingsRepository.readSettings()) }
+    companion object {
+        private val TAG = SettingsManager::class.java.simpleName
     }
 
-    fun observeSettings(): ReceiveChannel<Settings> = currentSettings.openSubscription()
+    private val currentSettings: BroadcastChannel<Settings> = ConflatedBroadcastChannel()
+
+    suspend fun observeSettings(): ReceiveChannel<Settings> {
+        return currentSettings.openSubscription().apply {
+            if (isEmpty) {
+                try {
+                    currentSettings.send(settingsRepository.readSettings())
+                } catch (e: Exception) {
+                    Log.e(TAG, e, "Failed to initialize settings")
+                    currentSettings.send(Settings.DEFAULT)
+                }
+            }
+        }
+    }
 
     suspend fun saveSettings(settings: Settings) {
         settingsRepository.saveSettings(settings)

@@ -44,11 +44,13 @@ class SettingsPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        currentSettings = ConflatedBroadcastChannel()
-        `when`(settingsManager.observeSettings()).thenReturn(currentSettings.openSubscription())
+        runBlocking {
+            currentSettings = ConflatedBroadcastChannel()
+            `when`(settingsManager.observeSettings()).thenReturn(currentSettings.openSubscription())
 
-        settingsPresenter = SettingsPresenter(app, settingsManager)
-        settingsPresenter.attachView(settingsView)
+            settingsPresenter = SettingsPresenter(app, settingsManager)
+            settingsPresenter.attachView(settingsView)
+        }
     }
 
     @After

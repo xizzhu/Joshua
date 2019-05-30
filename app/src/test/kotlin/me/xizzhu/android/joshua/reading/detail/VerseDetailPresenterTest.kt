@@ -47,18 +47,20 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-        `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+        runBlocking {
+            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-        verseDetailOpenState = ConflatedBroadcastChannel()
-        `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
+            verseDetailOpenState = ConflatedBroadcastChannel()
+            `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
 
-        currentTranslationShortName = ConflatedBroadcastChannel(MockContents.kjvShortName)
-        `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationShortName.openSubscription())
+            currentTranslationShortName = ConflatedBroadcastChannel(MockContents.kjvShortName)
+            `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationShortName.openSubscription())
 
-        verseDetailPresenter = VerseDetailPresenter(readingInteractor)
+            verseDetailPresenter = VerseDetailPresenter(readingInteractor)
 
-        verseDetailPresenter.attachView(verseDetailView)
+            verseDetailPresenter.attachView(verseDetailView)
+        }
     }
 
     @After
