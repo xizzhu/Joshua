@@ -72,6 +72,14 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
+    fun testCurrentVerseIndexWithException() {
+        runBlocking {
+            `when`(bibleReadingRepository.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
+            assertEquals(VerseIndex.INVALID, bibleReadingManager.observeCurrentVerseIndex().first())
+        }
+    }
+
+    @Test
     fun testObserveCurrentTranslation() {
         runBlocking {
             val observer = bibleReadingManager.observeCurrentTranslation()
@@ -80,6 +88,14 @@ class BibleReadingManagerTest : BaseUnitTest() {
                     observer.cancel()
                 }
             }
+        }
+    }
+
+    @Test
+    fun testObserveCurrentTranslationWithException() {
+        runBlocking {
+            `when`(bibleReadingRepository.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
+            assertEquals("", bibleReadingManager.observeCurrentTranslation().first())
         }
     }
 

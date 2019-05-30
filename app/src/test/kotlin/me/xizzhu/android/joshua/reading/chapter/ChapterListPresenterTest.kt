@@ -42,14 +42,16 @@ class ChapterListPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        currentTranslationChannel = ConflatedBroadcastChannel("")
-        `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
+        runBlocking {
+            currentTranslationChannel = ConflatedBroadcastChannel("")
+            `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
 
-        currentVerseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
-        `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
+            currentVerseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
+            `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
 
-        chapterListPresenter = ChapterListPresenter(readingInteractor)
-        chapterListPresenter.attachView(chapterListView)
+            chapterListPresenter = ChapterListPresenter(readingInteractor)
+            chapterListPresenter.attachView(chapterListView)
+        }
     }
 
     @After
