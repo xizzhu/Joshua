@@ -33,7 +33,7 @@ class NotesInteractor(private val notesActivity: NotesActivity,
                       settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
     private val notesLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
 
-    fun observeNotesSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
+    suspend fun observeNotesSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
 
     suspend fun saveNotesSortOrder(@Constants.SortOrder sortOrder: Int) {
         noteManager.saveSortOrder(sortOrder)

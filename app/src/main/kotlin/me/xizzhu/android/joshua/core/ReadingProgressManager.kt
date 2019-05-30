@@ -22,6 +22,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 
 data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimestamp: Long,
@@ -32,6 +33,10 @@ data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimest
 
 class ReadingProgressManager(private val bibleReadingManager: BibleReadingManager,
                              private val readingProgressRepository: ReadingProgressRepository) {
+    companion object {
+        private val TAG: String = ReadingProgressManager::class.java.simpleName
+    }
+
     private var currentVerseIndexObserver: ReceiveChannel<VerseIndex>? = null
 
     private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
@@ -55,15 +60,19 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
     }
 
     private suspend fun trackReadingProgress() {
-        val verseIndex = currentVerseIndex
-        if (!verseIndex.isValid() || lastTimestamp == 0L) {
-            return
-        }
+        try {
+            val verseIndex = currentVerseIndex
+            if (!verseIndex.isValid() || lastTimestamp == 0L) {
+                return
+            }
 
-        val now = System.currentTimeMillis()
-        val timeSpentInMillis = now - lastTimestamp
-        readingProgressRepository.trackReadingProgress(
-                verseIndex.bookIndex, verseIndex.chapterIndex, timeSpentInMillis, now)
+            val now = System.currentTimeMillis()
+            val timeSpentInMillis = now - lastTimestamp
+            readingProgressRepository.trackReadingProgress(
+                    verseIndex.bookIndex, verseIndex.chapterIndex, timeSpentInMillis, now)
+        } catch (e: Exception) {
+            Log.e(TAG, e, "Failed to track reading progress")
+        }
     }
 
     suspend fun stopTracking() {

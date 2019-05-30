@@ -32,7 +32,7 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
                           settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
     private val bookmarksLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
 
-    fun observeBookmarksSortOrder(): ReceiveChannel<Int> = bookmarkManager.observeSortOrder()
+    suspend fun observeBookmarksSortOrder(): ReceiveChannel<Int> = bookmarkManager.observeSortOrder()
 
     suspend fun saveBookmarksSortOrder(@Constants.SortOrder sortOrder: Int) {
         bookmarkManager.saveSortOrder(sortOrder)
