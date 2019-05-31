@@ -16,56 +16,12 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
-import android.text.SpannableStringBuilder
-import android.text.Spanned
-import android.text.style.RelativeSizeSpan
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.recyclerview.VerseTextItem
 
-data class VerseDetail(val verse: Verse, val bookmarked: Boolean, val note: String) {
+data class VerseDetail(val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
+                       val bookmarked: Boolean, val note: String) {
     companion object {
-        val INVALID: VerseDetail = VerseDetail(Verse.INVALID, false, "")
-
-        private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
-
-        private fun buildVerseForDisplay(out: SpannableStringBuilder, verseIndex: VerseIndex, text: Verse.Text) {
-            if (out.isNotEmpty()) {
-                out.append('\n').append('\n')
-            }
-
-            val startIndex = out.length
-            out.append(text.translationShortName).append(", ").append(text.bookName).append(' ')
-                    .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
-            out.setSpan(RelativeSizeSpan(0.95F), startIndex, out.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-
-            out.append('\n').append(text.text)
-        }
-    }
-
-    val textForDisplay: CharSequence by lazy {
-        if (!isValid()) {
-            return@lazy ""
-        }
-
-        SPANNABLE_STRING_BUILDER.clear()
-        SPANNABLE_STRING_BUILDER.clearSpans()
-
-        buildVerseForDisplay(SPANNABLE_STRING_BUILDER, verse.verseIndex, verse.text)
-        for (text in verse.parallel) {
-            buildVerseForDisplay(SPANNABLE_STRING_BUILDER, verse.verseIndex, text)
-        }
-
-        return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
-    }
-
-    fun isValid(): Boolean = verse.isValid()
-
-    fun toBuilder(): Builder = Builder(verse, bookmarked, note)
-
-    data class Builder(var verse: Verse = Verse.INVALID, var bookmarked: Boolean = false, var note: String = "") {
-        fun verse(verse: Verse) = apply { this.verse = verse }
-        fun bookmarked(bookmarked: Boolean) = apply { this.bookmarked = bookmarked }
-        fun note(note: String) = apply { this.note = note }
-        fun build() = VerseDetail(verse, bookmarked, note)
+        val INVALID: VerseDetail = VerseDetail(VerseIndex.INVALID, emptyList(), false, "")
     }
 }
