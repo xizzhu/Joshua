@@ -110,8 +110,24 @@ class TranslationManagerTest : BaseUnitTest() {
     }
 
     @Test
+    fun testDefaultAvailableTranslationsWithException() {
+        runBlocking {
+            `when`(translationRepository.readTranslationsFromLocal()).thenThrow(RuntimeException("Random exception"))
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+        }
+    }
+
+    @Test
     fun testDefaultDownloadedTranslations() {
         runBlocking {
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+        }
+    }
+
+    @Test
+    fun testDefaultDownloadedTranslationsWithException() {
+        runBlocking {
+            `when`(translationRepository.readTranslationsFromLocal()).thenThrow(RuntimeException("Random exception"))
             assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
         }
     }
