@@ -32,24 +32,24 @@ class TranslationManager(private val translationRepository: TranslationRepositor
     }
 
     private val translationsLock: Any = Any()
-    private val availableTranslations: MutableMap<String, TranslationInfo> = mutableMapOf()
-    private val downloadedTranslations: MutableMap<String, TranslationInfo> = mutableMapOf()
     private val availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
     private val downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
 
     @VisibleForTesting
     suspend fun updateTranslations(updatedTranslations: List<TranslationInfo>) {
         val (available, downloaded) = synchronized(translationsLock) {
-            for (t in updatedTranslations) {
+            val available = mutableMapOf<String, TranslationInfo>()
+            val downloaded = mutableMapOf<String, TranslationInfo>()
+            updatedTranslations.forEach { t ->
                 if (t.downloaded) {
-                    downloadedTranslations[t.shortName] = t
+                    downloaded[t.shortName] = t
                 } else {
-                    availableTranslations[t.shortName] = t
+                    available[t.shortName] = t
                 }
             }
-            Pair(availableTranslations.values.toList(), downloadedTranslations.values.toList())
+            return@synchronized Pair(available, downloaded)
         }
-        notifyTranslationsUpdated(available, downloaded)
+        notifyTranslationsUpdated(available.values.toList(), downloaded.values.toList())
     }
 
     @VisibleForTesting
@@ -97,13 +97,17 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         translationRepository.downloadTranslation(channel, translationInfo)
 
         val (available, downloaded) = synchronized(translationsLock) {
-            availableTranslations.remove(translationInfo.shortName)
+            val available = mutableListOf<TranslationInfo>().apply {
+                availableTranslationsChannel.valueOrNull?.let { addAll(it) }
+                removeAll { it.shortName == translationInfo.shortName }
+            }
 
-            downloadedTranslations[translationInfo.shortName] = TranslationInfo(
-                    translationInfo.shortName, translationInfo.name,
-                    translationInfo.language, translationInfo.size, true)
+            val downloaded = mutableListOf<TranslationInfo>().apply {
+                downloadedTranslationsChannel.valueOrNull?.let { addAll(it) }
+                add(translationInfo.copy(downloaded = true))
+            }
 
-            Pair(availableTranslations.values.toList(), downloadedTranslations.values.toList())
+            return@synchronized Pair(available, downloaded)
         }
         notifyTranslationsUpdated(available, downloaded)
 
@@ -114,13 +118,20 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         translationRepository.removeTranslation(translationInfo)
 
         val (available, downloaded) = synchronized(translationsLock) {
-            if (downloadedTranslations.remove(translationInfo.shortName) != null) {
-                availableTranslations[translationInfo.shortName] = TranslationInfo(
-                        translationInfo.shortName, translationInfo.name,
-                        translationInfo.language, translationInfo.size, false)
+            var removed = false
+            val downloaded = mutableListOf<TranslationInfo>().apply {
+                downloadedTranslationsChannel.valueOrNull?.let { addAll(it) }
+                removed = removeAll { it.shortName == translationInfo.shortName }
             }
 
-            Pair(availableTranslations.values.toList(), downloadedTranslations.values.toList())
+            val available = mutableListOf<TranslationInfo>().apply {
+                availableTranslationsChannel.valueOrNull?.let { addAll(it) }
+                if (removed) {
+                    add(translationInfo.copy(downloaded = false))
+                }
+            }
+
+            return@synchronized Pair(available, downloaded)
         }
         notifyTranslationsUpdated(available, downloaded)
     }
