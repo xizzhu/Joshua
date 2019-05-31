@@ -53,27 +53,29 @@ class TranslationPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-        `when`(translationInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+        runBlocking {
+            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+            `when`(translationInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-        translationLoadingStateChannel = ConflatedBroadcastChannel(SwipeRefresherState.IS_REFRESHING)
-        `when`(translationInteractor.observeTranslationsLoadingState()).then { translationLoadingStateChannel.openSubscription() }
+            translationLoadingStateChannel = ConflatedBroadcastChannel(SwipeRefresherState.IS_REFRESHING)
+            `when`(translationInteractor.observeTranslationsLoadingState()).then { translationLoadingStateChannel.openSubscription() }
 
-        translationsLoadingRequest = ConflatedBroadcastChannel()
-        `when`(translationInteractor.observeTranslationsLoadingRequest()).then { translationsLoadingRequest.openSubscription() }
+            translationsLoadingRequest = ConflatedBroadcastChannel()
+            `when`(translationInteractor.observeTranslationsLoadingRequest()).then { translationsLoadingRequest.openSubscription() }
 
-        availableTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-        `when`(translationInteractor.observeAvailableTranslations()).then { availableTranslationsChannel.openSubscription() }
+            availableTranslationsChannel = ConflatedBroadcastChannel(emptyList())
+            `when`(translationInteractor.observeAvailableTranslations()).then { availableTranslationsChannel.openSubscription() }
 
-        downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-        `when`(translationInteractor.observeDownloadedTranslations()).then { downloadedTranslationsChannel.openSubscription() }
+            downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
+            `when`(translationInteractor.observeDownloadedTranslations()).then { downloadedTranslationsChannel.openSubscription() }
 
-        currentTranslationChannel = ConflatedBroadcastChannel("")
-        `when`(translationInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
+            currentTranslationChannel = ConflatedBroadcastChannel("")
+            `when`(translationInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
 
-        `when`(context.getString(anyInt())).thenReturn("")
+            `when`(context.getString(anyInt())).thenReturn("")
 
-        translationPresenter = TranslationPresenter(translationInteractor, context)
+            translationPresenter = TranslationPresenter(translationInteractor, context)
+        }
     }
 
     @Test

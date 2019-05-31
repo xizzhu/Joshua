@@ -48,17 +48,19 @@ class SearchResultPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-        `when`(searchInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+        runBlocking {
+            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+            `when`(searchInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-        searchStateChannel = ConflatedBroadcastChannel(LoadingSpinnerState.NOT_LOADING)
-        `when`(searchInteractor.observeSearchState()).thenReturn(searchStateChannel.openSubscription())
+            searchStateChannel = ConflatedBroadcastChannel(LoadingSpinnerState.NOT_LOADING)
+            `when`(searchInteractor.observeSearchState()).thenReturn(searchStateChannel.openSubscription())
 
-        searchResultChannel = ConflatedBroadcastChannel(Pair("", emptyList()))
-        `when`(searchInteractor.observeSearchResult()).thenReturn(searchResultChannel.openSubscription())
+            searchResultChannel = ConflatedBroadcastChannel(Pair("", emptyList()))
+            `when`(searchInteractor.observeSearchResult()).thenReturn(searchResultChannel.openSubscription())
 
-        searchResultPresenter = SearchResultPresenter(searchInteractor)
-        searchResultPresenter.attachView(searchResultView)
+            searchResultPresenter = SearchResultPresenter(searchInteractor)
+            searchResultPresenter.attachView(searchResultView)
+        }
     }
 
     @After

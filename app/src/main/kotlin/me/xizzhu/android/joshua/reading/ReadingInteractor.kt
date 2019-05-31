@@ -56,10 +56,10 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     private val verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>> = ConflatedBroadcastChannel()
     private val verseState: BroadcastChannel<Pair<VerseIndex, Int>> = ConflatedBroadcastChannel()
 
-    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
+    suspend fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
 
-    fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
+    suspend fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
@@ -100,7 +100,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         bibleReadingManager.clearParallelTranslation()
     }
 
-    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
+    suspend fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)

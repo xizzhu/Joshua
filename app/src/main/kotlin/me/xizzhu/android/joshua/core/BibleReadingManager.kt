@@ -16,12 +16,10 @@
 
 package me.xizzhu.android.joshua.core
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 
 data class VerseIndex(val bookIndex: Int, val chapterIndex: Int, val verseIndex: Int) {
@@ -63,25 +61,44 @@ data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<
 }
 
 class BibleReadingManager(private val bibleReadingRepository: BibleReadingRepository) {
-    private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)
-    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel("")
-    private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
-
-    init {
-        GlobalScope.launch(Dispatchers.IO) {
-            currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
-            currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
-        }
+    companion object {
+        private val TAG = BibleReadingManager::class.java.simpleName
     }
 
-    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
+    private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
+    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
+    private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
+
+    suspend fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> {
+        return currentVerseIndex.openSubscription().apply {
+            if (isEmpty) {
+                try {
+                    currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
+                } catch (e: Exception) {
+                    Log.e(TAG, e, "Failed to initialize current verse index")
+                    currentVerseIndex.send(VerseIndex.INVALID)
+                }
+            }
+        }
+    }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         currentVerseIndex.send(verseIndex)
         bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
     }
 
-    fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
+    suspend fun observeCurrentTranslation(): ReceiveChannel<String> {
+        return currentTranslationShortName.openSubscription().apply {
+            if (isEmpty) {
+                try {
+                    currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
+                } catch (e: Exception) {
+                    Log.e(TAG, e, "Failed to initialize current translation")
+                    currentTranslationShortName.send("")
+                }
+            }
+        }
+    }
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         currentTranslationShortName.send(translationShortName)

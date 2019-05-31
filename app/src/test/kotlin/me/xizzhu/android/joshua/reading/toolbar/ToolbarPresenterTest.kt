@@ -45,20 +45,22 @@ class ToolbarPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        currentTranslationChannel = ConflatedBroadcastChannel("")
-        `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
+        runBlocking {
+            currentTranslationChannel = ConflatedBroadcastChannel("")
+            `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
 
-        currentVerseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
-        `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
+            currentVerseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
+            `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
 
-        downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-        `when`(readingInteractor.observeDownloadedTranslations()).then { downloadedTranslationsChannel.openSubscription() }
+            downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
+            `when`(readingInteractor.observeDownloadedTranslations()).then { downloadedTranslationsChannel.openSubscription() }
 
-        parallelTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-        `when`(readingInteractor.observeParallelTranslations()).then { parallelTranslationsChannel.openSubscription() }
+            parallelTranslationsChannel = ConflatedBroadcastChannel(emptyList())
+            `when`(readingInteractor.observeParallelTranslations()).then { parallelTranslationsChannel.openSubscription() }
 
-        toolbarPresenter = ToolbarPresenter(readingInteractor)
-        toolbarPresenter.attachView(toolbarView)
+            toolbarPresenter = ToolbarPresenter(readingInteractor)
+            toolbarPresenter.attachView(toolbarView)
+        }
     }
 
     @After

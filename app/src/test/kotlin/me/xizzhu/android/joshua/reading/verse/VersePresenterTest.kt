@@ -62,26 +62,28 @@ class VersePresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-        `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+        runBlocking {
+            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-        currentTranslationChannel = ConflatedBroadcastChannel("")
-        `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
+            currentTranslationChannel = ConflatedBroadcastChannel("")
+            `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
 
-        currentVerseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
-        `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
+            currentVerseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
+            `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
 
-        parallelTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-        `when`(readingInteractor.observeParallelTranslations()).then { parallelTranslationsChannel.openSubscription() }
+            parallelTranslationsChannel = ConflatedBroadcastChannel(emptyList())
+            `when`(readingInteractor.observeParallelTranslations()).then { parallelTranslationsChannel.openSubscription() }
 
-        verseDetailOpenState = ConflatedBroadcastChannel()
-        `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
+            verseDetailOpenState = ConflatedBroadcastChannel()
+            `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
 
-        verseState = ConflatedBroadcastChannel()
-        `when`(readingInteractor.observeVerseState()).thenReturn(verseDetailOpenState.openSubscription())
+            verseState = ConflatedBroadcastChannel()
+            `when`(readingInteractor.observeVerseState()).thenReturn(verseDetailOpenState.openSubscription())
 
-        versePresenter = VersePresenter(readingInteractor)
-        versePresenter.attachView(verseView)
+            versePresenter = VersePresenter(readingInteractor)
+            versePresenter.attachView(verseView)
+        }
     }
 
     @After

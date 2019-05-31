@@ -40,11 +40,13 @@ class BaseSettingsPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        currentSettings = ConflatedBroadcastChannel()
-        Mockito.`when`(baseSettingsInteractor.observeSettings()).thenReturn(currentSettings.openSubscription())
+        runBlocking {
+            currentSettings = ConflatedBroadcastChannel()
+            Mockito.`when`(baseSettingsInteractor.observeSettings()).thenReturn(currentSettings.openSubscription())
 
-        baseSettingsPresenter = object : BaseSettingsPresenter<BaseSettingsView>(baseSettingsInteractor) {}
-        baseSettingsPresenter.attachView(baseSettingsView)
+            baseSettingsPresenter = object : BaseSettingsPresenter<BaseSettingsView>(baseSettingsInteractor) {}
+            baseSettingsPresenter.attachView(baseSettingsView)
+        }
     }
 
     @After

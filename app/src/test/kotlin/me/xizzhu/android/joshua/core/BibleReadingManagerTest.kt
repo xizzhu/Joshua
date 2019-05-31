@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core
 
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
@@ -49,12 +48,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     @Test
     fun testObserveCurrentVerseIndex() {
         runBlocking {
-            val observer = bibleReadingManager.observeCurrentVerseIndex()
-            observer.consumeEach {
-                if (it == VerseIndex(1, 2, 3)) {
-                    observer.cancel()
-                }
-            }
+            assertEquals(VerseIndex(1, 2, 3), bibleReadingManager.observeCurrentVerseIndex().first())
         }
     }
 
@@ -62,24 +56,31 @@ class BibleReadingManagerTest : BaseUnitTest() {
     fun testCurrentVerseIndex() {
         runBlocking {
             bibleReadingManager.saveCurrentVerseIndex(VerseIndex(4, 5, 6))
-            val observer = bibleReadingManager.observeCurrentVerseIndex()
-            observer.consumeEach {
-                if (it == VerseIndex(4, 5, 6)) {
-                    observer.cancel()
-                }
-            }
+
+            assertEquals(VerseIndex(4, 5, 6), bibleReadingManager.observeCurrentVerseIndex().first())
+        }
+    }
+
+    @Test
+    fun testCurrentVerseIndexWithException() {
+        runBlocking {
+            `when`(bibleReadingRepository.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
+            assertEquals(VerseIndex.INVALID, bibleReadingManager.observeCurrentVerseIndex().first())
         }
     }
 
     @Test
     fun testObserveCurrentTranslation() {
         runBlocking {
-            val observer = bibleReadingManager.observeCurrentTranslation()
-            observer.consumeEach {
-                if (it == MockContents.kjvShortName) {
-                    observer.cancel()
-                }
-            }
+            assertEquals(MockContents.kjvShortName, bibleReadingManager.observeCurrentTranslation().first())
+        }
+    }
+
+    @Test
+    fun testObserveCurrentTranslationWithException() {
+        runBlocking {
+            `when`(bibleReadingRepository.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
+            assertEquals("", bibleReadingManager.observeCurrentTranslation().first())
         }
     }
 
@@ -87,12 +88,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     fun testCurrentTranslation() {
         runBlocking {
             bibleReadingManager.saveCurrentTranslation(MockContents.cuvShortName)
-            val observer = bibleReadingManager.observeCurrentTranslation()
-            observer.consumeEach {
-                if (it == MockContents.cuvShortName) {
-                    observer.cancel()
-                }
-            }
+            assertEquals(MockContents.cuvShortName, bibleReadingManager.observeCurrentTranslation().first())
         }
     }
 

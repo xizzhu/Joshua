@@ -37,13 +37,13 @@ class TranslationInteractor(private val translationManagementActivity: Translati
     fun observeTranslationsLoadingRequest(): ReceiveChannel<Unit> =
             translationsLoadingRequest.openSubscription()
 
-    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
+    suspend fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeAvailableTranslations()
 
-    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
+    suspend fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
 
-    fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
+    suspend fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
