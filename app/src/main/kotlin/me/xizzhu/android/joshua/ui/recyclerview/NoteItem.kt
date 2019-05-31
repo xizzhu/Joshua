@@ -44,8 +44,8 @@ data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: 
         SPANNABLE_STRING_BUILDER.clearSpans()
 
         // format:
-        // <book name> <chapter index>:<verse index> <verse text>
-        SPANNABLE_STRING_BUILDER.append(text.bookName).append(' ')
+        // <book short name> <chapter index>:<verse index> <verse text>
+        SPANNABLE_STRING_BUILDER.append(text.bookShortName).append(' ')
                 .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
         SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
 

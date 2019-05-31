@@ -31,7 +31,7 @@ class NoteItemTest : BaseUnitTest() {
 
     @Test
     fun testTextForDisplay() {
-        val expected = "Genesis 1:1 In the beginning God created the heaven and the earth."
+        val expected = "Gen. 1:1 In the beginning God created the heaven and the earth."
         val actual = NoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, "", 12345678L, {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
