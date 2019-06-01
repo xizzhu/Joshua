@@ -62,8 +62,8 @@ object Versions {
         const val viewPager = "1.0.0"
 
         object Test {
-            const val junit = "1.1.0"
-            const val rules = "1.1.1"
+            const val junit = "1.1.1"
+            const val rules = "1.2.0"
         }
     }
 
@@ -74,7 +74,7 @@ object Versions {
 
         object Crashlytics {
             const val classpath = "1.28.1"
-            const val crashlytics = "2.9.9"
+            const val crashlytics = "2.10.1"
         }
     }
 
