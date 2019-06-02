@@ -44,7 +44,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
                 if (it.isEmpty()) {
                     view?.onNoTranslationsDownloaded()
                 } else {
-                    view?.onDownloadedTranslationsLoaded(it.sortedBy { t -> t.language })
+                    view?.onDownloadedTranslationsLoaded(it.sortedBy { t -> t.shortName })
                 }
             }
         }
