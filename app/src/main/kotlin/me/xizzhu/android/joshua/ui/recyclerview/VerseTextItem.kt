@@ -28,7 +28,8 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import android.text.Spannable
 
-data class VerseTextItem(private val verseIndex: VerseIndex, private val verseText: Verse.Text) : BaseItem {
+data class VerseTextItem(val verseIndex: VerseIndex, val verseText: Verse.Text,
+                         val onLongClicked: (Verse) -> Unit) : BaseItem {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
@@ -61,6 +62,13 @@ data class VerseTextItem(private val verseIndex: VerseIndex, private val verseTe
 class VerseTextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<VerseTextItem>(inflater.inflate(R.layout.item_verse_text, parent, false)) {
     private val text: TextView = itemView.findViewById(R.id.text)
+
+    init {
+        itemView.setOnLongClickListener {
+            item?.let { it.onLongClicked(Verse(it.verseIndex, it.verseText, emptyList())) }
+            return@setOnLongClickListener true
+        }
+    }
 
     override fun bind(settings: Settings, item: VerseTextItem, payloads: List<Any>) {
         with(text) {

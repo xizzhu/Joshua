@@ -20,6 +20,7 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -60,9 +61,9 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                     val verse = readingInteractor.readVerseWithParallel(
                             readingInteractor.observeCurrentTranslation().first(), verseIndex)
                     val verseTextItems = mutableListOf<VerseTextItem>().apply {
-                        add(VerseTextItem(verseIndex, verse.text))
+                        add(VerseTextItem(verseIndex, verse.text, this@VerseDetailPresenter::onVerseLongClicked))
                     }
-                    verse.parallel.forEach { verseTextItems.add(VerseTextItem(verseIndex, it)) }
+                    verse.parallel.forEach { verseTextItems.add(VerseTextItem(verseIndex, it, this@VerseDetailPresenter::onVerseLongClicked)) }
 
                     verseDetail = VerseDetail(verseIndex, verseTextItems,
                             bookmarkAsync.await().isValid(), noteAsync.await().note)
@@ -74,6 +75,15 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                 Log.e(tag, e, "Failed to load verse detail")
                 view?.onVerseDetailLoadFailed(verseIndex)
             }
+        }
+    }
+
+    @VisibleForTesting
+    fun onVerseLongClicked(verse: Verse) {
+        if (readingInteractor.copyToClipBoard(listOf(verse))) {
+            view?.onVerseTextCopied()
+        } else {
+            view?.onVerseTextCopyFailed()
         }
     }
 

@@ -4,6 +4,7 @@
     style="@style/Text.Body"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
     android:paddingStart="@dimen/padding"
     android:paddingTop="@dimen/padding_small"
     android:paddingEnd="@dimen/padding"
