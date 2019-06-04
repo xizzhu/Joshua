@@ -4,6 +4,7 @@ CHANGELOG
 #### Next Release
 - Supported sorting bookmarks and notes by book
 - Divided search results by books
+- Click verse detail to select translation and long click to copy
 - Supported adaptive icons
 - Updated dependencies:
   - AndroidX JUnit to 1.1.1
