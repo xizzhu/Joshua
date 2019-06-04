@@ -28,14 +28,14 @@ class VerseTextItemTest : BaseUnitTest() {
     @Test
     fun testTextForDisplay() {
         val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = VerseTextItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, {}).textForDisplay.toString()
+        val actual = VerseTextItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, {}, {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 
     @Test
     fun testTextForDisplayWithInvalidVerse() {
-        assertTrue(VerseTextItem(VerseIndex.INVALID, Verse.Text.INVALID, {}).textForDisplay.isEmpty())
-        assertTrue(VerseTextItem(VerseIndex.INVALID, MockContents.kjvVerses[0].text, {}).textForDisplay.isEmpty())
-        assertTrue(VerseTextItem(MockContents.kjvVerses[0].verseIndex, Verse.Text.INVALID, {}).textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(VerseIndex.INVALID, Verse.Text.INVALID, {}, {}).textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(VerseIndex.INVALID, MockContents.kjvVerses[0].text, {}, {}).textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(MockContents.kjvVerses[0].verseIndex, Verse.Text.INVALID, {}, {}).textForDisplay.isEmpty())
     }
 }

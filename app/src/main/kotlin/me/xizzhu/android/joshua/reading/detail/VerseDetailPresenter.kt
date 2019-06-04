@@ -29,6 +29,10 @@ import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     : BaseSettingsPresenter<VerseDetailView>(readingInteractor) {
+    companion object {
+        private val TAG: String = VerseDetailPresenter::class.java.simpleName
+    }
+
     @VisibleForTesting
     var verseDetail: VerseDetail? = null
     private var updateBookmarkJob: Job? = null
@@ -61,9 +65,15 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                     val verse = readingInteractor.readVerseWithParallel(
                             readingInteractor.observeCurrentTranslation().first(), verseIndex)
                     val verseTextItems = mutableListOf<VerseTextItem>().apply {
-                        add(VerseTextItem(verseIndex, verse.text, this@VerseDetailPresenter::onVerseLongClicked))
+                        add(VerseTextItem(verseIndex, verse.text,
+                                this@VerseDetailPresenter::onVerseClicked,
+                                this@VerseDetailPresenter::onVerseLongClicked))
                     }
-                    verse.parallel.forEach { verseTextItems.add(VerseTextItem(verseIndex, it, this@VerseDetailPresenter::onVerseLongClicked)) }
+                    verse.parallel.forEach {
+                        verseTextItems.add(VerseTextItem(verseIndex, it,
+                                this@VerseDetailPresenter::onVerseClicked,
+                                this@VerseDetailPresenter::onVerseLongClicked))
+                    }
 
                     verseDetail = VerseDetail(verseIndex, verseTextItems,
                             bookmarkAsync.await().isValid(), noteAsync.await().note)
@@ -79,11 +89,26 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     }
 
     @VisibleForTesting
+    fun onVerseClicked(translation: String) {
+        launch(Dispatchers.Main) {
+            try {
+                if (translation != readingInteractor.observeCurrentTranslation().first()) {
+                    readingInteractor.saveCurrentTranslation(translation)
+                    readingInteractor.closeVerseDetail()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, e, "Failed to select translation")
+                view?.onVerseTextClickFailed()
+            }
+        }
+    }
+
+    @VisibleForTesting
     fun onVerseLongClicked(verse: Verse) {
         if (readingInteractor.copyToClipBoard(listOf(verse))) {
             view?.onVerseTextCopied()
         } else {
-            view?.onVerseTextCopyFailed()
+            view?.onVerseTextClickFailed()
         }
     }
 

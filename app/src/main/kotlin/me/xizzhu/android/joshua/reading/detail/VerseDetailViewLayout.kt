@@ -42,7 +42,7 @@ interface VerseDetailView : BaseSettingsView {
 
     fun onVerseTextCopied()
 
-    fun onVerseTextCopyFailed()
+    fun onVerseTextClickFailed()
 
     fun show(page: Int)
 
@@ -116,7 +116,7 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
         Toast.makeText(context, R.string.toast_verses_copied, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onVerseTextCopyFailed() {
+    override fun onVerseTextClickFailed() {
         Toast.makeText(context, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
     }
 

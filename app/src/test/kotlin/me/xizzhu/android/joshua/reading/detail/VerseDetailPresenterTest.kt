@@ -83,7 +83,8 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             verify(verseDetailView, times(1)).show(0)
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
             verify(verseDetailView, times(1)).onVerseDetailLoaded(
-                    VerseDetail(verseIndex, listOf(VerseTextItem(verseIndex, MockContents.kjvVerses[0].text, verseDetailPresenter::onVerseLongClicked)), false, ""))
+                    VerseDetail(verseIndex, listOf(VerseTextItem(verseIndex, MockContents.kjvVerses[0].text,
+                            verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)), false, ""))
             verify(verseDetailView, never()).hide()
         }
     }
@@ -100,7 +101,8 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
             verify(verseDetailView, times(1)).onVerseDetailLoaded(
-                    VerseDetail(verseIndex, listOf(VerseTextItem(verseIndex, MockContents.kjvVerses[0].text, verseDetailPresenter::onVerseLongClicked)), false, ""))
+                    VerseDetail(verseIndex, listOf(VerseTextItem(verseIndex, MockContents.kjvVerses[0].text,
+                            verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)), false, ""))
             verify(verseDetailView, never()).onVerseDetailLoadFailed(verseIndex)
         }
     }
@@ -120,12 +122,45 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testOnVerseClickedWithSameTranslation() {
+        runBlocking {
+            currentTranslationShortName.send(MockContents.kjvShortName)
+            verseDetailPresenter.onVerseClicked(MockContents.kjvShortName)
+            verify(readingInteractor, never()).saveCurrentTranslation(anyString())
+            verify(readingInteractor, never()).closeVerseDetail()
+            verify(verseDetailView, never()).onVerseTextClickFailed()
+        }
+    }
+
+    @Test
+    fun testOnVerseClickedWithDifferentTranslation() {
+        runBlocking {
+            currentTranslationShortName.send(MockContents.cuvShortName)
+            verseDetailPresenter.onVerseClicked(MockContents.kjvShortName)
+            verify(readingInteractor, times(1)).saveCurrentTranslation(MockContents.kjvShortName)
+            verify(readingInteractor, times(1)).closeVerseDetail()
+            verify(verseDetailView, never()).onVerseTextClickFailed()
+        }
+    }
+
+    @Test
+    fun testOnVerseClickedWithException() {
+        runBlocking {
+            `when`(readingInteractor.observeCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
+            verseDetailPresenter.onVerseClicked(MockContents.kjvShortName)
+            verify(readingInteractor, never()).saveCurrentTranslation(anyString())
+            verify(readingInteractor, never()).closeVerseDetail()
+            verify(verseDetailView, times(1)).onVerseTextClickFailed()
+        }
+    }
+
+    @Test
     fun testOnVerseLongClicked() {
         `when`(readingInteractor.copyToClipBoard(any())).thenReturn(true)
         verseDetailPresenter.onVerseLongClicked(MockContents.kjvVerses[0])
         verify(readingInteractor, times(1)).copyToClipBoard(listOf(MockContents.kjvVerses[0]))
         verify(verseDetailView, times(1)).onVerseTextCopied()
-        verify(verseDetailView, never()).onVerseTextCopyFailed()
+        verify(verseDetailView, never()).onVerseTextClickFailed()
     }
 
     @Test
@@ -134,7 +169,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         verseDetailPresenter.onVerseLongClicked(MockContents.kjvVerses[0])
         verify(readingInteractor, times(1)).copyToClipBoard(listOf(MockContents.kjvVerses[0]))
         verify(verseDetailView, never()).onVerseTextCopied()
-        verify(verseDetailView, times(1)).onVerseTextCopyFailed()
+        verify(verseDetailView, times(1)).onVerseTextClickFailed()
     }
 
     @Test
