@@ -7,6 +7,7 @@ CHANGELOG
 - Click verse detail to select translation and long click to copy
 - Supported adaptive icons
 - Updated dependencies:
+  - AndroidX Annotations to 1.1.0
   - AndroidX JUnit to 1.1.1
   - AndroidX Test Rules to 1.2.0
   - Crashlytics to 2.10.1

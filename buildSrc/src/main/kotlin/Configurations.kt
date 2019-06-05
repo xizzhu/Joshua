@@ -53,7 +53,7 @@ object Versions {
     }
 
     object AndroidX {
-        const val annotation = "1.0.1"
+        const val annotation = "1.1.0"
         const val appCompat = "1.0.2"
         const val coordinatorLayout = "1.0.0"
         const val drawerLayout = "1.0.0"
