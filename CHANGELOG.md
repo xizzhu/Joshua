@@ -11,6 +11,7 @@ CHANGELOG
   - AndroidX Test Rules to 1.2.0
   - Crashlytics to 2.10.1
   - Dagger to 2.23.1
+  - Retrofit to 2.6.0
   - Mockito to 2.28.2
 
 #### v0.4.1 (2019-05-23)

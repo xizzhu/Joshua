@@ -21,7 +21,6 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslation
@@ -39,8 +38,6 @@ import retrofit2.http.Streaming
 import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : RemoteTranslationService {
     companion object {
@@ -64,7 +61,7 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
 
     override suspend fun fetchTranslations(): List<RemoteTranslationInfo> {
         Log.i(TAG, "Start fetching translation list")
-        val backendTranslations = translationService.fetchTranslationList().await().translations
+        val backendTranslations = translationService.fetchTranslationList().translations
         val translations = ArrayList<RemoteTranslationInfo>(backendTranslations.size)
         for (backend in backendTranslations) {
             translations.add(RemoteTranslationInfo(backend.shortName, backend.name, backend.language, backend.size))
@@ -82,7 +79,7 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
             val bookShortNames = ArrayList<String>()
             val verses = HashMap<Pair<Int, Int>, List<String>>()
             try {
-                val response = translationService.fetchTranslation(translationInfo.shortName).await()
+                val response = translationService.fetchTranslation(translationInfo.shortName)
                 inputStream = ZipInputStream(response.byteStream())
                 var zipEntry: ZipEntry?
                 var downloaded = 0
@@ -127,32 +124,13 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
     }
 }
 
-private suspend fun <T> Call<T>.await(): T = suspendCancellableCoroutine { cont ->
-    cont.invokeOnCancellation { cancel() }
-
-    enqueue(object : Callback<T> {
-        override fun onResponse(call: Call<T>, response: Response<T>) {
-            if (response.isSuccessful) {
-                response.body()?.let { cont.resume(it) }
-                        ?: cont.resumeWithException(KotlinNullPointerException("Missing response body from ${call.request()}"))
-            } else {
-                cont.resumeWithException(HttpException(response))
-            }
-        }
-
-        override fun onFailure(call: Call<T>, t: Throwable) {
-            cont.resumeWithException(t)
-        }
-    })
-}
-
 private interface TranslationService {
     @GET("list.json")
-    fun fetchTranslationList(): Call<TranslationList>
+    suspend fun fetchTranslationList(): TranslationList
 
     @GET("{translationShortName}.zip")
     @Streaming
-    fun fetchTranslation(@Path("translationShortName") translationShortName: String): Call<ResponseBody>
+    suspend fun fetchTranslation(@Path("translationShortName") translationShortName: String): ResponseBody
 }
 
 private data class TranslationInfo(@Json(name = "shortName") val shortName: String,
