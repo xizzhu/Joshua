@@ -78,7 +78,7 @@ object Versions {
         }
     }
 
-    const val dagger = "2.22.1"
+    const val dagger = "2.23.1"
 
     object Retrofit {
         const val retrofit = "2.5.0"
@@ -89,7 +89,7 @@ object Versions {
 
     const val stetho = "1.5.1"
 
-    const val mockito = "2.27.0"
+    const val mockito = "2.28.2"
 }
 
 object Dependencies {
