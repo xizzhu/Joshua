@@ -20,13 +20,19 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
+import me.xizzhu.android.joshua.ui.recyclerview.VerseTextItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 
 class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     : BaseSettingsPresenter<VerseDetailView>(readingInteractor) {
+    companion object {
+        private val TAG: String = VerseDetailPresenter::class.java.simpleName
+    }
+
     @VisibleForTesting
     var verseDetail: VerseDetail? = null
     private var updateBookmarkJob: Job? = null
@@ -53,16 +59,24 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
             try {
                 val verseDetail = coroutineScope {
-                    val verseAsync = async {
-                        readingInteractor.readVerseWithParallel(readingInteractor.observeCurrentTranslation().first(), verseIndex)
-                    }
                     val bookmarkAsync = async { readingInteractor.readBookmark(verseIndex) }
                     val noteAsync = async { readingInteractor.readNote(verseIndex) }
-                    verseDetail = VerseDetail.Builder()
-                            .verse(verseAsync.await())
-                            .bookmarked(bookmarkAsync.await().isValid())
-                            .note(noteAsync.await().note)
-                            .build()
+
+                    val verse = readingInteractor.readVerseWithParallel(
+                            readingInteractor.observeCurrentTranslation().first(), verseIndex)
+                    val verseTextItems = mutableListOf<VerseTextItem>().apply {
+                        add(VerseTextItem(verseIndex, verse.text,
+                                this@VerseDetailPresenter::onVerseClicked,
+                                this@VerseDetailPresenter::onVerseLongClicked))
+                    }
+                    verse.parallel.forEach {
+                        verseTextItems.add(VerseTextItem(verseIndex, it,
+                                this@VerseDetailPresenter::onVerseClicked,
+                                this@VerseDetailPresenter::onVerseLongClicked))
+                    }
+
+                    verseDetail = VerseDetail(verseIndex, verseTextItems,
+                            bookmarkAsync.await().isValid(), noteAsync.await().note)
                     return@coroutineScope verseDetail!!
                 }
 
@@ -71,6 +85,30 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                 Log.e(tag, e, "Failed to load verse detail")
                 view?.onVerseDetailLoadFailed(verseIndex)
             }
+        }
+    }
+
+    @VisibleForTesting
+    fun onVerseClicked(translation: String) {
+        launch(Dispatchers.Main) {
+            try {
+                if (translation != readingInteractor.observeCurrentTranslation().first()) {
+                    readingInteractor.saveCurrentTranslation(translation)
+                    readingInteractor.closeVerseDetail()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, e, "Failed to select translation")
+                view?.onVerseTextClickFailed()
+            }
+        }
+    }
+
+    @VisibleForTesting
+    fun onVerseLongClicked(verse: Verse) {
+        if (readingInteractor.copyToClipBoard(listOf(verse))) {
+            view?.onVerseTextCopied()
+        } else {
+            view?.onVerseTextClickFailed()
         }
     }
 
@@ -83,11 +121,11 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
         updateBookmarkJob = launch(Dispatchers.Main) {
             verseDetail?.let { detail ->
                 if (detail.bookmarked) {
-                    readingInteractor.removeBookmark(detail.verse.verseIndex)
-                    verseDetail = detail.toBuilder().bookmarked(false).build()
+                    readingInteractor.removeBookmark(detail.verseIndex)
+                    verseDetail = detail.copy(bookmarked = false)
                 } else {
-                    readingInteractor.addBookmark(detail.verse.verseIndex)
-                    verseDetail = detail.toBuilder().bookmarked(true).build()
+                    readingInteractor.addBookmark(detail.verseIndex)
+                    verseDetail = detail.copy(bookmarked = true)
                 }
                 view?.onVerseDetailLoaded(verseDetail!!)
 
@@ -101,11 +139,11 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
         updateNoteJob = launch(Dispatchers.Main) {
             verseDetail?.let { detail ->
                 if (note.isEmpty()) {
-                    readingInteractor.removeNote(detail.verse.verseIndex)
+                    readingInteractor.removeNote(detail.verseIndex)
                 } else {
-                    readingInteractor.saveNote(detail.verse.verseIndex, note)
+                    readingInteractor.saveNote(detail.verseIndex, note)
                 }
-                verseDetail = detail.toBuilder().note(note).build()
+                verseDetail = detail.copy(note = note)
 
                 updateNoteJob = null
             }

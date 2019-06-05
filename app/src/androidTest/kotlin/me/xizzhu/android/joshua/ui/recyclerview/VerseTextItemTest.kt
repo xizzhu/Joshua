@@ -14,32 +14,28 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading.detail
+package me.xizzhu.android.joshua.ui.recyclerview
 
 import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class VerseDetailTest : BaseUnitTest() {
+class VerseTextItemTest : BaseUnitTest() {
     @Test
     fun testTextForDisplay() {
         val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = VerseDetail(MockContents.kjvVerses[0], false, "").textForDisplay.toString()
+        val actual = VerseTextItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, {}, {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 
     @Test
     fun testTextForDisplayWithInvalidVerse() {
-        assertTrue(VerseDetail(Verse.INVALID, false, "").textForDisplay.isEmpty())
-    }
-
-    @Test
-    fun testTextForDisplayWithParallelTranslation() {
-        val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth.\n\n中文和合本, 创世记 1:1\n起初神创造天地。"
-        val actual = VerseDetail(MockContents.kjvVersesWithCuvParallel[0], false, "").textForDisplay.toString()
-        assertEquals(expected, actual)
+        assertTrue(VerseTextItem(VerseIndex.INVALID, Verse.Text.INVALID, {}, {}).textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(VerseIndex.INVALID, MockContents.kjvVerses[0].text, {}, {}).textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(MockContents.kjvVerses[0].verseIndex, Verse.Text.INVALID, {}, {}).textForDisplay.isEmpty())
     }
 }

@@ -26,6 +26,7 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import me.xizzhu.android.joshua.R
@@ -38,6 +39,10 @@ interface VerseDetailView : BaseSettingsView {
     fun onVerseDetailLoaded(verseDetail: VerseDetail)
 
     fun onVerseDetailLoadFailed(verseIndex: VerseIndex)
+
+    fun onVerseTextCopied()
+
+    fun onVerseTextClickFailed()
 
     fun show(page: Int)
 
@@ -105,6 +110,14 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.loadVerseDetail(verseIndex)
                 })
+    }
+
+    override fun onVerseTextCopied() {
+        Toast.makeText(context, R.string.toast_verses_copied, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onVerseTextClickFailed() {
+        Toast.makeText(context, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
     }
 
     override fun show(page: Int) {
