@@ -6,6 +6,7 @@ CHANGELOG
 - Divided search results by books
 - Click verse detail to select translation and long click to copy
 - Supported adaptive icons
+- Only enabled Firebase crash and analytics reporting for release build
 - Updated dependencies:
   - AndroidX Annotations to 1.1.0
   - AndroidX JUnit to 1.1.1

@@ -20,10 +20,6 @@ import android.app.Activity
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
-import me.xizzhu.android.joshua.core.analytics.Analytics
-import me.xizzhu.android.joshua.core.analytics.android.FirebaseAnalyticsProvider
-import me.xizzhu.android.joshua.core.logger.Log
-import me.xizzhu.android.joshua.core.logger.android.CrashlyticsLogger
 import javax.inject.Inject
 
 class App : BaseApp(), HasActivityInjector {
@@ -39,9 +35,6 @@ class App : BaseApp(), HasActivityInjector {
 
         appComponent = DaggerAppComponent.builder().appModule(AppModule(this)).build()
         appComponent.inject(this)
-
-        Log.addLogger(CrashlyticsLogger())
-        Analytics.addProvider(FirebaseAnalyticsProvider(this))
     }
 
     override fun activityInjector(): AndroidInjector<Activity> = dispatchingAndroidInjector

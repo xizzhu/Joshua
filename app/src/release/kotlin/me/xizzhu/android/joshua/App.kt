@@ -17,5 +17,16 @@
 package me.xizzhu.android.joshua
 
 import android.app.Application
+import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.joshua.core.logger.android.CrashlyticsLogger
+import me.xizzhu.android.joshua.core.analytics.Analytics
+import me.xizzhu.android.joshua.core.analytics.android.FirebaseAnalyticsProvider
 
-abstract class BaseApp: Application()
+abstract class BaseApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+
+        Log.addLogger(CrashlyticsLogger())
+        Analytics.addProvider(FirebaseAnalyticsProvider(this))
+    }
+}
