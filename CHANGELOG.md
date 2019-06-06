@@ -7,9 +7,13 @@ CHANGELOG
 - Click verse detail to select translation and long click to copy
 - Supported adaptive icons
 - Updated dependencies:
+  - AndroidX Annotations to 1.1.0
   - AndroidX JUnit to 1.1.1
   - AndroidX Test Rules to 1.2.0
   - Crashlytics to 2.10.1
+  - Dagger to 2.23.1
+  - Retrofit to 2.6.0
+  - Mockito to 2.28.2
 
 #### v0.4.1 (2019-05-23)
 - Added missing on click listener for simple reading mode

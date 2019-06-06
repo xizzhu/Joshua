@@ -53,7 +53,7 @@ object Versions {
     }
 
     object AndroidX {
-        const val annotation = "1.0.1"
+        const val annotation = "1.1.0"
         const val appCompat = "1.0.2"
         const val coordinatorLayout = "1.0.0"
         const val drawerLayout = "1.0.0"
@@ -78,10 +78,10 @@ object Versions {
         }
     }
 
-    const val dagger = "2.22.1"
+    const val dagger = "2.23.1"
 
     object Retrofit {
-        const val retrofit = "2.5.0"
+        const val retrofit = "2.6.0"
         const val okhttp = "3.14.1"
         const val moshi = "1.8.0"
         const val okio = "2.2.2"
@@ -89,7 +89,7 @@ object Versions {
 
     const val stetho = "1.5.1"
 
-    const val mockito = "2.27.0"
+    const val mockito = "2.28.2"
 }
 
 object Dependencies {
