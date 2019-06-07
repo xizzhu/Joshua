@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.5.0 (2019-06-06)
 - Supported sorting bookmarks and notes by book
 - Divided search results by books
 - Click verse detail to select translation and long click to copy
