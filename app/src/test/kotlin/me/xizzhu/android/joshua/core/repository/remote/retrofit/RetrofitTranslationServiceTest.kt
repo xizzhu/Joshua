@@ -95,7 +95,7 @@ class RetrofitTranslationServiceTest : BaseUnitTest() {
     }
 
     private fun readAllFromResources(name: String): ByteArray {
-        val input = javaClass.classLoader.getResource(name).openStream()
+        val input = javaClass.classLoader!!.getResource(name).openStream()
         val results = ByteArray(input.available())
         input.read(results)
         input.close()

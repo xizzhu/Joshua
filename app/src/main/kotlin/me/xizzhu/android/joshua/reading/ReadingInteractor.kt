@@ -161,8 +161,8 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         try {
             val verse = verses.first()
             // On older devices, this only works on the threads with loopers.
-            (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).primaryClip =
-                    ClipData.newPlainText(verse.text.translationShortName + " " + verse.text.bookName, verses.toStringForSharing())
+            (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
+                    ClipData.newPlainText(verse.text.translationShortName + " " + verse.text.bookName, verses.toStringForSharing()))
             return true
         } catch (e: Exception) {
             Log.e(TAG, e, "Failed to copy")

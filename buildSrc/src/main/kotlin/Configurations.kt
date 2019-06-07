@@ -38,10 +38,10 @@ object Versions {
 
     object Sdk {
         const val classpath = "3.4.1"
-        const val buildTools = "28.0.3"
-        const val compile = 28
+        const val buildTools = "29.0.0"
+        const val compile = 29
         const val min = 21
-        const val target = 28
+        const val target = 29
     }
 
     val java = JavaVersion.VERSION_1_8

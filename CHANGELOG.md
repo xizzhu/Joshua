@@ -8,6 +8,8 @@ CHANGELOG
 - Supported adaptive icons
 - Only enabled Firebase crash and analytics reporting for release build
 - Updated dependencies:
+  - Build tool to 29.0.0
+  - Compile and target SDK to 29
   - AndroidX Annotations to 1.1.0
   - AndroidX JUnit to 1.1.1
   - AndroidX Test Rules to 1.2.0
