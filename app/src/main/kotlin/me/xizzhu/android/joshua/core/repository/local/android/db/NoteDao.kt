@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import android.content.ContentValues
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
@@ -49,71 +48,54 @@ class NoteDao(private val sqliteHelper: SQLiteOpenHelper) {
     private val db by lazy { sqliteHelper.writableDatabase }
 
     fun read(@Constants.SortOrder sortOrder: Int): List<Note> {
-        var cursor: Cursor? = null
-        try {
-            val orderBy = when (sortOrder) {
-                Constants.SORT_BY_DATE -> "$COLUMN_TIMESTAMP DESC"
-                Constants.SORT_BY_BOOK -> "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC"
-                else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
+        val orderBy = when (sortOrder) {
+            Constants.SORT_BY_DATE -> "$COLUMN_TIMESTAMP DESC"
+            Constants.SORT_BY_BOOK -> "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC"
+            else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
+        }
+
+        db.query(TABLE_NOTE, null, null, null, null, null, orderBy).use {
+            val notes = ArrayList<Note>(it.count)
+            val bookIndex = it.getColumnIndex(COLUMN_BOOK_INDEX)
+            val chapterIndex = it.getColumnIndex(COLUMN_CHAPTER_INDEX)
+            val verseIndex = it.getColumnIndex(COLUMN_VERSE_INDEX)
+            val note = it.getColumnIndex(COLUMN_NOTE)
+            val timestamp = it.getColumnIndex(COLUMN_TIMESTAMP)
+            while (it.moveToNext()) {
+                notes.add(Note(VerseIndex(it.getInt(bookIndex), it.getInt(chapterIndex), it.getInt(verseIndex)),
+                        it.getString(note), it.getLong(timestamp)))
             }
-            cursor = db.query(TABLE_NOTE, null, null, null, null, null, orderBy)
-            return with(cursor) {
-                val notes = ArrayList<Note>(count)
-                val bookIndex = getColumnIndex(COLUMN_BOOK_INDEX)
-                val chapterIndex = getColumnIndex(COLUMN_CHAPTER_INDEX)
-                val verseIndex = getColumnIndex(COLUMN_VERSE_INDEX)
-                val note = getColumnIndex(COLUMN_NOTE)
-                val timestamp = getColumnIndex(COLUMN_TIMESTAMP)
-                while (moveToNext()) {
-                    notes.add(Note(VerseIndex(getInt(bookIndex), getInt(chapterIndex), getInt(verseIndex)),
-                            getString(note), getLong(timestamp)))
-                }
-                return@with notes
-            }
-        } finally {
-            cursor?.close()
+            return notes
         }
     }
 
     fun read(bookIndex: Int, chapterIndex: Int): List<Note> {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_NOTE, arrayOf(COLUMN_NOTE, COLUMN_VERSE_INDEX, COLUMN_TIMESTAMP),
-                    "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
-                    arrayOf(bookIndex.toString(), chapterIndex.toString()),
-                    null, null, "$COLUMN_VERSE_INDEX ASC")
-            return with(cursor) {
-                val notes = ArrayList<Note>(count)
-                val verseIndex = getColumnIndex(COLUMN_VERSE_INDEX)
-                val note = getColumnIndex(COLUMN_NOTE)
-                val timestamp = getColumnIndex(COLUMN_TIMESTAMP)
-                while (moveToNext()) {
-                    notes.add(Note(VerseIndex(bookIndex, chapterIndex, getInt(verseIndex)),
-                            getString(note), getLong(timestamp)))
-                }
-                return@with notes
+        db.query(TABLE_NOTE, arrayOf(COLUMN_NOTE, COLUMN_VERSE_INDEX, COLUMN_TIMESTAMP),
+                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
+                arrayOf(bookIndex.toString(), chapterIndex.toString()),
+                null, null, "$COLUMN_VERSE_INDEX ASC").use {
+            val notes = ArrayList<Note>(it.count)
+            val verseIndex = it.getColumnIndex(COLUMN_VERSE_INDEX)
+            val note = it.getColumnIndex(COLUMN_NOTE)
+            val timestamp = it.getColumnIndex(COLUMN_TIMESTAMP)
+            while (it.moveToNext()) {
+                notes.add(Note(VerseIndex(bookIndex, chapterIndex, it.getInt(verseIndex)),
+                        it.getString(note), it.getLong(timestamp)))
             }
-        } finally {
-            cursor?.close()
+            return notes
         }
     }
 
     fun read(verseIndex: VerseIndex): Note {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_NOTE, arrayOf(COLUMN_NOTE, COLUMN_TIMESTAMP),
-                    "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
-                    arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
-                    null, null, null)
-            return with(cursor) {
-                return@with if (moveToNext()) {
-                    Note(verseIndex, getString(getColumnIndex(COLUMN_NOTE)), getLong(getColumnIndex(COLUMN_TIMESTAMP)))
-                } else {
-                    Note(verseIndex, "", -1L)
-                }
+        db.query(TABLE_NOTE, arrayOf(COLUMN_NOTE, COLUMN_TIMESTAMP),
+                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
+                arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
+                null, null, null).use {
+            return if (it.moveToNext()) {
+                Note(verseIndex, it.getString(it.getColumnIndex(COLUMN_NOTE)), it.getLong(it.getColumnIndex(COLUMN_TIMESTAMP)))
+            } else {
+                Note(verseIndex, "", -1L)
             }
-        } finally {
-            cursor?.close()
         }
     }
 

@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import android.content.ContentValues
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
@@ -49,35 +48,27 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun read(translationShortName: String): List<String> {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
-                    "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName), null, null,
-                    "$COLUMN_BOOK_INDEX ASC")
+        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
+                "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName), null, null,
+                "$COLUMN_BOOK_INDEX ASC").use {
             val bookNames = ArrayList<String>(Bible.BOOK_COUNT)
-            while (cursor.moveToNext()) {
-                bookNames.add(cursor.getString(0))
+            while (it.moveToNext()) {
+                bookNames.add(it.getString(0))
             }
             return bookNames
-        } finally {
-            cursor?.close()
         }
     }
 
     @WorkerThread
     fun readShortName(translationShortName: String): List<String> {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_SHORT_NAME),
-                    "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName), null, null,
-                    "$COLUMN_BOOK_INDEX ASC")
+        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_SHORT_NAME),
+                "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName), null, null,
+                "$COLUMN_BOOK_INDEX ASC").use {
             val bookNames = ArrayList<String>(Bible.BOOK_COUNT)
-            while (cursor.moveToNext()) {
-                bookNames.add(cursor.getString(0))
+            while (it.moveToNext()) {
+                bookNames.add(it.getString(0))
             }
             return bookNames
-        } finally {
-            cursor?.close()
         }
     }
 
@@ -101,23 +92,17 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
         selection.append(") AND ($COLUMN_BOOK_INDEX = ?)")
         selectionArgs[translations.size] = bookIndex.toString()
 
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_NAME),
-                    selection.toString(), selectionArgs, null, null, null)
-            return with(cursor) {
-                val bookNames = HashMap<String, String>(count)
-                if (count > 0) {
-                    val translationShortName = getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
-                    val bookName = getColumnIndex(COLUMN_BOOK_NAME)
-                    while (moveToNext()) {
-                        bookNames[getString(translationShortName)] = getString(bookName)
-                    }
+        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_NAME),
+                selection.toString(), selectionArgs, null, null, null).use {
+            val bookNames = HashMap<String, String>(it.count)
+            if (it.count > 0) {
+                val translationShortName = it.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
+                val bookName = it.getColumnIndex(COLUMN_BOOK_NAME)
+                while (it.moveToNext()) {
+                    bookNames[it.getString(translationShortName)] = it.getString(bookName)
                 }
-                return@with bookNames
             }
-        } finally {
-            cursor?.close()
+            return bookNames
         }
     }
 
@@ -141,23 +126,17 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
         selection.append(") AND ($COLUMN_BOOK_INDEX = ?)")
         selectionArgs[translations.size] = bookIndex.toString()
 
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_SHORT_NAME),
-                    selection.toString(), selectionArgs, null, null, null)
-            return with(cursor) {
-                val bookNames = HashMap<String, String>(count)
-                if (count > 0) {
-                    val translationShortName = getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
-                    val bookName = getColumnIndex(COLUMN_BOOK_SHORT_NAME)
-                    while (moveToNext()) {
-                        bookNames[getString(translationShortName)] = getString(bookName)
-                    }
+        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_SHORT_NAME),
+                selection.toString(), selectionArgs, null, null, null).use {
+            val bookNames = HashMap<String, String>(it.count)
+            if (it.count > 0) {
+                val translationShortName = it.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
+                val bookName = it.getColumnIndex(COLUMN_BOOK_SHORT_NAME)
+                while (it.moveToNext()) {
+                    bookNames[it.getString(translationShortName)] = it.getString(bookName)
                 }
-                return@with bookNames
             }
-        } finally {
-            cursor?.close()
+            return bookNames
         }
     }
 
@@ -167,23 +146,17 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
             return emptyMap()
         }
 
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_NAME),
-                    "$COLUMN_BOOK_INDEX = ?", arrayOf(bookIndex.toString()), null, null, null)
-            return with(cursor) {
-                val bookNames = HashMap<String, String>(count)
-                if (count > 0) {
-                    val translationShortName = getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
-                    val bookName = getColumnIndex(COLUMN_BOOK_NAME)
-                    while (moveToNext()) {
-                        bookNames[getString(translationShortName)] = getString(bookName)
-                    }
+        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_NAME),
+                "$COLUMN_BOOK_INDEX = ?", arrayOf(bookIndex.toString()), null, null, null).use {
+            val bookNames = HashMap<String, String>(it.count)
+            if (it.count > 0) {
+                val translationShortName = it.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
+                val bookName = it.getColumnIndex(COLUMN_BOOK_NAME)
+                while (it.moveToNext()) {
+                    bookNames[it.getString(translationShortName)] = it.getString(bookName)
                 }
-                return@with bookNames
             }
-        } finally {
-            cursor?.close()
+            return bookNames
         }
     }
 
@@ -193,59 +166,45 @@ class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
             return emptyMap()
         }
 
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_SHORT_NAME),
-                    "$COLUMN_BOOK_INDEX = ?", arrayOf(bookIndex.toString()), null, null, null)
-            return with(cursor) {
-                val bookNames = HashMap<String, String>(count)
-                if (count > 0) {
-                    val translationShortName = getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
-                    val bookName = getColumnIndex(COLUMN_BOOK_SHORT_NAME)
-                    while (moveToNext()) {
-                        bookNames[getString(translationShortName)] = getString(bookName)
-                    }
+        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_SHORT_NAME),
+                "$COLUMN_BOOK_INDEX = ?", arrayOf(bookIndex.toString()), null, null, null).use {
+            val bookNames = HashMap<String, String>(it.count)
+            if (it.count > 0) {
+                val translationShortName = it.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
+                val bookName = it.getColumnIndex(COLUMN_BOOK_SHORT_NAME)
+                while (it.moveToNext()) {
+                    bookNames[it.getString(translationShortName)] = it.getString(bookName)
                 }
-                return@with bookNames
             }
-        } finally {
-            cursor?.close()
+            return bookNames
         }
     }
 
     @WorkerThread
     fun read(translationShortName: String, bookIndex: Int): String {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
-                    "$COLUMN_TRANSLATION_SHORT_NAME = ? AND $COLUMN_BOOK_INDEX = ?",
-                    arrayOf(translationShortName, bookIndex.toString()),
-                    null, null, null)
-            return if (cursor.moveToNext()) {
-                cursor.getString(0)
+        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
+                "$COLUMN_TRANSLATION_SHORT_NAME = ? AND $COLUMN_BOOK_INDEX = ?",
+                arrayOf(translationShortName, bookIndex.toString()),
+                null, null, null).use {
+            return if (it.moveToNext()) {
+                it.getString(0)
             } else {
                 ""
             }
-        } finally {
-            cursor?.close()
         }
     }
 
     @WorkerThread
     fun readShortName(translationShortName: String, bookIndex: Int): String {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_SHORT_NAME),
-                    "$COLUMN_TRANSLATION_SHORT_NAME = ? AND $COLUMN_BOOK_INDEX = ?",
-                    arrayOf(translationShortName, bookIndex.toString()),
-                    null, null, null)
-            return if (cursor.moveToNext()) {
-                cursor.getString(0)
+        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_SHORT_NAME),
+                "$COLUMN_TRANSLATION_SHORT_NAME = ? AND $COLUMN_BOOK_INDEX = ?",
+                arrayOf(translationShortName, bookIndex.toString()),
+                null, null, null).use {
+            return if (it.moveToNext()) {
+                it.getString(0)
             } else {
                 ""
             }
-        } finally {
-            cursor?.close()
         }
     }
 

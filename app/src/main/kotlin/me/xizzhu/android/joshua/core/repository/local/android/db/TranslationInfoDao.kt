@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import android.content.ContentValues
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
@@ -45,44 +44,34 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun read(): List<TranslationInfo> {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_TRANSLATION_INFO, null, null, null, null, null, null, null)
-            return with(cursor) {
-                val translations = ArrayList<TranslationInfo>(count)
-                if (count > 0) {
-                    val shortName = getColumnIndex(COLUMN_SHORT_NAME)
-                    val name = getColumnIndex(COLUMN_NAME)
-                    val language = getColumnIndex(COLUMN_LANGUAGE)
-                    val size = getColumnIndex(COLUMN_SIZE)
-                    val downloaded = getColumnIndex(COLUMN_DOWNLOADED)
-                    while (moveToNext()) {
-                        translations.add(TranslationInfo(getString(shortName), getString(name),
-                                getString(language), getLong(size), getInt(downloaded) == 1))
+        db.query(TABLE_TRANSLATION_INFO, null, null, null, null, null, null, null)
+                .use {
+                    val translations = ArrayList<TranslationInfo>(it.count)
+                    if (it.count > 0) {
+                        val shortName = it.getColumnIndex(COLUMN_SHORT_NAME)
+                        val name = it.getColumnIndex(COLUMN_NAME)
+                        val language = it.getColumnIndex(COLUMN_LANGUAGE)
+                        val size = it.getColumnIndex(COLUMN_SIZE)
+                        val downloaded = it.getColumnIndex(COLUMN_DOWNLOADED)
+                        while (it.moveToNext()) {
+                            translations.add(TranslationInfo(it.getString(shortName), it.getString(name),
+                                    it.getString(language), it.getLong(size), it.getInt(downloaded) == 1))
+                        }
                     }
+                    return translations
                 }
-                return@with translations
-            }
-        } finally {
-            cursor?.close()
-        }
     }
 
     @WorkerThread
     fun replace(translations: List<TranslationInfo>) {
-        db.beginTransaction()
-        try {
+        db.transaction {
             db.delete(TABLE_TRANSLATION_INFO, null, null)
 
             val values = ContentValues(5)
             for (t in translations) {
                 t.saveTo(values)
-                db.insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+                insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
-
-            db.setTransactionSuccessful()
-        } finally {
-            db.endTransaction()
         }
     }
 

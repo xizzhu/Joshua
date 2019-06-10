@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import android.content.ContentValues
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
@@ -53,18 +52,14 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun read(key: String, defaultValue: String): String {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_METADATA, arrayOf(COLUMN_VALUE),
-                    "$COLUMN_KEY = ?", arrayOf(key), null, null, null)
-            return if (cursor.count > 0 && cursor.moveToNext()) {
-                cursor.getString(0)
-            } else {
-                defaultValue
-            }
-        } finally {
-            cursor?.close()
-        }
+        db.query(TABLE_METADATA, arrayOf(COLUMN_VALUE), "$COLUMN_KEY = ?", arrayOf(key), null, null, null)
+                .use {
+                    return if (it.count > 0 && it.moveToNext()) {
+                        it.getString(0)
+                    } else {
+                        defaultValue
+                    }
+                }
     }
 
     @WorkerThread
@@ -87,23 +82,17 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
             results[key.first] = key.second
         }
 
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_METADATA, arrayOf(COLUMN_KEY, COLUMN_VALUE),
-                    selection.toString(), selectionArgs, null, null, null)
-            with(cursor) {
-                if (count > 0) {
-                    val keyIndex = getColumnIndex(COLUMN_KEY)
-                    val valueIndex = getColumnIndex(COLUMN_VALUE)
-                    while (moveToNext()) {
-                        results[getString(keyIndex)] = getString(valueIndex)
-                    }
+        db.query(TABLE_METADATA, arrayOf(COLUMN_KEY, COLUMN_VALUE),
+                selection.toString(), selectionArgs, null, null, null).use {
+            if (it.count > 0) {
+                val keyIndex = it.getColumnIndex(COLUMN_KEY)
+                val valueIndex = it.getColumnIndex(COLUMN_VALUE)
+                while (it.moveToNext()) {
+                    results[it.getString(keyIndex)] = it.getString(valueIndex)
                 }
             }
-            return results
-        } finally {
-            cursor?.close()
         }
+        return results
     }
 
     @WorkerThread
@@ -118,20 +107,15 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun save(entries: List<Pair<String, String>>) {
-        db.beginTransaction()
-        try {
+        db.transaction {
             val values = ContentValues(2)
             for (entry in entries) {
                 with(values) {
                     put(COLUMN_KEY, entry.first)
                     put(COLUMN_VALUE, entry.second)
                 }
-                db.insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+                insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
-
-            db.setTransactionSuccessful()
-        } finally {
-            db.endTransaction()
         }
     }
 }

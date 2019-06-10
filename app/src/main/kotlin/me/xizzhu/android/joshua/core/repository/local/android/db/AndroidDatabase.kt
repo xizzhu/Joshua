@@ -35,22 +35,30 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     val translationInfoDao = TranslationInfoDao(this)
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.beginTransaction()
-        try {
+        db.transaction {
             BookmarkDao.createTable(db)
             BookNamesDao.createTable(db)
             MetadataDao.createTable(db)
             NoteDao.createTable(db)
             ReadingProgressDao.createTable(db)
             TranslationInfoDao.createTable(db)
-
-            db.setTransactionSuccessful()
-        } finally {
-            db.endTransaction()
         }
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // do nothing
+    }
+}
+
+public inline fun <R> SQLiteDatabase.transaction(block: SQLiteDatabase.() -> R): R {
+    try {
+        beginTransaction()
+        val r = block()
+        setTransactionSuccessful()
+        return r
+    } finally {
+        if (inTransaction()) {
+            endTransaction()
+        }
     }
 }

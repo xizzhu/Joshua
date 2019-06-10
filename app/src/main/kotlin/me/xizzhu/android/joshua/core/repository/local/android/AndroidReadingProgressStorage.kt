@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
-import android.database.sqlite.SQLiteDatabase
 import android.text.format.DateUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,15 +23,12 @@ import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingProgressStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
+import me.xizzhu.android.joshua.core.repository.local.android.db.transaction
 
 class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase) : LocalReadingProgressStorage {
     override suspend fun trackReadingProgress(bookIndex: Int, chapterIndex: Int, timeSpentInMills: Long, timestamp: Long) {
         withContext(Dispatchers.IO) {
-            var db: SQLiteDatabase? = null
-            try {
-                db = androidDatabase.writableDatabase
-                db.beginTransaction()
-
+            androidDatabase.writableDatabase.transaction {
                 val previousChapterReadingStatus = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
                 if (previousChapterReadingStatus.lastReadingTimestamp < timestamp) {
                     val currentChapterReadingStatus = ReadingProgress.ChapterReadingStatus(
@@ -68,39 +64,21 @@ class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase
                             Pair(MetadataDao.KEY_LAST_READING_TIMESTAMP, timestamp.toString())
                     ))
                 }
-
-                db.setTransactionSuccessful()
-            } finally {
-                if (db?.inTransaction() == true) {
-                    db.endTransaction()
-                }
             }
         }
     }
 
     override suspend fun readReadingProgress(): ReadingProgress {
         return withContext(Dispatchers.IO) {
-            var db: SQLiteDatabase? = null
-            try {
-                db = androidDatabase.readableDatabase
-                db.beginTransaction()
-
+            androidDatabase.readableDatabase.transaction {
                 val metadata = androidDatabase.metadataDao.read(listOf(
                         Pair(MetadataDao.KEY_CONTINUOUS_READING_DAYS, "1"),
                         Pair(MetadataDao.KEY_LAST_READING_TIMESTAMP, "0")
                 ))
-                val readingProgress = ReadingProgress(
+                return@withContext ReadingProgress(
                         metadata.getValue(MetadataDao.KEY_CONTINUOUS_READING_DAYS).toInt(),
                         metadata.getValue(MetadataDao.KEY_LAST_READING_TIMESTAMP).toLong(),
                         androidDatabase.readingProgressDao.read())
-
-                db.setTransactionSuccessful()
-
-                return@withContext readingProgress
-            } finally {
-                if (db?.inTransaction() == true) {
-                    db.endTransaction()
-                }
             }
         }
     }
