@@ -8,8 +8,8 @@ android:
   components:
     - tools
     - platform-tools
-    - build-tools-28.0.3
-    - android-28
+    - build-tools-29.0.0
+    - android-29
 #    - sys-img-arm64-v8a-google_apis-25
 
 jdk:
