@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import android.content.ContentValues
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
@@ -52,38 +51,34 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     @WorkerThread
     fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int,
              bookName: String, bookShortName: String): List<Verse> {
-        var cursor: Cursor? = null
         db.beginTransaction()
         try {
             if (!db.hasTable(translationShortName)) {
                 return emptyList()
             }
 
-            cursor = db.query(translationShortName, arrayOf(COLUMN_TEXT),
+            val verses = db.query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?", arrayOf(bookIndex.toString(), chapterIndex.toString()),
-                    null, null, "$COLUMN_VERSE_INDEX ASC")
-            val verses = with(cursor) {
-                val verses = ArrayList<Verse>(count)
+                    null, null, "$COLUMN_VERSE_INDEX ASC").use {
+                val verses = ArrayList<Verse>(it.count)
                 var verseIndex = 0
-                while (moveToNext()) {
+                while (it.moveToNext()) {
                     verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
-                            Verse.Text(translationShortName, bookName, bookShortName, getString(0)), emptyList()))
+                            Verse.Text(translationShortName, bookName, bookShortName, it.getString(0)), emptyList()))
                 }
-                return@with verses
+                return@use verses
             }
 
             db.setTransactionSuccessful()
             return verses
         } finally {
             db.endTransaction()
-            cursor?.close()
         }
     }
 
     private fun SQLiteDatabase.hasTable(name: String): Boolean {
-        val cursor: Cursor = rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null)
-        return cursor.use {
-            cursor.count > 0
+        rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null).use {
+            return it.count > 0
         }
     }
 
@@ -99,22 +94,16 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
         try {
             val results = mutableMapOf<String, List<Verse.Text>>()
             for ((translation, bookName) in translationToBookName) {
-                var cursor: Cursor? = null
-                try {
-                    cursor = db.query(translation, arrayOf(COLUMN_TEXT),
-                            "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
-                            arrayOf(bookIndex.toString(), chapterIndex.toString()),
-                            null, null, "$COLUMN_VERSE_INDEX ASC")
-                    results[translation] = with(cursor) {
-                        val texts = ArrayList<Verse.Text>(count)
-                        while (moveToNext()) {
-                            texts.add(Verse.Text(translation, bookName,
-                                    translationToBookShortName.getValue(translation), getString(0)))
-                        }
-                        return@with texts
+                db.query(translation, arrayOf(COLUMN_TEXT),
+                        "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
+                        arrayOf(bookIndex.toString(), chapterIndex.toString()),
+                        null, null, "$COLUMN_VERSE_INDEX ASC").use {
+                    val texts = ArrayList<Verse.Text>(it.count)
+                    while (it.moveToNext()) {
+                        texts.add(Verse.Text(translation, bookName,
+                                translationToBookShortName.getValue(translation), it.getString(0)))
                     }
-                } finally {
-                    cursor?.close()
+                    results[translation] = texts
                 }
             }
 
@@ -141,18 +130,14 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
         try {
             val results = mutableMapOf<String, Verse.Text>()
             for ((translation, bookName) in translationToBookName) {
-                var cursor: Cursor? = null
-                try {
-                    cursor = db.query(translation, arrayOf(COLUMN_TEXT),
-                            "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
-                            arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
-                            null, null, null)
-                    if (cursor.moveToNext()) {
+                db.query(translation, arrayOf(COLUMN_TEXT),
+                        "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
+                        arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
+                        null, null, null).use {
+                    if (it.moveToNext()) {
                         results[translation] = Verse.Text(translation, bookName,
-                                translationToBookShortName.getValue(translation), cursor.getString(0))
+                                translationToBookShortName.getValue(translation), it.getString(0))
                     }
-                } finally {
-                    cursor?.close()
                 }
             }
 
@@ -167,34 +152,36 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun read(translationShortName: String, verseIndex: VerseIndex, bookName: String, bookShortName: String): Verse {
-        var cursor: Cursor? = null
+        if (!verseIndex.isValid() || bookName.isEmpty() || bookShortName.isEmpty()) {
+            return Verse.INVALID
+        }
+
         db.beginTransaction()
         try {
-            if (!db.hasTable(translationShortName) || !verseIndex.isValid() || bookName.isEmpty() || bookShortName.isEmpty()) {
+            if (!db.hasTable(translationShortName)) {
                 return Verse.INVALID
             }
 
-            cursor = db.query(translationShortName, arrayOf(COLUMN_TEXT),
+            val verse = db.query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
                     arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
-                    null, null, null)
-            val verse = if (cursor.moveToNext()) {
-                Verse(verseIndex, Verse.Text(translationShortName, bookName, bookShortName, cursor.getString(0)), emptyList())
-            } else {
-                Verse.INVALID
+                    null, null, null).use {
+                return@use if (it.moveToNext()) {
+                    Verse(verseIndex, Verse.Text(translationShortName, bookName, bookShortName, it.getString(0)), emptyList())
+                } else {
+                    Verse.INVALID
+                }
             }
 
             db.setTransactionSuccessful()
             return verse
         } finally {
             db.endTransaction()
-            cursor?.close()
         }
     }
 
     @WorkerThread
     fun search(translationShortName: String, bookNames: List<String>, bookShortNames: List<String>, query: String): List<Verse> {
-        var cursor: Cursor? = null
         try {
             val keywords = query.trim().replace("\\s+", " ").split(" ")
             if (keywords.isEmpty()) {
@@ -218,26 +205,25 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                 return emptyList()
             }
 
-            cursor = db.query(translationShortName,
+            val verses = db.query(translationShortName,
                     arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX, COLUMN_TEXT),
                     selection.toString(), selectionArgs, null, null,
-                    "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC")
-            val verses = with(cursor) {
-                val verses = ArrayList<Verse>(count)
-                if (count > 0) {
-                    val bookColumnIndex = getColumnIndex(COLUMN_BOOK_INDEX)
-                    val chapterColumnIndex = getColumnIndex(COLUMN_CHAPTER_INDEX)
-                    val verseColumnIndex = getColumnIndex(COLUMN_VERSE_INDEX)
-                    val textColumnIndex = getColumnIndex(COLUMN_TEXT)
-                    while (moveToNext()) {
-                        val verseIndex = VerseIndex(getInt(bookColumnIndex),
-                                getInt(chapterColumnIndex), getInt(verseColumnIndex))
+                    "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC").use {
+                val verses = ArrayList<Verse>(it.count)
+                if (it.count > 0) {
+                    val bookColumnIndex = it.getColumnIndex(COLUMN_BOOK_INDEX)
+                    val chapterColumnIndex = it.getColumnIndex(COLUMN_CHAPTER_INDEX)
+                    val verseColumnIndex = it.getColumnIndex(COLUMN_VERSE_INDEX)
+                    val textColumnIndex = it.getColumnIndex(COLUMN_TEXT)
+                    while (it.moveToNext()) {
+                        val verseIndex = VerseIndex(it.getInt(bookColumnIndex),
+                                it.getInt(chapterColumnIndex), it.getInt(verseColumnIndex))
                         verses.add(Verse(verseIndex, Verse.Text(translationShortName,
                                 bookNames[verseIndex.bookIndex], bookShortNames[verseIndex.bookIndex],
-                                getString(textColumnIndex)), emptyList()))
+                                it.getString(textColumnIndex)), emptyList()))
                     }
                 }
-                return@with verses
+                return@use verses
             }
 
             db.setTransactionSuccessful()
@@ -246,7 +232,6 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             if (db.inTransaction()) {
                 db.endTransaction()
             }
-            cursor?.close()
         }
     }
 

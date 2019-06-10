@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import android.content.ContentValues
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
@@ -47,68 +46,53 @@ class BookmarkDao(private val sqliteHelper: SQLiteOpenHelper) {
     private val db by lazy { sqliteHelper.writableDatabase }
 
     fun read(@Constants.SortOrder sortOrder: Int): List<Bookmark> {
-        var cursor: Cursor? = null
-        try {
-            val orderBy = when (sortOrder) {
-                Constants.SORT_BY_DATE -> "$COLUMN_TIMESTAMP DESC"
-                Constants.SORT_BY_BOOK -> "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC"
-                else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
+        val orderBy = when (sortOrder) {
+            Constants.SORT_BY_DATE -> "$COLUMN_TIMESTAMP DESC"
+            Constants.SORT_BY_BOOK -> "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC"
+            else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
+        }
+
+        db.query(TABLE_BOOKMARK, null, null, null, null, null, orderBy).use {
+            val bookmarks = ArrayList<Bookmark>(it.count)
+            val bookIndex = it.getColumnIndex(COLUMN_BOOK_INDEX)
+            val chapterIndex = it.getColumnIndex(COLUMN_CHAPTER_INDEX)
+            val verseIndex = it.getColumnIndex(COLUMN_VERSE_INDEX)
+            val timestamp = it.getColumnIndex(COLUMN_TIMESTAMP)
+            while (it.moveToNext()) {
+                bookmarks.add(Bookmark(
+                        VerseIndex(it.getInt(bookIndex), it.getInt(chapterIndex), it.getInt(verseIndex)),
+                        it.getLong(timestamp)))
             }
-            cursor = db.query(TABLE_BOOKMARK, null, null, null, null, null, orderBy)
-            return with(cursor) {
-                val bookmarks = ArrayList<Bookmark>(count)
-                val bookIndex = getColumnIndex(COLUMN_BOOK_INDEX)
-                val chapterIndex = getColumnIndex(COLUMN_CHAPTER_INDEX)
-                val verseIndex = getColumnIndex(COLUMN_VERSE_INDEX)
-                val timestamp = getColumnIndex(COLUMN_TIMESTAMP)
-                while (moveToNext()) {
-                    bookmarks.add(
-                            Bookmark(VerseIndex(getInt(bookIndex), getInt(chapterIndex), getInt(verseIndex)),
-                                    getLong(timestamp)))
-                }
-                return@with bookmarks
-            }
-        } finally {
-            cursor?.close()
+            return bookmarks
         }
     }
 
     fun read(bookIndex: Int, chapterIndex: Int): List<Bookmark> {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_BOOKMARK, arrayOf(COLUMN_VERSE_INDEX, COLUMN_TIMESTAMP),
-                    "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
-                    arrayOf(bookIndex.toString(), chapterIndex.toString()),
-                    null, null, "$COLUMN_VERSE_INDEX ASC")
-            return with(cursor) {
-                val bookmarks = ArrayList<Bookmark>(count)
-                val verseIndex = getColumnIndex(COLUMN_VERSE_INDEX)
-                val timestamp = getColumnIndex(COLUMN_TIMESTAMP)
-                while (moveToNext()) {
-                    bookmarks.add(Bookmark(VerseIndex(bookIndex, chapterIndex,
-                            getInt(verseIndex)), getLong(timestamp)))
-                }
-                return@with bookmarks
+        db.query(TABLE_BOOKMARK, arrayOf(COLUMN_VERSE_INDEX, COLUMN_TIMESTAMP),
+                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
+                arrayOf(bookIndex.toString(), chapterIndex.toString()),
+                null, null, "$COLUMN_VERSE_INDEX ASC").use {
+            val bookmarks = ArrayList<Bookmark>(it.count)
+            val verseIndex = it.getColumnIndex(COLUMN_VERSE_INDEX)
+            val timestamp = it.getColumnIndex(COLUMN_TIMESTAMP)
+            while (it.moveToNext()) {
+                bookmarks.add(Bookmark(VerseIndex(bookIndex, chapterIndex, it.getInt(verseIndex)),
+                        it.getLong(timestamp)))
             }
-        } finally {
-            cursor?.close()
+            return bookmarks
         }
     }
 
     fun read(verseIndex: VerseIndex): Bookmark {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_BOOKMARK, arrayOf(COLUMN_TIMESTAMP),
-                    "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
-                    arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
-                    null, null, null)
-            return if (cursor.moveToNext()) {
-                Bookmark(verseIndex, cursor.getLong(0))
+        db.query(TABLE_BOOKMARK, arrayOf(COLUMN_TIMESTAMP),
+                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
+                arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
+                null, null, null).use {
+            return if (it.moveToNext()) {
+                Bookmark(verseIndex, it.getLong(0))
             } else {
                 Bookmark(verseIndex, -1L)
             }
-        } finally {
-            cursor?.close()
         }
     }
 

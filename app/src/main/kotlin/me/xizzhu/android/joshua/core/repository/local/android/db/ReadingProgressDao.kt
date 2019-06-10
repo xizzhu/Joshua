@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import android.content.ContentValues
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
@@ -59,55 +58,43 @@ class ReadingProgressDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun read(): List<ReadingProgress.ChapterReadingStatus> {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_READING_PROGRESS, arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX,
-                    COLUMN_READ_COUNT, COLUMN_TIME_SPENT_IN_MILLS, COLUMN_LAST_READING_TIMESTAMP),
-                    null, null, null, null, null)
-            return with(cursor) {
-                val result = ArrayList<ReadingProgress.ChapterReadingStatus>(count)
-                if (count > 0) {
-                    val bookIndex = getColumnIndex(COLUMN_BOOK_INDEX)
-                    val chapterIndex = getColumnIndex(COLUMN_CHAPTER_INDEX)
-                    val readCount = getColumnIndex(COLUMN_READ_COUNT)
-                    val timeSpentInMills = getColumnIndex(COLUMN_TIME_SPENT_IN_MILLS)
-                    val lastReadingTimestamp = getColumnIndex(COLUMN_LAST_READING_TIMESTAMP)
-                    while (moveToNext()) {
-                        result.add(ReadingProgress.ChapterReadingStatus(getInt(bookIndex), getInt(chapterIndex),
-                                getInt(readCount), getLong(timeSpentInMills), getLong(lastReadingTimestamp)))
-                    }
+        db.query(TABLE_READING_PROGRESS, arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX,
+                COLUMN_READ_COUNT, COLUMN_TIME_SPENT_IN_MILLS, COLUMN_LAST_READING_TIMESTAMP),
+                null, null, null, null, null).use {
+            val result = ArrayList<ReadingProgress.ChapterReadingStatus>(it.count)
+            if (it.count > 0) {
+                val bookIndex = it.getColumnIndex(COLUMN_BOOK_INDEX)
+                val chapterIndex = it.getColumnIndex(COLUMN_CHAPTER_INDEX)
+                val readCount = it.getColumnIndex(COLUMN_READ_COUNT)
+                val timeSpentInMills = it.getColumnIndex(COLUMN_TIME_SPENT_IN_MILLS)
+                val lastReadingTimestamp = it.getColumnIndex(COLUMN_LAST_READING_TIMESTAMP)
+                while (it.moveToNext()) {
+                    result.add(ReadingProgress.ChapterReadingStatus(it.getInt(bookIndex), it.getInt(chapterIndex),
+                            it.getInt(readCount), it.getLong(timeSpentInMills), it.getLong(lastReadingTimestamp)))
                 }
-                return@with result
             }
-        } finally {
-            cursor?.close()
+            return result
         }
     }
 
     @WorkerThread
     fun read(bookIndex: Int, chapterIndex: Int): ReadingProgress.ChapterReadingStatus {
-        var cursor: Cursor? = null
-        try {
-            cursor = db.query(TABLE_READING_PROGRESS, arrayOf(COLUMN_READ_COUNT, COLUMN_TIME_SPENT_IN_MILLS, COLUMN_LAST_READING_TIMESTAMP),
-                    "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
-                    arrayOf(bookIndex.toString(), chapterIndex.toString()), null, null, null)
+        db.query(TABLE_READING_PROGRESS, arrayOf(COLUMN_READ_COUNT, COLUMN_TIME_SPENT_IN_MILLS, COLUMN_LAST_READING_TIMESTAMP),
+                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
+                arrayOf(bookIndex.toString(), chapterIndex.toString()), null, null, null).use {
             val readCount: Int
             val timeSpentInMills: Long
             val lastReadingTimestamp: Long
-            with(cursor) {
-                if (count > 0 && moveToNext()) {
-                    readCount = getInt(getColumnIndex(COLUMN_READ_COUNT))
-                    timeSpentInMills = getLong(getColumnIndex(COLUMN_TIME_SPENT_IN_MILLS))
-                    lastReadingTimestamp = getLong(getColumnIndex(COLUMN_LAST_READING_TIMESTAMP))
-                } else {
-                    readCount = 0
-                    timeSpentInMills = 0L
-                    lastReadingTimestamp = 0L
-                }
+            if (it.count > 0 && it.moveToNext()) {
+                readCount = it.getInt(it.getColumnIndex(COLUMN_READ_COUNT))
+                timeSpentInMills = it.getLong(it.getColumnIndex(COLUMN_TIME_SPENT_IN_MILLS))
+                lastReadingTimestamp = it.getLong(it.getColumnIndex(COLUMN_LAST_READING_TIMESTAMP))
+            } else {
+                readCount = 0
+                timeSpentInMills = 0L
+                lastReadingTimestamp = 0L
             }
             return ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, readCount, timeSpentInMills, lastReadingTimestamp)
-        } finally {
-            cursor?.close()
         }
     }
 }
