@@ -16,13 +16,13 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
-import android.database.sqlite.SQLiteDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
+import me.xizzhu.android.joshua.core.repository.local.android.db.transaction
 
 class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : LocalTranslationStorage {
     override suspend fun readTranslationListRefreshTimestamp(): Long = withContext(Dispatchers.IO) {
@@ -52,11 +52,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                                          bookShortNames: List<String>,
                                          verses: Map<Pair<Int, Int>, List<String>>) {
         withContext(Dispatchers.IO) {
-            var db: SQLiteDatabase? = null
-            try {
-                db = androidDatabase.writableDatabase
-                db.beginTransaction()
-
+            androidDatabase.writableDatabase.transaction {
                 androidDatabase.bookNamesDao.save(translationInfo.shortName, bookNames, bookShortNames)
                 if (translationInfo.downloaded) {
                     androidDatabase.translationInfoDao.save(translationInfo)
@@ -67,21 +63,13 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                 }
                 androidDatabase.translationDao.createTable(translationInfo.shortName)
                 androidDatabase.translationDao.save(translationInfo.shortName, verses)
-
-                db.setTransactionSuccessful()
-            } finally {
-                db?.endTransaction()
             }
         }
     }
 
     override suspend fun removeTranslation(translationInfo: TranslationInfo) {
         withContext(Dispatchers.IO) {
-            var db: SQLiteDatabase? = null
-            try {
-                db = androidDatabase.writableDatabase
-                db.beginTransaction()
-
+            androidDatabase.writableDatabase.transaction {
                 androidDatabase.bookNamesDao.remove(translationInfo.shortName)
                 if (translationInfo.downloaded) {
                     androidDatabase.translationInfoDao.save(TranslationInfo(
@@ -91,10 +79,6 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                     androidDatabase.translationInfoDao.save(translationInfo)
                 }
                 androidDatabase.translationDao.removeTable(translationInfo.shortName)
-
-                db.setTransactionSuccessful()
-            } finally {
-                db?.endTransaction()
             }
         }
     }

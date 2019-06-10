@@ -107,20 +107,15 @@ class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun save(entries: List<Pair<String, String>>) {
-        db.beginTransaction()
-        try {
+        db.transaction {
             val values = ContentValues(2)
             for (entry in entries) {
                 with(values) {
                     put(COLUMN_KEY, entry.first)
                     put(COLUMN_VALUE, entry.second)
                 }
-                db.insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+                insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
-
-            db.setTransactionSuccessful()
-        } finally {
-            db.endTransaction()
         }
     }
 }

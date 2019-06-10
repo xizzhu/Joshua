@@ -64,19 +64,14 @@ class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun replace(translations: List<TranslationInfo>) {
-        db.beginTransaction()
-        try {
+        db.transaction {
             db.delete(TABLE_TRANSLATION_INFO, null, null)
 
             val values = ContentValues(5)
             for (t in translations) {
                 t.saveTo(values)
-                db.insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+                insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
-
-            db.setTransactionSuccessful()
-        } finally {
-            db.endTransaction()
         }
     }
 

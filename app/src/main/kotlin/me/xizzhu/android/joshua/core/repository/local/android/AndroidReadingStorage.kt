@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
+import me.xizzhu.android.joshua.core.repository.local.android.db.transaction
 
 class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : LocalReadingStorage {
     override suspend fun readCurrentVerseIndex(): VerseIndex {
@@ -82,87 +83,56 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
     }
 
     override suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
-                                    bookIndex: Int, chapterIndex: Int): List<Verse> {
-        return withContext(Dispatchers.IO) {
-            val db = androidDatabase.readableDatabase
-            try {
-                db.beginTransaction()
-
-                val translations = mutableListOf(translationShortName)
-                translations.addAll(parallelTranslations)
-                val translationToBookNames = androidDatabase.bookNamesDao.read(translations, bookIndex)
-                val translationToBookShortNames = androidDatabase.bookNamesDao.readShortName(translations, bookIndex)
-                val translationToTexts = androidDatabase.translationDao.read(
-                        translationToBookNames, translationToBookShortNames, bookIndex, chapterIndex)
-                val primaryTexts = translationToTexts.getValue(translationShortName)
-                val verses = ArrayList<Verse>(primaryTexts.size)
-                for ((i, primaryText) in primaryTexts.withIndex()) {
-                    val parallel = ArrayList<Verse.Text>(translationToTexts.size - 1)
-                    for ((translation, texts) in translationToTexts) {
-                        if (translationShortName == translation) {
-                            continue
-                        }
-                        parallel.add(if (texts.size > i) {
-                            texts[i]
-                        } else {
-                            Verse.Text(translation, translationToBookNames.getValue(translation),
-                                    translationToBookShortNames.getValue(translation), "")
-                        })
+                                    bookIndex: Int, chapterIndex: Int): List<Verse> = withContext(Dispatchers.IO) {
+        androidDatabase.readableDatabase.transaction {
+            val translations = mutableListOf(translationShortName)
+            translations.addAll(parallelTranslations)
+            val translationToBookNames = androidDatabase.bookNamesDao.read(translations, bookIndex)
+            val translationToBookShortNames = androidDatabase.bookNamesDao.readShortName(translations, bookIndex)
+            val translationToTexts = androidDatabase.translationDao.read(
+                    translationToBookNames, translationToBookShortNames, bookIndex, chapterIndex)
+            val primaryTexts = translationToTexts.getValue(translationShortName)
+            val verses = ArrayList<Verse>(primaryTexts.size)
+            for ((i, primaryText) in primaryTexts.withIndex()) {
+                val parallel = ArrayList<Verse.Text>(translationToTexts.size - 1)
+                for ((translation, texts) in translationToTexts) {
+                    if (translationShortName == translation) {
+                        continue
                     }
-
-                    verses.add(Verse(VerseIndex(bookIndex, chapterIndex, i), primaryText, parallel))
+                    parallel.add(if (texts.size > i) {
+                        texts[i]
+                    } else {
+                        Verse.Text(translation, translationToBookNames.getValue(translation),
+                                translationToBookShortNames.getValue(translation), "")
+                    })
                 }
 
-                db.setTransactionSuccessful()
-                return@withContext verses
-            } finally {
-                if (db.inTransaction()) {
-                    db.endTransaction()
-                }
+                verses.add(Verse(VerseIndex(bookIndex, chapterIndex, i), primaryText, parallel))
             }
+            return@withContext verses
         }
     }
 
     override suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse {
         return withContext(Dispatchers.IO) {
-            val db = androidDatabase.readableDatabase
-            try {
-                db.beginTransaction()
-
-                val verse = androidDatabase.translationDao.read(translationShortName, verseIndex,
+            androidDatabase.readableDatabase.transaction {
+                return@withContext androidDatabase.translationDao.read(translationShortName, verseIndex,
                         androidDatabase.bookNamesDao.read(translationShortName, verseIndex.bookIndex),
                         androidDatabase.bookNamesDao.readShortName(translationShortName, verseIndex.bookIndex))
-
-                db.setTransactionSuccessful()
-                return@withContext verse
-            } finally {
-                if (db.inTransaction()) {
-                    db.endTransaction()
-                }
             }
         }
     }
 
     override suspend fun readVerseWithParallel(translationShortName: String, verseIndex: VerseIndex): Verse {
         return withContext(Dispatchers.IO) {
-            val db = androidDatabase.readableDatabase
-            try {
-                db.beginTransaction()
-
+            androidDatabase.readableDatabase.transaction {
                 val translationToBookNames = androidDatabase.bookNamesDao.read(verseIndex.bookIndex)
                 val translationToBookShortNames = androidDatabase.bookNamesDao.readShortName(verseIndex.bookIndex)
                 val translationToText = androidDatabase.translationDao.read(
                         translationToBookNames, translationToBookShortNames, verseIndex).toMutableMap()
                 val primaryText = translationToText.remove(translationShortName)!!
-                val verse = Verse(verseIndex, primaryText,
+                return@withContext Verse(verseIndex, primaryText,
                         translationToText.values.sortedBy { it.translationShortName })
-
-                db.setTransactionSuccessful()
-                return@withContext verse
-            } finally {
-                if (db.inTransaction()) {
-                    db.endTransaction()
-                }
             }
         }
     }

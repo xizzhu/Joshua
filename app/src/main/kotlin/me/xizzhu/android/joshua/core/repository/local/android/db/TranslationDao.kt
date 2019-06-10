@@ -51,13 +51,12 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
     @WorkerThread
     fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int,
              bookName: String, bookShortName: String): List<Verse> {
-        db.beginTransaction()
-        try {
-            if (!db.hasTable(translationShortName)) {
+        db.transaction {
+            if (!hasTable(translationShortName)) {
                 return emptyList()
             }
 
-            val verses = db.query(translationShortName, arrayOf(COLUMN_TEXT),
+            db.query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?", arrayOf(bookIndex.toString(), chapterIndex.toString()),
                     null, null, "$COLUMN_VERSE_INDEX ASC").use {
                 val verses = ArrayList<Verse>(it.count)
@@ -66,13 +65,8 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                     verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
                             Verse.Text(translationShortName, bookName, bookShortName, it.getString(0)), emptyList()))
                 }
-                return@use verses
+                return verses
             }
-
-            db.setTransactionSuccessful()
-            return verses
-        } finally {
-            db.endTransaction()
         }
     }
 
@@ -90,11 +84,10 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             return emptyMap()
         }
 
-        db.beginTransaction()
-        try {
+        db.transaction {
             val results = mutableMapOf<String, List<Verse.Text>>()
             for ((translation, bookName) in translationToBookName) {
-                db.query(translation, arrayOf(COLUMN_TEXT),
+                query(translation, arrayOf(COLUMN_TEXT),
                         "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
                         arrayOf(bookIndex.toString(), chapterIndex.toString()),
                         null, null, "$COLUMN_VERSE_INDEX ASC").use {
@@ -106,13 +99,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                     results[translation] = texts
                 }
             }
-
-            db.setTransactionSuccessful()
             return results
-        } finally {
-            if (db.inTransaction()) {
-                db.endTransaction()
-            }
         }
     }
 
@@ -126,11 +113,10 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             return emptyMap()
         }
 
-        db.beginTransaction()
-        try {
+        db.transaction {
             val results = mutableMapOf<String, Verse.Text>()
             for ((translation, bookName) in translationToBookName) {
-                db.query(translation, arrayOf(COLUMN_TEXT),
+                query(translation, arrayOf(COLUMN_TEXT),
                         "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
                         arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
                         null, null, null).use {
@@ -140,13 +126,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                     }
                 }
             }
-
-            db.setTransactionSuccessful()
             return results
-        } finally {
-            if (db.inTransaction()) {
-                db.endTransaction()
-            }
         }
     }
 
@@ -156,56 +136,49 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
             return Verse.INVALID
         }
 
-        db.beginTransaction()
-        try {
-            if (!db.hasTable(translationShortName)) {
+        db.transaction {
+            if (!hasTable(translationShortName)) {
                 return Verse.INVALID
             }
 
-            val verse = db.query(translationShortName, arrayOf(COLUMN_TEXT),
+            db.query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
                     arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
                     null, null, null).use {
-                return@use if (it.moveToNext()) {
+                return if (it.moveToNext()) {
                     Verse(verseIndex, Verse.Text(translationShortName, bookName, bookShortName, it.getString(0)), emptyList())
                 } else {
                     Verse.INVALID
                 }
             }
-
-            db.setTransactionSuccessful()
-            return verse
-        } finally {
-            db.endTransaction()
         }
     }
 
     @WorkerThread
     fun search(translationShortName: String, bookNames: List<String>, bookShortNames: List<String>, query: String): List<Verse> {
-        try {
-            val keywords = query.trim().replace("\\s+", " ").split(" ")
-            if (keywords.isEmpty()) {
+        val keywords = query.trim().replace("\\s+", " ").split(" ")
+        if (keywords.isEmpty()) {
+            return emptyList()
+        }
+
+        val singleSelection = "$COLUMN_TEXT LIKE ?"
+        val selection = StringBuilder()
+        val selectionArgs = Array(keywords.size) { "" }
+        for (i in 0 until keywords.size) {
+            if (selection.isNotEmpty()) {
+                selection.append(" AND ")
+            }
+            selection.append(singleSelection)
+
+            selectionArgs[i] = "%%${keywords[i]}%%"
+        }
+
+        db.transaction {
+            if (!hasTable(translationShortName)) {
                 return emptyList()
             }
 
-            val singleSelection = "$COLUMN_TEXT LIKE ?"
-            val selection = StringBuilder()
-            val selectionArgs = Array(keywords.size) { "" }
-            for (i in 0 until keywords.size) {
-                if (selection.isNotEmpty()) {
-                    selection.append(" AND ")
-                }
-                selection.append(singleSelection)
-
-                selectionArgs[i] = "%%${keywords[i]}%%"
-            }
-
-            db.beginTransaction()
-            if (!db.hasTable(translationShortName)) {
-                return emptyList()
-            }
-
-            val verses = db.query(translationShortName,
+            db.query(translationShortName,
                     arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX, COLUMN_TEXT),
                     selection.toString(), selectionArgs, null, null,
                     "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC").use {
@@ -223,14 +196,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
                                 it.getString(textColumnIndex)), emptyList()))
                     }
                 }
-                return@use verses
-            }
-
-            db.setTransactionSuccessful()
-            return verses
-        } finally {
-            if (db.inTransaction()) {
-                db.endTransaction()
+                return verses
             }
         }
     }
