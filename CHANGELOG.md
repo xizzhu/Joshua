@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.5.1 (2019-06-10)
 - Improved color for selected verses and verse details in night mode
 
 #### v0.5.0 (2019-06-06)
