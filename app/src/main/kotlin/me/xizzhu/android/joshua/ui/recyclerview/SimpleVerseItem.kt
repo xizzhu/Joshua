@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.ui.recyclerview
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,7 +28,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
+import me.xizzhu.android.joshua.ui.*
 import java.lang.StringBuilder
 
 data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int,
@@ -107,6 +108,7 @@ data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int,
 
 class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<SimpleVerseItem>(inflater.inflate(R.layout.item_simple_verse, parent, false)) {
+    private val resources = itemView.resources
     private val index = itemView.findViewById(R.id.index) as TextView
     private val text = itemView.findViewById(R.id.text) as TextView
     private val divider = itemView.findViewById(R.id.divider) as View
@@ -121,13 +123,16 @@ class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
 
     override fun bind(settings: Settings, item: SimpleVerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {
-            text.updateSettingsWithPrimaryText(settings)
             text.text = item.textForDisplay
+            text.setTextColor(if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources))
+            text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
 
             if (item.verse.parallel.isEmpty()) {
-                index.updateSettingsWithPrimaryText(settings)
                 index.text = item.indexForDisplay
+                index.setTextColor(if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources))
+                index.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
                 index.visibility = View.VISIBLE
+
                 divider.visibility = View.GONE
             } else {
                 index.visibility = View.GONE
@@ -141,10 +146,18 @@ class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
                     VerseItemViewHolder.VERSE_SELECTED -> {
                         item.selected = true
                         itemView.isSelected = true
+                        if (settings.nightModeOn) {
+                            index.animateTextColor(settings.getPrimarySelectedTextColor(resources))
+                            text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
+                        }
                     }
                     VerseItemViewHolder.VERSE_DESELECTED -> {
                         item.selected = false
                         itemView.isSelected = false
+                        if (settings.nightModeOn) {
+                            index.animateTextColor(settings.getPrimaryTextColor(resources))
+                            text.animateTextColor(settings.getPrimaryTextColor(resources))
+                        }
                     }
                 }
             }

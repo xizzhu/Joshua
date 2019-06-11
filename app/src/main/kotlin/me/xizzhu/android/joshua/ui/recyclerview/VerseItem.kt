@@ -27,12 +27,15 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.lang.StringBuilder
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Color
-
+import android.util.TypedValue
+import me.xizzhu.android.joshua.ui.animateTextColor
+import me.xizzhu.android.joshua.ui.getBodyTextSize
+import me.xizzhu.android.joshua.ui.getPrimarySelectedTextColor
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 
 data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Boolean,
                      val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
@@ -107,6 +110,7 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
         private val OFF = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
     }
 
+    private val resources = itemView.resources
     private val text = itemView.findViewById<TextView>(R.id.text)
     private val bookmark = itemView.findViewById<ImageView>(R.id.bookmark)
     private val note = itemView.findViewById<ImageView>(R.id.note)
@@ -123,8 +127,9 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
 
     override fun bind(settings: Settings, item: VerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {
-            text.updateSettingsWithPrimaryText(settings)
             text.text = item.textForDisplay
+            text.setTextColor(if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources))
+            text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
 
             bookmark.colorFilter = if (item.hasBookmark) ON else OFF
             note.colorFilter = if (item.hasNote) ON else OFF
@@ -136,10 +141,16 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
                     VERSE_SELECTED -> {
                         item.selected = true
                         itemView.isSelected = true
+                        if (settings.nightModeOn) {
+                            text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
+                        }
                     }
                     VERSE_DESELECTED -> {
                         item.selected = false
                         itemView.isSelected = false
+                        if (settings.nightModeOn) {
+                            text.animateTextColor(settings.getPrimaryTextColor(resources))
+                        }
                     }
                     NOTE_ADDED -> {
                         item.hasNote = true
