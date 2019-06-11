@@ -78,6 +78,10 @@ private fun getTextColor(resources: Resources, nightModeOn: Boolean,
 }
 
 @ColorInt
+fun Settings.getPrimarySelectedTextColor(resources: Resources): Int =
+        getTextColor(resources, nightModeOn, R.color.text_dark_primary, R.color.text_dark_primary)
+
+@ColorInt
 fun Settings.getSecondaryTextColor(resources: Resources): Int =
         getTextColor(resources, nightModeOn, R.color.text_light_secondary, R.color.text_dark_secondary)
 

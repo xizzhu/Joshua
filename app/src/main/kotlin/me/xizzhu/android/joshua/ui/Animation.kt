@@ -18,7 +18,11 @@ package me.xizzhu.android.joshua.ui
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import android.view.View
+import android.widget.TextView
+import androidx.annotation.ColorInt
 
 private const val ANIMATION_DURATION = 300L
 
@@ -45,4 +49,17 @@ fun View.fadeOut() {
                     alpha = 1.0F
                 }
             })
+}
+
+fun TextView.animateTextColor(@ColorInt to: Int) {
+    val from = currentTextColor
+    val argbEvaluator = ArgbEvaluator()
+    with(ValueAnimator.ofFloat(0.0F, 1.0F)) {
+        addUpdateListener { animator ->
+            val fraction = animator.animatedValue as Float
+            val color = argbEvaluator.evaluate(fraction, from, to) as Int
+            setTextColor(color)
+        }
+        start()
+    }
 }

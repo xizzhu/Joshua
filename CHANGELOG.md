@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Improved color for selected verses and verse details in night mode
 
 #### v0.5.0 (2019-06-06)
 - Supported sorting bookmarks and notes by book
