@@ -30,6 +30,7 @@ import com.google.android.material.textfield.TextInputEditText
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.getBodyTextSize
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.VerseTextItem
 
@@ -139,6 +140,7 @@ private class NotePage(resources: Resources, inflater: LayoutInflater, container
     private val note: TextInputEditText = view.findViewById<TextInputEditText>(R.id.note).apply {
         addTextChangedListener(textWatcher)
         setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+        setTextColor(settings.getPrimaryTextColor(resources))
     }
 
     override fun bind(verseDetail: VerseDetail) {

@@ -26,6 +26,7 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
@@ -33,6 +34,9 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.getBackgroundColor
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.getSecondaryTextColor
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface VerseDetailView : BaseSettingsView {
@@ -70,12 +74,16 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
             presenter.updateNote(note)
         }
     })
+    private val divider: View
+    private val header: LinearLayout
     private val tabLayout: TabLayout
     private val viewPager: ViewPager
     private val bookmark: ImageView
 
     init {
         View.inflate(context, R.layout.inner_verse_detail_view, this)
+        divider = findViewById(R.id.divider)
+        header = findViewById(R.id.header)
         viewPager = findViewById<ViewPager>(R.id.view_pager).apply { adapter = this@VerseDetailViewLayout.adapter }
         tabLayout = findViewById<TabLayout>(R.id.tab_layout).apply { setupWithViewPager(viewPager) }
         bookmark = findViewById<ImageView>(R.id.bookmark).apply {
@@ -98,6 +106,18 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     override fun onSettingsUpdated(settings: Settings) {
         adapter.setSettings(settings)
+
+        header.setBackgroundColor(settings.getBackgroundColor())
+        val resources = resources
+        tabLayout.setTabTextColors(settings.getSecondaryTextColor(resources), settings.getPrimaryTextColor(resources))
+
+        if (settings.nightModeOn) {
+            divider.setBackgroundColor(0xFF222222.toInt())
+            viewPager.setBackgroundColor(0xFF222222.toInt())
+        } else {
+            divider.setBackgroundColor(0xFFEEEEEE.toInt())
+            viewPager.setBackgroundColor(0xFFEEEEEE.toInt())
+        }
     }
 
     override fun onVerseDetailLoaded(verseDetail: VerseDetail) {

@@ -9,14 +9,14 @@
         android:orientation="vertical">
 
         <View
+            android:id="@+id/divider"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#EEEEEE" />
+            android:layout_height="1dp" />
 
         <LinearLayout
+            android:id="@+id/header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
             android:orientation="horizontal">
 
             <com.google.android.material.tabs.TabLayout
@@ -38,7 +38,6 @@
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#EEEEEE" />
+            android:layout_height="match_parent" />
     </LinearLayout>
 </merge>
