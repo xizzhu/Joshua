@@ -128,9 +128,9 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                     verseDetail = detail.copy(bookmarked = true)
                 }
                 view?.onVerseDetailLoaded(verseDetail!!)
-
-                updateBookmarkJob = null
             }
+
+            updateBookmarkJob = null
         }
     }
 
@@ -144,9 +144,9 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                     readingInteractor.saveNote(detail.verseIndex, note)
                 }
                 verseDetail = detail.copy(note = note)
-
-                updateNoteJob = null
             }
+
+            updateNoteJob = null
         }
     }
 }
