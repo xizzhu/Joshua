@@ -20,13 +20,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.SearchItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.logger.Log
 import java.util.ArrayList
 
 class SearchResultPresenter(private val searchInteractor: SearchInteractor)
@@ -65,7 +65,7 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
                 searchInteractor.selectVerse(verseToSelect)
                 searchInteractor.openReading()
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to select verse and open reading activity")
+                Log.e(tag, "Failed to select verse and open reading activity", e)
                 view?.onVerseSelectionFailed(verseToSelect)
             }
         }

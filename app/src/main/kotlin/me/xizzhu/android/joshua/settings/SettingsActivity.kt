@@ -28,12 +28,12 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.widget.SwitchCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.utils.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -97,7 +97,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
                 startActivity(Intent(Intent.ACTION_VIEW)
                         .setData(Uri.parse("market://details?id=me.xizzhu.android.joshua")))
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to start activity to rate app")
+                Log.e(tag, "Failed to start activity to rate app", e)
                 Toast.makeText(this@SettingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
             }
         }

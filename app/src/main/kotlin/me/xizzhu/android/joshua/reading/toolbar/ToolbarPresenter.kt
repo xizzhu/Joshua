@@ -20,9 +20,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.logger.Log
 
 class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ToolbarView>() {
     override fun onViewAttached() {
@@ -60,10 +60,10 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
                 try {
                     readingInteractor.clearParallelTranslation()
                 } catch (e: Exception) {
-                    Log.w(tag, e, "Failed to clear parallel translation")
+                    Log.w(tag, "Failed to clear parallel translation", e)
                 }
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to update current translation")
+                Log.e(tag, "Failed to update current translation", e)
                 view?.onCurrentTranslationUpdateFailed(translationShortName)
             }
         }
@@ -81,7 +81,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         try {
             readingInteractor.openTranslationManagement()
         } catch (e: Exception) {
-            Log.e(tag, e, "Failed to open translation management activity")
+            Log.e(tag, "Failed to open translation management activity", e)
             view?.onFailedToNavigateToTranslationManagement()
         }
     }
@@ -90,7 +90,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         try {
             readingInteractor.openReadingProgress()
         } catch (e: Exception) {
-            Log.e(tag, e, "Failed to open reading progress activity")
+            Log.e(tag, "Failed to open reading progress activity", e)
             view?.onFailedToNavigateToReadingProgress()
         }
     }
@@ -99,7 +99,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         try {
             readingInteractor.openBookmarks()
         } catch (e: Exception) {
-            Log.e(tag, e, "Failed to open bookmarks activity")
+            Log.e(tag, "Failed to open bookmarks activity", e)
             view?.onFailedToNavigateToBookmarks()
         }
     }
@@ -108,7 +108,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         try {
             readingInteractor.openNotes()
         } catch (e: Exception) {
-            Log.e(tag, e, "Failed to open notes activity")
+            Log.e(tag, "Failed to open notes activity", e)
             view?.onFailedToNavigateToNotes()
         }
     }
@@ -117,7 +117,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         try {
             readingInteractor.openSettings()
         } catch (e: Exception) {
-            Log.e(tag, e, "Failed to open settings activity")
+            Log.e(tag, "Failed to open settings activity", e)
             view?.onFailedToNavigateToSettings()
         }
     }

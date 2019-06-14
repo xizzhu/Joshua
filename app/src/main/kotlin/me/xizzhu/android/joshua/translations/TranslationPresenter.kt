@@ -26,13 +26,13 @@ import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.SwipeRefresherState
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.ui.recyclerview.toTranslationItems
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.logger.Log
 import java.util.*
 import kotlin.Comparator
 
@@ -124,7 +124,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
             try {
                 translationInteractor.reload(forceRefresh)
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to load translation list")
+                Log.e(tag, "Failed to load translation list", e)
                 view?.onTranslationsLoadingFailed(forceRefresh)
             }
         }
@@ -161,7 +161,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 try {
                     view?.onTranslationDownloadProgressed(progress)
                 } catch (e: Exception) {
-                    Log.e(tag, e, "Error when download progress is updated")
+                    Log.e(tag, "Error when download progress is updated", e)
                 }
             }
         }
@@ -174,7 +174,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to download translation")
+                Log.e(tag, "Failed to download translation", e)
                 view?.onTranslationDownloadFailed(translationToDelete)
             }
         }
@@ -188,7 +188,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 translationInteractor.removeTranslation(translationToRemove)
                 view?.onTranslationDeleted()
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to remove translation")
+                Log.e(tag, "Failed to remove translation", e)
                 view?.onTranslationDeleteFailed(translationToRemove)
             }
         }
@@ -200,7 +200,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 translationInteractor.saveCurrentTranslation(translationShortName)
                 translationInteractor.finish()
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to select translation and close translation management activity")
+                Log.e(tag, "Failed to select translation and close translation management activity", e)
                 view?.onCurrentTranslationUpdateFailed(translationShortName)
             }
         }

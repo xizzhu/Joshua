@@ -19,8 +19,8 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.BookmarkRepository
+import me.xizzhu.android.logger.Log
 
 data class Bookmark(val verseIndex: VerseIndex, val timestamp: Long) {
     fun isValid(): Boolean = timestamp > 0L
@@ -39,7 +39,7 @@ class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
                 try {
                     bookmarksSortOrder.send(bookmarkRepository.readSortOrder())
                 } catch (e: Exception) {
-                    Log.e(TAG, e, "Failed to initialize bookmark sort order")
+                    Log.e(TAG, "Failed to initialize bookmark sort order", e)
                     bookmarksSortOrder.send(Constants.DEFAULT_SORT_ORDER)
                 }
             }

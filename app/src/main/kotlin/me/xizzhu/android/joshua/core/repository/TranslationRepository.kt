@@ -22,10 +22,10 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.analytics.Analytics
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
+import me.xizzhu.android.logger.Log
 
 class TranslationRepository(private val localTranslationStorage: LocalTranslationStorage,
                             private val remoteTranslationService: RemoteTranslationService) {
@@ -39,7 +39,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
             try {
                 readTranslationsFromBackend()
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to read translation list from backend")
+                Log.e(TAG, "Failed to read translation list from backend", e)
                 readTranslationsFromLocal()
             }
         } else {
@@ -84,7 +84,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
                         System.currentTimeMillis())
             }
         } catch (e: Exception) {
-            Log.e(TAG, e, "Failed to save translation list refresh timestamp")
+            Log.e(TAG, "Failed to save translation list refresh timestamp", e)
         }
 
         return translations

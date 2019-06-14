@@ -22,10 +22,10 @@ import com.squareup.moshi.Moshi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslation
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
+import me.xizzhu.android.logger.Log
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okio.buffer
@@ -115,7 +115,7 @@ class RetrofitTranslationService(moshi: Moshi, okHttpClient: OkHttpClient) : Rem
                 try {
                     inputStream?.close()
                 } catch (e: IOException) {
-                    Log.w(TAG, e, "Failed to close input stream")
+                    Log.w(TAG, "Failed to close input stream", e)
                 }
             }
 

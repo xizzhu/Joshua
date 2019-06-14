@@ -18,9 +18,9 @@ package me.xizzhu.android.joshua.search.toolbar
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.logger.Log
 import java.lang.Exception
 
 class ToolbarPresenter(private val searchInteractor: SearchInteractor) : MVPPresenter<ToolbarView>() {
@@ -32,7 +32,7 @@ class ToolbarPresenter(private val searchInteractor: SearchInteractor) : MVPPres
             try {
                 searchInteractor.search(query)
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to search Bible verses")
+                Log.e(tag, "Failed to search Bible verses", e)
                 view?.onError(query)
             }
         }

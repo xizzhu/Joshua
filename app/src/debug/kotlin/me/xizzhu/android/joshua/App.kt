@@ -20,8 +20,8 @@ import android.app.Application
 import android.os.StrictMode
 import androidx.annotation.CallSuper
 import com.facebook.stetho.Stetho
-import me.xizzhu.android.joshua.core.logger.Log
-import me.xizzhu.android.joshua.core.logger.android.LogcatLogger
+import me.xizzhu.android.logger.Log
+import me.xizzhu.android.logger.LogcatLogger
 
 abstract class BaseApp : Application() {
     @CallSuper

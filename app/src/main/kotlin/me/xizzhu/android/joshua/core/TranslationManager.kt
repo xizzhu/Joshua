@@ -20,8 +20,8 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
+import me.xizzhu.android.logger.Log
 
 data class TranslationInfo(val shortName: String, val name: String, val language: String,
                            val size: Long, val downloaded: Boolean)
@@ -69,7 +69,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
                 try {
                     updateTranslations(translationRepository.readTranslationsFromLocal())
                 } catch (e: Exception) {
-                    Log.e(TAG, e, "Failed to initialize available translations")
+                    Log.e(TAG, "Failed to initialize available translations", e)
                     updateTranslations(emptyList())
                 }
             }
@@ -82,7 +82,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
                 try {
                     updateTranslations(translationRepository.readTranslationsFromLocal())
                 } catch (e: Exception) {
-                    Log.e(TAG, e, "Failed to initialize downloaded translations")
+                    Log.e(TAG, "Failed to initialize downloaded translations", e)
                     updateTranslations(emptyList())
                 }
             }

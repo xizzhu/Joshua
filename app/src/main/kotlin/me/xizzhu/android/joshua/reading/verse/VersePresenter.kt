@@ -31,12 +31,12 @@ import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItem
 import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.logger.Log
 import kotlin.properties.Delegates
 
 class VersePresenter(private val readingInteractor: ReadingInteractor)
@@ -143,7 +143,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             try {
                 readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to update chapter selection")
+                Log.e(tag, "Failed to update chapter selection", e)
                 view?.onChapterSelectionFailed(bookIndex, chapterIndex)
             }
         }
@@ -154,7 +154,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             try {
                 readingInteractor.saveCurrentVerseIndex(verseIndex)
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to save current verse")
+                Log.e(tag, "Failed to save current verse", e)
             }
         }
     }
@@ -179,7 +179,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                 }
                 view?.onVersesLoaded(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to load verses")
+                Log.e(tag, "Failed to load verses", e)
                 view?.onVersesLoadFailed(bookIndex, chapterIndex)
             }
         }

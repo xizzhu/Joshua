@@ -21,8 +21,8 @@ import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.bookmarks.BookmarksInteractor
 import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.logger.Log
 
 class ToolbarPresenter(private val bookmarksInteractor: BookmarksInteractor) : MVPPresenter<ToolbarView>() {
     override fun onViewAttached() {
@@ -38,7 +38,7 @@ class ToolbarPresenter(private val bookmarksInteractor: BookmarksInteractor) : M
             try {
                 bookmarksInteractor.saveBookmarksSortOrder(sortOrder)
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to update sort method")
+                Log.e(tag, "Failed to update sort method", e)
                 // TODO
             }
         }
