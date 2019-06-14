@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Migrated to use Logger library
 
 #### v0.5.1 (2019-06-10)
 - Improved color for selected verses and verse details in night mode

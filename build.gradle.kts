@@ -20,7 +20,7 @@ buildscript {
         mavenCentral()
         jcenter()
 
-        maven(uri("https://maven.fabric.io/public"))
+        maven("https://maven.fabric.io/public")
     }
     dependencies {
         classpath(Dependencies.Sdk.classpath)
@@ -36,5 +36,7 @@ allprojects {
         google()
         mavenCentral()
         jcenter()
+
+        maven("https://jitpack.io")
     }
 }

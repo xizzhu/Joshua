@@ -17,8 +17,8 @@
 package me.xizzhu.android.joshua.core.logger.android
 
 import com.crashlytics.android.Crashlytics
-import me.xizzhu.android.joshua.core.logger.Log
-import me.xizzhu.android.joshua.core.logger.Logger
+import me.xizzhu.android.logger.Log
+import me.xizzhu.android.logger.Logger
 
 class CrashlyticsLogger : Logger {
     private val crashlyticsCore by lazy { Crashlytics.getInstance().core }
@@ -29,7 +29,7 @@ class CrashlyticsLogger : Logger {
         }
     }
 
-    override fun log(@Log.Level level: Int, tag: String, e: Throwable, msg: String) {
+    override fun log(@Log.Level level: Int, tag: String, msg: String, e: Throwable) {
         crashlyticsCore.log(level, tag, msg)
         crashlyticsCore.logException(e)
     }

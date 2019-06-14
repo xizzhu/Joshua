@@ -127,6 +127,8 @@ dependencies {
     implementation(Dependencies.Retrofit.moshi)
     implementation(Dependencies.Retrofit.okio)
 
+    implementation(Dependencies.Logger.logger)
+
     debugImplementation(Dependencies.Stetho.stetho)
 
     testImplementation(Dependencies.Kotlin.test)

@@ -25,7 +25,6 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.notes.NotesInteractor
 import me.xizzhu.android.joshua.ui.formatDate
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -33,6 +32,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.logger.Log
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -67,7 +67,7 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
                 notesInteractor.notifyLoadingFinished()
                 view?.onNotesLoadingCompleted()
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to load notes")
+                Log.e(tag, "Failed to load notes", e)
                 view?.onNotesLoadFailed(sortOrder)
             }
         }
@@ -121,7 +121,7 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
             try {
                 notesInteractor.openReading(verseToSelect)
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to select verse and open reading activity")
+                Log.e(tag, "Failed to select verse and open reading activity", e)
                 view?.onVerseSelectionFailed(verseToSelect)
             }
         }

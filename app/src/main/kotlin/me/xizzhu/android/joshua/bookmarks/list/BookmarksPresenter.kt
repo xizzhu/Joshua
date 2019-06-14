@@ -26,13 +26,13 @@ import me.xizzhu.android.joshua.bookmarks.BookmarksInteractor
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.formatDate
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BookmarkItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.logger.Log
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -67,7 +67,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                 bookmarksInteractor.notifyLoadingFinished()
                 view?.onBookmarksLoadingCompleted()
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to load bookmarks")
+                Log.e(tag, "Failed to load bookmarks", e)
                 view?.onBookmarksLoadFailed(sortOrder)
             }
         }
@@ -122,7 +122,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
             try {
                 bookmarksInteractor.openReading(verseToSelect)
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to select verse and open reading activity")
+                Log.e(tag, "Failed to select verse and open reading activity", e)
                 view?.onVerseSelectionFailed(verseToSelect)
             }
         }

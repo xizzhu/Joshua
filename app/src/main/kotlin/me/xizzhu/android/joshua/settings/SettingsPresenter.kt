@@ -22,8 +22,8 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.App
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.logger.Log
 import kotlin.properties.Delegates
 
 class SettingsPresenter(private val app: App, private val settingsManager: SettingsManager) : MVPPresenter<SettingsView>() {
@@ -41,7 +41,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
             val version = app.packageManager.getPackageInfo(app.packageName, 0).versionName
             view?.onVersionLoaded(version)
         } catch (e: Exception) {
-            Log.e(tag, e, "Failed to load app version")
+            Log.e(tag, "Failed to load app version", e)
         }
     }
 
@@ -50,7 +50,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
             try {
                 settingsManager.saveSettings(settings)
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to save settings")
+                Log.e(tag, "Failed to save settings", e)
                 view?.onSettingsUpdateFailed(settings)
             }
         }

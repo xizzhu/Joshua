@@ -19,8 +19,8 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
+import me.xizzhu.android.logger.Log
 
 data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fontSizeScale: Int,
                     val simpleReadingModeOn: Boolean) {
@@ -42,7 +42,7 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
                 try {
                     currentSettings.send(settingsRepository.readSettings())
                 } catch (e: Exception) {
-                    Log.e(TAG, e, "Failed to initialize settings")
+                    Log.e(TAG, "Failed to initialize settings", e)
                     currentSettings.send(Settings.DEFAULT)
                 }
             }

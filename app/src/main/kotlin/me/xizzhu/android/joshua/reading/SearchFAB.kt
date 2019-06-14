@@ -24,17 +24,17 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.logger.Log
 
 class SearchButtonPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<SearchButtonView>() {
     fun openSearch() {
         try {
             readingInteractor.openSearch()
         } catch (e: Exception) {
-            Log.e(tag, e, "Failed to open search activity")
+            Log.e(tag, "Failed to open search activity", e)
             view?.onFailedToNavigateToSearch()
         }
     }

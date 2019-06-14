@@ -36,9 +36,9 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.logger.Log
 
 
 class ReadingInteractor(private val readingActivity: ReadingActivity,
@@ -165,7 +165,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
                     ClipData.newPlainText(verse.text.translationShortName + " " + verse.text.bookName, verses.toStringForSharing()))
             return true
         } catch (e: Exception) {
-            Log.e(TAG, e, "Failed to copy")
+            Log.e(TAG, "Failed to copy", e)
             return false
         }
     }
@@ -187,7 +187,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
                 true
             } ?: false
         } catch (e: Exception) {
-            Log.e(TAG, e, "Failed to share")
+            Log.e(TAG, "Failed to share", e)
             return false
         }
     }

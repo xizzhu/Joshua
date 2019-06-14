@@ -19,8 +19,8 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.NoteRepository
+import me.xizzhu.android.logger.Log
 
 data class Note(val verseIndex: VerseIndex, val note: String, val timestamp: Long) {
     fun isValid(): Boolean = timestamp > 0L
@@ -39,7 +39,7 @@ class NoteManager(private val noteRepository: NoteRepository) {
                 try {
                     notesSortOrder.send(noteRepository.readSortOrder())
                 } catch (e: Exception) {
-                    Log.e(TAG, e, "Failed to initialize note sort order")
+                    Log.e(TAG, "Failed to initialize note sort order", e)
                     notesSortOrder.send(Constants.DEFAULT_SORT_ORDER)
                 }
             }

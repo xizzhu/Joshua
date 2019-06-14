@@ -87,6 +87,8 @@ object Versions {
         const val okio = "2.2.2"
     }
 
+    const val logger = "0.1.0"
+
     const val stetho = "1.5.1"
 
     const val mockito = "2.28.2"
@@ -151,6 +153,10 @@ object Dependencies {
         const val okhttp3 = "com.squareup.okhttp3:okhttp:${Versions.Retrofit.okhttp}"
         const val moshi = "com.squareup.moshi:moshi:${Versions.Retrofit.moshi}"
         const val okio = "com.squareup.okio:okio:${Versions.Retrofit.okio}"
+    }
+
+    object Logger {
+        const val logger = "com.github.xizzhu:Logger:${Versions.logger}"
     }
 
     object Stetho {

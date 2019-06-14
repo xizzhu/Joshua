@@ -20,9 +20,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.notes.NotesInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.logger.Log
 
 class ToolbarPresenter(private val notesInteractor: NotesInteractor) : MVPPresenter<ToolbarView>() {
     override fun onViewAttached() {
@@ -38,7 +38,7 @@ class ToolbarPresenter(private val notesInteractor: NotesInteractor) : MVPPresen
             try {
                 notesInteractor.saveNotesSortOrder(sortOrder)
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to update sort method")
+                Log.e(tag, "Failed to update sort method")
                 // TODO
             }
         }

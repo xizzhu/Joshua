@@ -22,8 +22,8 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
+import me.xizzhu.android.logger.Log
 
 data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimestamp: Long,
                            val chapterReadingStatus: List<ChapterReadingStatus>) {
@@ -71,7 +71,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
             readingProgressRepository.trackReadingProgress(
                     verseIndex.bookIndex, verseIndex.chapterIndex, timeSpentInMillis, now)
         } catch (e: Exception) {
-            Log.e(TAG, e, "Failed to track reading progress")
+            Log.e(TAG, "Failed to track reading progress", e)
         }
     }
 

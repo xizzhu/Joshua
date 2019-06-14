@@ -19,8 +19,8 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.logger.Log
 
 data class VerseIndex(val bookIndex: Int, val chapterIndex: Int, val verseIndex: Int) {
     companion object {
@@ -75,7 +75,7 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
                 try {
                     currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
                 } catch (e: Exception) {
-                    Log.e(TAG, e, "Failed to initialize current verse index")
+                    Log.e(TAG, "Failed to initialize current verse index", e)
                     currentVerseIndex.send(VerseIndex.INVALID)
                 }
             }
@@ -93,7 +93,7 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
                 try {
                     currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
                 } catch (e: Exception) {
-                    Log.e(TAG, e, "Failed to initialize current translation")
+                    Log.e(TAG, "Failed to initialize current translation", e)
                     currentTranslationShortName.send("")
                 }
             }

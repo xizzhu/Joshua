@@ -21,9 +21,9 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.logger.Log
 
 class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ChapterView>() {
     override fun onViewAttached() {
@@ -44,7 +44,7 @@ class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : M
             try {
                 readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to select chapter")
+                Log.e(tag, "Failed to select chapter", e)
                 view?.onChapterSelectionFailed(bookIndex, chapterIndex)
             }
         }

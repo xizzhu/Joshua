@@ -23,7 +23,7 @@ import dagger.android.AndroidInjection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import me.xizzhu.android.joshua.core.logger.Log
+import me.xizzhu.android.logger.Log
 
 abstract class BaseActivity : AppCompatActivity(), CoroutineScope by CoroutineScope(Dispatchers.Main) {
     protected val tag: String = javaClass.simpleName

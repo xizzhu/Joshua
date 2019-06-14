@@ -18,9 +18,9 @@ package me.xizzhu.android.joshua.progress
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.ui.recyclerview.toReadingProgressItems
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.logger.Log
 
 class ReadingProgressPresenter(private val readingProgressInteractor: ReadingProgressInteractor)
     : BaseSettingsPresenter<ReadingProgressView>(readingProgressInteractor) {
@@ -40,7 +40,7 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
 
                 readingProgressInteractor.notifyLoadingFinished()
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to load reading progress")
+                Log.e(tag, "Failed to load reading progress")
                 view?.onReadingProgressLoadFailed()
             }
         }

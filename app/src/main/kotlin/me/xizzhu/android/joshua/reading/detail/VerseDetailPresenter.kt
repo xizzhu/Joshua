@@ -22,10 +22,10 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.logger.Log
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.ui.recyclerview.VerseTextItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.logger.Log
 
 class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     : BaseSettingsPresenter<VerseDetailView>(readingInteractor) {
@@ -82,7 +82,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
                 view?.onVerseDetailLoaded(verseDetail)
             } catch (e: Exception) {
-                Log.e(tag, e, "Failed to load verse detail")
+                Log.e(tag, "Failed to load verse detail", e)
                 view?.onVerseDetailLoadFailed(verseIndex)
             }
         }
@@ -97,7 +97,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                     readingInteractor.closeVerseDetail()
                 }
             } catch (e: Exception) {
-                Log.e(TAG, e, "Failed to select translation")
+                Log.e(TAG, "Failed to select translation", e)
                 view?.onVerseTextClickFailed()
             }
         }
