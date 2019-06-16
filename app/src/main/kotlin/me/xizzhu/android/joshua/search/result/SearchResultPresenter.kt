@@ -22,12 +22,8 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
-import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.ui.recyclerview.SearchItem
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
-import java.util.ArrayList
 
 class SearchResultPresenter(private val searchInteractor: SearchInteractor)
     : BaseSettingsPresenter<SearchResultView>(searchInteractor) {
@@ -36,17 +32,7 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
 
         launch(Dispatchers.Main) {
             searchInteractor.observeSearchResult().consumeEach { (query, verses) ->
-                val items = ArrayList<BaseItem>()
-                var currentBookIndex = -1
-                verses.forEach { verse ->
-                    if (currentBookIndex != verse.verseIndex.bookIndex) {
-                        items.add(TitleItem(verse.text.bookName))
-                        currentBookIndex = verse.verseIndex.bookIndex
-                    }
-                    items.add(SearchItem(verse.verseIndex, verse.text.bookName,
-                            verse.text.text, query, this@SearchResultPresenter::selectVerse))
-                }
-                view?.onSearchResultUpdated(items)
+                view?.onSearchResultUpdated(verses.toSearchResult(query, this@SearchResultPresenter::selectVerse))
             }
         }
         launch(Dispatchers.Main) {

@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Fixed search result count
 - Migrated to use Logger library
 
 #### v0.5.1 (2019-06-10)
