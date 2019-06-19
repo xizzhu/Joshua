@@ -26,7 +26,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface ReadingProgressView : BaseSettingsView {
-    fun onReadingProgressLoaded(readingProgressItems: List<BaseItem>)
+    fun onReadingProgressLoaded(items: List<BaseItem>)
 
     fun onReadingProgressLoadFailed()
 }
@@ -44,8 +44,8 @@ class ReadingProgressListView : BaseRecyclerView, ReadingProgressView {
         this.presenter = presenter
     }
 
-    override fun onReadingProgressLoaded(readingProgressItems: List<BaseItem>) {
-        setItems(readingProgressItems)
+    override fun onReadingProgressLoaded(items: List<BaseItem>) {
+        setItems(items)
     }
 
     override fun onReadingProgressLoadFailed() {

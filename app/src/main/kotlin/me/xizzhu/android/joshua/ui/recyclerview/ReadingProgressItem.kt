@@ -17,13 +17,15 @@
 package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.progress.ReadingProgressBar
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class ReadingProgressSummaryItem(val continuousReadingDays: Int, val chaptersRead: Int,
@@ -66,22 +68,60 @@ class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: Vie
 }
 
 data class ReadingProgressDetailItem(val bookName: String, val chaptersRead: Int,
-                                     val chaptersCount: Int) : BaseItem {
+                                     val chapterCount: Int) : BaseItem {
     override fun getItemViewType(): Int = BaseItem.READING_PROGRESS_DETAIL_ITEM
 }
 
-class ReadingProgressDetailItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressDetailItem>(inflater.inflate(R.layout.item_reading_progress, parent, false)) {
+    companion object {
+        private const val ROW_CHILD_COUNT = 5
+    }
+
+    private val resources = itemView.resources
     private val bookName: TextView = itemView.findViewById(R.id.book_name)
-    private val readingProgressBar: ReadingProgressBar = itemView.findViewById(R.id.reading_progress_bar)
+    private val chapters: LinearLayout = itemView.findViewById(R.id.chapters)
+
+    private val onClickListener: View.OnClickListener = View.OnClickListener { v ->
+        // TODO
+    }
 
     override fun bind(settings: Settings, item: ReadingProgressDetailItem, payloads: List<Any>) {
         with(bookName) {
             updateSettingsWithPrimaryText(settings)
             text = item.bookName
         }
-        readingProgressBar.progress = item.chaptersRead * readingProgressBar.maxProgress / item.chaptersCount
-        readingProgressBar.text = "${item.chaptersRead} / ${item.chaptersCount}"
+
+        val rowCount = item.chapterCount / ROW_CHILD_COUNT + if (item.chapterCount % ROW_CHILD_COUNT == 0) 0 else 1
+        with(chapters) {
+            if (childCount > rowCount) {
+                removeViews(rowCount, childCount - rowCount)
+            }
+            repeat(rowCount - childCount) {
+                (inflater.inflate(R.layout.row_reading_progress_chapters, this, false) as LinearLayout).also {
+                    addView(it)
+                    for (i in 0 until it.childCount) {
+                        it.getChildAt(i).setOnClickListener(onClickListener)
+                    }
+                }
+            }
+
+            for (i in 0 until rowCount) {
+                val row = chapters.getChildAt(i) as LinearLayout
+                for (j in 0 until ROW_CHILD_COUNT) {
+                    val chapter = i * ROW_CHILD_COUNT + j
+                    with(row.getChildAt(j) as TextView) {
+                        if (chapter >= item.chapterCount) {
+                            visibility = View.GONE
+                        } else {
+                            visibility = View.VISIBLE
+                            text = (chapter + 1).toString()
+                            setTextColor(settings.getPrimaryTextColor(this@ReadingProgressDetailItemViewHolder.resources))
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
