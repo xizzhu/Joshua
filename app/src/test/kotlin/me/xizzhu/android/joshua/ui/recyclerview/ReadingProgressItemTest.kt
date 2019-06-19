@@ -27,7 +27,7 @@ class ReadingProgressItemTest : BaseUnitTest() {
     fun testItemViewType() {
         assertEquals(BaseItem.READING_PROGRESS_SUMMARY_ITEM,
                 ReadingProgressSummaryItem(0, 0, 0, 0, 0).getItemViewType())
-        assertEquals(BaseItem.READING_PROGRESS_DETAIL_ITEM, ReadingProgressDetailItem("", 0, 0).getItemViewType())
+        assertEquals(BaseItem.READING_PROGRESS_DETAIL_ITEM, ReadingProgressDetailItem("", emptyArray(), 0).getItemViewType())
     }
 
     @Test
@@ -57,22 +57,22 @@ class ReadingProgressItemTest : BaseUnitTest() {
 
             when (i - 1) {
                 0 -> {
-                    assertEquals(2, (item as ReadingProgressDetailItem).chaptersRead)
+                    assertEquals(2, (item as ReadingProgressDetailItem).chaptersReadCount)
                 }
                 2 -> {
-                    assertEquals(1, (item as ReadingProgressDetailItem).chaptersRead)
+                    assertEquals(1, (item as ReadingProgressDetailItem).chaptersReadCount)
                 }
                 7 -> {
-                    assertEquals(4, (item as ReadingProgressDetailItem).chaptersRead)
+                    assertEquals(4, (item as ReadingProgressDetailItem).chaptersReadCount)
                 }
                 63 -> {
-                    assertEquals(1, (item as ReadingProgressDetailItem).chaptersRead)
+                    assertEquals(1, (item as ReadingProgressDetailItem).chaptersReadCount)
                 }
                 64 -> {
-                    assertEquals(1, (item as ReadingProgressDetailItem).chaptersRead)
+                    assertEquals(1, (item as ReadingProgressDetailItem).chaptersReadCount)
                 }
                 else -> {
-                    assertEquals(0, (item as ReadingProgressDetailItem).chaptersRead)
+                    assertEquals(0, (item as ReadingProgressDetailItem).chaptersReadCount)
                 }
             }
         }
