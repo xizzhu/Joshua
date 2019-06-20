@@ -23,6 +23,7 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.ContextCompat
 import me.xizzhu.android.joshua.R
 import kotlin.math.roundToInt
 
@@ -60,8 +61,8 @@ class ReadingProgressBar : View {
     init {
         val resources = context.resources
         backGroundPaint.color = Color.LTGRAY
-        progressPaint.color = resources.getColor(R.color.dark_cyan)
-        fullProgressPaint.color = resources.getColor(R.color.dark_lime);
+        progressPaint.color = ContextCompat.getColor(context, R.color.dark_cyan)
+        fullProgressPaint.color = ContextCompat.getColor(context, R.color.dark_lime)
         textPaint.isAntiAlias = true
         textPaint.color = Color.BLACK
         textPaint.textAlign = Paint.Align.RIGHT
@@ -71,17 +72,17 @@ class ReadingProgressBar : View {
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val heightSpecMode = View.MeasureSpec.getMode(heightMeasureSpec)
-        if (View.MeasureSpec.getMode(widthMeasureSpec) != View.MeasureSpec.EXACTLY
-                || (heightSpecMode != View.MeasureSpec.AT_MOST && heightSpecMode != View.MeasureSpec.UNSPECIFIED)) {
+        val heightSpecMode = MeasureSpec.getMode(heightMeasureSpec)
+        if (MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.EXACTLY
+                || (heightSpecMode != MeasureSpec.AT_MOST && heightSpecMode != MeasureSpec.UNSPECIFIED)) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
             return
         }
 
         // we only use match_parent for width, and wrap_content for height
         val height = textPaint.textSize.roundToInt() + 2 * textPadding
-        setMeasuredDimension(View.MeasureSpec.getSize(widthMeasureSpec),
-                if (heightSpecMode == View.MeasureSpec.UNSPECIFIED) height else Math.min(height, View.MeasureSpec.getSize(heightMeasureSpec)))
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec),
+                if (heightSpecMode == MeasureSpec.UNSPECIFIED) height else Math.min(height, MeasureSpec.getSize(heightMeasureSpec)))
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -94,14 +95,14 @@ class ReadingProgressBar : View {
         val right = width - paddingRight
         val height = height.toFloat()
         val bottom = height - paddingBottom
-        if (progress <= 0) {
-            canvas.drawRect(paddingLeft, paddingTop, right, bottom, backGroundPaint);
-        } else if (progress >= maxProgress) {
-            canvas.drawRect(paddingLeft, paddingTop, right, bottom, fullProgressPaint);
-        } else {
-            val middle = progress * (width - paddingLeft - paddingRight) / maxProgress;
-            canvas.drawRect(paddingLeft, paddingTop, middle, bottom, progressPaint);
-            canvas.drawRect(middle, paddingTop, right, bottom, backGroundPaint);
+        when {
+            progress <= 0 -> canvas.drawRect(paddingLeft, paddingTop, right, bottom, backGroundPaint)
+            progress >= maxProgress -> canvas.drawRect(paddingLeft, paddingTop, right, bottom, fullProgressPaint)
+            else -> {
+                val middle = progress * (width - paddingLeft - paddingRight) / maxProgress
+                canvas.drawRect(paddingLeft, paddingTop, middle, bottom, progressPaint)
+                canvas.drawRect(middle, paddingTop, right, bottom, backGroundPaint)
+            }
         }
 
         canvas.drawText(text, width - textPadding, height - textPadding, textPaint)
