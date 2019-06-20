@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.progress.ReadingProgressBar
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
@@ -81,8 +82,9 @@ class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, 
     }
 
     private val resources = itemView.resources
-    private val chapterReadColor = ContextCompat.getColor(itemView.context, R.color.accent)
+    private val chapterReadColor = ContextCompat.getColor(itemView.context, R.color.dark_lime)
     private val bookName: TextView = itemView.findViewById(R.id.book_name)
+    private val readingProgressBar: ReadingProgressBar = itemView.findViewById(R.id.reading_progress_bar)
     private val chapters: LinearLayout = itemView.findViewById(R.id.chapters)
 
     private val onClickListener: View.OnClickListener = View.OnClickListener { v ->
@@ -93,6 +95,11 @@ class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, 
         with(bookName) {
             updateSettingsWithPrimaryText(settings)
             text = item.bookName
+        }
+
+        with(readingProgressBar) {
+            progress = item.chaptersReadCount * maxProgress / item.chaptersRead.size
+            text = "${item.chaptersReadCount} / ${item.chaptersRead.size}"
         }
 
         val rowCount = item.chaptersRead.size / ROW_CHILD_COUNT + if (item.chaptersRead.size % ROW_CHILD_COUNT == 0) 0 else 1

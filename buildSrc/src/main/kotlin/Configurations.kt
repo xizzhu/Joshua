@@ -55,6 +55,7 @@ object Versions {
     object AndroidX {
         const val annotation = "1.1.0"
         const val appCompat = "1.0.2"
+        const val constraintLayout = "1.1.3"
         const val coordinatorLayout = "1.0.0"
         const val drawerLayout = "1.0.0"
         const val material = "1.0.0"
@@ -114,6 +115,7 @@ object Dependencies {
     object AndroidX {
         const val annotation = "androidx.annotation:annotation:${Versions.AndroidX.annotation}"
         const val appCompat = "androidx.appcompat:appcompat:${Versions.AndroidX.appCompat}"
+        const val constraintLayout = "androidx.constraintlayout:constraintlayout:${Versions.AndroidX.constraintLayout}"
         const val coordinatorLayout = "androidx.coordinatorlayout:coordinatorlayout:${Versions.AndroidX.coordinatorLayout}"
         const val drawerLayout = "androidx.drawerlayout:drawerlayout:${Versions.AndroidX.drawerLayout}"
         const val material = "com.google.android.material:material:${Versions.AndroidX.material}"

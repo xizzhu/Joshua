@@ -1,24 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:paddingStart="@dimen/padding"
     android:paddingTop="@dimen/padding_small"
     android:paddingEnd="@dimen/padding"
     android:paddingBottom="@dimen/padding_small">
 
-    <TextView
-        android:id="@+id/book_name"
-        style="@style/Text.Body"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical" />
+    <me.xizzhu.android.joshua.progress.ReadingProgressBar
+        android:id="@+id/reading_progress_bar"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/chapters"
         android:layout_width="240dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical" />
-</LinearLayout>
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/reading_progress_bar" />
+
+    <TextView
+        android:id="@+id/book_name"
+        style="@style/Text.Body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        app:layout_constraintBottom_toBottomOf="@id/reading_progress_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/reading_progress_bar"
+        tools:text="Genesis" />
+</androidx.constraintlayout.widget.ConstraintLayout>
