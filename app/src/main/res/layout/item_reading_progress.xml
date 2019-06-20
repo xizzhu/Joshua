@@ -3,25 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingStart="@dimen/padding"
-    android:paddingTop="@dimen/padding_small"
-    android:paddingEnd="@dimen/padding"
-    android:paddingBottom="@dimen/padding_small">
+    android:layout_height="wrap_content">
+
+    <View
+        android:id="@+id/divider"
+        style="@style/Divider.Horizontal"
+        android:background="@color/dark_gray"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <me.xizzhu.android.joshua.progress.ReadingProgressBar
         android:id="@+id/reading_progress_bar"
         android:layout_width="240dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_small"
+        android:layout_marginEnd="@dimen/padding"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/divider" />
 
     <LinearLayout
         android:id="@+id/chapters"
         android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/reading_progress_bar"
         app:layout_constraintTop_toBottomOf="@id/reading_progress_bar" />
 
     <TextView
@@ -29,7 +34,7 @@
         style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:layout_marginStart="@dimen/padding"
         app:layout_constraintBottom_toBottomOf="@id/reading_progress_bar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/reading_progress_bar"
