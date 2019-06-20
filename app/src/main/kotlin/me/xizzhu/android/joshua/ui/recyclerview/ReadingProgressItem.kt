@@ -70,8 +70,9 @@ class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: Vie
     }
 }
 
-data class ReadingProgressDetailItem(val bookName: String, val chaptersRead: Array<Boolean>,
-                                     val chaptersReadCount: Int) : BaseItem {
+data class ReadingProgressDetailItem(val bookName: String, val bookIndex: Int,
+                                     val chaptersRead: Array<Boolean>, val chaptersReadCount: Int,
+                                     val onChapterClicked: (Int, Int) -> Unit) : BaseItem {
     override fun getItemViewType(): Int = BaseItem.READING_PROGRESS_DETAIL_ITEM
 }
 
@@ -88,7 +89,7 @@ class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, 
     private val chapters: LinearLayout = itemView.findViewById(R.id.chapters)
 
     private val onClickListener: View.OnClickListener = View.OnClickListener { v ->
-        // TODO
+        item?.let { it.onChapterClicked(it.bookIndex, v.tag as Int) }
     }
 
     override fun bind(settings: Settings, item: ReadingProgressDetailItem, payloads: List<Any>) {
@@ -125,6 +126,7 @@ class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, 
                             visibility = View.GONE
                         } else {
                             visibility = View.VISIBLE
+                            tag = chapter
                             text = (chapter + 1).toString()
                             if (item.chaptersRead[chapter]) {
                                 setTextColor(chapterReadColor)
@@ -141,7 +143,7 @@ class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, 
     }
 }
 
-fun ReadingProgress.toReadingProgressItems(bookNames: List<String>): List<BaseItem> {
+fun ReadingProgress.toReadingProgressItems(bookNames: List<String>, onChapterClicked: (Int, Int) -> Unit): List<BaseItem> {
     var totalChaptersRead = 0
     val chaptersReadPerBook = Array(Bible.BOOK_COUNT) { i -> Array(Bible.getChapterCount(i)) { false } }
     val chaptersReadCountPerBook = Array(Bible.BOOK_COUNT) { 0 }
@@ -165,7 +167,8 @@ fun ReadingProgress.toReadingProgressItems(bookNames: List<String>): List<BaseIt
                 ++finishedNewTestament
             }
         }
-        detailItems.add(ReadingProgressDetailItem(bookNames[bookIndex], chaptersRead, chaptersReadCount))
+        detailItems.add(ReadingProgressDetailItem(
+                bookNames[bookIndex], bookIndex, chaptersRead, chaptersReadCount, onChapterClicked))
     }
     return mutableListOf<BaseItem>(ReadingProgressSummaryItem(continuousReadingDays, totalChaptersRead, finishedBooks,
             finishedOldTestament, finishedNewTestament)).apply { addAll(detailItems) }

@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.progress
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.recyclerview.toReadingProgressItems
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
@@ -35,13 +36,24 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
                 val currentTranslation = readingProgressInteractor.readCurrentTranslation()
                 val bookNames = readingProgressInteractor.readBookNames(currentTranslation)
                 val readingProgress = readingProgressInteractor.readReadingProgress()
-                        .toReadingProgressItems(bookNames)
+                        .toReadingProgressItems(bookNames, this@ReadingProgressPresenter::openChapter)
                 view?.onReadingProgressLoaded(readingProgress)
 
                 readingProgressInteractor.notifyLoadingFinished()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load reading progress")
                 view?.onReadingProgressLoadFailed()
+            }
+        }
+    }
+
+    fun openChapter(bookIndex: Int, chapterIndex: Int) {
+        launch(Dispatchers.Main) {
+            try {
+                readingProgressInteractor.openChapter(VerseIndex(bookIndex, chapterIndex, 0))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to open chapter for reading", e)
+                // TODO
             }
         }
     }

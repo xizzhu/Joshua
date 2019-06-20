@@ -27,7 +27,7 @@ class ReadingProgressItemTest : BaseUnitTest() {
     fun testItemViewType() {
         assertEquals(BaseItem.READING_PROGRESS_SUMMARY_ITEM,
                 ReadingProgressSummaryItem(0, 0, 0, 0, 0).getItemViewType())
-        assertEquals(BaseItem.READING_PROGRESS_DETAIL_ITEM, ReadingProgressDetailItem("", emptyArray(), 0).getItemViewType())
+        assertEquals(BaseItem.READING_PROGRESS_DETAIL_ITEM, ReadingProgressDetailItem("", 0, emptyArray(), 0) { _, _ -> }.getItemViewType())
     }
 
     @Test
@@ -42,7 +42,7 @@ class ReadingProgressItemTest : BaseUnitTest() {
                         ReadingProgress.ChapterReadingStatus(7, 3, 4, 700L, 23458L),
                         ReadingProgress.ChapterReadingStatus(63, 0, 1, 700L, 23458L),
                         ReadingProgress.ChapterReadingStatus(64, 0, 1, 700L, 23458L)))
-        val actual = readingProgress.toReadingProgressItems(Array(Bible.BOOK_COUNT) { "" }.toList())
+        val actual = readingProgress.toReadingProgressItems(Array(Bible.BOOK_COUNT) { "" }.toList()) { _, _ -> }
 
         val actualSummaryItem = actual[0] as ReadingProgressSummaryItem
         assertEquals(1, actualSummaryItem.continuousReadingDays)
