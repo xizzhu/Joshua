@@ -27,7 +27,7 @@ class ReadingProgressItemTest : BaseUnitTest() {
     fun testItemViewType() {
         assertEquals(BaseItem.READING_PROGRESS_SUMMARY_ITEM,
                 ReadingProgressSummaryItem(0, 0, 0, 0, 0).getItemViewType())
-        assertEquals(BaseItem.READING_PROGRESS_DETAIL_ITEM, ReadingProgressDetailItem("", 0, emptyArray(), 0) { _, _ -> }.getItemViewType())
+        assertEquals(BaseItem.READING_PROGRESS_DETAIL_ITEM, ReadingProgressDetailItem("", 0, emptyArray(), 0, { _, _ -> }).getItemViewType())
     }
 
     @Test
