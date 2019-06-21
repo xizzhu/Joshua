@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Show per-chapter reading status in reading progress
 - Fixed search result count
 - Migrated to use Logger library
 - Updated dependencies:
