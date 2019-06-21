@@ -7,6 +7,8 @@ CHANGELOG
 - Migrated to use Logger library
 - Updated dependencies:
   - Firebase Analytics and Core to 17.0.0
+  - Kotlin to 1.3.40
+  - Dagger to 2.23.2
 
 #### v0.5.1 (2019-06-10)
 - Improved color for selected verses and verse details in night mode
