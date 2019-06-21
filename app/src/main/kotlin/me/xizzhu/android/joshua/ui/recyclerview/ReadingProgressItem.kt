@@ -72,8 +72,9 @@ class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: Vie
 
 data class ReadingProgressDetailItem(val bookName: String, val bookIndex: Int,
                                      val chaptersRead: Array<Boolean>, val chaptersReadCount: Int,
+                                     val onBookClicked: (Int, Boolean) -> Unit,
                                      val onChapterClicked: (Int, Int) -> Unit,
-                                     var expanded: Boolean = bookIndex == 0) : BaseItem {
+                                     var expanded: Boolean) : BaseItem {
     override fun getItemViewType(): Int = BaseItem.READING_PROGRESS_DETAIL_ITEM
 }
 
@@ -105,6 +106,7 @@ class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, 
                     showChapters(settings, it)
                     it.expanded = true
                 }
+                it.onBookClicked(it.bookIndex, it.expanded)
             }
         }
     }
@@ -172,7 +174,10 @@ class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, 
     }
 }
 
-fun ReadingProgress.toReadingProgressItems(bookNames: List<String>, onChapterClicked: (Int, Int) -> Unit): List<BaseItem> {
+fun ReadingProgress.toReadingProgressItems(bookNames: List<String>,
+                                           expanded: Array<Boolean>,
+                                           onBookClicked: (Int, Boolean) -> Unit,
+                                           onChapterClicked: (Int, Int) -> Unit): List<BaseItem> {
     var totalChaptersRead = 0
     val chaptersReadPerBook = Array(Bible.BOOK_COUNT) { i -> Array(Bible.getChapterCount(i)) { false } }
     val chaptersReadCountPerBook = Array(Bible.BOOK_COUNT) { 0 }
@@ -196,8 +201,8 @@ fun ReadingProgress.toReadingProgressItems(bookNames: List<String>, onChapterCli
                 ++finishedNewTestament
             }
         }
-        detailItems.add(ReadingProgressDetailItem(
-                bookNames[bookIndex], bookIndex, chaptersRead, chaptersReadCount, onChapterClicked))
+        detailItems.add(ReadingProgressDetailItem(bookNames[bookIndex], bookIndex, chaptersRead,
+                chaptersReadCount, onBookClicked, onChapterClicked, expanded[bookIndex]))
     }
     return mutableListOf<BaseItem>(ReadingProgressSummaryItem(continuousReadingDays, totalChaptersRead, finishedBooks,
             finishedOldTestament, finishedNewTestament)).apply { addAll(detailItems) }
