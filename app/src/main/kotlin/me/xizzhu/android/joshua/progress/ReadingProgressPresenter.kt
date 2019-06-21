@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.progress
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -47,6 +48,7 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
         }
     }
 
+    @VisibleForTesting
     fun openChapter(bookIndex: Int, chapterIndex: Int) {
         launch(Dispatchers.Main) {
             try {

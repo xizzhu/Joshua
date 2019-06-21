@@ -22,6 +22,7 @@ import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Before
@@ -77,6 +78,25 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
             verify(view, times(1)).onReadingProgressLoadFailed()
 
             presenter.detachView()
+        }
+    }
+
+    @Test
+    fun testOpenChapter() {
+        runBlocking {
+            presenter.openChapter(1, 2)
+            verify(readingProgressInteractor, times(1)).openChapter(VerseIndex(1, 2, 0))
+        }
+    }
+
+    @Test
+    fun testOpenChapterWithException() {
+        runBlocking {
+            `when`(readingProgressInteractor.openChapter(VerseIndex(1, 2, 0)))
+                    .thenThrow(RuntimeException("Random exception"))
+
+            presenter.openChapter(1, 2)
+            verify(readingProgressInteractor, times(1)).openChapter(VerseIndex(1, 2, 0))
         }
     }
 }
