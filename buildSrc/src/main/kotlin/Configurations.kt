@@ -25,7 +25,7 @@ object Configurations {
 
 object Versions {
     object App {
-        const val code = 501
+        const val code = 600
         val name: String by lazy {
             "${code / 10000}.${(code % 10000) / 100}.${code % 100} " +
                     "(${LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))})"
