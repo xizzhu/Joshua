@@ -72,7 +72,8 @@ class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: Vie
 
 data class ReadingProgressDetailItem(val bookName: String, val bookIndex: Int,
                                      val chaptersRead: Array<Boolean>, val chaptersReadCount: Int,
-                                     val onChapterClicked: (Int, Int) -> Unit) : BaseItem {
+                                     val onChapterClicked: (Int, Int) -> Unit,
+                                     var expanded: Boolean = bookIndex == 0) : BaseItem {
     override fun getItemViewType(): Int = BaseItem.READING_PROGRESS_DETAIL_ITEM
 }
 
@@ -92,7 +93,25 @@ class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, 
         item?.let { it.onChapterClicked(it.bookIndex, v.tag as Int) }
     }
 
+    private lateinit var settings: Settings
+
+    init {
+        itemView.setOnClickListener {
+            item?.let {
+                if (it.expanded) {
+                    chapters.visibility = View.GONE
+                    it.expanded = false
+                } else {
+                    showChapters(settings, it)
+                    it.expanded = true
+                }
+            }
+        }
+    }
+
     override fun bind(settings: Settings, item: ReadingProgressDetailItem, payloads: List<Any>) {
+        this.settings = settings
+
         with(bookName) {
             updateSettingsWithPrimaryText(settings)
             text = item.bookName
@@ -103,6 +122,14 @@ class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, 
             text = "${item.chaptersReadCount} / ${item.chaptersRead.size}"
         }
 
+        if (item.expanded) {
+            showChapters(settings, item)
+        } else {
+            chapters.visibility = View.GONE
+        }
+    }
+
+    private fun showChapters(settings: Settings, item: ReadingProgressDetailItem) {
         val rowCount = item.chaptersRead.size / ROW_CHILD_COUNT + if (item.chaptersRead.size % ROW_CHILD_COUNT == 0) 0 else 1
         with(chapters) {
             if (childCount > rowCount) {
@@ -139,6 +166,8 @@ class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, 
                     }
                 }
             }
+
+            visibility = View.VISIBLE
         }
     }
 }
