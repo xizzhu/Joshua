@@ -105,6 +105,7 @@ dependencies {
 
     implementation(Dependencies.AndroidX.annotation)
     implementation(Dependencies.AndroidX.appCompat)
+    implementation(Dependencies.AndroidX.constraintLayout)
     implementation(Dependencies.AndroidX.coordinatorLayout)
     implementation(Dependencies.AndroidX.drawerLayout)
     implementation(Dependencies.AndroidX.material)

@@ -129,13 +129,12 @@ class ChapterListView : ExpandableListView, ChapterView,
     }
 }
 
-private data class ViewTag(val textViews: Array<TextView>)
 private data class ChapterTag(var bookIndex: Int, var chapterIndex: Int)
 
 private class ChapterListAdapter(context: Context, private val onClickListener: View.OnClickListener)
     : BaseExpandableListAdapter() {
     companion object {
-        const val ROW_CHILD_COUNT = 5
+        private const val ROW_CHILD_COUNT = 5
     }
 
     private val inflater = LayoutInflater.from(context)
@@ -181,27 +180,23 @@ private class ChapterListAdapter(context: Context, private val onClickListener: 
 
     override fun getChildView(groupPosition: Int, childPosition: Int, isLastChild: Boolean, convertView: View?, parent: ViewGroup?): View {
         val linearLayout: LinearLayout
-        val viewTag: ViewTag
         if (convertView == null) {
-            linearLayout = inflater.inflate(R.layout.item_chapter_row, parent, false) as LinearLayout
-
-            val textViews = Array(ROW_CHILD_COUNT) {
-                return@Array (linearLayout.getChildAt(it) as TextView).apply {
-                    setOnClickListener(onClickListener)
-                    tag = ChapterTag(-1, -1)
+            linearLayout = (inflater.inflate(R.layout.item_chapter_row, parent, false) as LinearLayout).apply {
+                for (i in 0 until childCount) {
+                    with(getChildAt(i)) {
+                        setOnClickListener(onClickListener)
+                        tag = ChapterTag(-1, -1)
+                    }
                 }
             }
-            viewTag = ViewTag(textViews)
-            linearLayout.tag = viewTag
         } else {
             linearLayout = convertView as LinearLayout
-            viewTag = linearLayout.tag as ViewTag
         }
 
         val chapterCount = Bible.getChapterCount(groupPosition)
         for (i in 0 until ROW_CHILD_COUNT) {
             val chapter = childPosition * ROW_CHILD_COUNT + i
-            with(viewTag.textViews[i]) {
+            with(linearLayout.getChildAt(i) as TextView) {
                 if (chapter >= chapterCount) {
                     visibility = View.GONE
                 } else {

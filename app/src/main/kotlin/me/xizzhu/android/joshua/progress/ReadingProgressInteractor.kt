@@ -20,15 +20,15 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.first
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.ReadingProgress
-import me.xizzhu.android.joshua.core.ReadingProgressManager
-import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 
-class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager,
+class ReadingProgressInteractor(private val readingProgressActivity: ReadingProgressActivity,
+                                private val readingProgressManager: ReadingProgressManager,
                                 private val bibleReadingManager: BibleReadingManager,
+                                private val navigator: Navigator,
                                 settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
     private val readingProgressLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
 
@@ -44,4 +44,9 @@ class ReadingProgressInteractor(private val readingProgressManager: ReadingProgr
     suspend fun readBookNames(translationShortName: String): List<String> = bibleReadingManager.readBookNames(translationShortName)
 
     suspend fun readReadingProgress(): ReadingProgress = readingProgressManager.readReadingProgress()
+
+    suspend fun openChapter(verseIndex: VerseIndex) {
+        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
+        navigator.navigate(readingProgressActivity, Navigator.SCREEN_READING)
+    }
 }

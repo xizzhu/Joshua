@@ -16,14 +16,19 @@
 
 package me.xizzhu.android.joshua.progress
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.recyclerview.toReadingProgressItems
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
 
 class ReadingProgressPresenter(private val readingProgressInteractor: ReadingProgressInteractor)
     : BaseSettingsPresenter<ReadingProgressView>(readingProgressInteractor) {
+    private val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
+
     override fun onViewAttached() {
         super.onViewAttached()
         loadReadingProgress()
@@ -35,7 +40,9 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
                 val currentTranslation = readingProgressInteractor.readCurrentTranslation()
                 val bookNames = readingProgressInteractor.readBookNames(currentTranslation)
                 val readingProgress = readingProgressInteractor.readReadingProgress()
-                        .toReadingProgressItems(bookNames)
+                        .toReadingProgressItems(bookNames, expanded,
+                                this@ReadingProgressPresenter::onBookClicked,
+                                this@ReadingProgressPresenter::openChapter)
                 view?.onReadingProgressLoaded(readingProgress)
 
                 readingProgressInteractor.notifyLoadingFinished()
@@ -44,5 +51,21 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
                 view?.onReadingProgressLoadFailed()
             }
         }
+    }
+
+    @VisibleForTesting
+    fun openChapter(bookIndex: Int, chapterIndex: Int) {
+        launch(Dispatchers.Main) {
+            try {
+                readingProgressInteractor.openChapter(VerseIndex(bookIndex, chapterIndex, 0))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to open chapter for reading", e)
+                // TODO
+            }
+        }
+    }
+
+    private fun onBookClicked(bookIndex: Int, expanded: Boolean) {
+        this.expanded[bookIndex] = expanded
     }
 }
