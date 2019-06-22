@@ -28,18 +28,18 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentTranslation().filter { it.isNotEmpty() }
                     .consumeEach {
                         view?.onCurrentTranslationUpdated(it)
                         view?.onBookShortNamesUpdated(readingInteractor.readBookShortNames(it))
                     }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
                     .consumeEach { view?.onCurrentVerseIndexUpdated(it) }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeDownloadedTranslations().consumeEach {
                 if (it.isEmpty()) {
                     view?.onNoTranslationsDownloaded()
@@ -48,13 +48,13 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
                 }
             }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeParallelTranslations().consumeEach { view?.onParallelTranslationsUpdated(it) }
         }
     }
 
     fun updateCurrentTranslation(translationShortName: String) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 readingInteractor.saveCurrentTranslation(translationShortName)
                 try {
@@ -70,11 +70,11 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
     }
 
     fun requestParallelTranslation(translationShortName: String) {
-        launch(Dispatchers.Main) { readingInteractor.requestParallelTranslation(translationShortName) }
+        coroutineScope.launch(Dispatchers.Main) { readingInteractor.requestParallelTranslation(translationShortName) }
     }
 
     fun removeParallelTranslation(translationShortName: String) {
-        launch(Dispatchers.Main) { readingInteractor.removeParallelTranslation(translationShortName) }
+        coroutineScope.launch(Dispatchers.Main) { readingInteractor.removeParallelTranslation(translationShortName) }
     }
 
     fun openTranslationManagement() {

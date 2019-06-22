@@ -33,7 +33,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             settingsManager.observeSettings().consumeEach { settings = it }
         }
 
@@ -46,7 +46,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     }
 
     fun saveSettings(settings: Settings) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 settingsManager.saveSettings(settings)
             } catch (e: Exception) {
@@ -57,7 +57,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     }
 
     fun setFontSizeScale(fontSizeScale: Int) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             if (fontSizeScale != settings.fontSizeScale) {
                 saveSettings(settings.copy(fontSizeScale = fontSizeScale))
             }
@@ -65,7 +65,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     }
 
     fun setKeepScreenOn(keepScreenOn: Boolean) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             if (keepScreenOn != settings.keepScreenOn) {
                 saveSettings(settings.copy(keepScreenOn = keepScreenOn))
             }
@@ -73,7 +73,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     }
 
     fun setNightModeOn(nightModeOn: Boolean) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             if (nightModeOn != settings.nightModeOn) {
                 saveSettings(settings.copy(nightModeOn = nightModeOn))
             }
@@ -81,7 +81,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
     }
 
     fun setSimpleReadingModeOn(simpleReadingModeOn: Boolean) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             if (simpleReadingModeOn != settings.simpleReadingModeOn) {
                 saveSettings(settings.copy(simpleReadingModeOn = simpleReadingModeOn))
             }

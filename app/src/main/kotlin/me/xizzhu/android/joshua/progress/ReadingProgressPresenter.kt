@@ -35,7 +35,7 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
     }
 
     fun loadReadingProgress() {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 val currentTranslation = readingProgressInteractor.readCurrentTranslation()
                 val bookNames = readingProgressInteractor.readBookNames(currentTranslation)
@@ -55,7 +55,7 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
 
     @VisibleForTesting
     fun openChapter(bookIndex: Int, chapterIndex: Int) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 readingProgressInteractor.openChapter(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {

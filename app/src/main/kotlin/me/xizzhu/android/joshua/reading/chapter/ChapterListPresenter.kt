@@ -29,18 +29,18 @@ class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : M
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentTranslation().filter { it.isNotEmpty() }
                     .consumeEach { view?.onBookNamesUpdated(readingInteractor.readBookNames(it)) }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
                     .consumeEach { view?.onCurrentVerseIndexUpdated(it) }
         }
     }
 
     fun selectChapter(bookIndex: Int, chapterIndex: Int) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {

@@ -53,7 +53,7 @@ abstract class BaseSettingsPresenter<V : BaseSettingsView>(private val baseSetti
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             baseSettingsInteractor.observeSettings().consumeEach { view?.onSettingsUpdated(it) }
         }
     }

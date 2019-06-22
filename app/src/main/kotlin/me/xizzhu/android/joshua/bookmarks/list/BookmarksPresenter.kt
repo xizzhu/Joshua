@@ -41,13 +41,13 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             bookmarksInteractor.observeBookmarksSortOrder().consumeEach { loadBookmarks(it) }
         }
     }
 
     fun loadBookmarks(@Constants.SortOrder sortOrder: Int) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 bookmarksInteractor.notifyLoadingStarted()
                 view?.onBookmarksLoadingStarted()
@@ -118,7 +118,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
     }
 
     fun selectVerse(verseToSelect: VerseIndex) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 bookmarksInteractor.openReading(verseToSelect)
             } catch (e: Exception) {

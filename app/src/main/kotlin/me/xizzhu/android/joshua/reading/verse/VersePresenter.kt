@@ -110,16 +110,16 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentTranslation().consumeEach { currentTranslation = it }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentVerseIndex().consumeEach { currentVerseIndex = it }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeParallelTranslations().consumeEach { parallelTranslations = it }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeVerseDetailOpenState().consumeEach {
                 if (selectedVerse.isValid()) {
                     view?.onVerseDeselected(selectedVerse)
@@ -131,7 +131,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                 }
             }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeVerseState().consumeEach { (verseIndex, operation) ->
                 view?.onVerseUpdated(verseIndex, operation)
             }
@@ -139,7 +139,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     }
 
     fun selectChapter(bookIndex: Int, chapterIndex: Int) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
@@ -150,7 +150,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     }
 
     fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 readingInteractor.saveCurrentVerseIndex(verseIndex)
             } catch (e: Exception) {
@@ -160,7 +160,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     }
 
     fun loadVerses(bookIndex: Int, chapterIndex: Int) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 val items = if (readingInteractor.observeSettings().first().simpleReadingModeOn) {
                     val verses = readVerses(bookIndex, chapterIndex)
@@ -228,7 +228,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     @VisibleForTesting
     fun onVerseClicked(verse: Verse) {
         if (actionMode == null) {
-            launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES) }
+            coroutineScope.launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES) }
             return
         }
 
@@ -259,12 +259,12 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
 
     @VisibleForTesting
     fun onNoteClicked(verseIndex: VerseIndex) {
-        launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE) }
+        coroutineScope.launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE) }
     }
 
     @VisibleForTesting
     fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             if (hasBookmark) {
                 readingInteractor.removeBookmark(verseIndex)
             } else {
