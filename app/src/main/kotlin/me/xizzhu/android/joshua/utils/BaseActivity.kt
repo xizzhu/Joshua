@@ -22,11 +22,13 @@ import androidx.appcompat.app.AppCompatActivity
 import dagger.android.AndroidInjection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import me.xizzhu.android.logger.Log
 
-abstract class BaseActivity : AppCompatActivity(), CoroutineScope by CoroutineScope(Dispatchers.Main) {
+abstract class BaseActivity : AppCompatActivity() {
     protected val tag: String = javaClass.simpleName
+    protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.Main)
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,7 +64,7 @@ abstract class BaseActivity : AppCompatActivity(), CoroutineScope by CoroutineSc
     @CallSuper
     override fun onDestroy() {
         Log.i(tag, "onDestroy()")
-        cancel()
+        coroutineScope.cancel()
         super.onDestroy()
     }
 }

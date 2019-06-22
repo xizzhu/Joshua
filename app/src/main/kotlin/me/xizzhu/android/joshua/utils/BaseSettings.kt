@@ -27,7 +27,7 @@ import me.xizzhu.android.joshua.ui.getBackgroundColor
 
 abstract class BaseSettingsActivity : BaseActivity() {
     protected fun observeSettings(baseSettingsInteractor: BaseSettingsInteractor) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             baseSettingsInteractor.observeSettings().consumeEach { onSettingsUpdated(it) }
         }
     }

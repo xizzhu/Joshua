@@ -20,7 +20,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.ActionBarDrawerToggle
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.firstOrNull
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
@@ -90,7 +89,7 @@ class ReadingActivity : BaseSettingsActivity() {
 
     private fun openNoteIfNeeded() {
         if (intent.getBooleanExtra(KEY_OPEN_NOTE, false)) {
-            launch(Dispatchers.Main) {
+            coroutineScope.launch(Dispatchers.Main) {
                 readingInteractor.observeCurrentVerseIndex().firstOrNull()?.let {
                     readingInteractor.openVerseDetail(it, VerseDetailPagerAdapter.PAGE_NOTE)
                 }
@@ -116,11 +115,11 @@ class ReadingActivity : BaseSettingsActivity() {
 
     override fun onResume() {
         super.onResume()
-        launch(Dispatchers.Main) { readingInteractor.startTrackingReadingProgress() }
+        coroutineScope.launch(Dispatchers.Main) { readingInteractor.startTrackingReadingProgress() }
     }
 
     override fun onPause() {
-        launch(Dispatchers.Main.immediate) { readingInteractor.stopTrackingReadingProgress() }
+        coroutineScope.launch(Dispatchers.Main.immediate) { readingInteractor.stopTrackingReadingProgress() }
         super.onPause()
     }
 
@@ -141,7 +140,7 @@ class ReadingActivity : BaseSettingsActivity() {
     }
 
     override fun onBackPressed() {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             if (!readingInteractor.closeVerseDetail() && !drawerLayout.hide()) {
                 super.onBackPressed()
             }
