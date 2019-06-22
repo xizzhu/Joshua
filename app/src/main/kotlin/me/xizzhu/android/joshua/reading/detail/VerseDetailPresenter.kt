@@ -41,7 +41,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeVerseDetailOpenState().consumeEach {
                 if (it.first.isValid()) {
                     view?.show(it.second)
@@ -54,7 +54,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     }
 
     fun loadVerseDetail(verseIndex: VerseIndex) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             view?.onVerseDetailLoaded(VerseDetail.INVALID)
 
             try {
@@ -90,7 +90,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
     @VisibleForTesting
     fun onVerseClicked(translation: String) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 if (translation != readingInteractor.observeCurrentTranslation().first()) {
                     readingInteractor.saveCurrentTranslation(translation)
@@ -113,12 +113,12 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     }
 
     fun hide() {
-        launch(Dispatchers.Main) { readingInteractor.closeVerseDetail() }
+        coroutineScope.launch(Dispatchers.Main) { readingInteractor.closeVerseDetail() }
     }
 
     fun updateBookmark() {
         updateBookmarkJob?.cancel()
-        updateBookmarkJob = launch(Dispatchers.Main) {
+        updateBookmarkJob = coroutineScope.launch(Dispatchers.Main) {
             verseDetail?.let { detail ->
                 if (detail.bookmarked) {
                     readingInteractor.removeBookmark(detail.verseIndex)
@@ -136,7 +136,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
     fun updateNote(note: String) {
         updateNoteJob?.cancel()
-        updateNoteJob = launch(Dispatchers.Main) {
+        updateNoteJob = coroutineScope.launch(Dispatchers.Main) {
             verseDetail?.let { detail ->
                 if (note.isEmpty()) {
                     readingInteractor.removeNote(detail.verseIndex)

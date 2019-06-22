@@ -38,7 +38,7 @@ class BaseActivityTest : BaseUnitTest() {
             } catch (ignored: Exception) {
             }
 
-            myJob = launch(Dispatchers.Unconfined) {
+            myJob = coroutineScope.launch(Dispatchers.Unconfined) {
                 while (isActive) {
                     delay(1L)
                 }

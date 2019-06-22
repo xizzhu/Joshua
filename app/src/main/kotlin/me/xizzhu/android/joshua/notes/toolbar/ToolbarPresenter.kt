@@ -28,13 +28,13 @@ class ToolbarPresenter(private val notesInteractor: NotesInteractor) : MVPPresen
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             view?.onNotesSortOrderLoaded(notesInteractor.observeNotesSortOrder().first())
         }
     }
 
     fun updateNotesSortOrder(@Constants.SortOrder sortOrder: Int) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 notesInteractor.saveNotesSortOrder(sortOrder)
             } catch (e: Exception) {

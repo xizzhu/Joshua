@@ -41,13 +41,13 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             notesInteractor.observeNotesSortOrder().consumeEach { loadNotes(it) }
         }
     }
 
     fun loadNotes(@Constants.SortOrder sortOrder: Int) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 notesInteractor.notifyLoadingStarted()
                 view?.onNotesLoadingStarted()
@@ -117,7 +117,7 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
     }
 
     fun selectVerse(verseToSelect: VerseIndex) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 notesInteractor.openReading(verseToSelect)
             } catch (e: Exception) {

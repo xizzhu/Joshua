@@ -28,7 +28,7 @@ class ToolbarPresenter(private val searchInteractor: SearchInteractor) : MVPPres
         if (query.isEmpty()) {
             return false
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 searchInteractor.search(query)
             } catch (e: Exception) {

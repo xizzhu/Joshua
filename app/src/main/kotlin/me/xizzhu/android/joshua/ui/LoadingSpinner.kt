@@ -31,7 +31,7 @@ enum class LoadingSpinnerState { IS_LOADING, NOT_LOADING }
 
 class LoadingSpinnerPresenter(loadingState: ReceiveChannel<LoadingSpinnerState>) : MVPPresenter<LoadingSpinnerView>() {
     init {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             loadingState.consumeEach { state ->
                 when (state) {
                     LoadingSpinnerState.IS_LOADING -> view?.show()

@@ -33,7 +33,7 @@ class MVPTest {
         override fun onViewAttached() {
             super.onViewAttached()
             onViewAttachedCalled = true
-            job = launch(Dispatchers.Default) {
+            job = coroutineScope.launch(Dispatchers.Default) {
                 while (isActive) {
                     delay(1L)
                 }

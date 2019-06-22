@@ -33,7 +33,7 @@ enum class SwipeRefresherState { IS_REFRESHING, NOT_REFRESHING }
 class SwipeRefresherPresenter(refresherState: ReceiveChannel<SwipeRefresherState>,
                               private val refreshRequest: SendChannel<Unit>) : MVPPresenter<SwipeRefresherView>() {
     init {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             refresherState.consumeEach { state ->
                 when (state) {
                     SwipeRefresherState.IS_REFRESHING -> view?.show()
@@ -44,7 +44,7 @@ class SwipeRefresherPresenter(refresherState: ReceiveChannel<SwipeRefresherState
     }
 
     fun refresh() {
-        launch(Dispatchers.Main) { refreshRequest.send(Unit) }
+        coroutineScope.launch(Dispatchers.Main) { refreshRequest.send(Unit) }
     }
 }
 

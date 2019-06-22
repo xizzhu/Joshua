@@ -71,25 +71,25 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeCurrentTranslation().consumeEach {
                 currentTranslation = it
                 updateTranslations()
             }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeAvailableTranslations().consumeEach {
                 availableTranslations = it.sortedWith(translationComparator)
                 updateTranslations()
             }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeDownloadedTranslations().consumeEach {
                 downloadedTranslations = it.sortedWith(translationComparator)
                 updateTranslations()
             }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeTranslationsLoadingState().consumeEach { loadingState ->
                 when (loadingState) {
                     SwipeRefresherState.IS_REFRESHING -> view?.onTranslationsLoadingStarted()
@@ -97,7 +97,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
                 }
             }
         }
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeTranslationsLoadingRequest().consumeEach { loadTranslationList(true) }
         }
 
@@ -120,7 +120,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     }
 
     fun loadTranslationList(forceRefresh: Boolean) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 translationInteractor.reload(forceRefresh)
             } catch (e: Exception) {
@@ -156,7 +156,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     fun downloadTranslation(translationToDelete: TranslationInfo, downloadProgressChannel: Channel<Int> = Channel()) {
         view?.onTranslationDownloadStarted()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             downloadProgressChannel.consumeEach { progress ->
                 try {
                     view?.onTranslationDownloadProgressed(progress)
@@ -166,7 +166,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
             }
         }
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 translationInteractor.downloadTranslation(downloadProgressChannel, translationToDelete)
                 if (translationInteractor.observeCurrentTranslation().first().isEmpty()) {
@@ -183,7 +183,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     fun removeTranslation(translationToRemove: TranslationInfo) {
         view?.onTranslationDeleteStarted()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 translationInteractor.removeTranslation(translationToRemove)
                 view?.onTranslationDeleted()
@@ -195,7 +195,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     }
 
     fun updateCurrentTranslation(translationShortName: String) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 translationInteractor.saveCurrentTranslation(translationShortName)
                 translationInteractor.finish()

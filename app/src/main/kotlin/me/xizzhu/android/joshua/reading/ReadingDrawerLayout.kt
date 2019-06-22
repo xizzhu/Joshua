@@ -31,7 +31,7 @@ class ReadingDrawerPresenter(private val readingInteractor: ReadingInteractor) :
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
                     .consumeEach { view?.hide() }
         }

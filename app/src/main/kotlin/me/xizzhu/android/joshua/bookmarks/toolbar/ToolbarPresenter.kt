@@ -28,13 +28,13 @@ class ToolbarPresenter(private val bookmarksInteractor: BookmarksInteractor) : M
     override fun onViewAttached() {
         super.onViewAttached()
 
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             view?.onBookmarkSortOrderLoaded(bookmarksInteractor.observeBookmarksSortOrder().first())
         }
     }
 
     fun updateBookmarksSortOrder(@Constants.SortOrder sortOrder: Int) {
-        launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             try {
                 bookmarksInteractor.saveBookmarksSortOrder(sortOrder)
             } catch (e: Exception) {
