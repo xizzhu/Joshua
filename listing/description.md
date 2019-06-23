@@ -19,6 +19,7 @@ A simple and easy-to-use Bible reader with offline reading, multi-versions suppo
 #### AVAILABLE BIBLE VERSIONS
 - American King James Version (AKJV)
 - American Standard Version (ASV)
+- Amplified Version (Classic Edition) (AMP)
 - Authorized King James (KJV)
 - Bible in Basic English (BBE)
 - English Standard Version (ESV)
