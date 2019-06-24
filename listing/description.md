@@ -27,6 +27,7 @@ A simple and easy-to-use Bible reader with offline reading, multi-versions suppo
 - Green's Literal Translation (LITV)
 - New International Version (NIV)
 - New Living Translation (NLT)
+- The Message Bible (MSG)
 - Updated King James Version (UKJV)
 - World English Bible (WEB)
 - Young's Literal Translation (YLT)
