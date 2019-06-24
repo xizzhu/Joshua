@@ -20,6 +20,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -42,7 +43,22 @@ class TranslationItemTest : BaseUnitTest() {
         val expected = listOf(TranslationItem(MockContents.kjvDownloadedTranslationInfo, true, onClicked, onLongClicked),
                 TranslationItem(MockContents.cuvTranslationInfo, false, onClicked, onLongClicked))
         val actual = listOf(MockContents.kjvDownloadedTranslationInfo, MockContents.cuvTranslationInfo)
-                .toTranslationItems(MockContents.kjvShortName, onClicked, onLongClicked)
+                .toTranslationItems(MockContents.kjvShortName, false, onClicked, onLongClicked)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testToTranslationItemsGroupByLanguage() {
+        val onClicked: (TranslationInfo) -> Unit = {}
+        val onLongClicked: (TranslationInfo, Boolean) -> Unit = { _, _ -> }
+        val expected = listOf(
+                TranslationItem(MockContents.kjvDownloadedTranslationInfo, true, onClicked, onLongClicked),
+                TranslationItem(MockContents.bbeTranslationInfo, false, onClicked, onLongClicked),
+                TitleItem(Locale("zh").displayName, true),
+                TranslationItem(MockContents.cuvTranslationInfo, false, onClicked, onLongClicked)
+        )
+        val actual = listOf(MockContents.kjvDownloadedTranslationInfo, MockContents.bbeTranslationInfo, MockContents.cuvTranslationInfo)
+                .toTranslationItems(MockContents.kjvShortName, true, onClicked, onLongClicked)
         assertEquals(expected, actual)
     }
 }

@@ -102,12 +102,12 @@ class NotesPresenterTest : BaseUnitTest() {
             notesPresenter.attachView(notesView)
 
             verify(notesView, times(1)).onNotesLoaded(listOf(
-                    TitleItem(""),
+                    TitleItem("", false),
                     NoteItem(VerseIndex(0, 0, 4), MockContents.kjvVerses[4].text, "Note1", 2L * 365L * 24L * 3600L * 1000L, notesPresenter::selectVerse),
-                    TitleItem(""),
+                    TitleItem("", false),
                     NoteItem(VerseIndex(0, 0, 1), MockContents.kjvVerses[1].text, "Note2", 36L * 3600L * 1000L, notesPresenter::selectVerse),
                     NoteItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, "Note3", 36L * 3600L * 1000L - 1000L, notesPresenter::selectVerse),
-                    TitleItem(""),
+                    TitleItem("", false),
                     NoteItem(VerseIndex(0, 0, 2), MockContents.kjvVerses[2].text, "Note4", 0L, notesPresenter::selectVerse)
             ))
             verify(notesView, never()).onNotesLoadFailed(anyInt())
@@ -131,7 +131,7 @@ class NotesPresenterTest : BaseUnitTest() {
             notesPresenter.attachView(notesView)
 
             verify(notesView, times(1)).onNotesLoaded(listOf(
-                    TitleItem(MockContents.kjvVerses[3].text.bookName),
+                    TitleItem(MockContents.kjvVerses[3].text.bookName, false),
                     NoteItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, "Note", 0L, notesPresenter::selectVerse)
             ))
             verify(notesView, never()).onNotesLoadFailed(anyInt())

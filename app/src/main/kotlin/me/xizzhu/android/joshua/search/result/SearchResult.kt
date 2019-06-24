@@ -31,7 +31,7 @@ fun List<Verse>.toSearchResult(query: String, onClickListener: (VerseIndex) -> U
         var currentBookIndex = -1
         this@toSearchResult.forEach { verse ->
             if (currentBookIndex != verse.verseIndex.bookIndex) {
-                add(TitleItem(verse.text.bookName))
+                add(TitleItem(verse.text.bookName, false))
                 currentBookIndex = verse.verseIndex.bookIndex
             }
             add(SearchItem(verse.verseIndex, verse.text.bookName,

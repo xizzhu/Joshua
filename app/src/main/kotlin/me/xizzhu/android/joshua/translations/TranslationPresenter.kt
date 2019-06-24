@@ -110,10 +110,12 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
 
         val items: ArrayList<BaseItem> = ArrayList()
-        items.addAll(downloadedTranslations!!.toTranslationItems(currentTranslation!!, this::onTranslationClicked, this::onTranslationLongClicked))
+        items.addAll(downloadedTranslations!!.toTranslationItems(currentTranslation!!, false,
+                this::onTranslationClicked, this::onTranslationLongClicked))
         if (availableTranslations!!.isNotEmpty()) {
-            items.add(TitleItem(context.getString(R.string.header_available_translations)))
-            items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!, this::onTranslationClicked, this::onTranslationLongClicked))
+            items.add(TitleItem(context.getString(R.string.header_available_translations), false))
+            items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!, true,
+                    this::onTranslationClicked, this::onTranslationLongClicked))
         }
 
         view?.onTranslationsUpdated(items)

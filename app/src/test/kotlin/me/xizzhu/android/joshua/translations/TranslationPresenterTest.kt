@@ -32,6 +32,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
+import java.util.*
 
 class TranslationPresenterTest : BaseUnitTest() {
     @Mock
@@ -89,7 +90,7 @@ class TranslationPresenterTest : BaseUnitTest() {
 
             val expected = listOf(
                     TranslationItem(MockContents.kjvDownloadedTranslationInfo, true, translationPresenter::onTranslationClicked, translationPresenter::onTranslationLongClicked),
-                    TitleItem(""),
+                    TitleItem("", false),
                     TranslationItem(MockContents.cuvTranslationInfo, false, translationPresenter::onTranslationClicked, translationPresenter::onTranslationLongClicked)
             )
             verify(translationView, times(1)).onTranslationsUpdated(expected)

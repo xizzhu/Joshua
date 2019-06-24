@@ -41,7 +41,7 @@ class SearchResultTest : BaseUnitTest() {
         val onClickListener: (VerseIndex) -> Unit = {}
         assertEquals(SearchResult(
                 listOf(
-                        TitleItem(MockContents.kjvVerses[0].text.bookName),
+                        TitleItem(MockContents.kjvVerses[0].text.bookName, false),
                         SearchItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text.bookName,
                                 MockContents.kjvVerses[0].text.text, query, onClickListener),
                         SearchItem(MockContents.kjvVerses[1].verseIndex, MockContents.kjvVerses[1].text.bookName,

@@ -23,6 +23,8 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
+import java.util.*
+import kotlin.collections.ArrayList
 
 data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean,
                            val onClicked: (TranslationInfo) -> Unit,
@@ -32,10 +34,21 @@ data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTr
     override fun getItemViewType(): Int = BaseItem.TRANSLATION_ITEM
 }
 
-fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, onClicked: (TranslationInfo) -> Unit,
-                                             onLongClicked: (TranslationInfo, Boolean) -> Unit): List<TranslationItem> {
-    return ArrayList<TranslationItem>(size).apply {
+fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, groupByLanguage: Boolean,
+                                             onClicked: (TranslationInfo) -> Unit,
+                                             onLongClicked: (TranslationInfo, Boolean) -> Unit): List<BaseItem> {
+    return ArrayList<BaseItem>(size).apply {
+        var currentLanguage = ""
         for (translationInfo in this@toTranslationItems) {
+            if (groupByLanguage) {
+                val language = translationInfo.language.split("_")[0]
+                if (currentLanguage != language) {
+                    if (currentLanguage.isNotEmpty()) {
+                        add(TitleItem(Locale(language).displayName, true))
+                    }
+                    currentLanguage = language
+                }
+            }
             add(TranslationItem(translationInfo,
                     translationInfo.downloaded && translationInfo.shortName == currentTranslation,
                     onClicked, onLongClicked))
