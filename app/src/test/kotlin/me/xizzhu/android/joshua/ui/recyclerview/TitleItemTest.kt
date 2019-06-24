@@ -23,6 +23,6 @@ import kotlin.test.assertEquals
 class TitleItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.TITLE_ITEM, TitleItem("").getItemViewType())
+        assertEquals(BaseItem.TITLE_ITEM, TitleItem("", false).getItemViewType())
     }
 }

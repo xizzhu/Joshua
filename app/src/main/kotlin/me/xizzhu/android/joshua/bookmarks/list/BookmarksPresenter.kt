@@ -86,7 +86,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
             val currentYear = calendar.get(Calendar.YEAR)
             val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
             if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
-                items.add(TitleItem(bookmark.timestamp.formatDate(resources, calendar)))
+                items.add(TitleItem(bookmark.timestamp.formatDate(resources, calendar), false))
 
                 previousYear = currentYear
                 previousDayOfYear = currentDayOfYear
@@ -107,7 +107,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
         for (bookmark in this) {
             val verse = bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex)
             if (bookmark.verseIndex.bookIndex != currentBookIndex) {
-                items.add(TitleItem(verse.text.bookName))
+                items.add(TitleItem(verse.text.bookName, false))
                 currentBookIndex = bookmark.verseIndex.bookIndex
             }
 

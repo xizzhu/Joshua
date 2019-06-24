@@ -89,7 +89,7 @@ class TranslationPresenterTest : BaseUnitTest() {
 
             val expected = listOf(
                     TranslationItem(MockContents.kjvDownloadedTranslationInfo, true, translationPresenter::onTranslationClicked, translationPresenter::onTranslationLongClicked),
-                    TitleItem(""),
+                    TitleItem("", false),
                     TranslationItem(MockContents.cuvTranslationInfo, false, translationPresenter::onTranslationClicked, translationPresenter::onTranslationLongClicked)
             )
             verify(translationView, times(1)).onTranslationsUpdated(expected)

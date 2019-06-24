@@ -86,7 +86,7 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
             val currentYear = calendar.get(Calendar.YEAR)
             val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
             if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
-                items.add(TitleItem(note.timestamp.formatDate(resources, calendar)))
+                items.add(TitleItem(note.timestamp.formatDate(resources, calendar), false))
 
                 previousYear = currentYear
                 previousDayOfYear = currentDayOfYear
@@ -107,7 +107,7 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
         for (note in this) {
             val verse = notesInteractor.readVerse(currentTranslation, note.verseIndex)
             if (note.verseIndex.bookIndex != currentBookIndex) {
-                items.add(TitleItem(verse.text.bookName))
+                items.add(TitleItem(verse.text.bookName, false))
                 currentBookIndex = note.verseIndex.bookIndex
             }
 

@@ -18,24 +18,27 @@ package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.getCaptionTextSize
 
-data class TitleItem(val title: CharSequence) : BaseItem {
+data class TitleItem(val title: CharSequence, val hideDivider: Boolean) : BaseItem {
     override fun getItemViewType(): Int = BaseItem.TITLE_ITEM
 }
 
 class TitleItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<TitleItem>(inflater.inflate(R.layout.item_title, parent, false)) {
     private val title: TextView = itemView.findViewById(R.id.title)
+    private val divider: View = itemView.findViewById(R.id.divider)
 
     override fun bind(settings: Settings, item: TitleItem, payloads: List<Any>) {
         with(title) {
             setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
             text = item.title
         }
+        divider.visibility = if (item.hideDivider) View.GONE else View.VISIBLE
     }
 }
