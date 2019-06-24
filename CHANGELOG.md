@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Grouped available translations by language
 
 #### v0.6.0 (2019-06-20)
 - Show per-chapter reading status in reading progress
