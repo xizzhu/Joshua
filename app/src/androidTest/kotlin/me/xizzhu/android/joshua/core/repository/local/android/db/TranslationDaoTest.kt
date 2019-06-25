@@ -35,6 +35,12 @@ class TranslationDaoTest : BaseSqliteTest() {
     }
 
     @Test
+    fun testCreateSameTable() {
+        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
+        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
+    }
+
+    @Test
     fun testSaveThenRead() {
         saveTranslation()
         assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(

@@ -90,6 +90,20 @@ class AndroidTranslationStorageTest : BaseSqliteTest() {
     }
 
     @Test
+    fun testSaveTranslationMultipleTimesThenRead() {
+        runBlocking {
+            androidTranslationStorage.saveTranslation(MockContents.kjvDownloadedTranslationInfo,
+                    MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
+            androidTranslationStorage.saveTranslation(MockContents.kjvDownloadedTranslationInfo,
+                    MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
+
+            val actual = androidTranslationStorage.readTranslations()
+            assertEquals(1, actual.size)
+            assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
+        }
+    }
+
+    @Test
     fun testSaveTranslationWithDownloadedFalseThenRead() {
         runBlocking {
             androidTranslationStorage.saveTranslation(MockContents.kjvTranslationInfo,

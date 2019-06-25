@@ -37,7 +37,7 @@ class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun createTable(translationShortName: String) {
-        db.execSQL("CREATE TABLE $translationShortName (" +
+        db.execSQL("CREATE TABLE IF NOT EXISTS $translationShortName (" +
                 "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
                 "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL, " +
                 "PRIMARY KEY($COLUMN_BOOK_INDEX, $COLUMN_CHAPTER_INDEX, $COLUMN_VERSE_INDEX));")
