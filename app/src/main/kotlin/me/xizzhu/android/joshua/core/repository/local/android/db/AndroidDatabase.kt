@@ -50,7 +50,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     }
 }
 
-public inline fun <R> SQLiteDatabase.transaction(block: SQLiteDatabase.() -> R): R {
+inline fun <R> SQLiteDatabase.transaction(block: SQLiteDatabase.() -> R): R {
     try {
         beginTransaction()
         val r = block()
