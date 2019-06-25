@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.bookmarks.list
 
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -27,7 +28,7 @@ import kotlin.test.assertEquals
 class BookmarkItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.BOOKMARK_ITEM, BookmarkItem(VerseIndex.INVALID, Verse.Text.INVALID, 0L, Constants.DEFAULT_SORT_ORDER, {}).getItemViewType())
+        assertEquals(R.layout.item_bookmarks, BookmarkItem(VerseIndex.INVALID, Verse.Text.INVALID, 0L, Constants.DEFAULT_SORT_ORDER, {}).getItemViewType())
     }
 
     @Test

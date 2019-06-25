@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.bookmarks.list
 
 import android.graphics.Typeface
 import android.text.Spannable
@@ -29,6 +29,8 @@ import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val timestamp: Long,
@@ -37,6 +39,12 @@ data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val ti
         private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
         private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+
+        private const val VIEW_TYPE = R.layout.item_bookmarks
+
+        init {
+            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }
+        }
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -66,10 +74,10 @@ data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val ti
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }
 
-    override fun getItemViewType(): Int = BaseItem.BOOKMARK_ITEM
+    override fun getItemViewType(): Int = VIEW_TYPE
 }
 
-class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<BookmarkItem>(inflater.inflate(R.layout.item_bookmarks, parent, false)) {
     private val text: TextView = itemView.findViewById(R.id.text)
 

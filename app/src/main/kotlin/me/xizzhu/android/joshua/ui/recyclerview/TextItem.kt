@@ -25,14 +25,14 @@ import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class TextItem(val title: CharSequence) : BaseItem {
     companion object {
-        private const val itemViewType = R.layout.item_text
+        private const val VIEW_TYPE = R.layout.item_text
 
         init {
-            BaseItem.viewHolderCreator[itemViewType] = { inflater, parent -> TextItemViewHolder(inflater, parent) }
+            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> TextItemViewHolder(inflater, parent) }
         }
     }
 
-    override fun getItemViewType(): Int = itemViewType
+    override fun getItemViewType(): Int = VIEW_TYPE
 }
 
 private class TextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
