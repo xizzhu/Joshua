@@ -57,9 +57,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                 if (translationInfo.downloaded) {
                     androidDatabase.translationInfoDao.save(translationInfo)
                 } else {
-                    androidDatabase.translationInfoDao.save(TranslationInfo(
-                            translationInfo.shortName, translationInfo.name,
-                            translationInfo.language, translationInfo.size, true))
+                    androidDatabase.translationInfoDao.save(translationInfo.copy(downloaded = true))
                 }
                 androidDatabase.translationDao.createTable(translationInfo.shortName)
                 androidDatabase.translationDao.save(translationInfo.shortName, verses)
@@ -72,9 +70,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
             androidDatabase.writableDatabase.transaction {
                 androidDatabase.bookNamesDao.remove(translationInfo.shortName)
                 if (translationInfo.downloaded) {
-                    androidDatabase.translationInfoDao.save(TranslationInfo(
-                            translationInfo.shortName, translationInfo.name,
-                            translationInfo.language, translationInfo.size, false))
+                    androidDatabase.translationInfoDao.save(translationInfo.copy(downloaded = false))
                 } else {
                     androidDatabase.translationInfoDao.save(translationInfo)
                 }
