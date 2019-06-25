@@ -31,7 +31,6 @@ interface BaseItem {
     companion object {
         val viewHolderCreator = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>>()
 
-        const val TEXT_ITEM = 1
         const val SEARCH_ITEM = 2
         const val BOOKMARK_ITEM = 3
         const val NOTE_ITEM = 4
@@ -42,7 +41,7 @@ interface BaseItem {
         const val VERSE_ITEM = 9
         const val VERSE_TEXT_ITEM = 10
 
-        @IntDef(TEXT_ITEM, SEARCH_ITEM, BOOKMARK_ITEM, NOTE_ITEM, TRANSLATION_ITEM,
+        @IntDef(SEARCH_ITEM, BOOKMARK_ITEM, NOTE_ITEM, TRANSLATION_ITEM,
                 READING_PROGRESS_SUMMARY_ITEM, READING_PROGRESS_DETAIL_ITEM, SIMPLE_VERSE_ITEM,
                 VERSE_ITEM, VERSE_TEXT_ITEM)
         @Retention(AnnotationRetention.SOURCE)
@@ -90,7 +89,6 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
             when (viewType) {
-                BaseItem.TEXT_ITEM -> TextItemViewHolder(inflater, parent)
                 BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent)
                 BaseItem.BOOKMARK_ITEM -> BookmarkItemViewHolder(inflater, parent)
                 BaseItem.NOTE_ITEM -> NoteItemViewHolder(inflater, parent)
