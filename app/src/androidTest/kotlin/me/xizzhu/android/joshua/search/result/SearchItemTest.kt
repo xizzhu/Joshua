@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.search.result
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -30,7 +31,7 @@ import org.junit.runner.RunWith
 class SearchItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.SEARCH_ITEM, SearchItem(VerseIndex.INVALID, "", "", "", {}).getItemViewType())
+        assertEquals(R.layout.item_search_result, SearchItem(VerseIndex.INVALID, "", "", "", {}).getItemViewType())
     }
 
     @Test
