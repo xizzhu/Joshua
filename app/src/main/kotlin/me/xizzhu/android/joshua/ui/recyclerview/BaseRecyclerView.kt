@@ -31,15 +31,13 @@ interface BaseItem {
     companion object {
         val viewHolderCreator = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>>()
 
-        const val TRANSLATION_ITEM = 5
         const val READING_PROGRESS_SUMMARY_ITEM = 6
         const val READING_PROGRESS_DETAIL_ITEM = 7
         const val SIMPLE_VERSE_ITEM = 8
         const val VERSE_ITEM = 9
         const val VERSE_TEXT_ITEM = 10
 
-        @IntDef(TRANSLATION_ITEM,
-                READING_PROGRESS_SUMMARY_ITEM, READING_PROGRESS_DETAIL_ITEM, SIMPLE_VERSE_ITEM,
+        @IntDef(READING_PROGRESS_SUMMARY_ITEM, READING_PROGRESS_DETAIL_ITEM, SIMPLE_VERSE_ITEM,
                 VERSE_ITEM, VERSE_TEXT_ITEM)
         @Retention(AnnotationRetention.SOURCE)
         annotation class ItemViewType
@@ -86,7 +84,6 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
             when (viewType) {
-                BaseItem.TRANSLATION_ITEM -> TranslationItemViewHolder(inflater, parent)
                 BaseItem.READING_PROGRESS_SUMMARY_ITEM -> ReadingProgressSummaryItemViewHolder(inflater, parent)
                 BaseItem.READING_PROGRESS_DETAIL_ITEM -> ReadingProgressDetailItemViewHolder(inflater, parent)
                 BaseItem.SIMPLE_VERSE_ITEM -> SimpleVerseItemViewHolder(inflater, parent)

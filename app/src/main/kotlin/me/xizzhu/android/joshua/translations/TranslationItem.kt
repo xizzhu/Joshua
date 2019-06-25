@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.translations
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -22,6 +22,9 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.util.*
 import kotlin.collections.ArrayList
@@ -29,9 +32,17 @@ import kotlin.collections.ArrayList
 data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean,
                            val onClicked: (TranslationInfo) -> Unit,
                            val onLongClicked: (TranslationInfo, Boolean) -> Unit) : BaseItem {
+    companion object {
+        private const val VIEW_TYPE = R.layout.item_translation
+
+        init {
+            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> TranslationItemViewHolder(inflater, parent) }
+        }
+    }
+
     val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0
 
-    override fun getItemViewType(): Int = BaseItem.TRANSLATION_ITEM
+    override fun getItemViewType(): Int = VIEW_TYPE
 }
 
 fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, groupByLanguage: Boolean,
@@ -56,7 +67,7 @@ fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, groupBy
     }
 }
 
-class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<TranslationItem>(inflater.inflate(R.layout.item_translation, parent, false)) {
     private val textView = itemView as TextView
 

@@ -27,12 +27,10 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.SwipeRefresherState
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import me.xizzhu.android.joshua.ui.recyclerview.TranslationItem
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import java.util.*
 
 class TranslationPresenterTest : BaseUnitTest() {
     @Mock

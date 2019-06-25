@@ -30,7 +30,6 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.SwipeRefresherState
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import me.xizzhu.android.joshua.ui.recyclerview.toTranslationItems
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
 import java.util.*
