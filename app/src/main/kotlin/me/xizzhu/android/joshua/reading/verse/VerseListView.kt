@@ -22,7 +22,6 @@ import android.util.AttributeSet
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
 
 class VerseListView : BaseRecyclerView {
     constructor(context: Context) : super(context)

@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.reading.verse
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bookmark
@@ -30,7 +29,6 @@ import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

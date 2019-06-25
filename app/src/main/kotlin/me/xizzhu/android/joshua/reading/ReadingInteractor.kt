@@ -31,12 +31,10 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItemViewHolder
+import me.xizzhu.android.joshua.reading.verse.VerseItemViewHolder
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 import me.xizzhu.android.logger.Log
 

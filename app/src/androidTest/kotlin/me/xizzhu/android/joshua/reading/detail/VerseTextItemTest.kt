@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.reading.detail
 
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -25,6 +26,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class VerseTextItemTest : BaseUnitTest() {
+    @Test
+    fun testItemViewType() {
+        assertEquals(R.layout.item_verse_text, VerseTextItem(VerseIndex.INVALID, Verse.Text.INVALID, {}, {}).getItemViewType())
+    }
+
     @Test
     fun testTextForDisplay() {
         val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth."

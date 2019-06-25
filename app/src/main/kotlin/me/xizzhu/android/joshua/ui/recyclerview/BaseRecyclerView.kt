@@ -21,7 +21,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.IntDef
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.core.Settings
@@ -30,18 +29,8 @@ import me.xizzhu.android.joshua.utils.BaseSettingsView
 interface BaseItem {
     companion object {
         val viewHolderCreator = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>>()
-
-        const val SIMPLE_VERSE_ITEM = 8
-        const val VERSE_ITEM = 9
-        const val VERSE_TEXT_ITEM = 10
-
-        @IntDef(SIMPLE_VERSE_ITEM,
-                VERSE_ITEM, VERSE_TEXT_ITEM)
-        @Retention(AnnotationRetention.SOURCE)
-        annotation class ItemViewType
     }
 
-    @ItemViewType
     fun getItemViewType(): Int
 }
 
@@ -81,13 +70,8 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
     override fun getItemViewType(position: Int): Int = items[position].getItemViewType()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
-            when (viewType) {
-                BaseItem.SIMPLE_VERSE_ITEM -> SimpleVerseItemViewHolder(inflater, parent)
-                BaseItem.VERSE_ITEM -> VerseItemViewHolder(inflater, parent)
-                BaseItem.VERSE_TEXT_ITEM -> VerseTextItemViewHolder(inflater, parent)
-                else -> BaseItem.viewHolderCreator[viewType]?.invoke(inflater, parent)
-                        ?: throw IllegalStateException("Unknown view type - $viewType")
-            } as BaseViewHolder<BaseItem>
+            BaseItem.viewHolderCreator.getOrElse(viewType, { throw IllegalStateException("Unknown view type - $viewType") })
+                    .invoke(inflater, parent) as BaseViewHolder<BaseItem>
 
     override fun onBindViewHolder(holder: BaseViewHolder<BaseItem>, position: Int) {
         holder.bindData(settings!!, items[position])

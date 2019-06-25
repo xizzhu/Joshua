@@ -26,7 +26,6 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.VerseTextItem
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

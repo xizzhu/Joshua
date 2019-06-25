@@ -14,37 +14,38 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.reading.verse
 
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
+import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.*
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import java.lang.StringBuilder
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.Color
-import android.util.TypedValue
-import me.xizzhu.android.joshua.ui.animateTextColor
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimarySelectedTextColor
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 
-data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Boolean,
-                     val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
-                     val onNoteClicked: (VerseIndex) -> Unit, val onBookmarkClicked: (VerseIndex, Boolean) -> Unit,
-                     var selected: Boolean = false) : BaseItem {
+data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int,
+                           val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
+                           var selected: Boolean = false) : BaseItem {
     companion object {
         private val STRING_BUILDER = StringBuilder()
         private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+
+        private const val VIEW_TYPE = R.layout.item_simple_verse
+
+        init {
+            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }
+        }
 
         private fun buildVerseForDisplay(out: StringBuilder, verseIndex: VerseIndex, text: Verse.Text) {
             if (out.isNotEmpty()) {
@@ -56,16 +57,33 @@ data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Bo
         }
     }
 
+    val indexForDisplay: CharSequence by lazy {
+        if (verse.parallel.isEmpty()) {
+            STRING_BUILDER.setLength(0)
+            val verseIndex = verse.verseIndex.verseIndex
+            if (totalVerseCount >= 10) {
+                if (totalVerseCount < 100) {
+                    if (verseIndex + 1 < 10) {
+                        STRING_BUILDER.append(' ')
+                    }
+                } else {
+                    if (verseIndex + 1 < 10) {
+                        STRING_BUILDER.append("  ")
+                    } else if (verseIndex + 1 < 100) {
+                        STRING_BUILDER.append(" ")
+                    }
+                }
+            }
+            STRING_BUILDER.append(verseIndex + 1)
+            return@lazy STRING_BUILDER.toString()
+        } else {
+            return@lazy ""
+        }
+    }
+
     val textForDisplay: CharSequence by lazy {
         if (verse.parallel.isEmpty()) {
-            // format:
-            // <book name> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-            STRING_BUILDER.setLength(0)
-            STRING_BUILDER.append(verse.text.bookName).append(' ')
-                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
-                    .append(verse.text.text)
-            return@lazy STRING_BUILDER.toString()
+            return@lazy verse.text.text
         } else {
             // format:
             // <primary translation> <chapter verseIndex>:<verse verseIndex>
@@ -93,27 +111,15 @@ data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Bo
         }
     }
 
-    override fun getItemViewType(): Int = BaseItem.VERSE_ITEM
+    override fun getItemViewType(): Int = VIEW_TYPE
 }
 
-class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<VerseItem>(inflater.inflate(R.layout.item_verse, parent, false)) {
-    companion object {
-        const val VERSE_SELECTED = 1
-        const val VERSE_DESELECTED = 2
-        const val NOTE_ADDED = 3
-        const val NOTE_REMOVED = 4
-        const val BOOKMARK_ADDED = 5
-        const val BOOKMARK_REMOVED = 6
-
-        private val ON = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
-        private val OFF = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
-    }
-
+private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+    : BaseViewHolder<SimpleVerseItem>(inflater.inflate(R.layout.item_simple_verse, parent, false)) {
     private val resources = itemView.resources
-    private val text = itemView.findViewById<TextView>(R.id.text)
-    private val bookmark = itemView.findViewById<ImageView>(R.id.bookmark)
-    private val note = itemView.findViewById<ImageView>(R.id.note)
+    private val index = itemView.findViewById(R.id.index) as TextView
+    private val text = itemView.findViewById(R.id.text) as TextView
+    private val divider = itemView.findViewById(R.id.divider) as View
 
     init {
         itemView.setOnClickListener { item?.let { it.onClicked(it.verse) } }
@@ -121,52 +127,45 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
             item?.let { it.onLongClicked(it.verse) }
             return@setOnLongClickListener true
         }
-        note.setOnClickListener { item?.let { it.onNoteClicked(it.verse.verseIndex) } }
-        bookmark.setOnClickListener { item?.let { it.onBookmarkClicked(it.verse.verseIndex, it.hasBookmark) } }
     }
 
-    override fun bind(settings: Settings, item: VerseItem, payloads: List<Any>) {
+    override fun bind(settings: Settings, item: SimpleVerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {
             text.text = item.textForDisplay
             text.setTextColor(if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources))
             text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
 
-            bookmark.colorFilter = if (item.hasBookmark) ON else OFF
-            note.colorFilter = if (item.hasNote) ON else OFF
+            if (item.verse.parallel.isEmpty()) {
+                index.text = item.indexForDisplay
+                index.setTextColor(if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources))
+                index.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+                index.visibility = View.VISIBLE
+
+                divider.visibility = View.GONE
+            } else {
+                index.visibility = View.GONE
+                divider.visibility = View.VISIBLE
+            }
 
             itemView.isSelected = item.selected
         } else {
             payloads.forEach { payload ->
                 when (payload as Int) {
-                    VERSE_SELECTED -> {
+                    VerseItemViewHolder.VERSE_SELECTED -> {
                         item.selected = true
                         itemView.isSelected = true
                         if (settings.nightModeOn) {
+                            index.animateTextColor(settings.getPrimarySelectedTextColor(resources))
                             text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
                         }
                     }
-                    VERSE_DESELECTED -> {
+                    VerseItemViewHolder.VERSE_DESELECTED -> {
                         item.selected = false
                         itemView.isSelected = false
                         if (settings.nightModeOn) {
+                            index.animateTextColor(settings.getPrimaryTextColor(resources))
                             text.animateTextColor(settings.getPrimaryTextColor(resources))
                         }
-                    }
-                    NOTE_ADDED -> {
-                        item.hasNote = true
-                        note.colorFilter = ON
-                    }
-                    NOTE_REMOVED -> {
-                        item.hasNote = false
-                        note.colorFilter = OFF
-                    }
-                    BOOKMARK_ADDED -> {
-                        item.hasBookmark = true
-                        bookmark.colorFilter = ON
-                    }
-                    BOOKMARK_REMOVED -> {
-                        item.hasBookmark = false
-                        bookmark.colorFilter = OFF
                     }
                 }
             }
