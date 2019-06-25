@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.progress
 
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -27,9 +28,9 @@ import kotlin.test.assertTrue
 class ReadingProgressItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.READING_PROGRESS_SUMMARY_ITEM,
+        assertEquals(R.layout.item_reading_progress_header,
                 ReadingProgressSummaryItem(0, 0, 0, 0, 0).getItemViewType())
-        assertEquals(BaseItem.READING_PROGRESS_DETAIL_ITEM, ReadingProgressDetailItem(
+        assertEquals(R.layout.item_reading_progress, ReadingProgressDetailItem(
                 "", 0, emptyArray(), 0, { _, _ -> }, { _, _ -> }, false).getItemViewType())
     }
 
