@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Grouped available translations by language
+- Should not fail saving when translation table already exists
 
 #### v0.6.0 (2019-06-20)
 - Show per-chapter reading status in reading progress
