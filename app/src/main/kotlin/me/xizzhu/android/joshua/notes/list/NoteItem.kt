@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.notes.list
 
 import android.graphics.Typeface
 import android.text.Spannable
@@ -30,6 +30,8 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.getCaptionTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: String,
@@ -37,6 +39,12 @@ data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: 
     companion object {
         private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+
+        private const val VIEW_TYPE = R.layout.item_note
+
+        init {
+            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> NoteItemViewHolder(inflater, parent) }
+        }
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -54,10 +62,10 @@ data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }
 
-    override fun getItemViewType(): Int = BaseItem.NOTE_ITEM
+    override fun getItemViewType(): Int = VIEW_TYPE
 }
 
-class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<NoteItem>(inflater.inflate(R.layout.item_note, parent, false)) {
     private val verse: TextView = itemView.findViewById(R.id.verse)
     private val text: TextView = itemView.findViewById(R.id.text)

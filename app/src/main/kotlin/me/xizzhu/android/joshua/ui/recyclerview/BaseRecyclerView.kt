@@ -32,7 +32,6 @@ interface BaseItem {
         val viewHolderCreator = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>>()
 
         const val SEARCH_ITEM = 2
-        const val NOTE_ITEM = 4
         const val TRANSLATION_ITEM = 5
         const val READING_PROGRESS_SUMMARY_ITEM = 6
         const val READING_PROGRESS_DETAIL_ITEM = 7
@@ -40,7 +39,7 @@ interface BaseItem {
         const val VERSE_ITEM = 9
         const val VERSE_TEXT_ITEM = 10
 
-        @IntDef(SEARCH_ITEM, NOTE_ITEM, TRANSLATION_ITEM,
+        @IntDef(SEARCH_ITEM, TRANSLATION_ITEM,
                 READING_PROGRESS_SUMMARY_ITEM, READING_PROGRESS_DETAIL_ITEM, SIMPLE_VERSE_ITEM,
                 VERSE_ITEM, VERSE_TEXT_ITEM)
         @Retention(AnnotationRetention.SOURCE)
@@ -89,7 +88,6 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
             when (viewType) {
                 BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent)
-                BaseItem.NOTE_ITEM -> NoteItemViewHolder(inflater, parent)
                 BaseItem.TRANSLATION_ITEM -> TranslationItemViewHolder(inflater, parent)
                 BaseItem.READING_PROGRESS_SUMMARY_ITEM -> ReadingProgressSummaryItemViewHolder(inflater, parent)
                 BaseItem.READING_PROGRESS_DETAIL_ITEM -> ReadingProgressDetailItemViewHolder(inflater, parent)

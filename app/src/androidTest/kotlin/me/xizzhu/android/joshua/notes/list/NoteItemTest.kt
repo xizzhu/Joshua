@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.notes.list
 
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -26,7 +27,7 @@ import kotlin.test.assertEquals
 class NoteItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.NOTE_ITEM, NoteItem(VerseIndex.INVALID, Verse.Text.INVALID, "", 0L, {}).getItemViewType())
+        assertEquals(R.layout.item_note, NoteItem(VerseIndex.INVALID, Verse.Text.INVALID, "", 0L, {}).getItemViewType())
     }
 
     @Test
