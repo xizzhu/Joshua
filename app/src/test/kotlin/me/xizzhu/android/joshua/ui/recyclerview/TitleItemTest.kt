@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.ui.recyclerview
 
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -23,6 +24,6 @@ import kotlin.test.assertEquals
 class TitleItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.TITLE_ITEM, TitleItem("", false).getItemViewType())
+        assertEquals(R.layout.item_title, TitleItem("", false).getItemViewType())
     }
 }

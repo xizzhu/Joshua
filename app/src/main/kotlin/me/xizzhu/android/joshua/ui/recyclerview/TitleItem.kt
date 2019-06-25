@@ -26,10 +26,18 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.getCaptionTextSize
 
 data class TitleItem(val title: CharSequence, val hideDivider: Boolean) : BaseItem {
-    override fun getItemViewType(): Int = BaseItem.TITLE_ITEM
+    companion object {
+        private const val itemViewType = R.layout.item_title
+
+        init {
+            BaseItem.viewHolderCreator[itemViewType] = { inflater, parent -> TitleItemViewHolder(inflater, parent) }
+        }
+    }
+
+    override fun getItemViewType(): Int = itemViewType
 }
 
-class TitleItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class TitleItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<TitleItem>(inflater.inflate(R.layout.item_title, parent, false)) {
     private val title: TextView = itemView.findViewById(R.id.title)
     private val divider: View = itemView.findViewById(R.id.divider)

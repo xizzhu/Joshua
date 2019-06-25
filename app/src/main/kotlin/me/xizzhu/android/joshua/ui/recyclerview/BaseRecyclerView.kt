@@ -29,7 +29,8 @@ import me.xizzhu.android.joshua.utils.BaseSettingsView
 
 interface BaseItem {
     companion object {
-        const val TITLE_ITEM = 0
+        val viewHolderCreator = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>>()
+
         const val TEXT_ITEM = 1
         const val SEARCH_ITEM = 2
         const val BOOKMARK_ITEM = 3
@@ -41,7 +42,7 @@ interface BaseItem {
         const val VERSE_ITEM = 9
         const val VERSE_TEXT_ITEM = 10
 
-        @IntDef(TITLE_ITEM, TEXT_ITEM, SEARCH_ITEM, BOOKMARK_ITEM, NOTE_ITEM, TRANSLATION_ITEM,
+        @IntDef(TEXT_ITEM, SEARCH_ITEM, BOOKMARK_ITEM, NOTE_ITEM, TRANSLATION_ITEM,
                 READING_PROGRESS_SUMMARY_ITEM, READING_PROGRESS_DETAIL_ITEM, SIMPLE_VERSE_ITEM,
                 VERSE_ITEM, VERSE_TEXT_ITEM)
         @Retention(AnnotationRetention.SOURCE)
@@ -89,7 +90,6 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
             when (viewType) {
-                BaseItem.TITLE_ITEM -> TitleItemViewHolder(inflater, parent)
                 BaseItem.TEXT_ITEM -> TextItemViewHolder(inflater, parent)
                 BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent)
                 BaseItem.BOOKMARK_ITEM -> BookmarkItemViewHolder(inflater, parent)
@@ -100,7 +100,8 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
                 BaseItem.SIMPLE_VERSE_ITEM -> SimpleVerseItemViewHolder(inflater, parent)
                 BaseItem.VERSE_ITEM -> VerseItemViewHolder(inflater, parent)
                 BaseItem.VERSE_TEXT_ITEM -> VerseTextItemViewHolder(inflater, parent)
-                else -> throw IllegalStateException("Unknown view type - $viewType")
+                else -> BaseItem.viewHolderCreator[viewType]?.invoke(inflater, parent)
+                        ?: throw IllegalStateException("Unknown view type - $viewType")
             } as BaseViewHolder<BaseItem>
 
     override fun onBindViewHolder(holder: BaseViewHolder<BaseItem>, position: Int) {
