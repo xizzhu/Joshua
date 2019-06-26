@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.progress
 
 import android.graphics.Typeface
 import android.view.LayoutInflater
@@ -27,17 +27,17 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.progress.ReadingProgressBar
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class ReadingProgressSummaryItem(val continuousReadingDays: Int, val chaptersRead: Int,
                                       val finishedBooks: Int, val finishedOldTestament: Int,
-                                      val finishedNewTestament: Int) : BaseItem {
-    override fun getItemViewType(): Int = BaseItem.READING_PROGRESS_SUMMARY_ITEM
-}
+                                      val finishedNewTestament: Int)
+    : BaseItem(R.layout.item_reading_progress_header, { inflater, parent -> ReadingProgressSummaryItemViewHolder(inflater, parent) })
 
-class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressSummaryItem>(inflater.inflate(R.layout.item_reading_progress_header, parent, false)) {
     private val continuousReadingDaysTitle: TextView = itemView.findViewById(R.id.continuous_reading_days_title)
     private val continuousReadingDays: TextView = itemView.findViewById(R.id.continuous_reading_days_value)
@@ -74,11 +74,10 @@ data class ReadingProgressDetailItem(val bookName: String, val bookIndex: Int,
                                      val chaptersRead: Array<Boolean>, val chaptersReadCount: Int,
                                      val onBookClicked: (Int, Boolean) -> Unit,
                                      val onChapterClicked: (Int, Int) -> Unit,
-                                     var expanded: Boolean) : BaseItem {
-    override fun getItemViewType(): Int = BaseItem.READING_PROGRESS_DETAIL_ITEM
-}
+                                     var expanded: Boolean)
+    : BaseItem(R.layout.item_reading_progress, { inflater, parent -> ReadingProgressDetailItemViewHolder(inflater, parent) })
 
-class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, parent: ViewGroup)
+private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressDetailItem>(inflater.inflate(R.layout.item_reading_progress, parent, false)) {
     companion object {
         private const val ROW_CHILD_COUNT = 5

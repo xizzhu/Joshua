@@ -20,7 +20,6 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.SearchItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import kotlin.test.Test
 import kotlin.test.assertEquals

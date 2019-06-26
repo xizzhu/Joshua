@@ -28,7 +28,6 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.notes.NotesInteractor
 import me.xizzhu.android.joshua.ui.formatDate
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter

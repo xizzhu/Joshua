@@ -21,35 +21,23 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.IntDef
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
-interface BaseItem {
+abstract class BaseItem protected constructor(val viewType: Int,
+                                              viewHolderCreator: (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>) {
     companion object {
-        const val TITLE_ITEM = 0
-        const val TEXT_ITEM = 1
-        const val SEARCH_ITEM = 2
-        const val BOOKMARK_ITEM = 3
-        const val NOTE_ITEM = 4
-        const val TRANSLATION_ITEM = 5
-        const val READING_PROGRESS_SUMMARY_ITEM = 6
-        const val READING_PROGRESS_DETAIL_ITEM = 7
-        const val SIMPLE_VERSE_ITEM = 8
-        const val VERSE_ITEM = 9
-        const val VERSE_TEXT_ITEM = 10
+        private val VIEW_HOLDER_CREATORS = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>>()
 
-        @IntDef(TITLE_ITEM, TEXT_ITEM, SEARCH_ITEM, BOOKMARK_ITEM, NOTE_ITEM, TRANSLATION_ITEM,
-                READING_PROGRESS_SUMMARY_ITEM, READING_PROGRESS_DETAIL_ITEM, SIMPLE_VERSE_ITEM,
-                VERSE_ITEM, VERSE_TEXT_ITEM)
-        @Retention(AnnotationRetention.SOURCE)
-        annotation class ItemViewType
+        fun getViewHolderCreator(viewType: Int) = VIEW_HOLDER_CREATORS
+                .getOrElse(viewType, { throw IllegalStateException("Unknown view type - $viewType") })
     }
 
-    @ItemViewType
-    fun getItemViewType(): Int
+    init {
+        VIEW_HOLDER_CREATORS[viewType] = viewHolderCreator
+    }
 }
 
 abstract class BaseViewHolder<T : BaseItem>(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -85,23 +73,10 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
 
     override fun getItemCount(): Int = items.size
 
-    override fun getItemViewType(position: Int): Int = items[position].getItemViewType()
+    override fun getItemViewType(position: Int): Int = items[position].viewType
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
-            when (viewType) {
-                BaseItem.TITLE_ITEM -> TitleItemViewHolder(inflater, parent)
-                BaseItem.TEXT_ITEM -> TextItemViewHolder(inflater, parent)
-                BaseItem.SEARCH_ITEM -> SearchItemViewHolder(inflater, parent)
-                BaseItem.BOOKMARK_ITEM -> BookmarkItemViewHolder(inflater, parent)
-                BaseItem.NOTE_ITEM -> NoteItemViewHolder(inflater, parent)
-                BaseItem.TRANSLATION_ITEM -> TranslationItemViewHolder(inflater, parent)
-                BaseItem.READING_PROGRESS_SUMMARY_ITEM -> ReadingProgressSummaryItemViewHolder(inflater, parent)
-                BaseItem.READING_PROGRESS_DETAIL_ITEM -> ReadingProgressDetailItemViewHolder(inflater, parent)
-                BaseItem.SIMPLE_VERSE_ITEM -> SimpleVerseItemViewHolder(inflater, parent)
-                BaseItem.VERSE_ITEM -> VerseItemViewHolder(inflater, parent)
-                BaseItem.VERSE_TEXT_ITEM -> VerseTextItemViewHolder(inflater, parent)
-                else -> throw IllegalStateException("Unknown view type - $viewType")
-            } as BaseViewHolder<BaseItem>
+            BaseItem.getViewHolderCreator(viewType).invoke(inflater, parent) as BaseViewHolder<BaseItem>
 
     override fun onBindViewHolder(holder: BaseViewHolder<BaseItem>, position: Int) {
         holder.bindData(settings!!, items[position])

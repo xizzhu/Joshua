@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.notes.list
 
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-class VerseTextItemTest : BaseUnitTest() {
+class NoteItemTest : BaseUnitTest() {
     @Test
-    fun testTextForDisplay() {
-        val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = VerseTextItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, {}, {}).textForDisplay.toString()
-        assertEquals(expected, actual)
+    fun testItemViewType() {
+        assertEquals(R.layout.item_note, NoteItem(VerseIndex.INVALID, Verse.Text.INVALID, "", 0L, {}).viewType)
     }
 
     @Test
-    fun testTextForDisplayWithInvalidVerse() {
-        assertTrue(VerseTextItem(VerseIndex.INVALID, Verse.Text.INVALID, {}, {}).textForDisplay.isEmpty())
-        assertTrue(VerseTextItem(VerseIndex.INVALID, MockContents.kjvVerses[0].text, {}, {}).textForDisplay.isEmpty())
-        assertTrue(VerseTextItem(MockContents.kjvVerses[0].verseIndex, Verse.Text.INVALID, {}, {}).textForDisplay.isEmpty())
+    fun testTextForDisplay() {
+        val expected = "Gen. 1:1 In the beginning God created the heaven and the earth."
+        val actual = NoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, "", 12345678L, {}).textForDisplay.toString()
+        assertEquals(expected, actual)
     }
 }

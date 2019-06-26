@@ -32,7 +32,6 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.ui.recyclerview.VerseTextItem
 
 class VerseDetailPagerAdapter(context: Context, private val listener: Listener) : PagerAdapter() {
     interface Listener {

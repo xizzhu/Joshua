@@ -20,7 +20,6 @@ import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.ui.recyclerview.SearchItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import java.util.ArrayList
 

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.translations
 
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,7 +28,7 @@ import kotlin.test.assertEquals
 class TranslationItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.TRANSLATION_ITEM, TranslationItem(MockContents.kjvTranslationInfo, true, {}, { _, _ -> }).getItemViewType())
+        assertEquals(R.layout.item_translation, TranslationItem(MockContents.kjvTranslationInfo, true, {}, { _, _ -> }).viewType)
     }
 
     @Test

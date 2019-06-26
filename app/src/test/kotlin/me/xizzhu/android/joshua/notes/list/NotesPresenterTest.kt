@@ -27,7 +27,6 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.notes.NotesInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.NoteItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.Before

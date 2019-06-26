@@ -33,8 +33,6 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
-import me.xizzhu.android.joshua.ui.recyclerview.SimpleVerseItem
-import me.xizzhu.android.joshua.ui.recyclerview.VerseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
 import kotlin.properties.Delegates

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.reading.detail
 
 import android.text.SpannableStringBuilder
 import android.text.style.RelativeSizeSpan
@@ -27,9 +27,12 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import android.text.Spannable
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
 data class VerseTextItem(val verseIndex: VerseIndex, val verseText: Verse.Text,
-                         val onClicked: (String) -> Unit, val onLongClicked: (Verse) -> Unit) : BaseItem {
+                         val onClicked: (String) -> Unit, val onLongClicked: (Verse) -> Unit)
+    : BaseItem(R.layout.item_verse_text, { inflater, parent -> VerseTextItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
@@ -55,11 +58,9 @@ data class VerseTextItem(val verseIndex: VerseIndex, val verseText: Verse.Text,
 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }
-
-    override fun getItemViewType(): Int = BaseItem.VERSE_TEXT_ITEM
 }
 
-class VerseTextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class VerseTextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<VerseTextItem>(inflater.inflate(R.layout.item_verse_text, parent, false)) {
     private val text: TextView = itemView.findViewById(R.id.text)
 

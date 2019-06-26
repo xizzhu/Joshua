@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.reading.detail
 
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.recyclerview.VerseTextItem
 
 data class VerseDetail(val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
                        val bookmarked: Boolean, val note: String) {

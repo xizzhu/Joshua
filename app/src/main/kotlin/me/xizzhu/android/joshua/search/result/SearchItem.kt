@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.search.result
 
 import android.annotation.SuppressLint
 import android.graphics.Typeface
@@ -28,12 +28,15 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.util.*
 
 data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
                       private val text: String, private val query: String,
-                      val onClicked: (VerseIndex) -> Unit) : BaseItem {
+                      val onClicked: (VerseIndex) -> Unit)
+    : BaseItem(R.layout.item_search_result, { inflater, parent -> SearchItemViewHolder(inflater, parent) }) {
     companion object {
         // We don't expect users to change locale that frequently.
         @SuppressLint("ConstantLocale")
@@ -78,11 +81,9 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }
-
-    override fun getItemViewType(): Int = BaseItem.SEARCH_ITEM
 }
 
-class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<SearchItem>(inflater.inflate(R.layout.item_search_result, parent, false)) {
     private val text = itemView as TextView
 

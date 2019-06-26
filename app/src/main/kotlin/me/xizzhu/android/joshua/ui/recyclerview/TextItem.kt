@@ -23,11 +23,10 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class TextItem(val title: CharSequence) : BaseItem {
-    override fun getItemViewType(): Int = BaseItem.TEXT_ITEM
-}
+data class TextItem(val title: CharSequence)
+    : BaseItem(R.layout.item_text, { inflater, parent -> TextItemViewHolder(inflater, parent) })
 
-class TextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class TextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<TextItem>(inflater.inflate(R.layout.item_text, parent, false)) {
     private val title: TextView = itemView.findViewById(R.id.title)
 

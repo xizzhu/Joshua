@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.reading.verse
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -32,7 +33,7 @@ import org.junit.runner.RunWith
 class SimpleVerseItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(BaseItem.SIMPLE_VERSE_ITEM, SimpleVerseItem(Verse.INVALID, 0, {}, {}).getItemViewType())
+        assertEquals(R.layout.item_simple_verse, SimpleVerseItem(Verse.INVALID, 0, {}, {}).viewType)
     }
 
     @Test
