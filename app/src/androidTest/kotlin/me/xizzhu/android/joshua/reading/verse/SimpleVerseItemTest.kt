@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
 class SimpleVerseItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_simple_verse, SimpleVerseItem(Verse.INVALID, 0, {}, {}).getItemViewType())
+        assertEquals(R.layout.item_simple_verse, SimpleVerseItem(Verse.INVALID, 0, {}, {}).viewType)
     }
 
     @Test

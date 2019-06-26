@@ -28,10 +28,10 @@ import kotlin.test.assertTrue
 class ReadingProgressItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_reading_progress_header,
-                ReadingProgressSummaryItem(0, 0, 0, 0, 0).getItemViewType())
+        assertEquals(R.layout.item_reading_progress_header, ReadingProgressSummaryItem(
+                0, 0, 0, 0, 0).viewType)
         assertEquals(R.layout.item_reading_progress, ReadingProgressDetailItem(
-                "", 0, emptyArray(), 0, { _, _ -> }, { _, _ -> }, false).getItemViewType())
+                "", 0, emptyArray(), 0, { _, _ -> }, { _, _ -> }, false).viewType)
     }
 
     @Test

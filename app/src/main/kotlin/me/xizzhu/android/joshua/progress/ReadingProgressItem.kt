@@ -34,17 +34,8 @@ import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class ReadingProgressSummaryItem(val continuousReadingDays: Int, val chaptersRead: Int,
                                       val finishedBooks: Int, val finishedOldTestament: Int,
-                                      val finishedNewTestament: Int) : BaseItem {
-    companion object {
-        private const val VIEW_TYPE = R.layout.item_reading_progress_header
-
-        init {
-            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> ReadingProgressSummaryItemViewHolder(inflater, parent) }
-        }
-    }
-
-    override fun getItemViewType(): Int = VIEW_TYPE
-}
+                                      val finishedNewTestament: Int)
+    : BaseItem(R.layout.item_reading_progress_header, { inflater, parent -> ReadingProgressSummaryItemViewHolder(inflater, parent) })
 
 private class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressSummaryItem>(inflater.inflate(R.layout.item_reading_progress_header, parent, false)) {
@@ -83,17 +74,8 @@ data class ReadingProgressDetailItem(val bookName: String, val bookIndex: Int,
                                      val chaptersRead: Array<Boolean>, val chaptersReadCount: Int,
                                      val onBookClicked: (Int, Boolean) -> Unit,
                                      val onChapterClicked: (Int, Int) -> Unit,
-                                     var expanded: Boolean) : BaseItem {
-    companion object {
-        private const val VIEW_TYPE = R.layout.item_reading_progress
-
-        init {
-            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> ReadingProgressDetailItemViewHolder(inflater, parent) }
-        }
-    }
-
-    override fun getItemViewType(): Int = VIEW_TYPE
-}
+                                     var expanded: Boolean)
+    : BaseItem(R.layout.item_reading_progress, { inflater, parent -> ReadingProgressDetailItemViewHolder(inflater, parent) })
 
 private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressDetailItem>(inflater.inflate(R.layout.item_reading_progress, parent, false)) {

@@ -27,7 +27,7 @@ import kotlin.test.assertEquals
 class NoteItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_note, NoteItem(VerseIndex.INVALID, Verse.Text.INVALID, "", 0L, {}).getItemViewType())
+        assertEquals(R.layout.item_note, NoteItem(VerseIndex.INVALID, Verse.Text.INVALID, "", 0L, {}).viewType)
     }
 
     @Test

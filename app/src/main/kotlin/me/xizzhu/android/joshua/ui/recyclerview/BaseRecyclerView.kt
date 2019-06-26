@@ -26,12 +26,18 @@ import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.utils.BaseSettingsView
 
-interface BaseItem {
+abstract class BaseItem protected constructor(val viewType: Int,
+                                              viewHolderCreator: (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>) {
     companion object {
-        val viewHolderCreator = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>>()
+        private val VIEW_HOLDER_CREATORS = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>>()
+
+        fun getViewHolderCreator(viewType: Int) = VIEW_HOLDER_CREATORS
+                .getOrElse(viewType, { throw IllegalStateException("Unknown view type - $viewType") })
     }
 
-    fun getItemViewType(): Int
+    init {
+        VIEW_HOLDER_CREATORS[viewType] = viewHolderCreator
+    }
 }
 
 abstract class BaseViewHolder<T : BaseItem>(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -67,11 +73,10 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
 
     override fun getItemCount(): Int = items.size
 
-    override fun getItemViewType(position: Int): Int = items[position].getItemViewType()
+    override fun getItemViewType(position: Int): Int = items[position].viewType
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
-            BaseItem.viewHolderCreator.getOrElse(viewType, { throw IllegalStateException("Unknown view type - $viewType") })
-                    .invoke(inflater, parent) as BaseViewHolder<BaseItem>
+            BaseItem.getViewHolderCreator(viewType).invoke(inflater, parent) as BaseViewHolder<BaseItem>
 
     override fun onBindViewHolder(holder: BaseViewHolder<BaseItem>, position: Int) {
         holder.bindData(settings!!, items[position])

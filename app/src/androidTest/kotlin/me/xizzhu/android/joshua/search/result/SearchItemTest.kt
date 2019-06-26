@@ -31,7 +31,7 @@ import org.junit.runner.RunWith
 class SearchItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_search_result, SearchItem(VerseIndex.INVALID, "", "", "", {}).getItemViewType())
+        assertEquals(R.layout.item_search_result, SearchItem(VerseIndex.INVALID, "", "", "", {}).viewType)
     }
 
     @Test

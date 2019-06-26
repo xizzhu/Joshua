@@ -24,6 +24,6 @@ import kotlin.test.assertEquals
 class TextItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_text, TextItem("").getItemViewType())
+        assertEquals(R.layout.item_text, TextItem("").viewType)
     }
 }

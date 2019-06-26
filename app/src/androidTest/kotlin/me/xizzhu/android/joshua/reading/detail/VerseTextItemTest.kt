@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
 class VerseTextItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_verse_text, VerseTextItem(VerseIndex.INVALID, Verse.Text.INVALID, {}, {}).getItemViewType())
+        assertEquals(R.layout.item_verse_text, VerseTextItem(VerseIndex.INVALID, Verse.Text.INVALID, {}, {}).viewType)
     }
 
     @Test

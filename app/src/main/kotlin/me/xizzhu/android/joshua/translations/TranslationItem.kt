@@ -31,19 +31,9 @@ import kotlin.collections.ArrayList
 
 data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean,
                            val onClicked: (TranslationInfo) -> Unit,
-                           val onLongClicked: (TranslationInfo, Boolean) -> Unit) : BaseItem {
-    companion object {
-        private const val VIEW_TYPE = R.layout.item_translation
-
-        init {
-            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> TranslationItemViewHolder(inflater, parent) }
-        }
-    }
-
-    val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0
-
-    override fun getItemViewType(): Int = VIEW_TYPE
-}
+                           val onLongClicked: (TranslationInfo, Boolean) -> Unit,
+                           val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0)
+    : BaseItem(R.layout.item_translation, { inflater, parent -> TranslationItemViewHolder(inflater, parent) })
 
 fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, groupByLanguage: Boolean,
                                              onClicked: (TranslationInfo) -> Unit,

@@ -35,17 +35,12 @@ import java.lang.StringBuilder
 
 data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int,
                            val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
-                           var selected: Boolean = false) : BaseItem {
+                           var selected: Boolean = false)
+    : BaseItem(R.layout.item_simple_verse, { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }) {
     companion object {
         private val STRING_BUILDER = StringBuilder()
         private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
-
-        private const val VIEW_TYPE = R.layout.item_simple_verse
-
-        init {
-            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }
-        }
 
         private fun buildVerseForDisplay(out: StringBuilder, verseIndex: VerseIndex, text: Verse.Text) {
             if (out.isNotEmpty()) {
@@ -110,8 +105,6 @@ data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int,
             return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, length)
         }
     }
-
-    override fun getItemViewType(): Int = VIEW_TYPE
 }
 
 private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)

@@ -31,16 +31,11 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
 data class VerseTextItem(val verseIndex: VerseIndex, val verseText: Verse.Text,
-                         val onClicked: (String) -> Unit, val onLongClicked: (Verse) -> Unit) : BaseItem {
+                         val onClicked: (String) -> Unit, val onLongClicked: (Verse) -> Unit)
+    : BaseItem(R.layout.item_verse_text, { inflater, parent -> VerseTextItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
-
-        private const val VIEW_TYPE = R.layout.item_verse_text
-
-        init {
-            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> VerseTextItemViewHolder(inflater, parent) }
-        }
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -63,8 +58,6 @@ data class VerseTextItem(val verseIndex: VerseIndex, val verseText: Verse.Text,
 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }
-
-    override fun getItemViewType(): Int = VIEW_TYPE
 }
 
 private class VerseTextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)

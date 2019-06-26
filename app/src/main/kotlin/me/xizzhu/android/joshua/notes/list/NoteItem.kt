@@ -35,16 +35,11 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: String,
-                    val timestamp: Long, val onClicked: (VerseIndex) -> Unit) : BaseItem {
+                    val timestamp: Long, val onClicked: (VerseIndex) -> Unit)
+    : BaseItem(R.layout.item_note, { inflater, parent -> NoteItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
-
-        private const val VIEW_TYPE = R.layout.item_note
-
-        init {
-            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> NoteItemViewHolder(inflater, parent) }
-        }
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -61,8 +56,6 @@ data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: 
 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }
-
-    override fun getItemViewType(): Int = VIEW_TYPE
 }
 
 private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)

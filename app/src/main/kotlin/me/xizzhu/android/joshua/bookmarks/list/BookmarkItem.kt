@@ -34,17 +34,12 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val timestamp: Long,
-                        @Constants.SortOrder private val sortOrder: Int, val onClick: (VerseIndex) -> Unit) : BaseItem {
+                        @Constants.SortOrder private val sortOrder: Int, val onClick: (VerseIndex) -> Unit)
+    : BaseItem(R.layout.item_bookmarks, { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
         private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
-
-        private const val VIEW_TYPE = R.layout.item_bookmarks
-
-        init {
-            BaseItem.viewHolderCreator[VIEW_TYPE] = { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }
-        }
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -73,8 +68,6 @@ data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val ti
 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
     }
-
-    override fun getItemViewType(): Int = VIEW_TYPE
 }
 
 private class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)

@@ -28,7 +28,7 @@ import kotlin.test.assertEquals
 class TranslationItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_translation, TranslationItem(MockContents.kjvTranslationInfo, true, {}, { _, _ -> }).getItemViewType())
+        assertEquals(R.layout.item_translation, TranslationItem(MockContents.kjvTranslationInfo, true, {}, { _, _ -> }).viewType)
     }
 
     @Test
