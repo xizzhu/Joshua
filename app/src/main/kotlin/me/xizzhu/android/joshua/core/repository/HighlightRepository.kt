@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core
+package me.xizzhu.android.joshua.core.repository
 
-import androidx.annotation.ColorInt
-import me.xizzhu.android.joshua.core.repository.HighlightRepository
+import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.repository.local.LocalHighlightStorage
 
-data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val timestamp: Long)
-
-class HighlightManager(private val highlightRepository: HighlightRepository) {
+class HighlightRepository(private val localHighlightStorage: LocalHighlightStorage) {
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
-            highlightRepository.read(bookIndex, chapterIndex)
+            localHighlightStorage.read(bookIndex, chapterIndex)
 
     suspend fun save(highlight: Highlight) {
-        highlightRepository.save(highlight)
+        localHighlightStorage.save(highlight)
     }
 
     suspend fun remove(verseIndex: VerseIndex) {
-        highlightRepository.remove(verseIndex)
+        localHighlightStorage.remove(verseIndex)
     }
 }

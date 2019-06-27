@@ -75,6 +75,11 @@ class AppModule(private val app: App) {
 
     @Provides
     @Singleton
+    fun provideHighlightManager(highlightRepository: HighlightRepository): HighlightManager =
+            HighlightManager(highlightRepository)
+
+    @Provides
+    @Singleton
     fun provideNoteManager(noteRepository: NoteRepository): NoteManager =
             NoteManager(noteRepository)
 
@@ -105,6 +110,11 @@ class RepositoryModule {
     @Singleton
     fun provideLocalBookmarkStorage(androidDatabase: AndroidDatabase): LocalBookmarkStorage =
             AndroidBookmarkStorage(androidDatabase)
+
+    @Provides
+    @Singleton
+    fun provideLocalHighlightStorage(androidDatabase: AndroidDatabase): LocalHighlightStorage =
+            AndroidHighlightStorage(androidDatabase)
 
     @Provides
     @Singleton
@@ -158,6 +168,11 @@ class RepositoryModule {
     @Singleton
     fun provideBookmarkRepository(localBookmarkStorage: LocalBookmarkStorage): BookmarkRepository =
             BookmarkRepository(localBookmarkStorage)
+
+    @Provides
+    @Singleton
+    fun provideHighlightRepository(localHighlightStorage: LocalHighlightStorage): HighlightRepository =
+            HighlightRepository(localHighlightStorage)
 
     @Provides
     @Singleton
