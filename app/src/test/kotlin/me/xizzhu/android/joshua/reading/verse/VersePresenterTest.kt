@@ -16,15 +16,14 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+import android.graphics.Color
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Bookmark
-import me.xizzhu.android.joshua.core.Note
-import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -181,13 +180,46 @@ class VersePresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testToVerseItemsWithNoBookmarksNorNotes() {
+    fun testToSimpleVerseItemsWithoutHighlights() {
         val verses = MockContents.kjvVerses
-        val verseItems = versePresenter.toVerseItems(verses, emptyList(), emptyList())
+        val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, emptyList())
+        assertEquals(verses.size, simpleVerseItems.size)
+        simpleVerseItems.forEachIndexed { index, verseItem ->
+            assertEquals(verses[index], verseItem.verse)
+            assertEquals(Color.TRANSPARENT, verseItem.highlightColor)
+        }
+    }
+
+    @Test
+    fun testToSimpleVerseItems() {
+        val verses = MockContents.kjvVerses
+        val simpleVerseItems = versePresenter.toSimpleVerseItems(verses,
+                listOf(
+                        Highlight(VerseIndex(0, 0, 0), Color.RED, 1L),
+                        Highlight(VerseIndex(0, 0, 6), Color.GREEN, 2L),
+                        Highlight(VerseIndex(0, 0, 10), Color.BLUE, 3L)
+                )
+        )
+        assertEquals(verses.size, simpleVerseItems.size)
+        simpleVerseItems.forEachIndexed { index, verseItem ->
+            assertEquals(verses[index], verseItem.verse)
+            assertEquals(when (index) {
+                0 -> Color.RED
+                6 -> Color.GREEN
+                else -> Color.TRANSPARENT
+            }, verseItem.highlightColor)
+        }
+    }
+
+    @Test
+    fun testToVerseItemsWithoutBookmarksHighlightsNotes() {
+        val verses = MockContents.kjvVerses
+        val verseItems = versePresenter.toVerseItems(verses, emptyList(), emptyList(), emptyList())
         assertEquals(verses.size, verseItems.size)
         verseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
             assertFalse(verseItem.hasBookmark)
+            assertEquals(Color.TRANSPARENT, verseItem.highlightColor)
             assertFalse(verseItem.hasNote)
         }
     }
@@ -202,14 +234,25 @@ class VersePresenterTest : BaseUnitTest() {
                         Bookmark(VerseIndex(0, 0, 10), 0L)
                 ),
                 listOf(
+                        Highlight(VerseIndex(0, 0, 0), Color.RED, 1L),
+                        Highlight(VerseIndex(0, 0, 6), Color.GREEN, 2L),
+                        Highlight(VerseIndex(0, 0, 10), Color.BLUE, 3L)
+                ),
+                listOf(
                         Note(VerseIndex(0, 0, 0), "", 0L),
                         Note(VerseIndex(0, 0, 7), "", 0L),
                         Note(VerseIndex(0, 0, 10), "", 0L)
-                ))
+                )
+        )
         assertEquals(verses.size, verseItems.size)
         verseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
             assertTrue(if (index == 0 || index == 5) verseItem.hasBookmark else !verseItem.hasBookmark)
+            assertEquals(when (index) {
+                0 -> Color.RED
+                6 -> Color.GREEN
+                else -> Color.TRANSPARENT
+            }, verseItem.highlightColor)
             assertTrue(if (index == 0 || index == 7) verseItem.hasNote else !verseItem.hasNote)
         }
     }
@@ -223,11 +266,14 @@ class VersePresenterTest : BaseUnitTest() {
             val bookIndex = 1
             val chapterIndex = 2
             `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
+            `when`(readingInteractor.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
-            verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map {
+                SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
+            })
+            verify(verseView, never()).onVersesLoadFailed(anyInt(), anyInt())
         }
     }
 
@@ -242,8 +288,7 @@ class VersePresenterTest : BaseUnitTest() {
             `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenThrow(RuntimeException("Random exception"))
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
-            verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
+            verify(verseView, never()).onVersesLoaded(anyInt(), anyInt(), any())
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -260,14 +305,17 @@ class VersePresenterTest : BaseUnitTest() {
             val chapterIndex = 2
             `when`(readingInteractor.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex))
                     .thenReturn(MockContents.kjvVerses)
+            `when`(readingInteractor.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
 
             currentTranslationChannel.send(translationShortName)
             parallelTranslationsChannel.send(parallelTranslations)
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
-            verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map {
+                SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
+            })
+            verify(verseView, never()).onVersesLoadFailed(anyInt(), anyInt())
         }
     }
 
@@ -288,8 +336,7 @@ class VersePresenterTest : BaseUnitTest() {
             parallelTranslationsChannel.send(parallelTranslations)
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
-            verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
+            verify(verseView, never()).onVersesLoaded(anyInt(), anyInt(), any())
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }

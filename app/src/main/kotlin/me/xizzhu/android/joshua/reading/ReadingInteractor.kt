@@ -38,11 +38,11 @@ import me.xizzhu.android.joshua.reading.verse.VerseItemViewHolder
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 import me.xizzhu.android.logger.Log
 
-
 class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val navigator: Navigator,
                         private val bibleReadingManager: BibleReadingManager,
                         private val bookmarkManager: BookmarkManager,
+                        private val highlightManager: HighlightManager,
                         private val noteManager: NoteManager,
                         private val readingProgressManager: ReadingProgressManager,
                         private val translationManager: TranslationManager,
@@ -211,6 +211,9 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         bookmarkManager.remove(verseIndex)
         verseState.send(Pair(verseIndex, VerseItemViewHolder.BOOKMARK_REMOVED))
     }
+
+    suspend fun readHighlights(bookIndex: Int, chapterIndex: Int): List<Highlight> =
+            highlightManager.read(bookIndex, chapterIndex)
 
     suspend fun readNotes(bookIndex: Int, chapterIndex: Int): List<Note> = noteManager.read(bookIndex, chapterIndex)
 
