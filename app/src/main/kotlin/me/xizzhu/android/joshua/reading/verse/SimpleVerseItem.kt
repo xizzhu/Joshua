@@ -17,39 +17,27 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.text.SpannableStringBuilder
-import android.text.Spanned
-import android.text.style.RelativeSizeSpan
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import java.lang.StringBuilder
 
-data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int,
+data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int, @ColorInt var highlightColor: Int,
                            val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
                            var selected: Boolean = false)
     : BaseItem(R.layout.item_simple_verse, { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }) {
     companion object {
         private val STRING_BUILDER = StringBuilder()
-        private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
-
-        private fun buildVerseForDisplay(out: StringBuilder, verseIndex: VerseIndex, text: Verse.Text) {
-            if (out.isNotEmpty()) {
-                out.append('\n').append('\n')
-            }
-            out.append(text.translationShortName).append(' ')
-                    .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                    .append('\n').append(text.text)
-        }
     }
 
     val indexForDisplay: CharSequence by lazy {
@@ -76,35 +64,7 @@ data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int,
         }
     }
 
-    val textForDisplay: CharSequence by lazy {
-        if (verse.parallel.isEmpty()) {
-            return@lazy verse.text.text
-        } else {
-            // format:
-            // <primary translation> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-            // <empty line>
-            // <parallel translation 1> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-            // <parallel translation 2> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-
-            STRING_BUILDER.setLength(0)
-            buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, verse.text)
-            val primaryTextLength = STRING_BUILDER.length
-
-            for (text in verse.parallel) {
-                buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, text)
-            }
-
-            SPANNABLE_STRING_BUILDER.clear()
-            SPANNABLE_STRING_BUILDER.clearSpans()
-            SPANNABLE_STRING_BUILDER.append(STRING_BUILDER)
-            val length = SPANNABLE_STRING_BUILDER.length
-            SPANNABLE_STRING_BUILDER.setSpan(PARALLEL_VERSE_SIZE_SPAN, primaryTextLength, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, length)
-        }
-    }
+    val textForDisplay: CharSequence by lazy { SPANNABLE_STRING_BUILDER.format(verse, true, highlightColor) }
 }
 
 private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)

@@ -16,9 +16,16 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+import android.graphics.Color
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.BackgroundColorSpan
+import android.text.style.RelativeSizeSpan
+import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.append
 import java.lang.StringBuilder
 
 fun VerseIndex.toPagePosition(): Int = indexToPagePosition(bookIndex, chapterIndex)
@@ -101,4 +108,68 @@ fun Collection<Verse>.toStringForSharing(): String {
         }
     }
     return stringBuilder.toString()
+}
+
+private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
+
+private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Text): SpannableStringBuilder {
+    if (isNotEmpty()) {
+        append('\n').append('\n')
+    }
+    // format:
+    // <primary translation> <chapter verseIndex>:<verse verseIndex>
+    // <verse text>
+    append(text.translationShortName).append(' ')
+            .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
+            .append('\n').append(text.text)
+
+    return this
+}
+
+fun SpannableStringBuilder.format(verse: Verse, simpleReadingMode: Boolean, @ColorInt highlightColor: Int): CharSequence {
+    clear()
+    clearSpans()
+
+    if (verse.parallel.isEmpty()) {
+        if (simpleReadingMode) {
+            append(verse.text.text)
+        } else {
+            // format:
+            // <book name> <chapter verseIndex>:<verse verseIndex>
+            // <verse text>
+            append(verse.text.bookName).append(' ')
+                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
+                    .append(verse.text.text)
+        }
+        if (highlightColor != Color.TRANSPARENT) {
+            val length = length
+            setSpan(BackgroundColorSpan(highlightColor),
+                    length - verse.text.text.length, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        }
+    } else {
+        // format:
+        // <primary translation> <chapter verseIndex>:<verse verseIndex>
+        // <verse text>
+        // <empty line>
+        // <parallel translation 1> <chapter verseIndex>:<verse verseIndex>
+        // <verse text>
+        // <parallel translation 2> <chapter verseIndex>:<verse verseIndex>
+        // <verse text>
+
+        append(verse.verseIndex, verse.text)
+        val primaryTextLength = length
+        if (highlightColor != Color.TRANSPARENT) {
+            setSpan(BackgroundColorSpan(highlightColor),
+                    primaryTextLength - verse.text.text.length, primaryTextLength,
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        }
+
+        for (text in verse.parallel) {
+            append(verse.verseIndex, text)
+        }
+
+        setSpan(parallelVerseSizeSpan, primaryTextLength, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+    }
+
+    return subSequence(0, length)
 }

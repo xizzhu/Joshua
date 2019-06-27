@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.reading.verse
 
 import android.view.Menu
 import android.view.MenuItem
+import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.Dispatchers
@@ -164,7 +165,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                     val verses = readVerses(bookIndex, chapterIndex)
                     val totalVerseCount = verses.size
                     verses.map {
-                        SimpleVerseItem(it, totalVerseCount,
+                        SimpleVerseItem(it, totalVerseCount, 0, // TODO
                                 this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
                     }
                 } else {
@@ -216,9 +217,11 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             }
 
             verseItems.add(VerseItem(verse,
-                    bookmark?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
                     note?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
-                    this::onVerseClicked, this::onVerseLongClicked, this::onNoteClicked, this::onBookmarkClicked))
+                    0, // TODO
+                    bookmark?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
+                    this::onVerseClicked, this::onVerseLongClicked, this::onNoteClicked,
+                    this::onHighlightClicked, this::onBookmarkClicked))
         }
         return verseItems
     }
@@ -258,6 +261,11 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     @VisibleForTesting
     fun onNoteClicked(verseIndex: VerseIndex) {
         coroutineScope.launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE) }
+    }
+
+    @VisibleForTesting
+    fun onHighlightClicked(verseIndex: VerseIndex, @ColorInt currentHighlightColor: Int) {
+        // TODO
     }
 
     @VisibleForTesting

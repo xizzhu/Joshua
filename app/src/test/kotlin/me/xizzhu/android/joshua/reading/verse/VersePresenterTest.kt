@@ -226,7 +226,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -243,7 +243,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -266,7 +266,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
             verify(verseView, never()).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }
@@ -289,7 +289,7 @@ class VersePresenterTest : BaseUnitTest() {
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, never()).onVersesLoaded(
-                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map { SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked) })
             verify(verseView, times(1)).onVersesLoadFailed(bookIndex, chapterIndex)
         }
     }

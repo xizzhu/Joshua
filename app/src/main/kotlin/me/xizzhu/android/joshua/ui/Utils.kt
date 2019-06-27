@@ -22,6 +22,7 @@ import android.content.ContextWrapper
 import android.content.res.Resources
 import android.content.res.TypedArray
 import android.graphics.Color
+import android.text.SpannableStringBuilder
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.View
@@ -106,3 +107,5 @@ fun TextView.updateSettingsWithSecondaryText(settings: Settings) {
     setTextColor(settings.getSecondaryTextColor(resources))
     setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
 }
+
+fun SpannableStringBuilder.append(i: Int): SpannableStringBuilder = append(i.toString())
