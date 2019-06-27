@@ -24,7 +24,7 @@ import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 
-class BookmarkDao(private val sqliteHelper: SQLiteOpenHelper) {
+class BookmarkDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_BOOKMARK = "bookmark"
         private const val COLUMN_BOOK_INDEX = "bookIndex"

@@ -24,7 +24,7 @@ import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
 
-class NoteDao(private val sqliteHelper: SQLiteOpenHelper) {
+class NoteDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_NOTE = "note"
         private const val COLUMN_BOOK_INDEX = "bookIndex"

@@ -22,7 +22,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.ReadingProgress
 
-class ReadingProgressDao(private val sqliteHelper: SQLiteOpenHelper) {
+class ReadingProgressDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_READING_PROGRESS = "readingProgress"
         private const val COLUMN_BOOK_INDEX = "bookIndex"

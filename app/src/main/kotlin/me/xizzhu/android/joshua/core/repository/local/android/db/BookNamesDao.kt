@@ -23,7 +23,7 @@ import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.Bible
 import java.lang.StringBuilder
 
-class BookNamesDao(private val sqliteHelper: SQLiteOpenHelper) {
+class BookNamesDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_BOOK_NAMES = "bookNames"
         private const val INDEX_BOOK_NAMES = "bookNamesIndex"

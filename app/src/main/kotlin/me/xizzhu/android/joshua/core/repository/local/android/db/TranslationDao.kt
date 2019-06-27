@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import java.lang.StringBuilder
 
-class TranslationDao(private val sqliteHelper: SQLiteOpenHelper) {
+class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val COLUMN_BOOK_INDEX = "bookIndex"
         private const val COLUMN_CHAPTER_INDEX = "chapterIndex"

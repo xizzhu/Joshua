@@ -22,7 +22,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.TranslationInfo
 
-class TranslationInfoDao(private val sqliteHelper: SQLiteOpenHelper) {
+class TranslationInfoDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_TRANSLATION_INFO = "translationInfo"
         private const val COLUMN_SHORT_NAME = "shortName"
