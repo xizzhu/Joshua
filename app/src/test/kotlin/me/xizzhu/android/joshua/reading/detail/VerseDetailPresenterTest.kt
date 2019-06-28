@@ -92,7 +92,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     fun testLoadVerseDetail() {
         runBlocking {
             val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerseWithParallel(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
+            `when`(readingInteractor.readVerseWithParallel(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVersesWithBbeCuvParallel[0])
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
             `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
 
@@ -100,8 +100,13 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
             verify(verseDetailView, times(1)).onVerseDetailLoaded(
-                    VerseDetail(verseIndex, listOf(VerseTextItem(verseIndex, MockContents.kjvVerses[0].text,
-                            verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)), false, ""))
+                    VerseDetail(verseIndex,
+                            listOf(
+                                    VerseTextItem(verseIndex, MockContents.kjvVersesWithBbeCuvParallel[0].text, verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked),
+                                    VerseTextItem(verseIndex, MockContents.kjvVersesWithBbeCuvParallel[0].parallel[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked),
+                                    VerseTextItem(verseIndex, MockContents.kjvVersesWithBbeCuvParallel[0].parallel[1], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)
+                            ), false, "")
+            )
             verify(verseDetailView, never()).onVerseDetailLoadFailed(verseIndex)
         }
     }

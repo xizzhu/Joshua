@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 
 class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
@@ -57,29 +58,26 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
             view?.onVerseDetailLoaded(VerseDetail.INVALID)
 
             try {
-                val verseDetail = coroutineScope {
-                    val bookmarkAsync = async { readingInteractor.readBookmark(verseIndex) }
-                    val noteAsync = async { readingInteractor.readNote(verseIndex) }
+                val bookmarkAsync = supervisedAsync { readingInteractor.readBookmark(verseIndex) }
+                val noteAsync = supervisedAsync { readingInteractor.readNote(verseIndex) }
 
-                    val verse = readingInteractor.readVerseWithParallel(
-                            readingInteractor.observeCurrentTranslation().first(), verseIndex)
-                    val verseTextItems = mutableListOf<VerseTextItem>().apply {
-                        add(VerseTextItem(verseIndex, verse.text,
-                                this@VerseDetailPresenter::onVerseClicked,
-                                this@VerseDetailPresenter::onVerseLongClicked))
-                    }
-                    verse.parallel.forEach {
-                        verseTextItems.add(VerseTextItem(verseIndex, it,
-                                this@VerseDetailPresenter::onVerseClicked,
-                                this@VerseDetailPresenter::onVerseLongClicked))
-                    }
-
-                    verseDetail = VerseDetail(verseIndex, verseTextItems,
-                            bookmarkAsync.await().isValid(), noteAsync.await().note)
-                    return@coroutineScope verseDetail!!
+                val verse = readingInteractor.readVerseWithParallel(
+                        readingInteractor.observeCurrentTranslation().first(), verseIndex)
+                val verseTextItems = mutableListOf<VerseTextItem>().apply {
+                    add(VerseTextItem(verseIndex, verse.text,
+                            this@VerseDetailPresenter::onVerseClicked,
+                            this@VerseDetailPresenter::onVerseLongClicked))
+                }
+                verse.parallel.forEach {
+                    verseTextItems.add(VerseTextItem(verseIndex, it,
+                            this@VerseDetailPresenter::onVerseClicked,
+                            this@VerseDetailPresenter::onVerseLongClicked))
                 }
 
-                view?.onVerseDetailLoaded(verseDetail)
+                verseDetail = VerseDetail(verseIndex, verseTextItems,
+                        bookmarkAsync.await().isValid(), noteAsync.await().note)
+
+                view?.onVerseDetailLoaded(verseDetail!!)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verse detail", e)
                 view?.onVerseDetailLoadFailed(verseIndex)
