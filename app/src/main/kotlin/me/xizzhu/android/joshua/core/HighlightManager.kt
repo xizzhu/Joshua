@@ -16,10 +16,21 @@
 
 package me.xizzhu.android.joshua.core
 
+import android.graphics.Color
 import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.core.repository.HighlightRepository
 
-data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val timestamp: Long)
+data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val timestamp: Long) {
+    companion object {
+        const val COLOR_NONE = Color.TRANSPARENT
+        const val COLOR_YELLOW = Color.YELLOW
+        const val COLOR_PINK = 0xFFFFC0CB.toInt()
+        const val COLOR_PURPLE = 0xFFFF00FF.toInt()
+        const val COLOR_GREEN = Color.GREEN
+        const val COLOR_BLUE = Color.BLUE
+        val AVAILABLE_COLORS = arrayOf(COLOR_NONE, COLOR_YELLOW, COLOR_PINK, COLOR_PURPLE, COLOR_GREEN, COLOR_BLUE)
+    }
+}
 
 class HighlightManager(private val highlightRepository: HighlightRepository) {
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =

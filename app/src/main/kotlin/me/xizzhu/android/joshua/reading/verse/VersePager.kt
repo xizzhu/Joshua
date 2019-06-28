@@ -20,13 +20,16 @@ import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
 import android.widget.Toast
+import androidx.annotation.ColorInt
 import androidx.viewpager.widget.ViewPager
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsView
+import kotlin.math.max
 
 interface VerseView : BaseSettingsView {
     fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex)
@@ -50,6 +53,8 @@ interface VerseView : BaseSettingsView {
     fun onVersesCopyShareFailed()
 
     fun onVerseUpdated(verseIndex: VerseIndex, operation: Int)
+
+    fun onHighlightColorRequested(verseIndex: VerseIndex, @ColorInt currentHighlightColor: Int)
 }
 
 class VerseViewPager : ViewPager, VerseView {
@@ -169,5 +174,16 @@ class VerseViewPager : ViewPager, VerseView {
 
     override fun onVerseUpdated(verseIndex: VerseIndex, operation: Int) {
         adapter.notifyVerseUpdate(verseIndex, operation)
+    }
+
+    override fun onHighlightColorRequested(verseIndex: VerseIndex, @ColorInt currentHighlightColor: Int) {
+        DialogHelper.showDialog(context, R.string.text_pick_highlight_color,
+                resources.getStringArray(R.array.text_colors),
+                max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
+                DialogInterface.OnClickListener { dialog, which ->
+                    presenter.updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
+
+                    dialog.dismiss()
+                })
     }
 }

@@ -22,7 +22,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 
 object DialogHelper {
-    fun showDialog(context: Context, @StringRes title: Int, items: Array<CharSequence>, selected: Int,
+    fun showDialog(context: Context, @StringRes title: Int, items: Array<String>, selected: Int,
                    onClicked: DialogInterface.OnClickListener) {
         AlertDialog.Builder(context)
                 .setCancelable(true)

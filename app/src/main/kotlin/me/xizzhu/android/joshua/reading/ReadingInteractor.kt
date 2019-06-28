@@ -30,6 +30,7 @@ import android.content.pm.LabeledIntent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Parcelable
+import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -214,6 +215,16 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun readHighlights(bookIndex: Int, chapterIndex: Int): List<Highlight> =
             highlightManager.read(bookIndex, chapterIndex)
+
+    suspend fun saveHighlight(verseIndex: VerseIndex, @ColorInt color: Int) {
+        highlightManager.save(Highlight(verseIndex, color, System.currentTimeMillis()))
+        // TODO
+    }
+
+    suspend fun removeHighlight(verseIndex: VerseIndex) {
+        highlightManager.remove(verseIndex)
+        // TODO
+    }
 
     suspend fun readNotes(bookIndex: Int, chapterIndex: Int): List<Note> = noteManager.read(bookIndex, chapterIndex)
 

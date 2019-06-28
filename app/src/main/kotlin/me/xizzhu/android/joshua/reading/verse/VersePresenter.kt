@@ -29,7 +29,6 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
-import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
@@ -290,7 +289,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
 
     @VisibleForTesting
     fun onHighlightClicked(verseIndex: VerseIndex, @ColorInt currentHighlightColor: Int) {
-        // TODO
+        view?.onHighlightColorRequested(verseIndex, currentHighlightColor)
     }
 
     @VisibleForTesting
@@ -300,6 +299,21 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                 readingInteractor.removeBookmark(verseIndex)
             } else {
                 readingInteractor.addBookmark(verseIndex)
+            }
+        }
+    }
+
+    fun updateHighlight(verseIndex: VerseIndex, @ColorInt highlightColor: Int) {
+        coroutineScope.launch(Dispatchers.Main) {
+            try {
+                if (highlightColor == Highlight.COLOR_NONE) {
+                    readingInteractor.removeHighlight(verseIndex)
+                } else {
+                    readingInteractor.saveHighlight(verseIndex, highlightColor)
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to update highlight", e)
+                // TODO
             }
         }
     }
