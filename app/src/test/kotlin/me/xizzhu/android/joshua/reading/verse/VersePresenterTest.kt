@@ -342,6 +342,31 @@ class VersePresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testLoadVersesSimpleReadingModeOff() {
+        runBlocking {
+            settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = false))
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+
+            val bookIndex = 1
+            val chapterIndex = 2
+            `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
+            `when`(readingInteractor.readBookmarks(bookIndex, chapterIndex)).thenReturn(emptyList())
+            `when`(readingInteractor.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
+            `when`(readingInteractor.readNotes(bookIndex, chapterIndex)).thenReturn(emptyList())
+
+            versePresenter.loadVerses(bookIndex, chapterIndex)
+            verify(verseView, times(1)).onVersesLoaded(
+                    bookIndex, chapterIndex, MockContents.kjvVerses.map {
+                VerseItem(it, false, Color.TRANSPARENT, false,
+                        versePresenter::onVerseClicked, versePresenter::onVerseLongClicked,
+                        versePresenter::onNoteClicked, versePresenter::onHighlightClicked,
+                        versePresenter::onBookmarkClicked)
+            })
+            verify(verseView, never()).onVersesLoadFailed(anyInt(), anyInt())
+        }
+    }
+
+    @Test
     fun testOnVerseClickedWithoutActionMode() {
         runBlocking {
             val verse = MockContents.kjvVerses[0]
