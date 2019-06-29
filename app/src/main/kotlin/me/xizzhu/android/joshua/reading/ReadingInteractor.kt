@@ -31,13 +31,28 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Parcelable
 import androidx.annotation.ColorInt
+import androidx.annotation.IntDef
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.reading.verse.VerseItemViewHolder
 import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 import me.xizzhu.android.logger.Log
+
+data class VerseUpdate(@Operation val operation: Int, val data: Any? = null) {
+    companion object {
+        const val VERSE_SELECTED = 1
+        const val VERSE_DESELECTED = 2
+        const val NOTE_ADDED = 3
+        const val NOTE_REMOVED = 4
+        const val BOOKMARK_ADDED = 5
+        const val BOOKMARK_REMOVED = 6
+
+        @IntDef(VERSE_SELECTED, VERSE_DESELECTED, NOTE_ADDED, NOTE_REMOVED, BOOKMARK_ADDED, BOOKMARK_REMOVED)
+        @Retention(AnnotationRetention.SOURCE)
+        annotation class Operation
+    }
+}
 
 class ReadingInteractor(private val readingActivity: ReadingActivity,
                         private val navigator: Navigator,
@@ -53,7 +68,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     }
 
     private val verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>> = ConflatedBroadcastChannel()
-    private val verseState: BroadcastChannel<Pair<VerseIndex, Int>> = ConflatedBroadcastChannel()
+    private val verseUpdates: BroadcastChannel<Pair<VerseIndex, VerseUpdate>> = ConflatedBroadcastChannel()
 
     suspend fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
@@ -85,7 +100,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         return false
     }
 
-    fun observeVerseState(): ReceiveChannel<Pair<VerseIndex, Int>> = verseState.openSubscription()
+    fun observeVerseUpdates(): ReceiveChannel<Pair<VerseIndex, VerseUpdate>> = verseUpdates.openSubscription()
 
     suspend fun requestParallelTranslation(translationShortName: String) {
         bibleReadingManager.requestParallelTranslation(translationShortName)
@@ -205,12 +220,12 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun addBookmark(verseIndex: VerseIndex) {
         bookmarkManager.save(Bookmark(verseIndex, System.currentTimeMillis()))
-        verseState.send(Pair(verseIndex, VerseItemViewHolder.BOOKMARK_ADDED))
+        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.BOOKMARK_ADDED)))
     }
 
     suspend fun removeBookmark(verseIndex: VerseIndex) {
         bookmarkManager.remove(verseIndex)
-        verseState.send(Pair(verseIndex, VerseItemViewHolder.BOOKMARK_REMOVED))
+        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.BOOKMARK_REMOVED)))
     }
 
     suspend fun readHighlights(bookIndex: Int, chapterIndex: Int): List<Highlight> =
@@ -232,12 +247,12 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun saveNote(verseIndex: VerseIndex, note: String) {
         noteManager.save(Note(verseIndex, note, System.currentTimeMillis()))
-        verseState.send(Pair(verseIndex, VerseItemViewHolder.NOTE_ADDED))
+        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.NOTE_ADDED)))
     }
 
     suspend fun removeNote(verseIndex: VerseIndex) {
         noteManager.remove(verseIndex)
-        verseState.send(Pair(verseIndex, VerseItemViewHolder.NOTE_REMOVED))
+        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.NOTE_REMOVED)))
     }
 }
 

@@ -26,6 +26,7 @@ import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
@@ -103,8 +104,9 @@ private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
             itemView.isSelected = item.selected
         } else {
             payloads.forEach { payload ->
-                when (payload as Int) {
-                    VerseItemViewHolder.VERSE_SELECTED -> {
+                val update = payload as VerseUpdate
+                when (update.operation) {
+                    VerseUpdate.VERSE_SELECTED -> {
                         item.selected = true
                         itemView.isSelected = true
                         if (settings.nightModeOn) {
@@ -112,7 +114,7 @@ private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
                             text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
                         }
                     }
-                    VerseItemViewHolder.VERSE_DESELECTED -> {
+                    VerseUpdate.VERSE_DESELECTED -> {
                         item.selected = false
                         itemView.isSelected = false
                         if (settings.nightModeOn) {

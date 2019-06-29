@@ -20,11 +20,11 @@ import android.graphics.Color
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingInteractor
+import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -53,7 +53,7 @@ class VersePresenterTest : BaseUnitTest() {
     private lateinit var currentVerseIndexChannel: ConflatedBroadcastChannel<VerseIndex>
     private lateinit var parallelTranslationsChannel: ConflatedBroadcastChannel<List<String>>
     private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>>
-    private lateinit var verseState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>>
+    private lateinit var verseUpdates: ConflatedBroadcastChannel<Pair<VerseIndex, VerseUpdate>>
 
     @Before
     override fun setup() {
@@ -75,8 +75,8 @@ class VersePresenterTest : BaseUnitTest() {
             verseDetailOpenState = ConflatedBroadcastChannel()
             `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
 
-            verseState = ConflatedBroadcastChannel()
-            `when`(readingInteractor.observeVerseState()).thenReturn(verseDetailOpenState.openSubscription())
+            verseUpdates = ConflatedBroadcastChannel()
+            `when`(readingInteractor.observeVerseUpdates()).thenReturn(verseUpdates.openSubscription())
 
             versePresenter = VersePresenter(readingInteractor)
             versePresenter.attachView(verseView)

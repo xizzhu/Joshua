@@ -30,6 +30,7 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Color
 import android.util.TypedValue
 import androidx.annotation.ColorInt
+import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
@@ -46,16 +47,9 @@ data class VerseItem(val verse: Verse, var hasNote: Boolean, @ColorInt var highl
     val textForDisplay: CharSequence by lazy { SPANNABLE_STRING_BUILDER.format(verse, false, highlightColor) }
 }
 
-class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<VerseItem>(inflater.inflate(R.layout.item_verse, parent, false)) {
     companion object {
-        const val VERSE_SELECTED = 1
-        const val VERSE_DESELECTED = 2
-        const val NOTE_ADDED = 3
-        const val NOTE_REMOVED = 4
-        const val BOOKMARK_ADDED = 5
-        const val BOOKMARK_REMOVED = 6
-
         private val ON = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
         private val OFF = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
     }
@@ -90,34 +84,35 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
             itemView.isSelected = item.selected
         } else {
             payloads.forEach { payload ->
-                when (payload as Int) {
-                    VERSE_SELECTED -> {
+                val update = payload as VerseUpdate
+                when (update.operation) {
+                    VerseUpdate.VERSE_SELECTED -> {
                         item.selected = true
                         itemView.isSelected = true
                         if (settings.nightModeOn) {
                             text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
                         }
                     }
-                    VERSE_DESELECTED -> {
+                    VerseUpdate.VERSE_DESELECTED -> {
                         item.selected = false
                         itemView.isSelected = false
                         if (settings.nightModeOn) {
                             text.animateTextColor(settings.getPrimaryTextColor(resources))
                         }
                     }
-                    NOTE_ADDED -> {
+                    VerseUpdate.NOTE_ADDED -> {
                         item.hasNote = true
                         note.colorFilter = ON
                     }
-                    NOTE_REMOVED -> {
+                    VerseUpdate.NOTE_REMOVED -> {
                         item.hasNote = false
                         note.colorFilter = OFF
                     }
-                    BOOKMARK_ADDED -> {
+                    VerseUpdate.BOOKMARK_ADDED -> {
                         item.hasBookmark = true
                         bookmark.colorFilter = ON
                     }
-                    BOOKMARK_REMOVED -> {
+                    VerseUpdate.BOOKMARK_REMOVED -> {
                         item.hasBookmark = false
                         bookmark.colorFilter = OFF
                     }

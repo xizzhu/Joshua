@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.utils.BaseSettingsView
@@ -52,7 +53,7 @@ interface VerseView : BaseSettingsView {
 
     fun onVersesCopyShareFailed()
 
-    fun onVerseUpdated(verseIndex: VerseIndex, operation: Int)
+    fun onVerseUpdated(verseIndex: VerseIndex, update: VerseUpdate)
 
     fun onHighlightColorRequested(verseIndex: VerseIndex, @ColorInt currentHighlightColor: Int)
 }
@@ -172,8 +173,8 @@ class VerseViewPager : ViewPager, VerseView {
         Toast.makeText(context, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onVerseUpdated(verseIndex: VerseIndex, operation: Int) {
-        adapter.notifyVerseUpdate(verseIndex, operation)
+    override fun onVerseUpdated(verseIndex: VerseIndex, update: VerseUpdate) {
+        adapter.notifyVerseUpdate(verseIndex, update)
     }
 
     override fun onHighlightColorRequested(verseIndex: VerseIndex, @ColorInt currentHighlightColor: Int) {

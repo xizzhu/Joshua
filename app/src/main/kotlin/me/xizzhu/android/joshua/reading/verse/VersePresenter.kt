@@ -127,8 +127,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeVerseState().consumeEach { (verseIndex, operation) ->
-                view?.onVerseUpdated(verseIndex, operation)
+            readingInteractor.observeVerseUpdates().consumeEach { (verseIndex, update) ->
+                view?.onVerseUpdated(verseIndex, update)
             }
         }
     }
