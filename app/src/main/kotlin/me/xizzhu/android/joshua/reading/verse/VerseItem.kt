@@ -44,7 +44,13 @@ data class VerseItem(val verse: Verse, var hasNote: Boolean, @ColorInt var highl
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
-    val textForDisplay: CharSequence by lazy { SPANNABLE_STRING_BUILDER.format(verse, false, highlightColor) }
+    var textForDisplay: CharSequence = ""
+        get() {
+            if (field.isEmpty()) {
+                field = SPANNABLE_STRING_BUILDER.format(verse, false, highlightColor)
+            }
+            return field
+        }
 }
 
 private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
@@ -115,6 +121,11 @@ private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
                     VerseUpdate.BOOKMARK_REMOVED -> {
                         item.hasBookmark = false
                         bookmark.colorFilter = OFF
+                    }
+                    VerseUpdate.HIGHLIGHT_UPDATED -> {
+                        item.highlightColor = update.data as Int
+                        item.textForDisplay = ""
+                        bind(settings, item, emptyList())
                     }
                 }
             }

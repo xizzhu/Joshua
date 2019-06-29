@@ -47,8 +47,10 @@ data class VerseUpdate(@Operation val operation: Int, val data: Any? = null) {
         const val NOTE_REMOVED = 4
         const val BOOKMARK_ADDED = 5
         const val BOOKMARK_REMOVED = 6
+        const val HIGHLIGHT_UPDATED = 7
 
-        @IntDef(VERSE_SELECTED, VERSE_DESELECTED, NOTE_ADDED, NOTE_REMOVED, BOOKMARK_ADDED, BOOKMARK_REMOVED)
+        @IntDef(VERSE_SELECTED, VERSE_DESELECTED, NOTE_ADDED, NOTE_REMOVED,
+                BOOKMARK_ADDED, BOOKMARK_REMOVED, HIGHLIGHT_UPDATED)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Operation
     }
@@ -233,12 +235,12 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun saveHighlight(verseIndex: VerseIndex, @ColorInt color: Int) {
         highlightManager.save(Highlight(verseIndex, color, System.currentTimeMillis()))
-        // TODO
+        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.HIGHLIGHT_UPDATED, color)))
     }
 
     suspend fun removeHighlight(verseIndex: VerseIndex) {
         highlightManager.remove(verseIndex)
-        // TODO
+        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE)))
     }
 
     suspend fun readNotes(bookIndex: Int, chapterIndex: Int): List<Note> = noteManager.read(bookIndex, chapterIndex)
