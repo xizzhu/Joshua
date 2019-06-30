@@ -16,6 +16,8 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalHighlightStorage
@@ -23,13 +25,17 @@ import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 
 class AndroidHighlightStorage(private val androidDatabase: AndroidDatabase) : LocalHighlightStorage {
     override suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
-            androidDatabase.highlightDao.read(bookIndex, chapterIndex)
+            withContext(Dispatchers.IO) { androidDatabase.highlightDao.read(bookIndex, chapterIndex) }
 
     override suspend fun save(highlight: Highlight) {
-        androidDatabase.highlightDao.save(highlight)
+        withContext(Dispatchers.IO) {
+            androidDatabase.highlightDao.save(highlight)
+        }
     }
 
     override suspend fun remove(verseIndex: VerseIndex) {
-        androidDatabase.highlightDao.remove(verseIndex)
+        withContext(Dispatchers.IO) {
+            androidDatabase.highlightDao.remove(verseIndex)
+        }
     }
 }
