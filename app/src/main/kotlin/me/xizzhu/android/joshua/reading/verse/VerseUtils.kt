@@ -16,9 +16,11 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+import android.graphics.Color
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
+import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.core.Bible
@@ -142,9 +144,11 @@ fun SpannableStringBuilder.format(verse: Verse, simpleReadingMode: Boolean, @Col
                     .append(verse.text.text)
         }
         if (highlightColor != Highlight.COLOR_NONE) {
-            val length = length
-            setSpan(BackgroundColorSpan(highlightColor),
-                    length - verse.text.text.length, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            val end = length
+            val start = end - verse.text.text.length
+            setSpan(BackgroundColorSpan(highlightColor), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            setSpan(ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK),
+                    start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         }
     } else {
         // format:
@@ -159,9 +163,11 @@ fun SpannableStringBuilder.format(verse: Verse, simpleReadingMode: Boolean, @Col
         append(verse.verseIndex, verse.text)
         val primaryTextLength = length
         if (highlightColor != Highlight.COLOR_NONE) {
-            setSpan(BackgroundColorSpan(highlightColor),
-                    primaryTextLength - verse.text.text.length, primaryTextLength,
-                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            val end = primaryTextLength
+            val start = primaryTextLength - verse.text.text.length
+            setSpan(BackgroundColorSpan(highlightColor), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            setSpan(ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK),
+                    start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         }
 
         for (text in verse.parallel) {
