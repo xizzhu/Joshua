@@ -16,13 +16,13 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import android.graphics.Color
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.RelativeSizeSpan
 import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.append
@@ -141,7 +141,7 @@ fun SpannableStringBuilder.format(verse: Verse, simpleReadingMode: Boolean, @Col
                     .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
                     .append(verse.text.text)
         }
-        if (highlightColor != Color.TRANSPARENT) {
+        if (highlightColor != Highlight.COLOR_NONE) {
             val length = length
             setSpan(BackgroundColorSpan(highlightColor),
                     length - verse.text.text.length, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
@@ -158,7 +158,7 @@ fun SpannableStringBuilder.format(verse: Verse, simpleReadingMode: Boolean, @Col
 
         append(verse.verseIndex, verse.text)
         val primaryTextLength = length
-        if (highlightColor != Color.TRANSPARENT) {
+        if (highlightColor != Highlight.COLOR_NONE) {
             setSpan(BackgroundColorSpan(highlightColor),
                     primaryTextLength - verse.text.text.length, primaryTextLength,
                     Spanned.SPAN_INCLUSIVE_EXCLUSIVE)

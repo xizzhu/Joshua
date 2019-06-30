@@ -186,7 +186,7 @@ class VersePresenterTest : BaseUnitTest() {
         assertEquals(verses.size, simpleVerseItems.size)
         simpleVerseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
-            assertEquals(Color.TRANSPARENT, verseItem.highlightColor)
+            assertEquals(Highlight.COLOR_NONE, verseItem.highlightColor)
         }
     }
 
@@ -206,7 +206,7 @@ class VersePresenterTest : BaseUnitTest() {
             assertEquals(when (index) {
                 0 -> Color.RED
                 6 -> Color.GREEN
-                else -> Color.TRANSPARENT
+                else -> Highlight.COLOR_NONE
             }, verseItem.highlightColor)
         }
     }
@@ -219,7 +219,7 @@ class VersePresenterTest : BaseUnitTest() {
         verseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
             assertFalse(verseItem.hasBookmark)
-            assertEquals(Color.TRANSPARENT, verseItem.highlightColor)
+            assertEquals(Highlight.COLOR_NONE, verseItem.highlightColor)
             assertFalse(verseItem.hasNote)
         }
     }
@@ -251,7 +251,7 @@ class VersePresenterTest : BaseUnitTest() {
             assertEquals(when (index) {
                 0 -> Color.RED
                 6 -> Color.GREEN
-                else -> Color.TRANSPARENT
+                else -> Highlight.COLOR_NONE
             }, verseItem.highlightColor)
             assertTrue(if (index == 0 || index == 7) verseItem.hasNote else !verseItem.hasNote)
         }
@@ -357,7 +357,7 @@ class VersePresenterTest : BaseUnitTest() {
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
                     bookIndex, chapterIndex, MockContents.kjvVerses.map {
-                VerseItem(it, false, Color.TRANSPARENT, false,
+                VerseItem(it, false, Highlight.COLOR_NONE, false,
                         versePresenter::onVerseClicked, versePresenter::onVerseLongClicked,
                         versePresenter::onNoteClicked, versePresenter::onHighlightClicked,
                         versePresenter::onBookmarkClicked)

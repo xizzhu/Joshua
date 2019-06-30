@@ -30,6 +30,7 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Color
 import android.util.TypedValue
 import androidx.annotation.ColorInt
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -84,7 +85,7 @@ private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
             text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
 
             bookmark.colorFilter = if (item.hasBookmark) ON else OFF
-            highlight.colorFilter = if (item.highlightColor != Color.TRANSPARENT) ON else OFF
+            highlight.colorFilter = if (item.highlightColor != Highlight.COLOR_NONE) ON else OFF
             note.colorFilter = if (item.hasNote) ON else OFF
 
             itemView.isSelected = item.selected

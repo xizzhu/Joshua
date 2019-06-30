@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import android.graphics.Color
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.ColorInt
@@ -196,8 +195,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                         }
                     }
                     add(SimpleVerseItem(verse, verses.size,
-                            highlight?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Color.TRANSPARENT }
-                                    ?: Color.TRANSPARENT,
+                            highlight?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
+                                    ?: Highlight.COLOR_NONE,
                             this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked))
                 }
             }
@@ -241,8 +240,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
 
             verseItems.add(VerseItem(verse,
                     note?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
-                    highlight?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Color.TRANSPARENT }
-                            ?: Color.TRANSPARENT,
+                    highlight?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
+                            ?: Highlight.COLOR_NONE,
                     bookmark?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
                     this::onVerseClicked, this::onVerseLongClicked, this::onNoteClicked,
                     this::onHighlightClicked, this::onBookmarkClicked))
