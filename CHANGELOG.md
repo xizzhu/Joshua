@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Added verse highlight support
 - Grouped available translations by language
 - Should not fail saving when translation table already exists
 
