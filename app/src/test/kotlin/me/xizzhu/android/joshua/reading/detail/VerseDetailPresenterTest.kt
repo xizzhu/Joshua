@@ -245,4 +245,34 @@ class VerseDetailPresenterTest : BaseUnitTest() {
                     verseDetailPresenter.verseDetail)
         }
     }
+
+    @Test
+    fun testUpdateHighlight() {
+        runBlocking {
+            verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), false, Highlight.COLOR_NONE, "")
+
+            verseDetailPresenter.updateHighlight(Highlight.COLOR_BLUE)
+            verify(readingInteractor, never()).removeHighlight(any())
+            verify(readingInteractor, times(1)).saveHighlight(VerseIndex(0, 0, 0), Highlight.COLOR_BLUE)
+            assertEquals(VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), false, Highlight.COLOR_BLUE, ""),
+                    verseDetailPresenter.verseDetail)
+        }
+    }
+
+    @Test
+    fun testRemoveHighlight() {
+        runBlocking {
+            verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), false, Highlight.COLOR_PINK, "")
+
+            verseDetailPresenter.updateHighlight(Highlight.COLOR_NONE)
+            verify(readingInteractor, times(1)).removeHighlight(VerseIndex(0, 0, 0))
+            verify(readingInteractor, never()).saveHighlight(any(), anyInt())
+            assertEquals(VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), false, Highlight.COLOR_NONE, ""),
+                    verseDetailPresenter.verseDetail)
+        }
+    }
 }

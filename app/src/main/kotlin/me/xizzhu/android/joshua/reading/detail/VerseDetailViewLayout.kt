@@ -39,6 +39,7 @@ import me.xizzhu.android.joshua.ui.getBackgroundColor
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.getSecondaryTextColor
 import me.xizzhu.android.joshua.utils.BaseSettingsView
+import kotlin.math.max
 
 interface VerseDetailView : BaseSettingsView {
     fun onVerseDetailLoaded(verseDetail: VerseDetail)
@@ -89,7 +90,16 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
         viewPager = findViewById<ViewPager>(R.id.view_pager).apply { adapter = this@VerseDetailViewLayout.adapter }
         tabLayout = findViewById<TabLayout>(R.id.tab_layout).apply { setupWithViewPager(viewPager) }
         highlight = findViewById<ImageView>(R.id.highlight).apply {
-            setOnClickListener { /* TODO */ }
+            setOnClickListener {
+                DialogHelper.showDialog(context, R.string.text_pick_highlight_color,
+                        resources.getStringArray(R.array.text_colors),
+                        max(0, Highlight.AVAILABLE_COLORS.indexOf(presenter.currentHighlightColor())),
+                        DialogInterface.OnClickListener { dialog, which ->
+                            presenter.updateHighlight(Highlight.AVAILABLE_COLORS[which])
+
+                            dialog.dismiss()
+                        })
+            }
         }
         bookmark = findViewById<ImageView>(R.id.bookmark).apply {
             setOnClickListener { presenter.updateBookmark() }

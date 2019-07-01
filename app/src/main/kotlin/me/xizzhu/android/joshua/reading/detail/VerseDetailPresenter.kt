@@ -16,10 +16,12 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
+import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -36,6 +38,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     @VisibleForTesting
     var verseDetail: VerseDetail? = null
     private var updateBookmarkJob: Job? = null
+    private var updateHighlightJob: Job? = null
     private var updateNoteJob: Job? = null
 
     override fun onViewAttached() {
@@ -130,6 +133,26 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
             }
 
             updateBookmarkJob = null
+        }
+    }
+
+    @ColorInt
+    fun currentHighlightColor(): Int = verseDetail?.highlightColor ?: Highlight.COLOR_NONE
+
+    fun updateHighlight(@ColorInt highlightColor: Int) {
+        updateHighlightJob?.cancel()
+        updateHighlightJob = coroutineScope.launch(Dispatchers.Main) {
+            verseDetail?.let { detail ->
+                if (highlightColor == Highlight.COLOR_NONE) {
+                    readingInteractor.removeHighlight(detail.verseIndex)
+                } else {
+                    readingInteractor.saveHighlight(detail.verseIndex, highlightColor)
+                }
+                verseDetail = detail.copy(highlightColor = highlightColor)
+                view?.onVerseDetailLoaded(verseDetail!!)
+            }
+
+            updateHighlightJob = null
         }
     }
 
