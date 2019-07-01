@@ -31,6 +31,7 @@ import android.widget.Toast
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
@@ -78,6 +79,7 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
     private val header: LinearLayout
     private val tabLayout: TabLayout
     private val viewPager: ViewPager
+    private val highlight: ImageView
     private val bookmark: ImageView
 
     init {
@@ -86,6 +88,9 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
         header = findViewById(R.id.header)
         viewPager = findViewById<ViewPager>(R.id.view_pager).apply { adapter = this@VerseDetailViewLayout.adapter }
         tabLayout = findViewById<TabLayout>(R.id.tab_layout).apply { setupWithViewPager(viewPager) }
+        highlight = findViewById<ImageView>(R.id.highlight).apply {
+            setOnClickListener { /* TODO */ }
+        }
         bookmark = findViewById<ImageView>(R.id.bookmark).apply {
             setOnClickListener { presenter.updateBookmark() }
         }
@@ -123,6 +128,7 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
     override fun onVerseDetailLoaded(verseDetail: VerseDetail) {
         adapter.setVerseDetail(verseDetail)
         bookmark.colorFilter = if (verseDetail.bookmarked) ON_COLOR_FILTER else OFF_COLOR_FILTER
+        highlight.colorFilter = if (verseDetail.highlightColor != Highlight.COLOR_NONE) ON_COLOR_FILTER else OFF_COLOR_FILTER
     }
 
     override fun onVerseDetailLoadFailed(verseIndex: VerseIndex) {

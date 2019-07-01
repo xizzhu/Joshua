@@ -233,6 +233,8 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     suspend fun readHighlights(bookIndex: Int, chapterIndex: Int): List<Highlight> =
             highlightManager.read(bookIndex, chapterIndex)
 
+    suspend fun readHighlight(verseIndex: VerseIndex): Highlight = highlightManager.read(verseIndex)
+
     suspend fun saveHighlight(verseIndex: VerseIndex, @ColorInt color: Int) {
         highlightManager.save(Highlight(verseIndex, color, System.currentTimeMillis()))
         verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.HIGHLIGHT_UPDATED, color)))

@@ -19,10 +19,7 @@ package me.xizzhu.android.joshua.reading.detail
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.core.Bookmark
-import me.xizzhu.android.joshua.core.Note
-import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -75,6 +72,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             val verseIndex = VerseIndex(0, 0, 0)
             `when`(readingInteractor.readVerseWithParallel(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
+            `when`(readingInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, -1L))
             `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
 
             verseDetailOpenState.send(Pair(verseIndex, 0))
@@ -83,7 +81,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
             verify(verseDetailView, times(1)).onVerseDetailLoaded(
                     VerseDetail(verseIndex, listOf(VerseTextItem(verseIndex, MockContents.kjvVerses[0].text,
-                            verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)), false, ""))
+                            verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)), false, Highlight.COLOR_NONE, ""))
             verify(verseDetailView, never()).hide()
         }
     }
@@ -94,6 +92,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             val verseIndex = VerseIndex(0, 0, 0)
             `when`(readingInteractor.readVerseWithParallel(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVersesWithBbeCuvParallel[0])
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
+            `when`(readingInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, -1L))
             `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
 
             verseDetailPresenter.loadVerseDetail(verseIndex)
@@ -105,7 +104,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
                                     VerseTextItem(verseIndex, MockContents.kjvVersesWithBbeCuvParallel[0].text, verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked),
                                     VerseTextItem(verseIndex, MockContents.kjvVersesWithBbeCuvParallel[0].parallel[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked),
                                     VerseTextItem(verseIndex, MockContents.kjvVersesWithBbeCuvParallel[0].parallel[1], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)
-                            ), false, "")
+                            ), false, Highlight.COLOR_NONE, "")
             )
             verify(verseDetailView, never()).onVerseDetailLoadFailed(verseIndex)
         }
@@ -190,11 +189,13 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testAddBookmark() {
         runBlocking {
-            verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(0, 0, 0), emptyList(), false, "")
+            verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), false, Highlight.COLOR_NONE, "")
 
             verseDetailPresenter.updateBookmark()
 
-            val expected = VerseDetail(VerseIndex(0, 0, 0), emptyList(), true, "")
+            val expected = VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), true, Highlight.COLOR_NONE, "")
             verify(verseDetailView, times(1)).onVerseDetailLoaded(expected)
             assertEquals(expected, verseDetailPresenter.verseDetail)
         }
@@ -203,11 +204,13 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testRemoveBookmark() {
         runBlocking {
-            verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(0, 0, 0), emptyList(), true, "")
+            verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), true, Highlight.COLOR_NONE, "")
 
             verseDetailPresenter.updateBookmark()
 
-            val expected = VerseDetail(VerseIndex(0, 0, 0), emptyList(), false, "")
+            val expected = VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), false, Highlight.COLOR_NONE, "")
             verify(verseDetailView, times(1)).onVerseDetailLoaded(expected)
             assertEquals(expected, verseDetailPresenter.verseDetail)
         }
@@ -216,24 +219,30 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testUpdateNote() {
         runBlocking {
-            verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(0, 0, 0), emptyList(), false, "")
+            verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), false, Highlight.COLOR_NONE, "")
 
             verseDetailPresenter.updateNote("Random")
             verify(readingInteractor, never()).removeNote(VerseIndex(0, 0, 0))
             verify(readingInteractor, times(1)).saveNote(VerseIndex(0, 0, 0), "Random")
-            assertEquals(VerseDetail(VerseIndex(0, 0, 0), emptyList(), false, "Random"), verseDetailPresenter.verseDetail)
+            assertEquals(VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), false, Highlight.COLOR_NONE, "Random"),
+                    verseDetailPresenter.verseDetail)
         }
     }
 
     @Test
     fun testUpdateEmptyNote() {
         runBlocking {
-            verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(0, 0, 0), emptyList(), false, "")
+            verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), false, Highlight.COLOR_NONE, "")
 
             verseDetailPresenter.updateNote("")
             verify(readingInteractor, times(1)).removeNote(VerseIndex(0, 0, 0))
             verify(readingInteractor, never()).saveNote(any(), anyString())
-            assertEquals(VerseDetail(VerseIndex(0, 0, 0), emptyList(), false, ""), verseDetailPresenter.verseDetail)
+            assertEquals(VerseDetail(VerseIndex(0, 0, 0),
+                    emptyList(), false, Highlight.COLOR_NONE, ""),
+                    verseDetailPresenter.verseDetail)
         }
     }
 }

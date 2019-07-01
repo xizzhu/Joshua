@@ -59,6 +59,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
             try {
                 val bookmarkAsync = supervisedAsync { readingInteractor.readBookmark(verseIndex) }
+                val highlightAsync = supervisedAsync { readingInteractor.readHighlight(verseIndex) }
                 val noteAsync = supervisedAsync { readingInteractor.readNote(verseIndex) }
 
                 val verse = readingInteractor.readVerseWithParallel(
@@ -75,7 +76,8 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                 }
 
                 verseDetail = VerseDetail(verseIndex, verseTextItems,
-                        bookmarkAsync.await().isValid(), noteAsync.await().note)
+                        bookmarkAsync.await().isValid(), highlightAsync.await().color,
+                        noteAsync.await().note)
 
                 view?.onVerseDetailLoaded(verseDetail!!)
             } catch (e: Exception) {
