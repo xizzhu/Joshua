@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
@@ -36,6 +37,7 @@ class HighlightDaoTest : BaseSqliteTest() {
         for (bookIndex in 0 until Bible.BOOK_COUNT) {
             for (chapterIndex in 0 until Bible.getChapterCount(bookIndex)) {
                 assertTrue(androidDatabase.highlightDao.read(bookIndex, chapterIndex).isEmpty())
+                assertFalse(androidDatabase.highlightDao.read(VerseIndex(bookIndex, chapterIndex, 0)).isValid())
             }
         }
     }
@@ -52,6 +54,9 @@ class HighlightDaoTest : BaseSqliteTest() {
 
         assertEquals(listOf(highlight1, highlight2), androidDatabase.highlightDao.read(1, 2))
         assertEquals(listOf(highlight3), androidDatabase.highlightDao.read(1, 4))
+        assertEquals(highlight1, androidDatabase.highlightDao.read(VerseIndex(1, 2, 3)))
+        assertEquals(highlight2, androidDatabase.highlightDao.read(VerseIndex(1, 2, 4)))
+        assertEquals(highlight3, androidDatabase.highlightDao.read(VerseIndex(1, 4, 3)))
     }
 
     @Test
@@ -69,12 +74,16 @@ class HighlightDaoTest : BaseSqliteTest() {
 
         assertEquals(listOf(highlight1, highlight2), androidDatabase.highlightDao.read(1, 2))
         assertEquals(listOf(highlight3), androidDatabase.highlightDao.read(1, 4))
+        assertEquals(highlight1, androidDatabase.highlightDao.read(VerseIndex(1, 2, 3)))
+        assertEquals(highlight2, androidDatabase.highlightDao.read(VerseIndex(1, 2, 4)))
+        assertEquals(highlight3, androidDatabase.highlightDao.read(VerseIndex(1, 4, 3)))
     }
 
     @Test
     fun testRemoveNonExist() {
         androidDatabase.highlightDao.remove(VerseIndex(1, 2, 3))
         assertTrue(androidDatabase.highlightDao.read(1, 2).isEmpty())
+        assertFalse(androidDatabase.highlightDao.read(VerseIndex(1, 2, 3)).isValid())
     }
 
     @Test
@@ -85,5 +94,6 @@ class HighlightDaoTest : BaseSqliteTest() {
 
         androidDatabase.highlightDao.remove(highlight.verseIndex)
         assertTrue(androidDatabase.highlightDao.read(1, 2).isEmpty())
+        assertFalse(androidDatabase.highlightDao.read(VerseIndex(1, 2, 3)).isValid())
     }
 }

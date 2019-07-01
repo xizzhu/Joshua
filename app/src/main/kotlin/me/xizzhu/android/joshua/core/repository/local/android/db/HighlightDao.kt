@@ -63,6 +63,19 @@ class HighlightDao(sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    fun read(verseIndex: VerseIndex): Highlight {
+        db.query(TABLE_HIGHLIGHT, arrayOf(COLUMN_COLOR, COLUMN_TIMESTAMP),
+                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
+                arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
+                null, null, null).use {
+            return if (it.moveToNext()) {
+                Highlight(verseIndex, it.getInt(it.getColumnIndex(COLUMN_COLOR)), it.getLong(it.getColumnIndex(COLUMN_TIMESTAMP)))
+            } else {
+                Highlight(verseIndex, Highlight.COLOR_NONE, -1L)
+            }
+        }
+    }
+
     fun save(highlight: Highlight) {
         val values = ContentValues(4)
         with(values) {

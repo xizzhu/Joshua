@@ -30,11 +30,15 @@ data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val t
         const val COLOR_BLUE = Color.BLUE
         val AVAILABLE_COLORS = arrayOf(COLOR_NONE, COLOR_YELLOW, COLOR_PINK, COLOR_PURPLE, COLOR_GREEN, COLOR_BLUE)
     }
+
+    fun isValid(): Boolean = timestamp > 0L
 }
 
 class HighlightManager(private val highlightRepository: HighlightRepository) {
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
             highlightRepository.read(bookIndex, chapterIndex)
+
+    suspend fun read(verseIndex: VerseIndex): Highlight = highlightRepository.read(verseIndex)
 
     suspend fun save(highlight: Highlight) {
         highlightRepository.save(highlight)

@@ -22,6 +22,8 @@ import me.xizzhu.android.joshua.core.VerseIndex
 interface LocalHighlightStorage {
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight>
 
+    suspend fun read(verseIndex: VerseIndex): Highlight
+
     suspend fun save(highlight: Highlight)
 
     suspend fun remove(verseIndex: VerseIndex)

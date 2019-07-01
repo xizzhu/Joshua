@@ -24,6 +24,8 @@ class HighlightRepository(private val localHighlightStorage: LocalHighlightStora
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
             localHighlightStorage.read(bookIndex, chapterIndex)
 
+    suspend fun read(verseIndex: VerseIndex): Highlight = localHighlightStorage.read(verseIndex)
+
     suspend fun save(highlight: Highlight) {
         localHighlightStorage.save(highlight)
     }
