@@ -26,6 +26,8 @@ import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -110,13 +112,13 @@ class RetrofitTranslationServiceTest : BaseUnitTest() {
 
 private class MockInterceptor(private val expectedRelativePath: String, private val responseCode: Int, private val responseBody: ByteArray) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        assertEquals(RetrofitTranslationService.BASE_URL + expectedRelativePath, chain.request().url().toString())
+        assertEquals(RetrofitTranslationService.BASE_URL + expectedRelativePath, chain.request().url.toString())
         return Response.Builder()
                 .code(responseCode)
                 .message("")
                 .request(chain.request())
                 .protocol(Protocol.HTTP_1_1)
-                .body(ResponseBody.create(MediaType.parse("application/json"), responseBody))
+                .body(responseBody.toResponseBody("application/json".toMediaType()))
                 .build()
     }
 }

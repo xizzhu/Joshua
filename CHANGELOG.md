@@ -5,6 +5,10 @@ CHANGELOG
 - Added verse highlight support
 - Grouped available translations by language
 - Should not fail saving when translation table already exists
+- Updated dependencies:
+  - Gradle to 5.5
+  - Kotlin Coroutine to 1.2.2
+  - OkHttp to 4.0.0
 
 #### v0.6.0 (2019-06-20)
 - Show per-chapter reading status in reading progress
