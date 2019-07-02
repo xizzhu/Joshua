@@ -83,7 +83,7 @@ object Versions {
 
     object Retrofit {
         const val retrofit = "2.6.0"
-        const val okhttp = "3.14.1"
+        const val okhttp = "4.0.0"
         const val moshi = "1.8.0"
         const val okio = "2.2.2"
     }
