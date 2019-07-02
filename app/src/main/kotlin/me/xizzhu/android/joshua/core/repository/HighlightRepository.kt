@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading.detail
+package me.xizzhu.android.joshua.core.repository
 
-import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.repository.local.LocalHighlightStorage
 
-data class VerseDetail(val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
-                       val bookmarked: Boolean, @ColorInt val highlightColor: Int, val note: String) {
-    companion object {
-        val INVALID: VerseDetail = VerseDetail(VerseIndex.INVALID, emptyList(), false, Highlight.COLOR_NONE, "")
+class HighlightRepository(private val localHighlightStorage: LocalHighlightStorage) {
+    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
+            localHighlightStorage.read(bookIndex, chapterIndex)
+
+    suspend fun read(verseIndex: VerseIndex): Highlight = localHighlightStorage.read(verseIndex)
+
+    suspend fun save(highlight: Highlight) {
+        localHighlightStorage.save(highlight)
+    }
+
+    suspend fun remove(verseIndex: VerseIndex) {
+        localHighlightStorage.remove(verseIndex)
     }
 }

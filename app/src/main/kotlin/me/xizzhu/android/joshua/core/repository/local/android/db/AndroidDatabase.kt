@@ -23,11 +23,12 @@ import android.database.sqlite.SQLiteOpenHelper
 class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         const val DATABASE_NAME = "DATABASE_JOSHUA"
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
     }
 
     val bookmarkDao = BookmarkDao(this)
     val bookNamesDao = BookNamesDao(this)
+    val highlightDao = HighlightDao(this)
     val metadataDao = MetadataDao(this)
     val noteDao = NoteDao(this)
     val readingProgressDao = ReadingProgressDao(this)
@@ -38,6 +39,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         db.transaction {
             BookmarkDao.createTable(db)
             BookNamesDao.createTable(db)
+            HighlightDao.createTable(db)
             MetadataDao.createTable(db)
             NoteDao.createTable(db)
             ReadingProgressDao.createTable(db)
@@ -46,7 +48,9 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // do nothing
+        when (oldVersion) {
+            1 -> HighlightDao.createTable(db)
+        }
     }
 }
 

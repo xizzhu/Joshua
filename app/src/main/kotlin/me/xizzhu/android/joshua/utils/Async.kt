@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading.detail
+package me.xizzhu.android.joshua.utils
 
-import androidx.annotation.ColorInt
-import me.xizzhu.android.joshua.core.Highlight
-import me.xizzhu.android.joshua.core.VerseIndex
+import kotlinx.coroutines.*
+import kotlin.coroutines.CoroutineContext
 
-data class VerseDetail(val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
-                       val bookmarked: Boolean, @ColorInt val highlightColor: Int, val note: String) {
-    companion object {
-        val INVALID: VerseDetail = VerseDetail(VerseIndex.INVALID, emptyList(), false, Highlight.COLOR_NONE, "")
-    }
-}
+/*
+ * async with a SupervisorJob
+ * See https://github.com/Kotlin/kotlinx.coroutines/issues/763 for more details.
+ */
+fun <T> CoroutineScope.supervisedAsync(
+        context: CoroutineContext = SupervisorJob(coroutineContext[Job]),
+        start: CoroutineStart = CoroutineStart.DEFAULT,
+        block: suspend CoroutineScope.() -> T
+): Deferred<T> = async(context, start, block)

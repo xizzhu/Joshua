@@ -17,8 +17,6 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.text.SpannableStringBuilder
-import android.text.Spanned
-import android.text.style.RelativeSizeSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -27,86 +25,38 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import java.lang.StringBuilder
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Color
 import android.util.TypedValue
-import me.xizzhu.android.joshua.ui.animateTextColor
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimarySelectedTextColor
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import androidx.annotation.ColorInt
+import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.reading.VerseUpdate
+import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class VerseItem(val verse: Verse, var hasBookmark: Boolean, var hasNote: Boolean,
+data class VerseItem(val verse: Verse, var hasNote: Boolean, @ColorInt var highlightColor: Int, var hasBookmark: Boolean,
                      val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
-                     val onNoteClicked: (VerseIndex) -> Unit, val onBookmarkClicked: (VerseIndex, Boolean) -> Unit,
-                     var selected: Boolean = false)
+                     val onNoteClicked: (VerseIndex) -> Unit, val onHighlightClicked: (VerseIndex, Int) -> Unit,
+                     val onBookmarkClicked: (VerseIndex, Boolean) -> Unit, var selected: Boolean = false)
     : BaseItem(R.layout.item_verse, { inflater, parent -> VerseItemViewHolder(inflater, parent) }) {
     companion object {
-        private val STRING_BUILDER = StringBuilder()
-        private val PARALLEL_VERSE_SIZE_SPAN = RelativeSizeSpan(0.95F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
-
-        private fun buildVerseForDisplay(out: StringBuilder, verseIndex: VerseIndex, text: Verse.Text) {
-            if (out.isNotEmpty()) {
-                out.append('\n').append('\n')
-            }
-            out.append(text.translationShortName).append(' ')
-                    .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                    .append('\n').append(text.text)
-        }
     }
 
-    val textForDisplay: CharSequence by lazy {
-        if (verse.parallel.isEmpty()) {
-            // format:
-            // <book name> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-            STRING_BUILDER.setLength(0)
-            STRING_BUILDER.append(verse.text.bookName).append(' ')
-                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
-                    .append(verse.text.text)
-            return@lazy STRING_BUILDER.toString()
-        } else {
-            // format:
-            // <primary translation> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-            // <empty line>
-            // <parallel translation 1> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-            // <parallel translation 2> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-
-            STRING_BUILDER.setLength(0)
-            buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, verse.text)
-            val primaryTextLength = STRING_BUILDER.length
-
-            for (text in verse.parallel) {
-                buildVerseForDisplay(STRING_BUILDER, verse.verseIndex, text)
+    var textForDisplay: CharSequence = ""
+        get() {
+            if (field.isEmpty()) {
+                field = SPANNABLE_STRING_BUILDER.format(verse, false, highlightColor)
             }
-
-            SPANNABLE_STRING_BUILDER.clear()
-            SPANNABLE_STRING_BUILDER.clearSpans()
-            SPANNABLE_STRING_BUILDER.append(STRING_BUILDER)
-            val length = SPANNABLE_STRING_BUILDER.length
-            SPANNABLE_STRING_BUILDER.setSpan(PARALLEL_VERSE_SIZE_SPAN, primaryTextLength, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, length)
+            return field
         }
-    }
 }
 
-class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<VerseItem>(inflater.inflate(R.layout.item_verse, parent, false)) {
     companion object {
-        const val VERSE_SELECTED = 1
-        const val VERSE_DESELECTED = 2
-        const val NOTE_ADDED = 3
-        const val NOTE_REMOVED = 4
-        const val BOOKMARK_ADDED = 5
-        const val BOOKMARK_REMOVED = 6
-
         private val ON = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
         private val OFF = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
     }
@@ -114,6 +64,7 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     private val resources = itemView.resources
     private val text = itemView.findViewById<TextView>(R.id.text)
     private val bookmark = itemView.findViewById<ImageView>(R.id.bookmark)
+    private val highlight = itemView.findViewById<ImageView>(R.id.highlight)
     private val note = itemView.findViewById<ImageView>(R.id.note)
 
     init {
@@ -122,8 +73,9 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
             item?.let { it.onLongClicked(it.verse) }
             return@setOnLongClickListener true
         }
-        note.setOnClickListener { item?.let { it.onNoteClicked(it.verse.verseIndex) } }
         bookmark.setOnClickListener { item?.let { it.onBookmarkClicked(it.verse.verseIndex, it.hasBookmark) } }
+        highlight.setOnClickListener { item?.let { it.onHighlightClicked(it.verse.verseIndex, it.highlightColor) } }
+        note.setOnClickListener { item?.let { it.onNoteClicked(it.verse.verseIndex) } }
     }
 
     override fun bind(settings: Settings, item: VerseItem, payloads: List<Any>) {
@@ -133,41 +85,48 @@ class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
             text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
 
             bookmark.colorFilter = if (item.hasBookmark) ON else OFF
+            highlight.colorFilter = if (item.highlightColor != Highlight.COLOR_NONE) ON else OFF
             note.colorFilter = if (item.hasNote) ON else OFF
 
             itemView.isSelected = item.selected
         } else {
             payloads.forEach { payload ->
-                when (payload as Int) {
-                    VERSE_SELECTED -> {
+                val update = payload as VerseUpdate
+                when (update.operation) {
+                    VerseUpdate.VERSE_SELECTED -> {
                         item.selected = true
                         itemView.isSelected = true
                         if (settings.nightModeOn) {
                             text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
                         }
                     }
-                    VERSE_DESELECTED -> {
+                    VerseUpdate.VERSE_DESELECTED -> {
                         item.selected = false
                         itemView.isSelected = false
                         if (settings.nightModeOn) {
                             text.animateTextColor(settings.getPrimaryTextColor(resources))
                         }
                     }
-                    NOTE_ADDED -> {
+                    VerseUpdate.NOTE_ADDED -> {
                         item.hasNote = true
                         note.colorFilter = ON
                     }
-                    NOTE_REMOVED -> {
+                    VerseUpdate.NOTE_REMOVED -> {
                         item.hasNote = false
                         note.colorFilter = OFF
                     }
-                    BOOKMARK_ADDED -> {
+                    VerseUpdate.BOOKMARK_ADDED -> {
                         item.hasBookmark = true
                         bookmark.colorFilter = ON
                     }
-                    BOOKMARK_REMOVED -> {
+                    VerseUpdate.BOOKMARK_REMOVED -> {
                         item.hasBookmark = false
                         bookmark.colorFilter = OFF
+                    }
+                    VerseUpdate.HIGHLIGHT_UPDATED -> {
+                        item.highlightColor = update.data as Int
+                        item.textForDisplay = ""
+                        bind(settings, item, emptyList())
                     }
                 }
             }

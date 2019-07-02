@@ -46,7 +46,7 @@ interface SettingsView : MVPView {
 }
 
 class SettingsActivity : BaseActivity(), SettingsView {
-    private val fontSizeTexts: Array<CharSequence> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
+    private val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
 
     @Inject
     lateinit var presenter: SettingsPresenter

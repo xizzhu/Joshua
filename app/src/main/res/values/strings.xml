@@ -72,6 +72,16 @@
         <item>Dec</item>
     </string-array>
 
+    <string name="text_pick_highlight_color">Select highlight color</string>
+    <string-array name="text_colors">
+        <item>None</item>
+        <item>Yellow</item>
+        <item>Pink</item>
+        <item>Purple</item>
+        <item>Green</item>
+        <item>Blue</item>
+    </string-array>
+
     <string name="text_share_with">Share with</string>
     <string name="text_verse_comparison">Verses</string>
     <string name="text_note">Note</string>

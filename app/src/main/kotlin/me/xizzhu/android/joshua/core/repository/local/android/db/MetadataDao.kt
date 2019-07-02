@@ -21,7 +21,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
 
-class MetadataDao(private val sqliteHelper: SQLiteOpenHelper) {
+class MetadataDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_METADATA = "metadata"
         private const val COLUMN_KEY = "key"

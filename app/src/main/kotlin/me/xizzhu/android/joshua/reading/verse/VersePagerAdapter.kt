@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -78,8 +79,8 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
         findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.deselectVerse(verseIndex)
     }
 
-    fun notifyVerseUpdate(verseIndex: VerseIndex, operation: Int) {
-        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.notifyVerseUpdate(verseIndex, operation)
+    fun notifyVerseUpdate(verseIndex: VerseIndex, update: VerseUpdate) {
+        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.notifyVerseUpdate(verseIndex, update)
     }
 
     override fun getCount(): Int = if (currentTranslation.isNotEmpty() && settings != null) Bible.TOTAL_CHAPTER_COUNT else 0
@@ -187,7 +188,7 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         verseList.deselectVerse(verseIndex)
     }
 
-    fun notifyVerseUpdate(verseIndex: VerseIndex, operation: Int) {
-        verseList.notifyVerseUpdate(verseIndex, operation)
+    fun notifyVerseUpdate(verseIndex: VerseIndex, update: VerseUpdate) {
+        verseList.notifyVerseUpdate(verseIndex, update)
     }
 }
