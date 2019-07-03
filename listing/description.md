@@ -31,8 +31,10 @@ A simple and easy-to-use Bible reader with offline reading, multi-versions suppo
 - Updated King James Version (UKJV)
 - World English Bible (WEB)
 - Young's Literal Translation (YLT)
-- Hindi Bible: Easy-to-Read Version (ERV-HI) हिंदी बाइबिल
+- Raamattu 1938 (PR1938)
+- Raamattu 1992 (PR1992)
 - Ang Dating Biblia 1905 (ADB1905)
+- Hindi Bible: Easy-to-Read Version (ERV-HI) हिंदी बाइबिल
 - 中文和合本（简体）
 - 中文新译本（简体）
 - 華語和合本
