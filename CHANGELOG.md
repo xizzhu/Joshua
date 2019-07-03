@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.7.0 (2019-07-02)
 - Added verse highlight support
 - Grouped available translations by language
 - Should not fail saving when translation table already exists
