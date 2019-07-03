@@ -24,6 +24,7 @@ A simple and easy-to-use Bible reader with offline reading, multi-versions suppo
 - Bible in Basic English (BBE)
 - English Standard Version (ESV)
 - GOD'S WORD to the Nations (GodsWord)
+- Good News Translation (GNT)
 - Green's Literal Translation (LITV)
 - New International Version (NIV)
 - New Living Translation (NLT)
