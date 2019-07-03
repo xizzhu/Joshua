@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Should set hint on TextInputLayout
 
 #### v0.7.0 (2019-07-02)
 - Added verse highlight support
