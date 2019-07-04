@@ -45,7 +45,7 @@ fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, groupBy
                 val language = translationInfo.language.split("_")[0]
                 if (currentLanguage != language) {
                     if (currentLanguage.isNotEmpty()) {
-                        add(TitleItem(Locale(language).displayName, true))
+                        add(TitleItem(Locale(language).displayLanguage, true))
                     }
                     currentLanguage = language
                 }
