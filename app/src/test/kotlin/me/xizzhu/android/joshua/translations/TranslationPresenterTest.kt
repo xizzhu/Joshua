@@ -87,6 +87,7 @@ class TranslationPresenterTest : BaseUnitTest() {
             downloadedTranslationsChannel.send(listOf(MockContents.kjvDownloadedTranslationInfo))
 
             val expected = listOf(
+                    TitleItem("English", true),
                     TranslationItem(MockContents.kjvDownloadedTranslationInfo, true, translationPresenter::onTranslationClicked, translationPresenter::onTranslationLongClicked),
                     TitleItem("", false),
                     TranslationItem(MockContents.cuvTranslationInfo, false, translationPresenter::onTranslationClicked, translationPresenter::onTranslationLongClicked)

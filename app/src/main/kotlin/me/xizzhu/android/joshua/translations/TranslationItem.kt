@@ -35,20 +35,18 @@ data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTr
                            val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0)
     : BaseItem(R.layout.item_translation, { inflater, parent -> TranslationItemViewHolder(inflater, parent) })
 
-fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, groupByLanguage: Boolean,
+fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, showFirstLanguage: Boolean,
                                              onClicked: (TranslationInfo) -> Unit,
                                              onLongClicked: (TranslationInfo, Boolean) -> Unit): List<BaseItem> {
     return ArrayList<BaseItem>(size).apply {
         var currentLanguage = ""
         for (translationInfo in this@toTranslationItems) {
-            if (groupByLanguage) {
-                val language = translationInfo.language.split("_")[0]
-                if (currentLanguage != language) {
-                    if (currentLanguage.isNotEmpty()) {
-                        add(TitleItem(Locale(language).displayLanguage, true))
-                    }
-                    currentLanguage = language
+            val language = translationInfo.language.split("_")[0]
+            if (currentLanguage != language) {
+                if (currentLanguage.isNotEmpty() || showFirstLanguage) {
+                    add(TitleItem(Locale(language).displayLanguage, true))
                 }
+                currentLanguage = language
             }
             add(TranslationItem(translationInfo,
                     translationInfo.downloaded && translationInfo.shortName == currentTranslation,
