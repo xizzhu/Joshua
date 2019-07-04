@@ -8,7 +8,22 @@ Joshua
 
 A simple and easy-to-use Bible reader for your Android device. It supports offline reading, multi-versions, full-text search, and many other features, while maintaining a small download and install size.
 
-You can download the APK from [Play Store](https://play.google.com/store/apps/details?id=me.xizzhu.android.joshua) or [here](https://github.com/xizzhu/Joshua/releases). Recent changes are listed at [CHANGELOG.md](CHANGELOG.md).
+You can download the APK from [Play Store](https://play.google.com/store/apps/details?id=me.xizzhu.android.joshua) or [here](https://github.com/xizzhu/Joshua/releases). Recent changes are listed at [CHANGELOG.md](CHANGELOG.md). Feel free to request new features or report bugs [here](https://github.com/xizzhu/Joshua/issues).
+
+Main Features
+-------------
+* Download it for free
+* Read without network connection
+* Small download and installation size
+* Read multiple versions at the same time
+* Full-text search
+* Add bookmarks and highlights to your favorite verses
+* Add your own notes
+* Share verses with friends through your favorite social media, email, SMS, etc.
+* Customize font size
+* Day / night mode
+
+We currently support tens of different translations, with more added regularly. A full list of available translations can be found [here](TRANSLATIONS.md).
 
 License
 -------
