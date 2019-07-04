@@ -18,10 +18,12 @@ package me.xizzhu.android.joshua.translations
 
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.spy
+import java.util.*
 import kotlin.test.assertEquals
 
 class TranslationInfoComparatorTest : BaseUnitTest() {
@@ -29,14 +31,27 @@ class TranslationInfoComparatorTest : BaseUnitTest() {
     private val enUs2 = TranslationInfo("", "enUs2", "en_us", 0L, false)
     private val enGb = TranslationInfo("", "enGb", "en_gb", 0L, false)
     private val zhCn = TranslationInfo("", "zhCn", "zh_cn", 0L, false)
+    private val fiFi = TranslationInfo("", "fiFi", "fi_fi", 0L, false)
 
     private lateinit var comparator: TranslationInfoComparator
+    private lateinit var defaultLocale: Locale
 
     @Before
     override fun setup() {
         super.setup()
+
+        defaultLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+
         comparator = spy(TranslationInfoComparator())
-        `when`(comparator.userLanguage()).thenReturn("en")
+        `when`(comparator.userLanguage()).thenReturn(Locale.US.displayLanguage)
+    }
+
+    @After
+    override fun tearDown() {
+        Locale.setDefault(defaultLocale)
+
+        super.tearDown()
     }
 
     @Test
@@ -55,8 +70,9 @@ class TranslationInfoComparatorTest : BaseUnitTest() {
 
     @Test
     fun testDifferentLanguage() {
-        val expected = listOf(enUs1, zhCn)
-        assertEquals(expected, listOf(enUs1, zhCn).sortedWith(comparator))
-        assertEquals(expected, listOf(zhCn, enUs1).sortedWith(comparator))
+        val expected = listOf(enUs1, zhCn, fiFi)
+        assertEquals(expected, listOf(enUs1, fiFi, zhCn).sortedWith(comparator))
+        assertEquals(expected, listOf(zhCn, enUs1, fiFi).sortedWith(comparator))
+        assertEquals(expected, listOf(enUs1, zhCn, fiFi).sortedWith(comparator))
     }
 }

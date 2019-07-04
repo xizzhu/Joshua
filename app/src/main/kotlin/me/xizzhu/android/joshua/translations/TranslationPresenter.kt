@@ -38,13 +38,13 @@ import kotlin.Comparator
 class TranslationInfoComparator : Comparator<TranslationInfo> {
     override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
         val userLanguage = userLanguage()
-        val language1 = t1.language.split(("_"))[0]
-        val language2 = t2.language.split(("_"))[0]
+        val language1 = Locale(t1.language.split("_")[0]).displayLanguage
+        val language2 = Locale(t2.language.split("_")[0]).displayLanguage
         val score1 = if (userLanguage == language1) 1 else 0
         val score2 = if (userLanguage == language2) 1 else 0
         var r = score2 - score1
         if (r == 0) {
-            r = t1.language.compareTo(t2.language)
+            r = language1.compareTo(language2)
         }
         if (r == 0) {
             r = t1.name.compareTo(t2.name)
@@ -53,10 +53,7 @@ class TranslationInfoComparator : Comparator<TranslationInfo> {
     }
 
     @VisibleForTesting
-    fun userLanguage(): String {
-        val userLocale = Locale.getDefault()
-        return userLocale.language.toLowerCase(userLocale).split(("_"))[0]
-    }
+    fun userLanguage(): String = Locale.getDefault().displayLanguage
 }
 
 class TranslationPresenter(private val translationInteractor: TranslationInteractor,
