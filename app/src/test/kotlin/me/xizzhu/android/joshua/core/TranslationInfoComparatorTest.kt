@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.translations
+package me.xizzhu.android.joshua.core
 
-import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.After
 import org.junit.Before
