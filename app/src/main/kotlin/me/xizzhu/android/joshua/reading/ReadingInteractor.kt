@@ -129,8 +129,9 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
                            bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingManager.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
 
-    suspend fun readVerseWithParallel(translationShortName: String, verseIndex: VerseIndex): Verse =
-            bibleReadingManager.readVerseWithParallel(translationShortName, verseIndex)
+    suspend fun readVerse(translationShortName: String, parallelTranslations: List<String>,
+                          verseIndex: VerseIndex): Verse =
+            bibleReadingManager.readVerse(translationShortName, parallelTranslations, verseIndex)
 
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)

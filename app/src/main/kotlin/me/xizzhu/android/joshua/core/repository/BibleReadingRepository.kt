@@ -96,8 +96,9 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             localReadingStorage.readVerse(translationShortName, verseIndex)
 
-    suspend fun readVerseWithParallel(translationShortName: String, verseIndex: VerseIndex): Verse =
-            localReadingStorage.readVerseWithParallel(translationShortName, verseIndex)
+    suspend fun readVerse(translationShortName: String, parallelTranslations: List<String>,
+                          verseIndex: VerseIndex): Verse =
+            localReadingStorage.readVerse(translationShortName, parallelTranslations, verseIndex)
 
     suspend fun search(translationShortName: String, query: String): List<Verse> {
         Analytics.track(Analytics.EVENT_SEARCH, Bundle().apply {

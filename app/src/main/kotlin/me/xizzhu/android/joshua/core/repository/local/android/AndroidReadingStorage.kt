@@ -123,17 +123,18 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
         }
     }
 
-    override suspend fun readVerseWithParallel(translationShortName: String, verseIndex: VerseIndex): Verse {
-        return withContext(Dispatchers.IO) {
-            androidDatabase.readableDatabase.transaction {
-                val translationToBookNames = androidDatabase.bookNamesDao.read(verseIndex.bookIndex)
-                val translationToBookShortNames = androidDatabase.bookNamesDao.readShortName(verseIndex.bookIndex)
-                val translationToText = androidDatabase.translationDao.read(
-                        translationToBookNames, translationToBookShortNames, verseIndex).toMutableMap()
-                val primaryText = translationToText.remove(translationShortName)!!
-                return@withContext Verse(verseIndex, primaryText,
-                        translationToText.values.sortedBy { it.translationShortName })
-            }
+    override suspend fun readVerse(translationShortName: String, parallelTranslations: List<String>,
+                                   verseIndex: VerseIndex): Verse = withContext(Dispatchers.IO) {
+        androidDatabase.readableDatabase.transaction {
+            val translations = mutableListOf(translationShortName)
+            translations.addAll(parallelTranslations)
+            val translationToBookNames = androidDatabase.bookNamesDao.read(translations, verseIndex.bookIndex)
+            val translationToBookShortNames = androidDatabase.bookNamesDao.readShortName(translations, verseIndex.bookIndex)
+            val translationToText = androidDatabase.translationDao.read(
+                    translationToBookNames, translationToBookShortNames, verseIndex).toMutableMap()
+            val primaryText = translationToText.remove(translationShortName)!!
+            return@withContext Verse(verseIndex, primaryText,
+                    mutableListOf<Verse.Text>().apply { parallelTranslations.forEach { add(translationToText[it]!!) } })
         }
     }
 

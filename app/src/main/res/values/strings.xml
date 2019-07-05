@@ -9,7 +9,7 @@
     <string name="title_notes">Notes</string>
     <string name="title_settings">Settings</string>
 
-    <string name="header_available_translations">Available translations</string>
+    <string name="header_available_translations">Available for download</string>
 
     <string name="toast_translation_downloaded">Translation downloaded</string>
     <string name="toast_translation_deleted">Translation deleted</string>

@@ -22,14 +22,39 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.logger.Log
+import java.util.*
+import kotlin.Comparator
 
 data class TranslationInfo(val shortName: String, val name: String, val language: String,
                            val size: Long, val downloaded: Boolean)
+
+class TranslationInfoComparator : Comparator<TranslationInfo> {
+    override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
+        val userLanguage = userLanguage()
+        val language1 = Locale(t1.language.split("_")[0]).displayLanguage
+        val language2 = Locale(t2.language.split("_")[0]).displayLanguage
+        val score1 = if (userLanguage == language1) 1 else 0
+        val score2 = if (userLanguage == language2) 1 else 0
+        var r = score2 - score1
+        if (r == 0) {
+            r = language1.compareTo(language2)
+        }
+        if (r == 0) {
+            r = t1.name.compareTo(t2.name)
+        }
+        return r
+    }
+
+    @VisibleForTesting
+    fun userLanguage(): String = Locale.getDefault().displayLanguage
+}
 
 class TranslationManager(private val translationRepository: TranslationRepository) {
     companion object {
         private val TAG = TranslationManager::class.java.simpleName
     }
+
+    private val translationComparator = TranslationInfoComparator()
 
     private val translationsLock: Any = Any()
     private val availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
@@ -55,11 +80,11 @@ class TranslationManager(private val translationRepository: TranslationRepositor
     @VisibleForTesting
     suspend fun notifyTranslationsUpdated(available: List<TranslationInfo>, downloaded: List<TranslationInfo>) {
         if (available != availableTranslationsChannel.valueOrNull) {
-            availableTranslationsChannel.send(available)
+            availableTranslationsChannel.send(available.sortedWith(translationComparator))
         }
 
         if (downloaded != downloadedTranslationsChannel.valueOrNull) {
-            downloadedTranslationsChannel.send(downloaded)
+            downloadedTranslationsChannel.send(downloaded.sortedWith(translationComparator))
         }
     }
 

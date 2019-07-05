@@ -33,36 +33,9 @@ import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
 import java.util.*
-import kotlin.Comparator
-
-class TranslationInfoComparator : Comparator<TranslationInfo> {
-    override fun compare(t1: TranslationInfo, t2: TranslationInfo): Int {
-        val userLanguage = userLanguage()
-        val language1 = t1.language.split(("_"))[0]
-        val language2 = t2.language.split(("_"))[0]
-        val score1 = if (userLanguage == language1) 1 else 0
-        val score2 = if (userLanguage == language2) 1 else 0
-        var r = score2 - score1
-        if (r == 0) {
-            r = t1.language.compareTo(t2.language)
-        }
-        if (r == 0) {
-            r = t1.name.compareTo(t2.name)
-        }
-        return r
-    }
-
-    @VisibleForTesting
-    fun userLanguage(): String {
-        val userLocale = Locale.getDefault()
-        return userLocale.language.toLowerCase(userLocale).split(("_"))[0]
-    }
-}
 
 class TranslationPresenter(private val translationInteractor: TranslationInteractor,
                            private val context: Context) : BaseSettingsPresenter<TranslationView>(translationInteractor) {
-    private val translationComparator = TranslationInfoComparator()
-
     private var currentTranslation: String? = null
     private var availableTranslations: List<TranslationInfo>? = null
     private var downloadedTranslations: List<TranslationInfo>? = null
@@ -78,13 +51,13 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
         coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeAvailableTranslations().consumeEach {
-                availableTranslations = it.sortedWith(translationComparator)
+                availableTranslations = it
                 updateTranslations()
             }
         }
         coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeDownloadedTranslations().consumeEach {
-                downloadedTranslations = it.sortedWith(translationComparator)
+                downloadedTranslations = it
                 updateTranslations()
             }
         }
@@ -109,11 +82,11 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
 
         val items: ArrayList<BaseItem> = ArrayList()
-        items.addAll(downloadedTranslations!!.toTranslationItems(currentTranslation!!, false,
+        items.addAll(downloadedTranslations!!.toTranslationItems(currentTranslation!!,
                 this::onTranslationClicked, this::onTranslationLongClicked))
         if (availableTranslations!!.isNotEmpty()) {
             items.add(TitleItem(context.getString(R.string.header_available_translations), false))
-            items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!, true,
+            items.addAll(availableTranslations!!.toTranslationItems(currentTranslation!!,
                     this::onTranslationClicked, this::onTranslationLongClicked))
         }
 

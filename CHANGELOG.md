@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Improved translation list sorting
 - Should set hint on TextInputLayout
 
 #### v0.7.0 (2019-07-02)
