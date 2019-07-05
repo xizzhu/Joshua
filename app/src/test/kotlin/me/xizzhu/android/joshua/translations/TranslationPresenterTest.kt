@@ -90,6 +90,7 @@ class TranslationPresenterTest : BaseUnitTest() {
                     TitleItem("English", true),
                     TranslationItem(MockContents.kjvDownloadedTranslationInfo, true, translationPresenter::onTranslationClicked, translationPresenter::onTranslationLongClicked),
                     TitleItem("", false),
+                    TitleItem("Chinese", true),
                     TranslationItem(MockContents.cuvTranslationInfo, false, translationPresenter::onTranslationClicked, translationPresenter::onTranslationLongClicked)
             )
             verify(translationView, times(1)).onTranslationsUpdated(expected)

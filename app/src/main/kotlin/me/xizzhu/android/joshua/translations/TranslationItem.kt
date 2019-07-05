@@ -35,7 +35,7 @@ data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTr
                            val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0)
     : BaseItem(R.layout.item_translation, { inflater, parent -> TranslationItemViewHolder(inflater, parent) })
 
-fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, showFirstLanguage: Boolean,
+fun List<TranslationInfo>.toTranslationItems(currentTranslation: String,
                                              onClicked: (TranslationInfo) -> Unit,
                                              onLongClicked: (TranslationInfo, Boolean) -> Unit): List<BaseItem> {
     return ArrayList<BaseItem>(size).apply {
@@ -43,9 +43,7 @@ fun List<TranslationInfo>.toTranslationItems(currentTranslation: String, showFir
         for (translationInfo in this@toTranslationItems) {
             val language = translationInfo.language.split("_")[0]
             if (currentLanguage != language) {
-                if (currentLanguage.isNotEmpty() || showFirstLanguage) {
-                    add(TitleItem(Locale(language).displayLanguage, true))
-                }
+                add(TitleItem(Locale(language).displayLanguage, true))
                 currentLanguage = language
             }
             add(TranslationItem(translationInfo,

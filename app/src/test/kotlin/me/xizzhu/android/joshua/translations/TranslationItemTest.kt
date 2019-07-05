@@ -42,22 +42,6 @@ class TranslationItemTest : BaseUnitTest() {
         val onClicked: (TranslationInfo) -> Unit = {}
         val onLongClicked: (TranslationInfo, Boolean) -> Unit = { _, _ -> }
         val expected = listOf(
-                TranslationItem(MockContents.kjvDownloadedTranslationInfo, true, onClicked, onLongClicked),
-                TranslationItem(MockContents.bbeTranslationInfo, false, onClicked, onLongClicked),
-                TitleItem(Locale("zh").displayName, true),
-                TranslationItem(MockContents.cuvTranslationInfo, false, onClicked, onLongClicked)
-        )
-        val actual = listOf(MockContents.kjvDownloadedTranslationInfo, MockContents.bbeTranslationInfo, MockContents.cuvTranslationInfo)
-                .toTranslationItems(MockContents.kjvShortName, false, onClicked, onLongClicked)
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testToTranslationItemsShowFirstLanguage() {
-
-        val onClicked: (TranslationInfo) -> Unit = {}
-        val onLongClicked: (TranslationInfo, Boolean) -> Unit = { _, _ -> }
-        val expected = listOf(
                 TitleItem(Locale("en").displayName, true),
                 TranslationItem(MockContents.kjvDownloadedTranslationInfo, true, onClicked, onLongClicked),
                 TranslationItem(MockContents.bbeTranslationInfo, false, onClicked, onLongClicked),
@@ -65,7 +49,7 @@ class TranslationItemTest : BaseUnitTest() {
                 TranslationItem(MockContents.cuvTranslationInfo, false, onClicked, onLongClicked)
         )
         val actual = listOf(MockContents.kjvDownloadedTranslationInfo, MockContents.bbeTranslationInfo, MockContents.cuvTranslationInfo)
-                .toTranslationItems(MockContents.kjvShortName, true, onClicked, onLongClicked)
+                .toTranslationItems(MockContents.kjvShortName, onClicked, onLongClicked)
         assertEquals(expected, actual)
     }
 }
