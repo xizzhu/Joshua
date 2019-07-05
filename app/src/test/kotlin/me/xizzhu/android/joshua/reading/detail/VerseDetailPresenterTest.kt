@@ -38,6 +38,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
     private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>>
     private lateinit var currentTranslationShortName: BroadcastChannel<String>
+    private lateinit var downloadedTranslations: BroadcastChannel<List<TranslationInfo>>
     private lateinit var verseDetailPresenter: VerseDetailPresenter
 
     @Before
@@ -53,6 +54,9 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
             currentTranslationShortName = ConflatedBroadcastChannel(MockContents.kjvShortName)
             `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationShortName.openSubscription())
+
+            downloadedTranslations = ConflatedBroadcastChannel(emptyList())
+            `when`(readingInteractor.observeDownloadedTranslations()).thenReturn(downloadedTranslations.openSubscription())
 
             verseDetailPresenter = VerseDetailPresenter(readingInteractor)
 
@@ -70,7 +74,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     fun testShow() {
         runBlocking {
             val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerseWithParallel(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVerses[0])
+            `when`(readingInteractor.readVerse(MockContents.kjvShortName, emptyList(), verseIndex)).thenReturn(MockContents.kjvVerses[0])
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
             `when`(readingInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, -1L))
             `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
@@ -89,8 +93,10 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVerseDetail() {
         runBlocking {
+            downloadedTranslations.send(listOf(MockContents.bbeTranslationInfo, MockContents.kjvTranslationInfo, MockContents.cuvTranslationInfo))
+
             val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerseWithParallel(MockContents.kjvShortName, verseIndex)).thenReturn(MockContents.kjvVersesWithBbeCuvParallel[0])
+            `when`(readingInteractor.readVerse(MockContents.kjvShortName, listOf(MockContents.bbeShortName, MockContents.cuvShortName), verseIndex)).thenReturn(MockContents.kjvVersesWithBbeCuvParallel[0])
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
             `when`(readingInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, -1L))
             `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
@@ -114,7 +120,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     fun testLoadVerseDetailWithException() {
         runBlocking {
             val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerseWithParallel(MockContents.kjvShortName, verseIndex)).thenThrow(RuntimeException("Random exception"))
+            `when`(readingInteractor.readVerse(MockContents.kjvShortName, emptyList(), verseIndex)).thenThrow(RuntimeException("Random exception"))
             `when`(readingInteractor.readBookmark(verseIndex)).thenThrow(RuntimeException("Random exception"))
 
             verseDetailPresenter.loadVerseDetail(verseIndex)

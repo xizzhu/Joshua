@@ -187,7 +187,7 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
             androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
 
             assertEquals(MockContents.kjvVersesWithBbeCuvParallel[0],
-                    androidReadingStorage.readVerseWithParallel(MockContents.kjvShortName, VerseIndex(0, 0, 0)))
+                    androidReadingStorage.readVerse(MockContents.kjvShortName, listOf(MockContents.bbeShortName, MockContents.cuvShortName), VerseIndex(0, 0, 0)))
             assertEquals(MockContents.kjvVerses[0],
                     androidReadingStorage.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 0)))
         }

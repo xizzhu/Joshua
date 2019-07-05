@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Assert.assertEquals
@@ -33,10 +32,6 @@ class BookNamesDaoTest : BaseSqliteTest() {
     fun testEmptyTable() {
         assertTrue(androidDatabase.bookNamesDao.read("not_exist").isEmpty())
         assertTrue(androidDatabase.bookNamesDao.readShortName("not_exist").isEmpty())
-
-        for (bookIndex in 0 until Bible.BOOK_COUNT) {
-            assertTrue(androidDatabase.bookNamesDao.read(bookIndex).isEmpty())
-        }
     }
 
     @Test
@@ -90,30 +85,6 @@ class BookNamesDaoTest : BaseSqliteTest() {
                 androidDatabase.bookNamesDao.read(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
         assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookShortNames[1]), Pair(MockContents.cuvShortName, MockContents.cuvBookShortNames[1])),
                 androidDatabase.bookNamesDao.readShortName(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
-    }
-
-    @Test
-    fun testSaveThenReadByBookIndex() {
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
-
-        assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[0]), Pair(MockContents.cuvShortName, MockContents.cuvBookNames[0])),
-                androidDatabase.bookNamesDao.read(0))
-        assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookShortNames[0]), Pair(MockContents.cuvShortName, MockContents.cuvBookShortNames[0])),
-                androidDatabase.bookNamesDao.readShortName(0))
-    }
-
-    @Test
-    fun testSaveOverrideThenReadByBookIndex() {
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"), listOf("ok_3", "fine_4"))
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, listOf("random_3", "whatever_4"), listOf("ok_2", "fine_1"))
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
-
-        assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[0]), Pair(MockContents.cuvShortName, MockContents.cuvBookNames[0])),
-                androidDatabase.bookNamesDao.read(0))
-        assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookShortNames[0]), Pair(MockContents.cuvShortName, MockContents.cuvBookShortNames[0])),
-                androidDatabase.bookNamesDao.readShortName(0))
     }
 
     @Test

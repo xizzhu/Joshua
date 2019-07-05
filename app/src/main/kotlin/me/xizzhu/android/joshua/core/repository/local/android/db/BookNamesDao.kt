@@ -141,46 +141,6 @@ class BookNamesDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(bookIndex: Int): Map<String, String> {
-        if (bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT) {
-            return emptyMap()
-        }
-
-        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_NAME),
-                "$COLUMN_BOOK_INDEX = ?", arrayOf(bookIndex.toString()), null, null, null).use {
-            val bookNames = HashMap<String, String>(it.count)
-            if (it.count > 0) {
-                val translationShortName = it.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
-                val bookName = it.getColumnIndex(COLUMN_BOOK_NAME)
-                while (it.moveToNext()) {
-                    bookNames[it.getString(translationShortName)] = it.getString(bookName)
-                }
-            }
-            return bookNames
-        }
-    }
-
-    @WorkerThread
-    fun readShortName(bookIndex: Int): Map<String, String> {
-        if (bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT) {
-            return emptyMap()
-        }
-
-        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_SHORT_NAME),
-                "$COLUMN_BOOK_INDEX = ?", arrayOf(bookIndex.toString()), null, null, null).use {
-            val bookNames = HashMap<String, String>(it.count)
-            if (it.count > 0) {
-                val translationShortName = it.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
-                val bookName = it.getColumnIndex(COLUMN_BOOK_SHORT_NAME)
-                while (it.moveToNext()) {
-                    bookNames[it.getString(translationShortName)] = it.getString(bookName)
-                }
-            }
-            return bookNames
-        }
-    }
-
-    @WorkerThread
     fun read(translationShortName: String, bookIndex: Int): String {
         db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
                 "$COLUMN_TRANSLATION_SHORT_NAME = ? AND $COLUMN_BOOK_INDEX = ?",

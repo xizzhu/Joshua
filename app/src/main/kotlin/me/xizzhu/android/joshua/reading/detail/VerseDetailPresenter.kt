@@ -65,8 +65,11 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                 val highlightAsync = supervisedAsync { readingInteractor.readHighlight(verseIndex) }
                 val noteAsync = supervisedAsync { readingInteractor.readNote(verseIndex) }
 
-                val verse = readingInteractor.readVerseWithParallel(
-                        readingInteractor.observeCurrentTranslation().first(), verseIndex)
+                val currentTranslation = readingInteractor.observeCurrentTranslation().first()
+                val parallelTranslations = readingInteractor.observeDownloadedTranslations().first()
+                        .filter { it.shortName != currentTranslation }
+                        .map { it.shortName }
+                val verse = readingInteractor.readVerse(currentTranslation, parallelTranslations, verseIndex)
                 val verseTextItems = mutableListOf<VerseTextItem>().apply {
                     add(VerseTextItem(verseIndex, verse.text,
                             this@VerseDetailPresenter::onVerseClicked,

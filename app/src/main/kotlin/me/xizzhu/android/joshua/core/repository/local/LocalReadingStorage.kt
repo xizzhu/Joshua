@@ -40,7 +40,8 @@ interface LocalReadingStorage {
 
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse
 
-    suspend fun readVerseWithParallel(translationShortName: String, verseIndex: VerseIndex): Verse
+    suspend fun readVerse(translationShortName: String, parallelTranslations: List<String>,
+                          verseIndex: VerseIndex): Verse
 
     suspend fun search(translationShortName: String, bookNames: List<String>,
                        bookShortNames: List<String>, query: String): List<Verse>
