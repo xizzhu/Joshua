@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
+import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.style.RelativeSizeSpan
 import android.view.LayoutInflater
@@ -27,6 +28,7 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import android.text.Spannable
+import android.text.style.StyleSpan
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
@@ -34,7 +36,8 @@ data class VerseTextItem(val verseIndex: VerseIndex, val verseText: Verse.Text,
                          val onClicked: (String) -> Unit, val onLongClicked: (Verse) -> Unit)
     : BaseItem(R.layout.item_verse_text, { inflater, parent -> VerseTextItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
+        private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
+        private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.9F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -52,6 +55,7 @@ data class VerseTextItem(val verseIndex: VerseIndex, val verseText: Verse.Text,
         SPANNABLE_STRING_BUILDER.append(verseText.translationShortName).append(", ")
                 .append(verseText.bookName).append(' ')
                 .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
+        SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
         SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
 
         SPANNABLE_STRING_BUILDER.append('\n').append(verseText.text)
