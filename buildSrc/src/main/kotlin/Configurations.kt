@@ -47,8 +47,8 @@ object Versions {
     val java = JavaVersion.VERSION_1_8
 
     object Kotlin {
-        const val classpath = "1.3.40"
-        const val core = "1.3.40"
+        const val classpath = "1.3.41"
+        const val core = "1.3.41"
         const val coroutines = "1.2.2"
     }
 
@@ -88,7 +88,7 @@ object Versions {
         const val okio = "2.2.2"
     }
 
-    const val logger = "0.1.1"
+    const val logger = "0.1.2"
 
     const val stetho = "1.5.1"
 

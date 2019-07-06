@@ -4,6 +4,9 @@ CHANGELOG
 #### Next Release
 - Improved translation list sorting
 - Should set hint on TextInputLayout
+- Updated dependencies:
+  - Kotlin to 1.3.41
+  - Logger to 0.1.2
 
 #### v0.7.0 (2019-07-02)
 - Added verse highlight support
