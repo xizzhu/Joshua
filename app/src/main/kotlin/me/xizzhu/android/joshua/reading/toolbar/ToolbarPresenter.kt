@@ -21,10 +21,14 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.reading.ReadingInteractor
+import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.logger.Log
 
 class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ToolbarView>() {
+    private val translationComparator = TranslationInfoComparator(
+            TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
+
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -44,7 +48,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
                 if (it.isEmpty()) {
                     view?.onNoTranslationsDownloaded()
                 } else {
-                    view?.onDownloadedTranslationsLoaded(it)
+                    view?.onDownloadedTranslationsLoaded(it.sortedWith(translationComparator))
                 }
             }
         }

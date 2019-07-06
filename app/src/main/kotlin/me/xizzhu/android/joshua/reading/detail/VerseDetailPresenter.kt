@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
+import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
@@ -34,6 +35,9 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     companion object {
         private val TAG: String = VerseDetailPresenter::class.java.simpleName
     }
+
+    private val translationComparator = TranslationInfoComparator(
+            TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
 
     @VisibleForTesting
     var verseDetail: VerseDetail? = null
@@ -67,6 +71,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
                 val currentTranslation = readingInteractor.observeCurrentTranslation().first()
                 val parallelTranslations = readingInteractor.observeDownloadedTranslations().first()
+                        .sortedWith(translationComparator)
                         .filter { it.shortName != currentTranslation }
                         .map { it.shortName }
                 val verse = readingInteractor.readVerse(currentTranslation, parallelTranslations, verseIndex)

@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.SwipeRefresherState
+import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
@@ -36,6 +37,8 @@ import java.util.*
 
 class TranslationPresenter(private val translationInteractor: TranslationInteractor,
                            private val context: Context) : BaseSettingsPresenter<TranslationView>(translationInteractor) {
+    private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_NAME)
+
     private var currentTranslation: String? = null
     private var availableTranslations: List<TranslationInfo>? = null
     private var downloadedTranslations: List<TranslationInfo>? = null
@@ -51,13 +54,13 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
         coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeAvailableTranslations().consumeEach {
-                availableTranslations = it
+                availableTranslations = it.sortedWith(translationComparator)
                 updateTranslations()
             }
         }
         coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeDownloadedTranslations().consumeEach {
-                downloadedTranslations = it
+                downloadedTranslations = it.sortedWith(translationComparator)
                 updateTranslations()
             }
         }
