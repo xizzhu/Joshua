@@ -10,6 +10,7 @@ Available Translations
   * GOD'S WORD to the Nations (GodsWord)
   * Good News Translation (GNT)
   * Green's Literal Translation (LITV)
+  * New Heart English Bible (NHEB)
   * New International Version (NIV)
   * New Living Translation (NLT)
   * The Message Bible (MSG)
@@ -21,6 +22,9 @@ Available Translations
 * Finnish
   * Raamattu 1938 (PR1938)
   * Raamattu 1992 (PR1992)
+* German
+  * Darby Unrevidierte Elberfelder (Elb1905)
+  * Luther's Biblia (Lut1545)
 * Hindi
   * Hindi Bible: Easy-to-Read Version (ERV-HI) हिंदी बाइबिल
 * Simplified Chinese
