@@ -12,7 +12,7 @@ You can download the APK from [Play Store](https://play.google.com/store/apps/de
 
 Main Features
 -------------
-* Download it for free
+* Download it for free, and read the Bible ads-free
 * Read without network connection
 * Small download and installation size
 * Read multiple versions at the same time

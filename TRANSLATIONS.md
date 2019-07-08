@@ -13,6 +13,7 @@ Available Translations
   * New Heart English Bible (NHEB)
   * New International Version (NIV)
   * New Living Translation (NLT)
+  * Revised Standard Version (RSV)
   * The Message Bible (MSG)
   * Updated King James Version (UKJV)
   * World English Bible (WEB)
