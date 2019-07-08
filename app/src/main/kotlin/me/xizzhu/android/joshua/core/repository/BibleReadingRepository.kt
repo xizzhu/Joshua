@@ -85,7 +85,7 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
         val key = "$translationShortName-$bookIndex-$chapterIndex"
         return versesCache.get(key)
                 ?: localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex,
-                        readBookNames(translationShortName)[bookIndex], readBookShortNames(translationShortName)[bookIndex])
+                        readBookNames(translationShortName)[bookIndex])
                         .also { versesCache.put(key, it) }
     }
 
@@ -106,7 +106,6 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
             putString(Analytics.PARAM_SEARCH_TERM, query)
         })
 
-        return localReadingStorage.search(translationShortName, readBookNames(translationShortName),
-                readBookShortNames(translationShortName), query)
+        return localReadingStorage.search(translationShortName, readBookNames(translationShortName), query)
     }
 }

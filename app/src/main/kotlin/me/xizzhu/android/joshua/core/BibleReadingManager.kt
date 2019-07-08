@@ -51,12 +51,12 @@ data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<
         return true
     }
 
-    data class Text(val translationShortName: String, val bookName: String, val bookShortName: String, val text: String) {
+    data class Text(val translationShortName: String, val bookName: String, val text: String) {
         companion object {
-            val INVALID = Text("", "", "", "")
+            val INVALID = Text("", "", "")
         }
 
-        fun isValid(): Boolean = translationShortName.isNotEmpty() && bookName.isNotEmpty() && bookShortName.isNotEmpty() // text can be empty
+        fun isValid(): Boolean = translationShortName.isNotEmpty() && bookName.isNotEmpty() // text can be empty
     }
 }
 

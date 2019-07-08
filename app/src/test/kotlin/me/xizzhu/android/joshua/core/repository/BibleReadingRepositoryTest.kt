@@ -82,7 +82,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
                     .thenReturn(MockContents.kjvBookNames)
             `when`(localReadingStorage.readBookShortNames(MockContents.kjvShortName))
                     .thenReturn(MockContents.kjvBookShortNames)
-            `when`(localReadingStorage.readVerses(MockContents.kjvShortName, 0, 0, MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0]))
+            `when`(localReadingStorage.readVerses(MockContents.kjvShortName, 0, 0, MockContents.kjvBookNames[0]))
                     .thenReturn(MockContents.kjvVerses)
             assertEquals(MockContents.kjvVerses,
                     bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0))
@@ -90,7 +90,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
             // has cache now, read from there
             `when`(localReadingStorage.readBookNames(anyString()))
                     .thenThrow(IllegalStateException("Should read from in-memory cache"))
-            `when`(localReadingStorage.readVerses(anyString(), anyInt(), anyInt(), anyString(), anyString()))
+            `when`(localReadingStorage.readVerses(anyString(), anyInt(), anyInt(), anyString()))
                     .thenThrow(IllegalStateException("Should read from in-memory cache"))
             assertEquals(MockContents.kjvVerses,
                     bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0))

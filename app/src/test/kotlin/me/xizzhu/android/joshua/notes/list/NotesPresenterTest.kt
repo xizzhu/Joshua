@@ -96,18 +96,19 @@ class NotesPresenterTest : BaseUnitTest() {
                     .thenReturn(MockContents.kjvVerses[3])
             `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 4)))
                     .thenReturn(MockContents.kjvVerses[4])
+            `when`(notesInteractor.readBookShortName(MockContents.kjvShortName, 0)).thenReturn(MockContents.kjvBookShortNames[0])
 
             // loadBookmarks() is called by onViewAttached(), so no need to call again
             notesPresenter.attachView(notesView)
 
             verify(notesView, times(1)).onNotesLoaded(listOf(
                     TitleItem("", false),
-                    NoteItem(VerseIndex(0, 0, 4), MockContents.kjvVerses[4].text, "Note1", 2L * 365L * 24L * 3600L * 1000L, notesPresenter::selectVerse),
+                    NoteItem(VerseIndex(0, 0, 4), MockContents.kjvVerses[4].text, MockContents.kjvBookShortNames[0], "Note1", 2L * 365L * 24L * 3600L * 1000L, notesPresenter::selectVerse),
                     TitleItem("", false),
-                    NoteItem(VerseIndex(0, 0, 1), MockContents.kjvVerses[1].text, "Note2", 36L * 3600L * 1000L, notesPresenter::selectVerse),
-                    NoteItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, "Note3", 36L * 3600L * 1000L - 1000L, notesPresenter::selectVerse),
+                    NoteItem(VerseIndex(0, 0, 1), MockContents.kjvVerses[1].text, MockContents.kjvBookShortNames[0], "Note2", 36L * 3600L * 1000L, notesPresenter::selectVerse),
+                    NoteItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, MockContents.kjvBookShortNames[0], "Note3", 36L * 3600L * 1000L - 1000L, notesPresenter::selectVerse),
                     TitleItem("", false),
-                    NoteItem(VerseIndex(0, 0, 2), MockContents.kjvVerses[2].text, "Note4", 0L, notesPresenter::selectVerse)
+                    NoteItem(VerseIndex(0, 0, 2), MockContents.kjvVerses[2].text, MockContents.kjvBookShortNames[0], "Note4", 0L, notesPresenter::selectVerse)
             ))
             verify(notesView, never()).onNotesLoadFailed(anyInt())
 
@@ -125,13 +126,14 @@ class NotesPresenterTest : BaseUnitTest() {
             `when`(notesInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 3)))
                     .thenReturn(MockContents.kjvVerses[3])
+            `when`(notesInteractor.readBookShortName(MockContents.kjvShortName, 0)).thenReturn(MockContents.kjvBookShortNames[0])
 
             // loadBookmarks() is called by onViewAttached(), so no need to call again
             notesPresenter.attachView(notesView)
 
             verify(notesView, times(1)).onNotesLoaded(listOf(
                     TitleItem(MockContents.kjvVerses[3].text.bookName, false),
-                    NoteItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, "Note", 0L, notesPresenter::selectVerse)
+                    NoteItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, MockContents.kjvBookShortNames[0], "Note", 0L, notesPresenter::selectVerse)
             ))
             verify(notesView, never()).onNotesLoadFailed(anyInt())
 

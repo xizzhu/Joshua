@@ -93,6 +93,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
 
             items.add(BookmarkItem(bookmark.verseIndex,
                     bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
+                    bookmarksInteractor.readBookShortName(currentTranslation, bookmark.verseIndex.bookIndex),
                     bookmark.timestamp, Constants.SORT_BY_DATE, this@BookmarksPresenter::selectVerse))
         }
         return items
@@ -110,8 +111,9 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                 currentBookIndex = bookmark.verseIndex.bookIndex
             }
 
-            items.add(BookmarkItem(bookmark.verseIndex, verse.text, bookmark.timestamp,
-                    Constants.SORT_BY_BOOK, this@BookmarksPresenter::selectVerse))
+            items.add(BookmarkItem(bookmark.verseIndex, verse.text,
+                    bookmarksInteractor.readBookShortName(currentTranslation, bookmark.verseIndex.bookIndex),
+                    bookmark.timestamp, Constants.SORT_BY_BOOK, this@BookmarksPresenter::selectVerse))
         }
         return items
     }

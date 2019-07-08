@@ -27,13 +27,13 @@ import kotlin.test.assertEquals
 class NoteItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_note, NoteItem(VerseIndex.INVALID, Verse.Text.INVALID, "", 0L, {}).viewType)
+        assertEquals(R.layout.item_note, NoteItem(VerseIndex.INVALID, Verse.Text.INVALID, "", "", 0L, {}).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
         val expected = "Gen. 1:1 In the beginning God created the heaven and the earth."
-        val actual = NoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, "", 12345678L, {}).textForDisplay.toString()
+        val actual = NoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, MockContents.kjvBookShortNames[0], "", 12345678L, {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

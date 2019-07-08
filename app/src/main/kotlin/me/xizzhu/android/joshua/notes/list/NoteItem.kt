@@ -34,8 +34,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: String,
-                    val timestamp: Long, val onClicked: (VerseIndex) -> Unit)
+data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val bookShortName: String,
+                    val note: String, val timestamp: Long, val onClicked: (VerseIndex) -> Unit)
     : BaseItem(R.layout.item_note, { inflater, parent -> NoteItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
@@ -48,7 +48,7 @@ data class NoteItem(val verseIndex: VerseIndex, val text: Verse.Text, val note: 
 
         // format:
         // <book short name> <chapter index>:<verse index> <verse text>
-        SPANNABLE_STRING_BUILDER.append(text.bookShortName).append(' ')
+        SPANNABLE_STRING_BUILDER.append(bookShortName).append(' ')
                 .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
         SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
 
