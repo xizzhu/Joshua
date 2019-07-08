@@ -38,7 +38,7 @@ data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val ti
     : BaseItem(R.layout.item_bookmarks, { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
-        private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
+        private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.9F)
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -61,6 +61,7 @@ data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val ti
             // <verse text>
             SPANNABLE_STRING_BUILDER.append(text.bookName).append(' ')
                     .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
+            SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
             SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
 
             SPANNABLE_STRING_BUILDER.append('\n').append(text.text)
