@@ -92,9 +92,9 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
             }
 
             items.add(NoteItem(note.verseIndex,
-                    notesInteractor.readVerse(currentTranslation, note.verseIndex).text,
                     notesInteractor.readBookShortName(currentTranslation, note.verseIndex.bookIndex),
-                    note.note, note.timestamp, this@NotesPresenter::selectVerse))
+                    notesInteractor.readVerse(currentTranslation, note.verseIndex).text.text,
+                    note.note, this@NotesPresenter::selectVerse))
         }
         return items
     }
@@ -111,9 +111,9 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
                 currentBookIndex = note.verseIndex.bookIndex
             }
 
-            items.add(NoteItem(note.verseIndex, verse.text,
+            items.add(NoteItem(note.verseIndex,
                     notesInteractor.readBookShortName(currentTranslation, note.verseIndex.bookIndex),
-                    note.note, note.timestamp, this@NotesPresenter::selectVerse))
+                    verse.text.text, note.note, this@NotesPresenter::selectVerse))
         }
         return items
     }

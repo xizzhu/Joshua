@@ -103,12 +103,12 @@ class NotesPresenterTest : BaseUnitTest() {
 
             verify(notesView, times(1)).onNotesLoaded(listOf(
                     TitleItem("", false),
-                    NoteItem(VerseIndex(0, 0, 4), MockContents.kjvVerses[4].text, MockContents.kjvBookShortNames[0], "Note1", 2L * 365L * 24L * 3600L * 1000L, notesPresenter::selectVerse),
+                    NoteItem(VerseIndex(0, 0, 4), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[4].text.text, "Note1", notesPresenter::selectVerse),
                     TitleItem("", false),
-                    NoteItem(VerseIndex(0, 0, 1), MockContents.kjvVerses[1].text, MockContents.kjvBookShortNames[0], "Note2", 36L * 3600L * 1000L, notesPresenter::selectVerse),
-                    NoteItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, MockContents.kjvBookShortNames[0], "Note3", 36L * 3600L * 1000L - 1000L, notesPresenter::selectVerse),
+                    NoteItem(VerseIndex(0, 0, 1), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[1].text.text, "Note2", notesPresenter::selectVerse),
+                    NoteItem(VerseIndex(0, 0, 3), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, "Note3", notesPresenter::selectVerse),
                     TitleItem("", false),
-                    NoteItem(VerseIndex(0, 0, 2), MockContents.kjvVerses[2].text, MockContents.kjvBookShortNames[0], "Note4", 0L, notesPresenter::selectVerse)
+                    NoteItem(VerseIndex(0, 0, 2), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[2].text.text, "Note4", notesPresenter::selectVerse)
             ))
             verify(notesView, never()).onNotesLoadFailed(anyInt())
 
@@ -133,7 +133,7 @@ class NotesPresenterTest : BaseUnitTest() {
 
             verify(notesView, times(1)).onNotesLoaded(listOf(
                     TitleItem(MockContents.kjvVerses[3].text.bookName, false),
-                    NoteItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, MockContents.kjvBookShortNames[0], "Note", 0L, notesPresenter::selectVerse)
+                    NoteItem(VerseIndex(0, 0, 3), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, "Note", notesPresenter::selectVerse)
             ))
             verify(notesView, never()).onNotesLoadFailed(anyInt())
 
