@@ -32,7 +32,7 @@ import android.text.style.StyleSpan
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class VerseTextItem(val verseIndex: VerseIndex, val verseText: Verse.Text,
+data class VerseTextItem(val verseIndex: VerseIndex, val verseText: Verse.Text, private val bookName: String,
                          val onClicked: (String) -> Unit, val onLongClicked: (Verse) -> Unit)
     : BaseItem(R.layout.item_verse_text, { inflater, parent -> VerseTextItemViewHolder(inflater, parent) }) {
     companion object {
@@ -53,7 +53,7 @@ data class VerseTextItem(val verseIndex: VerseIndex, val verseText: Verse.Text,
         // <translation short name>, <book name> <chapter verseIndex>:<verse verseIndex>
         // <verse text>
         SPANNABLE_STRING_BUILDER.append(verseText.translationShortName).append(", ")
-                .append(verseText.bookName).append(' ')
+                .append(bookName).append(' ')
                 .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
         SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
         SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
