@@ -16,10 +16,7 @@
 
 package me.xizzhu.android.joshua.search
 
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.firstOrNull
+import kotlinx.coroutines.channels.*
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -47,13 +44,16 @@ class SearchInteractor(private val searchActivity: SearchActivity,
         searchState.send(LoadingSpinnerState.IS_LOADING)
 
         try {
-            val currentTranslation = bibleReadingManager.observeCurrentTranslation().firstOrNull()
-                    ?: throw IllegalStateException("No translation selected")
-            searchResult.send(Pair(query, bibleReadingManager.search(currentTranslation, query)))
+            searchResult.send(Pair(query, bibleReadingManager.search(readCurrentTranslation(), query)))
         } finally {
             searchState.send(LoadingSpinnerState.NOT_LOADING)
         }
     }
+
+    suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
+
+    suspend fun readBookNames(translationShortName: String): List<String> =
+            bibleReadingManager.readBookNames(translationShortName)
 
     fun openReading() {
         navigator.navigate(searchActivity, Navigator.SCREEN_READING)

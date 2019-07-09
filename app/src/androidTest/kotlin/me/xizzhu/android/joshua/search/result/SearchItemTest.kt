@@ -37,7 +37,7 @@ class SearchItemTest : BaseUnitTest() {
     @Test
     fun testTextForDisplay() {
         val verseIndex = VerseIndex(1, 2, 3)
-        val bookName = MockContents.kjvVerses[0].text.bookName
+        val bookName = MockContents.kjvBookNames[0]
         val text = MockContents.kjvVerses[0].text.text
         val expected = "$bookName ${verseIndex.chapterIndex + 1}:${verseIndex.verseIndex + 1}\n$text"
         val actual = SearchItem(verseIndex, bookName, text, "", {}).textForDisplay.toString()
