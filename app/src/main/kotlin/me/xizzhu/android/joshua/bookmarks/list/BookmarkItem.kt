@@ -33,8 +33,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text, val bookShortName: String,
-                        val timestamp: Long, @Constants.SortOrder private val sortOrder: Int,
+data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text,
+                        private val bookShortName: String, @Constants.SortOrder private val sortOrder: Int,
                         val onClick: (VerseIndex) -> Unit)
     : BaseItem(R.layout.item_bookmarks, { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }) {
     companion object {

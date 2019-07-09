@@ -103,12 +103,12 @@ class BookmarksPresenterTest : BaseUnitTest() {
 
             verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(
                     TitleItem("", false),
-                    BookmarkItem(VerseIndex(0, 0, 4), MockContents.kjvVerses[4].text, MockContents.kjvBookShortNames[0], 2L * 365L * 24L * 3600L * 1000L, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
+                    BookmarkItem(VerseIndex(0, 0, 4), MockContents.kjvVerses[4].text, MockContents.kjvBookShortNames[0], Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
                     TitleItem("", false),
-                    BookmarkItem(VerseIndex(0, 0, 1), MockContents.kjvVerses[1].text, MockContents.kjvBookShortNames[0], 36L * 3600L * 1000L, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
-                    BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, MockContents.kjvBookShortNames[0], 36L * 3600L * 1000L - 1000L, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
+                    BookmarkItem(VerseIndex(0, 0, 1), MockContents.kjvVerses[1].text, MockContents.kjvBookShortNames[0], Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
+                    BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, MockContents.kjvBookShortNames[0], Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
                     TitleItem("", false),
-                    BookmarkItem(VerseIndex(0, 0, 2), MockContents.kjvVerses[2].text, MockContents.kjvBookShortNames[0], 0L, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse)
+                    BookmarkItem(VerseIndex(0, 0, 2), MockContents.kjvVerses[2].text, MockContents.kjvBookShortNames[0], Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse)
             ))
             verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
 
@@ -133,7 +133,7 @@ class BookmarksPresenterTest : BaseUnitTest() {
 
             verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(
                     TitleItem(MockContents.kjvVerses[3].text.bookName, false),
-                    BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, MockContents.kjvBookShortNames[0], 0L, Constants.SORT_BY_BOOK, bookmarksPresenter::selectVerse)
+                    BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, MockContents.kjvBookShortNames[0], Constants.SORT_BY_BOOK, bookmarksPresenter::selectVerse)
             ))
             verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
 
