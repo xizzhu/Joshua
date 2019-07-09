@@ -96,7 +96,8 @@ class NotesPresenterTest : BaseUnitTest() {
                     .thenReturn(MockContents.kjvVerses[3])
             `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 4)))
                     .thenReturn(MockContents.kjvVerses[4])
-            `when`(notesInteractor.readBookShortName(MockContents.kjvShortName, 0)).thenReturn(MockContents.kjvBookShortNames[0])
+            `when`(notesInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+            `when`(notesInteractor.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
 
             // loadBookmarks() is called by onViewAttached(), so no need to call again
             notesPresenter.attachView(notesView)
@@ -126,13 +127,14 @@ class NotesPresenterTest : BaseUnitTest() {
             `when`(notesInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(notesInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 3)))
                     .thenReturn(MockContents.kjvVerses[3])
-            `when`(notesInteractor.readBookShortName(MockContents.kjvShortName, 0)).thenReturn(MockContents.kjvBookShortNames[0])
+            `when`(notesInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+            `when`(notesInteractor.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
 
             // loadBookmarks() is called by onViewAttached(), so no need to call again
             notesPresenter.attachView(notesView)
 
             verify(notesView, times(1)).onNotesLoaded(listOf(
-                    TitleItem(MockContents.kjvVerses[3].text.bookName, false),
+                    TitleItem(MockContents.kjvBookNames[0], false),
                     NoteItem(VerseIndex(0, 0, 3), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, "Note", notesPresenter::selectVerse)
             ))
             verify(notesView, never()).onNotesLoadFailed(anyInt())
