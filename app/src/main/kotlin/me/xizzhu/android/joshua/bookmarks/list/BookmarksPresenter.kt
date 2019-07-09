@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.bookmarks.list
 
 import android.content.res.Resources
-import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
@@ -31,6 +30,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import java.util.*
 import kotlin.collections.ArrayList
@@ -55,9 +55,13 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                 if (bookmarks.isEmpty()) {
                     view?.onBookmarksLoaded(listOf(TextItem(resources.getString(R.string.text_no_bookmark))))
                 } else {
+                    val currentTranslation = bookmarksInteractor.readCurrentTranslation()
+                    val bookNamesAsync = supervisedAsync { bookmarksInteractor.readBookNames(currentTranslation) }
+                    val bookShortNames = bookmarksInteractor.readBookShortNames(currentTranslation)
+                    val bookNames = bookNamesAsync.await()
                     val items = when (sortOrder) {
-                        Constants.SORT_BY_DATE -> bookmarks.toBaseItemsByDate()
-                        Constants.SORT_BY_BOOK -> bookmarks.toBaseItemsByBook()
+                        Constants.SORT_BY_DATE -> toBaseItemsByDate(bookmarks, currentTranslation, bookNames, bookShortNames)
+                        Constants.SORT_BY_BOOK -> toBaseItemsByBook(bookmarks, currentTranslation, bookNames, bookShortNames)
                         else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
                     }
                     view?.onBookmarksLoaded(items)
@@ -72,15 +76,14 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
         }
     }
 
-    @VisibleForTesting
-    suspend fun List<Bookmark>.toBaseItemsByDate(): List<BaseItem> {
+    private suspend fun toBaseItemsByDate(bookmarks: List<Bookmark>, currentTranslation: String,
+                                          bookNames: List<String>, bookShortNames: List<String>): List<BaseItem> {
         val calendar = Calendar.getInstance()
         var previousYear = -1
         var previousDayOfYear = -1
 
-        val currentTranslation = bookmarksInteractor.readCurrentTranslation()
         val items: ArrayList<BaseItem> = ArrayList()
-        for (bookmark in this) {
+        for (bookmark in bookmarks) {
             calendar.timeInMillis = bookmark.timestamp
             val currentYear = calendar.get(Calendar.YEAR)
             val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
@@ -91,29 +94,28 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                 previousDayOfYear = currentDayOfYear
             }
 
-            items.add(BookmarkItem(bookmark.verseIndex,
-                    bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text,
-                    bookmarksInteractor.readBookShortName(currentTranslation, bookmark.verseIndex.bookIndex),
+            items.add(BookmarkItem(bookmark.verseIndex, bookNames[bookmark.verseIndex.bookIndex],
+                    bookShortNames[bookmark.verseIndex.bookIndex],
+                    bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text.text,
                     Constants.SORT_BY_DATE, this@BookmarksPresenter::selectVerse))
         }
         return items
     }
 
-    @VisibleForTesting
-    suspend fun List<Bookmark>.toBaseItemsByBook(): List<BaseItem> {
-        val currentTranslation = bookmarksInteractor.readCurrentTranslation()
+    private suspend fun toBaseItemsByBook(bookmarks: List<Bookmark>, currentTranslation: String,
+                                          bookNames: List<String>, bookShortNames: List<String>): List<BaseItem> {
         val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
-        for (bookmark in this) {
+        for (bookmark in bookmarks) {
             val verse = bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex)
+            val bookName = bookNames[bookmark.verseIndex.bookIndex]
             if (bookmark.verseIndex.bookIndex != currentBookIndex) {
-                items.add(TitleItem(verse.text.bookName, false))
+                items.add(TitleItem(bookName, false))
                 currentBookIndex = bookmark.verseIndex.bookIndex
             }
 
-            items.add(BookmarkItem(bookmark.verseIndex, verse.text,
-                    bookmarksInteractor.readBookShortName(currentTranslation, bookmark.verseIndex.bookIndex),
-                    Constants.SORT_BY_BOOK, this@BookmarksPresenter::selectVerse))
+            items.add(BookmarkItem(bookmark.verseIndex, bookName, bookShortNames[bookmark.verseIndex.bookIndex],
+                    verse.text.text, Constants.SORT_BY_BOOK, this@BookmarksPresenter::selectVerse))
         }
         return items
     }

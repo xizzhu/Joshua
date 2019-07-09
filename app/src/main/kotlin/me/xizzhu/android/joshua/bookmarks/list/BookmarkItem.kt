@@ -27,14 +27,14 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text,
-                        private val bookShortName: String, @Constants.SortOrder private val sortOrder: Int,
+data class BookmarkItem(val verseIndex: VerseIndex, private val bookName: String,
+                        private val bookShortName: String, private val verseText: String,
+                        @Constants.SortOrder private val sortOrder: Int,
                         val onClick: (VerseIndex) -> Unit)
     : BaseItem(R.layout.item_bookmarks, { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }) {
     companion object {
@@ -55,17 +55,17 @@ data class BookmarkItem(val verseIndex: VerseIndex, val text: Verse.Text,
             SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
             SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
 
-            SPANNABLE_STRING_BUILDER.append(' ').append(text.text)
+            SPANNABLE_STRING_BUILDER.append(' ').append(verseText)
         } else {
             // format:
             // <book name> <chapter verseIndex>:<verse verseIndex>
             // <verse text>
-            SPANNABLE_STRING_BUILDER.append(text.bookName).append(' ')
+            SPANNABLE_STRING_BUILDER.append(bookName).append(' ')
                     .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
             SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
             SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
 
-            SPANNABLE_STRING_BUILDER.append('\n').append(text.text)
+            SPANNABLE_STRING_BUILDER.append('\n').append(verseText)
         }
 
         return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
