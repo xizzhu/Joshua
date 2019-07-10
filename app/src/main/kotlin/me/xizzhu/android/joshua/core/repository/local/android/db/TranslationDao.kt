@@ -49,7 +49,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int, bookName: String): List<Verse> {
+    fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
         db.transaction {
             if (!hasTable(translationShortName)) {
                 return emptyList()
@@ -62,7 +62,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
                 var verseIndex = 0
                 while (it.moveToNext()) {
                     verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
-                            Verse.Text(translationShortName, bookName, it.getString(0)), emptyList()))
+                            Verse.Text(translationShortName, it.getString(0)), emptyList()))
                 }
                 return verses
             }
@@ -76,22 +76,22 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(translationToBookName: Map<String, String>, bookIndex: Int, chapterIndex: Int): Map<String, List<Verse.Text>> {
-        if (translationToBookName.isEmpty() || bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT
+    fun read(translations: List<String>, bookIndex: Int, chapterIndex: Int): Map<String, List<Verse.Text>> {
+        if (translations.isEmpty() || bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT
                 || chapterIndex < 0 || chapterIndex >= Bible.getChapterCount(bookIndex)) {
             return emptyMap()
         }
 
         db.transaction {
             val results = mutableMapOf<String, List<Verse.Text>>()
-            for ((translation, bookName) in translationToBookName) {
+            for (translation in translations) {
                 query(translation, arrayOf(COLUMN_TEXT),
                         "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
                         arrayOf(bookIndex.toString(), chapterIndex.toString()),
                         null, null, "$COLUMN_VERSE_INDEX ASC").use {
                     val texts = ArrayList<Verse.Text>(it.count)
                     while (it.moveToNext()) {
-                        texts.add(Verse.Text(translation, bookName, it.getString(0)))
+                        texts.add(Verse.Text(translation, it.getString(0)))
                     }
                     results[translation] = texts
                 }
@@ -101,8 +101,8 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(translationToBookName: Map<String, String>, verseIndex: VerseIndex): Map<String, Verse.Text> {
-        if (translationToBookName.isEmpty()
+    fun read(translations: List<String>, verseIndex: VerseIndex): Map<String, Verse.Text> {
+        if (translations.isEmpty()
                 || verseIndex.bookIndex < 0 || verseIndex.bookIndex >= Bible.BOOK_COUNT
                 || verseIndex.chapterIndex < 0 || verseIndex.chapterIndex >= Bible.getChapterCount(verseIndex.bookIndex)
                 || verseIndex.verseIndex < 0) {
@@ -111,13 +111,13 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
 
         db.transaction {
             val results = mutableMapOf<String, Verse.Text>()
-            for ((translation, bookName) in translationToBookName) {
+            for (translation in translations) {
                 query(translation, arrayOf(COLUMN_TEXT),
                         "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
                         arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
                         null, null, null).use {
                     if (it.moveToNext()) {
-                        results[translation] = Verse.Text(translation, bookName, it.getString(0))
+                        results[translation] = Verse.Text(translation, it.getString(0))
                     }
                 }
             }
@@ -126,8 +126,8 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(translationShortName: String, verseIndex: VerseIndex, bookName: String): Verse {
-        if (!verseIndex.isValid() || bookName.isEmpty()) {
+    fun read(translationShortName: String, verseIndex: VerseIndex): Verse {
+        if (!verseIndex.isValid()) {
             return Verse.INVALID
         }
 
@@ -141,7 +141,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
                     arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
                     null, null, null).use {
                 return if (it.moveToNext()) {
-                    Verse(verseIndex, Verse.Text(translationShortName, bookName, it.getString(0)), emptyList())
+                    Verse(verseIndex, Verse.Text(translationShortName, it.getString(0)), emptyList())
                 } else {
                     Verse.INVALID
                 }
@@ -150,7 +150,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun search(translationShortName: String, bookNames: List<String>, query: String): List<Verse> {
+    fun search(translationShortName: String, query: String): List<Verse> {
         val keywords = query.trim().replace("\\s+", " ").split(" ")
         if (keywords.isEmpty()) {
             return emptyList()
@@ -186,11 +186,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
                     while (it.moveToNext()) {
                         val verseIndex = VerseIndex(it.getInt(bookColumnIndex),
                                 it.getInt(chapterColumnIndex), it.getInt(verseColumnIndex))
-                        verses.add(Verse(verseIndex,
-                                Verse.Text(translationShortName,
-                                        bookNames[verseIndex.bookIndex],
-                                        it.getString(textColumnIndex)),
-                                emptyList()))
+                        verses.add(Verse(verseIndex, Verse.Text(translationShortName, it.getString(textColumnIndex)), emptyList()))
                     }
                 }
                 return verses

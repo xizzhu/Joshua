@@ -32,7 +32,7 @@ interface LocalReadingStorage {
 
     suspend fun readBookShortNames(translationShortName: String): List<String>
 
-    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int, bookName: String): List<Verse>
+    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse>
 
     suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
                            bookIndex: Int, chapterIndex: Int): List<Verse>
@@ -42,5 +42,5 @@ interface LocalReadingStorage {
     suspend fun readVerse(translationShortName: String, parallelTranslations: List<String>,
                           verseIndex: VerseIndex): Verse
 
-    suspend fun search(translationShortName: String, bookNames: List<String>, query: String): List<Verse>
+    suspend fun search(translationShortName: String, query: String): List<Verse>
 }
