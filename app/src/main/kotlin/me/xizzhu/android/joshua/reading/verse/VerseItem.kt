@@ -36,7 +36,7 @@ import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class VerseItem(val verse: Verse, val bookName: String,
+data class VerseItem(val verse: Verse, private val bookName: String,
                      var hasNote: Boolean, @ColorInt var highlightColor: Int, var hasBookmark: Boolean,
                      val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
                      val onNoteClicked: (VerseIndex) -> Unit, val onHighlightClicked: (VerseIndex, Int) -> Unit,
