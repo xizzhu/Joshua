@@ -32,7 +32,9 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
 
         coroutineScope.launch(Dispatchers.Main) {
             searchInteractor.observeSearchResult().consumeEach { (query, verses) ->
-                view?.onSearchResultUpdated(verses.toSearchResult(query, this@SearchResultPresenter::selectVerse))
+                view?.onSearchResultUpdated(verses.toSearchResult(query,
+                        searchInteractor.readBookNames(searchInteractor.readCurrentTranslation()),
+                        this@SearchResultPresenter::selectVerse))
             }
         }
         coroutineScope.launch(Dispatchers.Main) {

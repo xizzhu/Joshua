@@ -96,18 +96,20 @@ class BookmarksPresenterTest : BaseUnitTest() {
                     .thenReturn(MockContents.kjvVerses[3])
             `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 4)))
                     .thenReturn(MockContents.kjvVerses[4])
+            `when`(bookmarksInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+            `when`(bookmarksInteractor.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
 
             // loadBookmarks() is called by onViewAttached(), so no need to call again
             bookmarksPresenter.attachView(bookmarksView)
 
             verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(
                     TitleItem("", false),
-                    BookmarkItem(VerseIndex(0, 0, 4), MockContents.kjvVerses[4].text, 2L * 365L * 24L * 3600L * 1000L, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
+                    BookmarkItem(VerseIndex(0, 0, 4), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[4].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
                     TitleItem("", false),
-                    BookmarkItem(VerseIndex(0, 0, 1), MockContents.kjvVerses[1].text, 36L * 3600L * 1000L, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
-                    BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, 36L * 3600L * 1000L - 1000L, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
+                    BookmarkItem(VerseIndex(0, 0, 1), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[1].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
+                    BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
                     TitleItem("", false),
-                    BookmarkItem(VerseIndex(0, 0, 2), MockContents.kjvVerses[2].text, 0L, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse)
+                    BookmarkItem(VerseIndex(0, 0, 2), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[2].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse)
             ))
             verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
 
@@ -125,13 +127,15 @@ class BookmarksPresenterTest : BaseUnitTest() {
             `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(bookmarksInteractor.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 3)))
                     .thenReturn(MockContents.kjvVerses[3])
+            `when`(bookmarksInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+            `when`(bookmarksInteractor.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
 
             // loadBookmarks() is called by onViewAttached(), so no need to call again
             bookmarksPresenter.attachView(bookmarksView)
 
             verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(
-                    TitleItem(MockContents.kjvVerses[3].text.bookName, false),
-                    BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvVerses[3].text, 0L, Constants.SORT_BY_BOOK, bookmarksPresenter::selectVerse)
+                    TitleItem(MockContents.kjvBookNames[0], false),
+                    BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, Constants.SORT_BY_BOOK, bookmarksPresenter::selectVerse)
             ))
             verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
 

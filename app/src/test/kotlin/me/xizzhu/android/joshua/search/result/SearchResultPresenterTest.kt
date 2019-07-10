@@ -56,6 +56,9 @@ class SearchResultPresenterTest : BaseUnitTest() {
             searchResultChannel = ConflatedBroadcastChannel(Pair("", emptyList()))
             `when`(searchInteractor.observeSearchResult()).thenReturn(searchResultChannel.openSubscription())
 
+            `when`(searchInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
+            `when`(searchInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+
             searchResultPresenter = SearchResultPresenter(searchInteractor)
             searchResultPresenter.attachView(searchResultView)
         }
@@ -91,7 +94,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
     fun testObserveDefaultSearchResultAndState() {
         runBlocking {
             verify(searchResultView, times(1))
-                    .onSearchResultUpdated(emptyList<Verse>().toSearchResult("", searchResultPresenter::selectVerse))
+                    .onSearchResultUpdated(emptyList<Verse>().toSearchResult("", emptyList(), searchResultPresenter::selectVerse))
             verify(searchResultView, times(1)).onSearchCompleted()
         }
     }
@@ -106,7 +109,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
             searchStateChannel.send(LoadingSpinnerState.NOT_LOADING)
 
             verify(searchResultView, times(1))
-                    .onSearchResultUpdated(verses.toSearchResult(query, searchResultPresenter::selectVerse))
+                    .onSearchResultUpdated(verses.toSearchResult(query, MockContents.kjvBookNames, searchResultPresenter::selectVerse))
             verify(searchResultView, times(1)).onSearchStarted()
 
             // once from initial state, and second time when search finishes

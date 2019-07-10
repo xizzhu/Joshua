@@ -77,11 +77,13 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
                 val verse = readingInteractor.readVerse(currentTranslation, parallelTranslations, verseIndex)
                 val verseTextItems = mutableListOf<VerseTextItem>().apply {
                     add(VerseTextItem(verseIndex, verse.text,
+                            readingInteractor.readBookNames(verse.text.translationShortName)[verseIndex.bookIndex],
                             this@VerseDetailPresenter::onVerseClicked,
                             this@VerseDetailPresenter::onVerseLongClicked))
                 }
                 verse.parallel.forEach {
                     verseTextItems.add(VerseTextItem(verseIndex, it,
+                            readingInteractor.readBookNames(it.translationShortName)[verseIndex.bookIndex],
                             this@VerseDetailPresenter::onVerseClicked,
                             this@VerseDetailPresenter::onVerseLongClicked))
                 }
@@ -115,10 +117,12 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
     @VisibleForTesting
     fun onVerseLongClicked(verse: Verse) {
-        if (readingInteractor.copyToClipBoard(listOf(verse))) {
-            view?.onVerseTextCopied()
-        } else {
-            view?.onVerseTextClickFailed()
+        coroutineScope.launch(Dispatchers.Main) {
+            if (readingInteractor.copyToClipBoard(listOf(verse))) {
+                view?.onVerseTextCopied()
+            } else {
+                view?.onVerseTextClickFailed()
+            }
         }
     }
 

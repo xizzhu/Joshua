@@ -68,8 +68,6 @@ class BookNamesDaoTest : BaseSqliteTest() {
         androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
         androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
 
-        assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[1]), Pair(MockContents.cuvShortName, MockContents.cuvBookNames[1])),
-                androidDatabase.bookNamesDao.read(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
         assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookShortNames[1]), Pair(MockContents.cuvShortName, MockContents.cuvBookShortNames[1])),
                 androidDatabase.bookNamesDao.readShortName(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
     }
@@ -81,8 +79,6 @@ class BookNamesDaoTest : BaseSqliteTest() {
         androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
         androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
 
-        assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookNames[1]), Pair(MockContents.cuvShortName, MockContents.cuvBookNames[1])),
-                androidDatabase.bookNamesDao.read(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
         assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookShortNames[1]), Pair(MockContents.cuvShortName, MockContents.cuvBookShortNames[1])),
                 androidDatabase.bookNamesDao.readShortName(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
     }

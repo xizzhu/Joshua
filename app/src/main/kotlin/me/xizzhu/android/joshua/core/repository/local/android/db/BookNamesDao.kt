@@ -73,40 +73,6 @@ class BookNamesDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(translations: List<String>, bookIndex: Int): Map<String, String> {
-        if (translations.isEmpty() || bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT) {
-            return emptyMap()
-        }
-
-        val selection = StringBuilder()
-        val selectionArgs = Array(translations.size + 1) { "" }
-        selection.append('(')
-        for ((i, translation) in translations.withIndex()) {
-            if (i > 0) {
-                selection.append(" OR ")
-            }
-            selection.append("$COLUMN_TRANSLATION_SHORT_NAME = ?")
-            selectionArgs[i] = translation
-        }
-
-        selection.append(") AND ($COLUMN_BOOK_INDEX = ?)")
-        selectionArgs[translations.size] = bookIndex.toString()
-
-        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_NAME),
-                selection.toString(), selectionArgs, null, null, null).use {
-            val bookNames = HashMap<String, String>(it.count)
-            if (it.count > 0) {
-                val translationShortName = it.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
-                val bookName = it.getColumnIndex(COLUMN_BOOK_NAME)
-                while (it.moveToNext()) {
-                    bookNames[it.getString(translationShortName)] = it.getString(bookName)
-                }
-            }
-            return bookNames
-        }
-    }
-
-    @WorkerThread
     fun readShortName(translations: List<String>, bookIndex: Int): Map<String, String> {
         if (translations.isEmpty() || bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT) {
             return emptyMap()

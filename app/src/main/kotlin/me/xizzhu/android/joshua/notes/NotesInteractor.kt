@@ -56,6 +56,12 @@ class NotesInteractor(private val notesActivity: NotesActivity,
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingManager.readVerse(translationShortName, verseIndex)
 
+    suspend fun readBookNames(translationShortName: String): List<String> =
+            bibleReadingManager.readBookNames(translationShortName)
+
+    suspend fun readBookShortNames(translationShortName: String): List<String> =
+            bibleReadingManager.readBookShortNames(translationShortName)
+
     suspend fun openReading(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
         navigator.navigate(notesActivity, Navigator.SCREEN_READING, ReadingActivity.bundleForOpenNote())

@@ -121,7 +121,7 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testReadVersesFromNonExistTranslation() {
         runBlocking {
-            assertTrue(androidReadingStorage.readVerses("not_exist", 0, 0, "", "").isEmpty())
+            assertTrue(androidReadingStorage.readVerses("not_exist", 0, 0).isEmpty())
         }
     }
 
@@ -129,8 +129,8 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     fun testSaveThenReadVerses() {
         runBlocking {
             saveTranslation()
-            assertEquals(MockContents.kjvVerses, androidReadingStorage.readVerses(
-                    MockContents.kjvShortName, 0, 0, MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0]))
+            assertEquals(MockContents.kjvVerses,
+                    androidReadingStorage.readVerses(MockContents.kjvShortName, 0, 0))
         }
     }
 
@@ -146,8 +146,8 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
             androidDatabase.translationDao.save(MockContents.kjvShortName,
                     mapOf(Pair(Pair(0, 0), listOf("verse_1", "verse_2"))))
             androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
-            assertEquals(MockContents.kjvVerses, androidReadingStorage.readVerses(
-                    MockContents.kjvShortName, 0, 0, MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0]))
+            assertEquals(MockContents.kjvVerses,
+                    androidReadingStorage.readVerses(MockContents.kjvShortName, 0, 0))
         }
     }
 
@@ -196,7 +196,7 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testSearchNonExistTranslation() {
         runBlocking {
-            assertTrue(androidReadingStorage.search("not_exist", emptyList(), emptyList(), "keyword").isEmpty())
+            assertTrue(androidReadingStorage.search("not_exist", "keyword").isEmpty())
         }
     }
 
@@ -205,12 +205,12 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
         runBlocking {
             saveTranslation()
 
-            assertEquals(MockContents.kjvVerses, androidReadingStorage.search(
-                    MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames, "God"))
-            assertEquals(MockContents.kjvVerses, androidReadingStorage.search(
-                    MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames, "god"))
-            assertEquals(MockContents.kjvVerses, androidReadingStorage.search(
-                    MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames, "GOD"))
+            assertEquals(MockContents.kjvVerses,
+                    androidReadingStorage.search(MockContents.kjvShortName, "God"))
+            assertEquals(MockContents.kjvVerses,
+                    androidReadingStorage.search(MockContents.kjvShortName, "god"))
+            assertEquals(MockContents.kjvVerses,
+                    androidReadingStorage.search(MockContents.kjvShortName, "GOD"))
         }
     }
 
@@ -219,10 +219,10 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
         runBlocking {
             saveTranslation()
 
-            assertEquals(listOf(MockContents.kjvVerses[0]), androidReadingStorage.search(
-                    MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames, "God created"))
-            assertEquals(listOf(MockContents.kjvVerses[0]), androidReadingStorage.search(
-                    MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames, "beginning created"))
+            assertEquals(listOf(MockContents.kjvVerses[0]),
+                    androidReadingStorage.search(MockContents.kjvShortName, "God created"))
+            assertEquals(listOf(MockContents.kjvVerses[0]),
+                    androidReadingStorage.search(MockContents.kjvShortName, "beginning created"))
         }
     }
 }

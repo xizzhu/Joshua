@@ -133,15 +133,14 @@ class AndroidTranslationStorageTest : BaseSqliteTest() {
             assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(MockContents.kjvShortName))
             assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(
                     MockContents.kjvShortName, MockContents.kjvVerses[0].verseIndex.bookIndex,
-                    MockContents.kjvVerses[0].verseIndex.chapterIndex, MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0]))
+                    MockContents.kjvVerses[0].verseIndex.chapterIndex))
 
             androidTranslationStorage.removeTranslation(MockContents.kjvTranslationInfo)
             assertFalse(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
             assertTrue(androidDatabase.bookNamesDao.read(MockContents.kjvShortName).isEmpty())
             assertTrue(androidDatabase.translationDao.read(MockContents.kjvShortName,
                     MockContents.kjvVerses[0].verseIndex.bookIndex,
-                    MockContents.kjvVerses[0].verseIndex.chapterIndex,
-                    MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0]).isEmpty())
+                    MockContents.kjvVerses[0].verseIndex.chapterIndex).isEmpty())
         }
     }
 }

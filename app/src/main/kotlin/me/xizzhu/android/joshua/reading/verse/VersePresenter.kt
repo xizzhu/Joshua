@@ -52,17 +52,21 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.action_copy -> {
-                    if (readingInteractor.copyToClipBoard(selectedVerses)) {
-                        view?.onVersesCopied()
-                    } else {
-                        view?.onVersesCopyShareFailed()
+                    coroutineScope.launch(Dispatchers.Main) {
+                        if (readingInteractor.copyToClipBoard(selectedVerses)) {
+                            view?.onVersesCopied()
+                        } else {
+                            view?.onVersesCopyShareFailed()
+                        }
                     }
                     mode.finish()
                     true
                 }
                 R.id.action_share -> {
-                    if (!readingInteractor.share(selectedVerses)) {
-                        view?.onVersesCopyShareFailed()
+                    coroutineScope.launch(Dispatchers.Main) {
+                        if (!readingInteractor.share(selectedVerses)) {
+                            view?.onVersesCopyShareFailed()
+                        }
                     }
                     mode.finish()
                     true
@@ -163,13 +167,15 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                         readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
                     }
                 }
+                val bookNameAsync = supervisedAsync { readingInteractor.readBookNames(currentTranslation)[bookIndex] }
                 val highlightsAsync = supervisedAsync { readingInteractor.readHighlights(bookIndex, chapterIndex) }
                 val items = if (readingInteractor.observeSettings().first().simpleReadingModeOn) {
-                    toSimpleVerseItems(versesAsync.await(), highlightsAsync.await())
+                    toSimpleVerseItems(versesAsync.await(), bookNameAsync.await(), highlightsAsync.await())
                 } else {
                     val bookmarksAsync = supervisedAsync { readingInteractor.readBookmarks(bookIndex, chapterIndex) }
                     val notesAsync = supervisedAsync { readingInteractor.readNotes(bookIndex, chapterIndex) }
-                    toVerseItems(versesAsync.await(), bookmarksAsync.await(), highlightsAsync.await(), notesAsync.await())
+                    toVerseItems(versesAsync.await(), bookNameAsync.await(),
+                            bookmarksAsync.await(), highlightsAsync.await(), notesAsync.await())
                 }
                 view?.onVersesLoaded(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
@@ -180,7 +186,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     }
 
     @VisibleForTesting
-    fun toSimpleVerseItems(verses: List<Verse>, highlights: List<Highlight>): List<SimpleVerseItem> =
+    fun toSimpleVerseItems(verses: List<Verse>, bookName: String, highlights: List<Highlight>): List<SimpleVerseItem> =
             ArrayList<SimpleVerseItem>(verses.size).apply {
                 val highlightIterator = highlights.iterator()
                 var highlight: Highlight? = null
@@ -194,7 +200,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                             }
                         }
                     }
-                    add(SimpleVerseItem(verse, verses.size,
+                    add(SimpleVerseItem(verse, bookName, verses.size,
                             highlight?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
                                     ?: Highlight.COLOR_NONE,
                             this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked))
@@ -202,7 +208,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             }
 
     @VisibleForTesting
-    fun toVerseItems(verses: List<Verse>, bookmarks: List<Bookmark>,
+    fun toVerseItems(verses: List<Verse>, bookName: String, bookmarks: List<Bookmark>,
                      highlights: List<Highlight>, notes: List<Note>): List<VerseItem> {
         val verseItems = ArrayList<VerseItem>(verses.size)
         val bookmarkIterator = bookmarks.iterator()
@@ -238,7 +244,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                 }
             }
 
-            verseItems.add(VerseItem(verse,
+            verseItems.add(VerseItem(verse, bookName,
                     note?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
                     highlight?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
                             ?: Highlight.COLOR_NONE,

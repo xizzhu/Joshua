@@ -80,7 +80,7 @@ fun Int.toChapterIndex(): Int {
     throw IllegalArgumentException("Invalid position: $position")
 }
 
-fun Collection<Verse>.toStringForSharing(): String {
+fun Collection<Verse>.toStringForSharing(bookName: String): String {
     val stringBuilder = StringBuilder()
     for (verse in sortedBy { verse ->
         val verseIndex = verse.verseIndex
@@ -91,7 +91,7 @@ fun Collection<Verse>.toStringForSharing(): String {
         }
         if (verse.parallel.isEmpty()) {
             // format: <book name> <chapter index>:<verse index> <text>
-            stringBuilder.append(verse.text.bookName).append(' ')
+            stringBuilder.append(bookName).append(' ')
                     .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append(' ')
                     .append(verse.text.text)
         } else {
@@ -100,7 +100,7 @@ fun Collection<Verse>.toStringForSharing(): String {
             // <primary translation>: <verse text>
             // <parallel translation 1>: <verse text>
             // <parallel translation 2>: <verse text>
-            stringBuilder.append(verse.text.bookName).append(' ')
+            stringBuilder.append(bookName).append(' ')
                     .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
                     .append(verse.text.translationShortName).append(": ").append(verse.text.text).append('\n')
             for (text in verse.parallel) {
@@ -128,7 +128,8 @@ private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Te
     return this
 }
 
-fun SpannableStringBuilder.format(verse: Verse, simpleReadingMode: Boolean, @ColorInt highlightColor: Int): CharSequence {
+fun SpannableStringBuilder.format(verse: Verse, bookName: String, simpleReadingMode: Boolean,
+                                  @ColorInt highlightColor: Int): CharSequence {
     clear()
     clearSpans()
 
@@ -139,7 +140,7 @@ fun SpannableStringBuilder.format(verse: Verse, simpleReadingMode: Boolean, @Col
             // format:
             // <book name> <chapter verseIndex>:<verse verseIndex>
             // <verse text>
-            append(verse.text.bookName).append(' ')
+            append(bookName).append(' ')
                     .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
                     .append(verse.text.text)
         }

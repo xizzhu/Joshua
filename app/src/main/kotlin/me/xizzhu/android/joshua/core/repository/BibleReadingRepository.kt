@@ -51,7 +51,7 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
             // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
             var length = 0
             for (verse in verses) {
-                length += 12 + (verse.text.bookName.length + verse.text.translationShortName.length + verse.text.text.length) * 4
+                length += 12 + (verse.text.translationShortName.length + verse.text.text.length) * 4
             }
             return length
         }
@@ -84,8 +84,7 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
         val key = "$translationShortName-$bookIndex-$chapterIndex"
         return versesCache.get(key)
-                ?: localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex,
-                        readBookNames(translationShortName)[bookIndex], readBookShortNames(translationShortName)[bookIndex])
+                ?: localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex)
                         .also { versesCache.put(key, it) }
     }
 
@@ -106,7 +105,6 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
             putString(Analytics.PARAM_SEARCH_TERM, query)
         })
 
-        return localReadingStorage.search(translationShortName, readBookNames(translationShortName),
-                readBookShortNames(translationShortName), query)
+        return localReadingStorage.search(translationShortName, query)
     }
 }

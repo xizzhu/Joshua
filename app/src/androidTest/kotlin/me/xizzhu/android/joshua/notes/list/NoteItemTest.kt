@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.notes.list
 
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -27,13 +26,13 @@ import kotlin.test.assertEquals
 class NoteItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_note, NoteItem(VerseIndex.INVALID, Verse.Text.INVALID, "", 0L, {}).viewType)
+        assertEquals(R.layout.item_note, NoteItem(VerseIndex.INVALID, "", "", "", {}).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
         val expected = "Gen. 1:1 In the beginning God created the heaven and the earth."
-        val actual = NoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, "", 12345678L, {}).textForDisplay.toString()
+        val actual = NoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, "", {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

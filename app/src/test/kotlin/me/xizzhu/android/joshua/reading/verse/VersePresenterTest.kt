@@ -91,40 +91,48 @@ class VersePresenterTest : BaseUnitTest() {
 
     @Test
     fun testOnActionCopyItemClickedSuccess() {
-        `when`(item.itemId).thenReturn(R.id.action_copy)
-        `when`(readingInteractor.copyToClipBoard(any())).thenReturn(true)
-        assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
-        verify(verseView, times(1)).onVersesCopied()
-        verify(verseView, never()).onVersesCopyShareFailed()
-        verify(actionMode, times(1)).finish()
+        runBlocking {
+            `when`(item.itemId).thenReturn(R.id.action_copy)
+            `when`(readingInteractor.copyToClipBoard(any())).thenReturn(true)
+            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            verify(verseView, times(1)).onVersesCopied()
+            verify(verseView, never()).onVersesCopyShareFailed()
+            verify(actionMode, times(1)).finish()
+        }
     }
 
     @Test
     fun testOnActionCopyItemClickedFailure() {
-        `when`(item.itemId).thenReturn(R.id.action_copy)
-        `when`(readingInteractor.copyToClipBoard(any())).thenReturn(false)
-        assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
-        verify(verseView, never()).onVersesCopied()
-        verify(verseView, times(1)).onVersesCopyShareFailed()
-        verify(actionMode, times(1)).finish()
+        runBlocking {
+            `when`(item.itemId).thenReturn(R.id.action_copy)
+            `when`(readingInteractor.copyToClipBoard(any())).thenReturn(false)
+            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            verify(verseView, never()).onVersesCopied()
+            verify(verseView, times(1)).onVersesCopyShareFailed()
+            verify(actionMode, times(1)).finish()
+        }
     }
 
     @Test
     fun testOnActionShareItemClickedSuccess() {
-        `when`(item.itemId).thenReturn(R.id.action_share)
-        `when`(readingInteractor.share(any())).thenReturn(true)
-        assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
-        verify(verseView, never()).onVersesCopyShareFailed()
-        verify(actionMode, times(1)).finish()
+        runBlocking {
+            `when`(item.itemId).thenReturn(R.id.action_share)
+            `when`(readingInteractor.share(any())).thenReturn(true)
+            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            verify(verseView, never()).onVersesCopyShareFailed()
+            verify(actionMode, times(1)).finish()
+        }
     }
 
     @Test
     fun testOnActionShareItemClickedFailure() {
-        `when`(item.itemId).thenReturn(R.id.action_share)
-        `when`(readingInteractor.share(any())).thenReturn(false)
-        assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
-        verify(verseView, times(1)).onVersesCopyShareFailed()
-        verify(actionMode, times(1)).finish()
+        runBlocking {
+            `when`(item.itemId).thenReturn(R.id.action_share)
+            `when`(readingInteractor.share(any())).thenReturn(false)
+            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            verify(verseView, times(1)).onVersesCopyShareFailed()
+            verify(actionMode, times(1)).finish()
+        }
     }
 
     @Test
@@ -182,7 +190,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testToSimpleVerseItemsWithoutHighlights() {
         val verses = MockContents.kjvVerses
-        val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, emptyList())
+        val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, MockContents.kjvBookNames[0], emptyList())
         assertEquals(verses.size, simpleVerseItems.size)
         simpleVerseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
@@ -193,7 +201,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testToSimpleVerseItems() {
         val verses = MockContents.kjvVerses
-        val simpleVerseItems = versePresenter.toSimpleVerseItems(verses,
+        val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, MockContents.kjvBookNames[0],
                 listOf(
                         Highlight(VerseIndex(0, 0, 0), Color.RED, 1L),
                         Highlight(VerseIndex(0, 0, 6), Color.GREEN, 2L),
@@ -214,7 +222,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testToVerseItemsWithoutBookmarksHighlightsNotes() {
         val verses = MockContents.kjvVerses
-        val verseItems = versePresenter.toVerseItems(verses, emptyList(), emptyList(), emptyList())
+        val verseItems = versePresenter.toVerseItems(verses, MockContents.kjvBookNames[0], emptyList(), emptyList(), emptyList())
         assertEquals(verses.size, verseItems.size)
         verseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
@@ -227,7 +235,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testToVerseItems() {
         val verses = MockContents.kjvVerses
-        val verseItems = versePresenter.toVerseItems(verses,
+        val verseItems = versePresenter.toVerseItems(verses, MockContents.kjvBookNames[0],
                 listOf(
                         Bookmark(VerseIndex(0, 0, 0), 0L),
                         Bookmark(VerseIndex(0, 0, 5), 0L),
@@ -260,18 +268,20 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVerses() {
         runBlocking {
+            currentTranslationChannel.send(MockContents.kjvShortName)
             settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = true))
             `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-            val bookIndex = 1
-            val chapterIndex = 2
-            `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
+            val bookIndex = 0
+            val chapterIndex = 0
+            `when`(readingInteractor.readVerses(MockContents.kjvShortName, bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
             `when`(readingInteractor.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
+            `when`(readingInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
                     bookIndex, chapterIndex, MockContents.kjvVerses.map {
-                SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
+                SimpleVerseItem(it, MockContents.kjvBookNames[0], MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
             })
             verify(verseView, never()).onVersesLoadFailed(anyInt(), anyInt())
         }
@@ -301,11 +311,12 @@ class VersePresenterTest : BaseUnitTest() {
 
             val translationShortName = MockContents.kjvShortName
             val parallelTranslations = listOf(MockContents.cuvShortName)
-            val bookIndex = 1
-            val chapterIndex = 2
+            val bookIndex = 0
+            val chapterIndex = 0
             `when`(readingInteractor.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex))
                     .thenReturn(MockContents.kjvVerses)
             `when`(readingInteractor.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
+            `when`(readingInteractor.readBookNames(translationShortName)).thenReturn(MockContents.kjvBookNames)
 
             currentTranslationChannel.send(translationShortName)
             parallelTranslationsChannel.send(parallelTranslations)
@@ -313,7 +324,7 @@ class VersePresenterTest : BaseUnitTest() {
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
                     bookIndex, chapterIndex, MockContents.kjvVerses.map {
-                SimpleVerseItem(it, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
+                SimpleVerseItem(it, MockContents.kjvBookNames[0], MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
             })
             verify(verseView, never()).onVersesLoadFailed(anyInt(), anyInt())
         }
@@ -345,19 +356,21 @@ class VersePresenterTest : BaseUnitTest() {
     fun testLoadVersesSimpleReadingModeOff() {
         runBlocking {
             settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = false))
+            currentTranslationChannel.send(MockContents.kjvShortName)
             `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-            val bookIndex = 1
-            val chapterIndex = 2
-            `when`(readingInteractor.readVerses("", bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
+            val bookIndex = 0
+            val chapterIndex = 0
+            `when`(readingInteractor.readVerses(MockContents.kjvShortName, bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
             `when`(readingInteractor.readBookmarks(bookIndex, chapterIndex)).thenReturn(emptyList())
             `when`(readingInteractor.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
             `when`(readingInteractor.readNotes(bookIndex, chapterIndex)).thenReturn(emptyList())
+            `when`(readingInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
 
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
                     bookIndex, chapterIndex, MockContents.kjvVerses.map {
-                VerseItem(it, false, Highlight.COLOR_NONE, false,
+                VerseItem(it, MockContents.kjvBookNames[0], false, Highlight.COLOR_NONE, false,
                         versePresenter::onVerseClicked, versePresenter::onVerseLongClicked,
                         versePresenter::onNoteClicked, versePresenter::onHighlightClicked,
                         versePresenter::onBookmarkClicked)

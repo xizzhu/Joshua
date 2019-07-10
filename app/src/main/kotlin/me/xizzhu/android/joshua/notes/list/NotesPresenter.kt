@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.notes.list
 
 import android.content.res.Resources
-import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
@@ -55,9 +54,11 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
                 if (notes.isEmpty()) {
                     view?.onNotesLoaded(listOf(TextItem(resources.getString(R.string.text_no_note))))
                 } else {
+                    val currentTranslation = notesInteractor.readCurrentTranslation()
+                    val bookShortNames = notesInteractor.readBookShortNames(currentTranslation)
                     val items = when (sortOrder) {
-                        Constants.SORT_BY_DATE -> notes.toBaseItemsByDate()
-                        Constants.SORT_BY_BOOK -> notes.toBaseItemsByBook()
+                        Constants.SORT_BY_DATE -> toBaseItemsByDate(notes, currentTranslation, bookShortNames)
+                        Constants.SORT_BY_BOOK -> toBaseItemsByBook(notes, currentTranslation, bookShortNames)
                         else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
                     }
                     view?.onNotesLoaded(items)
@@ -72,15 +73,14 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
         }
     }
 
-    @VisibleForTesting
-    suspend fun List<Note>.toBaseItemsByDate(): List<BaseItem> {
+    private suspend fun toBaseItemsByDate(notes: List<Note>, currentTranslation: String,
+                                          bookShortNames: List<String>): List<BaseItem> {
         val calendar = Calendar.getInstance()
         var previousYear = -1
         var previousDayOfYear = -1
 
-        val currentTranslation = notesInteractor.readCurrentTranslation()
         val items: ArrayList<BaseItem> = ArrayList()
-        for (note in this) {
+        for (note in notes) {
             calendar.timeInMillis = note.timestamp
             val currentYear = calendar.get(Calendar.YEAR)
             val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
@@ -91,26 +91,27 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
                 previousDayOfYear = currentDayOfYear
             }
 
-            items.add(NoteItem(note.verseIndex,
-                    notesInteractor.readVerse(currentTranslation, note.verseIndex).text,
-                    note.note, note.timestamp, this@NotesPresenter::selectVerse))
+            items.add(NoteItem(note.verseIndex, bookShortNames[note.verseIndex.bookIndex],
+                    notesInteractor.readVerse(currentTranslation, note.verseIndex).text.text,
+                    note.note, this@NotesPresenter::selectVerse))
         }
         return items
     }
 
-    @VisibleForTesting
-    suspend fun List<Note>.toBaseItemsByBook(): List<BaseItem> {
-        val currentTranslation = notesInteractor.readCurrentTranslation()
+    private suspend fun toBaseItemsByBook(notes: List<Note>, currentTranslation: String,
+                                          bookShortNames: List<String>): List<BaseItem> {
+        val bookNames = notesInteractor.readBookNames(currentTranslation)
         val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
-        for (note in this) {
+        for (note in notes) {
             val verse = notesInteractor.readVerse(currentTranslation, note.verseIndex)
             if (note.verseIndex.bookIndex != currentBookIndex) {
-                items.add(TitleItem(verse.text.bookName, false))
+                items.add(TitleItem(bookNames[note.verseIndex.bookIndex], false))
                 currentBookIndex = note.verseIndex.bookIndex
             }
 
-            items.add(NoteItem(note.verseIndex, verse.text, note.note, note.timestamp, this@NotesPresenter::selectVerse))
+            items.add(NoteItem(note.verseIndex, bookShortNames[note.verseIndex.bookIndex],
+                    verse.text.text, note.note, this@NotesPresenter::selectVerse))
         }
         return items
     }

@@ -3,7 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Improved translation list sorting
-- Made book names in verse detail view bold and smaller
+- Made book names in verse detail view, bookmark lists bold and smaller
 - Should set hint on TextInputLayout
 - Updated dependencies:
   - Kotlin to 1.3.41

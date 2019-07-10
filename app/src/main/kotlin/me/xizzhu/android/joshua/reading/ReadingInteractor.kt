@@ -170,16 +170,17 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     fun startActionMode(callback: ActionMode.Callback): ActionMode? =
             readingActivity.startSupportActionMode(callback)
 
-    fun copyToClipBoard(verses: Collection<Verse>): Boolean {
+    suspend fun copyToClipBoard(verses: Collection<Verse>): Boolean {
         if (verses.isEmpty()) {
             return false
         }
 
         try {
             val verse = verses.first()
+            val bookName = readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
             // On older devices, this only works on the threads with loopers.
             (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
-                    ClipData.newPlainText(verse.text.translationShortName + " " + verse.text.bookName, verses.toStringForSharing()))
+                    ClipData.newPlainText(verse.text.translationShortName + " " + bookName, verses.toStringForSharing(bookName)))
             return true
         } catch (e: Exception) {
             Log.e(TAG, "Failed to copy", e)
@@ -187,7 +188,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         }
     }
 
-    fun share(verses: Collection<Verse>): Boolean {
+    suspend fun share(verses: Collection<Verse>): Boolean {
         if (verses.isEmpty()) {
             return false
         }
@@ -197,8 +198,10 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         // Rants: it's a horrible way to force developers to use their SDK.
         // ref. https://developers.facebook.com/bugs/332619626816423
         try {
+            val verse = verses.first()
+            val bookName = readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
             val chooseIntent = createChooserForSharing(readingActivity.packageManager, readingActivity.resources,
-                    "com.facebook.katana", verses.toStringForSharing())
+                    "com.facebook.katana", verses.toStringForSharing(bookName))
             return chooseIntent?.let {
                 readingActivity.startActivity(it)
                 true

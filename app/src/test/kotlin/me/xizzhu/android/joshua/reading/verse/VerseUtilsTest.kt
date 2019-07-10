@@ -112,41 +112,41 @@ class VerseUtilsTest : BaseUnitTest() {
 
     @Test
     fun testEmptyVerseToStringForSharing() {
-        assertTrue(emptyList<Verse>().toStringForSharing().isEmpty())
+        assertTrue(emptyList<Verse>().toStringForSharing("").isEmpty())
     }
 
     @Test
     fun testSingleVerseToStringForSharing() {
         val expected = "Genesis 1:1 In the beginning God created the heaven and the earth."
-        val actual = listOf(MockContents.kjvVerses[0]).toStringForSharing()
+        val actual = listOf(MockContents.kjvVerses[0]).toStringForSharing(MockContents.kjvBookNames[0])
         assertEquals(expected, actual)
     }
 
     @Test
     fun testSingleVerseWithMultipleTranslationsToStringForSharing() {
         val expected = "Genesis 1:1\nKJV: In the beginning God created the heaven and the earth.\n中文和合本: 起初神创造天地。"
-        val actual = listOf(MockContents.kjvVersesWithCuvParallel[0]).toStringForSharing()
+        val actual = listOf(MockContents.kjvVersesWithCuvParallel[0]).toStringForSharing(MockContents.kjvBookNames[0])
         assertEquals(expected, actual)
     }
 
     @Test
     fun testMultipleVersesToStringForSharing() {
         val expected = "Genesis 1:1 In the beginning God created the heaven and the earth.\nGenesis 1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."
-        val actual = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toStringForSharing()
+        val actual = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toStringForSharing(MockContents.kjvBookNames[0])
         assertEquals(expected, actual)
     }
 
     @Test
     fun testMultipleVerseWithMultipleTranslationsToStringForSharing() {
         val expected = "Genesis 1:1\nKJV: In the beginning God created the heaven and the earth.\n中文和合本: 起初神创造天地。\nGenesis 1:2\nKJV: And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.\n中文和合本: 地是空虚混沌。渊面黑暗。神的灵运行在水面上。"
-        val actual = listOf(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvVersesWithCuvParallel[1]).toStringForSharing()
+        val actual = listOf(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvVersesWithCuvParallel[1]).toStringForSharing(MockContents.kjvBookNames[0])
         assertEquals(expected, actual)
     }
 
     @Test
     fun testMultipleVersesRandomOrderToStringForSharing() {
         val expected = "Genesis 1:1 In the beginning God created the heaven and the earth.\nGenesis 1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.\nGenesis 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good."
-        val actual = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[9], MockContents.kjvVerses[1]).toStringForSharing()
+        val actual = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[9], MockContents.kjvVerses[1]).toStringForSharing(MockContents.kjvBookNames[0])
         assertEquals(expected, actual)
     }
 }

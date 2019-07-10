@@ -79,14 +79,18 @@ class ReadingInteractorTest : BaseUnitTest() {
 
     @Test
     fun testCopyToClipBoardWithEmptyVerses() {
-        assertFalse(readingInteractor.copyToClipBoard(emptyList()))
+        runBlocking {
+            assertFalse(readingInteractor.copyToClipBoard(emptyList()))
+        }
     }
 
     @Test
     fun testCopyToClipBoardWithException() {
-        `when`(readingActivity.getSystemService(Context.CLIPBOARD_SERVICE)).thenThrow(RuntimeException("Random exception"))
+        runBlocking {
+            `when`(readingActivity.getSystemService(Context.CLIPBOARD_SERVICE)).thenThrow(RuntimeException("Random exception"))
 
-        assertFalse(readingInteractor.copyToClipBoard(MockContents.kjvVerses))
+            assertFalse(readingInteractor.copyToClipBoard(MockContents.kjvVerses))
+        }
     }
 
     @Test
