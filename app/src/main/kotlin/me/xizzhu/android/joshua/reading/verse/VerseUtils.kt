@@ -128,7 +128,8 @@ private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Te
     return this
 }
 
-fun SpannableStringBuilder.format(verse: Verse, simpleReadingMode: Boolean, @ColorInt highlightColor: Int): CharSequence {
+fun SpannableStringBuilder.format(verse: Verse, bookName: String, simpleReadingMode: Boolean,
+                                  @ColorInt highlightColor: Int): CharSequence {
     clear()
     clearSpans()
 
@@ -139,7 +140,7 @@ fun SpannableStringBuilder.format(verse: Verse, simpleReadingMode: Boolean, @Col
             // format:
             // <book name> <chapter verseIndex>:<verse verseIndex>
             // <verse text>
-            append(verse.text.bookName).append(' ')
+            append(bookName).append(' ')
                     .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
                     .append(verse.text.text)
         }

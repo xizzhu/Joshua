@@ -32,7 +32,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import java.lang.StringBuilder
 
-data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int, @ColorInt var highlightColor: Int,
+data class SimpleVerseItem(val verse: Verse, val bookName: String,
+                           private val totalVerseCount: Int, @ColorInt var highlightColor: Int,
                            val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
                            var selected: Boolean = false)
     : BaseItem(R.layout.item_simple_verse, { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }) {
@@ -68,7 +69,7 @@ data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int, @
     var textForDisplay: CharSequence = ""
         get() {
             if (field.isEmpty()) {
-                field = SPANNABLE_STRING_BUILDER.format(verse, true, highlightColor)
+                field = SPANNABLE_STRING_BUILDER.format(verse, bookName, true, highlightColor)
             }
             return field
         }
