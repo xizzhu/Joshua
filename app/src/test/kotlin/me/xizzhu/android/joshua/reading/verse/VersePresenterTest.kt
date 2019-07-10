@@ -91,40 +91,48 @@ class VersePresenterTest : BaseUnitTest() {
 
     @Test
     fun testOnActionCopyItemClickedSuccess() {
-        `when`(item.itemId).thenReturn(R.id.action_copy)
-        `when`(readingInteractor.copyToClipBoard(any())).thenReturn(true)
-        assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
-        verify(verseView, times(1)).onVersesCopied()
-        verify(verseView, never()).onVersesCopyShareFailed()
-        verify(actionMode, times(1)).finish()
+        runBlocking {
+            `when`(item.itemId).thenReturn(R.id.action_copy)
+            `when`(readingInteractor.copyToClipBoard(any())).thenReturn(true)
+            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            verify(verseView, times(1)).onVersesCopied()
+            verify(verseView, never()).onVersesCopyShareFailed()
+            verify(actionMode, times(1)).finish()
+        }
     }
 
     @Test
     fun testOnActionCopyItemClickedFailure() {
-        `when`(item.itemId).thenReturn(R.id.action_copy)
-        `when`(readingInteractor.copyToClipBoard(any())).thenReturn(false)
-        assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
-        verify(verseView, never()).onVersesCopied()
-        verify(verseView, times(1)).onVersesCopyShareFailed()
-        verify(actionMode, times(1)).finish()
+        runBlocking {
+            `when`(item.itemId).thenReturn(R.id.action_copy)
+            `when`(readingInteractor.copyToClipBoard(any())).thenReturn(false)
+            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            verify(verseView, never()).onVersesCopied()
+            verify(verseView, times(1)).onVersesCopyShareFailed()
+            verify(actionMode, times(1)).finish()
+        }
     }
 
     @Test
     fun testOnActionShareItemClickedSuccess() {
-        `when`(item.itemId).thenReturn(R.id.action_share)
-        `when`(readingInteractor.share(any())).thenReturn(true)
-        assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
-        verify(verseView, never()).onVersesCopyShareFailed()
-        verify(actionMode, times(1)).finish()
+        runBlocking {
+            `when`(item.itemId).thenReturn(R.id.action_share)
+            `when`(readingInteractor.share(any())).thenReturn(true)
+            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            verify(verseView, never()).onVersesCopyShareFailed()
+            verify(actionMode, times(1)).finish()
+        }
     }
 
     @Test
     fun testOnActionShareItemClickedFailure() {
-        `when`(item.itemId).thenReturn(R.id.action_share)
-        `when`(readingInteractor.share(any())).thenReturn(false)
-        assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
-        verify(verseView, times(1)).onVersesCopyShareFailed()
-        verify(actionMode, times(1)).finish()
+        runBlocking {
+            `when`(item.itemId).thenReturn(R.id.action_share)
+            `when`(readingInteractor.share(any())).thenReturn(false)
+            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            verify(verseView, times(1)).onVersesCopyShareFailed()
+            verify(actionMode, times(1)).finish()
+        }
     }
 
     @Test

@@ -117,10 +117,12 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
     @VisibleForTesting
     fun onVerseLongClicked(verse: Verse) {
-        if (readingInteractor.copyToClipBoard(listOf(verse))) {
-            view?.onVerseTextCopied()
-        } else {
-            view?.onVerseTextClickFailed()
+        coroutineScope.launch(Dispatchers.Main) {
+            if (readingInteractor.copyToClipBoard(listOf(verse))) {
+                view?.onVerseTextCopied()
+            } else {
+                view?.onVerseTextClickFailed()
+            }
         }
     }
 

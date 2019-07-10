@@ -170,20 +170,24 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
     @Test
     fun testOnVerseLongClicked() {
-        `when`(readingInteractor.copyToClipBoard(any())).thenReturn(true)
-        verseDetailPresenter.onVerseLongClicked(MockContents.kjvVerses[0])
-        verify(readingInteractor, times(1)).copyToClipBoard(listOf(MockContents.kjvVerses[0]))
-        verify(verseDetailView, times(1)).onVerseTextCopied()
-        verify(verseDetailView, never()).onVerseTextClickFailed()
+        runBlocking {
+            `when`(readingInteractor.copyToClipBoard(any())).thenReturn(true)
+            verseDetailPresenter.onVerseLongClicked(MockContents.kjvVerses[0])
+            verify(readingInteractor, times(1)).copyToClipBoard(listOf(MockContents.kjvVerses[0]))
+            verify(verseDetailView, times(1)).onVerseTextCopied()
+            verify(verseDetailView, never()).onVerseTextClickFailed()
+        }
     }
 
     @Test
     fun testOnVerseLongClickedWithCopyFailed() {
-        `when`(readingInteractor.copyToClipBoard(any())).thenReturn(false)
-        verseDetailPresenter.onVerseLongClicked(MockContents.kjvVerses[0])
-        verify(readingInteractor, times(1)).copyToClipBoard(listOf(MockContents.kjvVerses[0]))
-        verify(verseDetailView, never()).onVerseTextCopied()
-        verify(verseDetailView, times(1)).onVerseTextClickFailed()
+        runBlocking {
+            `when`(readingInteractor.copyToClipBoard(any())).thenReturn(false)
+            verseDetailPresenter.onVerseLongClicked(MockContents.kjvVerses[0])
+            verify(readingInteractor, times(1)).copyToClipBoard(listOf(MockContents.kjvVerses[0]))
+            verify(verseDetailView, never()).onVerseTextCopied()
+            verify(verseDetailView, times(1)).onVerseTextClickFailed()
+        }
     }
 
     @Test
