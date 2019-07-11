@@ -503,4 +503,24 @@ class VersePresenterTest : BaseUnitTest() {
             verify(readingInteractor, never()).removeBookmark(any())
         }
     }
+
+    @Test
+    fun testRemoveHighlight() {
+        runBlocking {
+            val verseIndex = VerseIndex(1, 2, 3)
+            versePresenter.updateHighlight(verseIndex, Highlight.COLOR_NONE)
+            verify(readingInteractor, times(1)).removeHighlight(verseIndex)
+            verify(readingInteractor, never()).saveHighlight(any(), anyInt())
+        }
+    }
+
+    @Test
+    fun testSaveHighlight() {
+        runBlocking {
+            val verseIndex = VerseIndex(1, 2, 3)
+            versePresenter.updateHighlight(verseIndex, Highlight.COLOR_BLUE)
+            verify(readingInteractor, never()).removeHighlight(any())
+            verify(readingInteractor, times(1)).saveHighlight(verseIndex, Highlight.COLOR_BLUE)
+        }
+    }
 }
