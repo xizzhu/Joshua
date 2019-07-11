@@ -88,7 +88,8 @@ class ChapterListPresenterTest : BaseUnitTest() {
             val bookIndex = 1
             val chapterIndex = 2
             chapterListPresenter.selectChapter(bookIndex, chapterIndex)
-            verify(chapterListView, never()).onChapterSelectionFailed(bookIndex, chapterIndex)
+            verify(readingInteractor, times(1)).saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+            verify(chapterListView, never()).onChapterSelectionFailed(anyInt(), anyInt())
         }
     }
 

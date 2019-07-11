@@ -112,7 +112,7 @@ class ToolbarPresenterTest : BaseUnitTest() {
 
             toolbarPresenter.updateCurrentTranslation(MockContents.kjvShortName)
             verify(toolbarView, times(1)).onCurrentTranslationUpdated(MockContents.kjvShortName)
-            verify(toolbarView, never()).onCurrentTranslationUpdateFailed(MockContents.kjvShortName)
+            verify(toolbarView, never()).onCurrentTranslationUpdateFailed(anyString())
         }
     }
 
@@ -122,7 +122,7 @@ class ToolbarPresenterTest : BaseUnitTest() {
             `when`(readingInteractor.saveCurrentTranslation(MockContents.kjvShortName)).thenThrow(RuntimeException("Random exception"))
 
             toolbarPresenter.updateCurrentTranslation(MockContents.kjvShortName)
-            verify(toolbarView, never()).onCurrentTranslationUpdated(MockContents.kjvShortName)
+            verify(toolbarView, never()).onCurrentTranslationUpdated(anyString())
             verify(toolbarView, times(1)).onCurrentTranslationUpdateFailed(MockContents.kjvShortName)
         }
     }
@@ -137,7 +137,7 @@ class ToolbarPresenterTest : BaseUnitTest() {
 
             toolbarPresenter.updateCurrentTranslation(MockContents.kjvShortName)
             verify(toolbarView, times(1)).onCurrentTranslationUpdated(MockContents.kjvShortName)
-            verify(toolbarView, never()).onCurrentTranslationUpdateFailed(MockContents.kjvShortName)
+            verify(toolbarView, never()).onCurrentTranslationUpdateFailed(anyString())
         }
     }
 

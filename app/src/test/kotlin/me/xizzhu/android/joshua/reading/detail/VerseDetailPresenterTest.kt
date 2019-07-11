@@ -117,7 +117,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
                                     VerseTextItem(verseIndex, MockContents.kjvVersesWithBbeCuvParallel[0].parallel[1], MockContents.cuvBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)
                             ), false, Highlight.COLOR_NONE, "")
             )
-            verify(verseDetailView, never()).onVerseDetailLoadFailed(verseIndex)
+            verify(verseDetailView, never()).onVerseDetailLoadFailed(any())
         }
     }
 
@@ -195,7 +195,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         runBlocking {
             verseDetailOpenState.send(Pair(VerseIndex.INVALID, 0))
 
-            verify(verseDetailView, never()).show(0)
+            verify(verseDetailView, never()).show(anyInt())
             verify(verseDetailView, never()).onVerseDetailLoaded(any())
             verify(verseDetailView, times(1)).hide()
         }
@@ -238,7 +238,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
                     emptyList(), false, Highlight.COLOR_NONE, "")
 
             verseDetailPresenter.updateNote("Random")
-            verify(readingInteractor, never()).removeNote(VerseIndex(0, 0, 0))
+            verify(readingInteractor, never()).removeNote(any())
             verify(readingInteractor, times(1)).saveNote(VerseIndex(0, 0, 0), "Random")
             assertEquals(VerseDetail(VerseIndex(0, 0, 0),
                     emptyList(), false, Highlight.COLOR_NONE, "Random"),

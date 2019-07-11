@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import android.graphics.Color
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -171,6 +170,7 @@ class VersePresenterTest : BaseUnitTest() {
             val bookIndex = 1
             val chapterIndex = 2
             versePresenter.selectChapter(bookIndex, chapterIndex)
+            verify(readingInteractor, times(1)).saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             verify(verseView, never()).onChapterSelectionFailed(bookIndex, chapterIndex)
         }
     }
@@ -203,17 +203,17 @@ class VersePresenterTest : BaseUnitTest() {
         val verses = MockContents.kjvVerses
         val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, MockContents.kjvBookNames[0],
                 listOf(
-                        Highlight(VerseIndex(0, 0, 0), Color.RED, 1L),
-                        Highlight(VerseIndex(0, 0, 6), Color.GREEN, 2L),
-                        Highlight(VerseIndex(0, 0, 10), Color.BLUE, 3L)
+                        Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 1L),
+                        Highlight(VerseIndex(0, 0, 6), Highlight.COLOR_BLUE, 2L),
+                        Highlight(VerseIndex(0, 0, 10), Highlight.COLOR_PURPLE, 3L)
                 )
         )
         assertEquals(verses.size, simpleVerseItems.size)
         simpleVerseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
             assertEquals(when (index) {
-                0 -> Color.RED
-                6 -> Color.GREEN
+                0 -> Highlight.COLOR_PINK
+                6 -> Highlight.COLOR_BLUE
                 else -> Highlight.COLOR_NONE
             }, verseItem.highlightColor)
         }
@@ -242,9 +242,9 @@ class VersePresenterTest : BaseUnitTest() {
                         Bookmark(VerseIndex(0, 0, 10), 0L)
                 ),
                 listOf(
-                        Highlight(VerseIndex(0, 0, 0), Color.RED, 1L),
-                        Highlight(VerseIndex(0, 0, 6), Color.GREEN, 2L),
-                        Highlight(VerseIndex(0, 0, 10), Color.BLUE, 3L)
+                        Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 1L),
+                        Highlight(VerseIndex(0, 0, 6), Highlight.COLOR_BLUE, 2L),
+                        Highlight(VerseIndex(0, 0, 10), Highlight.COLOR_PURPLE, 3L)
                 ),
                 listOf(
                         Note(VerseIndex(0, 0, 0), "", 0L),
@@ -257,8 +257,8 @@ class VersePresenterTest : BaseUnitTest() {
             assertEquals(verses[index], verseItem.verse)
             assertTrue(if (index == 0 || index == 5) verseItem.hasBookmark else !verseItem.hasBookmark)
             assertEquals(when (index) {
-                0 -> Color.RED
-                6 -> Color.GREEN
+                0 -> Highlight.COLOR_PINK
+                6 -> Highlight.COLOR_BLUE
                 else -> Highlight.COLOR_NONE
             }, verseItem.highlightColor)
             assertTrue(if (index == 0 || index == 7) verseItem.hasNote else !verseItem.hasNote)
