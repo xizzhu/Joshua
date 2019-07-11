@@ -66,13 +66,9 @@ data class SimpleVerseItem(val verse: Verse, private val bookName: String,
         }
     }
 
-    var textForDisplay: CharSequence = ""
-        get() {
-            if (field.isEmpty()) {
-                field = SPANNABLE_STRING_BUILDER.format(verse, bookName, true, highlightColor)
-            }
-            return field
-        }
+    val textForDisplay: CharSequence by lazy {
+        SPANNABLE_STRING_BUILDER.format(verse, bookName, true, highlightColor)
+    }
 }
 
 private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
