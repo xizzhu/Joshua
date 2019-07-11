@@ -37,8 +37,8 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "3.4.1"
-        const val buildTools = "29.0.0"
+        const val classpath = "3.4.2"
+        const val buildTools = "29.0.1"
         const val compile = 29
         const val min = 21
         const val target = 29
@@ -83,7 +83,7 @@ object Versions {
 
     object Retrofit {
         const val retrofit = "2.6.0"
-        const val okhttp = "4.0.0"
+        const val okhttp = "4.0.1"
         const val moshi = "1.8.0"
         const val okio = "2.2.2"
     }
@@ -92,7 +92,7 @@ object Versions {
 
     const val stetho = "1.5.1"
 
-    const val mockito = "2.28.2"
+    const val mockito = "3.0.0"
 }
 
 object Dependencies {

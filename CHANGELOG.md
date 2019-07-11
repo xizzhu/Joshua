@@ -6,8 +6,13 @@ CHANGELOG
 - Made book names in verse detail view, bookmark lists bold and smaller
 - Should set hint on TextInputLayout
 - Updated dependencies:
+  - Gradle to 5.5.1
+  - Android Gradle plugin to 3.4.2
+  - Build tool to 29.0.1
   - Kotlin to 1.3.41
+  - OkHttp to 4.0.1
   - Logger to 0.1.2
+  - Mockito to 3.0.0
 
 #### v0.7.0 (2019-07-02)
 - Added verse highlight support
