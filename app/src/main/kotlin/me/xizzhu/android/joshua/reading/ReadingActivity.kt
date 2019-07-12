@@ -34,6 +34,7 @@ import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewPager
 import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 import javax.inject.Inject
 
 class ReadingActivity : BaseSettingsActivity() {
@@ -83,7 +84,6 @@ class ReadingActivity : BaseSettingsActivity() {
         search.setPresenter(searchButtonPresenter)
         drawerLayout.addDrawerListener(drawerToggle)
 
-        observeSettings(readingInteractor)
         openNoteIfNeeded()
     }
 
@@ -134,7 +134,7 @@ class ReadingActivity : BaseSettingsActivity() {
         super.onStop()
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration?) {
+    override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         drawerToggle.onConfigurationChanged(newConfig)
     }
@@ -146,4 +146,6 @@ class ReadingActivity : BaseSettingsActivity() {
             }
         }
     }
+
+    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = readingInteractor
 }

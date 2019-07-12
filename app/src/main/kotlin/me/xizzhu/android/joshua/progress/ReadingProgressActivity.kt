@@ -22,6 +22,7 @@ import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 import javax.inject.Inject
 
 class ReadingProgressActivity : BaseSettingsActivity() {
@@ -42,8 +43,6 @@ class ReadingProgressActivity : BaseSettingsActivity() {
 
         setContentView(R.layout.activity_reading_progress)
         readingProgressListView.setPresenter(readingProgressPresenter)
-
-        observeSettings(readingProgressInteractor)
     }
 
     override fun onStart() {
@@ -59,4 +58,6 @@ class ReadingProgressActivity : BaseSettingsActivity() {
 
         super.onStop()
     }
+
+    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = readingProgressInteractor
 }

@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 import javax.inject.Inject
 
 class NotesActivity : BaseSettingsActivity() {
@@ -51,8 +52,6 @@ class NotesActivity : BaseSettingsActivity() {
         setContentView(R.layout.activity_notes)
         toolbar.setPresenter(toolbarPresenter)
         notesListView.setPresenter(notesPresenter)
-
-        observeSettings(notesInteractor)
     }
 
     override fun onStart() {
@@ -70,4 +69,6 @@ class NotesActivity : BaseSettingsActivity() {
 
         super.onStop()
     }
+
+    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = notesInteractor
 }

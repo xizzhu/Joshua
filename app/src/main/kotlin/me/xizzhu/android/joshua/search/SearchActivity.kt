@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
 import javax.inject.Inject
 
 class SearchActivity : BaseSettingsActivity() {
@@ -51,8 +52,6 @@ class SearchActivity : BaseSettingsActivity() {
         setContentView(R.layout.activity_search)
         toolbar.setPresenter(toolbarPresenter)
         searchResultList.setPresenter(searchResultPresenter)
-
-        observeSettings(searchInteractor)
     }
 
     override fun onStart() {
@@ -70,4 +69,6 @@ class SearchActivity : BaseSettingsActivity() {
 
         super.onStop()
     }
+
+    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = searchInteractor
 }
