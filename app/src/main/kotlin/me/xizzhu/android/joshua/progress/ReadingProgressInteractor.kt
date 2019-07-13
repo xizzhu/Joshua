@@ -23,7 +23,7 @@ import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
-import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
 class ReadingProgressInteractor(private val readingProgressActivity: ReadingProgressActivity,
                                 private val readingProgressManager: ReadingProgressManager,

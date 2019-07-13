@@ -36,7 +36,7 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import me.xizzhu.android.logger.Log
 
 data class VerseUpdate(@Operation val operation: Int, val data: Any? = null) {

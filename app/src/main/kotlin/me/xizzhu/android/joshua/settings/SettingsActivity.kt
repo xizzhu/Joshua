@@ -31,7 +31,7 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
 import me.xizzhu.android.joshua.ui.*
-import me.xizzhu.android.joshua.utils.BaseActivity
+import me.xizzhu.android.joshua.utils.activities.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject

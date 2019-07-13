@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
-import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
 
 class SearchResultPresenter(private val searchInteractor: SearchInteractor)

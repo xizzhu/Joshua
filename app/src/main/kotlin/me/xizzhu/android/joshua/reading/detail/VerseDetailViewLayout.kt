@@ -38,7 +38,7 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.getBackgroundColor
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.getSecondaryTextColor
-import me.xizzhu.android.joshua.utils.BaseSettingsView
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 import kotlin.math.max
 
 interface VerseDetailView : BaseSettingsView {

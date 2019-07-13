@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.utils.BaseSettingsView
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 
 interface SearchResultView : BaseSettingsView {
     fun onSearchStarted()

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.utils
+package me.xizzhu.android.joshua.utils.activities
 
 import android.os.Bundle
 import androidx.annotation.CallSuper
@@ -25,6 +25,8 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.getBackgroundColor
+import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.utils.MVPView
 
 abstract class BaseSettingsActivity : BaseActivity() {
     @CallSuper

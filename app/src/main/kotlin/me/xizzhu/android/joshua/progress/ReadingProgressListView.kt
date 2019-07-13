@@ -23,7 +23,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.utils.BaseSettingsView
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 
 interface ReadingProgressView : BaseSettingsView {
     fun onReadingProgressLoaded(items: List<BaseItem>)

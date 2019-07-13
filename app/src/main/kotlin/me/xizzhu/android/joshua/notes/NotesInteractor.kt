@@ -24,7 +24,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
-import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
 class NotesInteractor(private val notesActivity: NotesActivity,
                       private val bibleReadingManager: BibleReadingManager,

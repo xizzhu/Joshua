@@ -23,7 +23,7 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.LoadingSpinnerState
-import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
 class SearchInteractor(private val searchActivity: SearchActivity,
                        private val navigator: Navigator,

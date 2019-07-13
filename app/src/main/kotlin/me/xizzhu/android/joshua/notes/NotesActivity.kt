@@ -25,8 +25,8 @@ import me.xizzhu.android.joshua.notes.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.ui.LoadingSpinner
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView
-import me.xizzhu.android.joshua.utils.BaseSettingsActivity
-import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
 class NotesActivity : BaseSettingsActivity() {

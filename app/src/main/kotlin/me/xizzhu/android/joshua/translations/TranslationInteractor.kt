@@ -22,7 +22,7 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.ui.SwipeRefresherState
-import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
 class TranslationInteractor(private val translationManagementActivity: TranslationManagementActivity,
                             private val bibleReadingManager: BibleReadingManager,

@@ -21,7 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
 
 class ReadingProgressPresenter(private val readingProgressInteractor: ReadingProgressInteractor)
