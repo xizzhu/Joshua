@@ -18,24 +18,18 @@ package me.xizzhu.android.joshua.progress
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.LoadingSpinner
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class ReadingProgressActivity : BaseSettingsActivity() {
+class ReadingProgressActivity : BaseLoadingSpinnerActivity() {
     @Inject
     lateinit var readingProgressInteractor: ReadingProgressInteractor
 
     @Inject
-    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
-
-    @Inject
     lateinit var readingProgressPresenter: ReadingProgressPresenter
 
-    private val loadingSpinner: LoadingSpinner by bindView(R.id.loading_spinner)
     private val readingProgressListView: ReadingProgressListView by bindView(R.id.reading_progress_list)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,12 +42,10 @@ class ReadingProgressActivity : BaseSettingsActivity() {
     override fun onStart() {
         super.onStart()
 
-        loadingSpinnerPresenter.attachView(loadingSpinner)
         readingProgressPresenter.attachView(readingProgressListView)
     }
 
     override fun onStop() {
-        loadingSpinnerPresenter.detachView()
         readingProgressPresenter.detachView()
 
         super.onStop()
