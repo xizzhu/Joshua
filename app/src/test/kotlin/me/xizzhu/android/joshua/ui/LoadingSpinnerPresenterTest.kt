@@ -30,7 +30,7 @@ class LoadingSpinnerPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var loadingSpinnerView: LoadingSpinnerView
 
-    private lateinit var loadingSpinnerState: BroadcastChannel<LoadingSpinnerState>
+    private lateinit var loadingSpinnerState: BroadcastChannel<Int>
     private lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
     @Before
@@ -55,11 +55,11 @@ class LoadingSpinnerPresenterTest : BaseUnitTest() {
             verify(loadingSpinnerView, never()).show()
             verify(loadingSpinnerView, never()).hide()
 
-            loadingSpinnerState.send(LoadingSpinnerState.IS_LOADING)
+            loadingSpinnerState.send(LoadingSpinnerPresenter.IS_LOADING)
             verify(loadingSpinnerView, times(1)).show()
             verify(loadingSpinnerView, never()).hide()
 
-            loadingSpinnerState.send(LoadingSpinnerState.NOT_LOADING)
+            loadingSpinnerState.send(LoadingSpinnerPresenter.NOT_LOADING)
             verify(loadingSpinnerView, times(1)).show()
             verify(loadingSpinnerView, times(1)).hide()
         }

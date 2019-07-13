@@ -23,7 +23,7 @@ import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
 class NotesInteractor(private val notesActivity: NotesActivity,
@@ -31,7 +31,7 @@ class NotesInteractor(private val notesActivity: NotesActivity,
                       private val noteManager: NoteManager,
                       private val navigator: Navigator,
                       settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val notesLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
+    private val notesLoadingState: BroadcastChannel<Int> = ConflatedBroadcastChannel(LoadingSpinnerPresenter.IS_LOADING)
 
     suspend fun observeNotesSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
 
@@ -39,14 +39,14 @@ class NotesInteractor(private val notesActivity: NotesActivity,
         noteManager.saveSortOrder(sortOrder)
     }
 
-    fun observeNotesLoadingState(): ReceiveChannel<LoadingSpinnerState> = notesLoadingState.openSubscription()
+    fun observeNotesLoadingState(): ReceiveChannel<Int> = notesLoadingState.openSubscription()
 
     suspend fun notifyLoadingStarted() {
-        notesLoadingState.send(LoadingSpinnerState.IS_LOADING)
+        notesLoadingState.send(LoadingSpinnerPresenter.IS_LOADING)
     }
 
     suspend fun notifyLoadingFinished() {
-        notesLoadingState.send(LoadingSpinnerState.NOT_LOADING)
+        notesLoadingState.send(LoadingSpinnerPresenter.NOT_LOADING)
     }
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()

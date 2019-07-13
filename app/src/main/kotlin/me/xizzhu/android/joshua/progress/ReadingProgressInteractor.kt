@@ -22,7 +22,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
 class ReadingProgressInteractor(private val readingProgressActivity: ReadingProgressActivity,
@@ -30,13 +30,12 @@ class ReadingProgressInteractor(private val readingProgressActivity: ReadingProg
                                 private val bibleReadingManager: BibleReadingManager,
                                 private val navigator: Navigator,
                                 settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val readingProgressLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
+    private val readingProgressLoadingState: BroadcastChannel<Int> = ConflatedBroadcastChannel(LoadingSpinnerPresenter.IS_LOADING)
 
-    fun observeReadingProgressLoadingState(): ReceiveChannel<LoadingSpinnerState> =
-            readingProgressLoadingState.openSubscription()
+    fun observeReadingProgressLoadingState(): ReceiveChannel<Int> = readingProgressLoadingState.openSubscription()
 
     suspend fun notifyLoadingFinished() {
-        readingProgressLoadingState.send(LoadingSpinnerState.NOT_LOADING)
+        readingProgressLoadingState.send(LoadingSpinnerPresenter.NOT_LOADING)
     }
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()

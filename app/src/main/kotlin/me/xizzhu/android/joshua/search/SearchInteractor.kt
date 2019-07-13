@@ -22,17 +22,17 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
 class SearchInteractor(private val searchActivity: SearchActivity,
                        private val navigator: Navigator,
                        private val bibleReadingManager: BibleReadingManager,
                        settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val searchState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.NOT_LOADING)
+    private val searchState: BroadcastChannel<Int> = ConflatedBroadcastChannel(LoadingSpinnerPresenter.NOT_LOADING)
     private val searchResult: BroadcastChannel<Pair<String, List<Verse>>> = ConflatedBroadcastChannel(Pair("", emptyList()))
 
-    fun observeSearchState(): ReceiveChannel<LoadingSpinnerState> = searchState.openSubscription()
+    fun observeSearchState(): ReceiveChannel<Int> = searchState.openSubscription()
 
     fun observeSearchResult(): ReceiveChannel<Pair<String, List<Verse>>> = searchResult.openSubscription()
 
@@ -41,12 +41,12 @@ class SearchInteractor(private val searchActivity: SearchActivity,
     }
 
     suspend fun search(query: String) {
-        searchState.send(LoadingSpinnerState.IS_LOADING)
+        searchState.send(LoadingSpinnerPresenter.IS_LOADING)
 
         try {
             searchResult.send(Pair(query, bibleReadingManager.search(readCurrentTranslation(), query)))
         } finally {
-            searchState.send(LoadingSpinnerState.NOT_LOADING)
+            searchState.send(LoadingSpinnerPresenter.NOT_LOADING)
         }
     }
 

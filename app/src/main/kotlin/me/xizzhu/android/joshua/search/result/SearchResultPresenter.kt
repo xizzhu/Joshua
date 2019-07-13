@@ -21,7 +21,7 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
 
@@ -40,8 +40,8 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
         coroutineScope.launch(Dispatchers.Main) {
             searchInteractor.observeSearchState().consumeEach { loadingState ->
                 when (loadingState) {
-                    LoadingSpinnerState.IS_LOADING -> view?.onSearchStarted()
-                    LoadingSpinnerState.NOT_LOADING -> view?.onSearchCompleted()
+                    LoadingSpinnerPresenter.IS_LOADING -> view?.onSearchStarted()
+                    LoadingSpinnerPresenter.NOT_LOADING -> view?.onSearchCompleted()
                 }
             }
         }

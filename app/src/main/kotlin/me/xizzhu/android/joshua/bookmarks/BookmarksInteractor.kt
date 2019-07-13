@@ -22,7 +22,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
+import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
 class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
@@ -30,7 +30,7 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
                           private val bookmarkManager: BookmarkManager,
                           private val navigator: Navigator,
                           settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val bookmarksLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
+    private val bookmarksLoadingState: BroadcastChannel<Int> = ConflatedBroadcastChannel(LoadingSpinnerPresenter.IS_LOADING)
 
     suspend fun observeBookmarksSortOrder(): ReceiveChannel<Int> = bookmarkManager.observeSortOrder()
 
@@ -38,15 +38,14 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
         bookmarkManager.saveSortOrder(sortOrder)
     }
 
-    fun observeBookmarksLoadingState(): ReceiveChannel<LoadingSpinnerState> =
-            bookmarksLoadingState.openSubscription()
+    fun observeBookmarksLoadingState(): ReceiveChannel<Int> = bookmarksLoadingState.openSubscription()
 
     suspend fun notifyLoadingStarted() {
-        bookmarksLoadingState.send(LoadingSpinnerState.IS_LOADING)
+        bookmarksLoadingState.send(LoadingSpinnerPresenter.IS_LOADING)
     }
 
     suspend fun notifyLoadingFinished() {
-        bookmarksLoadingState.send(LoadingSpinnerState.NOT_LOADING)
+        bookmarksLoadingState.send(LoadingSpinnerPresenter.NOT_LOADING)
     }
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()

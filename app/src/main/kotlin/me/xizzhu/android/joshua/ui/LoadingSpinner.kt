@@ -20,6 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ProgressBar
+import androidx.annotation.IntDef
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
@@ -27,15 +28,23 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
 
-enum class LoadingSpinnerState { IS_LOADING, NOT_LOADING }
+class LoadingSpinnerPresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<LoadingSpinnerView>() {
+    companion object {
+        const val IS_LOADING = 0
+        const val NOT_LOADING = 1
 
-class LoadingSpinnerPresenter(loadingState: ReceiveChannel<LoadingSpinnerState>) : MVPPresenter<LoadingSpinnerView>() {
+        @IntDef(IS_LOADING, NOT_LOADING)
+        @Retention(AnnotationRetention.SOURCE)
+        annotation class LoadingState
+    }
+
     init {
         coroutineScope.launch(Dispatchers.Main) {
             loadingState.consumeEach { state ->
                 when (state) {
-                    LoadingSpinnerState.IS_LOADING -> view?.show()
-                    LoadingSpinnerState.NOT_LOADING -> view?.hide()
+                    IS_LOADING -> view?.show()
+                    NOT_LOADING -> view?.hide()
+                    else -> throw IllegalArgumentException("Unsupported loading state - $state")
                 }
             }
         }
