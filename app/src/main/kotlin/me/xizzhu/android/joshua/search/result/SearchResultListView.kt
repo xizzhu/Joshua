@@ -32,6 +32,8 @@ interface SearchResultView : BaseSettingsView {
 
     fun onSearchCompleted()
 
+    fun onSearchFailed(query: String)
+
     fun onSearchResultUpdated(searchResult: SearchResult)
 
     fun onVerseSelectionFailed(verseToSelect: VerseIndex)
@@ -59,6 +61,13 @@ class SearchResultListView : BaseRecyclerView, SearchResultView {
 
     override fun onSearchCompleted() {
         fadeIn()
+    }
+
+    override fun onSearchFailed(query: String) {
+        DialogHelper.showDialog(context, true, R.string.dialog_search_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.search(query)
+                })
     }
 
     override fun onSearchResultUpdated(searchResult: SearchResult) {

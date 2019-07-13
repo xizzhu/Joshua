@@ -18,10 +18,10 @@ package me.xizzhu.android.joshua.search.result
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
 
@@ -31,18 +31,27 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
         super.onViewAttached()
 
         coroutineScope.launch(Dispatchers.Main) {
-            searchInteractor.observeSearchResult().consumeEach { (query, verses) ->
-                view?.onSearchResultUpdated(verses.toSearchResult(query,
-                        searchInteractor.readBookNames(searchInteractor.readCurrentTranslation()),
-                        this@SearchResultPresenter::selectVerse))
-            }
+            searchInteractor.observeSearchQuery()
+                    .filter { it.isNotEmpty() }
+                    .consumeEach { query -> search(query) }
         }
+    }
+
+    fun search(query: String) {
         coroutineScope.launch(Dispatchers.Main) {
-            searchInteractor.observeSearchState().consumeEach { loadingState ->
-                when (loadingState) {
-                    LoadingSpinnerPresenter.IS_LOADING -> view?.onSearchStarted()
-                    LoadingSpinnerPresenter.NOT_LOADING -> view?.onSearchCompleted()
-                }
+            try {
+                searchInteractor.notifySearchStarted()
+                view?.onSearchStarted()
+
+                view?.onSearchResultUpdated(searchInteractor.search(query).toSearchResult(
+                        query, searchInteractor.readBookNames(searchInteractor.readCurrentTranslation()),
+                        this@SearchResultPresenter::selectVerse))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to search Bible verses", e)
+                view?.onSearchFailed(query)
+            } finally {
+                searchInteractor.notifySearchFinished()
+                view?.onSearchCompleted()
             }
         }
     }

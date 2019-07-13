@@ -17,19 +17,14 @@
 package me.xizzhu.android.joshua.search.toolbar
 
 import android.content.Context
-import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.getActivity
 import me.xizzhu.android.joshua.utils.MVPView
 
-interface ToolbarView : MVPView {
-    fun onError(query: String)
-}
+interface ToolbarView : MVPView
 
 class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
     constructor(context: Context) : super(context)
@@ -69,7 +64,7 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
         }
         currentQuery = query
 
-        return presenter.search(query).apply {
+        return presenter.updateSearchQuery(query).apply {
             if (hasFocus()) {
                 (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                         .hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
@@ -78,14 +73,4 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
     }
 
     override fun onQueryTextChange(newText: String): Boolean = false
-
-    override fun onError(query: String) {
-        // The toolbar is using own theme, so try to use the Activity context to make sure the dialog
-        // is consistent.
-        DialogHelper.showDialog(context.getActivity() ?: context,
-                true, R.string.dialog_search_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.search(query)
-                })
-    }
 }

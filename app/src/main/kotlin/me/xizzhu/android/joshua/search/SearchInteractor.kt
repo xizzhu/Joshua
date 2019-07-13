@@ -30,24 +30,28 @@ class SearchInteractor(private val searchActivity: SearchActivity,
                        private val bibleReadingManager: BibleReadingManager,
                        settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
     private val searchState: BroadcastChannel<Int> = ConflatedBroadcastChannel(LoadingSpinnerPresenter.NOT_LOADING)
-    private val searchResult: BroadcastChannel<Pair<String, List<Verse>>> = ConflatedBroadcastChannel(Pair("", emptyList()))
+    private val searchQuery: BroadcastChannel<String> = ConflatedBroadcastChannel("")
 
     fun observeSearchState(): ReceiveChannel<Int> = searchState.openSubscription()
 
-    fun observeSearchResult(): ReceiveChannel<Pair<String, List<Verse>>> = searchResult.openSubscription()
+    fun observeSearchQuery(): ReceiveChannel<String> = searchQuery.openSubscription()
+
+    suspend fun updateSearchQuery(query: String) {
+        searchQuery.send(query)
+    }
+
+    suspend fun notifySearchStarted() {
+        searchState.send(LoadingSpinnerPresenter.IS_LOADING)
+    }
+
+    suspend fun notifySearchFinished() {
+        searchState.send(LoadingSpinnerPresenter.NOT_LOADING)
+    }
+
+    suspend fun search(query: String): List<Verse> = bibleReadingManager.search(readCurrentTranslation(), query)
 
     suspend fun selectVerse(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-    }
-
-    suspend fun search(query: String) {
-        searchState.send(LoadingSpinnerPresenter.IS_LOADING)
-
-        try {
-            searchResult.send(Pair(query, bibleReadingManager.search(readCurrentTranslation(), query)))
-        } finally {
-            searchState.send(LoadingSpinnerPresenter.NOT_LOADING)
-        }
     }
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
