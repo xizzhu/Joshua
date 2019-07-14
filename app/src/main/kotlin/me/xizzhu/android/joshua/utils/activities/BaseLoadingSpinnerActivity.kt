@@ -18,24 +18,24 @@ package me.xizzhu.android.joshua.utils.activities
 
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.LoadingSpinner
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
 import me.xizzhu.android.joshua.ui.bindView
 import javax.inject.Inject
 
 abstract class BaseLoadingSpinnerActivity : BaseSettingsActivity() {
     @Inject
-    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
+    lateinit var loadingAwarePresenter: LoadingAwarePresenter
 
     private val loadingSpinner: LoadingSpinner by bindView(R.id.loading_spinner)
 
     override fun onStart() {
         super.onStart()
 
-        loadingSpinnerPresenter.attachView(loadingSpinner)
+        loadingAwarePresenter.attachView(loadingSpinner)
     }
 
     override fun onStop() {
-        loadingSpinnerPresenter.detachView()
+        loadingAwarePresenter.detachView()
 
         super.onStop()
     }

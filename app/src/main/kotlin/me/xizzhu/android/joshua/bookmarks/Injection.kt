@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.bookmarks.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.BookmarkManager
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
 
 @Module
 class BookmarksModule {
@@ -39,8 +39,8 @@ class BookmarksModule {
             BookmarksInteractor(bookmarksActivity, bibleReadingManager, bookmarkManager, navigator, settingsManager)
 
     @Provides
-    fun provideLoadingSpinnerPresenter(bookmarksInteractor: BookmarksInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(bookmarksInteractor.observeLoadingState())
+    fun provideLoadingAwarePresenter(bookmarksInteractor: BookmarksInteractor): LoadingAwarePresenter =
+            LoadingAwarePresenter(bookmarksInteractor.observeLoadingState())
 
     @Provides
     fun provideToolbarPresenter(bookmarksInteractor: BookmarksInteractor): ToolbarPresenter =

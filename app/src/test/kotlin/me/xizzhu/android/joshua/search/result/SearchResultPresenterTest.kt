@@ -25,8 +25,6 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

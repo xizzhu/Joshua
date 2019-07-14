@@ -57,7 +57,7 @@ abstract class BaseLoadingAwareInteractor(settingsManager: SettingsManager,
     }
 }
 
-class LoadingSpinnerPresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<LoadingSpinnerView>() {
+class LoadingAwarePresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<LoadingAwareView>() {
     init {
         coroutineScope.launch(Dispatchers.Main) {
             loadingState.consumeEach { state ->
@@ -71,13 +71,13 @@ class LoadingSpinnerPresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<
     }
 }
 
-interface LoadingSpinnerView : MVPView {
+interface LoadingAwareView : MVPView {
     fun show()
 
     fun hide()
 }
 
-class LoadingSpinner : ProgressBar, LoadingSpinnerView {
+class LoadingSpinner : ProgressBar, LoadingAwareView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
