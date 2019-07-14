@@ -36,6 +36,9 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
     fun loadReadingProgress() {
         coroutineScope.launch(Dispatchers.Main) {
             try {
+                readingProgressInteractor.notifyLoadingStarted()
+                view?.onReadingProgressLoadingStarted()
+
                 val currentTranslation = readingProgressInteractor.readCurrentTranslation()
                 val bookNames = readingProgressInteractor.readBookNames(currentTranslation)
                 val readingProgress = readingProgressInteractor.readReadingProgress()
@@ -43,11 +46,12 @@ class ReadingProgressPresenter(private val readingProgressInteractor: ReadingPro
                                 this@ReadingProgressPresenter::onBookClicked,
                                 this@ReadingProgressPresenter::openChapter)
                 view?.onReadingProgressLoaded(readingProgress)
-
-                readingProgressInteractor.notifyLoadingFinished()
+                view?.onReadingProgressLoadingCompleted()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load reading progress")
                 view?.onReadingProgressLoadFailed()
+            } finally {
+                readingProgressInteractor.notifyLoadingFinished()
             }
         }
     }

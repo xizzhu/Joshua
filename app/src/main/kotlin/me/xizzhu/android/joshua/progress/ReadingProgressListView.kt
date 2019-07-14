@@ -21,11 +21,16 @@ import android.content.DialogInterface
 import android.util.AttributeSet
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 
 interface ReadingProgressView : BaseSettingsView {
+    fun onReadingProgressLoadingStarted()
+
+    fun onReadingProgressLoadingCompleted()
+
     fun onReadingProgressLoaded(items: List<BaseItem>)
 
     fun onReadingProgressLoadFailed()
@@ -42,6 +47,14 @@ class ReadingProgressListView : BaseRecyclerView, ReadingProgressView {
 
     fun setPresenter(presenter: ReadingProgressPresenter) {
         this.presenter = presenter
+    }
+
+    override fun onReadingProgressLoadingStarted() {
+        visibility = GONE
+    }
+
+    override fun onReadingProgressLoadingCompleted() {
+        fadeIn()
     }
 
     override fun onReadingProgressLoaded(items: List<BaseItem>) {

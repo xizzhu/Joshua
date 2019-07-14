@@ -64,11 +64,12 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
                     view?.onNotesLoaded(items)
                 }
 
-                notesInteractor.notifyLoadingFinished()
                 view?.onNotesLoadingCompleted()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load notes", e)
                 view?.onNotesLoadFailed(sortOrder)
+            } finally {
+                notesInteractor.notifyLoadingFinished()
             }
         }
     }

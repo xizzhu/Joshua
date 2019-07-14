@@ -54,13 +54,23 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadReadingProgress() {
         runBlocking {
+            val bookNames = List(Bible.BOOK_COUNT) { i -> i.toString() }
+            val readingProgress = ReadingProgress(1, 4321L, emptyList())
             `when`(readingProgressInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-            `when`(readingProgressInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(List(Bible.BOOK_COUNT) { i -> i.toString() })
-            `when`(readingProgressInteractor.readReadingProgress()).thenReturn(ReadingProgress(1, 4321L, emptyList()))
+            `when`(readingProgressInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(bookNames)
+            `when`(readingProgressInteractor.readReadingProgress()).thenReturn(readingProgress)
             presenter.attachView(view)
 
-            verify(readingProgressInteractor, times(1)).notifyLoadingFinished()
-            verify(view, times(1)).onReadingProgressLoaded(any())
+            with(inOrder(readingProgressInteractor)) {
+                verify(readingProgressInteractor, times(1)).notifyLoadingStarted()
+                verify(readingProgressInteractor, times(1)).notifyLoadingFinished()
+            }
+
+            with(inOrder(view)) {
+                verify(view, times(1)).onReadingProgressLoadingStarted()
+                verify(view, times(1)).onReadingProgressLoaded(any())
+                verify(view, times(1)).onReadingProgressLoadingCompleted()
+            }
             verify(view, never()).onReadingProgressLoadFailed()
 
             presenter.detachView()
@@ -73,9 +83,17 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
             `when`(readingProgressInteractor.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
             presenter.attachView(view)
 
-            verify(readingProgressInteractor, never()).notifyLoadingFinished()
+            with(inOrder(readingProgressInteractor)) {
+                verify(readingProgressInteractor, times(1)).notifyLoadingStarted()
+                verify(readingProgressInteractor, times(1)).notifyLoadingFinished()
+            }
+
+            with(inOrder(view)) {
+                verify(view, times(1)).onReadingProgressLoadingStarted()
+                verify(view, times(1)).onReadingProgressLoadFailed()
+            }
             verify(view, never()).onReadingProgressLoaded(any())
-            verify(view, times(1)).onReadingProgressLoadFailed()
+            verify(view, never()).onReadingProgressLoadingCompleted()
 
             presenter.detachView()
         }

@@ -67,11 +67,12 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                     view?.onBookmarksLoaded(items)
                 }
 
-                bookmarksInteractor.notifyLoadingFinished()
                 view?.onBookmarksLoadingCompleted()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load bookmarks", e)
                 view?.onBookmarksLoadFailed(sortOrder)
+            } finally {
+                bookmarksInteractor.notifyLoadingFinished()
             }
         }
     }
