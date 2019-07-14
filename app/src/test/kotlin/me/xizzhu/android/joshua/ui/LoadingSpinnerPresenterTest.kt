@@ -55,11 +55,11 @@ class LoadingSpinnerPresenterTest : BaseUnitTest() {
             verify(loadingSpinnerView, never()).show()
             verify(loadingSpinnerView, never()).hide()
 
-            loadingSpinnerState.send(LoadingSpinnerPresenter.IS_LOADING)
+            loadingSpinnerState.send(BaseLoadingAwareInteractor.IS_LOADING)
             verify(loadingSpinnerView, times(1)).show()
             verify(loadingSpinnerView, never()).hide()
 
-            loadingSpinnerState.send(LoadingSpinnerPresenter.NOT_LOADING)
+            loadingSpinnerState.send(BaseLoadingAwareInteractor.NOT_LOADING)
             verify(loadingSpinnerView, times(1)).show()
             verify(loadingSpinnerView, times(1)).hide()
         }

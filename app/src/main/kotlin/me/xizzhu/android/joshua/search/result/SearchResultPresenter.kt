@@ -40,7 +40,7 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
     fun search(query: String) {
         coroutineScope.launch(Dispatchers.Main) {
             try {
-                searchInteractor.notifySearchStarted()
+                searchInteractor.notifyLoadingStarted()
                 view?.onSearchStarted()
 
                 view?.onSearchResultUpdated(searchInteractor.search(query).toSearchResult(
@@ -51,7 +51,7 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
                 Log.e(tag, "Failed to search Bible verses", e)
                 view?.onSearchFailed(query)
             } finally {
-                searchInteractor.notifySearchFinished()
+                searchInteractor.notifyLoadingFinished()
             }
         }
     }

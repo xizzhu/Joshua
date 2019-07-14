@@ -22,30 +22,18 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 
 class SearchInteractor(private val searchActivity: SearchActivity,
                        private val navigator: Navigator,
                        private val bibleReadingManager: BibleReadingManager,
-                       settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val searchState: BroadcastChannel<Int> = ConflatedBroadcastChannel(LoadingSpinnerPresenter.NOT_LOADING)
+                       settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, NOT_LOADING) {
     private val searchQuery: BroadcastChannel<String> = ConflatedBroadcastChannel("")
-
-    fun observeSearchState(): ReceiveChannel<Int> = searchState.openSubscription()
 
     fun observeSearchQuery(): ReceiveChannel<String> = searchQuery.openSubscription()
 
     suspend fun updateSearchQuery(query: String) {
         searchQuery.send(query)
-    }
-
-    suspend fun notifySearchStarted() {
-        searchState.send(LoadingSpinnerPresenter.IS_LOADING)
-    }
-
-    suspend fun notifySearchFinished() {
-        searchState.send(LoadingSpinnerPresenter.NOT_LOADING)
     }
 
     suspend fun search(query: String): List<Verse> = bibleReadingManager.search(readCurrentTranslation(), query)

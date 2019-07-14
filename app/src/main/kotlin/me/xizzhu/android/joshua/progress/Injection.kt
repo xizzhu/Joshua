@@ -38,7 +38,7 @@ class ReadingProgressModule {
 
     @Provides
     fun provideLoadingSpinnerPresenter(readingProgressInteractor: ReadingProgressInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(readingProgressInteractor.observeReadingProgressLoadingState())
+            LoadingSpinnerPresenter(readingProgressInteractor.observeLoadingState())
 
     @Provides
     fun provideReadingProgressPresenter(readingProgressInteractor: ReadingProgressInteractor): ReadingProgressPresenter =

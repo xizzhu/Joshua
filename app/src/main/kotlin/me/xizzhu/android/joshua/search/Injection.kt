@@ -42,7 +42,7 @@ class SearchModule {
 
     @Provides
     fun provideLoadingSpinnerPresenter(searchInteractor: SearchInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(searchInteractor.observeSearchState())
+            LoadingSpinnerPresenter(searchInteractor.observeLoadingState())
 
     @Provides
     fun provideSearchResultPresenter(searchInteractor: SearchInteractor): SearchResultPresenter =

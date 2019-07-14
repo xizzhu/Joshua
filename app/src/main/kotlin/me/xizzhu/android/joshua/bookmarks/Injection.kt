@@ -40,7 +40,7 @@ class BookmarksModule {
 
     @Provides
     fun provideLoadingSpinnerPresenter(bookmarksInteractor: BookmarksInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(bookmarksInteractor.observeBookmarksLoadingState())
+            LoadingSpinnerPresenter(bookmarksInteractor.observeLoadingState())
 
     @Provides
     fun provideToolbarPresenter(bookmarksInteractor: BookmarksInteractor): ToolbarPresenter =

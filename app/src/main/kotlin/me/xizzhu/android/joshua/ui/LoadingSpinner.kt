@@ -22,13 +22,19 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.IntDef
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
-class LoadingSpinnerPresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<LoadingSpinnerView>() {
+abstract class BaseLoadingAwareInteractor(settingsManager: SettingsManager,
+                                          @LoadingState initialLoadingState: Int)
+    : BaseSettingsInteractor(settingsManager) {
     companion object {
         const val IS_LOADING = 0
         const val NOT_LOADING = 1
@@ -38,12 +44,26 @@ class LoadingSpinnerPresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<
         annotation class LoadingState
     }
 
+    private val loadingState: BroadcastChannel<Int> = ConflatedBroadcastChannel(initialLoadingState)
+
+    fun observeLoadingState(): ReceiveChannel<Int> = loadingState.openSubscription()
+
+    suspend fun notifyLoadingStarted() {
+        loadingState.send(IS_LOADING)
+    }
+
+    suspend fun notifyLoadingFinished() {
+        loadingState.send(NOT_LOADING)
+    }
+}
+
+class LoadingSpinnerPresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<LoadingSpinnerView>() {
     init {
         coroutineScope.launch(Dispatchers.Main) {
             loadingState.consumeEach { state ->
                 when (state) {
-                    IS_LOADING -> view?.show()
-                    NOT_LOADING -> view?.hide()
+                    BaseLoadingAwareInteractor.IS_LOADING -> view?.show()
+                    BaseLoadingAwareInteractor.NOT_LOADING -> view?.hide()
                     else -> throw IllegalArgumentException("Unsupported loading state - $state")
                 }
             }

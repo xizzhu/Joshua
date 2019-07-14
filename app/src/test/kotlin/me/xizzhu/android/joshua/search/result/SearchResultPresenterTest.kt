@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import org.junit.After
 import org.junit.Before
@@ -39,7 +40,6 @@ class SearchResultPresenterTest : BaseUnitTest() {
     private lateinit var searchResultView: SearchResultView
     private lateinit var searchResultPresenter: SearchResultPresenter
     private lateinit var settingsChannel: BroadcastChannel<Settings>
-    private lateinit var searchStateChannel: BroadcastChannel<Int>
     private lateinit var searchQueryChannel: BroadcastChannel<String>
 
     @Before
@@ -49,9 +49,6 @@ class SearchResultPresenterTest : BaseUnitTest() {
         runBlocking {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
             `when`(searchInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-
-            searchStateChannel = ConflatedBroadcastChannel(LoadingSpinnerPresenter.NOT_LOADING)
-            `when`(searchInteractor.observeSearchState()).thenReturn(searchStateChannel.openSubscription())
 
             searchQueryChannel = ConflatedBroadcastChannel("")
             `when`(searchInteractor.observeSearchQuery()).thenReturn(searchQueryChannel.openSubscription())
@@ -100,8 +97,8 @@ class SearchResultPresenterTest : BaseUnitTest() {
             searchResultPresenter.search(query)
 
             with(inOrder(searchInteractor)) {
-                verify(searchInteractor, times(1)).notifySearchStarted()
-                verify(searchInteractor, times(1)).notifySearchFinished()
+                verify(searchInteractor, times(1)).notifyLoadingStarted()
+                verify(searchInteractor, times(1)).notifyLoadingFinished()
             }
 
             with(inOrder(searchResultView)) {
@@ -124,8 +121,8 @@ class SearchResultPresenterTest : BaseUnitTest() {
             searchResultPresenter.search(query)
 
             with(inOrder(searchInteractor)) {
-                verify(searchInteractor, times(1)).notifySearchStarted()
-                verify(searchInteractor, times(1)).notifySearchFinished()
+                verify(searchInteractor, times(1)).notifyLoadingStarted()
+                verify(searchInteractor, times(1)).notifyLoadingFinished()
             }
 
             with(inOrder(searchResultView)) {

@@ -40,7 +40,7 @@ class NotesModule {
 
     @Provides
     fun provideLoadingSpinnerPresenter(notesInteractor: NotesInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(notesInteractor.observeNotesLoadingState())
+            LoadingSpinnerPresenter(notesInteractor.observeLoadingState())
 
     @Provides
     fun provideToolbarPresenter(notesInteractor: NotesInteractor): ToolbarPresenter =

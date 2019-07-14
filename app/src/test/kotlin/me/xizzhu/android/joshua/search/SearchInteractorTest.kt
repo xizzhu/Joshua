@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -53,7 +53,7 @@ class SearchInteractorTest : BaseUnitTest() {
     @Test
     fun testDefaultSearchState() {
         runBlocking {
-            assertEquals(LoadingSpinnerPresenter.NOT_LOADING, searchInteractor.observeSearchState().first())
+            assertEquals(BaseLoadingAwareInteractor.NOT_LOADING, searchInteractor.observeLoadingState().first())
         }
     }
 
