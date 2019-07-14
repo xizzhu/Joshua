@@ -131,9 +131,9 @@ class SearchResultPresenterTest : BaseUnitTest() {
             with(inOrder(searchResultView)) {
                 verify(searchResultView, times(1)).onSearchStarted()
                 verify(searchResultView, times(1)).onSearchFailed(query)
-                verify(searchResultView, times(1)).onSearchCompleted()
             }
             verify(searchResultView, never()).onSearchResultUpdated(any())
+            verify(searchResultView, never()).onSearchCompleted()
         }
     }
 }

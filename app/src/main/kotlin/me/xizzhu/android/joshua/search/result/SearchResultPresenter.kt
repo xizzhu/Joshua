@@ -46,12 +46,12 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
                 view?.onSearchResultUpdated(searchInteractor.search(query).toSearchResult(
                         query, searchInteractor.readBookNames(searchInteractor.readCurrentTranslation()),
                         this@SearchResultPresenter::selectVerse))
+                view?.onSearchCompleted()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to search Bible verses", e)
                 view?.onSearchFailed(query)
             } finally {
                 searchInteractor.notifySearchFinished()
-                view?.onSearchCompleted()
             }
         }
     }
