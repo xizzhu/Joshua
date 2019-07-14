@@ -22,39 +22,17 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.utils.MVPPresenter
-import me.xizzhu.android.joshua.utils.MVPView
 
-enum class SwipeRefresherState { IS_REFRESHING, NOT_REFRESHING }
-
-class SwipeRefresherPresenter(refresherState: ReceiveChannel<SwipeRefresherState>,
-                              private val refreshRequest: SendChannel<Unit>) : MVPPresenter<SwipeRefresherView>() {
-    init {
-        coroutineScope.launch(Dispatchers.Main) {
-            refresherState.consumeEach { state ->
-                when (state) {
-                    SwipeRefresherState.IS_REFRESHING -> view?.show()
-                    SwipeRefresherState.NOT_REFRESHING -> view?.hide()
-                }
-            }
-        }
-    }
-
+class SwipeRefresherPresenter(loadingState: ReceiveChannel<Int>,
+                              private val refreshRequest: SendChannel<Unit>) : LoadingAwarePresenter(loadingState) {
     fun refresh() {
         coroutineScope.launch(Dispatchers.Main) { refreshRequest.send(Unit) }
     }
 }
 
-interface SwipeRefresherView : MVPView {
-    fun show()
-
-    fun hide()
-}
-
-class SwipeRefresher : SwipeRefreshLayout, SwipeRefresherView {
+class SwipeRefresher : SwipeRefreshLayout, LoadingAwareView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)

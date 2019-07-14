@@ -26,8 +26,8 @@ import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.SwipeRefresherState
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -67,8 +67,8 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeTranslationsLoadingState().consumeEach { loadingState ->
                 when (loadingState) {
-                    SwipeRefresherState.IS_REFRESHING -> view?.onTranslationsLoadingStarted()
-                    SwipeRefresherState.NOT_REFRESHING -> view?.onTranslationsLoadingCompleted()
+                    BaseLoadingAwareInteractor.IS_LOADING -> view?.onTranslationsLoadingStarted()
+                    BaseLoadingAwareInteractor.NOT_LOADING -> view?.onTranslationsLoadingCompleted()
                 }
             }
         }

@@ -22,10 +22,7 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.IntDef
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
@@ -57,7 +54,7 @@ abstract class BaseLoadingAwareInteractor(settingsManager: SettingsManager,
     }
 }
 
-class LoadingAwarePresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<LoadingAwareView>() {
+open class LoadingAwarePresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<LoadingAwareView>() {
     init {
         coroutineScope.launch(Dispatchers.Main) {
             loadingState.consumeEach { state ->
