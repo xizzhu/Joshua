@@ -57,7 +57,7 @@ class TranslationPresenterTest : BaseUnitTest() {
             `when`(translationInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
             translationLoadingStateChannel = ConflatedBroadcastChannel(BaseLoadingAwareInteractor.IS_LOADING)
-            `when`(translationInteractor.observeTranslationsLoadingState()).then { translationLoadingStateChannel.openSubscription() }
+            `when`(translationInteractor.observeLoadingState()).then { translationLoadingStateChannel.openSubscription() }
 
             translationsLoadingRequest = ConflatedBroadcastChannel()
             `when`(translationInteractor.observeTranslationsLoadingRequest()).then { translationsLoadingRequest.openSubscription() }
@@ -133,8 +133,17 @@ class TranslationPresenterTest : BaseUnitTest() {
         runBlocking {
             translationPresenter.attachView(translationView)
 
+            with(inOrder(translationInteractor)) {
+                verify(translationInteractor, times(1)).notifyLoadingStarted()
+                verify(translationInteractor, times(1)).reload(false)
+                verify(translationInteractor, times(1)).notifyLoadingFinished()
+            }
             verify(translationInteractor, never()).reload(true)
-            verify(translationInteractor, times(1)).reload(false)
+
+            with(inOrder(translationView)) {
+                verify(translationView, times(1)).onTranslationsLoadingStarted()
+                verify(translationView, times(1)).onTranslationsLoadingCompleted()
+            }
             verify(translationView, never()).onTranslationsLoadingFailed(anyBoolean())
 
             translationPresenter.detachView()
@@ -148,10 +157,17 @@ class TranslationPresenterTest : BaseUnitTest() {
 
             translationPresenter.attachView(translationView)
 
+            with(inOrder(translationInteractor)) {
+                verify(translationInteractor, times(1)).notifyLoadingStarted()
+                verify(translationInteractor, times(1)).notifyLoadingFinished()
+            }
             verify(translationInteractor, never()).reload(true)
-            verify(translationInteractor, times(1)).reload(false)
-            verify(translationView, times(1)).onTranslationsLoadingFailed(false)
-            verify(translationView, never()).onTranslationsLoadingFailed(true)
+
+            with(inOrder(translationView)) {
+                verify(translationView, times(1)).onTranslationsLoadingStarted()
+                verify(translationView, times(1)).onTranslationsLoadingFailed(false)
+            }
+            verify(translationView, never()).onTranslationsLoadingCompleted()
 
             translationPresenter.detachView()
         }

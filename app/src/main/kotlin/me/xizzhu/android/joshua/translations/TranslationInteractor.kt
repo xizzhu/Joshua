@@ -27,12 +27,8 @@ import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 class TranslationInteractor(private val translationManagementActivity: TranslationManagementActivity,
                             private val bibleReadingManager: BibleReadingManager,
                             private val translationManager: TranslationManager,
-                            settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val translationsLoadingState: BroadcastChannel<Int> = ConflatedBroadcastChannel(BaseLoadingAwareInteractor.IS_LOADING)
+                            settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, IS_LOADING) {
     val translationsLoadingRequest: BroadcastChannel<Unit> = ConflatedBroadcastChannel()
-
-    fun observeTranslationsLoadingState(): ReceiveChannel<Int> =
-            translationsLoadingState.openSubscription()
 
     fun observeTranslationsLoadingRequest(): ReceiveChannel<Unit> =
             translationsLoadingRequest.openSubscription()
@@ -50,12 +46,7 @@ class TranslationInteractor(private val translationManagementActivity: Translati
     }
 
     suspend fun reload(forceRefresh: Boolean) {
-        translationsLoadingState.send(BaseLoadingAwareInteractor.IS_LOADING)
-        try {
-            translationManager.reload(forceRefresh)
-        } finally {
-            translationsLoadingState.send(BaseLoadingAwareInteractor.NOT_LOADING)
-        }
+        translationManager.reload(forceRefresh)
     }
 
     suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {

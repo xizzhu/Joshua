@@ -27,8 +27,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 
 class TranslationInteractorTest : BaseUnitTest() {
     @Mock
@@ -51,18 +49,7 @@ class TranslationInteractorTest : BaseUnitTest() {
     @Test
     fun testInitialTranslationsLoadingState() {
         runBlocking {
-            assertEquals(BaseLoadingAwareInteractor.IS_LOADING, translationInteractor.observeTranslationsLoadingState().first())
-        }
-    }
-
-    @Test
-    fun testTranslationsReload() {
-        runBlocking {
-            val forceRefresh = true
-            translationInteractor.reload(forceRefresh)
-
-            verify(translationManager, times(1)).reload(forceRefresh)
-            assertEquals(BaseLoadingAwareInteractor.NOT_LOADING, translationInteractor.observeTranslationsLoadingState().first())
+            assertEquals(BaseLoadingAwareInteractor.IS_LOADING, translationInteractor.observeLoadingState().first())
         }
     }
 }
