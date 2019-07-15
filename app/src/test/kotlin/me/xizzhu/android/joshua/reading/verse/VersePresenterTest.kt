@@ -93,10 +93,14 @@ class VersePresenterTest : BaseUnitTest() {
         runBlocking {
             `when`(item.itemId).thenReturn(R.id.action_copy)
             `when`(readingInteractor.copyToClipBoard(any())).thenReturn(true)
+
             assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
-            verify(verseView, times(1)).onVersesCopied()
+
+            with(inOrder(verseView, actionMode)) {
+                verify(verseView, times(1)).onVersesCopied()
+                verify(actionMode, times(1)).finish()
+            }
             verify(verseView, never()).onVersesCopyShareFailed()
-            verify(actionMode, times(1)).finish()
         }
     }
 
@@ -105,10 +109,14 @@ class VersePresenterTest : BaseUnitTest() {
         runBlocking {
             `when`(item.itemId).thenReturn(R.id.action_copy)
             `when`(readingInteractor.copyToClipBoard(any())).thenReturn(false)
+
             assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+
+            with(inOrder(verseView, actionMode)) {
+                verify(verseView, times(1)).onVersesCopyShareFailed()
+                verify(actionMode, times(1)).finish()
+            }
             verify(verseView, never()).onVersesCopied()
-            verify(verseView, times(1)).onVersesCopyShareFailed()
-            verify(actionMode, times(1)).finish()
         }
     }
 
@@ -128,9 +136,13 @@ class VersePresenterTest : BaseUnitTest() {
         runBlocking {
             `when`(item.itemId).thenReturn(R.id.action_share)
             `when`(readingInteractor.share(any())).thenReturn(false)
+
             assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
-            verify(verseView, times(1)).onVersesCopyShareFailed()
-            verify(actionMode, times(1)).finish()
+
+            with(inOrder(verseView, actionMode)) {
+                verify(verseView, times(1)).onVersesCopyShareFailed()
+                verify(actionMode, times(1)).finish()
+            }
         }
     }
 

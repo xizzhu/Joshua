@@ -58,8 +58,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                         } else {
                             view?.onVersesCopyShareFailed()
                         }
+                        mode.finish()
                     }
-                    mode.finish()
                     true
                 }
                 R.id.action_share -> {
@@ -67,8 +67,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                         if (!readingInteractor.share(selectedVerses)) {
                             view?.onVersesCopyShareFailed()
                         }
+                        mode.finish()
                     }
-                    mode.finish()
                     true
                 }
                 else -> false
