@@ -102,12 +102,8 @@ class NotesPresenterTest : BaseUnitTest() {
             // loadBookmarks() is called by onViewAttached(), so no need to call again
             notesPresenter.attachView(notesView)
 
-            with(inOrder(notesInteractor)) {
+            with(inOrder(notesInteractor, notesView)) {
                 verify(notesInteractor, times(1)).notifyLoadingStarted()
-                verify(notesInteractor, times(1)).notifyLoadingFinished()
-            }
-
-            with(inOrder(notesView)) {
                 verify(notesView, times(1)).onNotesLoadingStarted()
                 verify(notesView, times(1)).onNotesLoaded(listOf(
                         TitleItem("", false),
@@ -119,6 +115,7 @@ class NotesPresenterTest : BaseUnitTest() {
                         NoteItem(VerseIndex(0, 0, 2), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[2].text.text, "Note4", notesPresenter::selectVerse)
                 ))
                 verify(notesView, times(1)).onNotesLoadingCompleted()
+                verify(notesInteractor, times(1)).notifyLoadingFinished()
             }
             verify(notesView, never()).onNotesLoadFailed(anyInt())
 
@@ -142,18 +139,15 @@ class NotesPresenterTest : BaseUnitTest() {
             // loadBookmarks() is called by onViewAttached(), so no need to call again
             notesPresenter.attachView(notesView)
 
-            with(inOrder(notesInteractor)) {
+            with(inOrder(notesInteractor, notesView)) {
                 verify(notesInteractor, times(1)).notifyLoadingStarted()
-                verify(notesInteractor, times(1)).notifyLoadingFinished()
-            }
-
-            with(inOrder(notesView)) {
                 verify(notesView, times(1)).onNotesLoadingStarted()
                 verify(notesView, times(1)).onNotesLoaded(listOf(
                         TitleItem(MockContents.kjvBookNames[0], false),
                         NoteItem(VerseIndex(0, 0, 3), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, "Note", notesPresenter::selectVerse)
                 ))
                 verify(notesView, times(1)).onNotesLoadingCompleted()
+                verify(notesInteractor, times(1)).notifyLoadingFinished()
             }
             verify(notesView, never()).onNotesLoadFailed(anyInt())
 
@@ -169,14 +163,11 @@ class NotesPresenterTest : BaseUnitTest() {
             // loadNotes() is called by onViewAttached()
             notesPresenter.attachView(notesView)
 
-            with(inOrder(notesInteractor)) {
+            with(inOrder(notesInteractor, notesView)) {
                 verify(notesInteractor, times(1)).notifyLoadingStarted()
-                verify(notesInteractor, times(1)).notifyLoadingFinished()
-            }
-
-            with(inOrder(notesView)) {
                 verify(notesView, times(1)).onNotesLoadingStarted()
                 verify(notesView, times(1)).onNotesLoadFailed(Constants.SORT_BY_DATE)
+                verify(notesInteractor, times(1)).notifyLoadingFinished()
             }
             verify(notesView, never()).onNotesLoaded(any())
             verify(notesView, never()).onNotesLoadingCompleted()

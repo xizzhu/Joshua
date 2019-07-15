@@ -61,15 +61,12 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
             `when`(readingProgressInteractor.readReadingProgress()).thenReturn(readingProgress)
             presenter.attachView(view)
 
-            with(inOrder(readingProgressInteractor)) {
+            with(inOrder(readingProgressInteractor, view)) {
                 verify(readingProgressInteractor, times(1)).notifyLoadingStarted()
-                verify(readingProgressInteractor, times(1)).notifyLoadingFinished()
-            }
-
-            with(inOrder(view)) {
                 verify(view, times(1)).onReadingProgressLoadingStarted()
                 verify(view, times(1)).onReadingProgressLoaded(any())
                 verify(view, times(1)).onReadingProgressLoadingCompleted()
+                verify(readingProgressInteractor, times(1)).notifyLoadingFinished()
             }
             verify(view, never()).onReadingProgressLoadFailed()
 
@@ -83,14 +80,11 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
             `when`(readingProgressInteractor.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
             presenter.attachView(view)
 
-            with(inOrder(readingProgressInteractor)) {
+            with(inOrder(readingProgressInteractor, view)) {
                 verify(readingProgressInteractor, times(1)).notifyLoadingStarted()
-                verify(readingProgressInteractor, times(1)).notifyLoadingFinished()
-            }
-
-            with(inOrder(view)) {
                 verify(view, times(1)).onReadingProgressLoadingStarted()
                 verify(view, times(1)).onReadingProgressLoadFailed()
+                verify(readingProgressInteractor, times(1)).notifyLoadingFinished()
             }
             verify(view, never()).onReadingProgressLoaded(any())
             verify(view, never()).onReadingProgressLoadingCompleted()

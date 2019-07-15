@@ -94,17 +94,14 @@ class SearchResultPresenterTest : BaseUnitTest() {
 
             searchResultPresenter.search(query)
 
-            with(inOrder(searchInteractor)) {
+            with(inOrder(searchInteractor, searchResultView)) {
                 verify(searchInteractor, times(1)).notifyLoadingStarted()
-                verify(searchInteractor, times(1)).notifyLoadingFinished()
-            }
-
-            with(inOrder(searchResultView)) {
                 verify(searchResultView, times(1)).onSearchStarted()
                 verify(searchResultView, times(1)).onSearchResultUpdated(
                         verses.toSearchResult(query, MockContents.kjvBookNames, searchResultPresenter::selectVerse)
                 )
                 verify(searchResultView, times(1)).onSearchCompleted()
+                verify(searchInteractor, times(1)).notifyLoadingFinished()
             }
             verify(searchResultView, never()).onSearchFailed(anyString())
         }
@@ -118,14 +115,11 @@ class SearchResultPresenterTest : BaseUnitTest() {
 
             searchResultPresenter.search(query)
 
-            with(inOrder(searchInteractor)) {
+            with(inOrder(searchInteractor, searchResultView)) {
                 verify(searchInteractor, times(1)).notifyLoadingStarted()
-                verify(searchInteractor, times(1)).notifyLoadingFinished()
-            }
-
-            with(inOrder(searchResultView)) {
                 verify(searchResultView, times(1)).onSearchStarted()
                 verify(searchResultView, times(1)).onSearchFailed(query)
+                verify(searchInteractor, times(1)).notifyLoadingFinished()
             }
             verify(searchResultView, never()).onSearchResultUpdated(any())
             verify(searchResultView, never()).onSearchCompleted()

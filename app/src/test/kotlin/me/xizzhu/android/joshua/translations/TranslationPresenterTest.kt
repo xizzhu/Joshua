@@ -133,17 +133,14 @@ class TranslationPresenterTest : BaseUnitTest() {
         runBlocking {
             translationPresenter.attachView(translationView)
 
-            with(inOrder(translationInteractor)) {
+            with(inOrder(translationInteractor, translationView)) {
                 verify(translationInteractor, times(1)).notifyLoadingStarted()
+                verify(translationView, times(1)).onTranslationsLoadingStarted()
                 verify(translationInteractor, times(1)).reload(false)
+                verify(translationView, times(1)).onTranslationsLoadingCompleted()
                 verify(translationInteractor, times(1)).notifyLoadingFinished()
             }
             verify(translationInteractor, never()).reload(true)
-
-            with(inOrder(translationView)) {
-                verify(translationView, times(1)).onTranslationsLoadingStarted()
-                verify(translationView, times(1)).onTranslationsLoadingCompleted()
-            }
             verify(translationView, never()).onTranslationsLoadingFailed(anyBoolean())
 
             translationPresenter.detachView()
@@ -157,16 +154,13 @@ class TranslationPresenterTest : BaseUnitTest() {
 
             translationPresenter.attachView(translationView)
 
-            with(inOrder(translationInteractor)) {
+            with(inOrder(translationInteractor, translationView)) {
                 verify(translationInteractor, times(1)).notifyLoadingStarted()
+                verify(translationView, times(1)).onTranslationsLoadingStarted()
+                verify(translationView, times(1)).onTranslationsLoadingFailed(false)
                 verify(translationInteractor, times(1)).notifyLoadingFinished()
             }
             verify(translationInteractor, never()).reload(true)
-
-            with(inOrder(translationView)) {
-                verify(translationView, times(1)).onTranslationsLoadingStarted()
-                verify(translationView, times(1)).onTranslationsLoadingFailed(false)
-            }
             verify(translationView, never()).onTranslationsLoadingCompleted()
 
             translationPresenter.detachView()
