@@ -29,8 +29,6 @@ import kotlin.test.assertTrue
 class ToolbarPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var searchInteractor: SearchInteractor
-    @Mock
-    private lateinit var toolbarView: ToolbarView
     private lateinit var toolbarPresenter: ToolbarPresenter
 
     @Before
@@ -41,29 +39,15 @@ class ToolbarPresenterTest : BaseUnitTest() {
 
     @Test
     fun testQueryEmpty() {
-        assertFalse(toolbarPresenter.search(""))
+        assertFalse(toolbarPresenter.updateSearchQuery(""))
     }
 
     @Test
     fun testQuery() {
         runBlocking {
             val query = "query"
-            assertTrue(toolbarPresenter.search(query))
-            verify(searchInteractor, times(1)).search(query)
-        }
-    }
-
-    @Test
-    fun testQueryException() {
-        runBlocking {
-            val query = "query"
-            val exception = RuntimeException("Random exception")
-            `when`(searchInteractor.search(query)).thenThrow(exception)
-
-            toolbarPresenter.attachView(toolbarView)
-            assertTrue(toolbarPresenter.search(query))
-            verify(searchInteractor, times(1)).search(query)
-            verify(toolbarView, times(1)).onError(query)
+            assertTrue(toolbarPresenter.updateSearchQuery(query))
+            verify(searchInteractor, times(1)).updateSearchQuery(query)
         }
     }
 }

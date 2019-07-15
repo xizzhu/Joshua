@@ -22,13 +22,11 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import me.xizzhu.android.joshua.ui.SwipeRefresherState
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 
 class TranslationInteractorTest : BaseUnitTest() {
     @Mock
@@ -51,18 +49,7 @@ class TranslationInteractorTest : BaseUnitTest() {
     @Test
     fun testInitialTranslationsLoadingState() {
         runBlocking {
-            assertEquals(SwipeRefresherState.IS_REFRESHING, translationInteractor.observeTranslationsLoadingState().first())
-        }
-    }
-
-    @Test
-    fun testTranslationsReload() {
-        runBlocking {
-            val forceRefresh = true
-            translationInteractor.reload(forceRefresh)
-
-            verify(translationManager, times(1)).reload(forceRefresh)
-            assertEquals(SwipeRefresherState.NOT_REFRESHING, translationInteractor.observeTranslationsLoadingState().first())
+            assertEquals(BaseLoadingAwareInteractor.IS_LOADING, translationInteractor.observeLoadingState().first())
         }
     }
 }

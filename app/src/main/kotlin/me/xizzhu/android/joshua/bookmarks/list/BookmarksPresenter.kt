@@ -29,7 +29,7 @@ import me.xizzhu.android.joshua.ui.formatDate
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import java.util.*
@@ -67,11 +67,12 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                     view?.onBookmarksLoaded(items)
                 }
 
-                bookmarksInteractor.notifyLoadingFinished()
                 view?.onBookmarksLoadingCompleted()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load bookmarks", e)
                 view?.onBookmarksLoadFailed(sortOrder)
+            } finally {
+                bookmarksInteractor.notifyLoadingFinished()
             }
         }
     }

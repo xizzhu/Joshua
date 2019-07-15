@@ -29,7 +29,7 @@ import me.xizzhu.android.joshua.ui.formatDate
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
 import java.util.*
 import kotlin.collections.ArrayList
@@ -64,11 +64,12 @@ class NotesPresenter(private val notesInteractor: NotesInteractor, private val r
                     view?.onNotesLoaded(items)
                 }
 
-                notesInteractor.notifyLoadingFinished()
                 view?.onNotesLoadingCompleted()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load notes", e)
                 view?.onNotesLoadFailed(sortOrder)
+            } finally {
+                notesInteractor.notifyLoadingFinished()
             }
         }
     }

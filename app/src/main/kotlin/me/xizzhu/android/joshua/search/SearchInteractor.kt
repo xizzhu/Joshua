@@ -22,32 +22,24 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
-import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 
 class SearchInteractor(private val searchActivity: SearchActivity,
                        private val navigator: Navigator,
                        private val bibleReadingManager: BibleReadingManager,
-                       settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val searchState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.NOT_LOADING)
-    private val searchResult: BroadcastChannel<Pair<String, List<Verse>>> = ConflatedBroadcastChannel(Pair("", emptyList()))
+                       settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, NOT_LOADING) {
+    private val searchQuery: BroadcastChannel<String> = ConflatedBroadcastChannel("")
 
-    fun observeSearchState(): ReceiveChannel<LoadingSpinnerState> = searchState.openSubscription()
+    fun observeSearchQuery(): ReceiveChannel<String> = searchQuery.openSubscription()
 
-    fun observeSearchResult(): ReceiveChannel<Pair<String, List<Verse>>> = searchResult.openSubscription()
+    suspend fun updateSearchQuery(query: String) {
+        searchQuery.send(query)
+    }
+
+    suspend fun search(query: String): List<Verse> = bibleReadingManager.search(readCurrentTranslation(), query)
 
     suspend fun selectVerse(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-    }
-
-    suspend fun search(query: String) {
-        searchState.send(LoadingSpinnerState.IS_LOADING)
-
-        try {
-            searchResult.send(Pair(query, bibleReadingManager.search(readCurrentTranslation(), query)))
-        } finally {
-            searchState.send(LoadingSpinnerState.NOT_LOADING)
-        }
     }
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()

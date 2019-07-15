@@ -27,11 +27,10 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.SwipeRefresherState
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.logger.Log
 import java.util.*
 
@@ -65,14 +64,6 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
             }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            translationInteractor.observeTranslationsLoadingState().consumeEach { loadingState ->
-                when (loadingState) {
-                    SwipeRefresherState.IS_REFRESHING -> view?.onTranslationsLoadingStarted()
-                    SwipeRefresherState.NOT_REFRESHING -> view?.onTranslationsLoadingCompleted()
-                }
-            }
-        }
-        coroutineScope.launch(Dispatchers.Main) {
             translationInteractor.observeTranslationsLoadingRequest().consumeEach { loadTranslationList(true) }
         }
 
@@ -99,10 +90,17 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     fun loadTranslationList(forceRefresh: Boolean) {
         coroutineScope.launch(Dispatchers.Main) {
             try {
+                translationInteractor.notifyLoadingStarted()
+                view?.onTranslationsLoadingStarted()
+
                 translationInteractor.reload(forceRefresh)
+
+                view?.onTranslationsLoadingCompleted()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load translation list", e)
                 view?.onTranslationsLoadingFailed(forceRefresh)
+            } finally {
+                translationInteractor.notifyLoadingFinished()
             }
         }
     }

@@ -29,7 +29,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.utils.BaseSettingsView
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 import kotlin.math.max
 
 interface VerseView : BaseSettingsView {

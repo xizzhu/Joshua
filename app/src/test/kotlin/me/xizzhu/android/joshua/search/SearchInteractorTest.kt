@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -53,16 +53,14 @@ class SearchInteractorTest : BaseUnitTest() {
     @Test
     fun testDefaultSearchState() {
         runBlocking {
-            assertEquals(LoadingSpinnerState.NOT_LOADING, searchInteractor.observeSearchState().first())
+            assertEquals(BaseLoadingAwareInteractor.NOT_LOADING, searchInteractor.observeLoadingState().first())
         }
     }
 
     @Test
     fun testDefaultSearchResult() {
         runBlocking {
-            val (query, verses) = searchInteractor.observeSearchResult().first()
-            assertTrue(query.isEmpty())
-            assertTrue(verses.isEmpty())
+            assertTrue(searchInteractor.observeSearchQuery().first().isEmpty())
         }
     }
 
@@ -93,15 +91,7 @@ class SearchInteractorTest : BaseUnitTest() {
             val query = "query"
             `when`(bibleReadingManager.search(MockContents.kjvShortName, query)).thenReturn(MockContents.kjvVerses)
 
-            searchInteractor.search(query)
-            assertEquals(LoadingSpinnerState.NOT_LOADING, searchInteractor.observeSearchState().first())
-
-            val (q, v) = searchInteractor.observeSearchResult().first()
-            assertEquals(query, q)
-            assertEquals(MockContents.kjvVerses.size, v.size)
-            for (i in 0 until MockContents.kjvVerses.size) {
-                assertEquals(MockContents.kjvVerses[i], v[i])
-            }
+            assertEquals(MockContents.kjvVerses, searchInteractor.search(query))
         }
     }
 }

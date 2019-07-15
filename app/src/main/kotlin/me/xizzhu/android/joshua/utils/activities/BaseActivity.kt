@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.utils
+package me.xizzhu.android.joshua.utils.activities
 
 import android.os.Bundle
 import androidx.annotation.CallSuper

@@ -20,35 +20,61 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ProgressBar
+import androidx.annotation.IntDef
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
-enum class LoadingSpinnerState { IS_LOADING, NOT_LOADING }
+abstract class BaseLoadingAwareInteractor(settingsManager: SettingsManager,
+                                          @LoadingState initialLoadingState: Int)
+    : BaseSettingsInteractor(settingsManager) {
+    companion object {
+        const val IS_LOADING = 0
+        const val NOT_LOADING = 1
 
-class LoadingSpinnerPresenter(loadingState: ReceiveChannel<LoadingSpinnerState>) : MVPPresenter<LoadingSpinnerView>() {
+        @IntDef(IS_LOADING, NOT_LOADING)
+        @Retention(AnnotationRetention.SOURCE)
+        annotation class LoadingState
+    }
+
+    private val loadingState: BroadcastChannel<Int> = ConflatedBroadcastChannel(initialLoadingState)
+
+    fun observeLoadingState(): ReceiveChannel<Int> = loadingState.openSubscription()
+
+    suspend fun notifyLoadingStarted() {
+        loadingState.send(IS_LOADING)
+    }
+
+    suspend fun notifyLoadingFinished() {
+        loadingState.send(NOT_LOADING)
+    }
+}
+
+open class LoadingAwarePresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<LoadingAwareView>() {
     init {
         coroutineScope.launch(Dispatchers.Main) {
             loadingState.consumeEach { state ->
                 when (state) {
-                    LoadingSpinnerState.IS_LOADING -> view?.show()
-                    LoadingSpinnerState.NOT_LOADING -> view?.hide()
+                    BaseLoadingAwareInteractor.IS_LOADING -> view?.show()
+                    BaseLoadingAwareInteractor.NOT_LOADING -> view?.hide()
+                    else -> throw IllegalArgumentException("Unsupported loading state - $state")
                 }
             }
         }
     }
 }
 
-interface LoadingSpinnerView : MVPView {
+interface LoadingAwareView : MVPView {
     fun show()
 
     fun hide()
 }
 
-class LoadingSpinner : ProgressBar, LoadingSpinnerView {
+class LoadingSpinner : ProgressBar, LoadingAwareView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)

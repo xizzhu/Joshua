@@ -21,7 +21,8 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.SwipeRefresher
 import me.xizzhu.android.joshua.ui.SwipeRefresherPresenter
 import me.xizzhu.android.joshua.ui.bindView
-import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
 class TranslationManagementActivity : BaseSettingsActivity() {
@@ -43,8 +44,6 @@ class TranslationManagementActivity : BaseSettingsActivity() {
         setContentView(R.layout.activity_translation_management)
         swipeRefresher.setPresenter(swipeRefresherPresenter)
         translationListView.setPresenter(translationPresenter)
-
-        observeSettings(translationInteractor)
     }
 
     override fun onStart() {
@@ -60,4 +59,6 @@ class TranslationManagementActivity : BaseSettingsActivity() {
 
         super.onStop()
     }
+
+    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = translationInteractor
 }

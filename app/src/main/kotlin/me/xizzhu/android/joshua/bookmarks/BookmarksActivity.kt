@@ -22,18 +22,14 @@ import me.xizzhu.android.joshua.bookmarks.list.BookmarksListView
 import me.xizzhu.android.joshua.bookmarks.list.BookmarksPresenter
 import me.xizzhu.android.joshua.bookmarks.toolbar.BookmarksToolbar
 import me.xizzhu.android.joshua.bookmarks.toolbar.ToolbarPresenter
-import me.xizzhu.android.joshua.ui.LoadingSpinner
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView
-import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class BookmarksActivity : BaseSettingsActivity() {
+class BookmarksActivity : BaseLoadingSpinnerActivity() {
     @Inject
     lateinit var bookmarksInteractor: BookmarksInteractor
-
-    @Inject
-    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
     @Inject
     lateinit var toolbarPresenter: ToolbarPresenter
@@ -41,7 +37,6 @@ class BookmarksActivity : BaseSettingsActivity() {
     @Inject
     lateinit var bookmarksPresenter: BookmarksPresenter
 
-    private val loadingSpinner: LoadingSpinner by bindView(R.id.loading_spinner)
     private val toolbar: BookmarksToolbar by bindView(R.id.toolbar)
     private val bookmarksListView: BookmarksListView by bindView(R.id.bookmarks)
 
@@ -51,23 +46,21 @@ class BookmarksActivity : BaseSettingsActivity() {
         setContentView(R.layout.activity_bookmarks)
         bookmarksListView.setPresenter(bookmarksPresenter)
         toolbar.setPresenter(toolbarPresenter)
-
-        observeSettings(bookmarksInteractor)
     }
 
     override fun onStart() {
         super.onStart()
 
-        loadingSpinnerPresenter.attachView(loadingSpinner)
         toolbarPresenter.attachView(toolbar)
         bookmarksPresenter.attachView(bookmarksListView)
     }
 
     override fun onStop() {
-        loadingSpinnerPresenter.detachView()
         toolbarPresenter.detachView()
         bookmarksPresenter.detachView()
 
         super.onStop()
     }
+
+    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = bookmarksInteractor
 }

@@ -22,13 +22,12 @@ import me.xizzhu.android.joshua.search.toolbar.SearchToolbar
 import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultListView
-import me.xizzhu.android.joshua.ui.LoadingSpinner
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView
-import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class SearchActivity : BaseSettingsActivity() {
+class SearchActivity : BaseLoadingSpinnerActivity() {
     @Inject
     lateinit var searchInteractor: SearchInteractor
 
@@ -36,14 +35,10 @@ class SearchActivity : BaseSettingsActivity() {
     lateinit var toolbarPresenter: ToolbarPresenter
 
     @Inject
-    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
-
-    @Inject
     lateinit var searchResultPresenter: SearchResultPresenter
 
     private val toolbar: SearchToolbar by bindView(R.id.toolbar)
     private val searchResultList: SearchResultListView by bindView(R.id.search_result)
-    private val loadingSpinner: LoadingSpinner by bindView(R.id.loading_spinner)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,23 +46,21 @@ class SearchActivity : BaseSettingsActivity() {
         setContentView(R.layout.activity_search)
         toolbar.setPresenter(toolbarPresenter)
         searchResultList.setPresenter(searchResultPresenter)
-
-        observeSettings(searchInteractor)
     }
 
     override fun onStart() {
         super.onStart()
 
         toolbarPresenter.attachView(toolbar)
-        loadingSpinnerPresenter.attachView(loadingSpinner)
         searchResultPresenter.attachView(searchResultList)
     }
 
     override fun onStop() {
         toolbarPresenter.detachView()
-        loadingSpinnerPresenter.detachView()
         searchResultPresenter.detachView()
 
         super.onStop()
     }
+
+    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = searchInteractor
 }

@@ -37,8 +37,7 @@ class TranslationManagementModule {
 
     @Provides
     fun provideSwipeRefresherPresenter(translationInteractor: TranslationInteractor): SwipeRefresherPresenter =
-            SwipeRefresherPresenter(translationInteractor.observeTranslationsLoadingState(),
-                    translationInteractor.translationsLoadingRequest)
+            SwipeRefresherPresenter(translationInteractor.observeLoadingState(), translationInteractor.translationsLoadingRequest)
 
     @Provides
     fun provideTranslationPresenter(translationManagementActivity: TranslationManagementActivity,

@@ -28,11 +28,11 @@ import org.mockito.Mockito.*
 
 class SwipeRefresherPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var swipeRefresherView: SwipeRefresherView
+    private lateinit var swipeRefresherView: LoadingAwareView
     @Mock
     private lateinit var refreshRequest: BroadcastChannel<Unit>
 
-    private lateinit var swipeRefresherState: BroadcastChannel<SwipeRefresherState>
+    private lateinit var swipeRefresherState: BroadcastChannel<Int>
     private lateinit var swipeRefresherPresenter: SwipeRefresherPresenter
 
     @Before
@@ -57,11 +57,11 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
             verify(swipeRefresherView, never()).show()
             verify(swipeRefresherView, never()).hide()
 
-            swipeRefresherState.send(SwipeRefresherState.IS_REFRESHING)
+            swipeRefresherState.send(BaseLoadingAwareInteractor.IS_LOADING)
             verify(swipeRefresherView, times(1)).show()
             verify(swipeRefresherView, never()).hide()
 
-            swipeRefresherState.send(SwipeRefresherState.NOT_REFRESHING)
+            swipeRefresherState.send(BaseLoadingAwareInteractor.NOT_LOADING)
             verify(swipeRefresherView, times(1)).show()
             verify(swipeRefresherView, times(1)).hide()
         }

@@ -23,7 +23,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
 
 @Module
 class ReadingProgressModule {
@@ -37,8 +37,8 @@ class ReadingProgressModule {
             ReadingProgressInteractor(readingProgressActivity, readingProgressManager, bibleReadingManager, navigator, settingsManager)
 
     @Provides
-    fun provideLoadingSpinnerPresenter(readingProgressInteractor: ReadingProgressInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(readingProgressInteractor.observeReadingProgressLoadingState())
+    fun provideLoadingAwarePresenter(readingProgressInteractor: ReadingProgressInteractor): LoadingAwarePresenter =
+            LoadingAwarePresenter(readingProgressInteractor.observeLoadingState())
 
     @Provides
     fun provideReadingProgressPresenter(readingProgressInteractor: ReadingProgressInteractor): ReadingProgressPresenter =

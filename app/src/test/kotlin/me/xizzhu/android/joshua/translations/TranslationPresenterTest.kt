@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.SwipeRefresherState
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.Before
 import org.junit.Test
@@ -42,7 +42,7 @@ class TranslationPresenterTest : BaseUnitTest() {
 
     private lateinit var translationPresenter: TranslationPresenter
     private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
-    private lateinit var translationLoadingStateChannel: ConflatedBroadcastChannel<SwipeRefresherState>
+    private lateinit var translationLoadingStateChannel: ConflatedBroadcastChannel<Int>
     private lateinit var translationsLoadingRequest: BroadcastChannel<Unit>
     private lateinit var availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
     private lateinit var downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
@@ -56,8 +56,8 @@ class TranslationPresenterTest : BaseUnitTest() {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
             `when`(translationInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-            translationLoadingStateChannel = ConflatedBroadcastChannel(SwipeRefresherState.IS_REFRESHING)
-            `when`(translationInteractor.observeTranslationsLoadingState()).then { translationLoadingStateChannel.openSubscription() }
+            translationLoadingStateChannel = ConflatedBroadcastChannel(BaseLoadingAwareInteractor.IS_LOADING)
+            `when`(translationInteractor.observeLoadingState()).then { translationLoadingStateChannel.openSubscription() }
 
             translationsLoadingRequest = ConflatedBroadcastChannel()
             `when`(translationInteractor.observeTranslationsLoadingRequest()).then { translationsLoadingRequest.openSubscription() }
@@ -105,7 +105,7 @@ class TranslationPresenterTest : BaseUnitTest() {
             translationPresenter.attachView(translationView)
             verify(translationView, times(1)).onTranslationsLoadingStarted()
 
-            translationLoadingStateChannel.send(SwipeRefresherState.NOT_REFRESHING)
+            translationLoadingStateChannel.send(BaseLoadingAwareInteractor.NOT_LOADING)
             verify(translationView, times(1)).onTranslationsLoadingCompleted()
 
             translationPresenter.detachView()
@@ -133,8 +133,14 @@ class TranslationPresenterTest : BaseUnitTest() {
         runBlocking {
             translationPresenter.attachView(translationView)
 
+            with(inOrder(translationInteractor, translationView)) {
+                verify(translationInteractor, times(1)).notifyLoadingStarted()
+                verify(translationView, times(1)).onTranslationsLoadingStarted()
+                verify(translationInteractor, times(1)).reload(false)
+                verify(translationView, times(1)).onTranslationsLoadingCompleted()
+                verify(translationInteractor, times(1)).notifyLoadingFinished()
+            }
             verify(translationInteractor, never()).reload(true)
-            verify(translationInteractor, times(1)).reload(false)
             verify(translationView, never()).onTranslationsLoadingFailed(anyBoolean())
 
             translationPresenter.detachView()
@@ -148,10 +154,14 @@ class TranslationPresenterTest : BaseUnitTest() {
 
             translationPresenter.attachView(translationView)
 
+            with(inOrder(translationInteractor, translationView)) {
+                verify(translationInteractor, times(1)).notifyLoadingStarted()
+                verify(translationView, times(1)).onTranslationsLoadingStarted()
+                verify(translationView, times(1)).onTranslationsLoadingFailed(false)
+                verify(translationInteractor, times(1)).notifyLoadingFinished()
+            }
             verify(translationInteractor, never()).reload(true)
-            verify(translationInteractor, times(1)).reload(false)
-            verify(translationView, times(1)).onTranslationsLoadingFailed(false)
-            verify(translationView, never()).onTranslationsLoadingFailed(true)
+            verify(translationView, never()).onTranslationsLoadingCompleted()
 
             translationPresenter.detachView()
         }

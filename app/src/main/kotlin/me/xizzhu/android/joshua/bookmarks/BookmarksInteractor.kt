@@ -16,37 +16,21 @@
 
 package me.xizzhu.android.joshua.bookmarks
 
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
-import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 
 class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
                           private val bibleReadingManager: BibleReadingManager,
                           private val bookmarkManager: BookmarkManager,
                           private val navigator: Navigator,
-                          settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val bookmarksLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
-
+                          settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, IS_LOADING) {
     suspend fun observeBookmarksSortOrder(): ReceiveChannel<Int> = bookmarkManager.observeSortOrder()
 
     suspend fun saveBookmarksSortOrder(@Constants.SortOrder sortOrder: Int) {
         bookmarkManager.saveSortOrder(sortOrder)
-    }
-
-    fun observeBookmarksLoadingState(): ReceiveChannel<LoadingSpinnerState> =
-            bookmarksLoadingState.openSubscription()
-
-    suspend fun notifyLoadingStarted() {
-        bookmarksLoadingState.send(LoadingSpinnerState.IS_LOADING)
-    }
-
-    suspend fun notifyLoadingFinished() {
-        bookmarksLoadingState.send(LoadingSpinnerState.NOT_LOADING)
     }
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()

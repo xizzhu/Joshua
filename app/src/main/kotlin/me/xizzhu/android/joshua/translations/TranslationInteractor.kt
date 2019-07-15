@@ -21,18 +21,14 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.ui.SwipeRefresherState
-import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
 class TranslationInteractor(private val translationManagementActivity: TranslationManagementActivity,
                             private val bibleReadingManager: BibleReadingManager,
                             private val translationManager: TranslationManager,
-                            settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val translationsLoadingState: BroadcastChannel<SwipeRefresherState> = ConflatedBroadcastChannel(SwipeRefresherState.IS_REFRESHING)
+                            settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, IS_LOADING) {
     val translationsLoadingRequest: BroadcastChannel<Unit> = ConflatedBroadcastChannel()
-
-    fun observeTranslationsLoadingState(): ReceiveChannel<SwipeRefresherState> =
-            translationsLoadingState.openSubscription()
 
     fun observeTranslationsLoadingRequest(): ReceiveChannel<Unit> =
             translationsLoadingRequest.openSubscription()
@@ -50,12 +46,7 @@ class TranslationInteractor(private val translationManagementActivity: Translati
     }
 
     suspend fun reload(forceRefresh: Boolean) {
-        translationsLoadingState.send(SwipeRefresherState.IS_REFRESHING)
-        try {
-            translationManager.reload(forceRefresh)
-        } finally {
-            translationsLoadingState.send(SwipeRefresherState.NOT_REFRESHING)
-        }
+        translationManager.reload(forceRefresh)
     }
 
     suspend fun downloadTranslation(progressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {

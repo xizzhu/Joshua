@@ -22,18 +22,14 @@ import me.xizzhu.android.joshua.notes.list.NotesListView
 import me.xizzhu.android.joshua.notes.list.NotesPresenter
 import me.xizzhu.android.joshua.notes.toolbar.NotesToolbar
 import me.xizzhu.android.joshua.notes.toolbar.ToolbarPresenter
-import me.xizzhu.android.joshua.ui.LoadingSpinner
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.ui.bindView
-import me.xizzhu.android.joshua.utils.BaseSettingsActivity
+import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class NotesActivity : BaseSettingsActivity() {
+class NotesActivity : BaseLoadingSpinnerActivity() {
     @Inject
     lateinit var notesInteractor: NotesInteractor
-
-    @Inject
-    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
     @Inject
     lateinit var toolbarPresenter: ToolbarPresenter
@@ -41,7 +37,6 @@ class NotesActivity : BaseSettingsActivity() {
     @Inject
     lateinit var notesPresenter: NotesPresenter
 
-    private val loadingSpinner: LoadingSpinner by bindView(R.id.loading_spinner)
     private val toolbar: NotesToolbar by bindView(R.id.toolbar)
     private val notesListView: NotesListView by bindView(R.id.notes)
 
@@ -51,23 +46,21 @@ class NotesActivity : BaseSettingsActivity() {
         setContentView(R.layout.activity_notes)
         toolbar.setPresenter(toolbarPresenter)
         notesListView.setPresenter(notesPresenter)
-
-        observeSettings(notesInteractor)
     }
 
     override fun onStart() {
         super.onStart()
 
-        loadingSpinnerPresenter.attachView(loadingSpinner)
         toolbarPresenter.attachView(toolbar)
         notesPresenter.attachView(notesListView)
     }
 
     override fun onStop() {
-        loadingSpinnerPresenter.detachView()
         toolbarPresenter.detachView()
         notesPresenter.detachView()
 
         super.onStop()
     }
+
+    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = notesInteractor
 }

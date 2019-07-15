@@ -26,7 +26,7 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.*
-import me.xizzhu.android.joshua.utils.BaseSettingsView
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 
 interface TranslationView : BaseSettingsView {
     fun onCurrentTranslationUpdateFailed(translationShortName: String)

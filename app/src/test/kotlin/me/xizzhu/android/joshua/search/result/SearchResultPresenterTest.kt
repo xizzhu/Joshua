@@ -25,7 +25,6 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -39,8 +38,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
     private lateinit var searchResultView: SearchResultView
     private lateinit var searchResultPresenter: SearchResultPresenter
     private lateinit var settingsChannel: BroadcastChannel<Settings>
-    private lateinit var searchStateChannel: BroadcastChannel<LoadingSpinnerState>
-    private lateinit var searchResultChannel: BroadcastChannel<Pair<String, List<Verse>>>
+    private lateinit var searchQueryChannel: BroadcastChannel<String>
 
     @Before
     override fun setup() {
@@ -50,11 +48,8 @@ class SearchResultPresenterTest : BaseUnitTest() {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
             `when`(searchInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
 
-            searchStateChannel = ConflatedBroadcastChannel(LoadingSpinnerState.NOT_LOADING)
-            `when`(searchInteractor.observeSearchState()).thenReturn(searchStateChannel.openSubscription())
-
-            searchResultChannel = ConflatedBroadcastChannel(Pair("", emptyList()))
-            `when`(searchInteractor.observeSearchResult()).thenReturn(searchResultChannel.openSubscription())
+            searchQueryChannel = ConflatedBroadcastChannel("")
+            `when`(searchInteractor.observeSearchQuery()).thenReturn(searchQueryChannel.openSubscription())
 
             `when`(searchInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(searchInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
@@ -91,29 +86,43 @@ class SearchResultPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveDefaultSearchResultAndState() {
+    fun testSearch() {
         runBlocking {
-            verify(searchResultView, times(1))
-                    .onSearchResultUpdated(emptyList<Verse>().toSearchResult("", emptyList(), searchResultPresenter::selectVerse))
-            verify(searchResultView, times(1)).onSearchCompleted()
+            val query = "query"
+            val verses: List<Verse> = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2])
+            `when`(searchInteractor.search(query)).thenReturn(verses)
+
+            searchResultPresenter.search(query)
+
+            with(inOrder(searchInteractor, searchResultView)) {
+                verify(searchInteractor, times(1)).notifyLoadingStarted()
+                verify(searchResultView, times(1)).onSearchStarted()
+                verify(searchResultView, times(1)).onSearchResultUpdated(
+                        verses.toSearchResult(query, MockContents.kjvBookNames, searchResultPresenter::selectVerse)
+                )
+                verify(searchResultView, times(1)).onSearchCompleted()
+                verify(searchInteractor, times(1)).notifyLoadingFinished()
+            }
+            verify(searchResultView, never()).onSearchFailed(anyString())
         }
     }
 
     @Test
-    fun testObserveSearchResultAndState() {
+    fun testSearchWithException() {
         runBlocking {
-            searchStateChannel.send(LoadingSpinnerState.IS_LOADING)
             val query = "query"
-            val verses: List<Verse> = listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2])
-            searchResultChannel.send(Pair(query, verses))
-            searchStateChannel.send(LoadingSpinnerState.NOT_LOADING)
+            `when`(searchInteractor.search(query)).thenThrow(RuntimeException("Random exception"))
 
-            verify(searchResultView, times(1))
-                    .onSearchResultUpdated(verses.toSearchResult(query, MockContents.kjvBookNames, searchResultPresenter::selectVerse))
-            verify(searchResultView, times(1)).onSearchStarted()
+            searchResultPresenter.search(query)
 
-            // once from initial state, and second time when search finishes
-            verify(searchResultView, times(2)).onSearchCompleted()
+            with(inOrder(searchInteractor, searchResultView)) {
+                verify(searchInteractor, times(1)).notifyLoadingStarted()
+                verify(searchResultView, times(1)).onSearchStarted()
+                verify(searchResultView, times(1)).onSearchFailed(query)
+                verify(searchInteractor, times(1)).notifyLoadingFinished()
+            }
+            verify(searchResultView, never()).onSearchResultUpdated(any())
+            verify(searchResultView, never()).onSearchCompleted()
         }
     }
 }

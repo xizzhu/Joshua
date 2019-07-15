@@ -24,7 +24,7 @@ import me.xizzhu.android.joshua.search.result.SearchResultPresenter
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
 
 @Module
 class SearchModule {
@@ -41,8 +41,8 @@ class SearchModule {
             ToolbarPresenter(searchInteractor)
 
     @Provides
-    fun provideLoadingSpinnerPresenter(searchInteractor: SearchInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(searchInteractor.observeSearchState())
+    fun provideLoadingAwarePresenter(searchInteractor: SearchInteractor): LoadingAwarePresenter =
+            LoadingAwarePresenter(searchInteractor.observeLoadingState())
 
     @Provides
     fun provideSearchResultPresenter(searchInteractor: SearchInteractor): SearchResultPresenter =

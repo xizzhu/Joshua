@@ -25,12 +25,14 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.utils.BaseSettingsView
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 
 interface SearchResultView : BaseSettingsView {
     fun onSearchStarted()
 
     fun onSearchCompleted()
+
+    fun onSearchFailed(query: String)
 
     fun onSearchResultUpdated(searchResult: SearchResult)
 
@@ -59,6 +61,13 @@ class SearchResultListView : BaseRecyclerView, SearchResultView {
 
     override fun onSearchCompleted() {
         fadeIn()
+    }
+
+    override fun onSearchFailed(query: String) {
+        DialogHelper.showDialog(context, true, R.string.dialog_search_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.search(query)
+                })
     }
 
     override fun onSearchResultUpdated(searchResult: SearchResult) {

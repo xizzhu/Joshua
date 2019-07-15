@@ -24,16 +24,16 @@ import me.xizzhu.android.logger.Log
 import java.lang.Exception
 
 class ToolbarPresenter(private val searchInteractor: SearchInteractor) : MVPPresenter<ToolbarView>() {
-    fun search(query: String): Boolean {
+    fun updateSearchQuery(query: String): Boolean {
         if (query.isEmpty()) {
             return false
         }
         coroutineScope.launch(Dispatchers.Main) {
             try {
-                searchInteractor.search(query)
+                searchInteractor.updateSearchQuery(query)
             } catch (e: Exception) {
-                Log.e(tag, "Failed to search Bible verses", e)
-                view?.onError(query)
+                Log.e(tag, "Failed to update search query", e)
+                // TODO
             }
         }
         return true

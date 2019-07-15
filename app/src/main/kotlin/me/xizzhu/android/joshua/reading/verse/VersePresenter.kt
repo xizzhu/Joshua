@@ -28,7 +28,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
-import me.xizzhu.android.joshua.utils.BaseSettingsPresenter
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import kotlin.properties.Delegates
@@ -58,8 +58,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                         } else {
                             view?.onVersesCopyShareFailed()
                         }
+                        mode.finish()
                     }
-                    mode.finish()
                     true
                 }
                 R.id.action_share -> {
@@ -67,8 +67,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                         if (!readingInteractor.share(selectedVerses)) {
                             view?.onVersesCopyShareFailed()
                         }
+                        mode.finish()
                     }
-                    mode.finish()
                     true
                 }
                 else -> false

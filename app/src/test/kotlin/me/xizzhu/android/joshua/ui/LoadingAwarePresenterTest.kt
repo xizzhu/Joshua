@@ -26,21 +26,21 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
 
-class LoadingSpinnerPresenterTest : BaseUnitTest() {
+class LoadingAwarePresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var loadingSpinnerView: LoadingSpinnerView
+    private lateinit var loadingAwareView: LoadingAwareView
 
-    private lateinit var loadingSpinnerState: BroadcastChannel<LoadingSpinnerState>
-    private lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
+    private lateinit var loadingSpinnerState: BroadcastChannel<Int>
+    private lateinit var loadingSpinnerPresenter: LoadingAwarePresenter
 
     @Before
     override fun setup() {
         super.setup()
 
         loadingSpinnerState = ConflatedBroadcastChannel()
-        loadingSpinnerPresenter = LoadingSpinnerPresenter(loadingSpinnerState.openSubscription())
+        loadingSpinnerPresenter = LoadingAwarePresenter(loadingSpinnerState.openSubscription())
 
-        loadingSpinnerPresenter.attachView(loadingSpinnerView)
+        loadingSpinnerPresenter.attachView(loadingAwareView)
     }
 
     @After
@@ -52,16 +52,16 @@ class LoadingSpinnerPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadingSpinnerState() {
         runBlocking {
-            verify(loadingSpinnerView, never()).show()
-            verify(loadingSpinnerView, never()).hide()
+            verify(loadingAwareView, never()).show()
+            verify(loadingAwareView, never()).hide()
 
-            loadingSpinnerState.send(LoadingSpinnerState.IS_LOADING)
-            verify(loadingSpinnerView, times(1)).show()
-            verify(loadingSpinnerView, never()).hide()
+            loadingSpinnerState.send(BaseLoadingAwareInteractor.IS_LOADING)
+            verify(loadingAwareView, times(1)).show()
+            verify(loadingAwareView, never()).hide()
 
-            loadingSpinnerState.send(LoadingSpinnerState.NOT_LOADING)
-            verify(loadingSpinnerView, times(1)).show()
-            verify(loadingSpinnerView, times(1)).hide()
+            loadingSpinnerState.send(BaseLoadingAwareInteractor.NOT_LOADING)
+            verify(loadingAwareView, times(1)).show()
+            verify(loadingAwareView, times(1)).hide()
         }
     }
 }

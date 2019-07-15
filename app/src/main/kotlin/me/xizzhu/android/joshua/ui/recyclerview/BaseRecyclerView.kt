@@ -24,7 +24,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.utils.BaseSettingsView
+import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 
 abstract class BaseItem protected constructor(val viewType: Int,
                                               viewHolderCreator: (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>) {

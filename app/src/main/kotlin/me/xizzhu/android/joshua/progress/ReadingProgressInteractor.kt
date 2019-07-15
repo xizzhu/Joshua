@@ -16,29 +16,16 @@
 
 package me.xizzhu.android.joshua.progress
 
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.ui.LoadingSpinnerState
-import me.xizzhu.android.joshua.utils.BaseSettingsInteractor
+import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 
 class ReadingProgressInteractor(private val readingProgressActivity: ReadingProgressActivity,
                                 private val readingProgressManager: ReadingProgressManager,
                                 private val bibleReadingManager: BibleReadingManager,
                                 private val navigator: Navigator,
-                                settingsManager: SettingsManager) : BaseSettingsInteractor(settingsManager) {
-    private val readingProgressLoadingState: BroadcastChannel<LoadingSpinnerState> = ConflatedBroadcastChannel(LoadingSpinnerState.IS_LOADING)
-
-    fun observeReadingProgressLoadingState(): ReceiveChannel<LoadingSpinnerState> =
-            readingProgressLoadingState.openSubscription()
-
-    suspend fun notifyLoadingFinished() {
-        readingProgressLoadingState.send(LoadingSpinnerState.NOT_LOADING)
-    }
-
+                                settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, IS_LOADING) {
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
 
     suspend fun readBookNames(translationShortName: String): List<String> = bibleReadingManager.readBookNames(translationShortName)
