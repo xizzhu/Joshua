@@ -11,6 +11,7 @@ CHANGELOG
   - Android Gradle plugin to 3.4.2
   - Build tool to 29.0.1
   - Kotlin to 1.3.41
+  - Firebase Core and Analytics to 17.0.1
   - OkHttp to 4.0.1
   - Logger to 0.1.2
   - Mockito to 3.0.0
