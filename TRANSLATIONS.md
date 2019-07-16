@@ -28,6 +28,9 @@ Available Translations
   * Luther's Biblia (Lut1545)
 * Hindi
   * Hindi Bible: Easy-to-Read Version (ERV-HI) हिंदी बाइबिल
+* Italian
+  * Italian Diodati Bibbia (Dio)
+  * Italian Riveduta Bibbia 1927 (ItaRive)
 * Simplified Chinese
   * 中文和合本
   * 中文新译本
