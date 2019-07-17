@@ -53,6 +53,5 @@
     <View
         android:id="@+id/divider"
         style="@style/Divider.Horizontal"
-        android:layout_gravity="bottom"
         android:background="@color/dark_gray" />
 </LinearLayout>
