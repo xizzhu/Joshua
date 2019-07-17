@@ -32,6 +32,8 @@ import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
+import me.xizzhu.android.joshua.highlights.HighlightsActivity
+import me.xizzhu.android.joshua.highlights.HighlightsModule
 import me.xizzhu.android.joshua.notes.NotesActivity
 import me.xizzhu.android.joshua.notes.NotesModule
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
@@ -201,6 +203,10 @@ abstract class ActivityModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = [(BookmarksModule::class)])
     abstract fun contributeBookmarksActivity(): BookmarksActivity
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [(HighlightsModule::class)])
+    abstract fun contributeHighlightsActivity(): HighlightsActivity
 
     @ActivityScope
     @ContributesAndroidInjector(modules = [(NotesModule::class)])

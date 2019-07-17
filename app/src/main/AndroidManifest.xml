@@ -23,6 +23,7 @@
         </activity-alias>
 
         <activity android:name=".bookmarks.BookmarksActivity" />
+        <activity android:name=".highlights.HighlightsActivity" />
         <activity android:name=".notes.NotesActivity" />
         <activity android:name=".progress.ReadingProgressActivity" />
         <activity android:name=".reading.ReadingActivity" />

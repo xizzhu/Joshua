@@ -22,6 +22,7 @@
     <string name="action_share">Share</string>
     <string name="action_reading_progress">Reading progress</string>
     <string name="action_bookmarks">Bookmarks</string>
+    <string name="action_highlights">Highlights</string>
     <string name="action_notes">Notes</string>
     <string name="action_settings">Settings</string>
 
@@ -44,6 +45,7 @@
     <string name="dialog_navigate_to_translation_error">Failed to open translation management view, retry?</string>
     <string name="dialog_navigate_to_reading_progress_error">Failed to open reading progress view, retry?</string>
     <string name="dialog_navigate_to_bookmarks_error">Failed to open bookmarks, retry?</string>
+    <string name="dialog_navigate_to_highlights_error">Failed to open highlights, retry?</string>
     <string name="dialog_navigate_to_notes_error">Failed to open notes, retry?</string>
     <string name="dialog_load_reading_progress_error">Failed to load reading progress, retry?</string>
     <string name="dialog_load_bookmarks_error">Failed to load bookmarks, retry?</string>

@@ -108,6 +108,15 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
         }
     }
 
+    fun openHighlights() {
+        try {
+            readingInteractor.openHighlights()
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to open highlights activity", e)
+            view?.onFailedToNavigateToHighlights()
+        }
+    }
+
     fun openNotes() {
         try {
             readingInteractor.openNotes()

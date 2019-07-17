@@ -19,6 +19,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_highlights"
+        android:title="@string/action_highlights"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_notes"
         android:title="@string/action_notes"
         app:showAsAction="never" />
