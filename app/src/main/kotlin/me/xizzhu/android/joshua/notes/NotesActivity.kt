@@ -20,8 +20,8 @@ import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.notes.list.NotesListView
 import me.xizzhu.android.joshua.notes.list.NotesPresenter
-import me.xizzhu.android.joshua.notes.toolbar.NotesToolbar
-import me.xizzhu.android.joshua.notes.toolbar.ToolbarPresenter
+import me.xizzhu.android.joshua.ui.SortOrderToolbar
+import me.xizzhu.android.joshua.ui.SortOrderToolbarPresenter
 import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
@@ -32,12 +32,12 @@ class NotesActivity : BaseLoadingSpinnerActivity() {
     lateinit var notesInteractor: NotesInteractor
 
     @Inject
-    lateinit var toolbarPresenter: ToolbarPresenter
+    lateinit var toolbarPresenter: SortOrderToolbarPresenter
 
     @Inject
     lateinit var notesPresenter: NotesPresenter
 
-    private val toolbar: NotesToolbar by bindView(R.id.toolbar)
+    private val toolbar: SortOrderToolbar by bindView(R.id.toolbar)
     private val notesListView: NotesListView by bindView(R.id.notes)
 
     override fun onCreate(savedInstanceState: Bundle?) {

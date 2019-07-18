@@ -18,14 +18,15 @@ package me.xizzhu.android.joshua.bookmarks
 
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.bookmarks.list.BookmarksPresenter
-import me.xizzhu.android.joshua.bookmarks.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.BookmarkManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
+import me.xizzhu.android.joshua.ui.SortOrderToolbarPresenter
 
 @Module
 class BookmarksModule {
@@ -43,8 +44,9 @@ class BookmarksModule {
             LoadingAwarePresenter(bookmarksInteractor.observeLoadingState())
 
     @Provides
-    fun provideToolbarPresenter(bookmarksInteractor: BookmarksInteractor): ToolbarPresenter =
-            ToolbarPresenter(bookmarksInteractor)
+    fun provideSortOrderToolbarPresenter(bookmarksInteractor: BookmarksInteractor): SortOrderToolbarPresenter =
+            SortOrderToolbarPresenter({ bookmarksInteractor.observeBookmarksSortOrder().first() },
+                    bookmarksInteractor::saveBookmarksSortOrder)
 
     @Provides
     fun provideBookmarksPresenter(bookmarksActivity: BookmarksActivity,

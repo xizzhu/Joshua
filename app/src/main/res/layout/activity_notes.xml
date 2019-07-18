@@ -21,11 +21,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <me.xizzhu.android.joshua.notes.toolbar.NotesToolbar
+        <me.xizzhu.android.joshua.ui.SortOrderToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:title="@string/title_notes" />
     </com.google.android.material.appbar.AppBarLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

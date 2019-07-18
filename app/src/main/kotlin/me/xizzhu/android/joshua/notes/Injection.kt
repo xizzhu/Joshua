@@ -18,14 +18,15 @@ package me.xizzhu.android.joshua.notes
 
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.NoteManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.notes.list.NotesPresenter
-import me.xizzhu.android.joshua.notes.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
+import me.xizzhu.android.joshua.ui.SortOrderToolbarPresenter
 
 @Module
 class NotesModule {
@@ -43,8 +44,9 @@ class NotesModule {
             LoadingAwarePresenter(notesInteractor.observeLoadingState())
 
     @Provides
-    fun provideToolbarPresenter(notesInteractor: NotesInteractor): ToolbarPresenter =
-            ToolbarPresenter(notesInteractor)
+    fun provideSortOrderToolbarPresenter(notesInteractor: NotesInteractor): SortOrderToolbarPresenter =
+            SortOrderToolbarPresenter({ notesInteractor.observeNotesSortOrder().first() },
+                    notesInteractor::saveNotesSortOrder)
 
     @Provides
     fun provideNotesPresenter(notesActivity: NotesActivity,

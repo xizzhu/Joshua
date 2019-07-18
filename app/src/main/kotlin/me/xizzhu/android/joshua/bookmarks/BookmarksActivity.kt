@@ -20,8 +20,8 @@ import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.bookmarks.list.BookmarksListView
 import me.xizzhu.android.joshua.bookmarks.list.BookmarksPresenter
-import me.xizzhu.android.joshua.bookmarks.toolbar.BookmarksToolbar
-import me.xizzhu.android.joshua.bookmarks.toolbar.ToolbarPresenter
+import me.xizzhu.android.joshua.ui.SortOrderToolbar
+import me.xizzhu.android.joshua.ui.SortOrderToolbarPresenter
 import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
@@ -32,12 +32,12 @@ class BookmarksActivity : BaseLoadingSpinnerActivity() {
     lateinit var bookmarksInteractor: BookmarksInteractor
 
     @Inject
-    lateinit var toolbarPresenter: ToolbarPresenter
+    lateinit var toolbarPresenter: SortOrderToolbarPresenter
 
     @Inject
     lateinit var bookmarksPresenter: BookmarksPresenter
 
-    private val toolbar: BookmarksToolbar by bindView(R.id.toolbar)
+    private val toolbar: SortOrderToolbar by bindView(R.id.toolbar)
     private val bookmarksListView: BookmarksListView by bindView(R.id.bookmarks)
 
     override fun onCreate(savedInstanceState: Bundle?) {
