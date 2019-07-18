@@ -18,7 +18,11 @@ package me.xizzhu.android.joshua.core
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.ReceiveChannel
 import me.xizzhu.android.joshua.core.repository.HighlightRepository
+import me.xizzhu.android.logger.Log
 
 data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val timestamp: Long) {
     companion object {
@@ -35,6 +39,30 @@ data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val t
 }
 
 class HighlightManager(private val highlightRepository: HighlightRepository) {
+    companion object {
+        private val TAG = HighlightManager::class.java.simpleName
+    }
+
+    private val sortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
+
+    suspend fun observeSortOrder(): ReceiveChannel<Int> {
+        return sortOrder.openSubscription().apply {
+            if (isEmpty) {
+                try {
+                    sortOrder.send(highlightRepository.readSortOrder())
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to initialize bookmark sort order", e)
+                    sortOrder.send(Constants.DEFAULT_SORT_ORDER)
+                }
+            }
+        }
+    }
+
+    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        highlightRepository.saveSortOrder(sortOrder)
+        this.sortOrder.send(sortOrder)
+    }
+
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
             highlightRepository.read(bookIndex, chapterIndex)
 

@@ -16,9 +16,16 @@
 
 package me.xizzhu.android.joshua.highlights
 
+import kotlinx.coroutines.channels.ReceiveChannel
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 
 class HighlightsInteractor(private val highlightsActivity: HighlightsActivity,
+                           private val highlightsManager: HighlightManager,
                            settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, IS_LOADING) {
+    suspend fun observeSortOrder(): ReceiveChannel<Int> = highlightsManager.observeSortOrder()
+
+    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        highlightsManager.saveSortOrder(sortOrder)
+    }
 }

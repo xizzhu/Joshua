@@ -18,6 +18,9 @@ package me.xizzhu.android.joshua.highlights
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.ui.SortOrderToolbar
+import me.xizzhu.android.joshua.ui.SortOrderToolbarPresenter
+import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
@@ -26,10 +29,28 @@ class HighlightsActivity : BaseLoadingSpinnerActivity() {
     @Inject
     lateinit var highlightInteractor: HighlightsInteractor
 
+    @Inject
+    lateinit var toolbarPresenter: SortOrderToolbarPresenter
+
+    private val toolbar: SortOrderToolbar by bindView(R.id.toolbar)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_highlights)
+        toolbar.setPresenter(toolbarPresenter)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        toolbarPresenter.attachView(toolbar)
+    }
+
+    override fun onStop() {
+        toolbarPresenter.detachView()
+
+        super.onStop()
     }
 
     override fun getBaseSettingsInteractor(): BaseSettingsInteractor = highlightInteractor

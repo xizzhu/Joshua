@@ -18,19 +18,28 @@ package me.xizzhu.android.joshua.highlights
 
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.ActivityScope
+import me.xizzhu.android.joshua.core.HighlightManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
+import me.xizzhu.android.joshua.ui.SortOrderToolbarPresenter
 
 @Module
 class HighlightsModule {
     @Provides
     @ActivityScope
     fun provideHighlightsInteractor(highlightsActivity: HighlightsActivity,
+                                    highlightsManager: HighlightManager,
                                     settingsManager: SettingsManager): HighlightsInteractor =
-            HighlightsInteractor(highlightsActivity, settingsManager)
+            HighlightsInteractor(highlightsActivity, highlightsManager, settingsManager)
 
     @Provides
     fun provideLoadingAwarePresenter(highlightsInteractor: HighlightsInteractor): LoadingAwarePresenter =
             LoadingAwarePresenter(highlightsInteractor.observeLoadingState())
+
+    @Provides
+    fun provideSortOrderToolbarPresenter(highlightsInteractor: HighlightsInteractor): SortOrderToolbarPresenter =
+            SortOrderToolbarPresenter({ highlightsInteractor.observeSortOrder().first() },
+                    highlightsInteractor::saveSortOrder)
 }
