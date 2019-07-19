@@ -25,6 +25,8 @@ interface LocalHighlightStorage {
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int)
 
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Highlight>
+
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight>
 
     suspend fun read(verseIndex: VerseIndex): Highlight

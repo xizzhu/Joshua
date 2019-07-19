@@ -28,6 +28,9 @@ class HighlightRepository(private val localHighlightStorage: LocalHighlightStora
         localHighlightStorage.saveSortOrder(sortOrder)
     }
 
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Highlight> =
+            localHighlightStorage.read(sortOrder)
+
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
             localHighlightStorage.read(bookIndex, chapterIndex)
 

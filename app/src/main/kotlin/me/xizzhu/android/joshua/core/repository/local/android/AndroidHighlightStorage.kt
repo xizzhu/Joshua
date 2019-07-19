@@ -35,6 +35,9 @@ class AndroidHighlightStorage(private val androidDatabase: AndroidDatabase) : Lo
         }
     }
 
+    override suspend fun read(@Constants.SortOrder sortOrder: Int): List<Highlight> =
+            withContext(Dispatchers.IO) { androidDatabase.highlightDao.read(sortOrder) }
+
     override suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
             withContext(Dispatchers.IO) { androidDatabase.highlightDao.read(bookIndex, chapterIndex) }
 

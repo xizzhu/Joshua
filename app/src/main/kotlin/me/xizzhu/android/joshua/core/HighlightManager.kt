@@ -63,8 +63,9 @@ class HighlightManager(private val highlightRepository: HighlightRepository) {
         this.sortOrder.send(sortOrder)
     }
 
-    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
-            highlightRepository.read(bookIndex, chapterIndex)
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Highlight> = highlightRepository.read(sortOrder)
+
+    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> = highlightRepository.read(bookIndex, chapterIndex)
 
     suspend fun read(verseIndex: VerseIndex): Highlight = highlightRepository.read(verseIndex)
 

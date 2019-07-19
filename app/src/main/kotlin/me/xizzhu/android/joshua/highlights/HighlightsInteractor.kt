@@ -28,4 +28,6 @@ class HighlightsInteractor(private val highlightsActivity: HighlightsActivity,
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         highlightsManager.saveSortOrder(sortOrder)
     }
+
+    suspend fun readHighlights(@Constants.SortOrder sortOrder: Int): List<Highlight> = highlightsManager.read(sortOrder)
 }
