@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <me.xizzhu.android.joshua.bookmarks.list.BookmarksListView
+    <me.xizzhu.android.joshua.ui.AnnotatedVerseListView
         android:id="@+id/bookmarks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

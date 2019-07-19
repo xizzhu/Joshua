@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.AnnotatedVersesView
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.Before
@@ -38,7 +39,7 @@ class BookmarksPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var bookmarksInteractor: BookmarksInteractor
     @Mock
-    private lateinit var bookmarksView: BookmarksView
+    private lateinit var bookmarksView: AnnotatedVersesView
     @Mock
     private lateinit var resources: Resources
 
@@ -54,7 +55,7 @@ class BookmarksPresenterTest : BaseUnitTest() {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
             bookmarksSortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
             `when`(bookmarksInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-            `when`(bookmarksInteractor.observeBookmarksSortOrder()).thenReturn(bookmarksSortOrder.openSubscription())
+            `when`(bookmarksInteractor.observeSortOrder()).thenReturn(bookmarksSortOrder.openSubscription())
             `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
             `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
@@ -71,8 +72,8 @@ class BookmarksPresenterTest : BaseUnitTest() {
 
             // loadBookmarks() is called by onViewAttached(), so no need to call again
             bookmarksPresenter.attachView(bookmarksView)
-            verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(TextItem("")))
-            verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
+            verify(bookmarksView, times(1)).onItemsLoaded(listOf(TextItem("")))
+            verify(bookmarksView, never()).onLoadingFailed(anyInt())
 
             bookmarksPresenter.detachView()
         }
@@ -104,20 +105,20 @@ class BookmarksPresenterTest : BaseUnitTest() {
 
             with(inOrder(bookmarksInteractor, bookmarksView)) {
                 verify(bookmarksInteractor, times(1)).notifyLoadingStarted()
-                verify(bookmarksView, times(1)).onBookmarksLoadingStarted()
-                verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(
+                verify(bookmarksView, times(1)).onLoadingStarted()
+                verify(bookmarksView, times(1)).onItemsLoaded(listOf(
                         TitleItem("", false),
-                        BookmarkItem(VerseIndex(0, 0, 4), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[4].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
+                        BookmarkItem(VerseIndex(0, 0, 4), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[4].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::openVerse),
                         TitleItem("", false),
-                        BookmarkItem(VerseIndex(0, 0, 1), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[1].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
-                        BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse),
+                        BookmarkItem(VerseIndex(0, 0, 1), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[1].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::openVerse),
+                        BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::openVerse),
                         TitleItem("", false),
-                        BookmarkItem(VerseIndex(0, 0, 2), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[2].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::selectVerse)
+                        BookmarkItem(VerseIndex(0, 0, 2), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[2].text.text, Constants.SORT_BY_DATE, bookmarksPresenter::openVerse)
                 ))
-                verify(bookmarksView, times(1)).onBookmarksLoadingCompleted()
+                verify(bookmarksView, times(1)).onLoadingCompleted()
                 verify(bookmarksInteractor, times(1)).notifyLoadingFinished()
             }
-            verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
+            verify(bookmarksView, never()).onLoadingFailed(anyInt())
 
             bookmarksPresenter.detachView()
         }
@@ -141,15 +142,15 @@ class BookmarksPresenterTest : BaseUnitTest() {
 
             with(inOrder(bookmarksInteractor, bookmarksView)) {
                 verify(bookmarksInteractor, times(1)).notifyLoadingStarted()
-                verify(bookmarksView, times(1)).onBookmarksLoadingStarted()
-                verify(bookmarksView, times(1)).onBookmarksLoaded(listOf(
+                verify(bookmarksView, times(1)).onLoadingStarted()
+                verify(bookmarksView, times(1)).onItemsLoaded(listOf(
                         TitleItem(MockContents.kjvBookNames[0], false),
-                        BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, Constants.SORT_BY_BOOK, bookmarksPresenter::selectVerse)
+                        BookmarkItem(VerseIndex(0, 0, 3), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, Constants.SORT_BY_BOOK, bookmarksPresenter::openVerse)
                 ))
-                verify(bookmarksView, times(1)).onBookmarksLoadingCompleted()
+                verify(bookmarksView, times(1)).onLoadingCompleted()
                 verify(bookmarksInteractor, times(1)).notifyLoadingFinished()
             }
-            verify(bookmarksView, never()).onBookmarksLoadFailed(anyInt())
+            verify(bookmarksView, never()).onLoadingFailed(anyInt())
 
             bookmarksPresenter.detachView()
         }
@@ -165,12 +166,12 @@ class BookmarksPresenterTest : BaseUnitTest() {
 
             with(inOrder(bookmarksInteractor, bookmarksView)) {
                 verify(bookmarksInteractor, times(1)).notifyLoadingStarted()
-                verify(bookmarksView, times(1)).onBookmarksLoadingStarted()
-                verify(bookmarksView, times(1)).onBookmarksLoadFailed(Constants.SORT_BY_DATE)
+                verify(bookmarksView, times(1)).onLoadingStarted()
+                verify(bookmarksView, times(1)).onLoadingFailed(Constants.SORT_BY_DATE)
                 verify(bookmarksInteractor, times(1)).notifyLoadingFinished()
             }
-            verify(bookmarksView, never()).onBookmarksLoaded(any())
-            verify(bookmarksView, never()).onBookmarksLoadingCompleted()
+            verify(bookmarksView, never()).onItemsLoaded(any())
+            verify(bookmarksView, never()).onLoadingCompleted()
 
             bookmarksPresenter.detachView()
         }

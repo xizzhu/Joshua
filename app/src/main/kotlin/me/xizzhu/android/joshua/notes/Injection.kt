@@ -45,7 +45,7 @@ class NotesModule {
 
     @Provides
     fun provideSortOrderToolbarPresenter(notesInteractor: NotesInteractor): SortOrderToolbarPresenter =
-            SortOrderToolbarPresenter({ notesInteractor.observeNotesSortOrder().first() },
+            SortOrderToolbarPresenter({ notesInteractor.observeSortOrder().first() },
                     notesInteractor::saveNotesSortOrder)
 
     @Provides

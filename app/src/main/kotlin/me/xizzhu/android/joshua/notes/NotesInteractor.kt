@@ -21,15 +21,13 @@ import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
+import me.xizzhu.android.joshua.ui.BaseAnnotatedVerseInteractor
 
 class NotesInteractor(private val notesActivity: NotesActivity,
                       private val bibleReadingManager: BibleReadingManager,
                       private val noteManager: NoteManager,
                       private val navigator: Navigator,
-                      settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, IS_LOADING) {
-    suspend fun observeNotesSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
-
+                      settingsManager: SettingsManager) : BaseAnnotatedVerseInteractor(settingsManager, IS_LOADING) {
     suspend fun saveNotesSortOrder(@Constants.SortOrder sortOrder: Int) {
         noteManager.saveSortOrder(sortOrder)
     }
@@ -47,7 +45,9 @@ class NotesInteractor(private val notesActivity: NotesActivity,
     suspend fun readBookShortNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookShortNames(translationShortName)
 
-    suspend fun openReading(verseIndex: VerseIndex) {
+    override suspend fun observeSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
+
+    override suspend fun openVerse(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
         navigator.navigate(notesActivity, Navigator.SCREEN_READING, ReadingActivity.bundleForOpenNote())
     }

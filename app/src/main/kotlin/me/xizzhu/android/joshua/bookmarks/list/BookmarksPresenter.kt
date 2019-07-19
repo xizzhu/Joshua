@@ -18,42 +18,32 @@ package me.xizzhu.android.joshua.bookmarks.list
 
 import android.content.res.Resources
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.bookmarks.BookmarksInteractor
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.AnnotatedVersePresenter
 import me.xizzhu.android.joshua.ui.formatDate
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import java.util.*
 import kotlin.collections.ArrayList
 
 class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, private val resources: Resources)
-    : BaseSettingsPresenter<BookmarksView>(bookmarksInteractor) {
-    override fun onViewAttached() {
-        super.onViewAttached()
-
-        coroutineScope.launch(Dispatchers.Main) {
-            bookmarksInteractor.observeBookmarksSortOrder().consumeEach { loadBookmarks(it) }
-        }
-    }
-
-    fun loadBookmarks(@Constants.SortOrder sortOrder: Int) {
+    : AnnotatedVersePresenter(bookmarksInteractor) {
+    override fun load(@Constants.SortOrder sortOrder: Int) {
         coroutineScope.launch(Dispatchers.Main) {
             try {
                 bookmarksInteractor.notifyLoadingStarted()
-                view?.onBookmarksLoadingStarted()
+                view?.onLoadingStarted()
 
                 val bookmarks = bookmarksInteractor.readBookmarks(sortOrder)
                 if (bookmarks.isEmpty()) {
-                    view?.onBookmarksLoaded(listOf(TextItem(resources.getString(R.string.text_no_bookmark))))
+                    view?.onItemsLoaded(listOf(TextItem(resources.getString(R.string.text_no_bookmark))))
                 } else {
                     val currentTranslation = bookmarksInteractor.readCurrentTranslation()
                     val bookNamesAsync = supervisedAsync { bookmarksInteractor.readBookNames(currentTranslation) }
@@ -64,13 +54,13 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
                         Constants.SORT_BY_BOOK -> toBaseItemsByBook(bookmarks, currentTranslation, bookNames, bookShortNames)
                         else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
                     }
-                    view?.onBookmarksLoaded(items)
+                    view?.onItemsLoaded(items)
                 }
 
-                view?.onBookmarksLoadingCompleted()
+                view?.onLoadingCompleted()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load bookmarks", e)
-                view?.onBookmarksLoadFailed(sortOrder)
+                view?.onLoadingFailed(sortOrder)
             } finally {
                 bookmarksInteractor.notifyLoadingFinished()
             }
@@ -98,7 +88,7 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
             items.add(BookmarkItem(bookmark.verseIndex, bookNames[bookmark.verseIndex.bookIndex],
                     bookShortNames[bookmark.verseIndex.bookIndex],
                     bookmarksInteractor.readVerse(currentTranslation, bookmark.verseIndex).text.text,
-                    Constants.SORT_BY_DATE, this@BookmarksPresenter::selectVerse))
+                    Constants.SORT_BY_DATE, this@BookmarksPresenter::openVerse))
         }
         return items
     }
@@ -116,19 +106,8 @@ class BookmarksPresenter(private val bookmarksInteractor: BookmarksInteractor, p
             }
 
             items.add(BookmarkItem(bookmark.verseIndex, bookName, bookShortNames[bookmark.verseIndex.bookIndex],
-                    verse.text.text, Constants.SORT_BY_BOOK, this@BookmarksPresenter::selectVerse))
+                    verse.text.text, Constants.SORT_BY_BOOK, this@BookmarksPresenter::openVerse))
         }
         return items
-    }
-
-    fun selectVerse(verseToSelect: VerseIndex) {
-        coroutineScope.launch(Dispatchers.Main) {
-            try {
-                bookmarksInteractor.openReading(verseToSelect)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to select verse and open reading activity", e)
-                view?.onVerseSelectionFailed(verseToSelect)
-            }
-        }
     }
 }

@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.notes
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.notes.list.NotesListView
 import me.xizzhu.android.joshua.notes.list.NotesPresenter
+import me.xizzhu.android.joshua.ui.AnnotatedVerseListView
 import me.xizzhu.android.joshua.ui.SortOrderToolbar
 import me.xizzhu.android.joshua.ui.SortOrderToolbarPresenter
 import me.xizzhu.android.joshua.ui.bindView
@@ -38,7 +38,7 @@ class NotesActivity : BaseLoadingSpinnerActivity() {
     lateinit var notesPresenter: NotesPresenter
 
     private val toolbar: SortOrderToolbar by bindView(R.id.toolbar)
-    private val notesListView: NotesListView by bindView(R.id.notes)
+    private val notesListView: AnnotatedVerseListView by bindView(R.id.notes)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

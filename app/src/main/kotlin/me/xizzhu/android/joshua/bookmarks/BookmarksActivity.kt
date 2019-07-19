@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.bookmarks
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.bookmarks.list.BookmarksListView
 import me.xizzhu.android.joshua.bookmarks.list.BookmarksPresenter
+import me.xizzhu.android.joshua.ui.AnnotatedVerseListView
 import me.xizzhu.android.joshua.ui.SortOrderToolbar
 import me.xizzhu.android.joshua.ui.SortOrderToolbarPresenter
 import me.xizzhu.android.joshua.ui.bindView
@@ -38,7 +38,7 @@ class BookmarksActivity : BaseLoadingSpinnerActivity() {
     lateinit var bookmarksPresenter: BookmarksPresenter
 
     private val toolbar: SortOrderToolbar by bindView(R.id.toolbar)
-    private val bookmarksListView: BookmarksListView by bindView(R.id.bookmarks)
+    private val bookmarksListView: AnnotatedVerseListView by bindView(R.id.bookmarks)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

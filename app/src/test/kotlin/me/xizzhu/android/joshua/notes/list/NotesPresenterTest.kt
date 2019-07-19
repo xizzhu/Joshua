@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.notes.NotesInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.AnnotatedVersesView
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.Before
@@ -38,7 +39,7 @@ class NotesPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var notesInteractor: NotesInteractor
     @Mock
-    private lateinit var notesView: NotesView
+    private lateinit var notesView: AnnotatedVersesView
     @Mock
     private lateinit var resources: Resources
 
@@ -54,7 +55,7 @@ class NotesPresenterTest : BaseUnitTest() {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
             notesSortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
             `when`(notesInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-            `when`(notesInteractor.observeNotesSortOrder()).thenReturn(notesSortOrder.openSubscription())
+            `when`(notesInteractor.observeSortOrder()).thenReturn(notesSortOrder.openSubscription())
             `when`(notesInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
             `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
@@ -71,8 +72,8 @@ class NotesPresenterTest : BaseUnitTest() {
 
             // loadNotes() is called by onViewAttached()
             notesPresenter.attachView(notesView)
-            verify(notesView, times(1)).onNotesLoaded(listOf(TextItem("")))
-            verify(notesView, never()).onNotesLoadFailed(Constants.SORT_BY_DATE)
+            verify(notesView, times(1)).onItemsLoaded(listOf(TextItem("")))
+            verify(notesView, never()).onLoadingFailed(Constants.SORT_BY_DATE)
 
             notesPresenter.detachView()
         }
@@ -104,20 +105,20 @@ class NotesPresenterTest : BaseUnitTest() {
 
             with(inOrder(notesInteractor, notesView)) {
                 verify(notesInteractor, times(1)).notifyLoadingStarted()
-                verify(notesView, times(1)).onNotesLoadingStarted()
-                verify(notesView, times(1)).onNotesLoaded(listOf(
+                verify(notesView, times(1)).onLoadingStarted()
+                verify(notesView, times(1)).onItemsLoaded(listOf(
                         TitleItem("", false),
-                        NoteItem(VerseIndex(0, 0, 4), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[4].text.text, "Note1", notesPresenter::selectVerse),
+                        NoteItem(VerseIndex(0, 0, 4), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[4].text.text, "Note1", notesPresenter::openVerse),
                         TitleItem("", false),
-                        NoteItem(VerseIndex(0, 0, 1), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[1].text.text, "Note2", notesPresenter::selectVerse),
-                        NoteItem(VerseIndex(0, 0, 3), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, "Note3", notesPresenter::selectVerse),
+                        NoteItem(VerseIndex(0, 0, 1), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[1].text.text, "Note2", notesPresenter::openVerse),
+                        NoteItem(VerseIndex(0, 0, 3), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, "Note3", notesPresenter::openVerse),
                         TitleItem("", false),
-                        NoteItem(VerseIndex(0, 0, 2), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[2].text.text, "Note4", notesPresenter::selectVerse)
+                        NoteItem(VerseIndex(0, 0, 2), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[2].text.text, "Note4", notesPresenter::openVerse)
                 ))
-                verify(notesView, times(1)).onNotesLoadingCompleted()
+                verify(notesView, times(1)).onLoadingCompleted()
                 verify(notesInteractor, times(1)).notifyLoadingFinished()
             }
-            verify(notesView, never()).onNotesLoadFailed(anyInt())
+            verify(notesView, never()).onLoadingFailed(anyInt())
 
             notesPresenter.detachView()
         }
@@ -141,15 +142,15 @@ class NotesPresenterTest : BaseUnitTest() {
 
             with(inOrder(notesInteractor, notesView)) {
                 verify(notesInteractor, times(1)).notifyLoadingStarted()
-                verify(notesView, times(1)).onNotesLoadingStarted()
-                verify(notesView, times(1)).onNotesLoaded(listOf(
+                verify(notesView, times(1)).onLoadingStarted()
+                verify(notesView, times(1)).onItemsLoaded(listOf(
                         TitleItem(MockContents.kjvBookNames[0], false),
-                        NoteItem(VerseIndex(0, 0, 3), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, "Note", notesPresenter::selectVerse)
+                        NoteItem(VerseIndex(0, 0, 3), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, "Note", notesPresenter::openVerse)
                 ))
-                verify(notesView, times(1)).onNotesLoadingCompleted()
+                verify(notesView, times(1)).onLoadingCompleted()
                 verify(notesInteractor, times(1)).notifyLoadingFinished()
             }
-            verify(notesView, never()).onNotesLoadFailed(anyInt())
+            verify(notesView, never()).onLoadingFailed(anyInt())
 
             notesPresenter.detachView()
         }
@@ -165,12 +166,12 @@ class NotesPresenterTest : BaseUnitTest() {
 
             with(inOrder(notesInteractor, notesView)) {
                 verify(notesInteractor, times(1)).notifyLoadingStarted()
-                verify(notesView, times(1)).onNotesLoadingStarted()
-                verify(notesView, times(1)).onNotesLoadFailed(Constants.SORT_BY_DATE)
+                verify(notesView, times(1)).onLoadingStarted()
+                verify(notesView, times(1)).onLoadingFailed(Constants.SORT_BY_DATE)
                 verify(notesInteractor, times(1)).notifyLoadingFinished()
             }
-            verify(notesView, never()).onNotesLoaded(any())
-            verify(notesView, never()).onNotesLoadingCompleted()
+            verify(notesView, never()).onItemsLoaded(any())
+            verify(notesView, never()).onLoadingCompleted()
 
             notesPresenter.detachView()
         }

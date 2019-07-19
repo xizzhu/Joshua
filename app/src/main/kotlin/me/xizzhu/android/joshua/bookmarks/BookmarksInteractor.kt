@@ -20,15 +20,13 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
+import me.xizzhu.android.joshua.ui.BaseAnnotatedVerseInteractor
 
 class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
                           private val bibleReadingManager: BibleReadingManager,
                           private val bookmarkManager: BookmarkManager,
                           private val navigator: Navigator,
-                          settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, IS_LOADING) {
-    suspend fun observeBookmarksSortOrder(): ReceiveChannel<Int> = bookmarkManager.observeSortOrder()
-
+                          settingsManager: SettingsManager) : BaseAnnotatedVerseInteractor(settingsManager, IS_LOADING) {
     suspend fun saveBookmarksSortOrder(@Constants.SortOrder sortOrder: Int) {
         bookmarkManager.saveSortOrder(sortOrder)
     }
@@ -46,7 +44,9 @@ class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
     suspend fun readBookShortNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookShortNames(translationShortName)
 
-    suspend fun openReading(verseIndex: VerseIndex) {
+    override suspend fun observeSortOrder(): ReceiveChannel<Int> = bookmarkManager.observeSortOrder()
+
+    override suspend fun openVerse(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
         navigator.navigate(bookmarksActivity, Navigator.SCREEN_READING)
     }

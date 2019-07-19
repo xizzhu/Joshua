@@ -45,7 +45,7 @@ class BookmarksModule {
 
     @Provides
     fun provideSortOrderToolbarPresenter(bookmarksInteractor: BookmarksInteractor): SortOrderToolbarPresenter =
-            SortOrderToolbarPresenter({ bookmarksInteractor.observeBookmarksSortOrder().first() },
+            SortOrderToolbarPresenter({ bookmarksInteractor.observeSortOrder().first() },
                     bookmarksInteractor::saveBookmarksSortOrder)
 
     @Provides
