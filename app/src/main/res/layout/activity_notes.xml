@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <me.xizzhu.android.joshua.ui.AnnotatedVerseListView
+    <me.xizzhu.android.joshua.annotated.AnnotatedVerseListView
         android:id="@+id/notes"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <me.xizzhu.android.joshua.ui.SortOrderToolbar
+        <me.xizzhu.android.joshua.annotated.SortOrderToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"

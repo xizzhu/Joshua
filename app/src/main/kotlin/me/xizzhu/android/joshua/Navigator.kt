@@ -20,9 +20,9 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.IntDef
-import me.xizzhu.android.joshua.bookmarks.BookmarksActivity
-import me.xizzhu.android.joshua.highlights.HighlightsActivity
-import me.xizzhu.android.joshua.notes.NotesActivity
+import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity
+import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
+import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.search.SearchActivity

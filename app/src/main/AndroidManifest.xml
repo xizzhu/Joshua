@@ -22,9 +22,9 @@
             </intent-filter>
         </activity-alias>
 
-        <activity android:name=".bookmarks.BookmarksActivity" />
-        <activity android:name=".highlights.HighlightsActivity" />
-        <activity android:name=".notes.NotesActivity" />
+        <activity android:name="me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity" />
+        <activity android:name="me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity" />
+        <activity android:name="me.xizzhu.android.joshua.annotated.notes.NotesActivity" />
         <activity android:name=".progress.ReadingProgressActivity" />
         <activity android:name=".reading.ReadingActivity" />
         <activity android:name=".search.SearchActivity" />
