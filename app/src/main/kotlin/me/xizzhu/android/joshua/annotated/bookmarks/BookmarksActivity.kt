@@ -16,52 +16,19 @@
 
 package me.xizzhu.android.joshua.annotated.bookmarks
 
-import android.os.Bundle
-import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.annotated.*
 import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksPresenter
-import me.xizzhu.android.joshua.annotated.AnnotatedVerseListView
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbar
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbarPresenter
-import me.xizzhu.android.joshua.ui.bindView
-import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class BookmarksActivity : BaseLoadingSpinnerActivity() {
+class BookmarksActivity : BaseAnnotatedVersesActivity() {
     @Inject
     lateinit var bookmarksInteractor: BookmarksInteractor
 
     @Inject
-    lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter
-
-    @Inject
     lateinit var bookmarksPresenter: BookmarksPresenter
 
-    private val toolbar: AnnotatedVersesToolbar by bindView(R.id.toolbar)
-    private val bookmarksListView: AnnotatedVerseListView by bindView(R.id.verse_list)
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_annotated)
-        bookmarksListView.setPresenter(bookmarksPresenter)
-        toolbar.setPresenter(toolbarPresenter)
-        toolbar.setTitle(R.string.title_bookmarks)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        toolbarPresenter.attachView(toolbar)
-        bookmarksPresenter.attachView(bookmarksListView)
-    }
-
-    override fun onStop() {
-        toolbarPresenter.detachView()
-        bookmarksPresenter.detachView()
-
-        super.onStop()
-    }
-
     override fun getBaseSettingsInteractor(): BaseSettingsInteractor = bookmarksInteractor
+
+    override fun getAnnotatedVersesPresenter(): AnnotatedVersePresenter = bookmarksPresenter
 }

@@ -16,52 +16,19 @@
 
 package me.xizzhu.android.joshua.annotated.notes
 
-import android.os.Bundle
-import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.annotated.*
 import me.xizzhu.android.joshua.annotated.notes.list.NotesPresenter
-import me.xizzhu.android.joshua.annotated.AnnotatedVerseListView
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbar
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbarPresenter
-import me.xizzhu.android.joshua.ui.bindView
-import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class NotesActivity : BaseLoadingSpinnerActivity() {
+class NotesActivity : BaseAnnotatedVersesActivity() {
     @Inject
     lateinit var notesInteractor: NotesInteractor
 
     @Inject
-    lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter
-
-    @Inject
     lateinit var notesPresenter: NotesPresenter
 
-    private val toolbar: AnnotatedVersesToolbar by bindView(R.id.toolbar)
-    private val notesListView: AnnotatedVerseListView by bindView(R.id.verse_list)
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_annotated)
-        toolbar.setPresenter(toolbarPresenter)
-        toolbar.setTitle(R.string.title_notes)
-        notesListView.setPresenter(notesPresenter)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        toolbarPresenter.attachView(toolbar)
-        notesPresenter.attachView(notesListView)
-    }
-
-    override fun onStop() {
-        toolbarPresenter.detachView()
-        notesPresenter.detachView()
-
-        super.onStop()
-    }
-
     override fun getBaseSettingsInteractor(): BaseSettingsInteractor = notesInteractor
+
+    override fun getAnnotatedVersesPresenter(): AnnotatedVersePresenter = notesPresenter
 }
