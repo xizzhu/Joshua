@@ -16,43 +16,20 @@
 
 package me.xizzhu.android.joshua.annotated.highlights
 
-import android.os.Bundle
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbar
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbarPresenter
-import me.xizzhu.android.joshua.ui.bindView
-import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
+import me.xizzhu.android.joshua.annotated.AnnotatedVersePresenter
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesActivity
+import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class HighlightsActivity : BaseLoadingSpinnerActivity() {
+class HighlightsActivity : BaseAnnotatedVersesActivity() {
     @Inject
     lateinit var highlightInteractor: HighlightsInteractor
 
     @Inject
-    lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter
-
-    private val toolbar: AnnotatedVersesToolbar by bindView(R.id.toolbar)
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_annotated)
-        toolbar.setPresenter(toolbarPresenter)
-        toolbar.setTitle(R.string.title_highlights)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        toolbarPresenter.attachView(toolbar)
-    }
-
-    override fun onStop() {
-        toolbarPresenter.detachView()
-
-        super.onStop()
-    }
+    lateinit var highlightsPresenter: HighlightsPresenter
 
     override fun getBaseSettingsInteractor(): BaseSettingsInteractor = highlightInteractor
+
+    override fun getAnnotatedVersesPresenter(): AnnotatedVersePresenter = highlightsPresenter
 }

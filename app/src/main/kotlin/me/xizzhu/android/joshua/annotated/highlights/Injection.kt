@@ -20,19 +20,24 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.ActivityScope
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.HighlightManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbarPresenter
+import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsPresenter
+import me.xizzhu.android.joshua.core.BibleReadingManager
 
 @Module
 class HighlightsModule {
     @Provides
     @ActivityScope
     fun provideHighlightsInteractor(highlightsActivity: HighlightsActivity,
+                                    bibleReadingManager: BibleReadingManager,
                                     highlightsManager: HighlightManager,
+                                    navigator: Navigator,
                                     settingsManager: SettingsManager): HighlightsInteractor =
-            HighlightsInteractor(highlightsActivity, highlightsManager, settingsManager)
+            HighlightsInteractor(highlightsActivity, bibleReadingManager, highlightsManager, navigator, settingsManager)
 
     @Provides
     fun provideLoadingAwarePresenter(highlightsInteractor: HighlightsInteractor): LoadingAwarePresenter =
@@ -42,4 +47,9 @@ class HighlightsModule {
     fun provideSortOrderToolbarPresenter(highlightsInteractor: HighlightsInteractor): AnnotatedVersesToolbarPresenter =
             AnnotatedVersesToolbarPresenter({ highlightsInteractor.observeSortOrder().first() },
                     highlightsInteractor::saveSortOrder)
+
+    @Provides
+    fun provideHighlightsPresenter(highlightsActivity: HighlightsActivity,
+                                   highlightsInteractor: HighlightsInteractor): HighlightsPresenter =
+            HighlightsPresenter(highlightsInteractor, highlightsActivity.resources)
 }
