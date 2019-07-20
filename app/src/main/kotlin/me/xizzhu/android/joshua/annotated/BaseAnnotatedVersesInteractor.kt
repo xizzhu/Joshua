@@ -16,15 +16,36 @@
 
 package me.xizzhu.android.joshua.annotated
 
+import android.app.Activity
 import kotlinx.coroutines.channels.ReceiveChannel
-import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.core.VerseIndex
+import kotlinx.coroutines.channels.first
+import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 
-abstract class BaseAnnotatedVersesInteractor(settingsManager: SettingsManager,
+abstract class BaseAnnotatedVersesInteractor(private val activity: Activity,
+                                             private val bibleReadingManager: BibleReadingManager,
+                                             private val navigator: Navigator,
+                                             settingsManager: SettingsManager,
                                              @Companion.LoadingState initialLoadingState: Int)
     : BaseLoadingAwareInteractor(settingsManager, initialLoadingState) {
+    suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
+
+    suspend fun readBookNames(translationShortName: String): List<String> =
+            bibleReadingManager.readBookNames(translationShortName)
+
+    suspend fun readBookShortNames(translationShortName: String): List<String> =
+            bibleReadingManager.readBookShortNames(translationShortName)
+
+    suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
+            bibleReadingManager.readVerse(translationShortName, verseIndex)
+
+    open suspend fun openVerse(verseIndex: VerseIndex) {
+        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
+        navigator.navigate(activity, Navigator.SCREEN_READING)
+    }
+
     abstract suspend fun observeSortOrder(): ReceiveChannel<Int>
 
-    abstract suspend fun openVerse(verseIndex: VerseIndex)
+    abstract suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int)
 }

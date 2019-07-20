@@ -17,37 +17,21 @@
 package me.xizzhu.android.joshua.annotated.bookmarks
 
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesInteractor
 
-class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
-                          private val bibleReadingManager: BibleReadingManager,
+class BookmarksInteractor(bookmarksActivity: BookmarksActivity,
+                          bibleReadingManager: BibleReadingManager,
                           private val bookmarkManager: BookmarkManager,
-                          private val navigator: Navigator,
-                          settingsManager: SettingsManager) : BaseAnnotatedVersesInteractor(settingsManager, IS_LOADING) {
-    suspend fun saveBookmarksSortOrder(@Constants.SortOrder sortOrder: Int) {
-        bookmarkManager.saveSortOrder(sortOrder)
-    }
-
-    suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
-
+                          navigator: Navigator,
+                          settingsManager: SettingsManager)
+    : BaseAnnotatedVersesInteractor(bookmarksActivity, bibleReadingManager, navigator, settingsManager, IS_LOADING) {
     suspend fun readBookmarks(@Constants.SortOrder sortOrder: Int): List<Bookmark> = bookmarkManager.read(sortOrder)
-
-    suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
-            bibleReadingManager.readVerse(translationShortName, verseIndex)
-
-    suspend fun readBookNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookNames(translationShortName)
-
-    suspend fun readBookShortNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookShortNames(translationShortName)
 
     override suspend fun observeSortOrder(): ReceiveChannel<Int> = bookmarkManager.observeSortOrder()
 
-    override suspend fun openVerse(verseIndex: VerseIndex) {
-        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-        navigator.navigate(bookmarksActivity, Navigator.SCREEN_READING)
+    override suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        bookmarkManager.saveSortOrder(sortOrder)
     }
 }

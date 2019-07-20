@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.annotated.notes
 
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -27,28 +26,18 @@ class NotesInteractor(private val notesActivity: NotesActivity,
                       private val bibleReadingManager: BibleReadingManager,
                       private val noteManager: NoteManager,
                       private val navigator: Navigator,
-                      settingsManager: SettingsManager) : BaseAnnotatedVersesInteractor(settingsManager, IS_LOADING) {
-    suspend fun saveNotesSortOrder(@Constants.SortOrder sortOrder: Int) {
-        noteManager.saveSortOrder(sortOrder)
-    }
-
-    suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
-
+                      settingsManager: SettingsManager)
+    : BaseAnnotatedVersesInteractor(notesActivity, bibleReadingManager, navigator, settingsManager, IS_LOADING) {
     suspend fun readNotes(@Constants.SortOrder sortOrder: Int): List<Note> = noteManager.read(sortOrder)
-
-    suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
-            bibleReadingManager.readVerse(translationShortName, verseIndex)
-
-    suspend fun readBookNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookNames(translationShortName)
-
-    suspend fun readBookShortNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookShortNames(translationShortName)
-
-    override suspend fun observeSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
 
     override suspend fun openVerse(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
         navigator.navigate(notesActivity, Navigator.SCREEN_READING, ReadingActivity.bundleForOpenNote())
+    }
+
+    override suspend fun observeSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
+
+    override suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        noteManager.saveSortOrder(sortOrder)
     }
 }

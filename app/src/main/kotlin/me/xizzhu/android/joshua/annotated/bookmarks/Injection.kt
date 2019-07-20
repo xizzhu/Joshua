@@ -45,8 +45,7 @@ class BookmarksModule {
 
     @Provides
     fun provideSortOrderToolbarPresenter(bookmarksInteractor: BookmarksInteractor): AnnotatedVersesToolbarPresenter =
-            AnnotatedVersesToolbarPresenter({ bookmarksInteractor.observeSortOrder().first() },
-                    bookmarksInteractor::saveBookmarksSortOrder)
+            AnnotatedVersesToolbarPresenter({ bookmarksInteractor.observeSortOrder().first() }, bookmarksInteractor::saveSortOrder)
 
     @Provides
     fun provideBookmarksPresenter(bookmarksActivity: BookmarksActivity,

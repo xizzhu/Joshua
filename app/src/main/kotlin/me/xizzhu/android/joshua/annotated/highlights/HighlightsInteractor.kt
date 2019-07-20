@@ -20,23 +20,18 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesInteractor
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 
-class HighlightsInteractor(private val highlightsActivity: HighlightsActivity,
-                           private val bibleReadingManager: BibleReadingManager,
+class HighlightsInteractor(highlightsActivity: HighlightsActivity,
+                           bibleReadingManager: BibleReadingManager,
                            private val highlightsManager: HighlightManager,
-                           private val navigator: Navigator,
-                           settingsManager: SettingsManager) : BaseAnnotatedVersesInteractor(settingsManager, IS_LOADING) {
-    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
-        highlightsManager.saveSortOrder(sortOrder)
-    }
-
+                           navigator: Navigator,
+                           settingsManager: SettingsManager)
+    : BaseAnnotatedVersesInteractor(highlightsActivity, bibleReadingManager, navigator, settingsManager, IS_LOADING) {
     suspend fun readHighlights(@Constants.SortOrder sortOrder: Int): List<Highlight> = highlightsManager.read(sortOrder)
 
     override suspend fun observeSortOrder(): ReceiveChannel<Int> = highlightsManager.observeSortOrder()
 
-    override suspend fun openVerse(verseIndex: VerseIndex) {
-        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-        navigator.navigate(highlightsActivity, Navigator.SCREEN_READING)
+    override suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        highlightsManager.saveSortOrder(sortOrder)
     }
 }
