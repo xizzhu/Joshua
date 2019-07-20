@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <me.xizzhu.android.joshua.annotated.AnnotatedVerseListView
-        android:id="@+id/bookmarks"
+        android:id="@+id/verse_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
@@ -26,7 +26,6 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:title="@string/title_bookmarks" />
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
     </com.google.android.material.appbar.AppBarLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

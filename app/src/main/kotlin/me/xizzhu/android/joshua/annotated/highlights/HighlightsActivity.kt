@@ -37,8 +37,9 @@ class HighlightsActivity : BaseLoadingSpinnerActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_highlights)
+        setContentView(R.layout.activity_annotated)
         toolbar.setPresenter(toolbarPresenter)
+        toolbar.setTitle(R.string.title_highlights)
     }
 
     override fun onStart() {

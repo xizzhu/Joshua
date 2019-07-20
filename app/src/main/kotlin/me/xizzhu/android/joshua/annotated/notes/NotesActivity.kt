@@ -38,13 +38,14 @@ class NotesActivity : BaseLoadingSpinnerActivity() {
     lateinit var notesPresenter: NotesPresenter
 
     private val toolbar: SortOrderToolbar by bindView(R.id.toolbar)
-    private val notesListView: AnnotatedVerseListView by bindView(R.id.notes)
+    private val notesListView: AnnotatedVerseListView by bindView(R.id.verse_list)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_notes)
+        setContentView(R.layout.activity_annotated)
         toolbar.setPresenter(toolbarPresenter)
+        toolbar.setTitle(R.string.title_notes)
         notesListView.setPresenter(notesPresenter)
     }
 

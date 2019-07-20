@@ -38,14 +38,15 @@ class BookmarksActivity : BaseLoadingSpinnerActivity() {
     lateinit var bookmarksPresenter: BookmarksPresenter
 
     private val toolbar: SortOrderToolbar by bindView(R.id.toolbar)
-    private val bookmarksListView: AnnotatedVerseListView by bindView(R.id.bookmarks)
+    private val bookmarksListView: AnnotatedVerseListView by bindView(R.id.verse_list)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_bookmarks)
+        setContentView(R.layout.activity_annotated)
         bookmarksListView.setPresenter(bookmarksPresenter)
         toolbar.setPresenter(toolbarPresenter)
+        toolbar.setTitle(R.string.title_bookmarks)
     }
 
     override fun onStart() {
