@@ -16,12 +16,13 @@
 
 package me.xizzhu.android.joshua.annotated.bookmarks
 
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.*
 import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class BookmarksActivity : BaseAnnotatedVersesActivity() {
+class BookmarksActivity : BaseAnnotatedVersesActivity(R.string.title_bookmarks) {
     @Inject
     lateinit var bookmarksInteractor: BookmarksInteractor
 

@@ -16,13 +16,14 @@
 
 package me.xizzhu.android.joshua.annotated.highlights
 
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.AnnotatedVersePresenter
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesActivity
 import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class HighlightsActivity : BaseAnnotatedVersesActivity() {
+class HighlightsActivity : BaseAnnotatedVersesActivity(R.string.title_highlights) {
     @Inject
     lateinit var highlightInteractor: HighlightsInteractor
 

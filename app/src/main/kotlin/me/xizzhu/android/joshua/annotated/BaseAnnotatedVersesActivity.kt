@@ -17,12 +17,13 @@
 package me.xizzhu.android.joshua.annotated
 
 import android.os.Bundle
+import androidx.annotation.StringRes
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
 import javax.inject.Inject
 
-abstract class BaseAnnotatedVersesActivity : BaseLoadingSpinnerActivity() {
+abstract class BaseAnnotatedVersesActivity(@StringRes private val title: Int) : BaseLoadingSpinnerActivity() {
     @Inject
     lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter
 
@@ -35,7 +36,7 @@ abstract class BaseAnnotatedVersesActivity : BaseLoadingSpinnerActivity() {
         setContentView(R.layout.activity_annotated)
         verseListView.setPresenter(getAnnotatedVersesPresenter())
         toolbar.setPresenter(toolbarPresenter)
-        toolbar.setTitle(R.string.title_bookmarks)
+        toolbar.setTitle(title)
     }
 
     override fun onStart() {

@@ -16,12 +16,13 @@
 
 package me.xizzhu.android.joshua.annotated.notes
 
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.*
 import me.xizzhu.android.joshua.annotated.notes.list.NotesPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class NotesActivity : BaseAnnotatedVersesActivity() {
+class NotesActivity : BaseAnnotatedVersesActivity(R.string.title_notes) {
     @Inject
     lateinit var notesInteractor: NotesInteractor
 
