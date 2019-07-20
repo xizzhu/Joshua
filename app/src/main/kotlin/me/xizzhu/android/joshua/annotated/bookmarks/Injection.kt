@@ -26,7 +26,7 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.BookmarkManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
-import me.xizzhu.android.joshua.annotated.SortOrderToolbarPresenter
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbarPresenter
 
 @Module
 class BookmarksModule {
@@ -44,8 +44,8 @@ class BookmarksModule {
             LoadingAwarePresenter(bookmarksInteractor.observeLoadingState())
 
     @Provides
-    fun provideSortOrderToolbarPresenter(bookmarksInteractor: BookmarksInteractor): SortOrderToolbarPresenter =
-            SortOrderToolbarPresenter({ bookmarksInteractor.observeSortOrder().first() },
+    fun provideSortOrderToolbarPresenter(bookmarksInteractor: BookmarksInteractor): AnnotatedVersesToolbarPresenter =
+            AnnotatedVersesToolbarPresenter({ bookmarksInteractor.observeSortOrder().first() },
                     bookmarksInteractor::saveBookmarksSortOrder)
 
     @Provides

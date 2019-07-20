@@ -20,13 +20,13 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.annotated.BaseAnnotatedVerseInteractor
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesInteractor
 
 class BookmarksInteractor(private val bookmarksActivity: BookmarksActivity,
                           private val bibleReadingManager: BibleReadingManager,
                           private val bookmarkManager: BookmarkManager,
                           private val navigator: Navigator,
-                          settingsManager: SettingsManager) : BaseAnnotatedVerseInteractor(settingsManager, IS_LOADING) {
+                          settingsManager: SettingsManager) : BaseAnnotatedVersesInteractor(settingsManager, IS_LOADING) {
     suspend fun saveBookmarksSortOrder(@Constants.SortOrder sortOrder: Int) {
         bookmarkManager.saveSortOrder(sortOrder)
     }

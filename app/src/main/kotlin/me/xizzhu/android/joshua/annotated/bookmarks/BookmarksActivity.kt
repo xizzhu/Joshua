@@ -20,8 +20,8 @@ import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksPresenter
 import me.xizzhu.android.joshua.annotated.AnnotatedVerseListView
-import me.xizzhu.android.joshua.annotated.SortOrderToolbar
-import me.xizzhu.android.joshua.annotated.SortOrderToolbarPresenter
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbar
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
@@ -32,12 +32,12 @@ class BookmarksActivity : BaseLoadingSpinnerActivity() {
     lateinit var bookmarksInteractor: BookmarksInteractor
 
     @Inject
-    lateinit var toolbarPresenter: SortOrderToolbarPresenter
+    lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter
 
     @Inject
     lateinit var bookmarksPresenter: BookmarksPresenter
 
-    private val toolbar: SortOrderToolbar by bindView(R.id.toolbar)
+    private val toolbar: AnnotatedVersesToolbar by bindView(R.id.toolbar)
     private val bookmarksListView: AnnotatedVerseListView by bindView(R.id.verse_list)
 
     override fun onCreate(savedInstanceState: Bundle?) {

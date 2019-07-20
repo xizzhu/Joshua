@@ -21,8 +21,8 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 
-abstract class BaseAnnotatedVerseInteractor(settingsManager: SettingsManager,
-                                            @Companion.LoadingState initialLoadingState: Int)
+abstract class BaseAnnotatedVersesInteractor(settingsManager: SettingsManager,
+                                             @Companion.LoadingState initialLoadingState: Int)
     : BaseLoadingAwareInteractor(settingsManager, initialLoadingState) {
     abstract suspend fun observeSortOrder(): ReceiveChannel<Int>
 

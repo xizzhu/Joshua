@@ -31,15 +31,15 @@ import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
 import me.xizzhu.android.logger.Log
 
-interface SortOrderToolbarView : MVPView {
+interface AnnotatedVersesToolbarView : MVPView {
     fun onSortOrderLoaded(@Constants.SortOrder sortOrder: Int)
 
     fun onSortOrderUpdateFailed(@Constants.SortOrder sortOrder: Int)
 }
 
-class SortOrderToolbarPresenter(private val getCurrentSortOrder: suspend () -> Int,
-                                private val updateCurrentSortOrder: suspend (Int) -> Unit)
-    : MVPPresenter<SortOrderToolbarView>() {
+class AnnotatedVersesToolbarPresenter(private val getCurrentSortOrder: suspend () -> Int,
+                                      private val updateCurrentSortOrder: suspend (Int) -> Unit)
+    : MVPPresenter<AnnotatedVersesToolbarView>() {
     override fun onViewAttached() {
         super.onViewAttached()
 
@@ -60,14 +60,14 @@ class SortOrderToolbarPresenter(private val getCurrentSortOrder: suspend () -> I
     }
 }
 
-class SortOrderToolbar : Toolbar, SortOrderToolbarView {
+class AnnotatedVersesToolbar : Toolbar, AnnotatedVersesToolbarView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private lateinit var presenter: SortOrderToolbarPresenter
+    private lateinit var presenter: AnnotatedVersesToolbarPresenter
 
     private val sortOrderSpinnerItemSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -92,7 +92,7 @@ class SortOrderToolbar : Toolbar, SortOrderToolbarView {
         }
     }
 
-    fun setPresenter(presenter: SortOrderToolbarPresenter) {
+    fun setPresenter(presenter: AnnotatedVersesToolbarPresenter) {
         this.presenter = presenter
     }
 

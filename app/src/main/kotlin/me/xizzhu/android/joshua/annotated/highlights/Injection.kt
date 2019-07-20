@@ -23,7 +23,7 @@ import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.core.HighlightManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
-import me.xizzhu.android.joshua.annotated.SortOrderToolbarPresenter
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbarPresenter
 
 @Module
 class HighlightsModule {
@@ -39,7 +39,7 @@ class HighlightsModule {
             LoadingAwarePresenter(highlightsInteractor.observeLoadingState())
 
     @Provides
-    fun provideSortOrderToolbarPresenter(highlightsInteractor: HighlightsInteractor): SortOrderToolbarPresenter =
-            SortOrderToolbarPresenter({ highlightsInteractor.observeSortOrder().first() },
+    fun provideSortOrderToolbarPresenter(highlightsInteractor: HighlightsInteractor): AnnotatedVersesToolbarPresenter =
+            AnnotatedVersesToolbarPresenter({ highlightsInteractor.observeSortOrder().first() },
                     highlightsInteractor::saveSortOrder)
 }

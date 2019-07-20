@@ -85,13 +85,13 @@ class AnnotatedVerseListView : BaseRecyclerView, AnnotatedVersesView {
     }
 }
 
-abstract class AnnotatedVersePresenter(private val baseAnnotatedVerseInteractor: BaseAnnotatedVerseInteractor)
-    : BaseSettingsPresenter<AnnotatedVersesView>(baseAnnotatedVerseInteractor) {
+abstract class AnnotatedVersePresenter(private val baseAnnotatedVersesInteractor: BaseAnnotatedVersesInteractor)
+    : BaseSettingsPresenter<AnnotatedVersesView>(baseAnnotatedVersesInteractor) {
     override fun onViewAttached() {
         super.onViewAttached()
 
         coroutineScope.launch(Dispatchers.Main) {
-            baseAnnotatedVerseInteractor.observeSortOrder().consumeEach { load(it) }
+            baseAnnotatedVersesInteractor.observeSortOrder().consumeEach { load(it) }
         }
     }
 
@@ -100,7 +100,7 @@ abstract class AnnotatedVersePresenter(private val baseAnnotatedVerseInteractor:
     fun openVerse(verseToSelect: VerseIndex) {
         coroutineScope.launch(Dispatchers.Main) {
             try {
-                baseAnnotatedVerseInteractor.openVerse(verseToSelect)
+                baseAnnotatedVersesInteractor.openVerse(verseToSelect)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
                 view?.onVerseSelectionFailed(verseToSelect)

@@ -21,13 +21,13 @@ import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.annotated.BaseAnnotatedVerseInteractor
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesInteractor
 
 class NotesInteractor(private val notesActivity: NotesActivity,
                       private val bibleReadingManager: BibleReadingManager,
                       private val noteManager: NoteManager,
                       private val navigator: Navigator,
-                      settingsManager: SettingsManager) : BaseAnnotatedVerseInteractor(settingsManager, IS_LOADING) {
+                      settingsManager: SettingsManager) : BaseAnnotatedVersesInteractor(settingsManager, IS_LOADING) {
     suspend fun saveNotesSortOrder(@Constants.SortOrder sortOrder: Int) {
         noteManager.saveSortOrder(sortOrder)
     }
