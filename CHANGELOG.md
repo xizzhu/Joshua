@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.8.0 (2019-07-20)
 - Supported highlight list
 - Improved translation list sorting
 - Made book names in verse detail view, bookmark lists bold and smaller
