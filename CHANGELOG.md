@@ -7,6 +7,7 @@ CHANGELOG
 - Made book names in verse detail view, bookmark lists bold and smaller
 - Should set hint on TextInputLayout
 - Should always notify loading started / finished for reading progress, bookmarks, and notes
+- Enabled R8 full mode
 - Updated dependencies:
   - Gradle to 5.5.1
   - Android Gradle plugin to 3.4.2
