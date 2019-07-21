@@ -23,7 +23,6 @@ import kotlinx.coroutines.channels.first
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -34,25 +33,45 @@ class TranslationManagerTest : BaseUnitTest() {
     @Mock
     private lateinit var translationRepository: TranslationRepository
 
-    private lateinit var translationManager: TranslationManager
-
-    @Before
-    override fun setup() {
-        super.setup()
-
+    @Test
+    fun testObserveInitialTranslations() {
         runBlocking {
-            `when`(translationRepository.readTranslationsFromLocal()).thenReturn(emptyList())
-            translationManager = TranslationManager(translationRepository)
+            `when`(translationRepository.readTranslationsFromLocal())
+                    .thenReturn(listOf(MockContents.kjvDownloadedTranslationInfo, MockContents.cuvTranslationInfo))
+            val translationManager = TranslationManager(translationRepository)
+
+            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo),
+                    translationManager.observeDownloadedTranslations().first())
+            assertEquals(listOf(MockContents.cuvTranslationInfo),
+                    translationManager.observeAvailableTranslations().first())
+        }
+    }
+
+    @Test
+    fun testObserveInitialTranslationsWithException() {
+        runBlocking {
+            `when`(translationRepository.readTranslationsFromLocal()).thenThrow(RuntimeException("Random exception"))
+            val translationManager = TranslationManager(translationRepository)
+
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
         }
     }
 
     @Test
     fun testUpdateTranslations() {
         runBlocking {
+            `when`(translationRepository.readTranslationsFromLocal()).thenReturn(emptyList())
+            val translationManager = TranslationManager(translationRepository)
+
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+
             translationManager.updateTranslations(listOf(MockContents.kjvTranslationInfo,
                     MockContents.kjvDownloadedTranslationInfo, MockContents.kjvDownloadedTranslationInfo,
                     MockContents.kjvTranslationInfo, MockContents.kjvTranslationInfo,
                     MockContents.kjvDownloadedTranslationInfo))
+
             assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationManager.observeDownloadedTranslations().first())
             assertEquals(listOf(MockContents.kjvTranslationInfo), translationManager.observeAvailableTranslations().first())
         }
@@ -62,6 +81,9 @@ class TranslationManagerTest : BaseUnitTest() {
     fun testNotifyTranslationsUpdated() {
         runBlocking {
             withTimeout(5000L) {
+                `when`(translationRepository.readTranslationsFromLocal()).thenReturn(emptyList())
+                val translationManager = TranslationManager(translationRepository)
+
                 var availableUpdated = 0
                 val availableJob = launch(Dispatchers.Unconfined) {
                     val availableReceiver = translationManager.observeAvailableTranslations()
@@ -99,6 +121,59 @@ class TranslationManagerTest : BaseUnitTest() {
                 availableJob.join()
                 downloadedJob.join()
             }
+        }
+    }
+
+    @Test
+    fun testDownloadTranslation() {
+        runBlocking {
+            `when`(translationRepository.readTranslationsFromLocal()).thenReturn(emptyList())
+            val translationManager = TranslationManager(translationRepository)
+
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+
+            translationManager.updateTranslations(listOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo))
+            translationManager.downloadTranslation(Channel(), MockContents.kjvTranslationInfo)
+
+            assertEquals(listOf(MockContents.cuvTranslationInfo),
+                    translationManager.observeAvailableTranslations().first())
+            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo),
+                    translationManager.observeDownloadedTranslations().first())
+        }
+    }
+
+    @Test
+    fun testRemoveNonExistTranslation() {
+        runBlocking {
+            `when`(translationRepository.readTranslationsFromLocal()).thenReturn(emptyList())
+            val translationManager = TranslationManager(translationRepository)
+
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+
+            translationManager.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, false))
+
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+        }
+    }
+
+    @Test
+    fun testRemoveTranslation() {
+        runBlocking {
+            `when`(translationRepository.readTranslationsFromLocal()).thenReturn(emptyList())
+            val translationManager = TranslationManager(translationRepository)
+
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
+            assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
+
+            translationManager.updateTranslations(listOf(MockContents.cuvTranslationInfo, MockContents.kjvDownloadedTranslationInfo))
+            translationManager.removeTranslation(MockContents.kjvDownloadedTranslationInfo)
+
+            assertEquals(setOf(MockContents.kjvTranslationInfo, MockContents.cuvTranslationInfo),
+                    translationManager.observeAvailableTranslations().first().toSet())
+            assertTrue(translationManager.observeDownloadedTranslations().first().isEmpty())
         }
     }
 }

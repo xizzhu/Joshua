@@ -43,13 +43,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
             try {
                 updateTranslations(translationRepository.readTranslationsFromLocal())
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to initialize available translations", e)
-                updateTranslations(emptyList())
-            }
-            try {
-                updateTranslations(translationRepository.readTranslationsFromLocal())
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to initialize downloaded translations", e)
+                Log.e(TAG, "Failed to initialize translations", e)
                 updateTranslations(emptyList())
             }
         }
