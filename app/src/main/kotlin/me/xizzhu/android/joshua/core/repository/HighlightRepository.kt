@@ -16,11 +16,21 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalHighlightStorage
 
 class HighlightRepository(private val localHighlightStorage: LocalHighlightStorage) {
+    suspend fun readSortOrder(): Int = localHighlightStorage.readSortOrder()
+
+    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        localHighlightStorage.saveSortOrder(sortOrder)
+    }
+
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Highlight> =
+            localHighlightStorage.read(sortOrder)
+
     suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
             localHighlightStorage.read(bookIndex, chapterIndex)
 

@@ -52,6 +52,8 @@ interface ToolbarView : MVPView {
 
     fun onFailedToNavigateToBookmarks()
 
+    fun onFailedToNavigateToHighlights()
+
     fun onFailedToNavigateToNotes()
 
     fun onFailedToNavigateToSettings()
@@ -102,6 +104,10 @@ class ReadingToolbar : Toolbar, ToolbarView {
             }
             R.id.action_bookmarks -> {
                 presenter.openBookmarks()
+                return@OnMenuItemClickListener true
+            }
+            R.id.action_highlights -> {
+                presenter.openHighlights()
                 return@OnMenuItemClickListener true
             }
             R.id.action_notes -> {
@@ -237,6 +243,13 @@ class ReadingToolbar : Toolbar, ToolbarView {
         DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_bookmarks_error,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.openBookmarks()
+                })
+    }
+
+    override fun onFailedToNavigateToHighlights() {
+        DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_highlights_error,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.openHighlights()
                 })
     }
 

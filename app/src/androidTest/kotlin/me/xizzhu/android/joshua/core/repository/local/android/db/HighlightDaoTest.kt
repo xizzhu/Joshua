@@ -20,9 +20,11 @@ import android.graphics.Color
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
@@ -34,6 +36,8 @@ import kotlin.test.assertTrue
 class HighlightDaoTest : BaseSqliteTest() {
     @Test
     fun testEmptyTable() {
+        Assert.assertTrue(androidDatabase.highlightDao.read(Constants.SORT_BY_DATE).isEmpty())
+        Assert.assertTrue(androidDatabase.highlightDao.read(Constants.SORT_BY_BOOK).isEmpty())
         for (bookIndex in 0 until Bible.BOOK_COUNT) {
             for (chapterIndex in 0 until Bible.getChapterCount(bookIndex)) {
                 assertTrue(androidDatabase.highlightDao.read(bookIndex, chapterIndex).isEmpty())
@@ -52,6 +56,8 @@ class HighlightDaoTest : BaseSqliteTest() {
         androidDatabase.highlightDao.save(highlight2)
         androidDatabase.highlightDao.save(highlight3)
 
+        assertEquals(listOf(highlight3, highlight2, highlight1), androidDatabase.highlightDao.read(Constants.SORT_BY_DATE))
+        assertEquals(listOf(highlight1, highlight2, highlight3), androidDatabase.highlightDao.read(Constants.SORT_BY_BOOK))
         assertEquals(listOf(highlight1, highlight2), androidDatabase.highlightDao.read(1, 2))
         assertEquals(listOf(highlight3), androidDatabase.highlightDao.read(1, 4))
         assertEquals(highlight1, androidDatabase.highlightDao.read(VerseIndex(1, 2, 3)))
@@ -72,6 +78,8 @@ class HighlightDaoTest : BaseSqliteTest() {
         androidDatabase.highlightDao.save(highlight2)
         androidDatabase.highlightDao.save(highlight3)
 
+        assertEquals(listOf(highlight3, highlight2, highlight1), androidDatabase.highlightDao.read(Constants.SORT_BY_DATE))
+        assertEquals(listOf(highlight1, highlight2, highlight3), androidDatabase.highlightDao.read(Constants.SORT_BY_BOOK))
         assertEquals(listOf(highlight1, highlight2), androidDatabase.highlightDao.read(1, 2))
         assertEquals(listOf(highlight3), androidDatabase.highlightDao.read(1, 4))
         assertEquals(highlight1, androidDatabase.highlightDao.read(VerseIndex(1, 2, 3)))
@@ -82,6 +90,7 @@ class HighlightDaoTest : BaseSqliteTest() {
     @Test
     fun testRemoveNonExist() {
         androidDatabase.highlightDao.remove(VerseIndex(1, 2, 3))
+        assertTrue(androidDatabase.highlightDao.read(Constants.SORT_BY_DATE).isEmpty())
         assertTrue(androidDatabase.highlightDao.read(1, 2).isEmpty())
         assertFalse(androidDatabase.highlightDao.read(VerseIndex(1, 2, 3)).isValid())
     }
@@ -90,10 +99,12 @@ class HighlightDaoTest : BaseSqliteTest() {
     fun testSaveThenRemove() {
         val highlight = Highlight(VerseIndex(1, 2, 3), Color.BLACK, 45678L)
         androidDatabase.highlightDao.save(highlight)
+        assertEquals(listOf(highlight), androidDatabase.highlightDao.read(Constants.SORT_BY_DATE))
         assertEquals(listOf(highlight), androidDatabase.highlightDao.read(1, 2))
 
         androidDatabase.highlightDao.remove(highlight.verseIndex)
         assertTrue(androidDatabase.highlightDao.read(1, 2).isEmpty())
+        assertTrue(androidDatabase.highlightDao.read(Constants.SORT_BY_DATE).isEmpty())
         assertFalse(androidDatabase.highlightDao.read(VerseIndex(1, 2, 3)).isValid())
     }
 }

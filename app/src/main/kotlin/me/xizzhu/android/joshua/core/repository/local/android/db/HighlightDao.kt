@@ -20,6 +20,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
 
@@ -45,6 +46,29 @@ class HighlightDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     private val db by lazy { sqliteHelper.writableDatabase }
+
+    fun read(@Constants.SortOrder sortOrder: Int): List<Highlight> {
+        val orderBy = when (sortOrder) {
+            Constants.SORT_BY_DATE -> "$COLUMN_TIMESTAMP DESC"
+            Constants.SORT_BY_BOOK -> "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC"
+            else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
+        }
+
+        db.query(TABLE_HIGHLIGHT, null, null, null, null, null, orderBy).use {
+            val highlights = ArrayList<Highlight>(it.count)
+            val bookIndex = it.getColumnIndex(COLUMN_BOOK_INDEX)
+            val chapterIndex = it.getColumnIndex(COLUMN_CHAPTER_INDEX)
+            val verseIndex = it.getColumnIndex(COLUMN_VERSE_INDEX)
+            val color = it.getColumnIndex(COLUMN_COLOR)
+            val timestamp = it.getColumnIndex(COLUMN_TIMESTAMP)
+            while (it.moveToNext()) {
+                highlights.add(Highlight(
+                        VerseIndex(it.getInt(bookIndex), it.getInt(chapterIndex), it.getInt(verseIndex)),
+                        it.getInt(color), it.getLong(timestamp)))
+            }
+            return highlights
+        }
+    }
 
     fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> {
         db.query(TABLE_HIGHLIGHT, arrayOf(COLUMN_VERSE_INDEX, COLUMN_COLOR, COLUMN_TIMESTAMP),

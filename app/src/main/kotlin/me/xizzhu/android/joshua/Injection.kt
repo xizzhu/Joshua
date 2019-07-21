@@ -23,8 +23,8 @@ import dagger.Provides
 import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
-import me.xizzhu.android.joshua.bookmarks.BookmarksActivity
-import me.xizzhu.android.joshua.bookmarks.BookmarksModule
+import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity
+import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksModule
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.core.repository.*
 import me.xizzhu.android.joshua.core.repository.local.*
@@ -32,8 +32,10 @@ import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
-import me.xizzhu.android.joshua.notes.NotesActivity
-import me.xizzhu.android.joshua.notes.NotesModule
+import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
+import me.xizzhu.android.joshua.annotated.highlights.HighlightsModule
+import me.xizzhu.android.joshua.annotated.notes.NotesActivity
+import me.xizzhu.android.joshua.annotated.notes.NotesModule
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
 import me.xizzhu.android.joshua.progress.ReadingProgressModule
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -201,6 +203,10 @@ abstract class ActivityModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = [(BookmarksModule::class)])
     abstract fun contributeBookmarksActivity(): BookmarksActivity
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [(HighlightsModule::class)])
+    abstract fun contributeHighlightsActivity(): HighlightsActivity
 
     @ActivityScope
     @ContributesAndroidInjector(modules = [(NotesModule::class)])
