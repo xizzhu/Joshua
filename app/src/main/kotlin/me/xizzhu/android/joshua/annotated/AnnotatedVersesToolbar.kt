@@ -86,7 +86,7 @@ class AnnotatedVersesToolbar : Toolbar, AnnotatedVersesToolbarView {
     private val sortOrderSpinnerAdapter = SortOrderSpinnerAdapter(context)
 
     init {
-        inflateMenu(R.menu.menu_sort_order)
+        inflateMenu(R.menu.menu_annotated)
         (menu.findItem(R.id.action_sort).actionView as Spinner).apply {
             onItemSelectedListener = sortOrderSpinnerItemSelectedListener
         }
