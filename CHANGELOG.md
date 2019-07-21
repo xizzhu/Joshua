@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Supported highlight list
 - Improved translation list sorting
 - Made book names in verse detail view, bookmark lists bold and smaller
 - Should set hint on TextInputLayout
