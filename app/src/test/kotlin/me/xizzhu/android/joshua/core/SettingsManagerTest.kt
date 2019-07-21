@@ -41,22 +41,6 @@ class SettingsManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveSortOrder() {
-        runBlocking {
-            `when`(settingsRepository.readSettings()).thenReturn(Settings.DEFAULT.copy(nightModeOn = true))
-            assertEquals(Settings.DEFAULT.copy(nightModeOn = true), settingsManager.observeSettings().first())
-        }
-    }
-
-    @Test
-    fun testObserveSortOrderWithException() {
-        runBlocking {
-            `when`(settingsRepository.readSettings()).thenThrow(RuntimeException("Random exception"))
-            assertEquals(Settings.DEFAULT, settingsManager.observeSettings().first())
-        }
-    }
-
-    @Test
     fun testUpdateSettings() {
         runBlocking {
             assertEquals(Settings.DEFAULT, settingsManager.observeSettings().first())

@@ -46,46 +46,15 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveCurrentVerseIndex() {
-        runBlocking {
-            assertEquals(VerseIndex(1, 2, 3), bibleReadingManager.observeCurrentVerseIndex().first())
-        }
-    }
-
-    @Test
-    fun testCurrentVerseIndex() {
+    fun testSaveCurrentVerseIndex() {
         runBlocking {
             bibleReadingManager.saveCurrentVerseIndex(VerseIndex(4, 5, 6))
-
             assertEquals(VerseIndex(4, 5, 6), bibleReadingManager.observeCurrentVerseIndex().first())
         }
     }
 
     @Test
-    fun testCurrentVerseIndexWithException() {
-        runBlocking {
-            `when`(bibleReadingRepository.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
-            assertEquals(VerseIndex.INVALID, bibleReadingManager.observeCurrentVerseIndex().first())
-        }
-    }
-
-    @Test
-    fun testObserveCurrentTranslation() {
-        runBlocking {
-            assertEquals(MockContents.kjvShortName, bibleReadingManager.observeCurrentTranslation().first())
-        }
-    }
-
-    @Test
-    fun testObserveCurrentTranslationWithException() {
-        runBlocking {
-            `when`(bibleReadingRepository.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
-            assertEquals("", bibleReadingManager.observeCurrentTranslation().first())
-        }
-    }
-
-    @Test
-    fun testCurrentTranslation() {
+    fun testSaveCurrentTranslation() {
         runBlocking {
             bibleReadingManager.saveCurrentTranslation(MockContents.cuvShortName)
             assertEquals(MockContents.cuvShortName, bibleReadingManager.observeCurrentTranslation().first())

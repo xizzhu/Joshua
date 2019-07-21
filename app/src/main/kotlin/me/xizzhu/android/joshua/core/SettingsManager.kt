@@ -16,9 +16,12 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 import me.xizzhu.android.logger.Log
 
@@ -36,18 +39,18 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
 
     private val currentSettings: BroadcastChannel<Settings> = ConflatedBroadcastChannel()
 
-    suspend fun observeSettings(): ReceiveChannel<Settings> {
-        return currentSettings.openSubscription().apply {
-            if (isEmpty) {
-                try {
-                    currentSettings.send(settingsRepository.readSettings())
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to initialize settings", e)
-                    currentSettings.send(Settings.DEFAULT)
-                }
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                currentSettings.send(settingsRepository.readSettings())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize settings", e)
+                currentSettings.send(Settings.DEFAULT)
             }
         }
     }
+
+    fun observeSettings(): ReceiveChannel<Settings> = currentSettings.openSubscription()
 
     suspend fun saveSettings(settings: Settings) {
         settingsRepository.saveSettings(settings)
