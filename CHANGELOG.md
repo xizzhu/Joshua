@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Fixed initialization of channels inside managers
 
 #### v0.8.0 (2019-07-20)
 - Supported highlight list
