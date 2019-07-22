@@ -20,11 +20,10 @@ import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.BookmarkRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.Before
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import kotlin.test.assertEquals
+import org.mockito.Mockito.*
 
 class BookmarkManagerTest : BaseUnitTest() {
     @Mock
@@ -32,26 +31,37 @@ class BookmarkManagerTest : BaseUnitTest() {
 
     private lateinit var bookmarkManager: BookmarkManager
 
-    @Before
-    override fun setup() {
-        super.setup()
-
-        bookmarkManager = BookmarkManager(bookmarkRepository)
-    }
-
     @Test
-    fun testObserveSortOrder() {
+    fun testObserveInitialSortOrder() {
         runBlocking {
             `when`(bookmarkRepository.readSortOrder()).thenReturn(Constants.SORT_BY_BOOK)
+            bookmarkManager = BookmarkManager(bookmarkRepository)
+
             assertEquals(Constants.SORT_BY_BOOK, bookmarkManager.observeSortOrder().first())
         }
     }
 
     @Test
-    fun testObserveSortOrderWithException() {
+    fun testObserveInitialSortOrderWithException() {
         runBlocking {
             `when`(bookmarkRepository.readSortOrder()).thenThrow(RuntimeException("Random exception"))
+            bookmarkManager = BookmarkManager(bookmarkRepository)
+
             assertEquals(Constants.DEFAULT_SORT_ORDER, bookmarkManager.observeSortOrder().first())
+        }
+    }
+
+    @Test
+    fun testSaveSortOrder() {
+        runBlocking {
+            `when`(bookmarkRepository.readSortOrder()).thenReturn(Constants.DEFAULT_SORT_ORDER)
+            bookmarkManager = BookmarkManager(bookmarkRepository)
+
+            assertEquals(Constants.DEFAULT_SORT_ORDER, bookmarkManager.observeSortOrder().first())
+
+            bookmarkManager.saveSortOrder(Constants.SORT_BY_BOOK)
+            verify(bookmarkRepository, times(1)).saveSortOrder(Constants.SORT_BY_BOOK)
+            assertEquals(Constants.SORT_BY_BOOK, bookmarkManager.observeSortOrder().first())
         }
     }
 }

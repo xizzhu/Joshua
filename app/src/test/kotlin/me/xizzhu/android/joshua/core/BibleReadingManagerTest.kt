@@ -26,6 +26,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class BibleReadingManagerTest : BaseUnitTest() {
@@ -46,49 +47,52 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveCurrentVerseIndex() {
+    fun testObserveInitialCurrentVerseIndex() {
         runBlocking {
             assertEquals(VerseIndex(1, 2, 3), bibleReadingManager.observeCurrentVerseIndex().first())
         }
     }
 
     @Test
-    fun testCurrentVerseIndex() {
+    fun testObserveInitialCurrentVerseIndexWithException() {
+        runBlocking {
+            `when`(bibleReadingRepository.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
+            bibleReadingManager = BibleReadingManager(bibleReadingRepository)
+
+            assertFalse(bibleReadingManager.observeCurrentVerseIndex().first().isValid())
+        }
+    }
+
+    @Test
+    fun testSaveCurrentVerseIndex() {
         runBlocking {
             bibleReadingManager.saveCurrentVerseIndex(VerseIndex(4, 5, 6))
-
             assertEquals(VerseIndex(4, 5, 6), bibleReadingManager.observeCurrentVerseIndex().first())
         }
     }
 
     @Test
-    fun testCurrentVerseIndexWithException() {
+    fun testSaveCurrentTranslation() {
         runBlocking {
-            `when`(bibleReadingRepository.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
-            assertEquals(VerseIndex.INVALID, bibleReadingManager.observeCurrentVerseIndex().first())
+            bibleReadingManager.saveCurrentTranslation(MockContents.cuvShortName)
+            assertEquals(MockContents.cuvShortName, bibleReadingManager.observeCurrentTranslation().first())
         }
     }
 
     @Test
-    fun testObserveCurrentTranslation() {
+    fun testObserveInitialCurrentTranslation() {
         runBlocking {
             assertEquals(MockContents.kjvShortName, bibleReadingManager.observeCurrentTranslation().first())
         }
     }
 
     @Test
-    fun testObserveCurrentTranslationWithException() {
+    fun testObserveInitialCurrentTranslationWithException() {
         runBlocking {
             `when`(bibleReadingRepository.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
-            assertEquals("", bibleReadingManager.observeCurrentTranslation().first())
-        }
-    }
+            bibleReadingManager = BibleReadingManager(bibleReadingRepository)
 
-    @Test
-    fun testCurrentTranslation() {
-        runBlocking {
-            bibleReadingManager.saveCurrentTranslation(MockContents.cuvShortName)
-            assertEquals(MockContents.cuvShortName, bibleReadingManager.observeCurrentTranslation().first())
+            assertTrue(bibleReadingManager.observeCurrentTranslation().first().isEmpty())
         }
     }
 

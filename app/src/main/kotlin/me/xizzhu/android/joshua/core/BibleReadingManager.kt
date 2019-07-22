@@ -16,9 +16,12 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.logger.Log
 
@@ -69,36 +72,31 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
     private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
     private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
 
-    suspend fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> {
-        return currentVerseIndex.openSubscription().apply {
-            if (isEmpty) {
-                try {
-                    currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to initialize current verse index", e)
-                    currentVerseIndex.send(VerseIndex.INVALID)
-                }
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize current verse index", e)
+                currentVerseIndex.send(VerseIndex.INVALID)
+            }
+            try {
+                currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize current translation", e)
+                currentTranslationShortName.send("")
             }
         }
     }
+
+    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         currentVerseIndex.send(verseIndex)
         bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
     }
 
-    suspend fun observeCurrentTranslation(): ReceiveChannel<String> {
-        return currentTranslationShortName.openSubscription().apply {
-            if (isEmpty) {
-                try {
-                    currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to initialize current translation", e)
-                    currentTranslationShortName.send("")
-                }
-            }
-        }
-    }
+    fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         currentTranslationShortName.send(translationShortName)

@@ -20,11 +20,10 @@ import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.NoteRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.Before
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import kotlin.test.assertEquals
+import org.mockito.Mockito.*
 
 class NoteManagerTest : BaseUnitTest() {
     @Mock
@@ -32,26 +31,37 @@ class NoteManagerTest : BaseUnitTest() {
 
     private lateinit var noteManager: NoteManager
 
-    @Before
-    override fun setup() {
-        super.setup()
-
-        noteManager = NoteManager(noteRepository)
-    }
-
     @Test
-    fun testObserveSortOrder() {
+    fun testObserveInitialSortOrder() {
         runBlocking {
             `when`(noteRepository.readSortOrder()).thenReturn(Constants.SORT_BY_BOOK)
+            noteManager = NoteManager(noteRepository)
+
             assertEquals(Constants.SORT_BY_BOOK, noteManager.observeSortOrder().first())
         }
     }
 
     @Test
-    fun testObserveSortOrderWithException() {
+    fun testObserveInitialSortOrderWithException() {
         runBlocking {
             `when`(noteRepository.readSortOrder()).thenThrow(RuntimeException("Random exception"))
+            noteManager = NoteManager(noteRepository)
+
             assertEquals(Constants.DEFAULT_SORT_ORDER, noteManager.observeSortOrder().first())
+        }
+    }
+
+    @Test
+    fun testSaveSortOrder() {
+        runBlocking {
+            `when`(noteRepository.readSortOrder()).thenReturn(Constants.DEFAULT_SORT_ORDER)
+            noteManager = NoteManager(noteRepository)
+
+            assertEquals(Constants.DEFAULT_SORT_ORDER, noteManager.observeSortOrder().first())
+
+            noteManager.saveSortOrder(Constants.SORT_BY_BOOK)
+            verify(noteRepository, times(1)).saveSortOrder(Constants.SORT_BY_BOOK)
+            assertEquals(Constants.SORT_BY_BOOK, noteManager.observeSortOrder().first())
         }
     }
 }

@@ -17,9 +17,12 @@
 package me.xizzhu.android.joshua.core
 
 import androidx.annotation.VisibleForTesting
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.logger.Log
 
@@ -34,6 +37,17 @@ class TranslationManager(private val translationRepository: TranslationRepositor
     private val translationsLock: Any = Any()
     private val availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
     private val downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                updateTranslations(translationRepository.readTranslationsFromLocal())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize translations", e)
+                updateTranslations(emptyList())
+            }
+        }
+    }
 
     @VisibleForTesting
     suspend fun updateTranslations(updatedTranslations: List<TranslationInfo>) {
@@ -63,31 +77,11 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         }
     }
 
-    suspend fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> {
-        return availableTranslationsChannel.openSubscription().apply {
-            if (isEmpty) {
-                try {
-                    updateTranslations(translationRepository.readTranslationsFromLocal())
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to initialize available translations", e)
-                    updateTranslations(emptyList())
-                }
-            }
-        }
-    }
+    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
+            availableTranslationsChannel.openSubscription()
 
-    suspend fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> {
-        return downloadedTranslationsChannel.openSubscription().apply {
-            if (isEmpty) {
-                try {
-                    updateTranslations(translationRepository.readTranslationsFromLocal())
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to initialize downloaded translations", e)
-                    updateTranslations(emptyList())
-                }
-            }
-        }
-    }
+    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
+            downloadedTranslationsChannel.openSubscription()
 
     suspend fun reload(forceRefresh: Boolean) {
         updateTranslations(translationRepository.reload(forceRefresh))

@@ -18,9 +18,12 @@ package me.xizzhu.android.joshua.core
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.HighlightRepository
 import me.xizzhu.android.logger.Log
 
@@ -45,18 +48,18 @@ class HighlightManager(private val highlightRepository: HighlightRepository) {
 
     private val sortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
 
-    suspend fun observeSortOrder(): ReceiveChannel<Int> {
-        return sortOrder.openSubscription().apply {
-            if (isEmpty) {
-                try {
-                    sortOrder.send(highlightRepository.readSortOrder())
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to initialize bookmark sort order", e)
-                    sortOrder.send(Constants.DEFAULT_SORT_ORDER)
-                }
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                sortOrder.send(highlightRepository.readSortOrder())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize bookmark sort order", e)
+                sortOrder.send(Constants.DEFAULT_SORT_ORDER)
             }
         }
     }
+
+    fun observeSortOrder(): ReceiveChannel<Int> = sortOrder.openSubscription()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         highlightRepository.saveSortOrder(sortOrder)

@@ -16,9 +16,12 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.NoteRepository
 import me.xizzhu.android.logger.Log
 
@@ -33,18 +36,18 @@ class NoteManager(private val noteRepository: NoteRepository) {
 
     private val notesSortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
 
-    suspend fun observeSortOrder(): ReceiveChannel<Int> {
-        return notesSortOrder.openSubscription().apply {
-            if (isEmpty) {
-                try {
-                    notesSortOrder.send(noteRepository.readSortOrder())
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to initialize note sort order", e)
-                    notesSortOrder.send(Constants.DEFAULT_SORT_ORDER)
-                }
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                notesSortOrder.send(noteRepository.readSortOrder())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize note sort order", e)
+                notesSortOrder.send(Constants.DEFAULT_SORT_ORDER)
             }
         }
     }
+
+    fun observeSortOrder(): ReceiveChannel<Int> = notesSortOrder.openSubscription()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         noteRepository.saveSortOrder(sortOrder)
