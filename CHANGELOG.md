@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.8.1 (2019-07-21)
 - Fixed initialization of channels inside managers
 
 #### v0.8.0 (2019-07-20)
