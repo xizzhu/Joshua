@@ -21,6 +21,7 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex

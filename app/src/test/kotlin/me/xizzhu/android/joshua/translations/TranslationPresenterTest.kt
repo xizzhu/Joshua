@@ -20,6 +20,7 @@ import android.content.Context
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Settings
@@ -56,19 +57,19 @@ class TranslationPresenterTest : BaseUnitTest() {
             `when`(translationInteractor.observeSettings()).thenReturn(flow { emit(Settings.DEFAULT) })
 
             translationLoadingStateChannel = ConflatedBroadcastChannel(BaseLoadingAwareInteractor.IS_LOADING)
-            `when`(translationInteractor.observeLoadingState()).then { translationLoadingStateChannel.openSubscription() }
+            `when`(translationInteractor.observeLoadingState()).thenReturn(translationLoadingStateChannel.openSubscription())
 
             translationsLoadingRequest = ConflatedBroadcastChannel()
-            `when`(translationInteractor.observeTranslationsLoadingRequest()).then { translationsLoadingRequest.openSubscription() }
+            `when`(translationInteractor.observeTranslationsLoadingRequest()).thenReturn(translationsLoadingRequest.asFlow())
 
             availableTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-            `when`(translationInteractor.observeAvailableTranslations()).then { availableTranslationsChannel.openSubscription() }
+            `when`(translationInteractor.observeAvailableTranslations()).thenReturn(availableTranslationsChannel.asFlow())
 
             downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-            `when`(translationInteractor.observeDownloadedTranslations()).then { downloadedTranslationsChannel.openSubscription() }
+            `when`(translationInteractor.observeDownloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
 
             currentTranslationChannel = ConflatedBroadcastChannel("")
-            `when`(translationInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
+            `when`(translationInteractor.observeCurrentTranslation()).thenReturn(currentTranslationChannel.openSubscription())
 
             `when`(context.getString(anyInt())).thenReturn("")
 
@@ -178,14 +179,16 @@ class TranslationPresenterTest : BaseUnitTest() {
             downloadProgressChannel.send(progress)
             downloadProgressChannel.close()
 
-            verify(translationInteractor, times(1))
-                    .downloadTranslation(downloadProgressChannel, MockContents.kjvTranslationInfo)
-            verify(translationView, times(1))
-                    .onTranslationDownloadProgressed(progress)
-            verify(translationInteractor, times(1))
-                    .saveCurrentTranslation(MockContents.kjvShortName)
-            verify(translationView, times(1))
-                    .onTranslationDownloaded()
+            with(inOrder(translationInteractor, translationView)) {
+                verify(translationInteractor, times(1))
+                        .downloadTranslation(downloadProgressChannel, MockContents.kjvTranslationInfo)
+                verify(translationView, times(1))
+                        .onTranslationDownloadProgressed(progress)
+                verify(translationInteractor, times(1))
+                        .saveCurrentTranslation(MockContents.kjvShortName)
+                verify(translationView, times(1))
+                        .onTranslationDownloaded()
+            }
 
             translationPresenter.detachView()
         }

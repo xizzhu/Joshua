@@ -20,8 +20,9 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.logger.Log
@@ -34,6 +35,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         private val TAG = TranslationManager::class.java.simpleName
     }
 
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val translationsLock: Any = Any()
     private val availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
     private val downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
@@ -77,11 +79,9 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         }
     }
 
-    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            availableTranslationsChannel.openSubscription()
+    fun observeAvailableTranslations(): Flow<List<TranslationInfo>> = availableTranslationsChannel.asFlow()
 
-    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            downloadedTranslationsChannel.openSubscription()
+    fun observeDownloadedTranslations(): Flow<List<TranslationInfo>> = downloadedTranslationsChannel.asFlow()
 
     suspend fun reload(forceRefresh: Boolean) {
         updateTranslations(translationRepository.reload(forceRefresh))

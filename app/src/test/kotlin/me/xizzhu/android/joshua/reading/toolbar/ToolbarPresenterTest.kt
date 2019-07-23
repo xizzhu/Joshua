@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading.toolbar
 
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -47,16 +48,16 @@ class ToolbarPresenterTest : BaseUnitTest() {
 
         runBlocking {
             currentTranslationChannel = ConflatedBroadcastChannel("")
-            `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
+            `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationChannel.openSubscription())
 
             currentVerseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
-            `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
+            `when`(readingInteractor.observeCurrentVerseIndex()).thenReturn(currentVerseIndexChannel.openSubscription())
 
             downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-            `when`(readingInteractor.observeDownloadedTranslations()).then { downloadedTranslationsChannel.openSubscription() }
+            `when`(readingInteractor.observeDownloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
 
             parallelTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-            `when`(readingInteractor.observeParallelTranslations()).then { parallelTranslationsChannel.openSubscription() }
+            `when`(readingInteractor.observeParallelTranslations()).thenReturn(parallelTranslationsChannel.openSubscription())
 
             toolbarPresenter = ToolbarPresenter(readingInteractor)
             toolbarPresenter.attachView(toolbarView)

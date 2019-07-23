@@ -57,7 +57,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationShortName.openSubscription())
 
             downloadedTranslations = ConflatedBroadcastChannel(emptyList())
-            `when`(readingInteractor.observeDownloadedTranslations()).thenReturn(downloadedTranslations.openSubscription())
+            `when`(readingInteractor.observeDownloadedTranslations()).thenReturn(downloadedTranslations.asFlow())
 
             verseDetailPresenter = VerseDetailPresenter(readingInteractor)
 

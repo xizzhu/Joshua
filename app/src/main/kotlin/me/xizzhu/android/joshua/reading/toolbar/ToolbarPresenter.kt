@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.toolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
@@ -44,7 +45,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
                     .consumeEach { view?.onCurrentVerseIndexUpdated(it) }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeDownloadedTranslations().consumeEach {
+            readingInteractor.observeDownloadedTranslations().collect {
                 if (it.isEmpty()) {
                     view?.onNoTranslationsDownloaded()
                 } else {

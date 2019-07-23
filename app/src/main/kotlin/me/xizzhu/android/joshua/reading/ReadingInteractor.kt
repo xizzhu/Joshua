@@ -34,6 +34,7 @@ import androidx.annotation.IntDef
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import me.xizzhu.android.logger.Log
@@ -72,8 +73,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
     private val verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>> = ConflatedBroadcastChannel()
     private val verseUpdates: BroadcastChannel<Pair<VerseIndex, VerseUpdate>> = ConflatedBroadcastChannel()
 
-    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            translationManager.observeDownloadedTranslations()
+    fun observeDownloadedTranslations(): Flow<List<TranslationInfo>> = translationManager.observeDownloadedTranslations()
 
     fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
 
