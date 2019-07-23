@@ -64,7 +64,7 @@ class TranslationInfoDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun replace(translations: List<TranslationInfo>) {
-        db.transaction {
+        db.withTransaction {
             db.delete(TABLE_TRANSLATION_INFO, null, null)
 
             val values = ContentValues(5)

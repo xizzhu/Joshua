@@ -50,7 +50,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
-        db.transaction {
+        db.withTransaction {
             if (!hasTable(translationShortName)) {
                 return emptyList()
             }
@@ -82,7 +82,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
             return emptyMap()
         }
 
-        db.transaction {
+        db.withTransaction {
             val results = mutableMapOf<String, List<Verse.Text>>()
             for (translation in translations) {
                 query(translation, arrayOf(COLUMN_TEXT),
@@ -109,7 +109,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
             return emptyMap()
         }
 
-        db.transaction {
+        db.withTransaction {
             val results = mutableMapOf<String, Verse.Text>()
             for (translation in translations) {
                 query(translation, arrayOf(COLUMN_TEXT),
@@ -131,7 +131,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
             return Verse.INVALID
         }
 
-        db.transaction {
+        db.withTransaction {
             if (!hasTable(translationShortName)) {
                 return Verse.INVALID
             }
@@ -168,7 +168,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
             selectionArgs[i] = "%%${keywords[i]}%%"
         }
 
-        db.transaction {
+        db.withTransaction {
             if (!hasTable(translationShortName)) {
                 return emptyList()
             }

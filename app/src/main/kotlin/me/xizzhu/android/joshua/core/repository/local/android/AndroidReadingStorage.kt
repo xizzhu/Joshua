@@ -23,7 +23,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
-import me.xizzhu.android.joshua.core.repository.local.android.db.transaction
+import me.xizzhu.android.joshua.core.repository.local.android.db.withTransaction
 
 class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : LocalReadingStorage {
     override suspend fun readCurrentVerseIndex(): VerseIndex {
@@ -76,7 +76,7 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
 
     override suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
                                     bookIndex: Int, chapterIndex: Int): List<Verse> = withContext(Dispatchers.IO) {
-        androidDatabase.readableDatabase.transaction {
+        androidDatabase.readableDatabase.withTransaction {
             val translations = mutableListOf(translationShortName)
             translations.addAll(parallelTranslations)
             val translationToTexts = androidDatabase.translationDao.read(translations, bookIndex, chapterIndex)
@@ -107,7 +107,7 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
 
     override suspend fun readVerse(translationShortName: String, parallelTranslations: List<String>,
                                    verseIndex: VerseIndex): Verse = withContext(Dispatchers.IO) {
-        androidDatabase.readableDatabase.transaction {
+        androidDatabase.readableDatabase.withTransaction {
             val translations = mutableListOf(translationShortName)
             translations.addAll(parallelTranslations)
             val translationToText = androidDatabase.translationDao.read(translations, verseIndex).toMutableMap()

@@ -108,7 +108,7 @@ class MetadataDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun save(entries: List<Pair<String, String>>) {
-        db.transaction {
+        db.withTransaction {
             val values = ContentValues(2)
             for (entry in entries) {
                 with(values) {

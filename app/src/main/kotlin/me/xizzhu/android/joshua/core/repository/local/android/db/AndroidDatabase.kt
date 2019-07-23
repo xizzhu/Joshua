@@ -36,7 +36,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     val translationInfoDao = TranslationInfoDao(this)
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.transaction {
+        db.withTransaction {
             BookmarkDao.createTable(db)
             BookNamesDao.createTable(db)
             HighlightDao.createTable(db)
@@ -54,7 +54,11 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     }
 }
 
-inline fun <R> SQLiteDatabase.transaction(block: SQLiteDatabase.() -> R): R {
+/**
+ * Due to limitation that transactions are thread confined, SQLite accessing code inside the block
+ * can only run in the current thread.
+ */
+inline fun <R> SQLiteDatabase.withTransaction(block: SQLiteDatabase.() -> R): R {
     try {
         beginTransaction()
         val r = block()

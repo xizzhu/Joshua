@@ -22,7 +22,7 @@ import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
-import me.xizzhu.android.joshua.core.repository.local.android.db.transaction
+import me.xizzhu.android.joshua.core.repository.local.android.db.withTransaction
 
 class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : LocalTranslationStorage {
     override suspend fun readTranslationListRefreshTimestamp(): Long = withContext(Dispatchers.IO) {
@@ -52,7 +52,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                                          bookShortNames: List<String>,
                                          verses: Map<Pair<Int, Int>, List<String>>) {
         withContext(Dispatchers.IO) {
-            androidDatabase.writableDatabase.transaction {
+            androidDatabase.writableDatabase.withTransaction {
                 androidDatabase.bookNamesDao.save(translationInfo.shortName, bookNames, bookShortNames)
                 if (translationInfo.downloaded) {
                     androidDatabase.translationInfoDao.save(translationInfo)
@@ -67,7 +67,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
 
     override suspend fun removeTranslation(translationInfo: TranslationInfo) {
         withContext(Dispatchers.IO) {
-            androidDatabase.writableDatabase.transaction {
+            androidDatabase.writableDatabase.withTransaction {
                 androidDatabase.bookNamesDao.remove(translationInfo.shortName)
                 if (translationInfo.downloaded) {
                     androidDatabase.translationInfoDao.save(translationInfo.copy(downloaded = false))
