@@ -20,7 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.BookmarkRepository
 import me.xizzhu.android.logger.Log
@@ -34,6 +35,7 @@ class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
         private val TAG = BookmarkManager::class.java.simpleName
     }
 
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val bookmarksSortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
 
     init {
@@ -47,7 +49,7 @@ class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
         }
     }
 
-    fun observeSortOrder(): ReceiveChannel<Int> = bookmarksSortOrder.openSubscription()
+    fun observeSortOrder(): Flow<Int> = bookmarksSortOrder.asFlow()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         bookmarkRepository.saveSortOrder(sortOrder)

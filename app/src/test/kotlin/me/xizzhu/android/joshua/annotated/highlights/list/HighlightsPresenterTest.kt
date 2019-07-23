@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.annotated.highlights.list
 import android.content.res.Resources
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
@@ -55,7 +56,7 @@ class HighlightsPresenterTest : BaseUnitTest() {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
             sortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
             `when`(highlightsInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-            `when`(highlightsInteractor.observeSortOrder()).thenReturn(sortOrder.openSubscription())
+            `when`(highlightsInteractor.observeSortOrder()).thenReturn(sortOrder.asFlow())
             `when`(highlightsInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
             `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")

@@ -22,7 +22,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.HighlightRepository
 import me.xizzhu.android.logger.Log
@@ -46,6 +47,7 @@ class HighlightManager(private val highlightRepository: HighlightRepository) {
         private val TAG = HighlightManager::class.java.simpleName
     }
 
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val sortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
 
     init {
@@ -59,7 +61,7 @@ class HighlightManager(private val highlightRepository: HighlightRepository) {
         }
     }
 
-    fun observeSortOrder(): ReceiveChannel<Int> = sortOrder.openSubscription()
+    fun observeSortOrder(): Flow<Int> = sortOrder.asFlow()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         highlightRepository.saveSortOrder(sortOrder)

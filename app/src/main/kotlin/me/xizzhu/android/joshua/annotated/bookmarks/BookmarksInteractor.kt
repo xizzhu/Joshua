@@ -16,7 +16,7 @@
 
 package me.xizzhu.android.joshua.annotated.bookmarks
 
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesInteractor
@@ -29,7 +29,7 @@ class BookmarksInteractor(bookmarksActivity: BookmarksActivity,
     : BaseAnnotatedVersesInteractor(bookmarksActivity, bibleReadingManager, navigator, settingsManager, IS_LOADING) {
     suspend fun readBookmarks(@Constants.SortOrder sortOrder: Int): List<Bookmark> = bookmarkManager.read(sortOrder)
 
-    override fun observeSortOrder(): ReceiveChannel<Int> = bookmarkManager.observeSortOrder()
+    override fun observeSortOrder(): Flow<Int> = bookmarkManager.observeSortOrder()
 
     override suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         bookmarkManager.saveSortOrder(sortOrder)

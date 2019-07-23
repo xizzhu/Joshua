@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.annotated.highlights
 
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.HighlightManager
@@ -48,8 +48,7 @@ object HighlightsModule {
     @JvmStatic
     @Provides
     fun provideSortOrderToolbarPresenter(highlightsInteractor: HighlightsInteractor): AnnotatedVersesToolbarPresenter =
-            AnnotatedVersesToolbarPresenter({ highlightsInteractor.observeSortOrder().first() },
-                    highlightsInteractor::saveSortOrder)
+            AnnotatedVersesToolbarPresenter({ highlightsInteractor.observeSortOrder().first() }, highlightsInteractor::saveSortOrder)
 
     @JvmStatic
     @Provides

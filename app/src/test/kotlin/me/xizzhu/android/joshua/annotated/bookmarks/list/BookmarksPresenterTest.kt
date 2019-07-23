@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.annotated.bookmarks.list
 import android.content.res.Resources
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksInteractor
 import me.xizzhu.android.joshua.core.Bookmark
@@ -55,7 +56,7 @@ class BookmarksPresenterTest : BaseUnitTest() {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
             bookmarksSortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
             `when`(bookmarksInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-            `when`(bookmarksInteractor.observeSortOrder()).thenReturn(bookmarksSortOrder.openSubscription())
+            `when`(bookmarksInteractor.observeSortOrder()).thenReturn(bookmarksSortOrder.asFlow())
             `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
             `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")

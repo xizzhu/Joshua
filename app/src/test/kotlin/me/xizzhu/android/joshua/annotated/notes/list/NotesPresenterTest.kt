@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.annotated.notes.list
 import android.content.res.Resources
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
@@ -55,7 +56,7 @@ class NotesPresenterTest : BaseUnitTest() {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
             notesSortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
             `when`(notesInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-            `when`(notesInteractor.observeSortOrder()).thenReturn(notesSortOrder.openSubscription())
+            `when`(notesInteractor.observeSortOrder()).thenReturn(notesSortOrder.asFlow())
             `when`(notesInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
             `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
