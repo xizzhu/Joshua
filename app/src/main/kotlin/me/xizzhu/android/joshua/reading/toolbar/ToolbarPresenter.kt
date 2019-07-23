@@ -17,9 +17,8 @@
 package me.xizzhu.android.joshua.reading.toolbar
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.reading.ReadingInteractor
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
@@ -35,14 +34,14 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
 
         coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentTranslation().filter { it.isNotEmpty() }
-                    .consumeEach {
+                    .collect {
                         view?.onCurrentTranslationUpdated(it)
                         view?.onBookShortNamesUpdated(readingInteractor.readBookShortNames(it))
                     }
         }
         coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
-                    .consumeEach { view?.onCurrentVerseIndexUpdated(it) }
+                    .collect { view?.onCurrentVerseIndexUpdated(it) }
         }
         coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeDownloadedTranslations().collect {
@@ -54,7 +53,7 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
             }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeParallelTranslations().consumeEach { view?.onParallelTranslationsUpdated(it) }
+            readingInteractor.observeParallelTranslations().collect { view?.onParallelTranslationsUpdated(it) }
         }
     }
 

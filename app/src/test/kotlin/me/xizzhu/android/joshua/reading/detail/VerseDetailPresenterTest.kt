@@ -51,10 +51,10 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.asFlow())
 
             verseDetailOpenState = ConflatedBroadcastChannel()
-            `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
+            `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.asFlow())
 
             currentTranslationShortName = ConflatedBroadcastChannel(MockContents.kjvShortName)
-            `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationShortName.openSubscription())
+            `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationShortName.asFlow())
 
             downloadedTranslations = ConflatedBroadcastChannel(emptyList())
             `when`(readingInteractor.observeDownloadedTranslations()).thenReturn(downloadedTranslations.asFlow())

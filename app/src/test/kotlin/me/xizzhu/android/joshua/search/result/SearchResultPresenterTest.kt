@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.search.result
 
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Settings
@@ -38,7 +36,6 @@ class SearchResultPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var searchResultView: SearchResultView
     private lateinit var searchResultPresenter: SearchResultPresenter
-    private lateinit var searchQueryChannel: BroadcastChannel<String>
 
     @Before
     override fun setup() {
@@ -46,10 +43,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
 
         runBlocking {
             `when`(searchInteractor.observeSettings()).thenReturn(flow { emit(Settings.DEFAULT) })
-
-            searchQueryChannel = ConflatedBroadcastChannel("")
-            `when`(searchInteractor.observeSearchQuery()).thenReturn(searchQueryChannel.openSubscription())
-
+            `when`(searchInteractor.observeSearchQuery()).thenReturn(flow { emit("") })
             `when`(searchInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(searchInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
             `when`(searchInteractor.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)

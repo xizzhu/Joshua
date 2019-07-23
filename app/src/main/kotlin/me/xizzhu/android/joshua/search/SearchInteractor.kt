@@ -17,6 +17,9 @@
 package me.xizzhu.android.joshua.search
 
 import kotlinx.coroutines.channels.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -28,9 +31,10 @@ class SearchInteractor(private val searchActivity: SearchActivity,
                        private val navigator: Navigator,
                        private val bibleReadingManager: BibleReadingManager,
                        settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, NOT_LOADING) {
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val searchQuery: BroadcastChannel<String> = ConflatedBroadcastChannel("")
 
-    fun observeSearchQuery(): ReceiveChannel<String> = searchQuery.openSubscription()
+    fun observeSearchQuery(): Flow<String> = searchQuery.asFlow()
 
     suspend fun updateSearchQuery(query: String) {
         searchQuery.send(query)

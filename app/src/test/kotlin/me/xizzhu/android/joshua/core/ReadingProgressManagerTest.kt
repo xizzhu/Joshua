@@ -19,6 +19,8 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
@@ -43,10 +45,10 @@ class ReadingProgressManagerTest : BaseUnitTest() {
         super.setup()
 
         verseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
-        `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(verseIndexChannel.openSubscription())
+        `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(verseIndexChannel.asFlow())
 
         currentTranslationChannel = ConflatedBroadcastChannel("")
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(currentTranslationChannel.openSubscription())
+        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(currentTranslationChannel.asFlow())
 
         readingProgressManager = ReadingProgressManager(bibleReadingManager, readingProgressRepository)
     }
@@ -57,6 +59,9 @@ class ReadingProgressManagerTest : BaseUnitTest() {
             readingProgressManager = spy(readingProgressManager)
             doReturn(0L).`when`(readingProgressManager).timeSpentThresholdInMillis()
             currentTranslationChannel.send(MockContents.kjvShortName)
+
+            val verseIndexChannel: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)
+            `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(verseIndexChannel.asFlow())
 
             readingProgressManager.startTracking()
             verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
@@ -98,6 +103,7 @@ class ReadingProgressManagerTest : BaseUnitTest() {
     fun testStartTrackingMultipleTimes() {
         runBlocking {
             currentTranslationChannel.send(MockContents.kjvShortName)
+            `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(flow { emit(VerseIndex.INVALID) })
 
             launch(Dispatchers.Unconfined) {
                 readingProgressManager.startTracking()

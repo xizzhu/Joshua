@@ -20,8 +20,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.logger.Log
@@ -70,6 +71,7 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
         private val TAG = BibleReadingManager::class.java.simpleName
     }
 
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
     private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
     private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
@@ -91,7 +93,7 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
             }
         }
         GlobalScope.launch(Dispatchers.Default) {
-            translationManager.observeDownloadedTranslations().consumeEach {
+            translationManager.observeDownloadedTranslations().collect {
                 downloadedTranslations.clear()
                 it.forEach { translation -> downloadedTranslations.add(translation.shortName) }
 
@@ -106,21 +108,21 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
         }
     }
 
-    fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = currentVerseIndex.openSubscription()
+    fun observeCurrentVerseIndex(): Flow<VerseIndex> = currentVerseIndex.asFlow()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         currentVerseIndex.send(verseIndex)
         bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
     }
 
-    fun observeCurrentTranslation(): ReceiveChannel<String> = currentTranslationShortName.openSubscription()
+    fun observeCurrentTranslation(): Flow<String> = currentTranslationShortName.asFlow()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         currentTranslationShortName.send(translationShortName)
         bibleReadingRepository.saveCurrentTranslation(translationShortName)
     }
 
-    fun observeParallelTranslations(): ReceiveChannel<List<String>> = parallelTranslations.openSubscription()
+    fun observeParallelTranslations(): Flow<List<String>> = parallelTranslations.asFlow()
 
     suspend fun requestParallelTranslation(translationShortName: String) {
         val parallel = parallelTranslations.value.toMutableSet()

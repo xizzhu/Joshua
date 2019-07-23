@@ -69,7 +69,7 @@ class TranslationPresenterTest : BaseUnitTest() {
             `when`(translationInteractor.observeDownloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
 
             currentTranslationChannel = ConflatedBroadcastChannel("")
-            `when`(translationInteractor.observeCurrentTranslation()).thenReturn(currentTranslationChannel.openSubscription())
+            `when`(translationInteractor.observeCurrentTranslation()).thenReturn(currentTranslationChannel.asFlow())
 
             `when`(context.getString(anyInt())).thenReturn("")
 

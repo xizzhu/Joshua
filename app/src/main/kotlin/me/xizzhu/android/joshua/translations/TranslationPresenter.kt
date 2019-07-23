@@ -22,8 +22,8 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
@@ -47,7 +47,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         super.onViewAttached()
 
         coroutineScope.launch(Dispatchers.Main) {
-            translationInteractor.observeCurrentTranslation().consumeEach {
+            translationInteractor.observeCurrentTranslation().collect {
                 currentTranslation = it
                 updateTranslations()
             }

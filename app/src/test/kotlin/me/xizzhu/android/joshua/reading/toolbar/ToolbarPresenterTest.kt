@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.reading.toolbar
 
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -40,7 +41,6 @@ class ToolbarPresenterTest : BaseUnitTest() {
     private lateinit var currentTranslationChannel: ConflatedBroadcastChannel<String>
     private lateinit var currentVerseIndexChannel: ConflatedBroadcastChannel<VerseIndex>
     private lateinit var downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
-    private lateinit var parallelTranslationsChannel: ConflatedBroadcastChannel<List<String>>
 
     @Before
     override fun setup() {
@@ -48,16 +48,15 @@ class ToolbarPresenterTest : BaseUnitTest() {
 
         runBlocking {
             currentTranslationChannel = ConflatedBroadcastChannel("")
-            `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationChannel.openSubscription())
+            `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationChannel.asFlow())
 
             currentVerseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
-            `when`(readingInteractor.observeCurrentVerseIndex()).thenReturn(currentVerseIndexChannel.openSubscription())
+            `when`(readingInteractor.observeCurrentVerseIndex()).thenReturn(currentVerseIndexChannel.asFlow())
 
             downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
             `when`(readingInteractor.observeDownloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
 
-            parallelTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-            `when`(readingInteractor.observeParallelTranslations()).thenReturn(parallelTranslationsChannel.openSubscription())
+            `when`(readingInteractor.observeParallelTranslations()).thenReturn(flow { emit(emptyList<String>()) })
 
             toolbarPresenter = ToolbarPresenter(readingInteractor)
             toolbarPresenter.attachView(toolbarView)

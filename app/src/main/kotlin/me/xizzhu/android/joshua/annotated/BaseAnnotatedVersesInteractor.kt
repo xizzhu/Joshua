@@ -17,8 +17,8 @@
 package me.xizzhu.android.joshua.annotated
 
 import android.app.Activity
-import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor

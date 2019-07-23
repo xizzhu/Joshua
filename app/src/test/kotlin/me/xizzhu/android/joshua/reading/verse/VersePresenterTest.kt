@@ -20,6 +20,7 @@ import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
@@ -53,7 +54,6 @@ class VersePresenterTest : BaseUnitTest() {
     private lateinit var currentVerseIndexChannel: ConflatedBroadcastChannel<VerseIndex>
     private lateinit var parallelTranslationsChannel: ConflatedBroadcastChannel<List<String>>
     private lateinit var verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>>
-    private lateinit var verseUpdates: ConflatedBroadcastChannel<Pair<VerseIndex, VerseUpdate>>
 
     @Before
     override fun setup() {
@@ -64,19 +64,18 @@ class VersePresenterTest : BaseUnitTest() {
             `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.asFlow())
 
             currentTranslationChannel = ConflatedBroadcastChannel("")
-            `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
+            `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationChannel.asFlow())
 
             currentVerseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
-            `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
+            `when`(readingInteractor.observeCurrentVerseIndex()).thenReturn(currentVerseIndexChannel.asFlow())
 
             parallelTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-            `when`(readingInteractor.observeParallelTranslations()).then { parallelTranslationsChannel.openSubscription() }
+            `when`(readingInteractor.observeParallelTranslations()).thenReturn(parallelTranslationsChannel.asFlow())
 
             verseDetailOpenState = ConflatedBroadcastChannel()
-            `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
+            `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.asFlow())
 
-            verseUpdates = ConflatedBroadcastChannel()
-            `when`(readingInteractor.observeVerseUpdates()).thenReturn(verseUpdates.openSubscription())
+            `when`(readingInteractor.observeVerseUpdates()).thenReturn(flow { })
 
             versePresenter = VersePresenter(readingInteractor)
             versePresenter.attachView(verseView)

@@ -19,8 +19,7 @@ package me.xizzhu.android.joshua.reading.detail
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
@@ -50,7 +49,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
         super.onViewAttached()
 
         coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeVerseDetailOpenState().consumeEach {
+            readingInteractor.observeVerseDetailOpenState().collect {
                 if (it.first.isValid()) {
                     view?.show(it.second)
                     loadVerseDetail(it.first)

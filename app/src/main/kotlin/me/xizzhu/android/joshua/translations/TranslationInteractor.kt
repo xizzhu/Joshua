@@ -38,8 +38,7 @@ class TranslationInteractor(private val translationManagementActivity: Translati
 
     fun observeDownloadedTranslations(): Flow<List<TranslationInfo>> = translationManager.observeDownloadedTranslations()
 
-    fun observeCurrentTranslation(): ReceiveChannel<String> =
-            bibleReadingManager.observeCurrentTranslation()
+    fun observeCurrentTranslation(): Flow<String> = bibleReadingManager.observeCurrentTranslation()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)

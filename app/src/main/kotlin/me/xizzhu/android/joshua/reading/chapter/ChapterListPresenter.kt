@@ -17,8 +17,8 @@
 package me.xizzhu.android.joshua.reading.chapter
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.filter
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -31,11 +31,11 @@ class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : M
 
         coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentTranslation().filter { it.isNotEmpty() }
-                    .consumeEach { view?.onBookNamesUpdated(readingInteractor.readBookNames(it)) }
+                    .collect { view?.onBookNamesUpdated(readingInteractor.readBookNames(it)) }
         }
         coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
-                    .consumeEach { view?.onCurrentVerseIndexUpdated(it) }
+                    .collect { view?.onCurrentVerseIndexUpdated(it) }
         }
     }
 
