@@ -20,6 +20,7 @@ import android.content.res.Resources
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksInteractor
 import me.xizzhu.android.joshua.core.Bookmark
@@ -44,7 +45,6 @@ class BookmarksPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var resources: Resources
 
-    private lateinit var settingsChannel: BroadcastChannel<Settings>
     private lateinit var bookmarksSortOrder: BroadcastChannel<Int>
     private lateinit var bookmarksPresenter: BookmarksPresenter
 
@@ -53,9 +53,8 @@ class BookmarksPresenterTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
             bookmarksSortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
-            `when`(bookmarksInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+            `when`(bookmarksInteractor.observeSettings()).thenReturn(flow { emit(Settings.DEFAULT) })
             `when`(bookmarksInteractor.observeSortOrder()).thenReturn(bookmarksSortOrder.asFlow())
             `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")

@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.utils.activities
 
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -42,7 +43,7 @@ class BaseSettingsPresenterTest : BaseUnitTest() {
 
         runBlocking {
             currentSettings = ConflatedBroadcastChannel()
-            Mockito.`when`(baseSettingsInteractor.observeSettings()).thenReturn(currentSettings.openSubscription())
+            Mockito.`when`(baseSettingsInteractor.observeSettings()).thenReturn(currentSettings.asFlow())
 
             baseSettingsPresenter = object : BaseSettingsPresenter<BaseSettingsView>(baseSettingsInteractor) {}
             baseSettingsPresenter.attachView(baseSettingsView)

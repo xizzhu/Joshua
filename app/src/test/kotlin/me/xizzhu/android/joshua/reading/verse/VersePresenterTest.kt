@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.verse
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
@@ -60,7 +61,7 @@ class VersePresenterTest : BaseUnitTest() {
 
         runBlocking {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.asFlow())
 
             currentTranslationChannel = ConflatedBroadcastChannel("")
             `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
@@ -310,7 +311,7 @@ class VersePresenterTest : BaseUnitTest() {
         runBlocking {
             currentTranslationChannel.send(MockContents.kjvShortName)
             settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = true))
-            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.asFlow())
 
             val bookIndex = 0
             val chapterIndex = 0
@@ -332,7 +333,7 @@ class VersePresenterTest : BaseUnitTest() {
     fun testLoadVersesWithExceptions() {
         runBlocking {
             settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = true))
-            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.asFlow())
 
             val bookIndex = 1
             val chapterIndex = 2
@@ -348,7 +349,7 @@ class VersePresenterTest : BaseUnitTest() {
     fun testLoadVersesWithParallelTranslations() {
         runBlocking {
             settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = true))
-            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.asFlow())
 
             val translationShortName = MockContents.kjvShortName
             val parallelTranslations = listOf(MockContents.cuvShortName)
@@ -376,7 +377,7 @@ class VersePresenterTest : BaseUnitTest() {
     fun testLoadVersesWithParallelTranslationsWithException() {
         runBlocking {
             settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = true))
-            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.asFlow())
 
             val translationShortName = MockContents.kjvShortName
             val parallelTranslations = listOf(MockContents.cuvShortName)
@@ -399,7 +400,7 @@ class VersePresenterTest : BaseUnitTest() {
         runBlocking {
             settingsChannel.send(Settings.DEFAULT.copy(simpleReadingModeOn = false))
             currentTranslationChannel.send(MockContents.kjvShortName)
-            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.asFlow())
 
             val bookIndex = 0
             val chapterIndex = 0

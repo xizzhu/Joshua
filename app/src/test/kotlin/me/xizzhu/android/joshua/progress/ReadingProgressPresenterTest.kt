@@ -16,8 +16,7 @@
 
 package me.xizzhu.android.joshua.progress
 
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
@@ -36,7 +35,6 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var view: ReadingProgressView
 
-    private lateinit var settingsChannel: BroadcastChannel<Settings>
     private lateinit var presenter: ReadingProgressPresenter
 
     @Before
@@ -44,8 +42,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-            `when`(readingProgressInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+            `when`(readingProgressInteractor.observeSettings()).thenReturn(flow { emit(Settings.DEFAULT) })
 
             presenter = ReadingProgressPresenter(readingProgressInteractor)
         }

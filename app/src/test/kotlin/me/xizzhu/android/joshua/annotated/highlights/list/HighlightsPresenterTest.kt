@@ -20,6 +20,7 @@ import android.content.res.Resources
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
@@ -44,7 +45,6 @@ class HighlightsPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var resources: Resources
 
-    private lateinit var settingsChannel: BroadcastChannel<Settings>
     private lateinit var sortOrder: BroadcastChannel<Int>
     private lateinit var highlightsPresenter: HighlightsPresenter
 
@@ -53,9 +53,8 @@ class HighlightsPresenterTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
             sortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
-            `when`(highlightsInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+            `when`(highlightsInteractor.observeSettings()).thenReturn(flow { emit(Settings.DEFAULT) })
             `when`(highlightsInteractor.observeSortOrder()).thenReturn(sortOrder.asFlow())
             `when`(highlightsInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")

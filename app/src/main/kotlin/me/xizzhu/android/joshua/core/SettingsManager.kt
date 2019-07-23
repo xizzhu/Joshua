@@ -20,7 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 import me.xizzhu.android.logger.Log
@@ -37,6 +38,7 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
         private val TAG = SettingsManager::class.java.simpleName
     }
 
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val currentSettings: BroadcastChannel<Settings> = ConflatedBroadcastChannel()
 
     init {
@@ -50,7 +52,7 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
         }
     }
 
-    fun observeSettings(): ReceiveChannel<Settings> = currentSettings.openSubscription()
+    fun observeSettings(): Flow<Settings> = currentSettings.asFlow()
 
     suspend fun saveSettings(settings: Settings) {
         settingsRepository.saveSettings(settings)

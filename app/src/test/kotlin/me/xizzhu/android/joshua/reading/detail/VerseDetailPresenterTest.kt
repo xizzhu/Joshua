@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.reading.detail
 
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -47,7 +48,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
         runBlocking {
             settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
+            `when`(readingInteractor.observeSettings()).thenReturn(settingsChannel.asFlow())
 
             verseDetailOpenState = ConflatedBroadcastChannel()
             `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.openSubscription())
