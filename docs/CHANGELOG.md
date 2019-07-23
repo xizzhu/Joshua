@@ -34,6 +34,8 @@ CHANGELOG
 
 #### v0.8.1 (2019-07-21)
 - Fixed initialization of channels inside managers
+- Updated dependencies:
+  - Kotlin Coroutine to 1.3.0-RC
 
 #### v0.8.0 (2019-07-20)
 - Supported highlight list
