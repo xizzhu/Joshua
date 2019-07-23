@@ -22,7 +22,6 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 
 class TranslationInteractor(private val translationManagementActivity: TranslationManagementActivity,
                             private val bibleReadingManager: BibleReadingManager,
@@ -33,13 +32,14 @@ class TranslationInteractor(private val translationManagementActivity: Translati
     fun observeTranslationsLoadingRequest(): ReceiveChannel<Unit> =
             translationsLoadingRequest.openSubscription()
 
-    suspend fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
+    fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeAvailableTranslations()
 
-    suspend fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
+    fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
             translationManager.observeDownloadedTranslations()
 
-    suspend fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
+    fun observeCurrentTranslation(): ReceiveChannel<String> =
+            bibleReadingManager.observeCurrentTranslation()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)

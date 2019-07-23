@@ -35,7 +35,7 @@ class NotesInteractor(private val notesActivity: NotesActivity,
         navigator.navigate(notesActivity, Navigator.SCREEN_READING, ReadingActivity.bundleForOpenNote())
     }
 
-    override suspend fun observeSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
+    override fun observeSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
 
     override suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         noteManager.saveSortOrder(sortOrder)

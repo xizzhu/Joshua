@@ -45,7 +45,7 @@ abstract class BaseAnnotatedVersesInteractor(private val activity: Activity,
         navigator.navigate(activity, Navigator.SCREEN_READING)
     }
 
-    abstract suspend fun observeSortOrder(): ReceiveChannel<Int>
+    abstract fun observeSortOrder(): ReceiveChannel<Int>
 
     abstract suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int)
 }

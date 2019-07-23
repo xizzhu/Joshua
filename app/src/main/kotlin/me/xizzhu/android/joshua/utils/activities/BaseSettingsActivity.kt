@@ -47,7 +47,7 @@ abstract class BaseSettingsActivity : BaseActivity() {
 }
 
 abstract class BaseSettingsInteractor(private val settingsManager: SettingsManager) {
-    suspend fun observeSettings(): ReceiveChannel<Settings> = settingsManager.observeSettings()
+    fun observeSettings(): ReceiveChannel<Settings> = settingsManager.observeSettings()
 }
 
 interface BaseSettingsView : MVPView {

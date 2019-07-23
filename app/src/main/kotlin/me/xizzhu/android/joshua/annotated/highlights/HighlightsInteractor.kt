@@ -29,7 +29,7 @@ class HighlightsInteractor(highlightsActivity: HighlightsActivity,
     : BaseAnnotatedVersesInteractor(highlightsActivity, bibleReadingManager, navigator, settingsManager, IS_LOADING) {
     suspend fun readHighlights(@Constants.SortOrder sortOrder: Int): List<Highlight> = highlightsManager.read(sortOrder)
 
-    override suspend fun observeSortOrder(): ReceiveChannel<Int> = highlightsManager.observeSortOrder()
+    override fun observeSortOrder(): ReceiveChannel<Int> = highlightsManager.observeSortOrder()
 
     override suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         highlightsManager.saveSortOrder(sortOrder)
