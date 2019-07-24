@@ -16,7 +16,7 @@
 
 package me.xizzhu.android.joshua.search.result
 
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
@@ -42,8 +42,8 @@ class SearchResultPresenterTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            `when`(searchInteractor.observeSettings()).thenReturn(flow { emit(Settings.DEFAULT) })
-            `when`(searchInteractor.observeSearchQuery()).thenReturn(flow { emit("") })
+            `when`(searchInteractor.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
+            `when`(searchInteractor.observeSearchQuery()).thenReturn(flowOf(""))
             `when`(searchInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(searchInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
             `when`(searchInteractor.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)

@@ -20,7 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
@@ -103,7 +103,7 @@ class ReadingProgressManagerTest : BaseUnitTest() {
     fun testStartTrackingMultipleTimes() {
         runBlocking {
             currentTranslationChannel.send(MockContents.kjvShortName)
-            `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(flow { emit(VerseIndex.INVALID) })
+            `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID))
 
             launch(Dispatchers.Unconfined) {
                 readingProgressManager.startTracking()

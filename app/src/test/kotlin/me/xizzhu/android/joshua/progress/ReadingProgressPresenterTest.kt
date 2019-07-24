@@ -16,7 +16,7 @@
 
 package me.xizzhu.android.joshua.progress
 
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
@@ -42,7 +42,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            `when`(readingProgressInteractor.observeSettings()).thenReturn(flow { emit(Settings.DEFAULT) })
+            `when`(readingProgressInteractor.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
 
             presenter = ReadingProgressPresenter(readingProgressInteractor)
         }

@@ -20,12 +20,11 @@ import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingInteractor
-import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -75,7 +74,7 @@ class VersePresenterTest : BaseUnitTest() {
             verseDetailOpenState = ConflatedBroadcastChannel()
             `when`(readingInteractor.observeVerseDetailOpenState()).thenReturn(verseDetailOpenState.asFlow())
 
-            `when`(readingInteractor.observeVerseUpdates()).thenReturn(flow { })
+            `when`(readingInteractor.observeVerseUpdates()).thenReturn(emptyFlow())
 
             versePresenter = VersePresenter(readingInteractor)
             versePresenter.attachView(verseView)

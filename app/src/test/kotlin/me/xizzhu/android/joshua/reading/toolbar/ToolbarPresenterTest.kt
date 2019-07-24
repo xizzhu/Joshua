@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.reading.toolbar
 
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -56,7 +56,7 @@ class ToolbarPresenterTest : BaseUnitTest() {
             downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
             `when`(readingInteractor.observeDownloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
 
-            `when`(readingInteractor.observeParallelTranslations()).thenReturn(flow { emit(emptyList<String>()) })
+            `when`(readingInteractor.observeParallelTranslations()).thenReturn(flowOf(emptyList()))
 
             toolbarPresenter = ToolbarPresenter(readingInteractor)
             toolbarPresenter.attachView(toolbarView)

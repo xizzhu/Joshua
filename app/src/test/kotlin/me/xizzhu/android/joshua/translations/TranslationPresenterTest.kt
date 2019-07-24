@@ -21,7 +21,7 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
@@ -54,7 +54,7 @@ class TranslationPresenterTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            `when`(translationInteractor.observeSettings()).thenReturn(flow { emit(Settings.DEFAULT) })
+            `when`(translationInteractor.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
 
             translationLoadingStateChannel = ConflatedBroadcastChannel(BaseLoadingAwareInteractor.IS_LOADING)
             `when`(translationInteractor.observeLoadingState()).thenReturn(translationLoadingStateChannel.asFlow())
