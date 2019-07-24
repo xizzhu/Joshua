@@ -23,6 +23,9 @@ import android.widget.ProgressBar
 import androidx.annotation.IntDef
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.utils.MVPPresenter
@@ -41,9 +44,10 @@ abstract class BaseLoadingAwareInteractor(settingsManager: SettingsManager,
         annotation class LoadingState
     }
 
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val loadingState: BroadcastChannel<Int> = ConflatedBroadcastChannel(initialLoadingState)
 
-    fun observeLoadingState(): ReceiveChannel<Int> = loadingState.openSubscription()
+    fun observeLoadingState(): Flow<Int> = loadingState.asFlow()
 
     suspend fun notifyLoadingStarted() {
         loadingState.send(IS_LOADING)
@@ -54,10 +58,10 @@ abstract class BaseLoadingAwareInteractor(settingsManager: SettingsManager,
     }
 }
 
-open class LoadingAwarePresenter(loadingState: ReceiveChannel<Int>) : MVPPresenter<LoadingAwareView>() {
+open class LoadingAwarePresenter(loadingState: Flow<Int>) : MVPPresenter<LoadingAwareView>() {
     init {
         coroutineScope.launch(Dispatchers.Main) {
-            loadingState.consumeEach { state ->
+            loadingState.collect { state ->
                 when (state) {
                     BaseLoadingAwareInteractor.IS_LOADING -> view?.show()
                     BaseLoadingAwareInteractor.NOT_LOADING -> view?.hide()

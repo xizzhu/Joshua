@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.ui
 
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.After
@@ -38,7 +39,7 @@ class LoadingAwarePresenterTest : BaseUnitTest() {
         super.setup()
 
         loadingSpinnerState = ConflatedBroadcastChannel()
-        loadingSpinnerPresenter = LoadingAwarePresenter(loadingSpinnerState.openSubscription())
+        loadingSpinnerPresenter = LoadingAwarePresenter(loadingSpinnerState.asFlow())
 
         loadingSpinnerPresenter.attachView(loadingAwareView)
     }

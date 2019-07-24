@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.ui
 
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.After
@@ -40,7 +41,7 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
         super.setup()
 
         swipeRefresherState = ConflatedBroadcastChannel()
-        swipeRefresherPresenter = SwipeRefresherPresenter(swipeRefresherState.openSubscription(), refreshRequest)
+        swipeRefresherPresenter = SwipeRefresherPresenter(swipeRefresherState.asFlow(), refreshRequest)
 
         swipeRefresherPresenter.attachView(swipeRefresherView)
     }
