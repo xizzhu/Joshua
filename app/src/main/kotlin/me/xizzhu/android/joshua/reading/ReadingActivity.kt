@@ -21,7 +21,7 @@ import android.os.Bundle
 import androidx.appcompat.app.ActionBarDrawerToggle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
@@ -91,7 +91,7 @@ class ReadingActivity : BaseSettingsActivity() {
     private fun openNoteIfNeeded() {
         if (intent.getBooleanExtra(KEY_OPEN_NOTE, false)) {
             coroutineScope.launch(Dispatchers.Main) {
-                readingInteractor.observeCurrentVerseIndex().first().let {
+                readingInteractor.observeCurrentVerseIndex().singleOrNull()?.let {
                     readingInteractor.openVerseDetail(it, VerseDetailPagerAdapter.PAGE_NOTE)
                 }
             }
