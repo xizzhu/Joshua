@@ -39,7 +39,7 @@ object TranslationManagementModule {
     @JvmStatic
     @Provides
     fun provideSwipeRefresherPresenter(translationInteractor: TranslationInteractor): SwipeRefresherPresenter =
-            SwipeRefresherPresenter(translationInteractor.observeLoadingState(), translationInteractor.translationsLoadingRequest)
+            SwipeRefresherPresenter(translationInteractor.observeLoadingState(), translationInteractor)
 
     @JvmStatic
     @Provides

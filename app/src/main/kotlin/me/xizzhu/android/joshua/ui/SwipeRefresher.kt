@@ -20,15 +20,33 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.SettingsManager
+
+abstract class BaseSwipeRefresherInteractor(settingsManager: SettingsManager,
+                                            @Companion.LoadingState initialLoadingState: Int)
+    : BaseLoadingAwareInteractor(settingsManager, initialLoadingState) {
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    private val refreshRequest: BroadcastChannel<Unit> = ConflatedBroadcastChannel()
+
+    fun observeRefreshRequest(): Flow<Unit> = refreshRequest.asFlow()
+
+    fun notifyRefreshRequested() {
+        refreshRequest.offer(Unit)
+    }
+}
 
 class SwipeRefresherPresenter(loadingState: Flow<Int>,
-                              private val refreshRequest: SendChannel<Unit>) : LoadingAwarePresenter(loadingState) {
+                              private val baseSwipeRefresherInteractor: BaseSwipeRefresherInteractor)
+    : LoadingAwarePresenter(loadingState) {
     fun refresh() {
-        coroutineScope.launch(Dispatchers.Main) { refreshRequest.send(Unit) }
+        baseSwipeRefresherInteractor.notifyRefreshRequested()
     }
 }
 

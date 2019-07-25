@@ -31,7 +31,7 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var swipeRefresherView: LoadingAwareView
     @Mock
-    private lateinit var refreshRequest: BroadcastChannel<Unit>
+    private lateinit var swipeRefresherInteractor: BaseSwipeRefresherInteractor
 
     private lateinit var swipeRefresherState: BroadcastChannel<Int>
     private lateinit var swipeRefresherPresenter: SwipeRefresherPresenter
@@ -41,7 +41,7 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
         super.setup()
 
         swipeRefresherState = ConflatedBroadcastChannel()
-        swipeRefresherPresenter = SwipeRefresherPresenter(swipeRefresherState.asFlow(), refreshRequest)
+        swipeRefresherPresenter = SwipeRefresherPresenter(swipeRefresherState.asFlow(), swipeRefresherInteractor)
 
         swipeRefresherPresenter.attachView(swipeRefresherView)
     }
@@ -53,7 +53,7 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testRefresherState() {
+    fun testRefresherStateIsLoading() {
         runBlocking {
             verify(swipeRefresherView, never()).show()
             verify(swipeRefresherView, never()).hide()
@@ -61,9 +61,17 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
             swipeRefresherState.send(BaseLoadingAwareInteractor.IS_LOADING)
             verify(swipeRefresherView, times(1)).show()
             verify(swipeRefresherView, never()).hide()
+        }
+    }
+
+    @Test
+    fun testRefresherStateNotLoading() {
+        runBlocking {
+            verify(swipeRefresherView, never()).show()
+            verify(swipeRefresherView, never()).hide()
 
             swipeRefresherState.send(BaseLoadingAwareInteractor.NOT_LOADING)
-            verify(swipeRefresherView, times(1)).show()
+            verify(swipeRefresherView, never()).show()
             verify(swipeRefresherView, times(1)).hide()
         }
     }
@@ -71,10 +79,10 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
     @Test
     fun testRefresh() {
         runBlocking {
-            verify(refreshRequest, never()).send(any())
+            verify(swipeRefresherInteractor, never()).notifyRefreshRequested()
 
             swipeRefresherPresenter.refresh()
-            verify(refreshRequest, times(1)).send(Unit)
+            verify(swipeRefresherInteractor, times(1)).notifyRefreshRequested()
         }
     }
 }

@@ -60,7 +60,7 @@ class TranslationPresenterTest : BaseUnitTest() {
             `when`(translationInteractor.observeLoadingState()).thenReturn(translationLoadingStateChannel.asFlow())
 
             translationsLoadingRequest = ConflatedBroadcastChannel()
-            `when`(translationInteractor.observeTranslationsLoadingRequest()).thenReturn(translationsLoadingRequest.asFlow())
+            `when`(translationInteractor.observeRefreshRequest()).thenReturn(translationsLoadingRequest.asFlow())
 
             availableTranslationsChannel = ConflatedBroadcastChannel(emptyList())
             `when`(translationInteractor.observeAvailableTranslations()).thenReturn(availableTranslationsChannel.asFlow())

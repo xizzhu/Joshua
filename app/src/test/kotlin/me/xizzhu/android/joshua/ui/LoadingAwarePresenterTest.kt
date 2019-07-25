@@ -51,7 +51,7 @@ class LoadingAwarePresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadingSpinnerState() {
+    fun testLoadingSpinnerStateIsLoading() {
         runBlocking {
             verify(loadingAwareView, never()).show()
             verify(loadingAwareView, never()).hide()
@@ -62,6 +62,18 @@ class LoadingAwarePresenterTest : BaseUnitTest() {
 
             loadingSpinnerState.send(BaseLoadingAwareInteractor.NOT_LOADING)
             verify(loadingAwareView, times(1)).show()
+            verify(loadingAwareView, times(1)).hide()
+        }
+    }
+
+    @Test
+    fun testLoadingSpinnerStateNotLoading() {
+        runBlocking {
+            verify(loadingAwareView, never()).show()
+            verify(loadingAwareView, never()).hide()
+
+            loadingSpinnerState.send(BaseLoadingAwareInteractor.NOT_LOADING)
+            verify(loadingAwareView, never()).show()
             verify(loadingAwareView, times(1)).hide()
         }
     }

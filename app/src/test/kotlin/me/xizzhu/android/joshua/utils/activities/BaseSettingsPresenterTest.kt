@@ -16,17 +16,14 @@
 
 package me.xizzhu.android.joshua.utils.activities
 
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito
+import org.mockito.Mockito.*
 
 class BaseSettingsPresenterTest : BaseUnitTest() {
     @Mock
@@ -34,35 +31,29 @@ class BaseSettingsPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var baseSettingsView: BaseSettingsView
 
-    private lateinit var currentSettings: BroadcastChannel<Settings>
-    private lateinit var baseSettingsPresenter: BaseSettingsPresenter<BaseSettingsView>
-
-    @Before
-    override fun setup() {
-        super.setup()
-
+    @Test
+    fun testObserveSettingsEmpty() {
         runBlocking {
-            currentSettings = ConflatedBroadcastChannel()
-            Mockito.`when`(baseSettingsInteractor.observeSettings()).thenReturn(currentSettings.asFlow())
+            `when`(baseSettingsInteractor.observeSettings()).thenReturn(emptyFlow())
 
-            baseSettingsPresenter = object : BaseSettingsPresenter<BaseSettingsView>(baseSettingsInteractor) {}
+            val baseSettingsPresenter = object : BaseSettingsPresenter<BaseSettingsView>(baseSettingsInteractor) {}
             baseSettingsPresenter.attachView(baseSettingsView)
-        }
-    }
+            baseSettingsPresenter.detachView()
 
-    @After
-    override fun tearDown() {
-        baseSettingsPresenter.detachView()
-        super.tearDown()
+            verify(baseSettingsView, never()).onSettingsUpdated(any())
+        }
     }
 
     @Test
     fun testObserveSettings() {
         runBlocking {
-            Mockito.verify(baseSettingsView, Mockito.never()).onSettingsUpdated(any())
+            `when`(baseSettingsInteractor.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
 
-            currentSettings.send(Settings.DEFAULT)
-            Mockito.verify(baseSettingsView, Mockito.times(1)).onSettingsUpdated(Settings.DEFAULT)
+            val baseSettingsPresenter = object : BaseSettingsPresenter<BaseSettingsView>(baseSettingsInteractor) {}
+            baseSettingsPresenter.attachView(baseSettingsView)
+            baseSettingsPresenter.detachView()
+
+            verify(baseSettingsView, times(1)).onSettingsUpdated(Settings.DEFAULT)
         }
     }
 }

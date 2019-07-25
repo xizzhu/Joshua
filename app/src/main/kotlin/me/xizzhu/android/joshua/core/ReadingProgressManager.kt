@@ -57,10 +57,13 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
                     ?.collect {
                         trackReadingProgress()
                         currentVerseIndex = it
-                        lastTimestamp = System.currentTimeMillis()
+                        lastTimestamp = now()
                     }
         }
     }
+
+    @VisibleForTesting
+    fun now() = System.currentTimeMillis()
 
     private suspend fun trackReadingProgress() {
         try {
@@ -71,7 +74,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
                 return
             }
 
-            val now = System.currentTimeMillis()
+            val now = now()
             val timeSpentInMillis = now - lastTimestamp
             if (timeSpentInMillis < timeSpentThresholdInMillis()) {
                 return
