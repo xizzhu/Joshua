@@ -24,10 +24,9 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslation
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.logger.Log
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
+import java.io.*
 import java.net.URL
+import java.util.zip.ZipInputStream
 
 class HttpTranslationService : RemoteTranslationService {
     companion object {
@@ -53,7 +52,43 @@ class HttpTranslationService : RemoteTranslationService {
                         readTimeout = TIMEOUT_IN_MILLISECONDS
                     }.getInputStream()
 
-    override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation = withContext(Dispatchers.IO) {
+        Log.i(TAG, "Start fetching translation - ${translationInfo.shortName}")
+
+        lateinit var bookNamesShortNamesPair: Pair<List<String>, List<String>>
+        val verses = HashMap<Pair<Int, Int>, List<String>>()
+        ZipInputStream(BufferedInputStream(getInputStream("${translationInfo.shortName}.zip")))
+                .use { zipInputStream ->
+                    val buffer = ByteArray(4096)
+                    val os = ByteArrayOutputStream()
+                    var entryName = ""
+                    var downloaded = 0
+                    var progress = -1
+                    while (zipInputStream.nextEntry?.also { entryName = it.name } != null) {
+                        os.reset()
+                        while (zipInputStream.read(buffer).also {
+                                    if (it > 0) os.write(buffer, 0, it)
+                                } != -1);
+                        val jsonReader = JsonReader(StringReader(os.toString("UTF-8")))
+
+                        if (entryName == "books.json") {
+                            bookNamesShortNamesPair = jsonReader.readBooksJson()
+                        } else {
+                            val (bookIndex, chapterIndex) = entryName.substring(0, entryName.length - 5).split("-")
+                            verses[Pair(bookIndex.toInt(), chapterIndex.toInt())] = jsonReader.readChapterJson()
+                        }
+
+                        // only emits if the progress is actually changed
+                        val currentProgress = ++downloaded / 12
+                        if (currentProgress > progress) {
+                            progress = currentProgress
+                            channel.send(progress)
+                        }
+                    }
+
+                    Log.i(TAG, "Translation downloaded")
+                }
+
+        return@withContext RemoteTranslation(translationInfo, bookNamesShortNamesPair.first, bookNamesShortNamesPair.second, verses)
     }
 }
