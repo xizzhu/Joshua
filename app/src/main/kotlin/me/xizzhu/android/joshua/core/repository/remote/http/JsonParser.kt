@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.core.repository.remote.http
 
 import android.util.JsonReader
 import androidx.annotation.VisibleForTesting
+import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.logger.Log
 
@@ -77,4 +78,58 @@ fun JsonReader.readTranslation(): RemoteTranslationInfo? {
         return null
     }
     return RemoteTranslationInfo(shortName, name, language, size)
+}
+
+fun JsonReader.readBooksJson(): Pair<List<String>, List<String>> {
+    var bookNames: List<String>? = null
+    var bookShortNames: List<String>? = null
+    beginObject()
+    while (hasNext()) {
+        when (nextName()) {
+            "name" -> skipValue()
+            "shortName" -> skipValue()
+            "language" -> skipValue()
+            "bookNames" -> bookNames = readStringsArray()
+            "bookShortNames" -> bookShortNames = readStringsArray()
+            else -> {
+                skipValue()
+                Log.w(TAG, "Unsupported JSON format", RuntimeException("Unsupported JSON format in books.json"))
+            }
+        }
+    }
+    endObject()
+    if (bookNames?.size == Bible.BOOK_COUNT && bookShortNames?.size == Bible.BOOK_COUNT) {
+        return Pair(bookNames, bookShortNames)
+    }
+    throw RuntimeException("Illegal JSON format in books.json")
+}
+
+@VisibleForTesting
+fun JsonReader.readStringsArray(): List<String> {
+    val strings = ArrayList<String>()
+    beginArray()
+    while (hasNext()) {
+        strings.add(nextString())
+    }
+    endArray()
+    return strings
+}
+
+fun JsonReader.readChapterJson(): List<String> {
+    beginObject()
+    while (hasNext()) {
+        when (nextName()) {
+            "verses" -> return readStringsArray().apply {
+                if (isEmpty()) {
+                    throw RuntimeException("Empty verses array in chapter JSON")
+                }
+            }
+            else -> {
+                skipValue()
+                Log.w(TAG, "Unsupported JSON format", RuntimeException("Unsupported format in chapter JSON"))
+            }
+        }
+    }
+    endObject()
+    throw RuntimeException("Illegal format in chapter JSON")
 }
