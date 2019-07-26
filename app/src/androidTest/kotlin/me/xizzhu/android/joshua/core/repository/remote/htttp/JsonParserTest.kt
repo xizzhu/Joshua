@@ -24,7 +24,6 @@ import java.io.StringReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class JsonParserTest : BaseUnitTest() {
     @Test
@@ -74,13 +73,11 @@ class JsonParserTest : BaseUnitTest() {
         }
     }
 
-    @Test
+    @Test(expected = RuntimeException::class)
     fun testReadListJsonMissingField() {
         JsonReader(StringReader("{\n" +
                 "\t\"random\": \"something random\"\n" +
-                "}")).use {
-            assertTrue(it.readListJson().isEmpty())
-        }
+                "}")).use { it.readListJson() }
     }
 
     @Test

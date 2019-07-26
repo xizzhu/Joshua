@@ -38,8 +38,7 @@ fun JsonReader.readListJson(): List<RemoteTranslationInfo> {
         }
     }
     endObject()
-    Log.w(TAG, "Unsupported JSON format", RuntimeException("Missing 'translations' in list.json"))
-    return emptyList()
+    throw RuntimeException("Missing 'translations' in list.json")
 }
 
 @VisibleForTesting
