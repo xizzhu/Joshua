@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.core.repository.remote.http
 
 import android.util.JsonReader
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withContext
@@ -28,7 +29,7 @@ import java.io.*
 import java.net.URL
 import java.util.zip.ZipInputStream
 
-class HttpTranslationService : RemoteTranslationService {
+open class HttpTranslationService : RemoteTranslationService {
     companion object {
         private const val TIMEOUT_IN_MILLISECONDS = 30000 // 30 seconds
         private const val BASE_URL = "https://xizzhu.me/bible/download"
@@ -44,7 +45,8 @@ class HttpTranslationService : RemoteTranslationService {
         return@withContext translations
     }
 
-    private fun getInputStream(relativeUrl: String): InputStream =
+    @VisibleForTesting
+    open fun getInputStream(relativeUrl: String): InputStream =
             URL("$BASE_URL/$relativeUrl")
                     .openConnection()
                     .apply {

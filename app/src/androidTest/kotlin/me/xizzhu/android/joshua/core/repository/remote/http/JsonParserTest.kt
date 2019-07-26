@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.repository.remote.htttp
+package me.xizzhu.android.joshua.core.repository.remote.http
 
 import android.util.JsonReader
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
-import me.xizzhu.android.joshua.core.repository.remote.http.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import java.io.StringReader
 import kotlin.test.Test
