@@ -2,10 +2,10 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Used URLConnection instead of Retrofit
 
 #### v0.8.1 (2019-07-21)
 - Fixed initialization of channels inside managers
-- Used URLConnection instead of Retrofit
 
 #### v0.8.0 (2019-07-20)
 - Supported highlight list
