@@ -47,8 +47,8 @@ class HttpTranslationServiceTest : BaseUnitTest() {
         runBlocking {
             doReturn(ByteArrayInputStream("{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1861134}]}".toByteArray()))
                     .`when`(httpTranslationService).getInputStream("list.json")
-            assertEquals(listOf(RemoteTranslationInfo("KJV", "Authorized King James", "en_gb", 1861134L))
-                    , httpTranslationService.fetchTranslations())
+            assertEquals(listOf(RemoteTranslationInfo("KJV", "Authorized King James", "en_gb", 1861134L)),
+                    httpTranslationService.fetchTranslations())
         }
     }
 
