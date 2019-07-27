@@ -20,8 +20,7 @@ apply(plugin = "com.github.kt3k.coveralls")
 tasks {
     val debugCoverageReport by registering(JacocoReport::class)
     debugCoverageReport {
-        //dependsOn("testDebugUnitTest", "connectedDebugAndroidTest")
-        dependsOn("testDebugUnitTest")
+        dependsOn("testDebugUnitTest", "connectedDebugAndroidTest")
 
         val kotlinClasses = fileTree("$buildDir/tmp/kotlin-classes/debug")
         val coverageSourceDirs = arrayOf("src/debug/kotlin", "src/main/kotlin")
