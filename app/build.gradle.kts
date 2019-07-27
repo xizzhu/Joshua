@@ -122,12 +122,6 @@ dependencies {
     kapt(Dependencies.Dagger.compiler)
     kapt(Dependencies.Dagger.androidProcessor)
 
-    implementation(Dependencies.Retrofit.retrofit)
-    implementation(Dependencies.Retrofit.moshiConverter)
-    implementation(Dependencies.Retrofit.okhttp3)
-    implementation(Dependencies.Retrofit.moshi)
-    implementation(Dependencies.Retrofit.okio)
-
     implementation(Dependencies.Logger.logger)
 
     debugImplementation(Dependencies.Stetho.stetho)

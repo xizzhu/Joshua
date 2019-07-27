@@ -34,7 +34,7 @@ abstract class BaseSqliteTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
         clearLocalStorage()
-        androidDatabase = AndroidDatabase(ApplicationProvider.getApplicationContext<Context>())
+        androidDatabase = AndroidDatabase(ApplicationProvider.getApplicationContext())
     }
 
     private fun clearLocalStorage() {

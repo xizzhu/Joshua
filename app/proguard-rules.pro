@@ -10,6 +10,3 @@
 
 -keep class com.crashlytics.** { *; }
 -dontwarn com.crashlytics.**
-
-
--keep class me.xizzhu.android.joshua.core.repository.remote.** { *; }
