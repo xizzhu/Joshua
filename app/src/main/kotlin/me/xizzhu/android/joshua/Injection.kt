@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua
 
-import com.squareup.moshi.Moshi
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -31,11 +30,11 @@ import me.xizzhu.android.joshua.core.repository.local.*
 import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
-import me.xizzhu.android.joshua.core.repository.remote.retrofit.RetrofitTranslationService
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsModule
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.annotated.notes.NotesModule
+import me.xizzhu.android.joshua.core.repository.remote.http.HttpTranslationService
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
 import me.xizzhu.android.joshua.progress.ReadingProgressModule
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -46,8 +45,6 @@ import me.xizzhu.android.joshua.settings.SettingsActivity
 import me.xizzhu.android.joshua.settings.SettingsModule
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementModule
-import okhttp3.OkHttpClient
-import java.util.concurrent.TimeUnit
 import javax.inject.Scope
 import javax.inject.Singleton
 
@@ -145,21 +142,7 @@ class RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideMoshi(): Moshi = Moshi.Builder().build()
-
-    @Provides
-    @Singleton
-    fun provideOkHttpClient(): OkHttpClient =
-            OkHttpClient.Builder()
-                    .connectTimeout(RetrofitTranslationService.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-                    .readTimeout(RetrofitTranslationService.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-                    .writeTimeout(RetrofitTranslationService.OKHTTP_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
-                    .build()
-
-    @Provides
-    @Singleton
-    fun provideRemoteTranslationService(moshi: Moshi, okHttpClient: OkHttpClient): RemoteTranslationService =
-            RetrofitTranslationService(moshi, okHttpClient)
+    fun provideRemoteTranslationService(): RemoteTranslationService = HttpTranslationService()
 
     @Provides
     @Singleton

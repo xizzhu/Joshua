@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 import org.gradle.api.JavaVersion
 
 object Configurations {
-    val applicationId = "me.xizzhu.android.joshua"
+    const val applicationId = "me.xizzhu.android.joshua"
     val supportedLocales = listOf("en")
 }
 
@@ -81,13 +81,6 @@ object Versions {
 
     const val dagger = "2.23.2"
 
-    object Retrofit {
-        const val retrofit = "2.6.0"
-        const val okhttp = "4.0.1"
-        const val moshi = "1.8.0"
-        const val okio = "2.2.2"
-    }
-
     const val logger = "0.1.2"
 
     const val stetho = "1.5.1"
@@ -147,14 +140,6 @@ object Dependencies {
         const val androidSupport = "com.google.dagger:dagger-android-support:${Versions.dagger}"
         const val compiler = "com.google.dagger:dagger-compiler:${Versions.dagger}"
         const val androidProcessor = "com.google.dagger:dagger-android-processor:${Versions.dagger}"
-    }
-
-    object Retrofit {
-        const val retrofit = "com.squareup.retrofit2:retrofit:${Versions.Retrofit.retrofit}"
-        const val moshiConverter = "com.squareup.retrofit2:converter-moshi:${Versions.Retrofit.retrofit}"
-        const val okhttp3 = "com.squareup.okhttp3:okhttp:${Versions.Retrofit.okhttp}"
-        const val moshi = "com.squareup.moshi:moshi:${Versions.Retrofit.moshi}"
-        const val okio = "com.squareup.okio:okio:${Versions.Retrofit.okio}"
     }
 
     object Logger {
