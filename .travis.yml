@@ -11,7 +11,7 @@ android:
     - platform-tools
     - build-tools-29.0.1
     - android-29
-#    - sys-img-arm64-v8a-google_apis-25
+    - sys-img-arm64-v8a-google_apis-25
 
 jdk:
   - oraclejdk8
@@ -22,10 +22,10 @@ branches:
 
 before_script:
   - android list targets
-#  - echo no | android create avd --force -n test -t android-25 --abi google_apis/arm64-v8a
-#  - emulator -avd test -no-skin -no-window &
-#  - android-wait-for-emulator
-#  - adb shell input keyevent 82 &
+  - echo no | android create avd --force -n test -t android-25 --abi google_apis/arm64-v8a
+  - emulator -avd test -no-skin -no-window &
+  - android-wait-for-emulator
+  - adb shell input keyevent 82 &
 
 script:
   - ./gradlew -Pcoverage clean coveralls
