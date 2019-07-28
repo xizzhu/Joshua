@@ -3,6 +3,8 @@ CHANGELOG
 
 #### Next Release
 - Used URLConnection instead of Retrofit
+- Updated dependencies:
+  - Dagger to 2.24
 
 #### v0.8.1 (2019-07-21)
 - Fixed initialization of channels inside managers

@@ -79,7 +79,7 @@ object Versions {
         }
     }
 
-    const val dagger = "2.23.2"
+    const val dagger = "2.24"
 
     const val logger = "0.1.2"
 

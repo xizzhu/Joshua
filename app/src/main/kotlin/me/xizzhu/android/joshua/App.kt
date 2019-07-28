@@ -16,17 +16,16 @@
 
 package me.xizzhu.android.joshua
 
-import android.app.Activity
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
+import dagger.android.HasAndroidInjector
 import javax.inject.Inject
 
-class App : BaseApp(), HasActivityInjector {
+class App : BaseApp(), HasAndroidInjector {
     private lateinit var appComponent: AppComponent
 
     @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Activity>
+    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
     override fun onCreate() {
         super.onCreate()
@@ -35,5 +34,5 @@ class App : BaseApp(), HasActivityInjector {
         appComponent.inject(this)
     }
 
-    override fun activityInjector(): AndroidInjector<Activity> = dispatchingAndroidInjector
+    override fun androidInjector(): AndroidInjector<Any> = dispatchingAndroidInjector
 }
