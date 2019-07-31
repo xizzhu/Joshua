@@ -12,6 +12,7 @@ Available Translations
   * Green's Literal Translation (LITV)
   * New Heart English Bible (NHEB)
   * New International Version (NIV)
+  * New King James Version (NKJV)
   * New Living Translation (NLT)
   * Revised Standard Version (RSV)
   * The Message Bible (MSG)
