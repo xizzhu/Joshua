@@ -118,20 +118,6 @@ private val indexStyleSpan = StyleSpan(Typeface.BOLD)
 private val indexSizeSpan = RelativeSizeSpan(0.75F)
 private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
 
-private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Text): SpannableStringBuilder {
-    if (isNotEmpty()) {
-        append('\n').append('\n')
-    }
-    // format:
-    // <primary translation> <chapter verseIndex>:<verse verseIndex>
-    // <verse text>
-    append(text.translationShortName).append(' ')
-            .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-            .append('\n').append(text.text)
-
-    return this
-}
-
 fun SpannableStringBuilder.format(verse: Verse, bookName: String, simpleReadingMode: Boolean,
                                   followingEmptyVerseCount: Int, @ColorInt highlightColor: Int): CharSequence {
     clear()
@@ -165,15 +151,11 @@ fun SpannableStringBuilder.format(verse: Verse, bookName: String, simpleReadingM
         }
     } else {
         // format:
-        // <primary translation> <chapter verseIndex>:<verse verseIndex>
-        // <verse text>
+        // <primary translation> <chapter verseIndex>:<verse verseIndex> <verse text>
         // <empty line>
-        // <parallel translation 1> <chapter verseIndex>:<verse verseIndex>
-        // <verse text>
-        // <parallel translation 2> <chapter verseIndex>:<verse verseIndex>
-        // <verse text>
-
-        append(verse.verseIndex, verse.text)
+        // <parallel translation 1> <chapter verseIndex>:<verse verseIndex> <verse text>
+        // <parallel translation 2> <chapter verseIndex>:<verse verseIndex> <verse text>
+        append(verse.verseIndex, verse.text, followingEmptyVerseCount)
         val primaryTextLength = length
         if (highlightColor != Highlight.COLOR_NONE) {
             val end = primaryTextLength
@@ -184,11 +166,33 @@ fun SpannableStringBuilder.format(verse: Verse, bookName: String, simpleReadingM
         }
 
         for (text in verse.parallel) {
-            append(verse.verseIndex, text)
+            append(verse.verseIndex, text, followingEmptyVerseCount)
         }
 
         setSpan(parallelVerseSizeSpan, primaryTextLength, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
     }
 
     return subSequence(0, length)
+}
+
+private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Text,
+                                          followingEmptyVerseCount: Int): SpannableStringBuilder {
+    if (isNotEmpty()) {
+        append('\n').append('\n')
+    }
+    // format:
+    // <primary translation> <chapter verseIndex>:<verse verseIndex> <verse text>
+    val start = length
+    append(text.translationShortName).append(' ')
+            .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
+    if (followingEmptyVerseCount > 0) {
+        append('-').append(verseIndex.verseIndex + followingEmptyVerseCount + 1)
+    }
+    val end = length
+    setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+    setSpan(RelativeSizeSpan(0.75F), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+
+    append(' ').append(text.text)
+
+    return this
 }

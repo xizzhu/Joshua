@@ -43,7 +43,7 @@ class VerseItemTest : BaseUnitTest() {
 
     @Test
     fun testTextForDisplayWithParallelTranslations() {
-        val expected = "KJV 1:1\nIn the beginning God created the heaven and the earth.\n\n中文和合本 1:1\n起初神创造天地。"
+        val expected = "KJV 1:1 In the beginning God created the heaven and the earth.\n\n中文和合本 1:1 起初神创造天地。"
         val actual = VerseItem(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvBookNames[0], false, 0, false, {}, {}, {}, { _, _ -> }, { _, _ -> }).textForDisplay.toString()
         assertEquals(expected, actual)
     }

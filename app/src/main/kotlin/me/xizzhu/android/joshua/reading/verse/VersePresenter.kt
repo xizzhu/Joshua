@@ -31,6 +31,7 @@ import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
+import java.lang.StringBuilder
 import kotlin.properties.Delegates
 
 class VersePresenter(private val readingInteractor: ReadingInteractor)
@@ -195,18 +196,21 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                 while (verse != null || verseIterator.hasNext()) {
                     verse = verse ?: verseIterator.next()
 
-                    // skips the empty verses
+                    val parallel = Array(verse.parallel.size) { StringBuilder() }
+                            .append(verse.parallel)
+
+                    // skips the empty verses, and rebuilds the parallels
                     var nextVerse: Verse? = null
                     while (verseIterator.hasNext()) {
                         nextVerse = verseIterator.next()
                         if (nextVerse.text.text.isEmpty()) {
+                            parallel.append(nextVerse.parallel)
                             nextVerse = null
                         } else {
                             break
                         }
                     }
 
-                    // TODO parallel verses
                     val verseIndex = verse.verseIndex.verseIndex
                     val followingEmptyVerseCount = nextVerse
                             ?.let { it.verseIndex.verseIndex - 1 - verseIndex }
@@ -224,12 +228,31 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                             ?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
                             ?: Highlight.COLOR_NONE
 
-                    add(SimpleVerseItem(verse, bookName, followingEmptyVerseCount, verses.size,
+                    val transformedVerse = if (verse.parallel.isEmpty()) {
+                        verse
+                    } else {
+                        val parallelTexts = ArrayList<Verse.Text>(parallel.size)
+                        verse.parallel.forEachIndexed { index, text ->
+                            parallelTexts.add(Verse.Text(text.translationShortName, parallel[index].toString()))
+                        }
+                        verse.copy(parallel = parallelTexts)
+                    }
+                    add(SimpleVerseItem(transformedVerse, bookName, followingEmptyVerseCount, verses.size,
                             highlightColor, this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked))
 
                     verse = nextVerse
                 }
             }
+
+    private fun Array<StringBuilder>.append(texts: List<Verse.Text>): Array<StringBuilder> {
+        texts.forEachIndexed { index, text ->
+            with(get(index)) {
+                if (isNotEmpty()) append(' ')
+                append(text.text)
+            }
+        }
+        return this
+    }
 
     @VisibleForTesting
     fun toVerseItems(verses: List<Verse>, bookName: String, bookmarks: List<Bookmark>,
