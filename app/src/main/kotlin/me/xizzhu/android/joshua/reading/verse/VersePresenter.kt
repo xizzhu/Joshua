@@ -188,22 +188,46 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     @VisibleForTesting
     fun toSimpleVerseItems(verses: List<Verse>, bookName: String, highlights: List<Highlight>): List<SimpleVerseItem> =
             ArrayList<SimpleVerseItem>(verses.size).apply {
+                val verseIterator = verses.iterator()
+                var verse: Verse? = null
                 val highlightIterator = highlights.iterator()
                 var highlight: Highlight? = null
-                verses.forEach { verse ->
+                while (verse != null || verseIterator.hasNext()) {
+                    verse = verse ?: verseIterator.next()
+
+                    // skips the empty verses
+                    var nextVerse: Verse? = null
+                    while (verseIterator.hasNext()) {
+                        nextVerse = verseIterator.next()
+                        if (nextVerse.text.text.isEmpty()) {
+                            nextVerse = null
+                        } else {
+                            break
+                        }
+                    }
+
+                    // TODO parallel verses
                     val verseIndex = verse.verseIndex.verseIndex
-                    if (highlight == null || highlight!!.verseIndex.verseIndex < verseIndex) {
+                    val followingEmptyVerseCount = nextVerse
+                            ?.let { it.verseIndex.verseIndex - 1 - verseIndex }
+                            ?: 0
+
+                    if (highlight == null || highlight.verseIndex.verseIndex < verseIndex) {
                         while (highlightIterator.hasNext()) {
                             highlight = highlightIterator.next()
-                            if (highlight!!.verseIndex.verseIndex >= verseIndex) {
+                            if (highlight.verseIndex.verseIndex >= verseIndex) {
                                 break
                             }
                         }
                     }
-                    add(SimpleVerseItem(verse, bookName, verses.size,
-                            highlight?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
-                                    ?: Highlight.COLOR_NONE,
-                            this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked))
+                    val highlightColor = highlight
+                            ?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
+                            ?: Highlight.COLOR_NONE
+
+                    add(SimpleVerseItem(verse, bookName, followingEmptyVerseCount, verses.size,
+                            highlightColor, this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked))
+
+                    verse = nextVerse
                 }
             }
 

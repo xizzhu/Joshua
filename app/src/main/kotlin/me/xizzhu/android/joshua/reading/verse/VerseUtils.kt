@@ -17,11 +17,13 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.graphics.Color
+import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Highlight
@@ -112,6 +114,8 @@ fun Collection<Verse>.toStringForSharing(bookName: String): String {
     return stringBuilder.toString()
 }
 
+private val indexStyleSpan = StyleSpan(Typeface.BOLD)
+private val indexSizeSpan = RelativeSizeSpan(0.75F)
 private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
 
 private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Text): SpannableStringBuilder {
@@ -129,13 +133,21 @@ private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Te
 }
 
 fun SpannableStringBuilder.format(verse: Verse, bookName: String, simpleReadingMode: Boolean,
-                                  @ColorInt highlightColor: Int): CharSequence {
+                                  followingEmptyVerseCount: Int, @ColorInt highlightColor: Int): CharSequence {
     clear()
     clearSpans()
 
     if (verse.parallel.isEmpty()) {
         if (simpleReadingMode) {
-            append(verse.text.text)
+            val verseIndex = verse.verseIndex.verseIndex
+            append(verseIndex + 1)
+            if (followingEmptyVerseCount > 0) {
+                append('-').append(verseIndex + followingEmptyVerseCount + 1)
+            }
+            setSpan(indexStyleSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            setSpan(indexSizeSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+
+            append(' ').append(verse.text.text)
         } else {
             // format:
             // <book name> <chapter verseIndex>:<verse verseIndex>

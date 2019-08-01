@@ -49,7 +49,7 @@ data class VerseItem(val verse: Verse, private val bookName: String,
     var textForDisplay: CharSequence = ""
         get() {
             if (field.isEmpty()) {
-                field = SPANNABLE_STRING_BUILDER.format(verse, bookName, false, highlightColor)
+                field = SPANNABLE_STRING_BUILDER.format(verse, bookName, false, 0 /* TODO */, highlightColor)
             }
             return field
         }
