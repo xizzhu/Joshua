@@ -25,9 +25,9 @@ object MockContents {
     const val kjvShortName = "KJV"
     val kjvTranslationInfo = TranslationInfo(kjvShortName, "Authorized King James", "en_gb", 1860978L, false)
     val kjvDownloadedTranslationInfo = TranslationInfo(kjvShortName, "Authorized King James", "en_gb", 1860978L, true)
-    val kjvBookNames: List<String> = arrayListOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
-    val kjvBookShortNames: List<String> = arrayListOf("Gen.", "Ex.", "Lev.", "Num.", "Deut.")
-    val kjvVerses: List<Verse> = arrayListOf(
+    val kjvBookNames: List<String> = listOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
+    val kjvBookShortNames: List<String> = listOf("Gen.", "Ex.", "Lev.", "Num.", "Deut.")
+    val kjvVerses: List<Verse> = listOf(
             Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "In the beginning God created the heaven and the earth."), emptyList()),
             Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), emptyList()),
             Verse(VerseIndex(0, 0, 2), Verse.Text(kjvShortName, "And God said, Let there be light: and there was light."), emptyList()),
@@ -44,9 +44,9 @@ object MockContents {
 
     const val bbeShortName = "BBE"
     val bbeTranslationInfo = TranslationInfo(bbeShortName, "Basic English", "en_us", 1869733L, false)
-    val bbeBookNames: List<String> = arrayListOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
-    val bbeBookShortNames: List<String> = arrayListOf("Gen.", "Ex.", "Lev.", "Num.", "Deut.")
-    val bbeVerses: List<Verse> = arrayListOf(
+    val bbeBookNames: List<String> = listOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
+    val bbeBookShortNames: List<String> = listOf("Gen.", "Ex.", "Lev.", "Num.", "Deut.")
+    val bbeVerses: List<Verse> = listOf(
             Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "At the first God made the heaven and the earth."), emptyList()),
             Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "And the earth was waste and without form; and it was dark on the face of the deep: and the Spirit of God was moving on the face of the waters."), emptyList()),
             Verse(VerseIndex(0, 0, 2), Verse.Text(kjvShortName, "And God said, Let there be light: and there was light."), emptyList()),
@@ -61,9 +61,9 @@ object MockContents {
 
     const val cuvShortName = "中文和合本"
     val cuvTranslationInfo = TranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L, false)
-    val cuvBookNames: List<String> = arrayListOf("创世记", "出埃及记", "利未记", "民数记", "申命记")
-    val cuvBookShortNames: List<String> = arrayListOf("创", "出", "利", "民", "申")
-    val cuvVerses: List<Verse> = arrayListOf(
+    val cuvBookNames: List<String> = listOf("创世记", "出埃及记", "利未记", "民数记", "申命记")
+    val cuvBookShortNames: List<String> = listOf("创", "出", "利", "民", "申")
+    val cuvVerses: List<Verse> = listOf(
             Verse(VerseIndex(0, 0, 0), Verse.Text(cuvShortName, "起初神创造天地。"), emptyList()),
             Verse(VerseIndex(0, 0, 1), Verse.Text(cuvShortName, "地是空虚混沌。渊面黑暗。神的灵运行在水面上。"), emptyList()),
             Verse(VerseIndex(0, 0, 2), Verse.Text(cuvShortName, "神说，要有光，就有了光。"), emptyList()),
@@ -78,6 +78,23 @@ object MockContents {
     const val cuvTranslationInfoJson = "{\"translations\":[{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
     val cuvRemoteTranslationInfo = RemoteTranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L)
 
+    const val msgShortName = "MSG"
+    val msgTranslationInfo = TranslationInfo(msgShortName, "The Message Bible", "en_us", 2066687L, false)
+    val msgBookNames: List<String> = listOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
+    val msgBookShortNames: List<String> = listOf("Gen.", "Ex.", "Lev.", "Num.", "Deut.")
+    val msgVerses: List<Verse> = listOf(
+            Verse(VerseIndex(0, 0, 0), Verse.Text(msgShortName, "First this: God created the Heavens and Earth—all you see, all you don't see. Earth was a soup of nothingness, a bottomless emptiness, an inky blackness. God's Spirit brooded like a bird above the watery abyss."), emptyList()),
+            Verse(VerseIndex(0, 0, 1), Verse.Text(msgShortName, ""), emptyList()),
+            Verse(VerseIndex(0, 0, 2), Verse.Text(msgShortName, "God spoke: \"Light!\"\nAnd light appeared.\nGod saw that light was good\nand separated light from dark.\nGod named the light Day,\nhe named the dark Night.\nIt was evening, it was morning—\nDay One."), emptyList()),
+            Verse(VerseIndex(0, 0, 3), Verse.Text(msgShortName, ""), emptyList()),
+            Verse(VerseIndex(0, 0, 4), Verse.Text(msgShortName, ""), emptyList()),
+            Verse(VerseIndex(0, 0, 5), Verse.Text(msgShortName, "God spoke: \"Sky! In the middle of the waters;\nseparate water from water!\"\nGod made sky.\nHe separated the water under sky\nfrom the water above sky.\nAnd there it was:\nhe named sky the Heavens;\nIt was evening, it was morning—\nDay Two."), emptyList()),
+            Verse(VerseIndex(0, 0, 6), Verse.Text(msgShortName, ""), emptyList()),
+            Verse(VerseIndex(0, 0, 7), Verse.Text(msgShortName, ""), emptyList()),
+            Verse(VerseIndex(0, 0, 8), Verse.Text(msgShortName, "God spoke: \"Separate!\nWater-beneath-Heaven, gather into one place;\nLand, appear!\"\nAnd there it was.\nGod named the land Earth.\nHe named the pooled water Ocean.\nGod saw that it was good."), emptyList()),
+            Verse(VerseIndex(0, 0, 9), Verse.Text(msgShortName, ""), emptyList())
+    )
+
     val kjvVersesWithCuvParallel = listOf(
             Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "In the beginning God created the heaven and the earth."), listOf(Verse.Text(cuvShortName, "起初神创造天地。"))),
             Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), listOf(Verse.Text(cuvShortName, "地是空虚混沌。渊面黑暗。神的灵运行在水面上。")))
@@ -85,6 +102,10 @@ object MockContents {
     val kjvVersesWithBbeCuvParallel = listOf(
             Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "In the beginning God created the heaven and the earth."), listOf(Verse.Text(bbeShortName, "At the first God made the heaven and the earth."), Verse.Text(cuvShortName, "起初神创造天地。"))),
             Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), listOf(Verse.Text(bbeShortName, "And the earth was waste and without form; and it was dark on the face of the deep: and the Spirit of God was moving on the face of the waters."), Verse.Text(cuvShortName, "地是空虚混沌。渊面黑暗。神的灵运行在水面上。")))
+    )
+    val msgVersesWithKjvParallel = listOf(
+            Verse(VerseIndex(0, 0, 0), Verse.Text(msgShortName, "First this: God created the Heavens and Earth—all you see, all you don't see. Earth was a soup of nothingness, a bottomless emptiness, an inky blackness. God's Spirit brooded like a bird above the watery abyss."), listOf(Verse.Text(kjvShortName, "In the beginning God created the heaven and the earth."))),
+            Verse(VerseIndex(0, 0, 1), Verse.Text(msgShortName, ""), listOf(Verse.Text(kjvShortName, "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.")))
     )
 
     const val kjvCuvTranslationInfoJson = "{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1860978},{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
