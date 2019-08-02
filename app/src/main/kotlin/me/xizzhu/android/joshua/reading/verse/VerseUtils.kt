@@ -118,30 +118,22 @@ private val indexStyleSpan = StyleSpan(Typeface.BOLD)
 private val indexSizeSpan = RelativeSizeSpan(0.75F)
 private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
 
-fun SpannableStringBuilder.format(verse: Verse, bookName: String, simpleReadingMode: Boolean,
-                                  followingEmptyVerseCount: Int, @ColorInt highlightColor: Int): CharSequence {
+fun SpannableStringBuilder.format(verse: Verse, followingEmptyVerseCount: Int,
+                                  @ColorInt highlightColor: Int): CharSequence {
     clear()
     clearSpans()
 
     if (verse.parallel.isEmpty()) {
-        if (simpleReadingMode) {
-            val verseIndex = verse.verseIndex.verseIndex
-            append(verseIndex + 1)
-            if (followingEmptyVerseCount > 0) {
-                append('-').append(verseIndex + followingEmptyVerseCount + 1)
-            }
-            setSpan(indexStyleSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            setSpan(indexSizeSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-
-            append(' ').append(verse.text.text)
-        } else {
-            // format:
-            // <book name> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-            append(bookName).append(' ')
-                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
-                    .append(verse.text.text)
+        val verseIndex = verse.verseIndex.verseIndex
+        append(verseIndex + 1)
+        if (followingEmptyVerseCount > 0) {
+            append('-').append(verseIndex + followingEmptyVerseCount + 1)
         }
+        setSpan(indexStyleSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        setSpan(indexSizeSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+
+        append(' ').append(verse.text.text)
+
         if (highlightColor != Highlight.COLOR_NONE) {
             val end = length
             val start = end - verse.text.text.length

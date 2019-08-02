@@ -36,7 +36,7 @@ import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class VerseItem(val verse: Verse, private val bookName: String,
+data class VerseItem(val verse: Verse, private val followingEmptyVerseCount: Int,
                      var hasNote: Boolean, @ColorInt var highlightColor: Int, var hasBookmark: Boolean,
                      val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
                      val onNoteClicked: (VerseIndex) -> Unit, val onHighlightClicked: (VerseIndex, Int) -> Unit,
@@ -49,7 +49,7 @@ data class VerseItem(val verse: Verse, private val bookName: String,
     var textForDisplay: CharSequence = ""
         get() {
             if (field.isEmpty()) {
-                field = SPANNABLE_STRING_BUILDER.format(verse, bookName, false, 0 /* TODO */, highlightColor)
+                field = SPANNABLE_STRING_BUILDER.format(verse, followingEmptyVerseCount, highlightColor)
             }
             return field
         }

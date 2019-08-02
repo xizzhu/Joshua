@@ -202,7 +202,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testToSimpleVerseItemsWithoutHighlights() {
         val verses = MockContents.kjvVerses
-        val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, MockContents.kjvBookNames[0], emptyList())
+        val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, emptyList())
         assertEquals(verses.size, simpleVerseItems.size)
         simpleVerseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
@@ -213,13 +213,11 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testToSimpleVerseItems() {
         val verses = MockContents.kjvVerses
-        val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, MockContents.kjvBookNames[0],
-                listOf(
-                        Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 1L),
-                        Highlight(VerseIndex(0, 0, 6), Highlight.COLOR_BLUE, 2L),
-                        Highlight(VerseIndex(0, 0, 10), Highlight.COLOR_PURPLE, 3L)
-                )
-        )
+        val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, listOf(
+                Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 1L),
+                Highlight(VerseIndex(0, 0, 6), Highlight.COLOR_BLUE, 2L),
+                Highlight(VerseIndex(0, 0, 10), Highlight.COLOR_PURPLE, 3L)
+        ))
         assertEquals(verses.size, simpleVerseItems.size)
         simpleVerseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
@@ -234,7 +232,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testToVerseItemsWithoutBookmarksHighlightsNotes() {
         val verses = MockContents.kjvVerses
-        val verseItems = versePresenter.toVerseItems(verses, MockContents.kjvBookNames[0], emptyList(), emptyList(), emptyList())
+        val verseItems = versePresenter.toVerseItems(verses, emptyList(), emptyList(), emptyList())
         assertEquals(verses.size, verseItems.size)
         verseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
@@ -247,7 +245,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testToVerseItems() {
         val verses = MockContents.kjvVerses
-        val verseItems = versePresenter.toVerseItems(verses, MockContents.kjvBookNames[0],
+        val verseItems = versePresenter.toVerseItems(verses,
                 listOf(
                         Bookmark(VerseIndex(0, 0, 0), 0L),
                         Bookmark(VerseIndex(0, 0, 5), 0L),
@@ -293,7 +291,7 @@ class VersePresenterTest : BaseUnitTest() {
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
                     bookIndex, chapterIndex, MockContents.kjvVerses.map {
-                SimpleVerseItem(it, MockContents.kjvBookNames[0], 0, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
+                SimpleVerseItem(it, 0, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
             })
             verify(verseView, never()).onVersesLoadFailed(anyInt(), anyInt())
         }
@@ -336,7 +334,7 @@ class VersePresenterTest : BaseUnitTest() {
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
                     bookIndex, chapterIndex, MockContents.kjvVerses.map {
-                SimpleVerseItem(it, MockContents.kjvBookNames[0], 0, MockContents.kjvVerses.size, Highlight.COLOR_NONE, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
+                SimpleVerseItem(it, 0, MockContents.kjvVerses.size, Highlight.COLOR_NONE, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
             })
             verify(verseView, never()).onVersesLoadFailed(anyInt(), anyInt())
         }
@@ -382,7 +380,7 @@ class VersePresenterTest : BaseUnitTest() {
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
                     bookIndex, chapterIndex, MockContents.kjvVerses.map {
-                VerseItem(it, MockContents.kjvBookNames[0], false, Highlight.COLOR_NONE, false,
+                VerseItem(it, 0, false, Highlight.COLOR_NONE, false,
                         versePresenter::onVerseClicked, versePresenter::onVerseLongClicked,
                         versePresenter::onNoteClicked, versePresenter::onHighlightClicked,
                         versePresenter::onBookmarkClicked)
