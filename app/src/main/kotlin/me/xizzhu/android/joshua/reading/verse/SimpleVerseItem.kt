@@ -40,9 +40,13 @@ data class SimpleVerseItem(val verse: Verse, private val followingEmptyVerseCoun
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
-    val textForDisplay: CharSequence by lazy {
-        SPANNABLE_STRING_BUILDER.format(verse, followingEmptyVerseCount, highlightColor)
-    }
+    var textForDisplay: CharSequence = ""
+        get() {
+            if (field.isEmpty()) {
+                field = SPANNABLE_STRING_BUILDER.format(verse, followingEmptyVerseCount, highlightColor)
+            }
+            return field
+        }
 }
 
 private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
@@ -87,6 +91,7 @@ private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
                     }
                     VerseUpdate.HIGHLIGHT_UPDATED -> {
                         item.highlightColor = update.data as Int
+                        item.textForDisplay = ""
                         bind(settings, item, emptyList())
                     }
                 }
