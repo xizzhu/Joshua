@@ -22,7 +22,7 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class VerseUtilsTest : BaseUnitTest() {
+class VerseIndexUtilsTest : BaseUnitTest() {
     @Test
     fun testPositionToBookIndex() {
         assertEquals(0, 0.toBookIndex())
