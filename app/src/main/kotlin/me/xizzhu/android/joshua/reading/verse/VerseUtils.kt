@@ -17,9 +17,7 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import me.xizzhu.android.joshua.core.Bible
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import java.lang.StringBuilder
 
 fun VerseIndex.toPagePosition(): Int = indexToPagePosition(bookIndex, chapterIndex)
 
@@ -69,36 +67,4 @@ fun Int.toChapterIndex(): Int {
     }
 
     throw IllegalArgumentException("Invalid position: $position")
-}
-
-fun Collection<Verse>.toStringForSharing(bookName: String): String {
-    val stringBuilder = StringBuilder()
-    for (verse in sortedBy { verse ->
-        val verseIndex = verse.verseIndex
-        verseIndex.bookIndex * 100000 + verseIndex.chapterIndex * 1000 + verseIndex.verseIndex
-    }) {
-        if (stringBuilder.isNotEmpty()) {
-            stringBuilder.append('\n')
-        }
-        if (verse.parallel.isEmpty()) {
-            // format: <book name> <chapter index>:<verse index> <text>
-            stringBuilder.append(bookName).append(' ')
-                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append(' ')
-                    .append(verse.text.text)
-        } else {
-            // format:
-            // <book name> <chapter verseIndex>:<verse verseIndex>
-            // <primary translation>: <verse text>
-            // <parallel translation 1>: <verse text>
-            // <parallel translation 2>: <verse text>
-            stringBuilder.append(bookName).append(' ')
-                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
-                    .append(verse.text.translationShortName).append(": ").append(verse.text.text).append('\n')
-            for (text in verse.parallel) {
-                stringBuilder.append(text.translationShortName).append(": ").append(text.text).append('\n')
-            }
-            stringBuilder.setLength(stringBuilder.length - 1)
-        }
-    }
-    return stringBuilder.toString()
 }
