@@ -32,9 +32,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
 data class SimpleVerseItem(val verse: Verse, private val followingEmptyVerseCount: Int,
-                           private val totalVerseCount: Int, @ColorInt var highlightColor: Int,
-                           val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
-                           var selected: Boolean = false)
+                           @ColorInt var highlightColor: Int, val onClicked: (Verse) -> Unit,
+                           val onLongClicked: (Verse) -> Unit, var selected: Boolean = false)
     : BaseItem(R.layout.item_simple_verse, { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }) {
     companion object {
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()

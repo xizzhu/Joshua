@@ -32,20 +32,20 @@ import org.junit.runner.RunWith
 class SimpleVerseItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_simple_verse, SimpleVerseItem(Verse.INVALID, 0, 0, Highlight.COLOR_NONE, {}, {}).viewType)
+        assertEquals(R.layout.item_simple_verse, SimpleVerseItem(Verse.INVALID, 0, Highlight.COLOR_NONE, {}, {}).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
         val expected = "1 In the beginning God created the heaven and the earth."
-        val actual = SimpleVerseItem(MockContents.kjvVerses[0], 0, 1, Highlight.COLOR_NONE, {}, {}).textForDisplay.toString()
+        val actual = SimpleVerseItem(MockContents.kjvVerses[0], 0, Highlight.COLOR_NONE, {}, {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 
     @Test
     fun testTextForDisplayWithParallelTranslations() {
         val expected = "KJV 1:1 In the beginning God created the heaven and the earth.\n\n中文和合本 1:1 起初神创造天地。"
-        val actual = SimpleVerseItem(MockContents.kjvVersesWithCuvParallel[0], 0, 1, Highlight.COLOR_NONE, {}, {}).textForDisplay.toString()
+        val actual = SimpleVerseItem(MockContents.kjvVersesWithCuvParallel[0], 0, Highlight.COLOR_NONE, {}, {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

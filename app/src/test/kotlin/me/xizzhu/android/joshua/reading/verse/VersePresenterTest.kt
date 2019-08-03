@@ -321,7 +321,7 @@ class VersePresenterTest : BaseUnitTest() {
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
                     bookIndex, chapterIndex, MockContents.kjvVerses.map {
-                SimpleVerseItem(it, 0, MockContents.kjvVerses.size, 0, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
+                SimpleVerseItem(it, 0, Highlight.COLOR_NONE, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
             })
             verify(verseView, never()).onVersesLoadFailed(anyInt(), anyInt())
         }
@@ -364,7 +364,7 @@ class VersePresenterTest : BaseUnitTest() {
             versePresenter.loadVerses(bookIndex, chapterIndex)
             verify(verseView, times(1)).onVersesLoaded(
                     bookIndex, chapterIndex, MockContents.kjvVerses.map {
-                SimpleVerseItem(it, 0, MockContents.kjvVerses.size, Highlight.COLOR_NONE, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
+                SimpleVerseItem(it, 0, Highlight.COLOR_NONE, versePresenter::onVerseClicked, versePresenter::onVerseLongClicked)
             })
             verify(verseView, never()).onVersesLoadFailed(anyInt(), anyInt())
         }

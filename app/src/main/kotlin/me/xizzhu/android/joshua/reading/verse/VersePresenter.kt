@@ -209,8 +209,8 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                             ?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
                             ?: Highlight.COLOR_NONE
 
-                    add(SimpleVerseItem(verse.transform(parallel), followingEmptyVerseCount, verses.size,
-                            highlightColor, this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked))
+                    add(SimpleVerseItem(verse.transform(parallel), followingEmptyVerseCount, highlightColor,
+                            this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked))
 
                     verse = nextVerse
                 }
