@@ -30,9 +30,12 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.append
 
-private val indexStyleSpan = StyleSpan(Typeface.BOLD)
-private val indexSizeSpan = RelativeSizeSpan(0.75F)
+private val indexStyleSpan = createIndexStypeSpan()
+private val indexSizeSpan = createIndexSizeSpan()
 private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
+
+private fun createIndexStypeSpan() = StyleSpan(Typeface.BOLD)
+private fun createIndexSizeSpan() = RelativeSizeSpan(0.85F)
 
 fun SpannableStringBuilder.format(verse: Verse, followingEmptyVerseCount: Int,
                                   @ColorInt highlightColor: Int): CharSequence {
@@ -92,10 +95,10 @@ private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Te
         append('-').append(verseIndex.verseIndex + followingEmptyVerseCount + 1)
     }
     val end = length
-    setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-    setSpan(RelativeSizeSpan(0.75F), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+    setSpan(createIndexStypeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+    setSpan(createIndexSizeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
 
-    append(' ').append(text.text)
+    append('\n').append(text.text)
 
     return this
 }
