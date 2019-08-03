@@ -24,7 +24,6 @@ import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ReceiveChannel
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import android.content.ComponentName
 import android.content.pm.LabeledIntent
 import android.content.pm.PackageManager
@@ -38,6 +37,7 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import me.xizzhu.android.logger.Log
+import java.lang.StringBuilder
 
 data class VerseUpdate(@Operation val operation: Int, val data: Any? = null) {
     companion object {
@@ -184,12 +184,45 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
             val bookName = readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
             // On older devices, this only works on the threads with loopers.
             (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
-                    ClipData.newPlainText(verse.text.translationShortName + " " + bookName, verses.toStringForSharing(bookName)))
+                    ClipData.newPlainText(verse.text.translationShortName + " " + bookName, toStringForSharing(verses, bookName)))
             return true
         } catch (e: Exception) {
             Log.e(TAG, "Failed to copy", e)
             return false
         }
+    }
+
+    @VisibleForTesting
+    fun toStringForSharing(verses: Collection<Verse>, bookName: String): String {
+        val stringBuilder = StringBuilder()
+        for (verse in verses.sortedBy { verse ->
+            val verseIndex = verse.verseIndex
+            verseIndex.bookIndex * 100000 + verseIndex.chapterIndex * 1000 + verseIndex.verseIndex
+        }) {
+            if (stringBuilder.isNotEmpty()) {
+                stringBuilder.append('\n')
+            }
+            if (verse.parallel.isEmpty()) {
+                // format: <book name> <chapter index>:<verse index> <text>
+                stringBuilder.append(bookName).append(' ')
+                        .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append(' ')
+                        .append(verse.text.text)
+            } else {
+                // format:
+                // <book name> <chapter verseIndex>:<verse verseIndex>
+                // <primary translation>: <verse text>
+                // <parallel translation 1>: <verse text>
+                // <parallel translation 2>: <verse text>
+                stringBuilder.append(bookName).append(' ')
+                        .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1).append('\n')
+                        .append(verse.text.translationShortName).append(": ").append(verse.text.text).append('\n')
+                for (text in verse.parallel) {
+                    stringBuilder.append(text.translationShortName).append(": ").append(text.text).append('\n')
+                }
+                stringBuilder.setLength(stringBuilder.length - 1)
+            }
+        }
+        return stringBuilder.toString()
     }
 
     suspend fun share(verses: Collection<Verse>): Boolean {
@@ -205,7 +238,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
             val verse = verses.first()
             val bookName = readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
             val chooseIntent = createChooserForSharing(readingActivity.packageManager, readingActivity.resources,
-                    "com.facebook.katana", verses.toStringForSharing(bookName))
+                    "com.facebook.katana", toStringForSharing(verses, bookName))
             return chooseIntent?.let {
                 readingActivity.startActivity(it)
                 true

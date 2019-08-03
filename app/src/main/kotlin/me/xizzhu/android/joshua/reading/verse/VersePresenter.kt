@@ -31,6 +31,7 @@ import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
+import java.lang.StringBuilder
 import kotlin.properties.Delegates
 
 class VersePresenter(private val readingInteractor: ReadingInteractor)
@@ -167,15 +168,13 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                         readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
                     }
                 }
-                val bookNameAsync = supervisedAsync { readingInteractor.readBookNames(currentTranslation)[bookIndex] }
                 val highlightsAsync = supervisedAsync { readingInteractor.readHighlights(bookIndex, chapterIndex) }
                 val items = if (readingInteractor.observeSettings().first().simpleReadingModeOn) {
-                    toSimpleVerseItems(versesAsync.await(), bookNameAsync.await(), highlightsAsync.await())
+                    toSimpleVerseItems(versesAsync.await(), highlightsAsync.await())
                 } else {
                     val bookmarksAsync = supervisedAsync { readingInteractor.readBookmarks(bookIndex, chapterIndex) }
                     val notesAsync = supervisedAsync { readingInteractor.readNotes(bookIndex, chapterIndex) }
-                    toVerseItems(versesAsync.await(), bookNameAsync.await(),
-                            bookmarksAsync.await(), highlightsAsync.await(), notesAsync.await())
+                    toVerseItems(versesAsync.await(), bookmarksAsync.await(), highlightsAsync.await(), notesAsync.await())
                 }
                 view?.onVersesLoaded(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
@@ -186,74 +185,138 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     }
 
     @VisibleForTesting
-    fun toSimpleVerseItems(verses: List<Verse>, bookName: String, highlights: List<Highlight>): List<SimpleVerseItem> =
+    fun toSimpleVerseItems(verses: List<Verse>, highlights: List<Highlight>): List<SimpleVerseItem> =
             ArrayList<SimpleVerseItem>(verses.size).apply {
+                val verseIterator = verses.iterator()
+                var verse: Verse? = null
                 val highlightIterator = highlights.iterator()
                 var highlight: Highlight? = null
-                verses.forEach { verse ->
+                while (verse != null || verseIterator.hasNext()) {
+                    verse = verse ?: verseIterator.next()
+
+                    val (nextVerse, parallel, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
+
                     val verseIndex = verse.verseIndex.verseIndex
-                    if (highlight == null || highlight!!.verseIndex.verseIndex < verseIndex) {
+                    if (highlight == null || highlight.verseIndex.verseIndex < verseIndex) {
                         while (highlightIterator.hasNext()) {
                             highlight = highlightIterator.next()
-                            if (highlight!!.verseIndex.verseIndex >= verseIndex) {
+                            if (highlight.verseIndex.verseIndex >= verseIndex) {
                                 break
                             }
                         }
                     }
-                    add(SimpleVerseItem(verse, bookName, verses.size,
-                            highlight?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
-                                    ?: Highlight.COLOR_NONE,
+                    val highlightColor = highlight
+                            ?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
+                            ?: Highlight.COLOR_NONE
+
+                    add(SimpleVerseItem(verse.transform(parallel), followingEmptyVerseCount, highlightColor,
                             this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked))
+
+                    verse = nextVerse
                 }
             }
+
+    // skips the empty verses, and concatenates the parallels
+    private fun Iterator<Verse>.nextNonEmpty(current: Verse): Triple<Verse?, Array<StringBuilder>, Int> {
+        val parallel = Array(current.parallel.size) { StringBuilder() }.append(current.parallel)
+
+        var nextVerse: Verse? = null
+        while (hasNext()) {
+            nextVerse = next()
+            if (nextVerse.text.text.isEmpty()) {
+                parallel.append(nextVerse.parallel)
+                nextVerse = null
+            } else {
+                break
+            }
+        }
+
+        val followingEmptyVerseCount = nextVerse
+                ?.let { it.verseIndex.verseIndex - 1 - current.verseIndex.verseIndex }
+                ?: 0
+
+        return Triple(nextVerse, parallel, followingEmptyVerseCount)
+    }
+
+    private fun Array<StringBuilder>.append(texts: List<Verse.Text>): Array<StringBuilder> {
+        texts.forEachIndexed { index, text ->
+            with(get(index)) {
+                if (isNotEmpty()) append(' ')
+                append(text.text)
+            }
+        }
+        return this
+    }
+
+    private fun Verse.transform(concatenatedParallel: Array<StringBuilder>): Verse {
+        if (parallel.isEmpty() || concatenatedParallel.isEmpty()) return this
+
+        val parallelTexts = ArrayList<Verse.Text>(concatenatedParallel.size)
+        parallel.forEachIndexed { index, text ->
+            parallelTexts.add(Verse.Text(text.translationShortName, concatenatedParallel[index].toString()))
+        }
+        return copy(parallel = parallelTexts)
+    }
 
     @VisibleForTesting
-    fun toVerseItems(verses: List<Verse>, bookName: String, bookmarks: List<Bookmark>,
-                     highlights: List<Highlight>, notes: List<Note>): List<VerseItem> {
-        val verseItems = ArrayList<VerseItem>(verses.size)
-        val bookmarkIterator = bookmarks.iterator()
-        var bookmark: Bookmark? = null
-        val highlightIterator = highlights.iterator()
-        var highlight: Highlight? = null
-        val noteIterator = notes.iterator()
-        var note: Note? = null
-        verses.forEach { verse ->
-            val verseIndex = verse.verseIndex.verseIndex
-            if (bookmark == null || bookmark!!.verseIndex.verseIndex < verseIndex) {
-                while (bookmarkIterator.hasNext()) {
-                    bookmark = bookmarkIterator.next()
-                    if (bookmark!!.verseIndex.verseIndex >= verseIndex) {
-                        break
-                    }
-                }
-            }
-            if (highlight == null || highlight!!.verseIndex.verseIndex < verseIndex) {
-                while (highlightIterator.hasNext()) {
-                    highlight = highlightIterator.next()
-                    if (highlight!!.verseIndex.verseIndex >= verseIndex) {
-                        break
-                    }
-                }
-            }
-            if (note == null || note!!.verseIndex.verseIndex < verseIndex) {
-                while (noteIterator.hasNext()) {
-                    note = noteIterator.next()
-                    if (note!!.verseIndex.verseIndex >= verseIndex) {
-                        break
-                    }
-                }
-            }
+    fun toVerseItems(verses: List<Verse>, bookmarks: List<Bookmark>,
+                     highlights: List<Highlight>, notes: List<Note>): List<VerseItem> =
+            ArrayList<VerseItem>(verses.size).apply {
+                val verseIterator = verses.iterator()
+                var verse: Verse? = null
+                val bookmarkIterator = bookmarks.iterator()
+                var bookmark: Bookmark? = null
+                val highlightIterator = highlights.iterator()
+                var highlight: Highlight? = null
+                val noteIterator = notes.iterator()
+                var note: Note? = null
+                while (verse != null || verseIterator.hasNext()) {
+                    verse = verse ?: verseIterator.next()
 
-            verseItems.add(VerseItem(verse, bookName,
-                    note?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
-                    highlight?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
-                            ?: Highlight.COLOR_NONE,
-                    bookmark?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
-                    this::onVerseClicked, this::onVerseLongClicked, this::onNoteClicked,
-                    this::onHighlightClicked, this::onBookmarkClicked))
-        }
-        return verseItems
-    }
+                    val (nextVerse, parallel, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
+
+                    val verseIndex = verse.verseIndex.verseIndex
+                    if (note == null || note.verseIndex.verseIndex < verseIndex) {
+                        while (noteIterator.hasNext()) {
+                            note = noteIterator.next()
+                            if (note.verseIndex.verseIndex >= verseIndex) {
+                                break
+                            }
+                        }
+                    }
+                    val hasNote = note?.let { it.verseIndex.verseIndex == verseIndex } ?: false
+
+                    if (highlight == null || highlight.verseIndex.verseIndex < verseIndex) {
+                        while (highlightIterator.hasNext()) {
+                            highlight = highlightIterator.next()
+                            if (highlight.verseIndex.verseIndex >= verseIndex) {
+                                break
+                            }
+                        }
+                    }
+                    val highlightColor = highlight
+                            ?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
+                            ?: Highlight.COLOR_NONE
+
+                    if (bookmark == null || bookmark.verseIndex.verseIndex < verseIndex) {
+                        while (bookmarkIterator.hasNext()) {
+                            bookmark = bookmarkIterator.next()
+                            if (bookmark.verseIndex.verseIndex >= verseIndex) {
+                                break
+                            }
+                        }
+                    }
+                    val hasBookmark = bookmark?.let { it.verseIndex.verseIndex == verseIndex }
+                            ?: false
+
+                    add(VerseItem(verse.transform(parallel), followingEmptyVerseCount,
+                            hasNote, highlightColor, hasBookmark, this@VersePresenter::onVerseClicked,
+                            this@VersePresenter::onVerseLongClicked, this@VersePresenter::onNoteClicked,
+                            this@VersePresenter::onHighlightClicked, this@VersePresenter::onBookmarkClicked))
+
+                    verse = nextVerse
+                }
+            }
 
     @VisibleForTesting
     fun onVerseClicked(verse: Verse) {

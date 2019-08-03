@@ -2,6 +2,10 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Improved UI for reading
+  - Harmonized format
+  - Better handling in case of empty verse (especially useful for MSG)
+  - Fixed highlight update under simple reading mode
 - Used URLConnection instead of Retrofit
 - Updated dependencies:
   - Dagger to 2.24

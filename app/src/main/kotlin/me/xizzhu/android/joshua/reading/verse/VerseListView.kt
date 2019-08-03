@@ -25,6 +25,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
 
 class VerseListView : BaseRecyclerView {
+    private var verses: List<BaseItem>? = null
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -40,25 +42,39 @@ class VerseListView : BaseRecyclerView {
                     override fun onChanged() {
                         adapter.unregisterAdapterDataObserver(this)
                         Handler().post {
-                            adapter.notifyItemChanged(verseIndex.verseIndex, VerseUpdate(VerseUpdate.VERSE_SELECTED))
+                            adapter.notifyItemChanged(verseIndex.toItemPosition(), VerseUpdate(VerseUpdate.VERSE_SELECTED))
                         }
                     }
                 })
             } else {
-                adapter.notifyItemChanged(verseIndex.verseIndex, VerseUpdate(VerseUpdate.VERSE_SELECTED))
+                adapter.notifyItemChanged(verseIndex.toItemPosition(), VerseUpdate(VerseUpdate.VERSE_SELECTED))
             }
         }
     }
 
+    // now we skip empty verses, so need to find the correct position
+    private fun VerseIndex.toItemPosition(): Int {
+        verses?.let {
+            it.forEachIndexed { index, item ->
+                when (item) {
+                    is SimpleVerseItem -> if (item.verse.verseIndex == this) return index
+                    is VerseItem -> if (item.verse.verseIndex == this) return index
+                }
+            }
+        }
+        return NO_POSITION
+    }
+
     fun deselectVerse(verseIndex: VerseIndex) {
-        adapter?.notifyItemChanged(verseIndex.verseIndex, VerseUpdate(VerseUpdate.VERSE_DESELECTED))
+        adapter?.notifyItemChanged(verseIndex.toItemPosition(), VerseUpdate(VerseUpdate.VERSE_DESELECTED))
     }
 
     fun notifyVerseUpdate(verseIndex: VerseIndex, update: VerseUpdate) {
-        adapter?.notifyItemChanged(verseIndex.verseIndex, update)
+        adapter?.notifyItemChanged(verseIndex.toItemPosition(), update)
     }
 
     fun setVerses(verses: List<BaseItem>) {
+        this.verses = verses
         setItems(verses)
     }
 }

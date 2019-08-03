@@ -23,13 +23,13 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ReadingInteractorTest : BaseUnitTest() {
     @Mock
@@ -105,5 +105,50 @@ class ReadingInteractorTest : BaseUnitTest() {
         runBlocking {
             assertFalse(readingInteractor.share(MockContents.kjvVerses))
         }
+    }
+
+    @Test
+    fun testEmptyVerseToStringForSharing() {
+        assertTrue(readingInteractor.toStringForSharing(emptyList(), "").isEmpty())
+    }
+
+    @Test
+    fun testSingleVerseToStringForSharing() {
+        assertEquals(
+                "Genesis 1:1 In the beginning God created the heaven and the earth.",
+                readingInteractor.toStringForSharing(listOf(MockContents.kjvVerses[0]), MockContents.kjvBookNames[0])
+        )
+    }
+
+    @Test
+    fun testSingleVerseWithMultipleTranslationsToStringForSharing() {
+        assertEquals(
+                "Genesis 1:1\nKJV: In the beginning God created the heaven and the earth.\n中文和合本: 起初神创造天地。",
+                readingInteractor.toStringForSharing(listOf(MockContents.kjvVersesWithCuvParallel[0]), MockContents.kjvBookNames[0])
+        )
+    }
+
+    @Test
+    fun testMultipleVersesToStringForSharing() {
+        assertEquals(
+                "Genesis 1:1 In the beginning God created the heaven and the earth.\nGenesis 1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.",
+                readingInteractor.toStringForSharing(listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]), MockContents.kjvBookNames[0])
+        )
+    }
+
+    @Test
+    fun testMultipleVerseWithMultipleTranslationsToStringForSharing() {
+        assertEquals(
+                "Genesis 1:1\nKJV: In the beginning God created the heaven and the earth.\n中文和合本: 起初神创造天地。\nGenesis 1:2\nKJV: And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.\n中文和合本: 地是空虚混沌。渊面黑暗。神的灵运行在水面上。",
+                readingInteractor.toStringForSharing(listOf(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvVersesWithCuvParallel[1]), MockContents.kjvBookNames[0])
+        )
+    }
+
+    @Test
+    fun testMultipleVersesRandomOrderToStringForSharing() {
+        assertEquals(
+                "Genesis 1:1 In the beginning God created the heaven and the earth.\nGenesis 1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.\nGenesis 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
+                readingInteractor.toStringForSharing(listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[9], MockContents.kjvVerses[1]), MockContents.kjvBookNames[0])
+        )
     }
 }
