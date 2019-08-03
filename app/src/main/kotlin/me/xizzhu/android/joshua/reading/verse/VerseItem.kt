@@ -127,7 +127,8 @@ private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
                     VerseUpdate.HIGHLIGHT_UPDATED -> {
                         item.highlightColor = update.data as Int
                         item.textForDisplay = ""
-                        bind(settings, item, emptyList())
+                        text.text = item.textForDisplay
+                        highlight.colorFilter = if (item.highlightColor != Highlight.COLOR_NONE) ON else OFF
                     }
                 }
             }

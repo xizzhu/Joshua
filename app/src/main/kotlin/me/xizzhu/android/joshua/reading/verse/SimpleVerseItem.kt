@@ -92,7 +92,7 @@ private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
                     VerseUpdate.HIGHLIGHT_UPDATED -> {
                         item.highlightColor = update.data as Int
                         item.textForDisplay = ""
-                        bind(settings, item, emptyList())
+                        text.text = item.textForDisplay
                     }
                 }
             }
