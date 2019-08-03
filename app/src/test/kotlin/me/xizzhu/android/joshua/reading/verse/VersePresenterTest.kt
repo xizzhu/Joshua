@@ -200,7 +200,7 @@ class VersePresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testToSimpleVerseItemsWithoutHighlights() {
+    fun testToSimpleVerseItems() {
         val verses = MockContents.kjvVerses
         val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, emptyList())
         assertEquals(verses.size, simpleVerseItems.size)
@@ -211,7 +211,37 @@ class VersePresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testToSimpleVerseItems() {
+    fun testToSimpleVerseItemsWithFollowingEmptyVerse() {
+        val verses = MockContents.msgVerses
+        val actual = versePresenter.toSimpleVerseItems(verses, emptyList())
+        assertTrue(verses.size > actual.size)
+
+        var index = 0
+        actual.forEach { verseItem ->
+            while (index < verses.size) {
+                if (verses[index] == verseItem.verse) {
+                    break
+                }
+                index++
+            }
+            assertTrue(index < verses.size)
+
+            assertEquals(Highlight.COLOR_NONE, verseItem.highlightColor)
+        }
+    }
+
+    @Test
+    fun testToSimpleVerseItemsWithFollowingEmptyVerseAndParallel() {
+        val verses = MockContents.msgVersesWithKjvParallel
+        val actual = versePresenter.toSimpleVerseItems(verses, emptyList())
+        assertEquals(1, actual.size)
+        assertEquals(Verse(VerseIndex(0, 0, 0), verses[0].text,
+                listOf(Verse.Text(MockContents.kjvShortName, "${MockContents.msgVersesWithKjvParallel[0].parallel[0].text} ${MockContents.msgVersesWithKjvParallel[1].parallel[0].text}"))),
+                actual[0].verse)
+    }
+
+    @Test
+    fun testToSimpleVerseItemsWithHighlights() {
         val verses = MockContents.kjvVerses
         val simpleVerseItems = versePresenter.toSimpleVerseItems(verses, listOf(
                 Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 1L),

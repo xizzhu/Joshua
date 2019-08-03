@@ -276,22 +276,6 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                     val (nextVerse, parallel, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
 
                     val verseIndex = verse.verseIndex.verseIndex
-                    if (bookmark == null || bookmark.verseIndex.verseIndex < verseIndex) {
-                        while (bookmarkIterator.hasNext()) {
-                            bookmark = bookmarkIterator.next()
-                            if (bookmark.verseIndex.verseIndex >= verseIndex) {
-                                break
-                            }
-                        }
-                    }
-                    if (highlight == null || highlight.verseIndex.verseIndex < verseIndex) {
-                        while (highlightIterator.hasNext()) {
-                            highlight = highlightIterator.next()
-                            if (highlight.verseIndex.verseIndex >= verseIndex) {
-                                break
-                            }
-                        }
-                    }
                     if (note == null || note.verseIndex.verseIndex < verseIndex) {
                         while (noteIterator.hasNext()) {
                             note = noteIterator.next()
@@ -300,15 +284,35 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
                             }
                         }
                     }
+                    val hasNote = note?.let { it.verseIndex.verseIndex == verseIndex } ?: false
+
+                    if (highlight == null || highlight.verseIndex.verseIndex < verseIndex) {
+                        while (highlightIterator.hasNext()) {
+                            highlight = highlightIterator.next()
+                            if (highlight.verseIndex.verseIndex >= verseIndex) {
+                                break
+                            }
+                        }
+                    }
+                    val highlightColor = highlight
+                            ?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
+                            ?: Highlight.COLOR_NONE
+
+                    if (bookmark == null || bookmark.verseIndex.verseIndex < verseIndex) {
+                        while (bookmarkIterator.hasNext()) {
+                            bookmark = bookmarkIterator.next()
+                            if (bookmark.verseIndex.verseIndex >= verseIndex) {
+                                break
+                            }
+                        }
+                    }
+                    val hasBookmark = bookmark?.let { it.verseIndex.verseIndex == verseIndex }
+                            ?: false
 
                     add(VerseItem(verse.transform(parallel), followingEmptyVerseCount,
-                            note?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
-                            highlight?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
-                                    ?: Highlight.COLOR_NONE,
-                            bookmark?.let { it.verseIndex.verseIndex == verseIndex } ?: false,
-                            this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked,
-                            this@VersePresenter::onNoteClicked, this@VersePresenter::onHighlightClicked,
-                            this@VersePresenter::onBookmarkClicked))
+                            hasNote, highlightColor, hasBookmark, this@VersePresenter::onVerseClicked,
+                            this@VersePresenter::onVerseLongClicked, this@VersePresenter::onNoteClicked,
+                            this@VersePresenter::onHighlightClicked, this@VersePresenter::onBookmarkClicked))
 
                     verse = nextVerse
                 }
