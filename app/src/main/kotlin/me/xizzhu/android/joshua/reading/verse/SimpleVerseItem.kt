@@ -31,18 +31,49 @@ import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class SimpleVerseItem(val verse: Verse, private val followingEmptyVerseCount: Int,
-                           @ColorInt var highlightColor: Int, val onClicked: (Verse) -> Unit,
-                           val onLongClicked: (Verse) -> Unit, var selected: Boolean = false)
+data class SimpleVerseItem(val verse: Verse, private val bookName: String, private val totalVerseCount: Int,
+                           private val followingEmptyVerseCount: Int, @ColorInt var highlightColor: Int,
+                           val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit, var selected: Boolean = false)
     : BaseItem(R.layout.item_simple_verse, { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }) {
     companion object {
+        private val STRING_BUILDER = StringBuilder()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+    }
+
+    val indexForDisplay: CharSequence by lazy {
+        if (verse.parallel.isEmpty()) {
+            STRING_BUILDER.setLength(0)
+
+            val verseIndex = verse.verseIndex.verseIndex
+            if (followingEmptyVerseCount > 0) {
+                STRING_BUILDER.append(verseIndex + 1).append('-').append(verseIndex + followingEmptyVerseCount + 1)
+            } else {
+                if (totalVerseCount >= 10) {
+                    if (totalVerseCount < 100) {
+                        if (verseIndex + 1 < 10) {
+                            STRING_BUILDER.append(' ')
+                        }
+                    } else {
+                        if (verseIndex + 1 < 10) {
+                            STRING_BUILDER.append("  ")
+                        } else if (verseIndex + 1 < 100) {
+                            STRING_BUILDER.append(' ')
+                        }
+                    }
+                }
+                STRING_BUILDER.append(verseIndex + 1)
+            }
+
+            return@lazy STRING_BUILDER.toString()
+        } else {
+            return@lazy ""
+        }
     }
 
     var textForDisplay: CharSequence = ""
         get() {
             if (field.isEmpty()) {
-                field = SPANNABLE_STRING_BUILDER.format(verse, followingEmptyVerseCount, highlightColor)
+                field = SPANNABLE_STRING_BUILDER.format(verse, bookName, followingEmptyVerseCount, true, highlightColor)
             }
             return field
         }
@@ -51,6 +82,7 @@ data class SimpleVerseItem(val verse: Verse, private val followingEmptyVerseCoun
 private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<SimpleVerseItem>(inflater.inflate(R.layout.item_simple_verse, parent, false)) {
     private val resources = itemView.resources
+    private val index = itemView.findViewById(R.id.index) as TextView
     private val text = itemView.findViewById(R.id.text) as TextView
     private val divider = itemView.findViewById(R.id.divider) as View
 
@@ -64,11 +96,25 @@ private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
 
     override fun bind(settings: Settings, item: SimpleVerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {
-            text.text = item.textForDisplay
-            text.setTextColor(if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources))
-            text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+            val textColor = if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources)
+            val textSize = settings.getBodyTextSize(resources)
 
-            divider.visibility = if (item.verse.parallel.isEmpty()) View.GONE else View.VISIBLE
+            text.text = item.textForDisplay
+            text.setTextColor(textColor)
+            text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+
+            if (item.verse.parallel.isEmpty()) {
+                index.text = item.indexForDisplay
+                index.setTextColor(textColor)
+                index.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize * 0.85F)
+                index.visibility = View.VISIBLE
+
+                divider.visibility = View.GONE
+            } else {
+                index.visibility = View.GONE
+                divider.visibility = View.VISIBLE
+            }
+
             itemView.isSelected = item.selected
         } else {
             payloads.forEach { payload ->

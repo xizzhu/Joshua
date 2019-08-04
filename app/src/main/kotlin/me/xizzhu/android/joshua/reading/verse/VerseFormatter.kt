@@ -30,28 +30,35 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.append
 
-private val indexStyleSpan = createIndexStypeSpan()
+private val indexStyleSpan = createIndexStyleSpan()
 private val indexSizeSpan = createIndexSizeSpan()
 private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
 
-private fun createIndexStypeSpan() = StyleSpan(Typeface.BOLD)
+private fun createIndexStyleSpan() = StyleSpan(Typeface.BOLD)
 private fun createIndexSizeSpan() = RelativeSizeSpan(0.85F)
 
-fun SpannableStringBuilder.format(verse: Verse, followingEmptyVerseCount: Int,
-                                  @ColorInt highlightColor: Int): CharSequence {
+fun SpannableStringBuilder.format(verse: Verse, bookName: String, followingEmptyVerseCount: Int,
+                                  simpleReadingModeOn: Boolean, @ColorInt highlightColor: Int): CharSequence {
     clear()
     clearSpans()
 
     if (verse.parallel.isEmpty()) {
-        val verseIndex = verse.verseIndex.verseIndex
-        append(verseIndex + 1)
-        if (followingEmptyVerseCount > 0) {
-            append('-').append(verseIndex + followingEmptyVerseCount + 1)
-        }
-        setSpan(indexStyleSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-        setSpan(indexSizeSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        if (!simpleReadingModeOn) {
+            // format:
+            // <book name> <chapter verseIndex>:<verse verseIndex>
+            // <verse text>
+            append(bookName).append(' ')
+                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
+            if (followingEmptyVerseCount > 0) {
+                append('-').append(verse.verseIndex.verseIndex + followingEmptyVerseCount + 1)
+            }
+            append('\n')
 
-        append(' ').append(verse.text.text).setHighlight(verse, highlightColor)
+            setSpan(indexStyleSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            setSpan(indexSizeSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        }
+
+        append(verse.text.text).setHighlight(verse, highlightColor)
     } else {
         // format:
         // <primary translation> <chapter verseIndex>:<verse verseIndex> <verse text>
@@ -95,7 +102,7 @@ private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Te
         append('-').append(verseIndex.verseIndex + followingEmptyVerseCount + 1)
     }
     val end = length
-    setSpan(createIndexStypeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+    setSpan(createIndexStyleSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
     setSpan(createIndexSizeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
 
     append('\n').append(text.text)

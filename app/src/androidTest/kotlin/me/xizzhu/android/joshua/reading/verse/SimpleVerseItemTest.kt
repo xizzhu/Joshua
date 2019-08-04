@@ -21,31 +21,54 @@ import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class SimpleVerseItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_simple_verse, SimpleVerseItem(Verse.INVALID, 0, Highlight.COLOR_NONE, {}, {}).viewType)
+        assertEquals(R.layout.item_simple_verse, SimpleVerseItem(Verse.INVALID, "", 0, 0, Highlight.COLOR_NONE, {}, {}).viewType)
+    }
+
+    @Test
+    fun testIndexForDisplay() {
+        assertEquals("1", SimpleVerseItem(MockContents.kjvVerses[0], MockContents.kjvBookNames[0], 9, 0, Highlight.COLOR_NONE, {}, {}).indexForDisplay)
+
+        assertEquals(" 1", SimpleVerseItem(MockContents.kjvVerses[0], MockContents.kjvBookNames[0], 10, 0, Highlight.COLOR_NONE, {}, {}).indexForDisplay)
+        assertEquals("10", SimpleVerseItem(MockContents.kjvVerses[9], MockContents.kjvBookNames[0], 10, 0, Highlight.COLOR_NONE, {}, {}).indexForDisplay)
+        assertEquals("99", SimpleVerseItem(Verse(VerseIndex(1, 2, 98), Verse.Text("", ""), emptyList()), "", 99, 0, Highlight.COLOR_NONE, {}, {}).indexForDisplay)
+
+        assertEquals("  1", SimpleVerseItem(MockContents.kjvVerses[0], MockContents.kjvBookNames[0], 100, 0, Highlight.COLOR_NONE, {}, {}).indexForDisplay)
+        assertEquals(" 10", SimpleVerseItem(MockContents.kjvVerses[9], MockContents.kjvBookNames[0], 100, 0, Highlight.COLOR_NONE, {}, {}).indexForDisplay)
+        assertEquals("100", SimpleVerseItem(Verse(VerseIndex(1, 2, 99), Verse.Text("", ""), emptyList()), "", 100, 0, Highlight.COLOR_NONE, {}, {}).indexForDisplay)
+    }
+
+    @Test
+    fun testIndexForDisplayWithEmptyFollowingVerses() {
+        assertEquals("1-2", SimpleVerseItem(MockContents.msgVerses[0], MockContents.msgBookNames[0], MockContents.msgVerses.size, 1, Highlight.COLOR_NONE, {}, {}).indexForDisplay)
+    }
+
+    @Test
+    fun testIndexForDisplayWithParallel() {
+        assertTrue(SimpleVerseItem(MockContents.msgVersesWithKjvParallel[0], MockContents.msgBookNames[0], MockContents.msgVerses.size, 1, Highlight.COLOR_NONE, {}, {}).indexForDisplay.isEmpty())
     }
 
     @Test
     fun testTextForDisplay() {
-        val expected = "1 In the beginning God created the heaven and the earth."
-        val actual = SimpleVerseItem(MockContents.kjvVerses[0], 0, Highlight.COLOR_NONE, {}, {}).textForDisplay.toString()
-        assertEquals(expected, actual)
+        assertEquals(MockContents.kjvVerses[0].text.text,
+                SimpleVerseItem(MockContents.kjvVerses[0], MockContents.kjvBookNames[0], MockContents.kjvVerses.size, 0, Highlight.COLOR_NONE, {}, {}).textForDisplay.toString())
     }
 
     @Test
     fun testTextForDisplayWithParallelTranslations() {
-        val expected = "KJV 1:1 In the beginning God created the heaven and the earth.\n\n中文和合本 1:1 起初神创造天地。"
-        val actual = SimpleVerseItem(MockContents.kjvVersesWithCuvParallel[0], 0, Highlight.COLOR_NONE, {}, {}).textForDisplay.toString()
-        assertEquals(expected, actual)
+        assertEquals("${MockContents.kjvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].text.text}\n\n${MockContents.cuvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].parallel[0].text}",
+                SimpleVerseItem(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvBookNames[0], MockContents.kjvVerses.size, 0, Highlight.COLOR_NONE, {}, {}).textForDisplay.toString())
     }
 }
