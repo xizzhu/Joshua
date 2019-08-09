@@ -7,6 +7,7 @@ CHANGELOG
   - Fixed highlight update under simple reading mode
 - Used URLConnection instead of Retrofit
 - Updated dependencies:
+  - Build tool to 29.0.2
   - Dagger to 2.24
 
 #### v0.8.1 (2019-07-21)
