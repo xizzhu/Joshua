@@ -10,6 +10,7 @@ Available Translations
   * GOD'S WORD to the Nations (GodsWord)
   * Good News Translation (GNT)
   * Green's Literal Translation (LITV)
+  * New American Standard Bible (NASB)
   * New Heart English Bible (NHEB)
   * New International Version (NIV)
   * New King James Version (NKJV)
