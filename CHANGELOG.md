@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.9.0 (2019-08-10)
 - Improved UI for reading
   - Better handling in case of empty verse (especially useful for MSG)
   - Fixed highlight update under simple reading mode
