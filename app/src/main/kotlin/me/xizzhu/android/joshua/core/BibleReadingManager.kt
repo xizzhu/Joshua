@@ -21,6 +21,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.logger.Log
@@ -63,7 +64,8 @@ data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<
     }
 }
 
-class BibleReadingManager(private val bibleReadingRepository: BibleReadingRepository) {
+class BibleReadingManager(private val bibleReadingRepository: BibleReadingRepository,
+                          translationManager: TranslationManager) {
     companion object {
         private val TAG = BibleReadingManager::class.java.simpleName
     }
@@ -71,6 +73,7 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
     private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
     private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
+    private val downloadedTranslations: MutableSet<String> = mutableSetOf()
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
@@ -85,6 +88,20 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize current translation", e)
                 currentTranslationShortName.send("")
+            }
+        }
+        GlobalScope.launch(Dispatchers.Default) {
+            translationManager.observeDownloadedTranslations().consumeEach {
+                downloadedTranslations.clear()
+                it.forEach { translation -> downloadedTranslations.add(translation.shortName) }
+
+                parallelTranslations.value.toList().let { current ->
+                    current.filter { parallel -> downloadedTranslations.contains(parallel) }.let { updated ->
+                        if (current != updated) {
+                            parallelTranslations.send(updated)
+                        }
+                    }
+                }
             }
         }
     }

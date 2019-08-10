@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
@@ -32,7 +33,10 @@ import kotlin.test.assertTrue
 class BibleReadingManagerTest : BaseUnitTest() {
     @Mock
     private lateinit var bibleReadingRepository: BibleReadingRepository
+    @Mock
+    private lateinit var translationManager: TranslationManager
 
+    private lateinit var downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
     private lateinit var bibleReadingManager: BibleReadingManager
 
     @Before
@@ -42,7 +46,10 @@ class BibleReadingManagerTest : BaseUnitTest() {
         runBlocking {
             `when`(bibleReadingRepository.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(bibleReadingRepository.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
-            bibleReadingManager = BibleReadingManager(bibleReadingRepository)
+
+            downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
+            `when`(translationManager.observeDownloadedTranslations()).thenReturn(downloadedTranslationsChannel.openSubscription())
+            bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
         }
     }
 
@@ -57,7 +64,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     fun testObserveInitialCurrentVerseIndexWithException() {
         runBlocking {
             `when`(bibleReadingRepository.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
-            bibleReadingManager = BibleReadingManager(bibleReadingRepository)
+            bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
 
             assertFalse(bibleReadingManager.observeCurrentVerseIndex().first().isValid())
         }
@@ -90,7 +97,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     fun testObserveInitialCurrentTranslationWithException() {
         runBlocking {
             `when`(bibleReadingRepository.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
-            bibleReadingManager = BibleReadingManager(bibleReadingRepository)
+            bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
 
             assertTrue(bibleReadingManager.observeCurrentTranslation().first().isEmpty())
         }

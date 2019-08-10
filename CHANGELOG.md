@@ -6,6 +6,7 @@ CHANGELOG
   - Better handling in case of empty verse (especially useful for MSG)
   - Fixed highlight update under simple reading mode
 - Used URLConnection instead of Retrofit
+- Should reload when user deletes translations
 - Updated dependencies:
   - Build tool to 29.0.2
   - Dagger to 2.24
