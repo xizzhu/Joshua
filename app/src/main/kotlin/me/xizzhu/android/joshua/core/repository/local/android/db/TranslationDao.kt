@@ -112,12 +112,14 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         db.withTransaction {
             val results = mutableMapOf<String, Verse.Text>()
             for (translation in translations) {
-                query(translation, arrayOf(COLUMN_TEXT),
-                        "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
-                        arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
-                        null, null, null).use {
-                    if (it.moveToNext()) {
-                        results[translation] = Verse.Text(translation, it.getString(0))
+                if (hasTable(translation)) {
+                    query(translation, arrayOf(COLUMN_TEXT),
+                            "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
+                            arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
+                            null, null, null).use {
+                        if (it.moveToNext()) {
+                            results[translation] = Verse.Text(translation, it.getString(0))
+                        }
                     }
                 }
             }

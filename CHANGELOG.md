@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Should not fail when a parallel translation is not available
 
 #### v0.9.0 (2019-08-10)
 - Improved UI for reading

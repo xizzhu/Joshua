@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.core.repository.local.android
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.toMap
@@ -128,15 +129,22 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenReadVerses() {
         runBlocking {
-            saveTranslation()
+            saveKjv()
             assertEquals(MockContents.kjvVerses,
                     androidReadingStorage.readVerses(MockContents.kjvShortName, 0, 0))
         }
     }
 
-    private fun saveTranslation() {
-        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
-        androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
+    private fun saveKjv() {
+        saveTranslation(MockContents.kjvShortName, MockContents.kjvBookNames,
+                MockContents.kjvBookShortNames, MockContents.kjvVerses)
+    }
+
+    private fun saveTranslation(translationShortName: String, bookNames: List<String>,
+                                bookShortNames: List<String>, verses: List<Verse>) {
+        androidDatabase.bookNamesDao.save(translationShortName, bookNames, bookShortNames)
+        androidDatabase.translationDao.createTable(translationShortName)
+        androidDatabase.translationDao.save(translationShortName, verses.toMap())
     }
 
     @Test
@@ -154,13 +162,8 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenReadWithParallelTranslations() {
         runBlocking {
-            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
-            androidDatabase.translationDao.createTable(MockContents.kjvShortName)
-            androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
-
-            androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
-            androidDatabase.translationDao.createTable(MockContents.cuvShortName)
-            androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
+            saveKjv()
+            saveCuv()
 
             val actual = androidReadingStorage.readVerses(MockContents.kjvShortName,
                     listOf(MockContents.cuvShortName), 0, 0)
@@ -171,25 +174,33 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
         }
     }
 
+    private fun saveCuv() {
+        saveTranslation(MockContents.cuvShortName, MockContents.cuvBookNames,
+                MockContents.cuvBookShortNames, MockContents.cuvVerses)
+    }
+
     @Test
     fun testSaveThenReadByVerseIndex() {
         runBlocking {
-            androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
-            androidDatabase.translationDao.createTable(MockContents.kjvShortName)
-            androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
-
-            androidDatabase.bookNamesDao.save(MockContents.bbeShortName, MockContents.bbeBookNames, MockContents.bbeBookShortNames)
-            androidDatabase.translationDao.createTable(MockContents.bbeShortName)
-            androidDatabase.translationDao.save(MockContents.bbeShortName, MockContents.bbeVerses.toMap())
-
-            androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
-            androidDatabase.translationDao.createTable(MockContents.cuvShortName)
-            androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
+            saveKjv()
+            saveCuv()
+            saveTranslation(MockContents.bbeShortName, MockContents.bbeBookNames, MockContents.bbeBookShortNames, MockContents.bbeVerses)
 
             assertEquals(MockContents.kjvVersesWithBbeCuvParallel[0],
                     androidReadingStorage.readVerse(MockContents.kjvShortName, listOf(MockContents.bbeShortName, MockContents.cuvShortName), VerseIndex(0, 0, 0)))
             assertEquals(MockContents.kjvVerses[0],
                     androidReadingStorage.readVerse(MockContents.kjvShortName, VerseIndex(0, 0, 0)))
+        }
+    }
+
+    @Test
+    fun testSaveThenReadByVerseIndexWithMissingParallel() {
+        runBlocking {
+            saveKjv()
+            saveCuv()
+
+            assertEquals(MockContents.kjvVersesWithCuvParallelMissingBbe[0],
+                    androidReadingStorage.readVerse(MockContents.kjvShortName, listOf(MockContents.bbeShortName, MockContents.cuvShortName), VerseIndex(0, 0, 0)))
         }
     }
 
@@ -203,7 +214,7 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenSearch() {
         runBlocking {
-            saveTranslation()
+            saveKjv()
 
             assertEquals(MockContents.kjvVerses,
                     androidReadingStorage.search(MockContents.kjvShortName, "God"))
@@ -217,7 +228,7 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenSearchMultiKeywords() {
         runBlocking {
-            saveTranslation()
+            saveKjv()
 
             assertEquals(listOf(MockContents.kjvVerses[0]),
                     androidReadingStorage.search(MockContents.kjvShortName, "God created"))

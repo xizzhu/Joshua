@@ -24,8 +24,13 @@ import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 import me.xizzhu.android.joshua.core.repository.local.android.db.withTransaction
+import me.xizzhu.android.logger.Log
 
 class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : LocalReadingStorage {
+    companion object {
+        private val TAG: String = AndroidReadingStorage::class.java.simpleName
+    }
+
     override suspend fun readCurrentVerseIndex(): VerseIndex {
         return withContext(Dispatchers.IO) {
             val keys = listOf(
@@ -112,8 +117,15 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
             translations.addAll(parallelTranslations)
             val translationToText = androidDatabase.translationDao.read(translations, verseIndex).toMutableMap()
             val primaryText = translationToText.remove(translationShortName)!!
-            return@withContext Verse(verseIndex, primaryText,
-                    mutableListOf<Verse.Text>().apply { parallelTranslations.forEach { add(translationToText[it]!!) } })
+            val parallelTexts = mutableListOf<Verse.Text>().apply {
+                parallelTranslations.forEach { translation ->
+                    add(translationToText.getOrElse(translation) {
+                        Log.e(TAG, "", IllegalStateException("Failed to read parallel verse for $translation"))
+                        Verse.Text(translation, "")
+                    })
+                }
+            }
+            return@withContext Verse(verseIndex, primaryText, parallelTexts)
         }
     }
 
