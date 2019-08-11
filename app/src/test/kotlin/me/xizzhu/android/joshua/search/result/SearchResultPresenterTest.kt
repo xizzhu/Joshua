@@ -53,6 +53,7 @@ class SearchResultPresenterTest : BaseUnitTest() {
 
             `when`(searchInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(searchInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+            `when`(searchInteractor.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
 
             searchResultPresenter = SearchResultPresenter(searchInteractor)
             searchResultPresenter.attachView(searchResultView)
@@ -98,7 +99,8 @@ class SearchResultPresenterTest : BaseUnitTest() {
                 verify(searchInteractor, times(1)).notifyLoadingStarted()
                 verify(searchResultView, times(1)).onSearchStarted()
                 verify(searchResultView, times(1)).onSearchResultUpdated(
-                        verses.toSearchResult(query, MockContents.kjvBookNames, searchResultPresenter::selectVerse)
+                        verses.toSearchResult(query, MockContents.kjvBookNames,
+                                MockContents.kjvBookShortNames, searchResultPresenter::selectVerse)
                 )
                 verify(searchResultView, times(1)).onSearchCompleted()
                 verify(searchInteractor, times(1)).notifyLoadingFinished()

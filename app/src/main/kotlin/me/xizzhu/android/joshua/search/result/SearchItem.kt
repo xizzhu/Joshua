@@ -28,12 +28,14 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.createBookNameSizeSpan
+import me.xizzhu.android.joshua.ui.createBookNameStyleSpan
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.util.*
 
-data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
+data class SearchItem(val verseIndex: VerseIndex, private val bookShortName: String,
                       private val text: String, private val query: String,
                       val onClicked: (VerseIndex) -> Unit)
     : BaseItem(R.layout.item_search_result, { inflater, parent -> SearchItemViewHolder(inflater, parent) }) {
@@ -42,16 +44,24 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
         @SuppressLint("ConstantLocale")
         private val DEFAULT_LOCALE = Locale.getDefault()
 
-        private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.95F)
-        private val KEYWORD_STYLE_SPAN = StyleSpan(Typeface.BOLD)
-        private val KEYWORD_SIZE_SPAN = RelativeSizeSpan(1.2F)
+        private val BOOK_NAME_SIZE_SPAN = createBookNameSizeSpan()
+        private val BOOK_NAME_STYLE_SPAN = createBookNameStyleSpan()
+        private val KEYWORD_SIZE_SPAN = createKeywordSizeSpan()
+        private val KEYWORD_STYLE_SPAN = createKeywordStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+
+        private fun createKeywordSizeSpan() = RelativeSizeSpan(1.2F)
+        private fun createKeywordStyleSpan() = StyleSpan(Typeface.BOLD)
     }
 
     val textForDisplay: CharSequence by lazy {
         SPANNABLE_STRING_BUILDER.clear()
         SPANNABLE_STRING_BUILDER.clearSpans()
-        SPANNABLE_STRING_BUILDER.append(bookName)
+
+        // format:
+        // <short book name> <chapter verseIndex>:<verse verseIndex>
+        // <verse text>
+        SPANNABLE_STRING_BUILDER.append(bookShortName)
                 .append(' ')
                 .append((verseIndex.chapterIndex + 1).toString())
                 .append(':')
@@ -62,6 +72,7 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
         // makes the book name & verse index smaller
         val textStartIndex = SPANNABLE_STRING_BUILDER.length - text.length
         SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, textStartIndex, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, textStartIndex, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
 
         // highlights the keywords
         val lowerCase = SPANNABLE_STRING_BUILDER.toString().toLowerCase(DEFAULT_LOCALE)
@@ -70,11 +81,11 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookName: String,
             if (start > 0) {
                 val end = start + keyword.length
                 if (index == 0) {
-                    SPANNABLE_STRING_BUILDER.setSpan(KEYWORD_STYLE_SPAN, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                     SPANNABLE_STRING_BUILDER.setSpan(KEYWORD_SIZE_SPAN, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                    SPANNABLE_STRING_BUILDER.setSpan(KEYWORD_STYLE_SPAN, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 } else {
-                    SPANNABLE_STRING_BUILDER.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                    SPANNABLE_STRING_BUILDER.setSpan(RelativeSizeSpan(1.2F), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                    SPANNABLE_STRING_BUILDER.setSpan(createKeywordSizeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                    SPANNABLE_STRING_BUILDER.setSpan(createKeywordStyleSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 }
             }
         }
