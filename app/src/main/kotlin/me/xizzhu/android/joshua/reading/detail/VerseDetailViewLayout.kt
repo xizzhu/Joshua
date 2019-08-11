@@ -76,7 +76,6 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
             presenter.updateNote(note)
         }
     })
-    private val divider: View
     private val header: LinearLayout
     private val tabLayout: TabLayout
     private val viewPager: ViewPager
@@ -85,7 +84,6 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     init {
         View.inflate(context, R.layout.inner_verse_detail_view, this)
-        divider = findViewById(R.id.divider)
         header = findViewById(R.id.header)
         viewPager = findViewById<ViewPager>(R.id.view_pager).apply { adapter = this@VerseDetailViewLayout.adapter }
         tabLayout = findViewById<TabLayout>(R.id.tab_layout).apply { setupWithViewPager(viewPager) }
@@ -122,17 +120,9 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
     override fun onSettingsUpdated(settings: Settings) {
         adapter.setSettings(settings)
 
-        header.setBackgroundColor(settings.getBackgroundColor())
-        val resources = resources
-        tabLayout.setTabTextColors(settings.getSecondaryTextColor(resources), settings.getPrimaryTextColor(resources))
-
-        if (settings.nightModeOn) {
-            divider.setBackgroundColor(0xFF222222.toInt())
-            viewPager.setBackgroundColor(0xFF222222.toInt())
-        } else {
-            divider.setBackgroundColor(0xFFEEEEEE.toInt())
-            viewPager.setBackgroundColor(0xFFEEEEEE.toInt())
-        }
+        header.setBackgroundColor(if (settings.nightModeOn) 0xFF222222.toInt() else 0xFFEEEEEE.toInt())
+        viewPager.setBackgroundColor(settings.getBackgroundColor())
+        resources.let { tabLayout.setTabTextColors(settings.getSecondaryTextColor(it), settings.getPrimaryTextColor(it)) }
     }
 
     override fun onVerseDetailLoaded(verseDetail: VerseDetail) {
