@@ -17,14 +17,11 @@
 package me.xizzhu.android.joshua.annotated.highlights.list
 
 import android.graphics.Color
-import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -34,6 +31,8 @@ import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.createBookNameSizeSpan
+import me.xizzhu.android.joshua.ui.createBookNameStyleSpan
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
@@ -44,8 +43,8 @@ data class HighlightItem(val verseIndex: VerseIndex, private val bookName: Strin
                          val onClick: (VerseIndex) -> Unit)
     : BaseItem(R.layout.item_highlight, { inflater, parent -> HighlightItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
-        private val BOOK_NAME_SIZE_SPAN = RelativeSizeSpan(0.9F)
+        private val BOOK_NAME_SIZE_SPAN = createBookNameSizeSpan()
+        private val BOOK_NAME_STYLE_SPAN = createBookNameStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
