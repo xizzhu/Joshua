@@ -181,9 +181,11 @@ fun ReadingProgress.toReadingProgressItems(bookNames: List<String>,
     val chaptersReadPerBook = Array(Bible.BOOK_COUNT) { i -> Array(Bible.getChapterCount(i)) { false } }
     val chaptersReadCountPerBook = Array(Bible.BOOK_COUNT) { 0 }
     for (chapter in chapterReadingStatus) {
-        chaptersReadPerBook[chapter.bookIndex][chapter.chapterIndex] = true
-        chaptersReadCountPerBook[chapter.bookIndex]++
-        ++totalChaptersRead
+        if (chapter.readCount > 0) {
+            chaptersReadPerBook[chapter.bookIndex][chapter.chapterIndex] = true
+            chaptersReadCountPerBook[chapter.bookIndex]++
+            ++totalChaptersRead
+        }
     }
 
     var finishedBooks = 0
