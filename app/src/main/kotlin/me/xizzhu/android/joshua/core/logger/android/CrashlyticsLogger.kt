@@ -24,13 +24,15 @@ class CrashlyticsLogger : Logger {
     private val crashlyticsCore by lazy { Crashlytics.getInstance().core }
 
     override fun log(@Log.Level level: Int, tag: String, msg: String) {
-        if (level >= Log.INFO) {
+        if (level >= Log.INFO && msg.isNotBlank()) {
             crashlyticsCore.log(level, tag, msg)
         }
     }
 
     override fun log(@Log.Level level: Int, tag: String, msg: String, e: Throwable) {
-        crashlyticsCore.log(level, tag, msg)
+        if (msg.isNotBlank()) {
+            crashlyticsCore.log(level, tag, msg)
+        }
         crashlyticsCore.logException(e)
     }
 }
