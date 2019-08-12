@@ -25,16 +25,16 @@ import java.util.ArrayList
 
 data class SearchResult(val items: List<BaseItem>, val searchResultCount: Int)
 
-fun List<Verse>.toSearchResult(query: String, bookNames: List<String>, onClickListener: (VerseIndex) -> Unit): SearchResult {
+fun List<Verse>.toSearchResult(query: String, bookNames: List<String>, bookShortNames: List<String>,
+                               onClickListener: (VerseIndex) -> Unit): SearchResult {
     val items = ArrayList<BaseItem>(size + Bible.BOOK_COUNT).apply {
         var currentBookIndex = -1
         this@toSearchResult.forEach { verse ->
-            val bookName = bookNames[verse.verseIndex.bookIndex]
             if (currentBookIndex != verse.verseIndex.bookIndex) {
-                add(TitleItem(bookName, false))
+                add(TitleItem(bookNames[verse.verseIndex.bookIndex], false))
                 currentBookIndex = verse.verseIndex.bookIndex
             }
-            add(SearchItem(verse.verseIndex, bookName, verse.text.text, query, onClickListener))
+            add(SearchItem(verse.verseIndex, bookShortNames[verse.verseIndex.bookIndex], verse.text.text, query, onClickListener))
         }
     }
     return SearchResult(items, size)

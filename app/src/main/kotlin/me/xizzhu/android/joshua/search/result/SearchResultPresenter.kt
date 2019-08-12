@@ -43,8 +43,10 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
                 searchInteractor.notifyLoadingStarted()
                 view?.onSearchStarted()
 
+                val currentTranslation = searchInteractor.readCurrentTranslation()
                 view?.onSearchResultUpdated(searchInteractor.search(query).toSearchResult(
-                        query, searchInteractor.readBookNames(searchInteractor.readCurrentTranslation()),
+                        query, searchInteractor.readBookNames(currentTranslation),
+                        searchInteractor.readBookShortNames(currentTranslation),
                         this@SearchResultPresenter::selectVerse))
                 view?.onSearchCompleted()
             } catch (e: Exception) {

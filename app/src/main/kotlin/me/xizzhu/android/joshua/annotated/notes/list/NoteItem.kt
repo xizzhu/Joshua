@@ -16,10 +16,8 @@
 
 package me.xizzhu.android.joshua.annotated.notes.list
 
-import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.style.StyleSpan
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -27,6 +25,7 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.createBookNameStyleSpan
 import me.xizzhu.android.joshua.ui.getCaptionTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -38,7 +37,7 @@ data class NoteItem(val verseIndex: VerseIndex, private val bookShortName: Strin
                     val onClicked: (VerseIndex) -> Unit)
     : BaseItem(R.layout.item_note, { inflater, parent -> NoteItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_STYLE_SPAN = StyleSpan(Typeface.BOLD)
+        private val BOOK_NAME_STYLE_SPAN = createBookNameStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 

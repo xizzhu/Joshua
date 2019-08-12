@@ -17,25 +17,22 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.graphics.Color
-import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
 import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.append
+import me.xizzhu.android.joshua.ui.createBookNameSizeSpan
+import me.xizzhu.android.joshua.ui.createBookNameStyleSpan
 
-private val indexStyleSpan = createIndexStyleSpan()
-private val indexSizeSpan = createIndexSizeSpan()
+private val bookNameSizeSpan = createBookNameSizeSpan()
+private val bookNameStyleSpan = createBookNameStyleSpan()
 private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
-
-private fun createIndexStyleSpan() = StyleSpan(Typeface.BOLD)
-private fun createIndexSizeSpan() = RelativeSizeSpan(0.85F)
 
 fun SpannableStringBuilder.format(verse: Verse, bookName: String, followingEmptyVerseCount: Int,
                                   simpleReadingModeOn: Boolean, @ColorInt highlightColor: Int): CharSequence {
@@ -54,8 +51,8 @@ fun SpannableStringBuilder.format(verse: Verse, bookName: String, followingEmpty
             }
             append('\n')
 
-            setSpan(indexStyleSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            setSpan(indexSizeSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            setSpan(bookNameStyleSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            setSpan(bookNameSizeSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         }
 
         append(verse.text.text).setHighlight(verse, highlightColor)
@@ -102,8 +99,8 @@ private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Te
         append('-').append(verseIndex.verseIndex + followingEmptyVerseCount + 1)
     }
     val end = length
-    setSpan(createIndexStyleSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-    setSpan(createIndexSizeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+    setSpan(createBookNameSizeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+    setSpan(createBookNameStyleSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
 
     append('\n').append(text.text)
 

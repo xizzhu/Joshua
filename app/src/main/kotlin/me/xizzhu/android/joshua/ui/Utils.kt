@@ -22,8 +22,11 @@ import android.content.ContextWrapper
 import android.content.res.Resources
 import android.content.res.TypedArray
 import android.graphics.Color
+import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.TextUtils
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
@@ -109,3 +112,6 @@ fun TextView.updateSettingsWithSecondaryText(settings: Settings) {
 }
 
 fun SpannableStringBuilder.append(i: Int): SpannableStringBuilder = append(i.toString())
+
+fun createBookNameSizeSpan() = RelativeSizeSpan(0.85F)
+fun createBookNameStyleSpan() = StyleSpan(Typeface.BOLD)

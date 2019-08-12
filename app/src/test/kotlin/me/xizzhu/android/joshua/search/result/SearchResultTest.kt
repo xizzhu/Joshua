@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
 class SearchResultTest : BaseUnitTest() {
     @Test
     fun testEmptyVerseList() {
-        val actual = emptyList<Verse>().toSearchResult("", emptyList(), {})
+        val actual = emptyList<Verse>().toSearchResult("", emptyList(), emptyList(), {})
         assertTrue(actual.items.isEmpty())
         assertEquals(0, actual.searchResultCount)
     }
@@ -41,13 +41,13 @@ class SearchResultTest : BaseUnitTest() {
         assertEquals(SearchResult(
                 listOf(
                         TitleItem(MockContents.kjvBookNames[0], false),
-                        SearchItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookNames[0],
+                        SearchItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0],
                                 MockContents.kjvVerses[0].text.text, query, onClickListener),
-                        SearchItem(MockContents.kjvVerses[1].verseIndex, MockContents.kjvBookNames[0],
+                        SearchItem(MockContents.kjvVerses[1].verseIndex, MockContents.kjvBookShortNames[0],
                                 MockContents.kjvVerses[1].text.text, query, onClickListener),
-                        SearchItem(MockContents.kjvVerses[2].verseIndex, MockContents.kjvBookNames[0],
+                        SearchItem(MockContents.kjvVerses[2].verseIndex, MockContents.kjvBookShortNames[0],
                                 MockContents.kjvVerses[2].text.text, query, onClickListener)
                 ), verses.size),
-                verses.toSearchResult(query, MockContents.kjvBookNames, onClickListener))
+                verses.toSearchResult(query, MockContents.kjvBookNames, MockContents.kjvBookShortNames, onClickListener))
     }
 }
