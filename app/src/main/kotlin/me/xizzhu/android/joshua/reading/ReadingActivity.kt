@@ -20,6 +20,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.ActionBarDrawerToggle
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.firstOrNull
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
@@ -119,7 +120,9 @@ class ReadingActivity : BaseSettingsActivity() {
     }
 
     override fun onPause() {
-        coroutineScope.launch(Dispatchers.Main.immediate) { readingInteractor.stopTrackingReadingProgress() }
+        // uses GlobalScope to make sure this will be executed without being canceled
+        // uses Dispatchers.Main.immediate to make sure this will be executed immediately
+        GlobalScope.launch(Dispatchers.Main.immediate) { readingInteractor.stopTrackingReadingProgress() }
         super.onPause()
     }
 
