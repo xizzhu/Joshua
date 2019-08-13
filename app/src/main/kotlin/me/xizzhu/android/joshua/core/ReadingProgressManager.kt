@@ -37,7 +37,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
                              private val readingProgressRepository: ReadingProgressRepository) {
     companion object {
         private val TAG: String = ReadingProgressManager::class.java.simpleName
-        private const val TIME_SPENT_THRESHOLD_IN_MILLIS = 5000L
+        private const val TIME_SPENT_THRESHOLD_IN_MILLIS = 2500L
     }
 
     private var currentVerseIndexObserver: ReceiveChannel<VerseIndex>? = null
