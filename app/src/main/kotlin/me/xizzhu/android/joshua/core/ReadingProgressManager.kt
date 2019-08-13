@@ -22,6 +22,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.logger.Log
@@ -64,7 +65,9 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
     private suspend fun trackReadingProgress() {
         try {
             val verseIndex = currentVerseIndex
-            if (!verseIndex.isValid() || lastTimestamp == 0L) {
+            if (!verseIndex.isValid()
+                    || lastTimestamp == 0L
+                    || bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
                 return
             }
 
