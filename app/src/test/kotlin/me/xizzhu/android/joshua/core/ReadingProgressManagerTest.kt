@@ -25,7 +25,6 @@ import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.*
 
@@ -45,19 +44,34 @@ class ReadingProgressManagerTest : BaseUnitTest() {
     @Test
     fun testTracking() {
         runBlocking {
+            readingProgressManager = spy(readingProgressManager)
+            doReturn(0L).`when`(readingProgressManager).timeSpentThresholdInMillis()
+
             val verseIndexChannel: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)
             `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(verseIndexChannel.openSubscription())
 
-            launch(Dispatchers.Unconfined) {
-                readingProgressManager.startTracking()
-            }
+            readingProgressManager.startTracking()
             verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
 
             verseIndexChannel.send(VerseIndex(1, 2, 3))
             readingProgressManager.stopTracking()
-
             verify(readingProgressRepository, times(1))
                     .trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
+        }
+    }
+
+    @Test
+    fun testTrackingWithTooLowTimeSpent() {
+        runBlocking {
+            val verseIndexChannel: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)
+            `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(verseIndexChannel.openSubscription())
+
+            readingProgressManager.startTracking()
+            verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
+
+            verseIndexChannel.send(VerseIndex(1, 2, 3))
+            readingProgressManager.stopTracking()
+            verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
         }
     }
 

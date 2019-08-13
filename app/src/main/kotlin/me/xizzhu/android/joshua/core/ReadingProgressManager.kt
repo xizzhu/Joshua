@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -35,6 +36,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
                              private val readingProgressRepository: ReadingProgressRepository) {
     companion object {
         private val TAG: String = ReadingProgressManager::class.java.simpleName
+        private const val TIME_SPENT_THRESHOLD_IN_MILLIS = 5000L
     }
 
     private var currentVerseIndexObserver: ReceiveChannel<VerseIndex>? = null
@@ -68,12 +70,19 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
 
             val now = System.currentTimeMillis()
             val timeSpentInMillis = now - lastTimestamp
+            if (timeSpentInMillis < timeSpentThresholdInMillis()) {
+                return
+            }
+
             readingProgressRepository.trackReadingProgress(
                     verseIndex.bookIndex, verseIndex.chapterIndex, timeSpentInMillis, now)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to track reading progress", e)
         }
     }
+
+    @VisibleForTesting
+    fun timeSpentThresholdInMillis(): Long = TIME_SPENT_THRESHOLD_IN_MILLIS
 
     suspend fun stopTracking() {
         trackReadingProgress()
