@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.core.repository.local.LocalReadingProgressStorag
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 import me.xizzhu.android.joshua.core.repository.local.android.db.withTransaction
+import kotlin.math.max
 
 class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase) : LocalReadingProgressStorage {
     override suspend fun trackReadingProgress(bookIndex: Int, chapterIndex: Int, timeSpentInMills: Long, timestamp: Long) {
@@ -50,7 +51,7 @@ class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase
                             lastReadingTimestamp / DateUtils.DAY_IN_MILLIS
                     val continuousReadingDays = when (daysSinceLastReadingTimestamp) {
                         0L -> {
-                            Math.max(1, values.getValue(MetadataDao.KEY_CONTINUOUS_READING_DAYS).toInt())
+                            max(1, values.getValue(MetadataDao.KEY_CONTINUOUS_READING_DAYS).toInt())
                         }
                         1L -> {
                             values.getValue(MetadataDao.KEY_CONTINUOUS_READING_DAYS).toInt() + 1
