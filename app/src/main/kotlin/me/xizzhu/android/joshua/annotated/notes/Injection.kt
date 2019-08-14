@@ -29,7 +29,8 @@ import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbarPresenter
 
 @Module
-class NotesModule {
+object NotesModule {
+    @JvmStatic
     @Provides
     @ActivityScope
     fun provideNotesInteractor(notesActivity: NotesActivity,
@@ -39,14 +40,17 @@ class NotesModule {
                                settingsManager: SettingsManager): NotesInteractor =
             NotesInteractor(notesActivity, bibleReadingManager, noteManager, navigator, settingsManager)
 
+    @JvmStatic
     @Provides
     fun provideLoadingAwarePresenter(notesInteractor: NotesInteractor): LoadingAwarePresenter =
             LoadingAwarePresenter(notesInteractor.observeLoadingState())
 
+    @JvmStatic
     @Provides
     fun provideSortOrderToolbarPresenter(notesInteractor: NotesInteractor): AnnotatedVersesToolbarPresenter =
             AnnotatedVersesToolbarPresenter({ notesInteractor.observeSortOrder().first() }, notesInteractor::saveSortOrder)
 
+    @JvmStatic
     @Provides
     fun provideNotesPresenter(notesActivity: NotesActivity,
                               notesInteractor: NotesInteractor): NotesPresenter =

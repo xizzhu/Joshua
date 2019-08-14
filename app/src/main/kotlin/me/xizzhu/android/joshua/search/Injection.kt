@@ -27,7 +27,8 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
 
 @Module
-class SearchModule {
+object SearchModule {
+    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSearchViewController(searchActivity: SearchActivity,
@@ -36,14 +37,17 @@ class SearchModule {
                                     settingsManager: SettingsManager): SearchInteractor =
             SearchInteractor(searchActivity, navigator, bibleReadingManager, settingsManager)
 
+    @JvmStatic
     @Provides
     fun provideToolbarPresenter(searchInteractor: SearchInteractor): ToolbarPresenter =
             ToolbarPresenter(searchInteractor)
 
+    @JvmStatic
     @Provides
     fun provideLoadingAwarePresenter(searchInteractor: SearchInteractor): LoadingAwarePresenter =
             LoadingAwarePresenter(searchInteractor.observeLoadingState())
 
+    @JvmStatic
     @Provides
     fun provideSearchResultPresenter(searchInteractor: SearchInteractor): SearchResultPresenter =
             SearchResultPresenter(searchInteractor)

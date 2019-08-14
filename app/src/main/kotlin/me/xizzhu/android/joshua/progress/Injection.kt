@@ -26,7 +26,8 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
 
 @Module
-class ReadingProgressModule {
+object ReadingProgressModule {
+    @JvmStatic
     @Provides
     @ActivityScope
     fun provideReadingProgressInteractor(readingProgressActivity: ReadingProgressActivity,
@@ -36,10 +37,12 @@ class ReadingProgressModule {
                                          settingsManager: SettingsManager): ReadingProgressInteractor =
             ReadingProgressInteractor(readingProgressActivity, readingProgressManager, bibleReadingManager, navigator, settingsManager)
 
+    @JvmStatic
     @Provides
     fun provideLoadingAwarePresenter(readingProgressInteractor: ReadingProgressInteractor): LoadingAwarePresenter =
             LoadingAwarePresenter(readingProgressInteractor.observeLoadingState())
 
+    @JvmStatic
     @Provides
     fun provideReadingProgressPresenter(readingProgressInteractor: ReadingProgressInteractor): ReadingProgressPresenter =
             ReadingProgressPresenter(readingProgressInteractor)

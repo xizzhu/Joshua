@@ -25,7 +25,8 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.ui.SwipeRefresherPresenter
 
 @Module
-class TranslationManagementModule {
+object TranslationManagementModule {
+    @JvmStatic
     @Provides
     @ActivityScope
     fun provideTranslationViewController(translationManagementActivity: TranslationManagementActivity,
@@ -35,10 +36,12 @@ class TranslationManagementModule {
             TranslationInteractor(translationManagementActivity, bibleReadingManager,
                     translationManager, settingsManager)
 
+    @JvmStatic
     @Provides
     fun provideSwipeRefresherPresenter(translationInteractor: TranslationInteractor): SwipeRefresherPresenter =
             SwipeRefresherPresenter(translationInteractor.observeLoadingState(), translationInteractor.translationsLoadingRequest)
 
+    @JvmStatic
     @Provides
     fun provideTranslationPresenter(translationManagementActivity: TranslationManagementActivity,
                                     translationInteractor: TranslationInteractor): TranslationPresenter =

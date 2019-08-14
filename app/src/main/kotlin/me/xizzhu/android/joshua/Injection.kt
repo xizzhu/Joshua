@@ -58,123 +58,150 @@ class AppModule(private val app: App) {
     @Singleton
     fun provideApp(): App = app
 
-    @Provides
-    @Singleton
-    fun provideNavigator(): Navigator = Navigator()
+    @Module
+    companion object {
+        @JvmStatic
+        @Provides
+        @Singleton
+        fun provideNavigator(): Navigator = Navigator()
 
-    @Provides
-    @Singleton
-    fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository,
-                                   translationManager: TranslationManager): BibleReadingManager =
-            BibleReadingManager(bibleReadingRepository, translationManager)
+        @JvmStatic
+        @Provides
+        @Singleton
+        fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository,
+                                       translationManager: TranslationManager): BibleReadingManager =
+                BibleReadingManager(bibleReadingRepository, translationManager)
 
-    @Provides
-    @Singleton
-    fun provideBookmarkManager(bookmarkRepository: BookmarkRepository): BookmarkManager =
-            BookmarkManager(bookmarkRepository)
+        @JvmStatic
+        @Provides
+        @Singleton
+        fun provideBookmarkManager(bookmarkRepository: BookmarkRepository): BookmarkManager =
+                BookmarkManager(bookmarkRepository)
 
-    @Provides
-    @Singleton
-    fun provideHighlightManager(highlightRepository: HighlightRepository): HighlightManager =
-            HighlightManager(highlightRepository)
+        @JvmStatic
+        @Provides
+        @Singleton
+        fun provideHighlightManager(highlightRepository: HighlightRepository): HighlightManager =
+                HighlightManager(highlightRepository)
 
-    @Provides
-    @Singleton
-    fun provideNoteManager(noteRepository: NoteRepository): NoteManager =
-            NoteManager(noteRepository)
+        @JvmStatic
+        @Provides
+        @Singleton
+        fun provideNoteManager(noteRepository: NoteRepository): NoteManager =
+                NoteManager(noteRepository)
 
-    @Provides
-    @Singleton
-    fun provideReadingProgressManager(bibleReadingManager: BibleReadingManager,
-                                      readingProgressRepository: ReadingProgressRepository): ReadingProgressManager =
-            ReadingProgressManager(bibleReadingManager, readingProgressRepository)
+        @JvmStatic
+        @Provides
+        @Singleton
+        fun provideReadingProgressManager(bibleReadingManager: BibleReadingManager,
+                                          readingProgressRepository: ReadingProgressRepository): ReadingProgressManager =
+                ReadingProgressManager(bibleReadingManager, readingProgressRepository)
 
-    @Provides
-    @Singleton
-    fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager =
-            SettingsManager(settingsRepository)
+        @JvmStatic
+        @Provides
+        @Singleton
+        fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager =
+                SettingsManager(settingsRepository)
 
-    @Provides
-    @Singleton
-    fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
-            TranslationManager(translationRepository)
+        @JvmStatic
+        @Provides
+        @Singleton
+        fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
+                TranslationManager(translationRepository)
+    }
 }
 
 @Module
-class RepositoryModule {
+object RepositoryModule {
+    @JvmStatic
     @Provides
     @Singleton
     fun provideAndroidDatabase(app: App): AndroidDatabase = AndroidDatabase(app)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalBookmarkStorage(androidDatabase: AndroidDatabase): LocalBookmarkStorage =
             AndroidBookmarkStorage(androidDatabase)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalHighlightStorage(androidDatabase: AndroidDatabase): LocalHighlightStorage =
             AndroidHighlightStorage(androidDatabase)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalNoteStorage(androidDatabase: AndroidDatabase): LocalNoteStorage =
             AndroidNoteStorage(androidDatabase)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalReadingProgressStorage(androidDatabase: AndroidDatabase): LocalReadingProgressStorage =
             AndroidReadingProgressStorage(androidDatabase)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalReadingStorage(androidDatabase: AndroidDatabase): LocalReadingStorage =
             AndroidReadingStorage(androidDatabase)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalSettingsStorage(androidDatabase: AndroidDatabase): LocalSettingsStorage =
             AndroidSettingsStorage(androidDatabase)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalTranslationStorage(androidDatabase: AndroidDatabase): LocalTranslationStorage =
             AndroidTranslationStorage(androidDatabase)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideRemoteTranslationService(): RemoteTranslationService = HttpTranslationService()
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideBibleReadingRepository(localReadingStorage: LocalReadingStorage): BibleReadingRepository =
             BibleReadingRepository(localReadingStorage)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideBookmarkRepository(localBookmarkStorage: LocalBookmarkStorage): BookmarkRepository =
             BookmarkRepository(localBookmarkStorage)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideHighlightRepository(localHighlightStorage: LocalHighlightStorage): HighlightRepository =
             HighlightRepository(localHighlightStorage)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideNoteRepository(localNoteStorage: LocalNoteStorage): NoteRepository =
             NoteRepository(localNoteStorage)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideReadingProgressRepository(localReadingProgressStorage: LocalReadingProgressStorage): ReadingProgressRepository =
             ReadingProgressRepository(localReadingProgressStorage)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideSettingsRepository(localSettingsStorage: LocalSettingsStorage): SettingsRepository =
             SettingsRepository(localSettingsStorage)
 
+    @JvmStatic
     @Provides
     @Singleton
     fun provideTranslationRepository(localAndroidStorage: LocalTranslationStorage,

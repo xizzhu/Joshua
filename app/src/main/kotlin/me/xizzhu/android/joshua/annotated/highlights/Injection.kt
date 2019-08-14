@@ -29,7 +29,8 @@ import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
 
 @Module
-class HighlightsModule {
+object HighlightsModule {
+    @JvmStatic
     @Provides
     @ActivityScope
     fun provideHighlightsInteractor(highlightsActivity: HighlightsActivity,
@@ -39,15 +40,18 @@ class HighlightsModule {
                                     settingsManager: SettingsManager): HighlightsInteractor =
             HighlightsInteractor(highlightsActivity, bibleReadingManager, highlightsManager, navigator, settingsManager)
 
+    @JvmStatic
     @Provides
     fun provideLoadingAwarePresenter(highlightsInteractor: HighlightsInteractor): LoadingAwarePresenter =
             LoadingAwarePresenter(highlightsInteractor.observeLoadingState())
 
+    @JvmStatic
     @Provides
     fun provideSortOrderToolbarPresenter(highlightsInteractor: HighlightsInteractor): AnnotatedVersesToolbarPresenter =
             AnnotatedVersesToolbarPresenter({ highlightsInteractor.observeSortOrder().first() },
                     highlightsInteractor::saveSortOrder)
 
+    @JvmStatic
     @Provides
     fun provideHighlightsPresenter(highlightsActivity: HighlightsActivity,
                                    highlightsInteractor: HighlightsInteractor): HighlightsPresenter =

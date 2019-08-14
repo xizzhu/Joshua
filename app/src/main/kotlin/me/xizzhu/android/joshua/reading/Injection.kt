@@ -27,7 +27,8 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPresenter
 
 @Module
-class ReadingModule {
+object ReadingModule {
+    @JvmStatic
     @ActivityScope
     @Provides
     fun provideReadingViewController(readingActivity: ReadingActivity,
@@ -42,26 +43,32 @@ class ReadingModule {
             ReadingInteractor(readingActivity, navigator, bibleReadingManager, bookmarkManager,
                     highlightManager, noteManager, readingProgressManager, translationManager, settingsManager)
 
+    @JvmStatic
     @Provides
     fun provideReadingDrawerPresenter(readingInteractor: ReadingInteractor): ReadingDrawerPresenter =
             ReadingDrawerPresenter(readingInteractor)
 
+    @JvmStatic
     @Provides
     fun provideToolbarPresenter(readingInteractor: ReadingInteractor): ToolbarPresenter =
             ToolbarPresenter(readingInteractor)
 
+    @JvmStatic
     @Provides
     fun provideChapterListPresenter(readingInteractor: ReadingInteractor): ChapterListPresenter =
             ChapterListPresenter(readingInteractor)
 
+    @JvmStatic
     @Provides
     fun provideVersePresenter(readingInteractor: ReadingInteractor): VersePresenter =
             VersePresenter(readingInteractor)
 
+    @JvmStatic
     @Provides
     fun provideVerseDetailPresenter(readingInteractor: ReadingInteractor): VerseDetailPresenter =
             VerseDetailPresenter(readingInteractor)
 
+    @JvmStatic
     @Provides
     fun provideSearchButtonPresenter(readingInteractor: ReadingInteractor): SearchButtonPresenter =
             SearchButtonPresenter(readingInteractor)

@@ -22,7 +22,8 @@ import me.xizzhu.android.joshua.App
 import me.xizzhu.android.joshua.core.SettingsManager
 
 @Module
-class SettingsModule {
+object SettingsModule {
+    @JvmStatic
     @Provides
     fun provideSettingsPresenter(app: App, settingsManager: SettingsManager): SettingsPresenter =
             SettingsPresenter(app, settingsManager)
