@@ -23,9 +23,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
+import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.*
 
@@ -34,38 +34,70 @@ class ReadingProgressManagerTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
     @Mock
     private lateinit var readingProgressRepository: ReadingProgressRepository
+    private lateinit var verseIndexChannel: BroadcastChannel<VerseIndex>
+    private lateinit var currentTranslationChannel: BroadcastChannel<String>
     private lateinit var readingProgressManager: ReadingProgressManager
 
     @Before
     override fun setup() {
         super.setup()
+
+        verseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
+        `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(verseIndexChannel.openSubscription())
+
+        currentTranslationChannel = ConflatedBroadcastChannel("")
+        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(currentTranslationChannel.openSubscription())
+
         readingProgressManager = ReadingProgressManager(bibleReadingManager, readingProgressRepository)
     }
 
     @Test
     fun testTracking() {
         runBlocking {
-            val verseIndexChannel: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)
-            `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(verseIndexChannel.openSubscription())
+            readingProgressManager = spy(readingProgressManager)
+            doReturn(0L).`when`(readingProgressManager).timeSpentThresholdInMillis()
+            currentTranslationChannel.send(MockContents.kjvShortName)
 
-            launch(Dispatchers.Unconfined) {
-                readingProgressManager.startTracking()
-            }
+            readingProgressManager.startTracking()
             verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
 
             verseIndexChannel.send(VerseIndex(1, 2, 3))
             readingProgressManager.stopTracking()
-
             verify(readingProgressRepository, times(1))
                     .trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
         }
     }
 
     @Test
+    fun testTrackingWithTooLowTimeSpent() {
+        runBlocking {
+            currentTranslationChannel.send(MockContents.kjvShortName)
+
+            readingProgressManager.startTracking()
+            verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
+
+            verseIndexChannel.send(VerseIndex(1, 2, 3))
+            readingProgressManager.stopTracking()
+            verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
+        }
+    }
+
+    @Test
+    fun testTrackingWithoutCurrentTranslation() {
+        runBlocking {
+            readingProgressManager.startTracking()
+            verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
+
+            verseIndexChannel.send(VerseIndex(1, 2, 3))
+            readingProgressManager.stopTracking()
+            verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
+        }
+    }
+
+    @Test
     fun testStartTrackingMultipleTimes() {
         runBlocking {
-            val verseIndexChannel: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel(VerseIndex.INVALID)
-            `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(verseIndexChannel.openSubscription())
+            currentTranslationChannel.send(MockContents.kjvShortName)
 
             launch(Dispatchers.Unconfined) {
                 readingProgressManager.startTracking()

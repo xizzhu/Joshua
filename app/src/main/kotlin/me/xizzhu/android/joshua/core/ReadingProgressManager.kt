@@ -16,11 +16,13 @@
 
 package me.xizzhu.android.joshua.core
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.filter
+import kotlinx.coroutines.channels.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.logger.Log
@@ -35,6 +37,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
                              private val readingProgressRepository: ReadingProgressRepository) {
     companion object {
         private val TAG: String = ReadingProgressManager::class.java.simpleName
+        private const val TIME_SPENT_THRESHOLD_IN_MILLIS = 2500L
     }
 
     private var currentVerseIndexObserver: ReceiveChannel<VerseIndex>? = null
@@ -62,18 +65,27 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
     private suspend fun trackReadingProgress() {
         try {
             val verseIndex = currentVerseIndex
-            if (!verseIndex.isValid() || lastTimestamp == 0L) {
+            if (!verseIndex.isValid()
+                    || lastTimestamp == 0L
+                    || bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
                 return
             }
 
             val now = System.currentTimeMillis()
             val timeSpentInMillis = now - lastTimestamp
+            if (timeSpentInMillis < timeSpentThresholdInMillis()) {
+                return
+            }
+
             readingProgressRepository.trackReadingProgress(
                     verseIndex.bookIndex, verseIndex.chapterIndex, timeSpentInMillis, now)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to track reading progress", e)
         }
     }
+
+    @VisibleForTesting
+    fun timeSpentThresholdInMillis(): Long = TIME_SPENT_THRESHOLD_IN_MILLIS
 
     suspend fun stopTracking() {
         trackReadingProgress()

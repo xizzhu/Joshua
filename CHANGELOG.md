@@ -3,6 +3,8 @@ CHANGELOG
 
 #### Next Release
 - Harmonized styles for verses rendering
+- Should wait for 2.5 seconds before tracking reading progress
+- Should not track reading progress when no translation is available
 - Should not fail when a parallel translation is not available
 
 #### v0.9.0 (2019-08-10)

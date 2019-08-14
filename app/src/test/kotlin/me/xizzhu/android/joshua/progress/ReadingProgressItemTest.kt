@@ -45,12 +45,14 @@ class ReadingProgressItemTest : BaseUnitTest() {
                         ReadingProgress.ChapterReadingStatus(7, 2, 3, 700L, 23458L),
                         ReadingProgress.ChapterReadingStatus(7, 3, 4, 700L, 23458L),
                         ReadingProgress.ChapterReadingStatus(63, 0, 1, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(64, 0, 1, 700L, 23458L)))
+                        ReadingProgress.ChapterReadingStatus(64, 0, 1, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(65, 0, 0, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(65, 1, 2, 700L, 23458L)))
         val actual = readingProgress.toReadingProgressItems(Array(Bible.BOOK_COUNT) { "" }.toList(), Array(Bible.BOOK_COUNT) { false }, { _, _ -> }, { _, _ -> })
 
         val actualSummaryItem = actual[0] as ReadingProgressSummaryItem
         assertEquals(1, actualSummaryItem.continuousReadingDays)
-        assertEquals(9, actualSummaryItem.chaptersRead)
+        assertEquals(10, actualSummaryItem.chaptersRead)
         assertEquals(3, actualSummaryItem.finishedBooks)
         assertEquals(1, actualSummaryItem.finishedOldTestament)
         assertEquals(2, actualSummaryItem.finishedNewTestament)
@@ -75,6 +77,9 @@ class ReadingProgressItemTest : BaseUnitTest() {
                     assertEquals(1, item.chaptersReadCount)
                 }
                 64 -> {
+                    assertEquals(1, item.chaptersReadCount)
+                }
+                65 -> {
                     assertEquals(1, item.chaptersReadCount)
                 }
                 else -> {
