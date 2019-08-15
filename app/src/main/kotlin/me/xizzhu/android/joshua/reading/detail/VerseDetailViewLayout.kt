@@ -34,10 +34,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.getBackgroundColor
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
-import me.xizzhu.android.joshua.ui.getSecondaryTextColor
+import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 import kotlin.math.max
 
@@ -153,5 +150,6 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     override fun hide() {
         animate().translationY(height.toFloat())
+        hideKeyboard()
     }
 }

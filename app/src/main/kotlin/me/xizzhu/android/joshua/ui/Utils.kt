@@ -29,6 +29,7 @@ import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.util.TypedValue
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.annotation.*
 import me.xizzhu.android.joshua.R
@@ -50,6 +51,13 @@ fun View.setBackground(resId: Int) {
     val out = TypedValue()
     context.theme.resolveAttribute(resId, out, true)
     setBackgroundResource(out.resourceId)
+}
+
+fun View.hideKeyboard() {
+    if (hasFocus()) {
+        (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                .hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+    }
 }
 
 fun Context.getActivity(): Activity? {

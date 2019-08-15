@@ -6,6 +6,7 @@ CHANGELOG
 - Should wait for 2.5 seconds before tracking reading progress
 - Should not track reading progress when no translation is available
 - Should not fail when a parallel translation is not available
+- Should hide keyboard when verse detail is closed
 - Updated dependencies:
   - Grardle to 5.6
 

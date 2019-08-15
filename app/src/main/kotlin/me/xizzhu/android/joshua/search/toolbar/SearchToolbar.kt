@@ -18,10 +18,10 @@ package me.xizzhu.android.joshua.search.toolbar
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.ui.hideKeyboard
 import me.xizzhu.android.joshua.utils.MVPView
 
 interface ToolbarView : MVPView
@@ -64,12 +64,7 @@ class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
         }
         currentQuery = query
 
-        return presenter.updateSearchQuery(query).apply {
-            if (hasFocus()) {
-                (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                        .hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
-            }
-        }
+        return presenter.updateSearchQuery(query).apply { hideKeyboard() }
     }
 
     override fun onQueryTextChange(newText: String): Boolean = false
