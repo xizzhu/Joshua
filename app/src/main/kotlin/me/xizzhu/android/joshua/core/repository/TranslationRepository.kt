@@ -61,7 +61,9 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
     @VisibleForTesting
     suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
+        Log.i(TAG, "Start fetching translation list")
         val fetchedTranslations = remoteTranslationService.fetchTranslations()
+        Log.i(TAG, "Translation list downloaded")
         val localTranslations = readTranslationsFromLocal()
 
         val translations = ArrayList<TranslationInfo>(fetchedTranslations.size)
@@ -94,8 +96,10 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
         val start = elapsedRealtime()
+        Log.i(TAG, "Start downloading translation - ${translationInfo.shortName}")
         val translation = remoteTranslationService.fetchTranslation(
                 channel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))
+        Log.i(TAG, "Translation downloaded")
         channel.send(100)
         val downloadFinished = elapsedRealtime()
 
