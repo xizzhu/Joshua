@@ -24,7 +24,6 @@ import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslation
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
-import me.xizzhu.android.logger.Log
 import java.io.*
 import java.net.URL
 import java.util.zip.ZipInputStream
@@ -33,16 +32,11 @@ open class HttpTranslationService : RemoteTranslationService {
     companion object {
         private const val TIMEOUT_IN_MILLISECONDS = 30000 // 30 seconds
         private const val BASE_URL = "https://xizzhu.me/bible/download"
-
-        private val TAG: String = HttpTranslationService::class.java.simpleName
     }
 
     override suspend fun fetchTranslations(): List<RemoteTranslationInfo> = withContext(Dispatchers.IO) {
-        Log.i(TAG, "Start fetching translation list")
-        val translations = JsonReader(BufferedReader(InputStreamReader(getInputStream("list.json"), "UTF-8")))
+        return@withContext JsonReader(BufferedReader(InputStreamReader(getInputStream("list.json"), "UTF-8")))
                 .use { reader -> reader.readListJson() }
-        Log.i(TAG, "Translation list downloaded")
-        return@withContext translations
     }
 
     @VisibleForTesting
@@ -55,8 +49,6 @@ open class HttpTranslationService : RemoteTranslationService {
                     }.getInputStream()
 
     override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation = withContext(Dispatchers.IO) {
-        Log.i(TAG, "Start fetching translation - ${translationInfo.shortName}")
-
         lateinit var bookNamesShortNamesPair: Pair<List<String>, List<String>>
         val verses = HashMap<Pair<Int, Int>, List<String>>()
         ZipInputStream(BufferedInputStream(getInputStream("${translationInfo.shortName}.zip")))
@@ -87,8 +79,6 @@ open class HttpTranslationService : RemoteTranslationService {
                             channel.send(progress)
                         }
                     }
-
-                    Log.i(TAG, "Translation downloaded")
                 }
 
         return@withContext RemoteTranslation(translationInfo, bookNamesShortNamesPair.first, bookNamesShortNamesPair.second, verses)
