@@ -64,6 +64,14 @@ class TranslationRepositoryTest : BaseUnitTest() {
         }
     }
 
+    @Test(expected = IllegalStateException::class)
+    fun testReloadWithEmptyList() {
+        runBlocking {
+            doReturn(emptyList<TranslationInfo>()).`when`(translationRepository).readTranslationsFromBackend()
+            translationRepository.reload(true)
+        }
+    }
+
     @Test
     fun testReloadWithTooOldTranslationList() {
         runBlocking {
