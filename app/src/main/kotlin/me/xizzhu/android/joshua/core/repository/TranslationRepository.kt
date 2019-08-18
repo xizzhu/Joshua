@@ -105,6 +105,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
         localTranslationStorage.saveTranslation(translation.translationInfo.toTranslationInfo(true),
                 translation.bookNames, translation.bookShortNames, translation.verses)
+        Log.i(TAG, "Translation saved to database")
         val installFinished = elapsedRealtime()
 
         Analytics.track(Analytics.EVENT_DOWNLOAD_TRANSLATION,
@@ -123,6 +124,8 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
     }
 
     suspend fun removeTranslation(translationInfo: TranslationInfo) {
+        Log.i(TAG, "Start removing translation - ${translationInfo.shortName}")
         localTranslationStorage.removeTranslation(translationInfo)
+        Log.i(TAG, "Translation removed")
     }
 }
