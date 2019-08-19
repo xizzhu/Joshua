@@ -23,7 +23,6 @@ import android.widget.Toast
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.*
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsView

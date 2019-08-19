@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui
+package me.xizzhu.android.joshua.translations
 
 import android.content.Context
 import android.view.View

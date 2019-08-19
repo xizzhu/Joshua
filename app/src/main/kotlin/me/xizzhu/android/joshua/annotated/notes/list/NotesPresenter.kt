@@ -24,7 +24,7 @@ import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.annotated.notes.NotesInteractor
 import me.xizzhu.android.joshua.annotated.AnnotatedVersePresenter
-import me.xizzhu.android.joshua.ui.formatDate
+import me.xizzhu.android.joshua.annotated.formatDate
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
