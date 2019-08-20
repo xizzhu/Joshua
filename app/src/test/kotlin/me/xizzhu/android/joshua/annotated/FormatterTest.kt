@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui
+package me.xizzhu.android.joshua.annotated
 
 import android.content.res.Resources
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.annotated.formatDate
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Before
 import org.mockito.ArgumentMatchers.anyInt

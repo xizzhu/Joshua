@@ -4,15 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="@dimen/item_height"
-    android:paddingStart="@dimen/padding"
+    android:paddingStart="@dimen/padding_small"
     android:paddingEnd="@dimen/padding">
 
     <androidx.appcompat.widget.AppCompatCheckBox
         android:id="@+id/checkbox"
         android:layout_width="40dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_vertical"
+        android:layout_height="match_parent"
         android:focusable="false"
+        android:minHeight="@dimen/item_height"
         android:theme="@style/AppCheckBoxStyle" />
 
     <TextView

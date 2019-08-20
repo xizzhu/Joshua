@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui
+package me.xizzhu.android.joshua.annotated
 
 import android.content.res.Resources
 import me.xizzhu.android.joshua.R
