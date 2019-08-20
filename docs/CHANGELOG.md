@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Used proguard-android-optimize.txt
 - Updated dependencies:
   - Firebase Core and Analytics to 17.1.0
 
