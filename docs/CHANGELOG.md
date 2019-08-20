@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Updated dependencies:
+  - Firebase Core and Analytics to 17.1.0
 
 #### v0.9.1 (2019-08-14)
 - Harmonized styles for verses rendering
