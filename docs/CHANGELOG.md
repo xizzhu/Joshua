@@ -2,6 +2,9 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Improved R8 configurations:
+  - Used proguard-android-optimize.txt
+  - Do not keep unnecessary AndroidX classes
 - Updated dependencies:
   - Firebase Core and Analytics to 17.1.0
 
