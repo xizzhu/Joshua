@@ -6,6 +6,8 @@ CHANGELOG
   - Used proguard-android-optimize.txt
   - Do not keep unnecessary AndroidX classes
 - Updated dependencies:
+  - Android Gradle plugin to 3.5.0
+  - Coveralls plugin to 2.8.3
   - Firebase Core and Analytics to 17.1.0
 
 #### v0.9.1 (2019-08-14)

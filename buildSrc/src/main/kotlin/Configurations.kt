@@ -33,11 +33,11 @@ object Versions {
     }
 
     object Coveralls {
-        const val classpath = "2.8.2"
+        const val classpath = "2.8.3"
     }
 
     object Sdk {
-        const val classpath = "3.4.2"
+        const val classpath = "3.5.0"
         const val buildTools = "29.0.2"
         const val compile = 29
         const val min = 21
