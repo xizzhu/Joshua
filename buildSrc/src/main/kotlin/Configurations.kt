@@ -49,7 +49,7 @@ object Versions {
     object Kotlin {
         const val classpath = "1.3.50"
         const val core = "1.3.50"
-        const val coroutines = "1.3.0-RC2"
+        const val coroutines = "1.3.0"
     }
 
     object AndroidX {
