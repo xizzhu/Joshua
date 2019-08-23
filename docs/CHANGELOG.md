@@ -8,7 +8,9 @@ CHANGELOG
 - Updated dependencies:
   - Android Gradle plugin to 3.5.0
   - Coveralls plugin to 2.8.3
+  - Kotlin to 1.3.50
   - Firebase Core and Analytics to 17.1.0
+  - Logger to 0.1.3
 
 #### v0.9.1 (2019-08-14)
 - Harmonized styles for verses rendering
