@@ -143,10 +143,8 @@ class ReadingActivity : BaseSettingsActivity() {
     }
 
     override fun onBackPressed() {
-        coroutineScope.launch(Dispatchers.Main) {
-            if (!readingInteractor.closeVerseDetail() && !drawerLayout.hide()) {
-                super.onBackPressed()
-            }
+        if (!readingInteractor.closeVerseDetail() && !drawerLayout.hide()) {
+            super.onBackPressed()
         }
     }
 

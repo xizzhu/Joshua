@@ -74,11 +74,11 @@ class ToolbarPresenter(private val readingInteractor: ReadingInteractor) : MVPPr
     }
 
     fun requestParallelTranslation(translationShortName: String) {
-        coroutineScope.launch(Dispatchers.Main) { readingInteractor.requestParallelTranslation(translationShortName) }
+        readingInteractor.requestParallelTranslation(translationShortName)
     }
 
     fun removeParallelTranslation(translationShortName: String) {
-        coroutineScope.launch(Dispatchers.Main) { readingInteractor.removeParallelTranslation(translationShortName) }
+        readingInteractor.removeParallelTranslation(translationShortName)
     }
 
     fun openTranslationManagement() {

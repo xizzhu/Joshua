@@ -53,10 +53,10 @@ class HighlightManager(private val highlightRepository: HighlightRepository) {
     init {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                sortOrder.send(highlightRepository.readSortOrder())
+                sortOrder.offer(highlightRepository.readSortOrder())
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize bookmark sort order", e)
-                sortOrder.send(Constants.DEFAULT_SORT_ORDER)
+                sortOrder.offer(Constants.DEFAULT_SORT_ORDER)
             }
         }
     }
@@ -65,7 +65,7 @@ class HighlightManager(private val highlightRepository: HighlightRepository) {
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         highlightRepository.saveSortOrder(sortOrder)
-        this.sortOrder.send(sortOrder)
+        this.sortOrder.offer(sortOrder)
     }
 
     suspend fun read(@Constants.SortOrder sortOrder: Int): List<Highlight> = highlightRepository.read(sortOrder)

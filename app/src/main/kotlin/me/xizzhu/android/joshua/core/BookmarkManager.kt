@@ -41,10 +41,10 @@ class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
     init {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                bookmarksSortOrder.send(bookmarkRepository.readSortOrder())
+                bookmarksSortOrder.offer(bookmarkRepository.readSortOrder())
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize bookmark sort order", e)
-                bookmarksSortOrder.send(Constants.DEFAULT_SORT_ORDER)
+                bookmarksSortOrder.offer(Constants.DEFAULT_SORT_ORDER)
             }
         }
     }
@@ -53,7 +53,7 @@ class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         bookmarkRepository.saveSortOrder(sortOrder)
-        bookmarksSortOrder.send(sortOrder)
+        bookmarksSortOrder.offer(sortOrder)
     }
 
     suspend fun read(@Constants.SortOrder sortOrder: Int): List<Bookmark> = bookmarkRepository.read(sortOrder)

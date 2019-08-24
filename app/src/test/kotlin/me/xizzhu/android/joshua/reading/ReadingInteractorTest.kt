@@ -63,7 +63,7 @@ class ReadingInteractorTest : BaseUnitTest() {
 
     @Test
     fun testCloseVerseDetailWithDefaultState() {
-        runBlocking { assertFalse(readingInteractor.closeVerseDetail()) }
+        assertFalse(readingInteractor.closeVerseDetail())
     }
 
     @Test

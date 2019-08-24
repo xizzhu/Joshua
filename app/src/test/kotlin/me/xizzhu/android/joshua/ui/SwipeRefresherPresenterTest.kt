@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.ui
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.After
 import org.junit.Before
@@ -54,35 +53,29 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
 
     @Test
     fun testRefresherStateIsLoading() {
-        runBlocking {
-            verify(swipeRefresherView, never()).show()
-            verify(swipeRefresherView, never()).hide()
+        verify(swipeRefresherView, never()).show()
+        verify(swipeRefresherView, never()).hide()
 
-            swipeRefresherState.send(BaseLoadingAwareInteractor.IS_LOADING)
-            verify(swipeRefresherView, times(1)).show()
-            verify(swipeRefresherView, never()).hide()
-        }
+        swipeRefresherState.offer(BaseLoadingAwareInteractor.IS_LOADING)
+        verify(swipeRefresherView, times(1)).show()
+        verify(swipeRefresherView, never()).hide()
     }
 
     @Test
     fun testRefresherStateNotLoading() {
-        runBlocking {
-            verify(swipeRefresherView, never()).show()
-            verify(swipeRefresherView, never()).hide()
+        verify(swipeRefresherView, never()).show()
+        verify(swipeRefresherView, never()).hide()
 
-            swipeRefresherState.send(BaseLoadingAwareInteractor.NOT_LOADING)
-            verify(swipeRefresherView, never()).show()
-            verify(swipeRefresherView, times(1)).hide()
-        }
+        swipeRefresherState.offer(BaseLoadingAwareInteractor.NOT_LOADING)
+        verify(swipeRefresherView, never()).show()
+        verify(swipeRefresherView, times(1)).hide()
     }
 
     @Test
     fun testRefresh() {
-        runBlocking {
-            verify(swipeRefresherInteractor, never()).notifyRefreshRequested()
+        verify(swipeRefresherInteractor, never()).notifyRefreshRequested()
 
-            swipeRefresherPresenter.refresh()
-            verify(swipeRefresherInteractor, times(1)).notifyRefreshRequested()
-        }
+        swipeRefresherPresenter.refresh()
+        verify(swipeRefresherInteractor, times(1)).notifyRefreshRequested()
     }
 }

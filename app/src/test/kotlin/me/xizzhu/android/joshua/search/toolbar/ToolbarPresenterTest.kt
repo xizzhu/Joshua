@@ -44,10 +44,8 @@ class ToolbarPresenterTest : BaseUnitTest() {
 
     @Test
     fun testQuery() {
-        runBlocking {
-            val query = "query"
-            assertTrue(toolbarPresenter.updateSearchQuery(query))
-            verify(searchInteractor, times(1)).updateSearchQuery(query)
-        }
+        val query = "query"
+        assertTrue(toolbarPresenter.updateSearchQuery(query))
+        verify(searchInteractor, times(1)).updateSearchQuery(query)
     }
 }

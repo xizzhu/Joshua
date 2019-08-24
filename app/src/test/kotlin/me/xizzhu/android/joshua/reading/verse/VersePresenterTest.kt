@@ -422,13 +422,11 @@ class VersePresenterTest : BaseUnitTest() {
 
     @Test
     fun testOnVerseClickedWithoutActionMode() {
-        runBlocking {
-            val verse = MockContents.kjvVerses[0]
-            versePresenter.onVerseClicked(verse)
-            assertTrue(versePresenter.selectedVerses.isEmpty())
-            verify(verseView, never()).onVerseDeselected(any())
-            verify(readingInteractor, times(1)).openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES)
-        }
+        val verse = MockContents.kjvVerses[0]
+        versePresenter.onVerseClicked(verse)
+        assertTrue(versePresenter.selectedVerses.isEmpty())
+        verify(verseView, never()).onVerseDeselected(any())
+        verify(readingInteractor, times(1)).openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES)
     }
 
     @Test
@@ -520,11 +518,8 @@ class VersePresenterTest : BaseUnitTest() {
 
     @Test
     fun testOnNoteClicked() {
-        runBlocking {
-            versePresenter.onNoteClicked(VerseIndex(1, 2, 3))
-            verify(readingInteractor, times(1))
-                    .openVerseDetail(VerseIndex(1, 2, 3), VerseDetailPagerAdapter.PAGE_NOTE)
-        }
+        versePresenter.onNoteClicked(VerseIndex(1, 2, 3))
+        verify(readingInteractor, times(1)).openVerseDetail(VerseIndex(1, 2, 3), VerseDetailPagerAdapter.PAGE_NOTE)
     }
 
     @Test

@@ -52,7 +52,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
     }
 
     @VisibleForTesting
-    suspend fun updateTranslations(updatedTranslations: List<TranslationInfo>) {
+    fun updateTranslations(updatedTranslations: List<TranslationInfo>) {
         val (available, downloaded) = synchronized(translationsLock) {
             val available = mutableMapOf<String, TranslationInfo>()
             val downloaded = mutableMapOf<String, TranslationInfo>()
@@ -69,13 +69,13 @@ class TranslationManager(private val translationRepository: TranslationRepositor
     }
 
     @VisibleForTesting
-    suspend fun notifyTranslationsUpdated(available: List<TranslationInfo>, downloaded: List<TranslationInfo>) {
+    fun notifyTranslationsUpdated(available: List<TranslationInfo>, downloaded: List<TranslationInfo>) {
         if (available != availableTranslationsChannel.valueOrNull) {
-            availableTranslationsChannel.send(available)
+            availableTranslationsChannel.offer(available)
         }
 
         if (downloaded != downloadedTranslationsChannel.valueOrNull) {
-            downloadedTranslationsChannel.send(downloaded)
+            downloadedTranslationsChannel.offer(downloaded)
         }
     }
 

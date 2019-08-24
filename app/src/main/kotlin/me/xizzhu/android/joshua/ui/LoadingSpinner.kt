@@ -49,12 +49,12 @@ abstract class BaseLoadingAwareInteractor(settingsManager: SettingsManager,
 
     fun observeLoadingState(): Flow<Int> = loadingState.asFlow()
 
-    suspend fun notifyLoadingStarted() {
-        loadingState.send(IS_LOADING)
+    fun notifyLoadingStarted() {
+        loadingState.offer(IS_LOADING)
     }
 
-    suspend fun notifyLoadingFinished() {
-        loadingState.send(NOT_LOADING)
+    fun notifyLoadingFinished() {
+        loadingState.offer(NOT_LOADING)
     }
 }
 

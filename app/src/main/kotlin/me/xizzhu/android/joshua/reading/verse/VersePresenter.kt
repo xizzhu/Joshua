@@ -323,7 +323,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     @VisibleForTesting
     fun onVerseClicked(verse: Verse) {
         if (actionMode == null) {
-            coroutineScope.launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES) }
+            readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES)
             return
         }
 
@@ -354,7 +354,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
 
     @VisibleForTesting
     fun onNoteClicked(verseIndex: VerseIndex) {
-        coroutineScope.launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE) }
+        readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE)
     }
 
     @VisibleForTesting

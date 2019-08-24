@@ -127,7 +127,7 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
     }
 
     fun hide() {
-        coroutineScope.launch(Dispatchers.Main) { readingInteractor.closeVerseDetail() }
+        readingInteractor.closeVerseDetail()
     }
 
     fun updateBookmark() {

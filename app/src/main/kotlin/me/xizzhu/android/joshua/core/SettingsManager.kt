@@ -44,10 +44,10 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
     init {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                currentSettings.send(settingsRepository.readSettings())
+                currentSettings.offer(settingsRepository.readSettings())
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize settings", e)
-                currentSettings.send(Settings.DEFAULT)
+                currentSettings.offer(Settings.DEFAULT)
             }
         }
     }
@@ -56,6 +56,6 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
 
     suspend fun saveSettings(settings: Settings) {
         settingsRepository.saveSettings(settings)
-        currentSettings.send(settings)
+        currentSettings.offer(settings)
     }
 }

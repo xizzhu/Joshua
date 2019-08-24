@@ -41,10 +41,10 @@ class NoteManager(private val noteRepository: NoteRepository) {
     init {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                notesSortOrder.send(noteRepository.readSortOrder())
+                notesSortOrder.offer(noteRepository.readSortOrder())
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize note sort order", e)
-                notesSortOrder.send(Constants.DEFAULT_SORT_ORDER)
+                notesSortOrder.offer(Constants.DEFAULT_SORT_ORDER)
             }
         }
     }
@@ -53,7 +53,7 @@ class NoteManager(private val noteRepository: NoteRepository) {
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         noteRepository.saveSortOrder(sortOrder)
-        notesSortOrder.send(sortOrder)
+        notesSortOrder.offer(sortOrder)
     }
 
     suspend fun read(@Constants.SortOrder sortOrder: Int): List<Note> = noteRepository.read(sortOrder)

@@ -80,16 +80,16 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
     init {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                currentVerseIndex.send(bibleReadingRepository.readCurrentVerseIndex())
+                currentVerseIndex.offer(bibleReadingRepository.readCurrentVerseIndex())
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize current verse index", e)
-                currentVerseIndex.send(VerseIndex.INVALID)
+                currentVerseIndex.offer(VerseIndex.INVALID)
             }
             try {
-                currentTranslationShortName.send(bibleReadingRepository.readCurrentTranslation())
+                currentTranslationShortName.offer(bibleReadingRepository.readCurrentTranslation())
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize current translation", e)
-                currentTranslationShortName.send("")
+                currentTranslationShortName.offer("")
             }
         }
         GlobalScope.launch(Dispatchers.Default) {
@@ -100,7 +100,7 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
                 parallelTranslations.value.toList().let { current ->
                     current.filter { parallel -> downloadedTranslations.contains(parallel) }.let { updated ->
                         if (current != updated) {
-                            parallelTranslations.send(updated)
+                            parallelTranslations.offer(updated)
                         }
                     }
                 }
@@ -111,35 +111,35 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
     fun observeCurrentVerseIndex(): Flow<VerseIndex> = currentVerseIndex.asFlow()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        currentVerseIndex.send(verseIndex)
+        currentVerseIndex.offer(verseIndex)
         bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
     }
 
     fun observeCurrentTranslation(): Flow<String> = currentTranslationShortName.asFlow()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
-        currentTranslationShortName.send(translationShortName)
+        currentTranslationShortName.offer(translationShortName)
         bibleReadingRepository.saveCurrentTranslation(translationShortName)
     }
 
     fun observeParallelTranslations(): Flow<List<String>> = parallelTranslations.asFlow()
 
-    suspend fun requestParallelTranslation(translationShortName: String) {
+    fun requestParallelTranslation(translationShortName: String) {
         val parallel = parallelTranslations.value.toMutableSet()
         if (parallel.add(translationShortName)) {
-            parallelTranslations.send(parallel.toList())
+            parallelTranslations.offer(parallel.toList())
         }
     }
 
-    suspend fun removeParallelTranslation(translationShortName: String) {
+    fun removeParallelTranslation(translationShortName: String) {
         val parallel = parallelTranslations.value.toMutableSet()
         if (parallel.remove(translationShortName)) {
-            parallelTranslations.send(parallel.toList())
+            parallelTranslations.offer(parallel.toList())
         }
     }
 
-    suspend fun clearParallelTranslation() {
-        parallelTranslations.send(emptyList())
+    fun clearParallelTranslation() {
+        parallelTranslations.offer(emptyList())
     }
 
     suspend fun readBookNames(translationShortName: String): List<String> =
