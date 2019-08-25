@@ -17,8 +17,8 @@
 package me.xizzhu.android.joshua.annotated
 
 import android.app.Activity
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
@@ -45,7 +45,7 @@ abstract class BaseAnnotatedVersesInteractor(private val activity: Activity,
         navigator.navigate(activity, Navigator.SCREEN_READING)
     }
 
-    abstract suspend fun observeSortOrder(): ReceiveChannel<Int>
+    abstract fun observeSortOrder(): Flow<Int>
 
     abstract suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int)
 }

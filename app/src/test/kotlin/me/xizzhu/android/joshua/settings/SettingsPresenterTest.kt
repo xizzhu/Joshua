@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.App
 import me.xizzhu.android.joshua.core.Settings
@@ -46,7 +47,7 @@ class SettingsPresenterTest : BaseUnitTest() {
 
         runBlocking {
             currentSettings = ConflatedBroadcastChannel()
-            `when`(settingsManager.observeSettings()).thenReturn(currentSettings.openSubscription())
+            `when`(settingsManager.observeSettings()).thenReturn(currentSettings.asFlow())
 
             settingsPresenter = SettingsPresenter(app, settingsManager)
             settingsPresenter.attachView(settingsView)

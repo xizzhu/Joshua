@@ -19,10 +19,10 @@ package me.xizzhu.android.joshua.core
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.filter
-import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.logger.Log
@@ -40,7 +40,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
         private const val TIME_SPENT_THRESHOLD_IN_MILLIS = 2500L
     }
 
-    private var currentVerseIndexObserver: ReceiveChannel<VerseIndex>? = null
+    private var currentVerseIndexObserver: Flow<VerseIndex>? = null
 
     private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
     private var lastTimestamp: Long = 0L
@@ -54,13 +54,16 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
         currentVerseIndexObserver = bibleReadingManager.observeCurrentVerseIndex()
         GlobalScope.launch(Dispatchers.Main) {
             currentVerseIndexObserver?.filter { it.isValid() }
-                    ?.consumeEach {
+                    ?.collect {
                         trackReadingProgress()
                         currentVerseIndex = it
-                        lastTimestamp = System.currentTimeMillis()
+                        lastTimestamp = now()
                     }
         }
     }
+
+    @VisibleForTesting
+    fun now() = System.currentTimeMillis()
 
     private suspend fun trackReadingProgress() {
         try {
@@ -71,7 +74,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
                 return
             }
 
-            val now = System.currentTimeMillis()
+            val now = now()
             val timeSpentInMillis = now - lastTimestamp
             if (timeSpentInMillis < timeSpentThresholdInMillis()) {
                 return
@@ -91,8 +94,6 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
         trackReadingProgress()
         currentVerseIndex = VerseIndex.INVALID
         lastTimestamp = 0L
-
-        currentVerseIndexObserver?.cancel()
         currentVerseIndexObserver = null
     }
 

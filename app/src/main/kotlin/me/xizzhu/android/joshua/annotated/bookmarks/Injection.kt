@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.annotated.bookmarks
 
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksPresenter

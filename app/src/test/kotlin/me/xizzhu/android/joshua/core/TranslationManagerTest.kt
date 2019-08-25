@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -87,9 +87,9 @@ class TranslationManagerTest : BaseUnitTest() {
                 var availableUpdated = 0
                 val availableJob = launch(Dispatchers.Unconfined) {
                     val availableReceiver = translationManager.observeAvailableTranslations()
-                    availableReceiver.consumeEach {
+                    availableReceiver.collect {
                         if (++availableUpdated == 3) {
-                            availableReceiver.cancel()
+                            cancel()
                         }
                     }
                 }
@@ -97,9 +97,9 @@ class TranslationManagerTest : BaseUnitTest() {
                 var downloadedUpdated = 0
                 val downloadedJob = launch(Dispatchers.Unconfined) {
                     val downloadedReceiver = translationManager.observeDownloadedTranslations()
-                    downloadedReceiver.consumeEach {
+                    downloadedReceiver.collect {
                         if (++downloadedUpdated == 4) {
-                            downloadedReceiver.cancel()
+                            cancel()
                         }
                     }
                 }

@@ -17,29 +17,22 @@
 package me.xizzhu.android.joshua.translations
 
 import kotlinx.coroutines.channels.*
+import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
+import me.xizzhu.android.joshua.ui.BaseSwipeRefresherInteractor
 
 class TranslationInteractor(private val translationManagementActivity: TranslationManagementActivity,
                             private val bibleReadingManager: BibleReadingManager,
                             private val translationManager: TranslationManager,
-                            settingsManager: SettingsManager) : BaseLoadingAwareInteractor(settingsManager, IS_LOADING) {
-    val translationsLoadingRequest: BroadcastChannel<Unit> = ConflatedBroadcastChannel()
+                            settingsManager: SettingsManager) : BaseSwipeRefresherInteractor(settingsManager, IS_LOADING) {
+    fun observeAvailableTranslations(): Flow<List<TranslationInfo>> = translationManager.observeAvailableTranslations()
 
-    fun observeTranslationsLoadingRequest(): ReceiveChannel<Unit> =
-            translationsLoadingRequest.openSubscription()
+    fun observeDownloadedTranslations(): Flow<List<TranslationInfo>> = translationManager.observeDownloadedTranslations()
 
-    suspend fun observeAvailableTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            translationManager.observeAvailableTranslations()
-
-    suspend fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            translationManager.observeDownloadedTranslations()
-
-    suspend fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
+    fun observeCurrentTranslation(): Flow<String> = bibleReadingManager.observeCurrentTranslation()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)

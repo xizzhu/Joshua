@@ -22,8 +22,8 @@ import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -110,16 +110,16 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         super.onViewAttached()
 
         coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeCurrentTranslation().consumeEach { currentTranslation = it }
+            readingInteractor.observeCurrentTranslation().collect { currentTranslation = it }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeCurrentVerseIndex().consumeEach { currentVerseIndex = it }
+            readingInteractor.observeCurrentVerseIndex().collect { currentVerseIndex = it }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeParallelTranslations().consumeEach { parallelTranslations = it }
+            readingInteractor.observeParallelTranslations().collect { parallelTranslations = it }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeVerseDetailOpenState().consumeEach {
+            readingInteractor.observeVerseDetailOpenState().collect {
                 if (selectedVerse.isValid()) {
                     view?.onVerseDeselected(selectedVerse)
                     selectedVerse = VerseIndex.INVALID
@@ -131,7 +131,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeVerseUpdates().consumeEach { (verseIndex, update) ->
+            readingInteractor.observeVerseUpdates().collect { (verseIndex, update) ->
                 view?.onVerseUpdated(verseIndex, update)
             }
         }
@@ -323,7 +323,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     @VisibleForTesting
     fun onVerseClicked(verse: Verse) {
         if (actionMode == null) {
-            coroutineScope.launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES) }
+            readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES)
             return
         }
 
@@ -354,7 +354,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
 
     @VisibleForTesting
     fun onNoteClicked(verseIndex: VerseIndex) {
-        coroutineScope.launch(Dispatchers.Main) { readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE) }
+        readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE)
     }
 
     @VisibleForTesting

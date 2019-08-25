@@ -17,8 +17,8 @@
 package me.xizzhu.android.joshua.search.result
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.filter
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchInteractor
@@ -33,7 +33,7 @@ class SearchResultPresenter(private val searchInteractor: SearchInteractor)
         coroutineScope.launch(Dispatchers.Main) {
             searchInteractor.observeSearchQuery()
                     .filter { it.isNotEmpty() }
-                    .consumeEach { query -> search(query) }
+                    .collect { query -> search(query) }
         }
     }
 

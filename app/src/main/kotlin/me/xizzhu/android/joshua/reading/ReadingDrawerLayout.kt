@@ -21,8 +21,8 @@ import android.util.AttributeSet
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.filter
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.joshua.utils.MVPView
@@ -33,7 +33,7 @@ class ReadingDrawerPresenter(private val readingInteractor: ReadingInteractor) :
 
         coroutineScope.launch(Dispatchers.Main) {
             readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
-                    .consumeEach { view?.hide() }
+                    .collect { view?.hide() }
         }
     }
 }

@@ -28,13 +28,11 @@ class ToolbarPresenter(private val searchInteractor: SearchInteractor) : MVPPres
         if (query.isEmpty()) {
             return false
         }
-        coroutineScope.launch(Dispatchers.Main) {
-            try {
-                searchInteractor.updateSearchQuery(query)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to update search query", e)
-                // TODO
-            }
+        try {
+            searchInteractor.updateSearchQuery(query)
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to update search query", e)
+            // TODO
         }
         return true
     }

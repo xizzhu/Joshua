@@ -16,7 +16,7 @@
 
 package me.xizzhu.android.joshua.annotated.highlights
 
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesInteractor
 import me.xizzhu.android.joshua.core.*
@@ -29,7 +29,7 @@ class HighlightsInteractor(highlightsActivity: HighlightsActivity,
     : BaseAnnotatedVersesInteractor(highlightsActivity, bibleReadingManager, navigator, settingsManager, IS_LOADING) {
     suspend fun readHighlights(@Constants.SortOrder sortOrder: Int): List<Highlight> = highlightsManager.read(sortOrder)
 
-    override suspend fun observeSortOrder(): ReceiveChannel<Int> = highlightsManager.observeSortOrder()
+    override fun observeSortOrder(): Flow<Int> = highlightsManager.observeSortOrder()
 
     override suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         highlightsManager.saveSortOrder(sortOrder)

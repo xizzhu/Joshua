@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.ui
 
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.asFlow
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.After
 import org.junit.Before
@@ -30,7 +30,7 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var swipeRefresherView: LoadingAwareView
     @Mock
-    private lateinit var refreshRequest: BroadcastChannel<Unit>
+    private lateinit var swipeRefresherInteractor: BaseSwipeRefresherInteractor
 
     private lateinit var swipeRefresherState: BroadcastChannel<Int>
     private lateinit var swipeRefresherPresenter: SwipeRefresherPresenter
@@ -40,7 +40,7 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
         super.setup()
 
         swipeRefresherState = ConflatedBroadcastChannel()
-        swipeRefresherPresenter = SwipeRefresherPresenter(swipeRefresherState.openSubscription(), refreshRequest)
+        swipeRefresherPresenter = SwipeRefresherPresenter(swipeRefresherState.asFlow(), swipeRefresherInteractor)
 
         swipeRefresherPresenter.attachView(swipeRefresherView)
     }
@@ -52,28 +52,30 @@ class SwipeRefresherPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testRefresherState() {
-        runBlocking {
-            verify(swipeRefresherView, never()).show()
-            verify(swipeRefresherView, never()).hide()
+    fun testRefresherStateIsLoading() {
+        verify(swipeRefresherView, never()).show()
+        verify(swipeRefresherView, never()).hide()
 
-            swipeRefresherState.send(BaseLoadingAwareInteractor.IS_LOADING)
-            verify(swipeRefresherView, times(1)).show()
-            verify(swipeRefresherView, never()).hide()
+        swipeRefresherState.offer(BaseLoadingAwareInteractor.IS_LOADING)
+        verify(swipeRefresherView, times(1)).show()
+        verify(swipeRefresherView, never()).hide()
+    }
 
-            swipeRefresherState.send(BaseLoadingAwareInteractor.NOT_LOADING)
-            verify(swipeRefresherView, times(1)).show()
-            verify(swipeRefresherView, times(1)).hide()
-        }
+    @Test
+    fun testRefresherStateNotLoading() {
+        verify(swipeRefresherView, never()).show()
+        verify(swipeRefresherView, never()).hide()
+
+        swipeRefresherState.offer(BaseLoadingAwareInteractor.NOT_LOADING)
+        verify(swipeRefresherView, never()).show()
+        verify(swipeRefresherView, times(1)).hide()
     }
 
     @Test
     fun testRefresh() {
-        runBlocking {
-            verify(refreshRequest, never()).send(any())
+        verify(swipeRefresherInteractor, never()).notifyRefreshRequested()
 
-            swipeRefresherPresenter.refresh()
-            verify(refreshRequest, times(1)).send(Unit)
-        }
+        swipeRefresherPresenter.refresh()
+        verify(swipeRefresherInteractor, times(1)).notifyRefreshRequested()
     }
 }

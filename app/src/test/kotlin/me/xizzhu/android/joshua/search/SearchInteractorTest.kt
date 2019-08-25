@@ -16,8 +16,8 @@
 
 package me.xizzhu.android.joshua.search
 
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -82,10 +82,7 @@ class SearchInteractorTest : BaseUnitTest() {
     @Test
     fun testSearch() {
         runBlocking {
-            val channel = Channel<String>(Channel.UNLIMITED)
-            channel.send(MockContents.kjvShortName)
-            `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(channel)
-
+            `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
             `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
 
             val query = "query"

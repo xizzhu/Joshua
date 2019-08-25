@@ -16,8 +16,7 @@
 
 package me.xizzhu.android.joshua.search.result
 
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
@@ -37,20 +36,14 @@ class SearchResultPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var searchResultView: SearchResultView
     private lateinit var searchResultPresenter: SearchResultPresenter
-    private lateinit var settingsChannel: BroadcastChannel<Settings>
-    private lateinit var searchQueryChannel: BroadcastChannel<String>
 
     @Before
     override fun setup() {
         super.setup()
 
         runBlocking {
-            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-            `when`(searchInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-
-            searchQueryChannel = ConflatedBroadcastChannel("")
-            `when`(searchInteractor.observeSearchQuery()).thenReturn(searchQueryChannel.openSubscription())
-
+            `when`(searchInteractor.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
+            `when`(searchInteractor.observeSearchQuery()).thenReturn(flowOf(""))
             `when`(searchInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(searchInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
             `when`(searchInteractor.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)

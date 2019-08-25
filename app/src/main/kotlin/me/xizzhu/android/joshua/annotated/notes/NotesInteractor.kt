@@ -16,7 +16,7 @@
 
 package me.xizzhu.android.joshua.annotated.notes
 
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -35,7 +35,7 @@ class NotesInteractor(private val notesActivity: NotesActivity,
         navigator.navigate(notesActivity, Navigator.SCREEN_READING, ReadingActivity.bundleForOpenNote())
     }
 
-    override suspend fun observeSortOrder(): ReceiveChannel<Int> = noteManager.observeSortOrder()
+    override fun observeSortOrder(): Flow<Int> = noteManager.observeSortOrder()
 
     override suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         noteManager.saveSortOrder(sortOrder)

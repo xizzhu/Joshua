@@ -19,8 +19,8 @@ package me.xizzhu.android.joshua.utils.activities
 import android.os.Bundle
 import androidx.annotation.CallSuper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -34,7 +34,7 @@ abstract class BaseSettingsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         coroutineScope.launch(Dispatchers.Main) {
-            getBaseSettingsInteractor().observeSettings().consumeEach { settings ->
+            getBaseSettingsInteractor().observeSettings().collect { settings ->
                 with(window.decorView) {
                     keepScreenOn = settings.keepScreenOn
                     setBackgroundColor(settings.getBackgroundColor())
@@ -47,7 +47,7 @@ abstract class BaseSettingsActivity : BaseActivity() {
 }
 
 abstract class BaseSettingsInteractor(private val settingsManager: SettingsManager) {
-    suspend fun observeSettings(): ReceiveChannel<Settings> = settingsManager.observeSettings()
+    fun observeSettings(): Flow<Settings> = settingsManager.observeSettings()
 }
 
 interface BaseSettingsView : MVPView {
@@ -60,7 +60,7 @@ abstract class BaseSettingsPresenter<V : BaseSettingsView>(private val baseSetti
         super.onViewAttached()
 
         coroutineScope.launch(Dispatchers.Main) {
-            baseSettingsInteractor.observeSettings().consumeEach { view?.onSettingsUpdated(it) }
+            baseSettingsInteractor.observeSettings().collect { view?.onSettingsUpdated(it) }
         }
     }
 }

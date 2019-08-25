@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading.chapter
 
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ReadingInteractor
@@ -44,10 +45,10 @@ class ChapterListPresenterTest : BaseUnitTest() {
 
         runBlocking {
             currentTranslationChannel = ConflatedBroadcastChannel("")
-            `when`(readingInteractor.observeCurrentTranslation()).then { currentTranslationChannel.openSubscription() }
+            `when`(readingInteractor.observeCurrentTranslation()).thenReturn(currentTranslationChannel.asFlow())
 
             currentVerseIndexChannel = ConflatedBroadcastChannel(VerseIndex.INVALID)
-            `when`(readingInteractor.observeCurrentVerseIndex()).then { currentVerseIndexChannel.openSubscription() }
+            `when`(readingInteractor.observeCurrentVerseIndex()).thenReturn(currentVerseIndexChannel.asFlow())
 
             chapterListPresenter = ChapterListPresenter(readingInteractor)
             chapterListPresenter.attachView(chapterListView)

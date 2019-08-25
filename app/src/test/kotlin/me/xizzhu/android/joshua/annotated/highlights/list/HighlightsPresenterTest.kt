@@ -17,8 +17,7 @@
 package me.xizzhu.android.joshua.annotated.highlights.list
 
 import android.content.res.Resources
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
@@ -43,8 +42,6 @@ class HighlightsPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var resources: Resources
 
-    private lateinit var settingsChannel: BroadcastChannel<Settings>
-    private lateinit var sortOrder: BroadcastChannel<Int>
     private lateinit var highlightsPresenter: HighlightsPresenter
 
     @Before
@@ -52,10 +49,8 @@ class HighlightsPresenterTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-            sortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
-            `when`(highlightsInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-            `when`(highlightsInteractor.observeSortOrder()).thenReturn(sortOrder.openSubscription())
+            `when`(highlightsInteractor.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
+            `when`(highlightsInteractor.observeSortOrder()).thenReturn(flowOf(Constants.SORT_BY_DATE))
             `when`(highlightsInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
             `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
@@ -127,7 +122,7 @@ class HighlightsPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadHighlightsSortByBook() {
         runBlocking {
-            sortOrder.send(Constants.SORT_BY_BOOK)
+            `when`(highlightsInteractor.observeSortOrder()).thenReturn(flowOf(Constants.SORT_BY_BOOK))
             `when`(highlightsInteractor.readHighlights(Constants.SORT_BY_BOOK)).thenReturn(listOf(
                     Highlight(VerseIndex(0, 0, 3), Highlight.COLOR_PINK, 0L)
             ))

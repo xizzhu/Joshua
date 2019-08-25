@@ -17,8 +17,7 @@
 package me.xizzhu.android.joshua.annotated.bookmarks.list
 
 import android.content.res.Resources
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksInteractor
 import me.xizzhu.android.joshua.core.Bookmark
@@ -43,8 +42,6 @@ class BookmarksPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var resources: Resources
 
-    private lateinit var settingsChannel: BroadcastChannel<Settings>
-    private lateinit var bookmarksSortOrder: BroadcastChannel<Int>
     private lateinit var bookmarksPresenter: BookmarksPresenter
 
     @Before
@@ -52,10 +49,8 @@ class BookmarksPresenterTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-            bookmarksSortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
-            `when`(bookmarksInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-            `when`(bookmarksInteractor.observeSortOrder()).thenReturn(bookmarksSortOrder.openSubscription())
+            `when`(bookmarksInteractor.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
+            `when`(bookmarksInteractor.observeSortOrder()).thenReturn(flowOf(Constants.SORT_BY_DATE))
             `when`(bookmarksInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
             `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
@@ -127,7 +122,7 @@ class BookmarksPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadBookmarksSortByBook() {
         runBlocking {
-            bookmarksSortOrder.send(Constants.SORT_BY_BOOK)
+            `when`(bookmarksInteractor.observeSortOrder()).thenReturn(flowOf(Constants.SORT_BY_BOOK))
             `when`(bookmarksInteractor.readBookmarks(Constants.SORT_BY_BOOK)).thenReturn(listOf(
                     Bookmark(VerseIndex(0, 0, 3), 0L)
             ))

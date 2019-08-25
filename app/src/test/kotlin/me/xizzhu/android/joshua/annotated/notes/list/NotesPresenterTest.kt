@@ -17,8 +17,7 @@
 package me.xizzhu.android.joshua.annotated.notes.list
 
 import android.content.res.Resources
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
@@ -43,8 +42,6 @@ class NotesPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var resources: Resources
 
-    private lateinit var settingsChannel: BroadcastChannel<Settings>
-    private lateinit var notesSortOrder: BroadcastChannel<Int>
     private lateinit var notesPresenter: NotesPresenter
 
     @Before
@@ -52,10 +49,8 @@ class NotesPresenterTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            settingsChannel = ConflatedBroadcastChannel(Settings.DEFAULT)
-            notesSortOrder = ConflatedBroadcastChannel(Constants.SORT_BY_DATE)
-            `when`(notesInteractor.observeSettings()).thenReturn(settingsChannel.openSubscription())
-            `when`(notesInteractor.observeSortOrder()).thenReturn(notesSortOrder.openSubscription())
+            `when`(notesInteractor.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
+            `when`(notesInteractor.observeSortOrder()).thenReturn(flowOf(Constants.SORT_BY_DATE))
             `when`(notesInteractor.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(resources.getString(anyInt())).thenReturn("")
             `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
@@ -127,7 +122,7 @@ class NotesPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadNotesSortByBook() {
         runBlocking {
-            notesSortOrder.send(Constants.SORT_BY_BOOK)
+            `when`(notesInteractor.observeSortOrder()).thenReturn(flowOf(Constants.SORT_BY_BOOK))
             `when`(notesInteractor.readNotes(Constants.SORT_BY_BOOK)).thenReturn(listOf(
                     Note(VerseIndex(0, 0, 3), "Note", 0L)
             ))

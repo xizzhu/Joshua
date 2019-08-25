@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.App
 import me.xizzhu.android.joshua.core.Settings
@@ -34,7 +34,7 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
         super.onViewAttached()
 
         coroutineScope.launch(Dispatchers.Main) {
-            settingsManager.observeSettings().consumeEach { settings = it }
+            settingsManager.observeSettings().collect { settings = it }
         }
 
         try {

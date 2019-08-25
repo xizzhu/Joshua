@@ -22,7 +22,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.HighlightRepository
 import me.xizzhu.android.logger.Log
@@ -46,24 +47,25 @@ class HighlightManager(private val highlightRepository: HighlightRepository) {
         private val TAG = HighlightManager::class.java.simpleName
     }
 
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val sortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                sortOrder.send(highlightRepository.readSortOrder())
+                sortOrder.offer(highlightRepository.readSortOrder())
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize bookmark sort order", e)
-                sortOrder.send(Constants.DEFAULT_SORT_ORDER)
+                sortOrder.offer(Constants.DEFAULT_SORT_ORDER)
             }
         }
     }
 
-    fun observeSortOrder(): ReceiveChannel<Int> = sortOrder.openSubscription()
+    fun observeSortOrder(): Flow<Int> = sortOrder.asFlow()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         highlightRepository.saveSortOrder(sortOrder)
-        this.sortOrder.send(sortOrder)
+        this.sortOrder.offer(sortOrder)
     }
 
     suspend fun read(@Constants.SortOrder sortOrder: Int): List<Highlight> = highlightRepository.read(sortOrder)

@@ -16,7 +16,7 @@
 
 package me.xizzhu.android.joshua.translations
 
-import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager

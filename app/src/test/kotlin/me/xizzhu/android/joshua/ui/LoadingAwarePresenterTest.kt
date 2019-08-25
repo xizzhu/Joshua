@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.ui
 
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.After
@@ -38,7 +39,7 @@ class LoadingAwarePresenterTest : BaseUnitTest() {
         super.setup()
 
         loadingSpinnerState = ConflatedBroadcastChannel()
-        loadingSpinnerPresenter = LoadingAwarePresenter(loadingSpinnerState.openSubscription())
+        loadingSpinnerPresenter = LoadingAwarePresenter(loadingSpinnerState.asFlow())
 
         loadingSpinnerPresenter.attachView(loadingAwareView)
     }
@@ -50,7 +51,7 @@ class LoadingAwarePresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadingSpinnerState() {
+    fun testLoadingSpinnerStateIsLoading() {
         runBlocking {
             verify(loadingAwareView, never()).show()
             verify(loadingAwareView, never()).hide()
@@ -61,6 +62,18 @@ class LoadingAwarePresenterTest : BaseUnitTest() {
 
             loadingSpinnerState.send(BaseLoadingAwareInteractor.NOT_LOADING)
             verify(loadingAwareView, times(1)).show()
+            verify(loadingAwareView, times(1)).hide()
+        }
+    }
+
+    @Test
+    fun testLoadingSpinnerStateNotLoading() {
+        runBlocking {
+            verify(loadingAwareView, never()).show()
+            verify(loadingAwareView, never()).hide()
+
+            loadingSpinnerState.send(BaseLoadingAwareInteractor.NOT_LOADING)
+            verify(loadingAwareView, never()).show()
             verify(loadingAwareView, times(1)).hide()
         }
     }

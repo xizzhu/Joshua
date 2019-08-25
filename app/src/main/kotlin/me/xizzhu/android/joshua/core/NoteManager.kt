@@ -20,7 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.NoteRepository
 import me.xizzhu.android.logger.Log
@@ -34,24 +35,25 @@ class NoteManager(private val noteRepository: NoteRepository) {
         private val TAG = NoteManager::class.java.simpleName
     }
 
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val notesSortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                notesSortOrder.send(noteRepository.readSortOrder())
+                notesSortOrder.offer(noteRepository.readSortOrder())
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize note sort order", e)
-                notesSortOrder.send(Constants.DEFAULT_SORT_ORDER)
+                notesSortOrder.offer(Constants.DEFAULT_SORT_ORDER)
             }
         }
     }
 
-    fun observeSortOrder(): ReceiveChannel<Int> = notesSortOrder.openSubscription()
+    fun observeSortOrder(): Flow<Int> = notesSortOrder.asFlow()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         noteRepository.saveSortOrder(sortOrder)
-        notesSortOrder.send(sortOrder)
+        notesSortOrder.offer(sortOrder)
     }
 
     suspend fun read(@Constants.SortOrder sortOrder: Int): List<Note> = noteRepository.read(sortOrder)

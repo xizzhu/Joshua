@@ -21,8 +21,9 @@ import android.content.DialogInterface
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.first
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
@@ -46,25 +47,25 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         super.onViewAttached()
 
         coroutineScope.launch(Dispatchers.Main) {
-            translationInteractor.observeCurrentTranslation().consumeEach {
+            translationInteractor.observeCurrentTranslation().collect {
                 currentTranslation = it
                 updateTranslations()
             }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            translationInteractor.observeAvailableTranslations().consumeEach {
+            translationInteractor.observeAvailableTranslations().collect {
                 availableTranslations = it.sortedWith(translationComparator)
                 updateTranslations()
             }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            translationInteractor.observeDownloadedTranslations().consumeEach {
+            translationInteractor.observeDownloadedTranslations().collect {
                 downloadedTranslations = it.sortedWith(translationComparator)
                 updateTranslations()
             }
         }
         coroutineScope.launch(Dispatchers.Main) {
-            translationInteractor.observeTranslationsLoadingRequest().consumeEach { loadTranslationList(true) }
+            translationInteractor.observeRefreshRequest().collect { loadTranslationList(true) }
         }
 
         loadTranslationList(false)
@@ -128,11 +129,16 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         }
     }
 
-    fun downloadTranslation(translationToDelete: TranslationInfo, downloadProgressChannel: Channel<Int> = Channel()) {
+    fun downloadTranslation(translationToDownload: TranslationInfo) {
+        downloadTranslation(translationToDownload, Channel())
+    }
+
+    @VisibleForTesting
+    fun downloadTranslation(translationToDownload: TranslationInfo, downloadProgressChannel: Channel<Int>) {
         view?.onTranslationDownloadStarted()
 
         coroutineScope.launch(Dispatchers.Main) {
-            downloadProgressChannel.consumeEach { progress ->
+            downloadProgressChannel.consumeAsFlow().collect { progress ->
                 try {
                     view?.onTranslationDownloadProgressed(progress)
                 } catch (e: Exception) {
@@ -143,14 +149,14 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
 
         coroutineScope.launch(Dispatchers.Main) {
             try {
-                translationInteractor.downloadTranslation(downloadProgressChannel, translationToDelete)
+                translationInteractor.downloadTranslation(downloadProgressChannel, translationToDownload)
                 if (translationInteractor.observeCurrentTranslation().first().isEmpty()) {
-                    translationInteractor.saveCurrentTranslation(translationToDelete.shortName)
+                    translationInteractor.saveCurrentTranslation(translationToDownload.shortName)
                 }
                 view?.onTranslationDownloaded()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to download translation", e)
-                view?.onTranslationDownloadFailed(translationToDelete)
+                view?.onTranslationDownloadFailed(translationToDownload)
             }
         }
     }

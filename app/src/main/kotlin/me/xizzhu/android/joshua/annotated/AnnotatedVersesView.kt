@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
@@ -91,7 +91,7 @@ abstract class AnnotatedVersePresenter(private val baseAnnotatedVersesInteractor
         super.onViewAttached()
 
         coroutineScope.launch(Dispatchers.Main) {
-            baseAnnotatedVersesInteractor.observeSortOrder().consumeEach { load(it) }
+            baseAnnotatedVersesInteractor.observeSortOrder().collect { load(it) }
         }
     }
 

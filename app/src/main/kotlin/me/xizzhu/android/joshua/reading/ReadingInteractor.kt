@@ -21,7 +21,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.view.ActionMode
-import kotlinx.coroutines.channels.ReceiveChannel
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import android.content.ComponentName
@@ -34,6 +33,8 @@ import androidx.annotation.IntDef
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import me.xizzhu.android.logger.Log
@@ -69,54 +70,54 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         private val TAG = ReadingInteractor::class.java.simpleName
     }
 
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val verseDetailOpenState: ConflatedBroadcastChannel<Pair<VerseIndex, Int>> = ConflatedBroadcastChannel()
     private val verseUpdates: BroadcastChannel<Pair<VerseIndex, VerseUpdate>> = ConflatedBroadcastChannel()
 
-    suspend fun observeDownloadedTranslations(): ReceiveChannel<List<TranslationInfo>> =
-            translationManager.observeDownloadedTranslations()
+    fun observeDownloadedTranslations(): Flow<List<TranslationInfo>> = translationManager.observeDownloadedTranslations()
 
-    suspend fun observeCurrentTranslation(): ReceiveChannel<String> = bibleReadingManager.observeCurrentTranslation()
+    fun observeCurrentTranslation(): Flow<String> = bibleReadingManager.observeCurrentTranslation()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
-    fun observeParallelTranslations(): ReceiveChannel<List<String>> = bibleReadingManager.observeParallelTranslations()
+    fun observeParallelTranslations(): Flow<List<String>> = bibleReadingManager.observeParallelTranslations()
 
-    fun observeVerseDetailOpenState(): ReceiveChannel<Pair<VerseIndex, Int>> = verseDetailOpenState.openSubscription()
+    fun observeVerseDetailOpenState(): Flow<Pair<VerseIndex, Int>> = verseDetailOpenState.asFlow()
 
-    suspend fun openVerseDetail(verseIndex: VerseIndex, page: Int) {
-        verseDetailOpenState.send(Pair(verseIndex, page))
+    fun openVerseDetail(verseIndex: VerseIndex, page: Int) {
+        verseDetailOpenState.offer(Pair(verseIndex, page))
     }
 
     /**
      * @return true if verse detail view was open, or false otherwise
      * */
-    suspend fun closeVerseDetail(): Boolean {
+    fun closeVerseDetail(): Boolean {
         verseDetailOpenState.valueOrNull?.let {
             if (it.first.isValid()) {
-                verseDetailOpenState.send(Pair(VerseIndex.INVALID, 0))
+                verseDetailOpenState.offer(Pair(VerseIndex.INVALID, 0))
                 return true
             }
         }
         return false
     }
 
-    fun observeVerseUpdates(): ReceiveChannel<Pair<VerseIndex, VerseUpdate>> = verseUpdates.openSubscription()
+    fun observeVerseUpdates(): Flow<Pair<VerseIndex, VerseUpdate>> = verseUpdates.asFlow()
 
-    suspend fun requestParallelTranslation(translationShortName: String) {
+    fun requestParallelTranslation(translationShortName: String) {
         bibleReadingManager.requestParallelTranslation(translationShortName)
     }
 
-    suspend fun removeParallelTranslation(translationShortName: String) {
+    fun removeParallelTranslation(translationShortName: String) {
         bibleReadingManager.removeParallelTranslation(translationShortName)
     }
 
-    suspend fun clearParallelTranslation() {
+    fun clearParallelTranslation() {
         bibleReadingManager.clearParallelTranslation()
     }
 
-    suspend fun observeCurrentVerseIndex(): ReceiveChannel<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
+    fun observeCurrentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
@@ -263,12 +264,12 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun addBookmark(verseIndex: VerseIndex) {
         bookmarkManager.save(Bookmark(verseIndex, System.currentTimeMillis()))
-        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.BOOKMARK_ADDED)))
+        verseUpdates.offer(Pair(verseIndex, VerseUpdate(VerseUpdate.BOOKMARK_ADDED)))
     }
 
     suspend fun removeBookmark(verseIndex: VerseIndex) {
         bookmarkManager.remove(verseIndex)
-        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.BOOKMARK_REMOVED)))
+        verseUpdates.offer(Pair(verseIndex, VerseUpdate(VerseUpdate.BOOKMARK_REMOVED)))
     }
 
     suspend fun readHighlights(bookIndex: Int, chapterIndex: Int): List<Highlight> =
@@ -278,12 +279,12 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun saveHighlight(verseIndex: VerseIndex, @ColorInt color: Int) {
         highlightManager.save(Highlight(verseIndex, color, System.currentTimeMillis()))
-        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.HIGHLIGHT_UPDATED, color)))
+        verseUpdates.offer(Pair(verseIndex, VerseUpdate(VerseUpdate.HIGHLIGHT_UPDATED, color)))
     }
 
     suspend fun removeHighlight(verseIndex: VerseIndex) {
         highlightManager.remove(verseIndex)
-        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE)))
+        verseUpdates.offer(Pair(verseIndex, VerseUpdate(VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE)))
     }
 
     suspend fun readNotes(bookIndex: Int, chapterIndex: Int): List<Note> = noteManager.read(bookIndex, chapterIndex)
@@ -292,12 +293,12 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
 
     suspend fun saveNote(verseIndex: VerseIndex, note: String) {
         noteManager.save(Note(verseIndex, note, System.currentTimeMillis()))
-        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.NOTE_ADDED)))
+        verseUpdates.offer(Pair(verseIndex, VerseUpdate(VerseUpdate.NOTE_ADDED)))
     }
 
     suspend fun removeNote(verseIndex: VerseIndex) {
         noteManager.remove(verseIndex)
-        verseUpdates.send(Pair(verseIndex, VerseUpdate(VerseUpdate.NOTE_REMOVED)))
+        verseUpdates.offer(Pair(verseIndex, VerseUpdate(VerseUpdate.NOTE_REMOVED)))
     }
 }
 
