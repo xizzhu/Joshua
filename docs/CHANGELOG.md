@@ -9,6 +9,7 @@ CHANGELOG
   - Android Gradle plugin to 3.5.0
   - Coveralls plugin to 2.8.3
   - Kotlin to 1.3.50
+  - Kotlin Coroutine to 1.3.0
   - Play Services plugin to 4.3.1
   - Firebase Core and Analytics to 17.1.0
   - Logger to 0.1.3
