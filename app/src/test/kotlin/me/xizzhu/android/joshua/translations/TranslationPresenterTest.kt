@@ -179,16 +179,17 @@ class TranslationPresenterTest : BaseUnitTest() {
             downloadProgressChannel.send(progress)
             downloadProgressChannel.close()
 
+            // This runs in a separate coroutine, so we can not guarantee when it's executed
+            verify(translationView, times(1))
+                    .onTranslationDownloadProgressed(progress)
+
             with(inOrder(translationInteractor, translationView)) {
                 verify(translationInteractor, times(1))
                         .downloadTranslation(downloadProgressChannel, MockContents.kjvTranslationInfo)
+                verify(translationInteractor, times(1))
+                        .saveCurrentTranslation(MockContents.kjvShortName)
                 verify(translationView, times(1))
-                        .onTranslationDownloadProgressed(progress)
-                // FIXME
-                // verify(translationInteractor, times(1))
-                //         .saveCurrentTranslation(MockContents.kjvShortName)
-                // verify(translationView, times(1))
-                //         .onTranslationDownloaded()
+                        .onTranslationDownloaded()
             }
 
             translationPresenter.detachView()

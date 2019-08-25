@@ -55,14 +55,17 @@ open class HttpTranslationService : RemoteTranslationService {
                 .use { zipInputStream ->
                     val buffer = ByteArray(4096)
                     val os = ByteArrayOutputStream()
-                    var entryName = ""
                     var downloaded = 0
                     var progress = -1
-                    while (zipInputStream.nextEntry?.also { entryName = it.name } != null) {
+                    while (true) {
+                        val entryName = zipInputStream.nextEntry?.name ?: break
+
                         os.reset()
-                        while (zipInputStream.read(buffer).also {
-                                    if (it > 0) os.write(buffer, 0, it)
-                                } != -1);
+                        while (true) {
+                            val byteCount = zipInputStream.read(buffer)
+                            if (byteCount < 0) break
+                            os.write(buffer, 0, byteCount)
+                        }
                         val jsonReader = JsonReader(StringReader(os.toString("UTF-8")))
 
                         if (entryName == "books.json") {
