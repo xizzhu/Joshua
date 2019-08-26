@@ -36,9 +36,7 @@ class SearchInteractor(private val searchActivity: SearchActivity,
 
     fun observeSearchQuery(): Flow<String> = searchQuery.asFlow()
 
-    fun updateSearchQuery(query: String) {
-        searchQuery.offer(query)
-    }
+    fun updateSearchQuery(query: String): Boolean = searchQuery.offer(query)
 
     suspend fun search(query: String): List<Verse> = bibleReadingManager.search(readCurrentTranslation(), query)
 

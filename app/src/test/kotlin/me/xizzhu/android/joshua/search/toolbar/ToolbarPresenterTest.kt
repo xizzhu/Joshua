@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.search.toolbar
 
-import kotlinx.coroutines.*
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Before
@@ -45,7 +44,22 @@ class ToolbarPresenterTest : BaseUnitTest() {
     @Test
     fun testQuery() {
         val query = "query"
+        `when`(searchInteractor.updateSearchQuery(query)).thenReturn(true)
         assertTrue(toolbarPresenter.updateSearchQuery(query))
         verify(searchInteractor, times(1)).updateSearchQuery(query)
+    }
+
+    @Test
+    fun testQueryWithFailure() {
+        val query = "query"
+        `when`(searchInteractor.updateSearchQuery(query)).thenReturn(false)
+        assertFalse(toolbarPresenter.updateSearchQuery(query))
+    }
+
+    @Test
+    fun testQueryWithException() {
+        val query = "query"
+        `when`(searchInteractor.updateSearchQuery(query)).thenThrow(RuntimeException("Random exception"))
+        assertFalse(toolbarPresenter.updateSearchQuery(query))
     }
 }
