@@ -365,10 +365,15 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     @VisibleForTesting
     fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
         coroutineScope.launch(Dispatchers.Main) {
-            if (hasBookmark) {
-                readingInteractor.removeBookmark(verseIndex)
-            } else {
-                readingInteractor.addBookmark(verseIndex)
+            try {
+                if (hasBookmark) {
+                    readingInteractor.removeBookmark(verseIndex)
+                } else {
+                    readingInteractor.addBookmark(verseIndex)
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to update bookmark", e)
+                // TODO
             }
         }
     }
