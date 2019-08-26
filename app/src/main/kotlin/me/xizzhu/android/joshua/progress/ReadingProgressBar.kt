@@ -25,6 +25,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
 import me.xizzhu.android.joshua.R
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 class ReadingProgressBar : View {
@@ -82,7 +83,7 @@ class ReadingProgressBar : View {
         // we only use match_parent for width, and wrap_content for height
         val height = textPaint.textSize.roundToInt() + 2 * textPadding
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec),
-                if (heightSpecMode == MeasureSpec.UNSPECIFIED) height else Math.min(height, MeasureSpec.getSize(heightMeasureSpec)))
+                if (heightSpecMode == MeasureSpec.UNSPECIFIED) height else min(height, MeasureSpec.getSize(heightMeasureSpec)))
     }
 
     override fun onDraw(canvas: Canvas) {
