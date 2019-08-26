@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.search.toolbar
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.search.SearchInteractor
 import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.logger.Log
@@ -29,11 +27,10 @@ class ToolbarPresenter(private val searchInteractor: SearchInteractor) : MVPPres
             return false
         }
         try {
-            searchInteractor.updateSearchQuery(query)
+            return searchInteractor.updateSearchQuery(query)
         } catch (e: Exception) {
             Log.e(tag, "Failed to update search query", e)
-            // TODO
+            return false
         }
-        return true
     }
 }
