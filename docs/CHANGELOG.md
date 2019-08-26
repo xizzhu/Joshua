@@ -12,7 +12,7 @@ CHANGELOG
   - Kotlin Coroutine to 1.3.0
   - Play Services plugin to 4.3.1
   - Firebase Core and Analytics to 17.1.0
-  - Logger to 0.1.3
+  - Logger to 0.1.4
 
 #### v0.9.1 (2019-08-14)
 - Harmonized styles for verses rendering

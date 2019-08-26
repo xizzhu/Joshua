@@ -81,7 +81,7 @@ object Versions {
 
     const val dagger = "2.24"
 
-    const val logger = "0.1.3"
+    const val logger = "0.1.4"
 
     const val stetho = "1.5.1"
 
