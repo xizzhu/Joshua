@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.10.0 (2019-08-26)
 - Improved R8 configurations:
   - Used proguard-android-optimize.txt
   - Do not keep unnecessary AndroidX classes
