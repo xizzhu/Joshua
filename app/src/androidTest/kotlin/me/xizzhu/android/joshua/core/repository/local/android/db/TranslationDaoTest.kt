@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -42,14 +43,22 @@ class TranslationDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenRead() {
-        saveTranslation()
+        saveKjv()
         assertEquals(MockContents.kjvVerses,
                 androidDatabase.translationDao.read(MockContents.kjvShortName, 0, 0))
     }
 
-    private fun saveTranslation() {
-        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
-        androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
+    private fun saveKjv() {
+        saveTranslation(MockContents.kjvShortName, MockContents.kjvVerses)
+    }
+
+    private fun saveCuv() {
+        saveTranslation(MockContents.cuvShortName, MockContents.cuvVerses)
+    }
+
+    private fun saveTranslation(translationShortName: String, verses: List<Verse>) {
+        androidDatabase.translationDao.createTable(translationShortName)
+        androidDatabase.translationDao.save(translationShortName, verses.toMap())
     }
 
     @Test
@@ -64,24 +73,21 @@ class TranslationDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenReadWithParallelTranslations() {
-        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
-        androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
-
-        androidDatabase.translationDao.createTable(MockContents.cuvShortName)
-        androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
+        saveKjv()
+        saveCuv()
 
         val actual = androidDatabase.translationDao.read(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 0, 0)
         for ((translation, texts) in actual) {
             when (translation) {
                 MockContents.kjvShortName -> {
                     assertEquals(MockContents.kjvVerses.size, texts.size)
-                    for (i in 0 until MockContents.kjvVerses.size) {
+                    for (i in MockContents.kjvVerses.indices) {
                         assertEquals(MockContents.kjvVerses[i].text, texts[i])
                     }
                 }
                 MockContents.cuvShortName -> {
                     assertEquals(MockContents.cuvVerses.size, texts.size)
-                    for (i in 0 until MockContents.cuvVerses.size) {
+                    for (i in MockContents.cuvVerses.indices) {
                         assertEquals(MockContents.cuvVerses[i].text, texts[i])
                     }
                 }
@@ -92,11 +98,8 @@ class TranslationDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenReadByVerseIndex() {
-        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
-        androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
-
-        androidDatabase.translationDao.createTable(MockContents.cuvShortName)
-        androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
+        saveKjv()
+        saveCuv()
 
         val actual = androidDatabase.translationDao.read(listOf(MockContents.kjvShortName, MockContents.cuvShortName),
                 VerseIndex(0, 0, 0))
@@ -118,11 +121,8 @@ class TranslationDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenReadByVerseIndexWithMissingVerse() {
-        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
-        androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
-
-        androidDatabase.translationDao.createTable(MockContents.cuvShortName)
-        androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
+        saveKjv()
+        saveCuv()
 
         assertTrue(androidDatabase.translationDao.read(
                 listOf(MockContents.kjvShortName, MockContents.cuvShortName),
@@ -132,11 +132,8 @@ class TranslationDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenReadByVerseIndexWithMissingParallel() {
-        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
-        androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())
-
-        androidDatabase.translationDao.createTable(MockContents.cuvShortName)
-        androidDatabase.translationDao.save(MockContents.cuvShortName, MockContents.cuvVerses.toMap())
+        saveKjv()
+        saveCuv()
 
         val actual = androidDatabase.translationDao.read(listOf(MockContents.kjvShortName, MockContents.bbeShortName, MockContents.cuvShortName),
                 VerseIndex(0, 0, 0))
@@ -160,7 +157,7 @@ class TranslationDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenSearch() {
-        saveTranslation()
+        saveKjv()
 
         assertEquals(MockContents.kjvVerses,
                 androidDatabase.translationDao.search(MockContents.kjvShortName, "God"))
@@ -172,7 +169,7 @@ class TranslationDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenSearchMultiKeywords() {
-        saveTranslation()
+        saveKjv()
 
         assertEquals(listOf(MockContents.kjvVerses[0]),
                 androidDatabase.translationDao.search(MockContents.kjvShortName, "God created"))
@@ -189,7 +186,7 @@ class TranslationDaoTest : BaseSqliteTest() {
 
     @Test
     fun testRemoveTranslation() {
-        saveTranslation()
+        saveKjv()
         assertTrue(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
 
         androidDatabase.translationDao.removeTable(MockContents.kjvShortName)
