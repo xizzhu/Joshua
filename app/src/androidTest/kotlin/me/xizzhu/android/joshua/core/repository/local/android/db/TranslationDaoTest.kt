@@ -33,6 +33,9 @@ class TranslationDaoTest : BaseSqliteTest() {
     @Test
     fun testReadNonExistTranslation() {
         assertTrue(androidDatabase.translationDao.read("not_exist", 0, 0).isEmpty())
+        assertTrue(androidDatabase.translationDao.read("not_exist", listOf(), 0, 0).isEmpty())
+        assertFalse(androidDatabase.translationDao.read("not_exist", listOf(), VerseIndex(0, 0, 0)).isValid())
+        assertFalse(androidDatabase.translationDao.read("not_exist", VerseIndex(0, 0, 0)).isValid())
     }
 
     @Test
@@ -85,6 +88,19 @@ class TranslationDaoTest : BaseSqliteTest() {
     }
 
     @Test
+    fun testSaveThenReadWithParallelTranslationsAndMissingVerses() {
+        saveKjv()
+        saveCuv()
+
+        val actual = androidDatabase.translationDao.read(MockContents.kjvShortName,
+                listOf(MockContents.cuvShortName, MockContents.bbeShortName), 0, 0)
+        for ((i, verse) in actual.withIndex()) {
+            assertEquals(MockContents.kjvVerses[i].text, verse.text)
+            assertEquals(listOf(MockContents.cuvVerses[i].text, Verse.Text(MockContents.bbeShortName, "")), verse.parallel)
+        }
+    }
+
+    @Test
     fun testSaveThenReadByVerseIndex() {
         saveKjv()
         saveCuv()
@@ -93,6 +109,8 @@ class TranslationDaoTest : BaseSqliteTest() {
                 listOf(MockContents.cuvShortName), VerseIndex(0, 0, 0)))
         assertEquals(MockContents.kjvVerses[0], androidDatabase.translationDao.read(
                 MockContents.kjvShortName, VerseIndex(0, 0, 0)))
+        assertFalse(androidDatabase.translationDao.read(MockContents.kjvShortName, VerseIndex(1, 1, 1)).isValid())
+        assertFalse(androidDatabase.translationDao.read(MockContents.kjvShortName, VerseIndex(-1, -1, -1)).isValid())
     }
 
     @Test
@@ -131,6 +149,7 @@ class TranslationDaoTest : BaseSqliteTest() {
                 androidDatabase.translationDao.search(MockContents.kjvShortName, "god"))
         assertEquals(MockContents.kjvVerses,
                 androidDatabase.translationDao.search(MockContents.kjvShortName, "GOD"))
+        assertTrue(androidDatabase.translationDao.search(MockContents.kjvShortName, "not_exist").isEmpty())
     }
 
     @Test
