@@ -76,23 +76,11 @@ class TranslationDaoTest : BaseSqliteTest() {
         saveKjv()
         saveCuv()
 
-        val actual = androidDatabase.translationDao.read(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 0, 0)
-        for ((translation, texts) in actual) {
-            when (translation) {
-                MockContents.kjvShortName -> {
-                    assertEquals(MockContents.kjvVerses.size, texts.size)
-                    for (i in MockContents.kjvVerses.indices) {
-                        assertEquals(MockContents.kjvVerses[i].text, texts[i])
-                    }
-                }
-                MockContents.cuvShortName -> {
-                    assertEquals(MockContents.cuvVerses.size, texts.size)
-                    for (i in MockContents.cuvVerses.indices) {
-                        assertEquals(MockContents.cuvVerses[i].text, texts[i])
-                    }
-                }
-                else -> fail()
-            }
+        val actual = androidDatabase.translationDao.read(
+                MockContents.kjvShortName, listOf(MockContents.cuvShortName), 0, 0)
+        for ((i, verse) in actual.withIndex()) {
+            assertEquals(MockContents.kjvVerses[i].text, verse.text)
+            assertEquals(listOf(MockContents.cuvVerses[i].text), verse.parallel)
         }
     }
 
@@ -101,20 +89,8 @@ class TranslationDaoTest : BaseSqliteTest() {
         saveKjv()
         saveCuv()
 
-        val actual = androidDatabase.translationDao.read(listOf(MockContents.kjvShortName, MockContents.cuvShortName),
-                VerseIndex(0, 0, 0))
-        for ((translation, text) in actual) {
-            when (translation) {
-                MockContents.kjvShortName -> {
-                    assertEquals(MockContents.kjvVerses[0].text, text)
-                }
-                MockContents.cuvShortName -> {
-                    assertEquals(MockContents.cuvVerses[0].text, text)
-                }
-                else -> fail()
-            }
-        }
-
+        assertEquals(MockContents.kjvVersesWithCuvParallel[0], androidDatabase.translationDao.read(MockContents.kjvShortName,
+                listOf(MockContents.cuvShortName), VerseIndex(0, 0, 0)))
         assertEquals(MockContents.kjvVerses[0], androidDatabase.translationDao.read(
                 MockContents.kjvShortName, VerseIndex(0, 0, 0)))
     }
@@ -124,10 +100,10 @@ class TranslationDaoTest : BaseSqliteTest() {
         saveKjv()
         saveCuv()
 
-        assertTrue(androidDatabase.translationDao.read(
-                listOf(MockContents.kjvShortName, MockContents.cuvShortName),
-                VerseIndex(1, 1, 1)
-        ).isEmpty())
+        val actual = androidDatabase.translationDao.read(MockContents.kjvShortName,
+                listOf(MockContents.cuvShortName), VerseIndex(1, 1, 1))
+        assertEquals(Verse.Text(MockContents.kjvShortName, ""), actual.text)
+        assertEquals(listOf(Verse.Text(MockContents.cuvShortName, "")), actual.parallel)
     }
 
     @Test
@@ -135,19 +111,9 @@ class TranslationDaoTest : BaseSqliteTest() {
         saveKjv()
         saveCuv()
 
-        val actual = androidDatabase.translationDao.read(listOf(MockContents.kjvShortName, MockContents.bbeShortName, MockContents.cuvShortName),
-                VerseIndex(0, 0, 0))
-        for ((translation, text) in actual) {
-            when (translation) {
-                MockContents.kjvShortName -> {
-                    assertEquals(MockContents.kjvVerses[0].text, text)
-                }
-                MockContents.cuvShortName -> {
-                    assertEquals(MockContents.cuvVerses[0].text, text)
-                }
-                else -> fail()
-            }
-        }
+        assertEquals(MockContents.kjvVersesWithCuvParallelMissingBbe[0],
+                androidDatabase.translationDao.read(MockContents.kjvShortName, listOf(MockContents.bbeShortName, MockContents.cuvShortName),
+                        VerseIndex(0, 0, 0)))
     }
 
     @Test

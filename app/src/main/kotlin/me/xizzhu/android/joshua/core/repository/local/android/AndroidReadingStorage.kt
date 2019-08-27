@@ -23,14 +23,8 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
-import me.xizzhu.android.joshua.core.repository.local.android.db.withTransaction
-import me.xizzhu.android.logger.Log
 
 class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : LocalReadingStorage {
-    companion object {
-        private val TAG: String = AndroidReadingStorage::class.java.simpleName
-    }
-
     override suspend fun readCurrentVerseIndex(): VerseIndex {
         return withContext(Dispatchers.IO) {
             val keys = listOf(
@@ -81,29 +75,7 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
 
     override suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
                                     bookIndex: Int, chapterIndex: Int): List<Verse> = withContext(Dispatchers.IO) {
-        androidDatabase.readableDatabase.withTransaction {
-            val translations = mutableListOf(translationShortName)
-            translations.addAll(parallelTranslations)
-            val translationToTexts = androidDatabase.translationDao.read(translations, bookIndex, chapterIndex)
-            val primaryTexts = translationToTexts.getValue(translationShortName)
-            val verses = ArrayList<Verse>(primaryTexts.size)
-            for ((i, primaryText) in primaryTexts.withIndex()) {
-                val parallel = ArrayList<Verse.Text>(translationToTexts.size - 1)
-                for ((translation, texts) in translationToTexts) {
-                    if (translationShortName == translation) {
-                        continue
-                    }
-                    parallel.add(if (texts.size > i) {
-                        texts[i]
-                    } else {
-                        Verse.Text(translation, "")
-                    })
-                }
-
-                verses.add(Verse(VerseIndex(bookIndex, chapterIndex, i), primaryText, parallel))
-            }
-            return@withContext verses
-        }
+        androidDatabase.translationDao.read(translationShortName, parallelTranslations, bookIndex, chapterIndex)
     }
 
     override suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse = withContext(Dispatchers.IO) {
@@ -112,21 +84,7 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
 
     override suspend fun readVerse(translationShortName: String, parallelTranslations: List<String>,
                                    verseIndex: VerseIndex): Verse = withContext(Dispatchers.IO) {
-        androidDatabase.readableDatabase.withTransaction {
-            val translations = mutableListOf(translationShortName)
-            translations.addAll(parallelTranslations)
-            val translationToText = androidDatabase.translationDao.read(translations, verseIndex).toMutableMap()
-            val primaryText = translationToText.remove(translationShortName)!!
-            val parallelTexts = mutableListOf<Verse.Text>().apply {
-                parallelTranslations.forEach { translation ->
-                    add(translationToText.getOrElse(translation) {
-                        Log.e(TAG, "", IllegalStateException("Failed to read parallel verse for $translation"))
-                        Verse.Text(translation, "")
-                    })
-                }
-            }
-            return@withContext Verse(verseIndex, primaryText, parallelTexts)
-        }
+        androidDatabase.translationDao.read(translationShortName, parallelTranslations, verseIndex)
     }
 
     override suspend fun search(translationShortName: String, query: String): List<Verse> = withContext(Dispatchers.IO) {
