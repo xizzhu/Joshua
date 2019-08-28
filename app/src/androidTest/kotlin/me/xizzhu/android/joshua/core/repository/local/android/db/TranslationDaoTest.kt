@@ -59,6 +59,10 @@ class TranslationDaoTest : BaseSqliteTest() {
         saveTranslation(MockContents.cuvShortName, MockContents.cuvVerses)
     }
 
+    private fun saveMsg() {
+        saveTranslation(MockContents.msgShortName, MockContents.msgVerses)
+    }
+
     private fun saveTranslation(translationShortName: String, verses: List<Verse>) {
         androidDatabase.translationDao.createTable(translationShortName)
         androidDatabase.translationDao.save(translationShortName, verses.toMap())
@@ -88,15 +92,37 @@ class TranslationDaoTest : BaseSqliteTest() {
     }
 
     @Test
-    fun testSaveThenReadWithParallelTranslationsAndMissingVerses() {
+    fun testSaveThenReadWithParallelTranslationsAndMissingParallelVerses() {
         saveKjv()
         saveCuv()
+        saveMsg()
 
         val actual = androidDatabase.translationDao.read(MockContents.kjvShortName,
-                listOf(MockContents.cuvShortName, MockContents.bbeShortName), 0, 0)
+                listOf(MockContents.cuvShortName, MockContents.bbeShortName, MockContents.msgShortName), 0, 0)
+        assertEquals(MockContents.kjvVerses.size, actual.size)
         for ((i, verse) in actual.withIndex()) {
             assertEquals(MockContents.kjvVerses[i].text, verse.text)
-            assertEquals(listOf(MockContents.cuvVerses[i].text, Verse.Text(MockContents.bbeShortName, "")), verse.parallel)
+            assertEquals(
+                    listOf(
+                            MockContents.cuvVerses[i].text,
+                            Verse.Text(MockContents.bbeShortName, ""),
+                            if (MockContents.msgVerses.size > i) MockContents.msgVerses[i].text else Verse.Text(MockContents.msgShortName, "")
+                    ), verse.parallel)
+        }
+    }
+
+    @Test
+    fun testSaveThenReadWithParallelTranslationsAndMissingPrimaryVerses() {
+        saveKjv()
+        saveCuv()
+        saveMsg()
+
+        val actual = androidDatabase.translationDao.read(MockContents.msgShortName,
+                listOf(MockContents.cuvShortName, MockContents.bbeShortName, MockContents.kjvShortName), 0, 0)
+        assertEquals(MockContents.kjvVerses.size, actual.size)
+        for ((i, verse) in actual.withIndex()) {
+            assertEquals(if (MockContents.msgVerses.size > i) MockContents.msgVerses[i].text else Verse.Text(MockContents.msgShortName, ""), verse.text)
+            assertEquals(listOf(MockContents.cuvVerses[i].text, Verse.Text(MockContents.bbeShortName, ""), MockContents.kjvVerses[i].text), verse.parallel)
         }
     }
 

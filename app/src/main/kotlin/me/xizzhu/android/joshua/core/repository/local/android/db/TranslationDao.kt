@@ -23,6 +23,7 @@ import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import java.lang.StringBuilder
+import kotlin.math.max
 
 class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
@@ -79,14 +80,16 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
             if (!hasTable(translationShortName)) return emptyList()
 
             val primaryTexts = readVerseTexts(translationShortName, bookIndex, chapterIndex)
+            var versesCount = primaryTexts.size
             val parallelTexts = ArrayList<ArrayList<Verse.Text>>(parallelTranslations.size).apply {
-                parallelTranslations.forEach {
-                    add(readVerseTexts(it, bookIndex, chapterIndex))
-                }
+                val countVerses: (List<Verse.Text>) -> Unit = { versesCount = max(versesCount, it.size) }
+                parallelTranslations.forEach { add(readVerseTexts(it, bookIndex, chapterIndex).also(countVerses)) }
             }
 
-            val verses = ArrayList<Verse>()
-            for ((verseIndex, primaryText) in primaryTexts.withIndex()) {
+            val verses = ArrayList<Verse>(versesCount)
+            for (verseIndex in 0 until versesCount) {
+                val primary = if (primaryTexts.size > verseIndex) primaryTexts[verseIndex] else Verse.Text(translationShortName, "")
+
                 val parallel = ArrayList<Verse.Text>(parallelTranslations.size)
                 for ((i, translation) in parallelTranslations.withIndex()) {
                     parallel.add(parallelTexts[i].let {
@@ -94,8 +97,9 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
                     })
                 }
 
-                verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex), primaryText, parallel))
+                verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex), primary, parallel))
             }
+
             return verses
         }
     }
