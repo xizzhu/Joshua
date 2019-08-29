@@ -98,8 +98,7 @@ class MetadataDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun save(key: String, value: String) {
-        val values = ContentValues(2)
-        with(values) {
+        val values = ContentValues(2).apply {
             put(COLUMN_KEY, key)
             put(COLUMN_VALUE, value)
         }

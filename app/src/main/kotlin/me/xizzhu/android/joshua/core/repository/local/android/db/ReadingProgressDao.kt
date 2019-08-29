@@ -45,8 +45,7 @@ class ReadingProgressDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun save(chapterReadingStatus: ReadingProgress.ChapterReadingStatus) {
-        val values = ContentValues(5)
-        with(values) {
+        val values = ContentValues(5).apply {
             put(COLUMN_BOOK_INDEX, chapterReadingStatus.bookIndex)
             put(COLUMN_CHAPTER_INDEX, chapterReadingStatus.chapterIndex)
             put(COLUMN_READ_COUNT, chapterReadingStatus.readCount)

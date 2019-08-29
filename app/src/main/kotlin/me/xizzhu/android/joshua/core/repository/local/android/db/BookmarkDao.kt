@@ -97,8 +97,7 @@ class BookmarkDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     fun save(bookmark: Bookmark) {
-        val values = ContentValues(4)
-        with(values) {
+        val values = ContentValues(4).apply {
             put(COLUMN_BOOK_INDEX, bookmark.verseIndex.bookIndex)
             put(COLUMN_CHAPTER_INDEX, bookmark.verseIndex.chapterIndex)
             put(COLUMN_VERSE_INDEX, bookmark.verseIndex.verseIndex)

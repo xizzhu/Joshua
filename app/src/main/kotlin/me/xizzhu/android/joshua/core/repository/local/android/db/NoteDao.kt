@@ -100,8 +100,7 @@ class NoteDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     fun save(note: Note) {
-        val values = ContentValues(5)
-        with(values) {
+        val values = ContentValues(5).apply {
             put(COLUMN_BOOK_INDEX, note.verseIndex.bookIndex)
             put(COLUMN_CHAPTER_INDEX, note.verseIndex.chapterIndex)
             put(COLUMN_VERSE_INDEX, note.verseIndex.verseIndex)
