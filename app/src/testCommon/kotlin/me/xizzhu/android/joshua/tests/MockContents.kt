@@ -91,8 +91,7 @@ object MockContents {
             Verse(VerseIndex(0, 0, 5), Verse.Text(msgShortName, "God spoke: \"Sky! In the middle of the waters;\nseparate water from water!\"\nGod made sky.\nHe separated the water under sky\nfrom the water above sky.\nAnd there it was:\nhe named sky the Heavens;\nIt was evening, it was morning—\nDay Two."), emptyList()),
             Verse(VerseIndex(0, 0, 6), Verse.Text(msgShortName, ""), emptyList()),
             Verse(VerseIndex(0, 0, 7), Verse.Text(msgShortName, ""), emptyList()),
-            Verse(VerseIndex(0, 0, 8), Verse.Text(msgShortName, "God spoke: \"Separate!\nWater-beneath-Heaven, gather into one place;\nLand, appear!\"\nAnd there it was.\nGod named the land Earth.\nHe named the pooled water Ocean.\nGod saw that it was good."), emptyList()),
-            Verse(VerseIndex(0, 0, 9), Verse.Text(msgShortName, ""), emptyList())
+            Verse(VerseIndex(0, 0, 8), Verse.Text(msgShortName, "God spoke: \"Separate!\nWater-beneath-Heaven, gather into one place;\nLand, appear!\"\nAnd there it was.\nGod named the land Earth.\nHe named the pooled water Ocean.\nGod saw that it was good."), emptyList())
     )
 
     val kjvVersesWithCuvParallel = listOf(
