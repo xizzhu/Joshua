@@ -172,8 +172,10 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun search(translationShortName: String, query: String): List<Verse> {
-        val keywords = query.trim().replace("\\s+", " ").split(" ")
-                .apply { if (isEmpty()) return emptyList() }
+        val keywords = query.trim().let {
+            if (it.isEmpty()) return emptyList()
+            return@let it.replace("\\s+", " ").split(" ")
+        }
 
         val singleSelection = "$COLUMN_TEXT LIKE ?"
         val selection = StringBuilder()
