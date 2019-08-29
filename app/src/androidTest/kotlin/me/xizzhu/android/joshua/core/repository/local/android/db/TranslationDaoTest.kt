@@ -176,6 +176,8 @@ class TranslationDaoTest : BaseSqliteTest() {
         assertEquals(MockContents.kjvVerses,
                 androidDatabase.translationDao.search(MockContents.kjvShortName, "GOD"))
         assertTrue(androidDatabase.translationDao.search(MockContents.kjvShortName, "not_exist").isEmpty())
+        assertTrue(androidDatabase.translationDao.search(MockContents.kjvShortName, "").isEmpty())
+        assertTrue(androidDatabase.translationDao.search(MockContents.kjvShortName, "    ").isEmpty())
     }
 
     @Test

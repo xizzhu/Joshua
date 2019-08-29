@@ -40,12 +40,6 @@ class BookNamesDaoTest : BaseSqliteTest() {
         androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
         assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(translationShortName))
         assertEquals(MockContents.kjvBookShortNames, androidDatabase.bookNamesDao.readShortName(translationShortName))
-        for ((index, bookName) in MockContents.kjvBookNames.withIndex()) {
-            assertEquals(bookName, androidDatabase.bookNamesDao.read(translationShortName, index))
-        }
-        for ((index, bookShortName) in MockContents.kjvBookShortNames.withIndex()) {
-            assertEquals(bookShortName, androidDatabase.bookNamesDao.readShortName(translationShortName, index))
-        }
     }
 
     @Test
@@ -55,32 +49,6 @@ class BookNamesDaoTest : BaseSqliteTest() {
         androidDatabase.bookNamesDao.save(translationShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
         assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(translationShortName))
         assertEquals(MockContents.kjvBookShortNames, androidDatabase.bookNamesDao.readShortName(translationShortName))
-        for ((index, bookName) in MockContents.kjvBookNames.withIndex()) {
-            assertEquals(bookName, androidDatabase.bookNamesDao.read(translationShortName, index))
-        }
-        for ((index, bookShortName) in MockContents.kjvBookShortNames.withIndex()) {
-            assertEquals(bookShortName, androidDatabase.bookNamesDao.readShortName(translationShortName, index))
-        }
-    }
-
-    @Test
-    fun testSaveThenReadParallel() {
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
-
-        assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookShortNames[1]), Pair(MockContents.cuvShortName, MockContents.cuvBookShortNames[1])),
-                androidDatabase.bookNamesDao.readShortName(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
-    }
-
-    @Test
-    fun testSaveOverrideThenReadParallel() {
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, listOf("random_1", "whatever_2"), listOf("ok_3", "fine_4"))
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, listOf("random_3", "whatever_4"), listOf("ok_1", "fine_2"))
-        androidDatabase.bookNamesDao.save(MockContents.kjvShortName, MockContents.kjvBookNames, MockContents.kjvBookShortNames)
-        androidDatabase.bookNamesDao.save(MockContents.cuvShortName, MockContents.cuvBookNames, MockContents.cuvBookShortNames)
-
-        assertEquals(mapOf(Pair(MockContents.kjvShortName, MockContents.kjvBookShortNames[1]), Pair(MockContents.cuvShortName, MockContents.cuvBookShortNames[1])),
-                androidDatabase.bookNamesDao.readShortName(listOf(MockContents.kjvShortName, MockContents.cuvShortName), 1))
     }
 
     @Test

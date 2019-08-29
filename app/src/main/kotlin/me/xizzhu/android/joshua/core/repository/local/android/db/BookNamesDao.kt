@@ -73,68 +73,6 @@ class BookNamesDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun readShortName(translations: List<String>, bookIndex: Int): Map<String, String> {
-        if (translations.isEmpty() || bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT) {
-            return emptyMap()
-        }
-
-        val selection = StringBuilder()
-        val selectionArgs = Array(translations.size + 1) { "" }
-        selection.append('(')
-        for ((i, translation) in translations.withIndex()) {
-            if (i > 0) {
-                selection.append(" OR ")
-            }
-            selection.append("$COLUMN_TRANSLATION_SHORT_NAME = ?")
-            selectionArgs[i] = translation
-        }
-
-        selection.append(") AND ($COLUMN_BOOK_INDEX = ?)")
-        selectionArgs[translations.size] = bookIndex.toString()
-
-        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_TRANSLATION_SHORT_NAME, COLUMN_BOOK_SHORT_NAME),
-                selection.toString(), selectionArgs, null, null, null).use {
-            val bookNames = HashMap<String, String>(it.count)
-            if (it.count > 0) {
-                val translationShortName = it.getColumnIndex(COLUMN_TRANSLATION_SHORT_NAME)
-                val bookName = it.getColumnIndex(COLUMN_BOOK_SHORT_NAME)
-                while (it.moveToNext()) {
-                    bookNames[it.getString(translationShortName)] = it.getString(bookName)
-                }
-            }
-            return bookNames
-        }
-    }
-
-    @WorkerThread
-    fun read(translationShortName: String, bookIndex: Int): String {
-        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
-                "$COLUMN_TRANSLATION_SHORT_NAME = ? AND $COLUMN_BOOK_INDEX = ?",
-                arrayOf(translationShortName, bookIndex.toString()),
-                null, null, null).use {
-            return if (it.moveToNext()) {
-                it.getString(0)
-            } else {
-                ""
-            }
-        }
-    }
-
-    @WorkerThread
-    fun readShortName(translationShortName: String, bookIndex: Int): String {
-        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_SHORT_NAME),
-                "$COLUMN_TRANSLATION_SHORT_NAME = ? AND $COLUMN_BOOK_INDEX = ?",
-                arrayOf(translationShortName, bookIndex.toString()),
-                null, null, null).use {
-            return if (it.moveToNext()) {
-                it.getString(0)
-            } else {
-                ""
-            }
-        }
-    }
-
-    @WorkerThread
     fun save(translationShortName: String, bookNames: List<String>, bookShortNames: List<String>) {
         val values = ContentValues(4)
         with(values) {
