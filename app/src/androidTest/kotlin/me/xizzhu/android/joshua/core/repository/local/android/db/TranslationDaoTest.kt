@@ -39,9 +39,9 @@ class TranslationDaoTest : BaseSqliteTest() {
     }
 
     @Test
-    fun testCreateSameTable() {
-        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
-        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
+    fun testSaveSameTranslation() {
+        saveKjv()
+        saveKjv()
     }
 
     @Test
@@ -64,13 +64,11 @@ class TranslationDaoTest : BaseSqliteTest() {
     }
 
     private fun saveTranslation(translationShortName: String, verses: List<Verse>) {
-        androidDatabase.translationDao.createTable(translationShortName)
         androidDatabase.translationDao.save(translationShortName, verses.toMap())
     }
 
     @Test
     fun testSaveOverrideThenReadVerses() {
-        androidDatabase.translationDao.createTable(MockContents.kjvShortName)
         androidDatabase.translationDao.save(MockContents.kjvShortName,
                 mapOf(Pair(Pair(0, 0), listOf("verse_1", "verse_2"))))
         androidDatabase.translationDao.save(MockContents.kjvShortName, MockContents.kjvVerses.toMap())

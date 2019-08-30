@@ -59,7 +59,6 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                 } else {
                     androidDatabase.translationInfoDao.save(translationInfo.copy(downloaded = true))
                 }
-                androidDatabase.translationDao.createTable(translationInfo.shortName)
                 androidDatabase.translationDao.save(translationInfo.shortName, verses)
             }
         }
