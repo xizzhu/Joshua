@@ -5,6 +5,7 @@ CHANGELOG
 - Fixed issue with parallel verses loading (#104)
 - Updated dependencies:
   - Grardle to 5.6.1
+  - Firebase Core and Analytics to 17.2.0
 
 #### v0.10.0 (2019-08-26)
 - Improved R8 configurations:
