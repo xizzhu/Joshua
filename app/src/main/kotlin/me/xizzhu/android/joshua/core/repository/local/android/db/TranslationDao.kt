@@ -58,9 +58,13 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    private fun SQLiteDatabase.hasTable(name: String): Boolean {
+    private fun SQLiteDatabase.hasTable(name: String, logIfNoTable: Boolean = true): Boolean {
         rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null).use {
-            return it.count > 0
+            val hasTable = it.count > 0
+            if (logIfNoTable && !hasTable) {
+                Log.e(TAG, "", IllegalStateException("Missing translation $name"))
+            }
+            return hasTable
         }
     }
 
@@ -209,8 +213,8 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     @WorkerThread
     fun save(translationShortName: String, verses: Map<Pair<Int, Int>, List<String>>) {
         db.withTransaction {
-            if (hasTable(translationShortName)) {
-                Log.e(TAG, "", IllegalStateException("Translation ($translationShortName) already installed"))
+            if (hasTable(translationShortName, false)) {
+                Log.e(TAG, "", IllegalStateException("Translation $translationShortName already installed"))
                 remove(translationShortName)
             }
             execSQL("CREATE TABLE IF NOT EXISTS $translationShortName (" +
