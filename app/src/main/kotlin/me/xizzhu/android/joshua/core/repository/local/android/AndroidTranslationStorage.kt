@@ -73,7 +73,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                 } else {
                     androidDatabase.translationInfoDao.save(translationInfo)
                 }
-                androidDatabase.translationDao.removeTable(translationInfo.shortName)
+                androidDatabase.translationDao.remove(translationInfo.shortName)
             }
         }
     }

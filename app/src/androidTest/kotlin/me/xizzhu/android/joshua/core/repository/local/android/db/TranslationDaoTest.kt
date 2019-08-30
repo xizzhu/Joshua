@@ -191,7 +191,7 @@ class TranslationDaoTest : BaseSqliteTest() {
     @Test
     fun testRemoveNonExistTranslation() {
         assertFalse(androidDatabase.readableDatabase.hasTable("non_exist"))
-        androidDatabase.translationDao.removeTable("non_exist")
+        androidDatabase.translationDao.remove("non_exist")
         assertFalse(androidDatabase.readableDatabase.hasTable("non_exist"))
     }
 
@@ -200,7 +200,7 @@ class TranslationDaoTest : BaseSqliteTest() {
         saveKjv()
         assertTrue(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
 
-        androidDatabase.translationDao.removeTable(MockContents.kjvShortName)
+        androidDatabase.translationDao.remove(MockContents.kjvShortName)
         assertFalse(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
     }
 }

@@ -43,7 +43,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         db.withTransaction {
             if (!hasTable(translationShortName)) return emptyList()
 
-            db.query(translationShortName, arrayOf(COLUMN_TEXT),
+            query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?", arrayOf(bookIndex.toString(), chapterIndex.toString()),
                     null, null, "$COLUMN_VERSE_INDEX ASC").use {
                 val verses = ArrayList<Verse>(it.count)
@@ -57,6 +57,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    @WorkerThread
     private fun SQLiteDatabase.hasTable(name: String): Boolean {
         rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null).use {
             return it.count > 0
@@ -94,6 +95,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    @WorkerThread
     private fun SQLiteDatabase.readVerseTexts(translation: String,
                                               bookIndex: Int, chapterIndex: Int): ArrayList<Verse.Text> {
         if (!hasTable(translation)) return ArrayList()
@@ -129,6 +131,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    @WorkerThread
     private fun SQLiteDatabase.readVerseText(translation: String, verseIndex: VerseIndex): Verse.Text {
         if (!hasTable(translation)) return Verse.Text.INVALID
 
@@ -147,7 +150,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         db.withTransaction {
             if (!hasTable(translationShortName)) return Verse.INVALID
 
-            db.query(translationShortName, arrayOf(COLUMN_TEXT),
+            query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
                     arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
                     null, null, null).use {
@@ -182,7 +185,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         db.withTransaction {
             if (!hasTable(translationShortName)) return emptyList()
 
-            db.query(translationShortName,
+            query(translationShortName,
                     arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX, COLUMN_TEXT),
                     selection.toString(), selectionArgs, null, null,
                     "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC").use {
@@ -208,7 +211,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         db.withTransaction {
             if (hasTable(translationShortName)) {
                 Log.e(TAG, "", IllegalStateException("Translation ($translationShortName) already installed"))
-                removeTable(translationShortName)
+                remove(translationShortName)
             }
             execSQL("CREATE TABLE IF NOT EXISTS $translationShortName (" +
                     "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
@@ -231,7 +234,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun removeTable(translationShortName: String) {
+    fun remove(translationShortName: String) {
         db.execSQL("DROP TABLE IF EXISTS $translationShortName")
     }
 }
