@@ -22,6 +22,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.logger.Log
 import java.lang.StringBuilder
 import kotlin.math.max
 
@@ -31,29 +32,18 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_CHAPTER_INDEX = "chapterIndex"
         private const val COLUMN_VERSE_INDEX = "verseIndex"
         private const val COLUMN_TEXT = "text"
+
+        private val TAG: String = TranslationDao::class.java.simpleName
     }
 
     private val db by lazy { sqliteHelper.writableDatabase }
-
-    @WorkerThread
-    fun createTable(translationShortName: String) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS $translationShortName (" +
-                "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
-                "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL, " +
-                "PRIMARY KEY($COLUMN_BOOK_INDEX, $COLUMN_CHAPTER_INDEX, $COLUMN_VERSE_INDEX));")
-    }
-
-    @WorkerThread
-    fun removeTable(translationShortName: String) {
-        db.execSQL("DROP TABLE IF EXISTS $translationShortName")
-    }
 
     @WorkerThread
     fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
         db.withTransaction {
             if (!hasTable(translationShortName)) return emptyList()
 
-            db.query(translationShortName, arrayOf(COLUMN_TEXT),
+            query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?", arrayOf(bookIndex.toString(), chapterIndex.toString()),
                     null, null, "$COLUMN_VERSE_INDEX ASC").use {
                 val verses = ArrayList<Verse>(it.count)
@@ -67,9 +57,14 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
-    private fun SQLiteDatabase.hasTable(name: String): Boolean {
+    @WorkerThread
+    private fun SQLiteDatabase.hasTable(name: String, logIfNoTable: Boolean = true): Boolean {
         rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '$name'", null).use {
-            return it.count > 0
+            val hasTable = it.count > 0
+            if (logIfNoTable && !hasTable) {
+                Log.e(TAG, "", IllegalStateException("Missing translation $name"))
+            }
+            return hasTable
         }
     }
 
@@ -104,6 +99,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    @WorkerThread
     private fun SQLiteDatabase.readVerseTexts(translation: String,
                                               bookIndex: Int, chapterIndex: Int): ArrayList<Verse.Text> {
         if (!hasTable(translation)) return ArrayList()
@@ -139,6 +135,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         }
     }
 
+    @WorkerThread
     private fun SQLiteDatabase.readVerseText(translation: String, verseIndex: VerseIndex): Verse.Text {
         if (!hasTable(translation)) return Verse.Text.INVALID
 
@@ -157,7 +154,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         db.withTransaction {
             if (!hasTable(translationShortName)) return Verse.INVALID
 
-            db.query(translationShortName, arrayOf(COLUMN_TEXT),
+            query(translationShortName, arrayOf(COLUMN_TEXT),
                     "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
                     arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
                     null, null, null).use {
@@ -192,7 +189,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         db.withTransaction {
             if (!hasTable(translationShortName)) return emptyList()
 
-            db.query(translationShortName,
+            query(translationShortName,
                     arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX, COLUMN_TEXT),
                     selection.toString(), selectionArgs, null, null,
                     "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC").use {
@@ -215,17 +212,33 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun save(translationShortName: String, verses: Map<Pair<Int, Int>, List<String>>) {
-        val values = ContentValues(4)
-        for (entry in verses) {
-            with(values) {
-                put(COLUMN_BOOK_INDEX, entry.key.first)
-                put(COLUMN_CHAPTER_INDEX, entry.key.second)
-                for ((verseIndex, verse) in entry.value.withIndex()) {
-                    put(COLUMN_VERSE_INDEX, verseIndex)
-                    put(COLUMN_TEXT, verse)
-                    db.insertWithOnConflict(translationShortName, null, this, SQLiteDatabase.CONFLICT_REPLACE)
+        db.withTransaction {
+            if (hasTable(translationShortName, false)) {
+                Log.e(TAG, "", IllegalStateException("Translation $translationShortName already installed"))
+                remove(translationShortName)
+            }
+            execSQL("CREATE TABLE IF NOT EXISTS $translationShortName (" +
+                    "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
+                    "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL, " +
+                    "PRIMARY KEY($COLUMN_BOOK_INDEX, $COLUMN_CHAPTER_INDEX, $COLUMN_VERSE_INDEX));")
+
+            val values = ContentValues(4)
+            for (entry in verses) {
+                with(values) {
+                    put(COLUMN_BOOK_INDEX, entry.key.first)
+                    put(COLUMN_CHAPTER_INDEX, entry.key.second)
+                    for ((verseIndex, verse) in entry.value.withIndex()) {
+                        put(COLUMN_VERSE_INDEX, verseIndex)
+                        put(COLUMN_TEXT, verse)
+                        insertWithOnConflict(translationShortName, null, this, SQLiteDatabase.CONFLICT_REPLACE)
+                    }
                 }
             }
         }
+    }
+
+    @WorkerThread
+    fun remove(translationShortName: String) {
+        db.execSQL("DROP TABLE IF EXISTS $translationShortName")
     }
 }
