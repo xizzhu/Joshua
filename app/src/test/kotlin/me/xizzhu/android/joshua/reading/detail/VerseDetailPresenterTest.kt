@@ -75,7 +75,8 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     fun testShow() {
         runBlocking {
             val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerse(MockContents.kjvShortName, emptyList(), verseIndex)).thenReturn(MockContents.kjvVerses[0])
+            `when`(readingInteractor.readVerses(MockContents.kjvShortName, emptyList(), verseIndex.bookIndex, verseIndex.chapterIndex))
+                    .thenReturn(MockContents.kjvVerses)
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
             `when`(readingInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, -1L))
             `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
@@ -87,8 +88,9 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
             verify(verseDetailView, times(1)).onVerseDetailLoaded(
                     VerseDetail(verseIndex, listOf(
-                            VerseTextItem(verseIndex, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)
+                            VerseTextItem(verseIndex, 0, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)
                     ), false, Highlight.COLOR_NONE, ""))
+
             verify(verseDetailView, never()).hide()
         }
     }
@@ -96,10 +98,12 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadVerseDetail() {
         runBlocking {
+            currentTranslationShortName.send(MockContents.kjvShortName)
             downloadedTranslations.send(listOf(MockContents.bbeTranslationInfo, MockContents.kjvTranslationInfo, MockContents.cuvTranslationInfo))
 
             val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerse(MockContents.kjvShortName, listOf(MockContents.bbeShortName, MockContents.cuvShortName), verseIndex)).thenReturn(MockContents.kjvVersesWithBbeCuvParallel[0])
+            `when`(readingInteractor.readVerses(MockContents.kjvShortName, listOf(MockContents.bbeShortName, MockContents.cuvShortName), verseIndex.bookIndex, verseIndex.chapterIndex))
+                    .thenReturn(MockContents.kjvVersesWithBbeCuvParallel)
             `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
             `when`(readingInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, -1L))
             `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
@@ -113,9 +117,40 @@ class VerseDetailPresenterTest : BaseUnitTest() {
             verify(verseDetailView, times(1)).onVerseDetailLoaded(
                     VerseDetail(verseIndex,
                             listOf(
-                                    VerseTextItem(verseIndex, MockContents.kjvVersesWithBbeCuvParallel[0].text, MockContents.kjvBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked),
-                                    VerseTextItem(verseIndex, MockContents.kjvVersesWithBbeCuvParallel[0].parallel[0], MockContents.bbeBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked),
-                                    VerseTextItem(verseIndex, MockContents.kjvVersesWithBbeCuvParallel[0].parallel[1], MockContents.cuvBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)
+                                    VerseTextItem(verseIndex, 0, MockContents.kjvVersesWithBbeCuvParallel[0].text, MockContents.kjvBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked),
+                                    VerseTextItem(verseIndex, 0, MockContents.kjvVersesWithBbeCuvParallel[0].parallel[0], MockContents.bbeBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked),
+                                    VerseTextItem(verseIndex, 0, MockContents.kjvVersesWithBbeCuvParallel[0].parallel[1], MockContents.cuvBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)
+                            ), false, Highlight.COLOR_NONE, "")
+            )
+            verify(verseDetailView, never()).onVerseDetailLoadFailed(any())
+        }
+    }
+
+    @Test
+    fun testLoadVerseDetailWithFollowingEmptyVerses() {
+        runBlocking {
+            currentTranslationShortName.send(MockContents.msgShortName)
+            downloadedTranslations.send(listOf(MockContents.msgTranslationInfo, MockContents.kjvTranslationInfo))
+
+            val verseIndex = VerseIndex(0, 0, 1)
+            `when`(readingInteractor.readVerses(MockContents.msgShortName, listOf(MockContents.kjvShortName), verseIndex.bookIndex, verseIndex.chapterIndex))
+                    .thenReturn(MockContents.msgVersesWithKjvParallel)
+            `when`(readingInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, -1L))
+            `when`(readingInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, -1L))
+            `when`(readingInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", -1L))
+            `when`(readingInteractor.readBookNames(MockContents.msgShortName)).thenReturn(MockContents.msgBookNames)
+            `when`(readingInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+
+            verseDetailPresenter.loadVerseDetail(verseIndex)
+
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(VerseDetail.INVALID)
+            verify(verseDetailView, times(1)).onVerseDetailLoaded(
+                    VerseDetail(verseIndex,
+                            listOf(
+                                    VerseTextItem(verseIndex.copy(verseIndex = 0), 1, MockContents.msgVersesWithKjvParallel[0].text, MockContents.msgBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked),
+                                    VerseTextItem(verseIndex.copy(verseIndex = 0), 1,
+                                            Verse.Text(MockContents.msgVersesWithKjvParallel[0].parallel[0].translationShortName, MockContents.msgVersesWithKjvParallel[0].parallel[0].text + " " + MockContents.msgVersesWithKjvParallel[1].parallel[0].text),
+                                            MockContents.kjvBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)
                             ), false, Highlight.COLOR_NONE, "")
             )
             verify(verseDetailView, never()).onVerseDetailLoadFailed(any())
@@ -126,7 +161,8 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     fun testLoadVerseDetailWithException() {
         runBlocking {
             val verseIndex = VerseIndex(0, 0, 0)
-            `when`(readingInteractor.readVerse(MockContents.kjvShortName, emptyList(), verseIndex)).thenThrow(RuntimeException("Random exception"))
+            `when`(readingInteractor.readVerses(MockContents.kjvShortName, emptyList(), verseIndex.bookIndex, verseIndex.chapterIndex))
+                    .thenThrow(RuntimeException("Random exception"))
             `when`(readingInteractor.readBookmark(verseIndex)).thenThrow(RuntimeException("Random exception"))
 
             verseDetailPresenter.loadVerseDetail(verseIndex)

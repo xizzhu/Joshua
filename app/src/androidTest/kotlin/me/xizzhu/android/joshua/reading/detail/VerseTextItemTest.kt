@@ -28,20 +28,27 @@ import kotlin.test.assertTrue
 class VerseTextItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_verse_text, VerseTextItem(VerseIndex.INVALID, Verse.Text.INVALID, "", {}, {}).viewType)
+        assertEquals(R.layout.item_verse_text, VerseTextItem(VerseIndex.INVALID, 0, Verse.Text.INVALID, "", {}, {}).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
         val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = VerseTextItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0], {}, {}).textForDisplay.toString()
+        val actual = VerseTextItem(MockContents.kjvVerses[0].verseIndex, 0, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0], {}, {}).textForDisplay.toString()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testTextForDisplayWithFollowingEmptyVerse() {
+        val expected = "KJV, Genesis 1:1-2\nIn the beginning God created the heaven and the earth."
+        val actual = VerseTextItem(MockContents.kjvVerses[0].verseIndex, 1, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0], {}, {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 
     @Test
     fun testTextForDisplayWithInvalidVerse() {
-        assertTrue(VerseTextItem(VerseIndex.INVALID, Verse.Text.INVALID, "", {}, {}).textForDisplay.isEmpty())
-        assertTrue(VerseTextItem(VerseIndex.INVALID, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0], {}, {}).textForDisplay.isEmpty())
-        assertTrue(VerseTextItem(MockContents.kjvVerses[0].verseIndex, Verse.Text.INVALID, "", {}, {}).textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(VerseIndex.INVALID, 0, Verse.Text.INVALID, "", {}, {}).textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(VerseIndex.INVALID, 0, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0], {}, {}).textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(MockContents.kjvVerses[0].verseIndex, 0, Verse.Text.INVALID, "", {}, {}).textForDisplay.isEmpty())
     }
 }
