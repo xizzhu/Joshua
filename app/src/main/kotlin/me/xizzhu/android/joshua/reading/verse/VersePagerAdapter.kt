@@ -171,9 +171,11 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         if (currentVerseIndex.verseIndex > 0
                 && currentVerseIndex.bookIndex == bookIndex
                 && currentVerseIndex.chapterIndex == chapterIndex) {
-            verseList.post {
-                (verseList.layoutManager as LinearLayoutManager)
-                        .scrollToPositionWithOffset(currentVerseIndex.verseIndex, 0)
+            with(verseList) {
+                post {
+                    (layoutManager as LinearLayoutManager)
+                            .scrollToPositionWithOffset(currentVerseIndex.toItemPosition(), 0)
+                }
             }
         } else {
             verseList.scrollToPosition(0)

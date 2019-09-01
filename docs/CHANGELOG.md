@@ -3,6 +3,8 @@ CHANGELOG
 
 #### Next Release
 - Fixed issue with parallel verses loading (#104)
+- Fixed scrolling position in case of following empty verses
+- Fixed issue when loading verse detail with following empty verses (#108)
 - Updated dependencies:
   - Grardle to 5.6.1
   - Firebase Core and Analytics to 17.2.0

@@ -53,7 +53,7 @@ class VerseListView : BaseRecyclerView {
     }
 
     // now we skip empty verses, so need to find the correct position
-    private fun VerseIndex.toItemPosition(): Int {
+    fun VerseIndex.toItemPosition(): Int {
         verses?.let {
             it.forEachIndexed { index, item ->
                 when (item) {

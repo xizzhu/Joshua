@@ -158,10 +158,6 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingRepository.readVerse(translationShortName, verseIndex)
 
-    suspend fun readVerse(translationShortName: String, parallelTranslations: List<String>,
-                          verseIndex: VerseIndex): Verse =
-            bibleReadingRepository.readVerse(translationShortName, parallelTranslations, verseIndex)
-
     suspend fun search(translationShortName: String, query: String): List<Verse> =
             bibleReadingRepository.search(translationShortName, query)
 }

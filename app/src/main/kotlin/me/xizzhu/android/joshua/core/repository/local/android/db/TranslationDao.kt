@@ -117,37 +117,6 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(translationShortName: String, parallelTranslations: List<String>, verseIndex: VerseIndex): Verse {
-        db.withTransaction {
-            if (!hasTable(translationShortName)) return Verse.INVALID
-
-            val primaryText = readVerseText(translationShortName, verseIndex).let { text ->
-                return@let if (text.isValid()) text else Verse.Text(translationShortName, "")
-            }
-            val parallelTexts = mutableListOf<Verse.Text>().apply {
-                parallelTranslations.forEach { translation ->
-                    readVerseText(translation, verseIndex).let { text ->
-                        add(if (text.isValid()) text else Verse.Text(translation, ""))
-                    }
-                }
-            }
-            return Verse(verseIndex, primaryText, parallelTexts)
-        }
-    }
-
-    @WorkerThread
-    private fun SQLiteDatabase.readVerseText(translation: String, verseIndex: VerseIndex): Verse.Text {
-        if (!hasTable(translation)) return Verse.Text.INVALID
-
-        query(translation, arrayOf(COLUMN_TEXT),
-                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
-                arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
-                null, null, null).use {
-            return if (it.moveToNext()) Verse.Text(translation, it.getString(0)) else Verse.Text.INVALID
-        }
-    }
-
-    @WorkerThread
     fun read(translationShortName: String, verseIndex: VerseIndex): Verse {
         if (!verseIndex.isValid()) return Verse.INVALID
 

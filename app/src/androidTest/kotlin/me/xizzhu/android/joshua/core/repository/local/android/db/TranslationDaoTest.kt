@@ -34,7 +34,6 @@ class TranslationDaoTest : BaseSqliteTest() {
     fun testReadNonExistTranslation() {
         assertTrue(androidDatabase.translationDao.read("not_exist", 0, 0).isEmpty())
         assertTrue(androidDatabase.translationDao.read("not_exist", listOf(), 0, 0).isEmpty())
-        assertFalse(androidDatabase.translationDao.read("not_exist", listOf(), VerseIndex(0, 0, 0)).isValid())
         assertFalse(androidDatabase.translationDao.read("not_exist", VerseIndex(0, 0, 0)).isValid())
     }
 
@@ -129,33 +128,10 @@ class TranslationDaoTest : BaseSqliteTest() {
         saveKjv()
         saveCuv()
 
-        assertEquals(MockContents.kjvVersesWithCuvParallel[0], androidDatabase.translationDao.read(MockContents.kjvShortName,
-                listOf(MockContents.cuvShortName), VerseIndex(0, 0, 0)))
         assertEquals(MockContents.kjvVerses[0], androidDatabase.translationDao.read(
                 MockContents.kjvShortName, VerseIndex(0, 0, 0)))
         assertFalse(androidDatabase.translationDao.read(MockContents.kjvShortName, VerseIndex(1, 1, 1)).isValid())
         assertFalse(androidDatabase.translationDao.read(MockContents.kjvShortName, VerseIndex(-1, -1, -1)).isValid())
-    }
-
-    @Test
-    fun testSaveThenReadByVerseIndexWithMissingVerse() {
-        saveKjv()
-        saveCuv()
-
-        val actual = androidDatabase.translationDao.read(MockContents.kjvShortName,
-                listOf(MockContents.cuvShortName), VerseIndex(1, 1, 1))
-        assertEquals(Verse.Text(MockContents.kjvShortName, ""), actual.text)
-        assertEquals(listOf(Verse.Text(MockContents.cuvShortName, "")), actual.parallel)
-    }
-
-    @Test
-    fun testSaveThenReadByVerseIndexWithMissingParallel() {
-        saveKjv()
-        saveCuv()
-
-        assertEquals(MockContents.kjvVersesWithCuvParallelMissingBbe[0],
-                androidDatabase.translationDao.read(MockContents.kjvShortName, listOf(MockContents.bbeShortName, MockContents.cuvShortName),
-                        VerseIndex(0, 0, 0)))
     }
 
     @Test

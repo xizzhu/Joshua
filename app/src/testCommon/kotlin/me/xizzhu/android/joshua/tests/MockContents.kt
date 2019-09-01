@@ -98,10 +98,6 @@ object MockContents {
             Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "In the beginning God created the heaven and the earth."), listOf(Verse.Text(cuvShortName, "起初神创造天地。"))),
             Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), listOf(Verse.Text(cuvShortName, "地是空虚混沌。渊面黑暗。神的灵运行在水面上。")))
     )
-    val kjvVersesWithCuvParallelMissingBbe = listOf(
-            Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "In the beginning God created the heaven and the earth."), listOf(Verse.Text(bbeShortName, ""), Verse.Text(cuvShortName, "起初神创造天地。"))),
-            Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), listOf(Verse.Text(bbeShortName, ""), Verse.Text(cuvShortName, "地是空虚混沌。渊面黑暗。神的灵运行在水面上。")))
-    )
     val kjvVersesWithBbeCuvParallel = listOf(
             Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "In the beginning God created the heaven and the earth."), listOf(Verse.Text(bbeShortName, "At the first God made the heaven and the earth."), Verse.Text(cuvShortName, "起初神创造天地。"))),
             Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), listOf(Verse.Text(bbeShortName, "And the earth was waste and without form; and it was dark on the face of the deep: and the Spirit of God was moving on the face of the waters."), Verse.Text(cuvShortName, "地是空虚混沌。渊面黑暗。神的灵运行在水面上。")))
