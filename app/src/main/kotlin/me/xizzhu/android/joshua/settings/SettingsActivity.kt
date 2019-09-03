@@ -51,6 +51,9 @@ class SettingsActivity : BaseActivity(), SettingsView {
     @Inject
     lateinit var presenter: SettingsPresenter
 
+    private val account: SettingSectionHeader by bindView(R.id.account)
+    private val backup: SettingButton by bindView(R.id.backup)
+    private val restore: SettingButton by bindView(R.id.restore)
     private val display: SettingSectionHeader by bindView(R.id.display)
     private val fontSize: SettingButton by bindView(R.id.font_size)
     private val keepScreenOn: SwitchCompat by bindView(R.id.keep_screen_on)
@@ -69,6 +72,14 @@ class SettingsActivity : BaseActivity(), SettingsView {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_settings)
+
+        backup.setOnClickListener {
+            // TODO
+        }
+
+        restore.setOnClickListener {
+            // TODO
+        }
 
         fontSize.setOnClickListener {
             DialogHelper.showDialog(this@SettingsActivity, R.string.settings_title_font_size,
@@ -166,6 +177,8 @@ class SettingsActivity : BaseActivity(), SettingsView {
                             @ColorInt secondaryTextColor: Int) {
         window.decorView.setBackgroundColor(backgroundColor)
 
+        backup.setTextColor(primaryTextColor, secondaryTextColor)
+        restore.setTextColor(primaryTextColor, secondaryTextColor)
         fontSize.setTextColor(primaryTextColor, secondaryTextColor)
         keepScreenOn.setTextColor(primaryTextColor)
         nightModeOn.setTextColor(primaryTextColor)
@@ -187,6 +200,9 @@ class SettingsActivity : BaseActivity(), SettingsView {
     }
 
     private fun updateTextSize(bodyTextSize: Float, captionTextSize: Float) {
+        account.setTextSize(bodyTextSize.roundToInt())
+        backup.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+        restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         display.setTextSize(bodyTextSize.roundToInt())
         fontSize.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
