@@ -38,6 +38,12 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 interface SettingsView : MVPView {
+    fun onBackupStarted()
+
+    fun onBackupFinished()
+
+    fun onBackupFailed()
+
     fun onVersionLoaded(version: String)
 
     fun onSettingsUpdated(settings: Settings)
@@ -68,13 +74,15 @@ class SettingsActivity : BaseActivity(), SettingsView {
     private var shouldAnimateColor = false
     private var originalSettings: Settings? = null
 
+    private var dialog: ProgressDialog? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_settings)
 
         backup.setOnClickListener {
-            // TODO
+            presenter.backup()
         }
 
         restore.setOnClickListener {
@@ -122,6 +130,21 @@ class SettingsActivity : BaseActivity(), SettingsView {
     override fun onStop() {
         presenter.detachView()
         super.onStop()
+    }
+
+    override fun onBackupStarted() {
+        dialog?.dismiss()
+        dialog = ProgressDialog.showIndeterminateProgressDialog(this, R.string.dialog_wait)
+    }
+
+    override fun onBackupFinished() {
+        dialog?.dismiss()
+        dialog = null
+    }
+
+    override fun onBackupFailed() {
+        DialogHelper.showDialog(this, true, R.string.dialog_backup_error,
+                DialogInterface.OnClickListener { _, _ -> presenter.backup() })
     }
 
     override fun onVersionLoaded(version: String) {

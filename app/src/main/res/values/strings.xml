@@ -33,6 +33,7 @@
     <string name="dialog_downloading_translation">Downloading…</string>
     <string name="dialog_installing_translation">Installing…</string>
     <string name="dialog_deleting_translation">Deleting…</string>
+    <string name="dialog_wait">Please wait…</string>
 
     <string name="dialog_load_translation_list_error">Failed to load translation list, retry?</string>
     <string name="dialog_download_error">Failed to download, retry?</string>
@@ -53,12 +54,43 @@
     <string name="dialog_navigate_to_settings_error">Failed to open settings, retry?</string>
     <string name="dialog_update_settings_error">Failed to update settings, retry?</string>
     <string name="dialog_load_verse_detail_error">Failed to load verse detail, retry?</string>
+    <string name="dialog_backup_error">Failed to backup, retry?</string>
 
     <!--
     %1$s: month, %2$d: date, %3$d: year
      -->
     <string name="text_date">%1$s %2$d, %3$d</string>
     <string name="text_date_without_year">%1$s %2$d</string>
+    <string name="text_pick_highlight_color">Select highlight color</string>
+
+    <string name="text_share_with">Share with</string>
+    <string name="text_verse_comparison">Verses</string>
+
+    <string name="text_note">Note</string>
+    <string name="text_no_bookmark">No bookmarks yet.</string>
+    <string name="text_no_highlights">No highlights yet.</string>
+
+    <string name="text_no_note">No notes yet.</string>
+    <string name="text_continuous_reading">Consecutive Reading</string>
+    <string name="text_continuous_reading_count">%1$d day(s)</string>
+
+    <string name="text_chapters_read">Chapters Read</string>
+    <string name="text_finished_books">Books Finished</string>
+    <string name="text_finished_old_testament">Old Testament</string>
+    <string name="text_finished_new_testament">New Testament</string>
+    <string name="settings_header_account">Account</string>
+    <string name="settings_title_backup">Backup</string>
+
+    <string name="settings_title_restore">Restore</string>
+    <string name="settings_header_display">Display</string>
+    <string name="settings_title_font_size">Font size</string>
+    <string name="settings_title_keep_screen_on">Keep screen on</string>
+    <string name="settings_title_night_mode_on">Night mode</string>
+    <string name="settings_header_reading">Reading</string>
+    <string name="settings_title_simple_reading">Simple reading</string>
+    <string name="settings_header_about">About</string>
+    <string name="settings_title_rate">Rate me on Google Play</string>
+    <string name="settings_title_version">Version</string>
     <string-array name="text_months">
         <item>Jan</item>
         <item>Feb</item>
@@ -73,8 +105,6 @@
         <item>Nov</item>
         <item>Dec</item>
     </string-array>
-
-    <string name="text_pick_highlight_color">Select highlight color</string>
     <string-array name="text_colors">
         <item>None</item>
         <item>Yellow</item>
@@ -83,34 +113,6 @@
         <item>Green</item>
         <item>Blue</item>
     </string-array>
-
-    <string name="text_share_with">Share with</string>
-    <string name="text_verse_comparison">Verses</string>
-    <string name="text_note">Note</string>
-
-    <string name="text_no_bookmark">No bookmarks yet.</string>
-    <string name="text_no_highlights">No highlights yet.</string>
-    <string name="text_no_note">No notes yet.</string>
-
-    <string name="text_continuous_reading">Consecutive Reading</string>
-    <string name="text_continuous_reading_count">%1$d day(s)</string>
-    <string name="text_chapters_read">Chapters Read</string>
-    <string name="text_finished_books">Books Finished</string>
-    <string name="text_finished_old_testament">Old Testament</string>
-    <string name="text_finished_new_testament">New Testament</string>
-
-    <string name="settings_header_account">Account</string>
-    <string name="settings_title_backup">Backup</string>
-    <string name="settings_title_restore">Restore</string>
-    <string name="settings_header_display">Display</string>
-    <string name="settings_title_font_size">Font size</string>
-    <string name="settings_title_keep_screen_on">Keep screen on</string>
-    <string name="settings_title_night_mode_on">Night mode</string>
-    <string name="settings_header_reading">Reading</string>
-    <string name="settings_title_simple_reading">Simple reading</string>
-    <string name="settings_header_about">About</string>
-    <string name="settings_title_rate">Rate me on Google Play</string>
-    <string name="settings_title_version">Version</string>
 
     <string-array name="text_sort_order">
         <item>By date</item>

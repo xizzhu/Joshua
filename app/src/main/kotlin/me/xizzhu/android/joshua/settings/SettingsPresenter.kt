@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.App
@@ -42,6 +43,22 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
             view?.onVersionLoaded(version)
         } catch (e: Exception) {
             Log.e(tag, "Failed to load app version", e)
+        }
+    }
+
+    fun backup() {
+        coroutineScope.launch(Dispatchers.Main) {
+            try {
+                view?.onBackupStarted()
+
+                // TODO
+                delay(250)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to backup data", e)
+                view?.onBackupFailed()
+            } finally {
+                view?.onBackupFinished()
+            }
         }
     }
 
