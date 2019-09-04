@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.core.serializer.android
 
 import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import kotlin.test.BeforeTest
@@ -77,6 +78,57 @@ class BackupJsonWriterSerializerTest : BaseUnitTest() {
                 serializer.withBookmarks(listOf(
                         Bookmark(VerseIndex(1, 2, 3), 4567890L),
                         Bookmark(VerseIndex(9, 8, 7), 6543210L)
+                )).serialize())
+    }
+
+    @Test
+    fun testWithEmptyHighlights() {
+        assertEquals("{\n" +
+                "  \"highlights\": []\n" +
+                "}", serializer.withHighlights(emptyList()).serialize())
+    }
+
+    @Test
+    fun testWithSingleHighlight() {
+        assertEquals("{\n" +
+                "  \"highlights\": [\n" +
+                "    {\n" +
+                "      \"bookIndex\": 1,\n" +
+                "      \"chapterIndex\": 2,\n" +
+                "      \"verseIndex\": 3,\n" +
+                "      \"color\": ${Highlight.COLOR_BLUE},\n" +
+                "      \"timestamp\": 4567890\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}",
+                serializer.withHighlights(listOf(
+                        Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L)
+                )).serialize())
+    }
+
+    @Test
+    fun testWithHighlights() {
+        assertEquals("{\n" +
+                "  \"highlights\": [\n" +
+                "    {\n" +
+                "      \"bookIndex\": 1,\n" +
+                "      \"chapterIndex\": 2,\n" +
+                "      \"verseIndex\": 3,\n" +
+                "      \"color\": ${Highlight.COLOR_BLUE},\n" +
+                "      \"timestamp\": 4567890\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"bookIndex\": 9,\n" +
+                "      \"chapterIndex\": 8,\n" +
+                "      \"verseIndex\": 7,\n" +
+                "      \"color\": ${Highlight.COLOR_YELLOW},\n" +
+                "      \"timestamp\": 6543210\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}",
+                serializer.withHighlights(listOf(
+                        Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
+                        Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
                 )).serialize())
     }
 }

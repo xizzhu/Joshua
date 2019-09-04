@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.core.serializer.android
 import android.util.JsonWriter
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
 import java.io.BufferedWriter
 import java.io.StringWriter
@@ -26,10 +27,13 @@ import java.io.StringWriter
 class BackupJsonWriterSerializer : BackupManager.Serializer {
     companion object {
         private const val KEY_BOOKMARKS = "bookmarks"
+        private const val KEY_HIGHLIGHTS = "highlights"
+
         private const val KEY_BOOK_INDEX = "bookIndex"
         private const val KEY_CHAPTER_INDEX = "chapterIndex"
         private const val KEY_VERSE_INDEX = "verseIndex"
         private const val KEY_TIMESTAMP = "timestamp"
+        private const val KEY_COLOR = "color"
     }
 
     private val writer = StringWriter()
@@ -60,6 +64,23 @@ class BackupJsonWriterSerializer : BackupManager.Serializer {
             name(KEY_CHAPTER_INDEX).value(verseIndex.chapterIndex)
             name(KEY_VERSE_INDEX).value(verseIndex.verseIndex)
         }
+    }
+
+    override fun withHighlights(highlights: List<Highlight>): BackupManager.Serializer {
+        with(jsonWriter) {
+            name(KEY_HIGHLIGHTS)
+            beginArray()
+            highlights.forEach { highlight ->
+                beginObject()
+                withVerseIndex(highlight.verseIndex)
+                name(KEY_COLOR).value(highlight.color)
+                name(KEY_TIMESTAMP).value(highlight.timestamp)
+                endObject()
+            }
+            endArray()
+        }
+
+        return this
     }
 
     override fun serialize(): String {

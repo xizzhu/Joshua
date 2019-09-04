@@ -28,14 +28,18 @@ class BackupManager(private val serializerFactory: () -> Serializer,
     interface Serializer {
         fun withBookmarks(bookmarks: List<Bookmark>): Serializer
 
+        fun withHighlights(highlights: List<Highlight>): Serializer
+
         fun serialize(): String
     }
 
     suspend fun prepareJsonForBackup(): String = withContext(Dispatchers.Default) {
         val bookmarksAsync = supervisedAsync { bookmarkManager.read(Constants.SORT_BY_DATE) }
-        // TODO highlights, notes, and reading progress
+        val highlightsAsync = supervisedAsync { highlightManager.read(Constants.SORT_BY_DATE) }
+        // TODO notes and reading progress
         return@withContext serializerFactory()
                 .withBookmarks(bookmarksAsync.await())
+                .withHighlights(highlightsAsync.await())
                 .serialize()
     }
 }
