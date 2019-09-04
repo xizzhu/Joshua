@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.core.serializer.android
 
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import kotlin.test.BeforeTest
@@ -129,6 +130,57 @@ class BackupJsonWriterSerializerTest : BaseUnitTest() {
                 serializer.withHighlights(listOf(
                         Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
                         Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
+                )).serialize())
+    }
+
+    @Test
+    fun testWithEmptyNotes() {
+        assertEquals("{\n" +
+                "  \"notes\": []\n" +
+                "}", serializer.withNotes(emptyList()).serialize())
+    }
+
+    @Test
+    fun testWithSingleNote() {
+        assertEquals("{\n" +
+                "  \"notes\": [\n" +
+                "    {\n" +
+                "      \"bookIndex\": 1,\n" +
+                "      \"chapterIndex\": 2,\n" +
+                "      \"verseIndex\": 3,\n" +
+                "      \"note\": \"random note\",\n" +
+                "      \"timestamp\": 4567890\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}",
+                serializer.withNotes(listOf(
+                        Note(VerseIndex(1, 2, 3), "random note", 4567890L)
+                )).serialize())
+    }
+
+    @Test
+    fun testWithNotes() {
+        assertEquals("{\n" +
+                "  \"notes\": [\n" +
+                "    {\n" +
+                "      \"bookIndex\": 1,\n" +
+                "      \"chapterIndex\": 2,\n" +
+                "      \"verseIndex\": 3,\n" +
+                "      \"note\": \"random note\",\n" +
+                "      \"timestamp\": 4567890\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"bookIndex\": 9,\n" +
+                "      \"chapterIndex\": 8,\n" +
+                "      \"verseIndex\": 7,\n" +
+                "      \"note\": \"yet another note\",\n" +
+                "      \"timestamp\": 6543210\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}",
+                serializer.withNotes(listOf(
+                        Note(VerseIndex(1, 2, 3), "random note", 4567890L),
+                        Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
                 )).serialize())
     }
 }
