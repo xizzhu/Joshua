@@ -21,6 +21,7 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.App
+import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -36,6 +37,8 @@ class SettingsPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var settingsManager: SettingsManager
     @Mock
+    private lateinit var backupManager: BackupManager
+    @Mock
     private lateinit var settingsView: SettingsView
 
     private lateinit var currentSettings: BroadcastChannel<Settings>
@@ -49,7 +52,7 @@ class SettingsPresenterTest : BaseUnitTest() {
             currentSettings = ConflatedBroadcastChannel()
             `when`(settingsManager.observeSettings()).thenReturn(currentSettings.asFlow())
 
-            settingsPresenter = SettingsPresenter(app, settingsManager)
+            settingsPresenter = SettingsPresenter(app, settingsManager, backupManager)
             settingsPresenter.attachView(settingsView)
         }
     }

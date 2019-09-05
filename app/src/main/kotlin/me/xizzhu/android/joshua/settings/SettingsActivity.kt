@@ -33,6 +33,7 @@ import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.utils.activities.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.joshua.utils.createChooserForSharing
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -40,7 +41,7 @@ import kotlin.math.roundToInt
 interface SettingsView : MVPView {
     fun onBackupStarted()
 
-    fun onBackupFinished()
+    fun onBackupReady(textForBackup: String)
 
     fun onBackupFailed()
 
@@ -133,16 +134,24 @@ class SettingsActivity : BaseActivity(), SettingsView {
     }
 
     override fun onBackupStarted() {
-        dialog?.dismiss()
+        dismissDialog()
         dialog = ProgressDialog.showIndeterminateProgressDialog(this, R.string.dialog_wait)
     }
 
-    override fun onBackupFinished() {
+    private fun dismissDialog() {
         dialog?.dismiss()
         dialog = null
     }
 
+    override fun onBackupReady(textForBackup: String) {
+        dismissDialog()
+        createChooserForSharing(this, getString(R.string.text_backup_with), textForBackup)
+                ?.let { startActivity(it) }
+                ?: Toast.makeText(this, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
+    }
+
     override fun onBackupFailed() {
+        dismissDialog()
         DialogHelper.showDialog(this, true, R.string.dialog_backup_error,
                 DialogInterface.OnClickListener { _, _ -> presenter.backup() })
     }

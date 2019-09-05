@@ -19,12 +19,14 @@ package me.xizzhu.android.joshua.settings
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.App
+import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.SettingsManager
 
 @Module
 object SettingsModule {
     @JvmStatic
     @Provides
-    fun provideSettingsPresenter(app: App, settingsManager: SettingsManager): SettingsPresenter =
-            SettingsPresenter(app, settingsManager)
+    fun provideSettingsPresenter(app: App, settingsManager: SettingsManager,
+                                 backupManager: BackupManager): SettingsPresenter =
+            SettingsPresenter(app, settingsManager, backupManager)
 }

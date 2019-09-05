@@ -17,8 +17,8 @@
 package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.utils.supervisedAsync
 
 class BackupManager(private val serializerFactory: () -> Serializer,
                     private val bookmarkManager: BookmarkManager,
@@ -37,11 +37,11 @@ class BackupManager(private val serializerFactory: () -> Serializer,
         fun serialize(): String
     }
 
-    suspend fun prepareJsonForBackup(): String = withContext(Dispatchers.Default) {
-        val bookmarksAsync = supervisedAsync { bookmarkManager.read(Constants.SORT_BY_DATE) }
-        val highlightsAsync = supervisedAsync { highlightManager.read(Constants.SORT_BY_DATE) }
-        val notesAsync = supervisedAsync { noteManager.read(Constants.SORT_BY_DATE) }
-        val readingProgressAsync = supervisedAsync { readingProgressManager.readReadingProgress() }
+    suspend fun prepareForBackup(): String = withContext(Dispatchers.Default) {
+        val bookmarksAsync = async { bookmarkManager.read(Constants.SORT_BY_DATE) }
+        val highlightsAsync = async { highlightManager.read(Constants.SORT_BY_DATE) }
+        val notesAsync = async { noteManager.read(Constants.SORT_BY_DATE) }
+        val readingProgressAsync = async { readingProgressManager.readReadingProgress() }
         return@withContext serializerFactory()
                 .withBookmarks(bookmarksAsync.await())
                 .withHighlights(highlightsAsync.await())
