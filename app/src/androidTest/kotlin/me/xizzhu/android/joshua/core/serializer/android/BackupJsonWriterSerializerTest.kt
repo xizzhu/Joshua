@@ -243,4 +243,89 @@ class BackupJsonWriterSerializerTest : BaseUnitTest() {
                         ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
                 ))).serialize())
     }
+
+    @Test
+    fun testWithEverything() {
+        assertEquals("{\n" +
+                "  \"bookmarks\": [\n" +
+                "    {\n" +
+                "      \"bookIndex\": 1,\n" +
+                "      \"chapterIndex\": 2,\n" +
+                "      \"verseIndex\": 3,\n" +
+                "      \"timestamp\": 4567890\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"bookIndex\": 9,\n" +
+                "      \"chapterIndex\": 8,\n" +
+                "      \"verseIndex\": 7,\n" +
+                "      \"timestamp\": 6543210\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"highlights\": [\n" +
+                "    {\n" +
+                "      \"bookIndex\": 1,\n" +
+                "      \"chapterIndex\": 2,\n" +
+                "      \"verseIndex\": 3,\n" +
+                "      \"color\": ${Highlight.COLOR_BLUE},\n" +
+                "      \"timestamp\": 4567890\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"bookIndex\": 9,\n" +
+                "      \"chapterIndex\": 8,\n" +
+                "      \"verseIndex\": 7,\n" +
+                "      \"color\": ${Highlight.COLOR_YELLOW},\n" +
+                "      \"timestamp\": 6543210\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"notes\": [\n" +
+                "    {\n" +
+                "      \"bookIndex\": 1,\n" +
+                "      \"chapterIndex\": 2,\n" +
+                "      \"verseIndex\": 3,\n" +
+                "      \"note\": \"random note\",\n" +
+                "      \"timestamp\": 4567890\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"bookIndex\": 9,\n" +
+                "      \"chapterIndex\": 8,\n" +
+                "      \"verseIndex\": 7,\n" +
+                "      \"note\": \"yet another note\",\n" +
+                "      \"timestamp\": 6543210\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 1,\n" +
+                "    \"lastReadingTimestamp\": 2,\n" +
+                "    \"chapterReadingStatus\": [\n" +
+                "      {\n" +
+                "        \"bookIndex\": 3,\n" +
+                "        \"chapterIndex\": 4,\n" +
+                "        \"readCount\": 5,\n" +
+                "        \"timeSpentInMillis\": 6,\n" +
+                "        \"lastReadingTimestamp\": 7\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"bookIndex\": 9,\n" +
+                "        \"chapterIndex\": 8,\n" +
+                "        \"readCount\": 7,\n" +
+                "        \"timeSpentInMillis\": 2,\n" +
+                "        \"lastReadingTimestamp\": 1\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}",
+                serializer.withBookmarks(listOf(
+                        Bookmark(VerseIndex(1, 2, 3), 4567890L),
+                        Bookmark(VerseIndex(9, 8, 7), 6543210L)
+                )).withHighlights(listOf(
+                        Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
+                        Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
+                )).withNotes(listOf(
+                        Note(VerseIndex(1, 2, 3), "random note", 4567890L),
+                        Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
+                )).withReadingProgress(ReadingProgress(1, 2L, listOf(
+                        ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
+                        ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
+                ))).serialize())
+    }
 }
