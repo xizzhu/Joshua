@@ -19,15 +19,9 @@ package me.xizzhu.android.joshua.reading
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import androidx.appcompat.view.ActionMode
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import android.content.ComponentName
-import android.content.pm.LabeledIntent
-import android.content.pm.PackageManager
-import android.content.res.Resources
-import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.IntDef
 import androidx.annotation.VisibleForTesting
@@ -37,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
+import me.xizzhu.android.joshua.utils.createChooserForSharing
 import me.xizzhu.android.logger.Log
 import java.lang.StringBuilder
 
@@ -227,15 +222,11 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
             return false
         }
 
-        // Facebook doesn't want us to pre-fill the message, but still captures ACTION_SEND. Therefore,
-        // I have to exclude their package from being shown.
-        // Rants: it's a horrible way to force developers to use their SDK.
-        // ref. https://developers.facebook.com/bugs/332619626816423
         try {
             val verse = verses.first()
             val bookName = readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
-            val chooseIntent = createChooserForSharing(readingActivity.packageManager, readingActivity.resources,
-                    "com.facebook.katana", toStringForSharing(verses, bookName))
+            val chooseIntent = createChooserForSharing(readingActivity,
+                    readingActivity.getString(R.string.text_share_with), toStringForSharing(verses, bookName))
             return chooseIntent?.let {
                 readingActivity.startActivity(it)
                 true
@@ -296,36 +287,4 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         noteManager.remove(verseIndex)
         verseUpdates.offer(Pair(verseIndex, VerseUpdate(VerseUpdate.NOTE_REMOVED)))
     }
-}
-
-@VisibleForTesting
-fun createChooserForSharing(packageManager: PackageManager, resources: Resources,
-                            packageToExclude: String, text: String): Intent? {
-    val sendIntent = Intent(Intent.ACTION_SEND).setType("text/plain")
-    val resolveInfoList = packageManager.queryIntentActivities(sendIntent, 0)
-    if (resolveInfoList.isEmpty()) {
-        return null
-    }
-
-    val filteredIntents = ArrayList<Intent>(resolveInfoList.size)
-    for (resolveInfo in resolveInfoList) {
-        val packageName = resolveInfo.activityInfo.packageName
-        if (packageToExclude != packageName) {
-            val labeledIntent = LabeledIntent(packageName, resolveInfo.loadLabel(packageManager), resolveInfo.iconResource)
-            labeledIntent.setAction(Intent.ACTION_SEND).setPackage(packageName)
-                    .setComponent(ComponentName(packageName, resolveInfo.activityInfo.name))
-                    .setType("text/plain")
-                    .putExtra(Intent.EXTRA_TEXT, text)
-            filteredIntents.add(labeledIntent)
-        }
-    }
-    if (filteredIntents.isEmpty()) {
-        return null
-    }
-
-    val chooserIntent = Intent.createChooser(filteredIntents.removeAt(0),
-            resources.getText(R.string.text_share_with))
-    val array = arrayOfNulls<Parcelable>(filteredIntents.size)
-    chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, filteredIntents.toArray(array))
-    return chooserIntent
 }

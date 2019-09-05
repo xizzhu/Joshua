@@ -14,64 +14,62 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading
+package me.xizzhu.android.joshua.utils
 
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
+import org.mockito.Mockito
+import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class ReadingInteractorTest : BaseUnitTest() {
+class IntentHelperTest : BaseUnitTest() {
     @Mock
     private lateinit var packageManager: PackageManager
 
     private lateinit var resolveInfoList: MutableList<ResolveInfo>
 
-    @Before
+    @BeforeTest
     override fun setup() {
         super.setup()
 
         resolveInfoList = mutableListOf()
         for (i in 0 until 10) {
-            val activityInfo = mock(ActivityInfo::class.java)
+            val activityInfo = Mockito.mock(ActivityInfo::class.java)
             activityInfo.name = "name$i"
             activityInfo.packageName = "packageName$i"
 
-            val resolveInfo = mock(ResolveInfo::class.java)
+            val resolveInfo = Mockito.mock(ResolveInfo::class.java)
             resolveInfo.activityInfo = activityInfo
             resolveInfoList.add(resolveInfo)
         }
 
-        `when`(packageManager.queryIntentActivities(any(), ArgumentMatchers.anyInt())).thenReturn(resolveInfoList)
+        Mockito.`when`(packageManager.queryIntentActivities(any(), ArgumentMatchers.anyInt())).thenReturn(resolveInfoList)
     }
 
     @Test
     fun testCreateChooserForSharing() {
+        val title = "random Title"
         val textToShare = "Random text to share"
         val packageToExclude = "packageName5"
-        val chooseIntent = createChooserForSharing(
-                packageManager, ApplicationProvider.getApplicationContext<Context>().resources,
-                packageToExclude, textToShare)
+        val chooseIntent = createChooserForSharing(packageManager, packageToExclude, title, textToShare)
         assertNotNull(chooseIntent)
         assertEquals(Intent.ACTION_CHOOSER, chooseIntent.action)
+        assertEquals(title, chooseIntent.getStringExtra(Intent.EXTRA_TITLE))
 
         val primaryIntent = chooseIntent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
+        assertNotNull(primaryIntent)
         verifyShareIntent(primaryIntent, "name0", "packageName0")
 
         val filteredIntents = chooseIntent.getParcelableArrayExtra(Intent.EXTRA_INITIAL_INTENTS)
@@ -84,7 +82,6 @@ class ReadingInteractorTest : BaseUnitTest() {
     }
 
     private fun verifyShareIntent(intent: Intent, expectedName: String, expectedPackageName: String) {
-        assertNotNull(intent)
         assertEquals(Intent.ACTION_SEND, intent.action)
         assertEquals("text/plain", intent.type)
         assertEquals(expectedName, intent.component!!.className)
