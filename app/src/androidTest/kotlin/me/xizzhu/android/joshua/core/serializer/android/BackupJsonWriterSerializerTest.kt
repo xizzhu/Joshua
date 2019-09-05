@@ -16,10 +16,7 @@
 
 package me.xizzhu.android.joshua.core.serializer.android
 
-import me.xizzhu.android.joshua.core.Bookmark
-import me.xizzhu.android.joshua.core.Highlight
-import me.xizzhu.android.joshua.core.Note
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -182,5 +179,68 @@ class BackupJsonWriterSerializerTest : BaseUnitTest() {
                         Note(VerseIndex(1, 2, 3), "random note", 4567890L),
                         Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
                 )).serialize())
+    }
+
+    @Test
+    fun testWithEmptyReadingProgress() {
+        assertEquals("{\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 1,\n" +
+                "    \"lastReadingTimestamp\": 2,\n" +
+                "    \"chapterReadingStatus\": []\n" +
+                "  }\n" +
+                "}", serializer.withReadingProgress(ReadingProgress(1, 2L, emptyList())).serialize())
+    }
+
+    @Test
+    fun testWithSingleReadingProgress() {
+        assertEquals("{\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 1,\n" +
+                "    \"lastReadingTimestamp\": 2,\n" +
+                "    \"chapterReadingStatus\": [\n" +
+                "      {\n" +
+                "        \"bookIndex\": 3,\n" +
+                "        \"chapterIndex\": 4,\n" +
+                "        \"readCount\": 5,\n" +
+                "        \"timeSpentInMillis\": 6,\n" +
+                "        \"lastReadingTimestamp\": 7\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}",
+                serializer.withReadingProgress(ReadingProgress(1, 2L, listOf(
+                        ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L)
+                ))).serialize())
+    }
+
+    @Test
+    fun testWithReadingProgress() {
+        assertEquals("{\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 1,\n" +
+                "    \"lastReadingTimestamp\": 2,\n" +
+                "    \"chapterReadingStatus\": [\n" +
+                "      {\n" +
+                "        \"bookIndex\": 3,\n" +
+                "        \"chapterIndex\": 4,\n" +
+                "        \"readCount\": 5,\n" +
+                "        \"timeSpentInMillis\": 6,\n" +
+                "        \"lastReadingTimestamp\": 7\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"bookIndex\": 9,\n" +
+                "        \"chapterIndex\": 8,\n" +
+                "        \"readCount\": 7,\n" +
+                "        \"timeSpentInMillis\": 2,\n" +
+                "        \"lastReadingTimestamp\": 1\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}",
+                serializer.withReadingProgress(ReadingProgress(1, 2L, listOf(
+                        ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
+                        ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
+                ))).serialize())
     }
 }

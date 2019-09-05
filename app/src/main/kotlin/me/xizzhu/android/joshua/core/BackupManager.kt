@@ -32,6 +32,8 @@ class BackupManager(private val serializerFactory: () -> Serializer,
 
         fun withNotes(notes: List<Note>): Serializer
 
+        fun withReadingProgress(readingProgress: ReadingProgress): Serializer
+
         fun serialize(): String
     }
 
@@ -39,11 +41,12 @@ class BackupManager(private val serializerFactory: () -> Serializer,
         val bookmarksAsync = supervisedAsync { bookmarkManager.read(Constants.SORT_BY_DATE) }
         val highlightsAsync = supervisedAsync { highlightManager.read(Constants.SORT_BY_DATE) }
         val notesAsync = supervisedAsync { noteManager.read(Constants.SORT_BY_DATE) }
-        // TODO reading progress
+        val readingProgressAsync = supervisedAsync { readingProgressManager.readReadingProgress() }
         return@withContext serializerFactory()
                 .withBookmarks(bookmarksAsync.await())
                 .withHighlights(highlightsAsync.await())
                 .withNotes(notesAsync.await())
+                .withReadingProgress(readingProgressAsync.await())
                 .serialize()
     }
 }

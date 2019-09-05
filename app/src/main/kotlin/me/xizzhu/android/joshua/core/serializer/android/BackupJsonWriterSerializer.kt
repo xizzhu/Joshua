@@ -26,6 +26,7 @@ class BackupJsonWriterSerializer : BackupManager.Serializer {
         private const val KEY_BOOKMARKS = "bookmarks"
         private const val KEY_HIGHLIGHTS = "highlights"
         private const val KEY_NOTES = "notes"
+        private const val KEY_READING_PROGRESS = "readingProgress"
 
         private const val KEY_BOOK_INDEX = "bookIndex"
         private const val KEY_CHAPTER_INDEX = "chapterIndex"
@@ -33,6 +34,11 @@ class BackupJsonWriterSerializer : BackupManager.Serializer {
         private const val KEY_TIMESTAMP = "timestamp"
         private const val KEY_COLOR = "color"
         private const val KEY_NOTE = "note"
+        private const val KEY_CONTINUOUS_READING_DAYS = "continuousReadingDays"
+        private const val KEY_LAST_READING_TIMESTAMP = "lastReadingTimestamp"
+        private const val KEY_CHAPTER_READING_STATUS = "chapterReadingStatus"
+        private const val KEY_READ_COUNT = "readCount"
+        private const val KEY_TIME_SPENT_IN_MILLIS = "timeSpentInMillis"
     }
 
     private val writer = StringWriter()
@@ -94,6 +100,30 @@ class BackupJsonWriterSerializer : BackupManager.Serializer {
                 endObject()
             }
             endArray()
+        }
+
+        return this
+    }
+
+    override fun withReadingProgress(readingProgress: ReadingProgress): BackupManager.Serializer {
+        with(jsonWriter) {
+            name(KEY_READING_PROGRESS)
+            beginObject()
+            name(KEY_CONTINUOUS_READING_DAYS).value(readingProgress.continuousReadingDays)
+            name(KEY_LAST_READING_TIMESTAMP).value(readingProgress.lastReadingTimestamp)
+            name(KEY_CHAPTER_READING_STATUS)
+            beginArray()
+            readingProgress.chapterReadingStatus.forEach { chapterReadingStatus ->
+                beginObject()
+                name(KEY_BOOK_INDEX).value(chapterReadingStatus.bookIndex)
+                name(KEY_CHAPTER_INDEX).value(chapterReadingStatus.chapterIndex)
+                name(KEY_READ_COUNT).value(chapterReadingStatus.readCount)
+                name(KEY_TIME_SPENT_IN_MILLIS).value(chapterReadingStatus.timeSpentInMillis)
+                name(KEY_LAST_READING_TIMESTAMP).value(chapterReadingStatus.lastReadingTimestamp)
+                endObject()
+            }
+            endArray()
+            endObject()
         }
 
         return this
