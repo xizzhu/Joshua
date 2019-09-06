@@ -245,6 +245,25 @@ class BackupJsonSerializerTest : BaseUnitTest() {
     }
 
     @Test
+    fun testWithEverythingEmpty() {
+        assertEquals("{\n" +
+                "  \"bookmarks\": [],\n" +
+                "  \"highlights\": [],\n" +
+                "  \"notes\": [],\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 1,\n" +
+                "    \"lastReadingTimestamp\": 2,\n" +
+                "    \"chapterReadingStatus\": []\n" +
+                "  }\n" +
+                "}",
+                serializer.withBookmarks(emptyList())
+                        .withHighlights(emptyList())
+                        .withNotes(emptyList())
+                        .withReadingProgress(ReadingProgress(1, 2L, emptyList()))
+                        .serialize())
+    }
+
+    @Test
     fun testWithEverything() {
         assertEquals("{\n" +
                 "  \"bookmarks\": [\n" +
