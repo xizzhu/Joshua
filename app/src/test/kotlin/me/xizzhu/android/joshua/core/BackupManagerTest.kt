@@ -28,6 +28,8 @@ class BackupManagerTest : BaseUnitTest() {
     @Mock
     private lateinit var serializer: BackupManager.Serializer
     @Mock
+    private lateinit var deserializer: BackupManager.Deserializer
+    @Mock
     private lateinit var bookmarkManager: BookmarkManager
     @Mock
     private lateinit var highlightManager: HighlightManager
@@ -51,7 +53,7 @@ class BackupManagerTest : BaseUnitTest() {
             `when`(highlightManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
             `when`(noteManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
             `when`(readingProgressManager.readReadingProgress()).thenReturn(ReadingProgress(1, 2L, emptyList()))
-            backupManager = BackupManager({ serializer }, bookmarkManager, highlightManager, noteManager, readingProgressManager)
+            backupManager = BackupManager({ serializer }, { deserializer }, bookmarkManager, highlightManager, noteManager, readingProgressManager)
         }
     }
 

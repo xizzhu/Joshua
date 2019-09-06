@@ -22,13 +22,13 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class BackupJsonWriterSerializerTest : BaseUnitTest() {
-    private lateinit var serializer: BackupJsonWriterSerializer
+class BackupJsonSerializerTest : BaseUnitTest() {
+    private lateinit var serializer: BackupJsonSerializer
 
     @BeforeTest
     override fun setup() {
         super.setup()
-        serializer = BackupJsonWriterSerializer()
+        serializer = BackupJsonSerializer()
     }
 
     @Test
