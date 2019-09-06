@@ -16,6 +16,8 @@
 
 package me.xizzhu.android.joshua.settings
 
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
@@ -25,15 +27,19 @@ import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class SettingsPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var app: App
+    @Mock
+    private lateinit var packageManager: PackageManager
+    @Mock
+    private lateinit var packageInfo: PackageInfo
     @Mock
     private lateinit var settingsManager: SettingsManager
     @Mock
@@ -44,23 +50,76 @@ class SettingsPresenterTest : BaseUnitTest() {
     private lateinit var currentSettings: BroadcastChannel<Settings>
     private lateinit var settingsPresenter: SettingsPresenter
 
-    @Before
+    private val versionName = "Random Version Name"
+
+    @BeforeTest
     override fun setup() {
         super.setup()
 
-        runBlocking {
-            currentSettings = ConflatedBroadcastChannel()
-            `when`(settingsManager.observeSettings()).thenReturn(currentSettings.asFlow())
+        currentSettings = ConflatedBroadcastChannel()
+        `when`(settingsManager.observeSettings()).thenReturn(currentSettings.asFlow())
 
-            settingsPresenter = SettingsPresenter(app, settingsManager, backupManager)
-            settingsPresenter.attachView(settingsView)
-        }
+        settingsPresenter = SettingsPresenter(app, settingsManager, backupManager)
+        settingsPresenter.attachView(settingsView)
     }
 
-    @After
+    @AfterTest
     override fun tearDown() {
         settingsPresenter.detachView()
         super.tearDown()
+    }
+
+    @Test
+    fun testLoadingVersion() {
+        `when`(app.packageManager).thenReturn(packageManager)
+        `when`(app.packageName).thenReturn("packageName")
+        `when`(packageManager.getPackageInfo("packageName", 0)).thenReturn(packageInfo)
+        packageInfo.versionName = versionName
+
+        settingsPresenter = SettingsPresenter(app, settingsManager, backupManager)
+        settingsPresenter.attachView(settingsView)
+
+        // version is loaded when view is attached
+        verify(settingsView, times(1)).onVersionLoaded(versionName)
+    }
+
+    @Test
+    fun testLoadingVersionWithException() {
+        `when`(app.packageManager).thenThrow(RuntimeException("Random exception"))
+        settingsPresenter = SettingsPresenter(app, settingsManager, backupManager)
+        settingsPresenter.attachView(settingsView)
+
+        // version is loaded when view is attached
+        verify(settingsView, never()).onVersionLoaded(anyString())
+    }
+
+    @Test
+    fun testBackup() {
+        runBlocking {
+            val backup = "random backup string"
+            `when`(backupManager.prepareForBackup()).thenReturn(backup)
+
+            settingsPresenter.backup()
+            with(inOrder(settingsView)) {
+                verify(settingsView, times(1)).onBackupStarted()
+                verify(settingsView, times(1)).onBackupReady(backup)
+            }
+            verify(settingsView, never()).onBackupFailed()
+        }
+    }
+
+    @Test
+    fun testBackupWithException() {
+        runBlocking {
+            `when`(backupManager.prepareForBackup()).thenThrow(RuntimeException("Random exception"))
+
+            settingsPresenter.backup()
+            with(inOrder(settingsView)) {
+                verify(settingsView, times(1)).onBackupStarted()
+                verify(settingsView, times(1)).onBackupFailed()
+            }
+            verify(settingsView, never()).onBackupReady(anyString())
+        }
     }
 
     @Test
