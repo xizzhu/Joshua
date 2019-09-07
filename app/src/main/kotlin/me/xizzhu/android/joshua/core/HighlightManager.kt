@@ -39,7 +39,7 @@ data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val t
         val AVAILABLE_COLORS = arrayOf(COLOR_NONE, COLOR_YELLOW, COLOR_PINK, COLOR_PURPLE, COLOR_GREEN, COLOR_BLUE)
     }
 
-    fun isValid(): Boolean = timestamp > 0L
+    fun isValid(): Boolean = verseIndex.isValid() && timestamp > 0L
 }
 
 class HighlightManager(private val highlightRepository: HighlightRepository) {

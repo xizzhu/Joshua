@@ -16,10 +16,7 @@
 
 package me.xizzhu.android.joshua.core.serializer.android
 
-import me.xizzhu.android.joshua.core.BackupManager
-import me.xizzhu.android.joshua.core.Bookmark
-import me.xizzhu.android.joshua.core.ReadingProgress
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -113,6 +110,82 @@ class BackupJsonDeserializerTest : BaseUnitTest() {
                         "    }\n" +
                         "  ],\n" +
                         "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  }\n" +
+                        "}").deserialize())
+    }
+
+    @Test
+    fun testWithHighlights() {
+        assertEquals(
+                BackupManager.Data(
+                        emptyList(),
+                        listOf(
+                                Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
+                                Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
+                        ),
+                        emptyList(),
+                        ReadingProgress(1, 2L, emptyList())),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"color\": ${Highlight.COLOR_BLUE},\n" +
+                        "      \"timestamp\": 4567890,\n" +
+                        "      \"someRandomUnknownField\": 98765\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"color\": ${Highlight.COLOR_YELLOW},\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  }\n" +
+                        "}").deserialize())
+    }
+
+    @Test
+    fun testWithInvalidHighlights() {
+        assertEquals(
+                BackupManager.Data(
+                        emptyList(),
+                        listOf(
+                                Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L)
+                        ),
+                        emptyList(),
+                        ReadingProgress(1, 2L, emptyList())),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"color\": ${Highlight.COLOR_BLUE},\n" +
+                        "      \"timestamp\": 4567890,\n" +
+                        "      \"someRandomUnknownField\": 98765\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"color\": ${Highlight.COLOR_YELLOW}\n" +
+                        "    }\n" +
+                        "  ],\n" +
                         "  \"notes\": [],\n" +
                         "  \"readingProgress\": {\n" +
                         "    \"continuousReadingDays\": 1,\n" +
