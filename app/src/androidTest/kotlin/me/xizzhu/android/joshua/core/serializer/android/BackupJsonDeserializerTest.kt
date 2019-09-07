@@ -33,8 +33,87 @@ class BackupJsonDeserializerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testWithEmptyContent() {
-        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(0, 0L, emptyList())),
-                deserializer.withContent("").deserialize())
+    fun testWithMinimumContent() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  },\n" +
+                        "  \"someUnknownField\": \"Not known yet\"\n" +
+                        "}").deserialize())
+    }
+
+    @Test
+    fun testWithReadingProgress() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(),
+                ReadingProgress(1, 2L, listOf(
+                        ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
+                        ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
+                ))),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": [\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 3,\n" +
+                        "        \"chapterIndex\": 4,\n" +
+                        "        \"readCount\": 5,\n" +
+                        "        \"timeSpentInMillis\": 6,\n" +
+                        "        \"lastReadingTimestamp\": 7,\n" +
+                        "        \"someRandomUnknownField\": 890\n" +
+                        "      },\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 9,\n" +
+                        "        \"chapterIndex\": 8,\n" +
+                        "        \"readCount\": 7,\n" +
+                        "        \"timeSpentInMillis\": 2,\n" +
+                        "        \"lastReadingTimestamp\": 1\n" +
+                        "      }\n" +
+                        "    ],\n" +
+                        "    \"someUnknownField\": \"Known or unknown?\"\n" +
+                        "  }\n" +
+                        "}").deserialize())
+    }
+
+    @Test
+    fun testWithReadingProgressAndInvalidChapterReadingStatus() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(),
+                ReadingProgress(1, 2L, listOf(
+                        ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L)
+                ))),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": [\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 3,\n" +
+                        "        \"chapterIndex\": 4,\n" +
+                        "        \"readCount\": 5,\n" +
+                        "        \"timeSpentInMillis\": 6,\n" +
+                        "        \"lastReadingTimestamp\": 7,\n" +
+                        "        \"someRandomUnknownField\": 890\n" +
+                        "      },\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 9,\n" +
+                        "        \"chapterIndex\": 8,\n" +
+                        "        \"readCount\": 7,\n" +
+                        "        \"timeSpentInMillis\": 2\n" +
+                        "      }\n" +
+                        "    ]\n" +
+                        "  }\n" +
+                        "}").deserialize())
     }
 }

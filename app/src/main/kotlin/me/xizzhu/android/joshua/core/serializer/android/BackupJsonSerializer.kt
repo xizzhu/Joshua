@@ -16,9 +16,11 @@
 
 package me.xizzhu.android.joshua.core.serializer.android
 
+import android.util.JsonReader
 import android.util.JsonWriter
 import me.xizzhu.android.joshua.core.*
 import java.io.BufferedWriter
+import java.io.StringReader
 import java.io.StringWriter
 
 private object Constants {
@@ -149,13 +151,78 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
                 val bookmarks = mutableListOf<Bookmark>()
                 val highlights = mutableListOf<Highlight>()
                 val notes = mutableListOf<Note>()
-                val continuousReadingDays = 0
-                val lastReadingTimestamp = 0L
-                val chapterReadingStatus = mutableListOf<ReadingProgress.ChapterReadingStatus>()
+                var readingProgress: ReadingProgress? = null
 
-                // TODO
+                with(JsonReader(StringReader(it))) {
+                    beginObject()
+                    while (hasNext()) {
+                        when (nextName()) {
+                            Constants.KEY_BOOKMARKS -> {
+                                // TODO
+                                skipValue()
+                            }
+                            Constants.KEY_HIGHLIGHTS -> {
+                                // TODO
+                                skipValue()
+                            }
+                            Constants.KEY_NOTES -> {
+                                // TODO
+                                skipValue()
+                            }
+                            Constants.KEY_READING_PROGRESS -> readingProgress = readReadingProgress()
+                            else -> skipValue()
+                        }
+                    }
+                    endObject()
+                    close()
+                }
 
-                return@let BackupManager.Data(bookmarks, highlights, notes,
-                        ReadingProgress(continuousReadingDays, lastReadingTimestamp, chapterReadingStatus))
+                if (readingProgress == null) throw IllegalStateException("Missing reading progress")
+
+                return@let BackupManager.Data(bookmarks, highlights, notes, readingProgress!!)
             } ?: throw IllegalStateException("Missing content")
+
+    private fun JsonReader.readReadingProgress(): ReadingProgress {
+        var continuousReadingDays = 0
+        var lastReadingTimestamp = 0L
+        val chapterReadingStatus = mutableListOf<ReadingProgress.ChapterReadingStatus>()
+        beginObject()
+        while (hasNext()) {
+            when (nextName()) {
+                Constants.KEY_CONTINUOUS_READING_DAYS -> continuousReadingDays = nextInt()
+                Constants.KEY_LAST_READING_TIMESTAMP -> lastReadingTimestamp = nextLong()
+                Constants.KEY_CHAPTER_READING_STATUS -> {
+                    beginArray()
+                    while (hasNext()) {
+                        readChapterReadingStatus().apply { if (isValid()) chapterReadingStatus.add(this) }
+                    }
+                    endArray()
+                }
+                else -> skipValue()
+            }
+        }
+        endObject()
+        return ReadingProgress(continuousReadingDays, lastReadingTimestamp, chapterReadingStatus)
+    }
+
+    private fun JsonReader.readChapterReadingStatus(): ReadingProgress.ChapterReadingStatus {
+        var bookIndex = -1
+        var chapterIndex = -1
+        var readCount = -1
+        var timeSpentInMillis = -1L
+        var lastReadingTimestamp = -1L
+        beginObject()
+        while (hasNext()) {
+            when (nextName()) {
+                Constants.KEY_BOOK_INDEX -> bookIndex = nextInt()
+                Constants.KEY_CHAPTER_INDEX -> chapterIndex = nextInt()
+                Constants.KEY_READ_COUNT -> readCount = nextInt()
+                Constants.KEY_TIME_SPENT_IN_MILLIS -> timeSpentInMillis = nextLong()
+                Constants.KEY_LAST_READING_TIMESTAMP -> lastReadingTimestamp = nextLong()
+                else -> skipValue()
+            }
+        }
+        endObject()
+        return ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, readCount, timeSpentInMillis, lastReadingTimestamp)
+    }
 }
