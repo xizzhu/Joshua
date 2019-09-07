@@ -27,7 +27,7 @@ import me.xizzhu.android.joshua.core.repository.BookmarkRepository
 import me.xizzhu.android.logger.Log
 
 data class Bookmark(val verseIndex: VerseIndex, val timestamp: Long) {
-    fun isValid(): Boolean = timestamp > 0L
+    fun isValid(): Boolean = verseIndex.isValid() && timestamp > 0L
 }
 
 class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {

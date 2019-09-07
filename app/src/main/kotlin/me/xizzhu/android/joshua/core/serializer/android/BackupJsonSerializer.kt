@@ -148,7 +148,7 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
 
     override fun deserialize(): BackupManager.Data =
             content?.let {
-                val bookmarks = mutableListOf<Bookmark>()
+                var bookmarks: List<Bookmark>? = null
                 val highlights = mutableListOf<Highlight>()
                 val notes = mutableListOf<Note>()
                 var readingProgress: ReadingProgress? = null
@@ -157,10 +157,7 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
                     beginObject()
                     while (hasNext()) {
                         when (nextName()) {
-                            Constants.KEY_BOOKMARKS -> {
-                                // TODO
-                                skipValue()
-                            }
+                            Constants.KEY_BOOKMARKS -> bookmarks = readBookMarks()
                             Constants.KEY_HIGHLIGHTS -> {
                                 // TODO
                                 skipValue()
@@ -177,10 +174,40 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
                     close()
                 }
 
+                if (bookmarks == null) throw IllegalStateException("Missing bookmarks")
                 if (readingProgress == null) throw IllegalStateException("Missing reading progress")
 
-                return@let BackupManager.Data(bookmarks, highlights, notes, readingProgress!!)
+                return@let BackupManager.Data(bookmarks!!, highlights, notes, readingProgress!!)
             } ?: throw IllegalStateException("Missing content")
+
+    private fun JsonReader.readBookMarks(): List<Bookmark> {
+        val bookmarks = mutableListOf<Bookmark>()
+        beginArray()
+        while (hasNext()) {
+            readBookmark().let { if (it.isValid()) bookmarks.add(it) }
+        }
+        endArray()
+        return bookmarks
+    }
+
+    private fun JsonReader.readBookmark(): Bookmark {
+        var bookIndex = -1
+        var chapterIndex = -1
+        var verseIndex = -1
+        var timestamp = -1L
+        beginObject()
+        while (hasNext()) {
+            when (nextName()) {
+                Constants.KEY_BOOK_INDEX -> bookIndex = nextInt()
+                Constants.KEY_CHAPTER_INDEX -> chapterIndex = nextInt()
+                Constants.KEY_VERSE_INDEX -> verseIndex = nextInt()
+                Constants.KEY_TIMESTAMP -> timestamp = nextLong()
+                else -> skipValue()
+            }
+        }
+        endObject()
+        return Bookmark(VerseIndex(bookIndex, chapterIndex, verseIndex), timestamp)
+    }
 
     private fun JsonReader.readReadingProgress(): ReadingProgress {
         var continuousReadingDays = 0
@@ -194,7 +221,7 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
                 Constants.KEY_CHAPTER_READING_STATUS -> {
                     beginArray()
                     while (hasNext()) {
-                        readChapterReadingStatus().apply { if (isValid()) chapterReadingStatus.add(this) }
+                        readChapterReadingStatus().let { if (it.isValid()) chapterReadingStatus.add(it) }
                     }
                     endArray()
                 }
