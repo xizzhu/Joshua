@@ -171,7 +171,7 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
                 if (bookmarks == null) throw IllegalStateException("Missing bookmarks")
                 if (highlights == null) throw IllegalStateException("Missing highlights")
                 if (notes == null) throw IllegalStateException("Missing notes")
-                if (readingProgress == null) throw IllegalStateException("Missing reading progress")
+                if (readingProgress?.isValid() != true) throw IllegalStateException("Missing reading progress")
 
                 return@let BackupManager.Data(bookmarks!!, highlights!!, notes!!, readingProgress!!)
             } ?: throw IllegalStateException("Missing content")
@@ -268,8 +268,8 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
     }
 
     private fun JsonReader.readReadingProgress(): ReadingProgress {
-        var continuousReadingDays = 0
-        var lastReadingTimestamp = 0L
+        var continuousReadingDays = -1
+        var lastReadingTimestamp = -1L
         val chapterReadingStatus = mutableListOf<ReadingProgress.ChapterReadingStatus>()
         beginObject()
         while (hasNext()) {

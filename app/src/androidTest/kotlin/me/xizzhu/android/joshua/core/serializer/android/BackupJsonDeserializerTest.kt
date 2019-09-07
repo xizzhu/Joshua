@@ -368,6 +368,28 @@ class BackupJsonDeserializerTest : BaseUnitTest() {
                         "}").deserialize())
     }
 
+    @Test(expected = IllegalStateException::class)
+    fun testWithInvalidReadingProgress() {
+        deserializer.withContent("{\n" +
+                "  \"bookmarks\": [],\n" +
+                "  \"highlights\": [],\n" +
+                "  \"notes\": [],\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"lastReadingTimestamp\": 2,\n" +
+                "    \"chapterReadingStatus\": [\n" +
+                "      {\n" +
+                "        \"bookIndex\": 3,\n" +
+                "        \"chapterIndex\": 4,\n" +
+                "        \"readCount\": 5,\n" +
+                "        \"timeSpentInMillis\": 6,\n" +
+                "        \"lastReadingTimestamp\": 7,\n" +
+                "        \"someRandomUnknownField\": 890\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}").deserialize()
+    }
+
     @Test
     fun testWithReadingProgressAndInvalidChapterReadingStatus() {
         assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(),

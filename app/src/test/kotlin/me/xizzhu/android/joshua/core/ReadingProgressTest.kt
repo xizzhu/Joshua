@@ -41,4 +41,20 @@ class ReadingProgressTest : BaseUnitTest() {
         assertFalse(ReadingProgress.ChapterReadingStatus(0, 0, 0, -1L, 0L).isValid())
         assertFalse(ReadingProgress.ChapterReadingStatus(0, 0, 0, 0L, -1L).isValid())
     }
+
+    @Test
+    fun testValidReadingProgress() {
+        assertTrue(ReadingProgress(0, 0L, listOf(ReadingProgress.ChapterReadingStatus(0, 0, 0, 0L, 0L))).isValid())
+    }
+
+    @Test
+    fun testInvalidReadingProgress() {
+        assertFalse(ReadingProgress(-1, 0L, listOf(ReadingProgress.ChapterReadingStatus(0, 0, 0, 0L, 0L))).isValid())
+        assertFalse(ReadingProgress(0, -1L, listOf(ReadingProgress.ChapterReadingStatus(0, 0, 0, 0L, 0L))).isValid())
+        assertFalse(ReadingProgress(0, 0L, listOf(ReadingProgress.ChapterReadingStatus(-1, 0, 0, 0L, 0L))).isValid())
+        assertFalse(ReadingProgress(0, 0L, listOf(
+                ReadingProgress.ChapterReadingStatus(0, 0, 0, 0L, 0L),
+                ReadingProgress.ChapterReadingStatus(-1, 0, 0, 0L, 0L)
+        )).isValid())
+    }
 }
