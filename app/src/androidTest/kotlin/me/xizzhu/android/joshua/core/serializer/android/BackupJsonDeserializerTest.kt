@@ -31,6 +31,67 @@ class BackupJsonDeserializerTest : BaseUnitTest() {
         deserializer = BackupJsonDeserializer()
     }
 
+    @Test(expected = IllegalStateException::class)
+    fun testWithoutContent() {
+        deserializer.deserialize()
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testWithoutBookmarks() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
+                deserializer.withContent("{\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  },\n" +
+                        "  \"someUnknownField\": \"Not known yet\"\n" +
+                        "}").deserialize())
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testWithoutHighlights() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  },\n" +
+                        "  \"someUnknownField\": \"Not known yet\"\n" +
+                        "}").deserialize())
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testWithoutNotes() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  },\n" +
+                        "  \"someUnknownField\": \"Not known yet\"\n" +
+                        "}").deserialize())
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testWithoutReadingProgress() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"someUnknownField\": \"Not known yet\"\n" +
+                        "}").deserialize())
+    }
+
     @Test
     fun testWithMinimumContent() {
         assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
@@ -334,6 +395,97 @@ class BackupJsonDeserializerTest : BaseUnitTest() {
                         "        \"chapterIndex\": 8,\n" +
                         "        \"readCount\": 7,\n" +
                         "        \"timeSpentInMillis\": 2\n" +
+                        "      }\n" +
+                        "    ]\n" +
+                        "  }\n" +
+                        "}").deserialize())
+    }
+
+    @Test
+    fun testWithEverything() {
+        assertEquals(
+                BackupManager.Data(
+                        listOf(
+                                Bookmark(VerseIndex(1, 2, 3), 4567890L),
+                                Bookmark(VerseIndex(9, 8, 7), 6543210L)
+                        ),
+                        listOf(
+                                Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
+                                Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
+                        ),
+                        listOf(
+                                Note(VerseIndex(1, 2, 3), "random note", 4567890L),
+                                Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
+                        ),
+                        ReadingProgress(1, 2L, listOf(
+                                ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
+                                ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
+                        ))
+                ),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"timestamp\": 4567890\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"highlights\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"color\": ${Highlight.COLOR_BLUE},\n" +
+                        "      \"timestamp\": 4567890\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"color\": ${Highlight.COLOR_YELLOW},\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"notes\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"note\": \"random note\",\n" +
+                        "      \"timestamp\": 4567890\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"note\": \"yet another note\",\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": [\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 3,\n" +
+                        "        \"chapterIndex\": 4,\n" +
+                        "        \"readCount\": 5,\n" +
+                        "        \"timeSpentInMillis\": 6,\n" +
+                        "        \"lastReadingTimestamp\": 7\n" +
+                        "      },\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 9,\n" +
+                        "        \"chapterIndex\": 8,\n" +
+                        "        \"readCount\": 7,\n" +
+                        "        \"timeSpentInMillis\": 2,\n" +
+                        "        \"lastReadingTimestamp\": 1\n" +
                         "      }\n" +
                         "    ]\n" +
                         "  }\n" +
