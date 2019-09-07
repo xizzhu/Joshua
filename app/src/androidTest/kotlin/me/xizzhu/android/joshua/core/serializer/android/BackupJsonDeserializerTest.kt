@@ -196,6 +196,82 @@ class BackupJsonDeserializerTest : BaseUnitTest() {
     }
 
     @Test
+    fun testWithNotes() {
+        assertEquals(
+                BackupManager.Data(
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                                Note(VerseIndex(1, 2, 3), "random note", 4567890L),
+                                Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
+                        ),
+                        ReadingProgress(1, 2L, emptyList())),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"note\": \"random note\",\n" +
+                        "      \"timestamp\": 4567890,\n" +
+                        "      \"someRandomUnknownField\": 98765\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"note\": \"yet another note\",\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  }\n" +
+                        "}").deserialize())
+    }
+
+    @Test
+    fun testWithInvalidNotes() {
+        assertEquals(
+                BackupManager.Data(
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                                Note(VerseIndex(1, 2, 3), "random note", 4567890L)
+                        ),
+                        ReadingProgress(1, 2L, emptyList())),
+                deserializer.withContent("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"note\": \"random note\",\n" +
+                        "      \"timestamp\": 4567890,\n" +
+                        "      \"someRandomUnknownField\": 98765\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"note\": \"yet another note\"\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  }\n" +
+                        "}").deserialize())
+    }
+
+    @Test
     fun testWithReadingProgress() {
         assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(),
                 ReadingProgress(1, 2L, listOf(

@@ -150,7 +150,7 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
             content?.let {
                 var bookmarks: List<Bookmark>? = null
                 var highlights: List<Highlight>? = null
-                val notes = mutableListOf<Note>()
+                var notes: List<Note>? = null
                 var readingProgress: ReadingProgress? = null
 
                 with(JsonReader(StringReader(it))) {
@@ -159,10 +159,7 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
                         when (nextName()) {
                             Constants.KEY_BOOKMARKS -> bookmarks = readBookMarks()
                             Constants.KEY_HIGHLIGHTS -> highlights = readHighlights()
-                            Constants.KEY_NOTES -> {
-                                // TODO
-                                skipValue()
-                            }
+                            Constants.KEY_NOTES -> notes = readNotes()
                             Constants.KEY_READING_PROGRESS -> readingProgress = readReadingProgress()
                             else -> skipValue()
                         }
@@ -173,9 +170,10 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
 
                 if (bookmarks == null) throw IllegalStateException("Missing bookmarks")
                 if (highlights == null) throw IllegalStateException("Missing highlights")
+                if (notes == null) throw IllegalStateException("Missing notes")
                 if (readingProgress == null) throw IllegalStateException("Missing reading progress")
 
-                return@let BackupManager.Data(bookmarks!!, highlights!!, notes, readingProgress!!)
+                return@let BackupManager.Data(bookmarks!!, highlights!!, notes!!, readingProgress!!)
             } ?: throw IllegalStateException("Missing content")
 
     private fun JsonReader.readBookMarks(): List<Bookmark> {
@@ -236,6 +234,37 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
         }
         endObject()
         return Highlight(VerseIndex(bookIndex, chapterIndex, verseIndex), color, timestamp)
+    }
+
+    private fun JsonReader.readNotes(): List<Note> {
+        val notes = mutableListOf<Note>()
+        beginArray()
+        while (hasNext()) {
+            readNote().let { if (it.isValid()) notes.add(it) }
+        }
+        endArray()
+        return notes
+    }
+
+    private fun JsonReader.readNote(): Note {
+        var bookIndex = -1
+        var chapterIndex = -1
+        var verseIndex = -1
+        var note = ""
+        var timestamp = -1L
+        beginObject()
+        while (hasNext()) {
+            when (nextName()) {
+                Constants.KEY_BOOK_INDEX -> bookIndex = nextInt()
+                Constants.KEY_CHAPTER_INDEX -> chapterIndex = nextInt()
+                Constants.KEY_VERSE_INDEX -> verseIndex = nextInt()
+                Constants.KEY_NOTE -> note = nextString()
+                Constants.KEY_TIMESTAMP -> timestamp = nextLong()
+                else -> skipValue()
+            }
+        }
+        endObject()
+        return Note(VerseIndex(bookIndex, chapterIndex, verseIndex), note, timestamp)
     }
 
     private fun JsonReader.readReadingProgress(): ReadingProgress {
