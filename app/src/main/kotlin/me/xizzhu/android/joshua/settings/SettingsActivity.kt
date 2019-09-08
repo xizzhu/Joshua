@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.settings
 
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
+import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -53,6 +54,10 @@ interface SettingsView : MVPView {
 }
 
 class SettingsActivity : BaseActivity(), SettingsView {
+    companion object {
+        private const val CODE_PICK_CONTENT_FOR_RESTORE = 9999
+    }
+
     private val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
 
     @Inject
@@ -87,7 +92,15 @@ class SettingsActivity : BaseActivity(), SettingsView {
         }
 
         restore.setOnClickListener {
-            // TODO
+            try {
+                val chooserIntent = Intent.createChooser(
+                        Intent(Intent.ACTION_GET_CONTENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE),
+                        getString(R.string.text_restore_from))
+                startActivityForResult(chooserIntent, CODE_PICK_CONTENT_FOR_RESTORE)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to start activity to get content for restore", e)
+                Toast.makeText(this@SettingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+            }
         }
 
         fontSize.setOnClickListener {
@@ -131,6 +144,18 @@ class SettingsActivity : BaseActivity(), SettingsView {
     override fun onStop() {
         presenter.detachView()
         super.onStop()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            CODE_PICK_CONTENT_FOR_RESTORE -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    data?.data?.let { presenter.restore(it) }
+                            ?: Toast.makeText(this, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+                }
+            }
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     override fun onBackupStarted() {
