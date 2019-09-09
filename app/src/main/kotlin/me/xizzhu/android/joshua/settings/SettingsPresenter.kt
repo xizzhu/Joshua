@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.settings
 
-import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -60,8 +59,17 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
         }
     }
 
-    fun restore(uri: Uri) {
-        // TODO
+    fun restore(content: String) {
+        coroutineScope.launch(Dispatchers.Main) {
+            try {
+                view?.onRestoreStarted()
+                backupManager.restore(content)
+                view?.onRestored()
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to restore data", e)
+                view?.onRestoreFailed()
+            }
+        }
     }
 
     fun saveSettings(settings: Settings) {

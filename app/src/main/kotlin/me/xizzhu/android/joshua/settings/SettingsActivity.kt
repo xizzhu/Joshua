@@ -27,6 +27,8 @@ import android.util.TypedValue
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.SwitchCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
@@ -45,6 +47,12 @@ interface SettingsView : MVPView {
     fun onBackupReady(textForBackup: String)
 
     fun onBackupFailed()
+
+    fun onRestoreStarted()
+
+    fun onRestored()
+
+    fun onRestoreFailed()
 
     fun onVersionLoaded(version: String)
 
@@ -150,7 +158,15 @@ class SettingsActivity : BaseActivity(), SettingsView {
         when (requestCode) {
             CODE_PICK_CONTENT_FOR_RESTORE -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    data?.data?.let { presenter.restore(it) }
+                    data?.data
+                            ?.let {
+                                showDialog()
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    contentResolver.openInputStream(it)?.use {
+                                        presenter.restore(String(it.readBytes(), Charsets.UTF_8))
+                                    }
+                                }
+                            }
                             ?: Toast.makeText(this, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
                 }
             }
@@ -159,6 +175,10 @@ class SettingsActivity : BaseActivity(), SettingsView {
     }
 
     override fun onBackupStarted() {
+        showDialog()
+    }
+
+    private fun showDialog() {
         dismissDialog()
         dialog = ProgressDialog.showIndeterminateProgressDialog(this, R.string.dialog_wait)
     }
@@ -179,6 +199,19 @@ class SettingsActivity : BaseActivity(), SettingsView {
         dismissDialog()
         DialogHelper.showDialog(this, true, R.string.dialog_backup_error,
                 DialogInterface.OnClickListener { _, _ -> presenter.backup() })
+    }
+
+    override fun onRestoreStarted() {
+        // do nothing
+    }
+
+    override fun onRestored() {
+        dismissDialog()
+    }
+
+    override fun onRestoreFailed() {
+        dismissDialog()
+        Toast.makeText(this, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
     }
 
     override fun onVersionLoaded(version: String) {

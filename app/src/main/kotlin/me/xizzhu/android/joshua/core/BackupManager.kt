@@ -64,6 +64,8 @@ class BackupManager(private val serializerFactory: () -> Serializer,
     suspend fun restore(content: String) {
         withContext(Dispatchers.Default) {
             val data = deserializerFactory().withContent(content).deserialize()
+
+            // TODO merge and store data
         }
     }
 }

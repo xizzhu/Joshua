@@ -123,6 +123,36 @@ class SettingsPresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testRestore() {
+        runBlocking {
+            val content = "random content for restore"
+            settingsPresenter.restore(content)
+            with(inOrder(settingsView, backupManager)) {
+                verify(settingsView, times(1)).onRestoreStarted()
+                verify(backupManager, times(1)).restore(content)
+                verify(settingsView, times(1)).onRestored()
+            }
+            verify(settingsView, never()).onRestoreFailed()
+        }
+    }
+
+    @Test
+    fun testRestoreWithException() {
+        runBlocking {
+            val content = "random content for restore"
+            `when`(backupManager.restore(content)).thenThrow(RuntimeException("Random exception"))
+
+            settingsPresenter.restore(content)
+            with(inOrder(settingsView, backupManager)) {
+                verify(settingsView, times(1)).onRestoreStarted()
+                verify(backupManager, times(1)).restore(content)
+                verify(settingsView, times(1)).onRestoreFailed()
+            }
+            verify(settingsView, never()).onRestored()
+        }
+    }
+
+    @Test
     fun testObserveSettings() {
         runBlocking {
             verify(settingsView, never()).onSettingsUpdated(any())
