@@ -66,6 +66,10 @@ class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
         bookmarkRepository.save(bookmark)
     }
 
+    suspend fun save(bookmarks: List<Bookmark>) {
+        bookmarkRepository.save(bookmarks)
+    }
+
     suspend fun remove(verseIndex: VerseIndex) {
         bookmarkRepository.remove(verseIndex)
     }

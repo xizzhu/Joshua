@@ -106,6 +106,10 @@ class BookmarkDao(sqliteHelper: SQLiteOpenHelper) {
         db.insertWithOnConflict(TABLE_BOOKMARK, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
+    fun save(bookmarks: List<Bookmark>) {
+        db.withTransaction { bookmarks.forEach { save(it) } }
+    }
+
     fun remove(verseIndex: VerseIndex) {
         db.delete(TABLE_BOOKMARK, "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
                 arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()))
