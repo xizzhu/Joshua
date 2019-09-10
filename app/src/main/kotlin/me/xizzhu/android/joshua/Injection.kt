@@ -35,7 +35,6 @@ import me.xizzhu.android.joshua.annotated.highlights.HighlightsModule
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.annotated.notes.NotesModule
 import me.xizzhu.android.joshua.core.repository.remote.http.HttpTranslationService
-import me.xizzhu.android.joshua.core.serializer.android.BackupJsonDeserializer
 import me.xizzhu.android.joshua.core.serializer.android.BackupJsonSerializer
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
 import me.xizzhu.android.joshua.progress.ReadingProgressModule
@@ -74,8 +73,7 @@ class AppModule(private val app: App) {
                                  highlightManager: HighlightManager,
                                  noteManager: NoteManager,
                                  readingProgressManager: ReadingProgressManager): BackupManager =
-                BackupManager({ BackupJsonSerializer() }, { BackupJsonDeserializer() },
-                        bookmarkManager, highlightManager, noteManager, readingProgressManager)
+                BackupManager(BackupJsonSerializer(), bookmarkManager, highlightManager, noteManager, readingProgressManager)
 
         @JvmStatic
         @Provides

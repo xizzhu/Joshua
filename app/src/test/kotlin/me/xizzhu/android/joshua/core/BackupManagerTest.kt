@@ -28,8 +28,6 @@ class BackupManagerTest : BaseUnitTest() {
     @Mock
     private lateinit var serializer: BackupManager.Serializer
     @Mock
-    private lateinit var deserializer: BackupManager.Deserializer
-    @Mock
     private lateinit var bookmarkManager: BookmarkManager
     @Mock
     private lateinit var highlightManager: HighlightManager
@@ -45,36 +43,32 @@ class BackupManagerTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            `when`(serializer.withBookmarks(any())).thenReturn(serializer)
-            `when`(serializer.withHighlights(any())).thenReturn(serializer)
-            `when`(serializer.withNotes(any())).thenReturn(serializer)
-            `when`(serializer.withReadingProgress(any())).thenReturn(serializer)
             `when`(bookmarkManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
             `when`(highlightManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
             `when`(noteManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
             `when`(readingProgressManager.readReadingProgress()).thenReturn(ReadingProgress(1, 2L, emptyList()))
-            backupManager = BackupManager({ serializer }, { deserializer }, bookmarkManager, highlightManager, noteManager, readingProgressManager)
+            backupManager = BackupManager(serializer, bookmarkManager, highlightManager, noteManager, readingProgressManager)
         }
     }
 
     @Test
-    fun testPrepareJsonForBackup() {
+    fun testPrepareForBackup() {
         runBlocking {
-            `when`(serializer.serialize()).thenReturn("random value")
+            `when`(serializer.serialize(any())).thenReturn("random value")
             assertEquals("random value", backupManager.prepareForBackup())
         }
     }
 
     @Test(expected = RuntimeException::class)
-    fun testPrepareJsonForBackupWithException() {
+    fun testPrepareForBackupWithException() {
         runBlocking {
-            `when`(serializer.serialize()).thenThrow(RuntimeException("Random exception"))
+            `when`(serializer.serialize(any())).thenThrow(RuntimeException("Random exception"))
             backupManager.prepareForBackup()
         }
     }
 
     @Test(expected = RuntimeException::class)
-    fun testPrepareJsonForBackupWithAsyncFailed() {
+    fun testPrepareForBackupWithAsyncFailed() {
         runBlocking {
             `when`(bookmarkManager.read(Constants.SORT_BY_DATE)).thenThrow(RuntimeException("Random exception"))
             backupManager.prepareForBackup()

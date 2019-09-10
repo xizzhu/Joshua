@@ -20,29 +20,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 
-class BackupManager(private val serializerFactory: () -> Serializer,
-                    private val deserializerFactory: () -> Deserializer,
+class BackupManager(private val serializer: Serializer,
                     private val bookmarkManager: BookmarkManager,
                     private val highlightManager: HighlightManager,
                     private val noteManager: NoteManager,
                     private val readingProgressManager: ReadingProgressManager) {
     interface Serializer {
-        fun withBookmarks(bookmarks: List<Bookmark>): Serializer
+        fun serialize(data: Data): String
 
-        fun withHighlights(highlights: List<Highlight>): Serializer
-
-        fun withNotes(notes: List<Note>): Serializer
-
-        fun withReadingProgress(readingProgress: ReadingProgress): Serializer
-
-        fun serialize(): String
-    }
-
-    interface Deserializer {
-        fun withContent(content: String): Deserializer
-
-
-        fun deserialize(): Data
+        fun deserialize(content: String): Data
     }
 
     data class Data(val bookmarks: List<Bookmark>, val highlights: List<Highlight>,
@@ -53,17 +39,13 @@ class BackupManager(private val serializerFactory: () -> Serializer,
         val highlightsAsync = async { highlightManager.read(Constants.SORT_BY_DATE) }
         val notesAsync = async { noteManager.read(Constants.SORT_BY_DATE) }
         val readingProgressAsync = async { readingProgressManager.readReadingProgress() }
-        return@withContext serializerFactory()
-                .withBookmarks(bookmarksAsync.await())
-                .withHighlights(highlightsAsync.await())
-                .withNotes(notesAsync.await())
-                .withReadingProgress(readingProgressAsync.await())
-                .serialize()
+        return@withContext serializer.serialize(
+                Data(bookmarksAsync.await(), highlightsAsync.await(), notesAsync.await(), readingProgressAsync.await()))
     }
 
     suspend fun restore(content: String) {
         withContext(Dispatchers.Default) {
-            val data = deserializerFactory().withContent(content).deserialize()
+            val data = serializer.deserialize(content)
 
             // TODO merge and store data
         }

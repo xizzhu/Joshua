@@ -43,138 +43,116 @@ private object Constants {
 }
 
 class BackupJsonSerializer : BackupManager.Serializer {
-    private val writer = StringWriter()
-    private val jsonWriter = JsonWriter(BufferedWriter(writer)).apply {
-        setIndent("  ")
-        beginObject()
-    }
-
-    override fun withBookmarks(bookmarks: List<Bookmark>): BackupManager.Serializer {
-        with(jsonWriter) {
-            name(Constants.KEY_BOOKMARKS)
-            beginArray()
-            bookmarks.forEach { bookmark ->
-                beginObject()
-                withVerseIndex(bookmark.verseIndex)
-                name(Constants.KEY_TIMESTAMP).value(bookmark.timestamp)
-                endObject()
-            }
-            endArray()
-        }
-
-        return this
-    }
-
-    private fun withVerseIndex(verseIndex: VerseIndex) {
-        with(jsonWriter) {
-            name(Constants.KEY_BOOK_INDEX).value(verseIndex.bookIndex)
-            name(Constants.KEY_CHAPTER_INDEX).value(verseIndex.chapterIndex)
-            name(Constants.KEY_VERSE_INDEX).value(verseIndex.verseIndex)
-        }
-    }
-
-    override fun withHighlights(highlights: List<Highlight>): BackupManager.Serializer {
-        with(jsonWriter) {
-            name(Constants.KEY_HIGHLIGHTS)
-            beginArray()
-            highlights.forEach { highlight ->
-                beginObject()
-                withVerseIndex(highlight.verseIndex)
-                name(Constants.KEY_COLOR).value(highlight.color)
-                name(Constants.KEY_TIMESTAMP).value(highlight.timestamp)
-                endObject()
-            }
-            endArray()
-        }
-
-        return this
-    }
-
-    override fun withNotes(notes: List<Note>): BackupManager.Serializer {
-        with(jsonWriter) {
-            name(Constants.KEY_NOTES)
-            beginArray()
-            notes.forEach { note ->
-                beginObject()
-                withVerseIndex(note.verseIndex)
-                name(Constants.KEY_NOTE).value(note.note)
-                name(Constants.KEY_TIMESTAMP).value(note.timestamp)
-                endObject()
-            }
-            endArray()
-        }
-
-        return this
-    }
-
-    override fun withReadingProgress(readingProgress: ReadingProgress): BackupManager.Serializer {
-        with(jsonWriter) {
-            name(Constants.KEY_READING_PROGRESS)
-            beginObject()
-            name(Constants.KEY_CONTINUOUS_READING_DAYS).value(readingProgress.continuousReadingDays)
-            name(Constants.KEY_LAST_READING_TIMESTAMP).value(readingProgress.lastReadingTimestamp)
-            name(Constants.KEY_CHAPTER_READING_STATUS)
-            beginArray()
-            readingProgress.chapterReadingStatus.forEach { chapterReadingStatus ->
-                beginObject()
-                name(Constants.KEY_BOOK_INDEX).value(chapterReadingStatus.bookIndex)
-                name(Constants.KEY_CHAPTER_INDEX).value(chapterReadingStatus.chapterIndex)
-                name(Constants.KEY_READ_COUNT).value(chapterReadingStatus.readCount)
-                name(Constants.KEY_TIME_SPENT_IN_MILLIS).value(chapterReadingStatus.timeSpentInMillis)
-                name(Constants.KEY_LAST_READING_TIMESTAMP).value(chapterReadingStatus.lastReadingTimestamp)
-                endObject()
-            }
-            endArray()
-            endObject()
-        }
-
-        return this
-    }
-
-    override fun serialize(): String {
-        jsonWriter.endObject()
-        jsonWriter.close()
+    override fun serialize(data: BackupManager.Data): String {
+        val writer = StringWriter()
+        JsonWriter(BufferedWriter(writer)).apply { setIndent("  ") }
+                .beginObject()
+                .withBookmarks(data.bookmarks)
+                .withHighlights(data.highlights)
+                .withNotes(data.notes)
+                .withReadingProgress(data.readingProgress)
+                .endObject()
+                .close()
         return writer.toString()
     }
-}
 
-class BackupJsonDeserializer : BackupManager.Deserializer {
-    private var content: String? = null
-
-    override fun withContent(content: String): BackupManager.Deserializer {
-        this.content = content
+    private fun JsonWriter.withBookmarks(bookmarks: List<Bookmark>): JsonWriter {
+        name(Constants.KEY_BOOKMARKS)
+        beginArray()
+        bookmarks.forEach { bookmark ->
+            beginObject()
+            withVerseIndex(bookmark.verseIndex)
+            name(Constants.KEY_TIMESTAMP).value(bookmark.timestamp)
+            endObject()
+        }
+        endArray()
         return this
     }
 
-    override fun deserialize(): BackupManager.Data =
-            content?.let {
-                var bookmarks: List<Bookmark>? = null
-                var highlights: List<Highlight>? = null
-                var notes: List<Note>? = null
-                var readingProgress: ReadingProgress? = null
+    private fun JsonWriter.withVerseIndex(verseIndex: VerseIndex): JsonWriter {
+        name(Constants.KEY_BOOK_INDEX).value(verseIndex.bookIndex)
+        name(Constants.KEY_CHAPTER_INDEX).value(verseIndex.chapterIndex)
+        name(Constants.KEY_VERSE_INDEX).value(verseIndex.verseIndex)
+        return this
+    }
 
-                with(JsonReader(StringReader(it))) {
-                    beginObject()
-                    while (hasNext()) {
-                        when (nextName()) {
-                            Constants.KEY_BOOKMARKS -> bookmarks = readBookMarks()
-                            Constants.KEY_HIGHLIGHTS -> highlights = readHighlights()
-                            Constants.KEY_NOTES -> notes = readNotes()
-                            Constants.KEY_READING_PROGRESS -> readingProgress = readReadingProgress()
-                            else -> skipValue()
-                        }
-                    }
-                    endObject()
-                    close()
+    private fun JsonWriter.withHighlights(highlights: List<Highlight>): JsonWriter {
+        name(Constants.KEY_HIGHLIGHTS)
+        beginArray()
+        highlights.forEach { highlight ->
+            beginObject()
+            withVerseIndex(highlight.verseIndex)
+            name(Constants.KEY_COLOR).value(highlight.color)
+            name(Constants.KEY_TIMESTAMP).value(highlight.timestamp)
+            endObject()
+        }
+        endArray()
+        return this
+    }
+
+    private fun JsonWriter.withNotes(notes: List<Note>): JsonWriter {
+        name(Constants.KEY_NOTES)
+        beginArray()
+        notes.forEach { note ->
+            beginObject()
+            withVerseIndex(note.verseIndex)
+            name(Constants.KEY_NOTE).value(note.note)
+            name(Constants.KEY_TIMESTAMP).value(note.timestamp)
+            endObject()
+        }
+        endArray()
+        return this
+    }
+
+    private fun JsonWriter.withReadingProgress(readingProgress: ReadingProgress): JsonWriter {
+        name(Constants.KEY_READING_PROGRESS)
+        beginObject()
+        name(Constants.KEY_CONTINUOUS_READING_DAYS).value(readingProgress.continuousReadingDays)
+        name(Constants.KEY_LAST_READING_TIMESTAMP).value(readingProgress.lastReadingTimestamp)
+        name(Constants.KEY_CHAPTER_READING_STATUS)
+        beginArray()
+        readingProgress.chapterReadingStatus.forEach { chapterReadingStatus ->
+            beginObject()
+            name(Constants.KEY_BOOK_INDEX).value(chapterReadingStatus.bookIndex)
+            name(Constants.KEY_CHAPTER_INDEX).value(chapterReadingStatus.chapterIndex)
+            name(Constants.KEY_READ_COUNT).value(chapterReadingStatus.readCount)
+            name(Constants.KEY_TIME_SPENT_IN_MILLIS).value(chapterReadingStatus.timeSpentInMillis)
+            name(Constants.KEY_LAST_READING_TIMESTAMP).value(chapterReadingStatus.lastReadingTimestamp)
+            endObject()
+        }
+        endArray()
+        endObject()
+        return this
+    }
+
+    override fun deserialize(content: String): BackupManager.Data {
+        var bookmarks: List<Bookmark>? = null
+        var highlights: List<Highlight>? = null
+        var notes: List<Note>? = null
+        var readingProgress: ReadingProgress? = null
+
+        with(JsonReader(StringReader(content))) {
+            beginObject()
+            while (hasNext()) {
+                when (nextName()) {
+                    Constants.KEY_BOOKMARKS -> bookmarks = readBookMarks()
+                    Constants.KEY_HIGHLIGHTS -> highlights = readHighlights()
+                    Constants.KEY_NOTES -> notes = readNotes()
+                    Constants.KEY_READING_PROGRESS -> readingProgress = readReadingProgress()
+                    else -> skipValue()
                 }
+            }
+            endObject()
+            close()
+        }
 
-                if (bookmarks == null) throw IllegalStateException("Missing bookmarks")
-                if (highlights == null) throw IllegalStateException("Missing highlights")
-                if (notes == null) throw IllegalStateException("Missing notes")
-                if (readingProgress?.isValid() != true) throw IllegalStateException("Missing reading progress")
+        if (bookmarks == null) throw IllegalStateException("Missing bookmarks")
+        if (highlights == null) throw IllegalStateException("Missing highlights")
+        if (notes == null) throw IllegalStateException("Missing notes")
+        if (readingProgress?.isValid() != true) throw IllegalStateException("Missing reading progress")
 
-                return@let BackupManager.Data(bookmarks!!, highlights!!, notes!!, readingProgress!!)
-            } ?: throw IllegalStateException("Missing content")
+        return BackupManager.Data(bookmarks!!, highlights!!, notes!!, readingProgress!!)
+    }
 
     private fun JsonReader.readBookMarks(): List<Bookmark> {
         val bookmarks = mutableListOf<Bookmark>()
@@ -311,3 +289,4 @@ class BackupJsonDeserializer : BackupManager.Deserializer {
         return ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, readCount, timeSpentInMillis, lastReadingTimestamp)
     }
 }
+

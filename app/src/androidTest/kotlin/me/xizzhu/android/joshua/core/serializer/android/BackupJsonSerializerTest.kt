@@ -32,10 +32,26 @@ class BackupJsonSerializerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testWithEmptyBookmarks() {
+    fun testWithEmptyData() {
         assertEquals("{\n" +
-                "  \"bookmarks\": []\n" +
-                "}", serializer.withBookmarks(emptyList()).serialize())
+                "  \"bookmarks\": [],\n" +
+                "  \"highlights\": [],\n" +
+                "  \"notes\": [],\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 0,\n" +
+                "    \"lastReadingTimestamp\": 0,\n" +
+                "    \"chapterReadingStatus\": []\n" +
+                "  }\n" +
+                "}",
+                serializer.serialize(
+                        BackupManager.Data(
+                                emptyList(),
+                                emptyList(),
+                                emptyList(),
+                                ReadingProgress(0, 0L, emptyList())
+                        )
+                )
+        )
     }
 
     @Test
@@ -48,11 +64,26 @@ class BackupJsonSerializerTest : BaseUnitTest() {
                 "      \"verseIndex\": 3,\n" +
                 "      \"timestamp\": 4567890\n" +
                 "    }\n" +
-                "  ]\n" +
+                "  ],\n" +
+                "  \"highlights\": [],\n" +
+                "  \"notes\": [],\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 0,\n" +
+                "    \"lastReadingTimestamp\": 0,\n" +
+                "    \"chapterReadingStatus\": []\n" +
+                "  }\n" +
                 "}",
-                serializer.withBookmarks(listOf(
-                        Bookmark(VerseIndex(1, 2, 3), 4567890L)
-                )).serialize())
+                serializer.serialize(
+                        BackupManager.Data(
+                                listOf(
+                                        Bookmark(VerseIndex(1, 2, 3), 4567890L)
+                                ),
+                                emptyList(),
+                                emptyList(),
+                                ReadingProgress(0, 0L, emptyList())
+                        )
+                )
+        )
     }
 
     @Test
@@ -71,24 +102,33 @@ class BackupJsonSerializerTest : BaseUnitTest() {
                 "      \"verseIndex\": 7,\n" +
                 "      \"timestamp\": 6543210\n" +
                 "    }\n" +
-                "  ]\n" +
+                "  ],\n" +
+                "  \"highlights\": [],\n" +
+                "  \"notes\": [],\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 0,\n" +
+                "    \"lastReadingTimestamp\": 0,\n" +
+                "    \"chapterReadingStatus\": []\n" +
+                "  }\n" +
                 "}",
-                serializer.withBookmarks(listOf(
-                        Bookmark(VerseIndex(1, 2, 3), 4567890L),
-                        Bookmark(VerseIndex(9, 8, 7), 6543210L)
-                )).serialize())
-    }
-
-    @Test
-    fun testWithEmptyHighlights() {
-        assertEquals("{\n" +
-                "  \"highlights\": []\n" +
-                "}", serializer.withHighlights(emptyList()).serialize())
+                serializer.serialize(
+                        BackupManager.Data(
+                                listOf(
+                                        Bookmark(VerseIndex(1, 2, 3), 4567890L),
+                                        Bookmark(VerseIndex(9, 8, 7), 6543210L)
+                                ),
+                                emptyList(),
+                                emptyList(),
+                                ReadingProgress(0, 0L, emptyList())
+                        )
+                )
+        )
     }
 
     @Test
     fun testWithSingleHighlight() {
         assertEquals("{\n" +
+                "  \"bookmarks\": [],\n" +
                 "  \"highlights\": [\n" +
                 "    {\n" +
                 "      \"bookIndex\": 1,\n" +
@@ -97,16 +137,31 @@ class BackupJsonSerializerTest : BaseUnitTest() {
                 "      \"color\": ${Highlight.COLOR_BLUE},\n" +
                 "      \"timestamp\": 4567890\n" +
                 "    }\n" +
-                "  ]\n" +
+                "  ],\n" +
+                "  \"notes\": [],\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 0,\n" +
+                "    \"lastReadingTimestamp\": 0,\n" +
+                "    \"chapterReadingStatus\": []\n" +
+                "  }\n" +
                 "}",
-                serializer.withHighlights(listOf(
-                        Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L)
-                )).serialize())
+                serializer.serialize(
+                        BackupManager.Data(
+                                emptyList(),
+                                listOf(
+                                        Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L)
+                                ),
+                                emptyList(),
+                                ReadingProgress(0, 0L, emptyList())
+                        )
+                )
+        )
     }
 
     @Test
     fun testWithHighlights() {
         assertEquals("{\n" +
+                "  \"bookmarks\": [],\n" +
                 "  \"highlights\": [\n" +
                 "    {\n" +
                 "      \"bookIndex\": 1,\n" +
@@ -122,24 +177,33 @@ class BackupJsonSerializerTest : BaseUnitTest() {
                 "      \"color\": ${Highlight.COLOR_YELLOW},\n" +
                 "      \"timestamp\": 6543210\n" +
                 "    }\n" +
-                "  ]\n" +
+                "  ],\n" +
+                "  \"notes\": [],\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 0,\n" +
+                "    \"lastReadingTimestamp\": 0,\n" +
+                "    \"chapterReadingStatus\": []\n" +
+                "  }\n" +
                 "}",
-                serializer.withHighlights(listOf(
-                        Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
-                        Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
-                )).serialize())
-    }
-
-    @Test
-    fun testWithEmptyNotes() {
-        assertEquals("{\n" +
-                "  \"notes\": []\n" +
-                "}", serializer.withNotes(emptyList()).serialize())
+                serializer.serialize(
+                        BackupManager.Data(
+                                emptyList(),
+                                listOf(
+                                        Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
+                                        Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
+                                ),
+                                emptyList(),
+                                ReadingProgress(0, 0L, emptyList())
+                        )
+                )
+        )
     }
 
     @Test
     fun testWithSingleNote() {
         assertEquals("{\n" +
+                "  \"bookmarks\": [],\n" +
+                "  \"highlights\": [],\n" +
                 "  \"notes\": [\n" +
                 "    {\n" +
                 "      \"bookIndex\": 1,\n" +
@@ -148,16 +212,31 @@ class BackupJsonSerializerTest : BaseUnitTest() {
                 "      \"note\": \"random note\",\n" +
                 "      \"timestamp\": 4567890\n" +
                 "    }\n" +
-                "  ]\n" +
+                "  ],\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"continuousReadingDays\": 0,\n" +
+                "    \"lastReadingTimestamp\": 0,\n" +
+                "    \"chapterReadingStatus\": []\n" +
+                "  }\n" +
                 "}",
-                serializer.withNotes(listOf(
-                        Note(VerseIndex(1, 2, 3), "random note", 4567890L)
-                )).serialize())
+                serializer.serialize(
+                        BackupManager.Data(
+                                emptyList(),
+                                emptyList(),
+                                listOf(
+                                        Note(VerseIndex(1, 2, 3), "random note", 4567890L)
+                                ),
+                                ReadingProgress(0, 0L, emptyList())
+                        )
+                )
+        )
     }
 
     @Test
     fun testWithNotes() {
         assertEquals("{\n" +
+                "  \"bookmarks\": [],\n" +
+                "  \"highlights\": [],\n" +
                 "  \"notes\": [\n" +
                 "    {\n" +
                 "      \"bookIndex\": 1,\n" +
@@ -173,28 +252,33 @@ class BackupJsonSerializerTest : BaseUnitTest() {
                 "      \"note\": \"yet another note\",\n" +
                 "      \"timestamp\": 6543210\n" +
                 "    }\n" +
-                "  ]\n" +
-                "}",
-                serializer.withNotes(listOf(
-                        Note(VerseIndex(1, 2, 3), "random note", 4567890L),
-                        Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
-                )).serialize())
-    }
-
-    @Test
-    fun testWithEmptyReadingProgress() {
-        assertEquals("{\n" +
+                "  ],\n" +
                 "  \"readingProgress\": {\n" +
-                "    \"continuousReadingDays\": 1,\n" +
-                "    \"lastReadingTimestamp\": 2,\n" +
+                "    \"continuousReadingDays\": 0,\n" +
+                "    \"lastReadingTimestamp\": 0,\n" +
                 "    \"chapterReadingStatus\": []\n" +
                 "  }\n" +
-                "}", serializer.withReadingProgress(ReadingProgress(1, 2L, emptyList())).serialize())
+                "}",
+                serializer.serialize(
+                        BackupManager.Data(
+                                emptyList(),
+                                emptyList(),
+                                listOf(
+                                        Note(VerseIndex(1, 2, 3), "random note", 4567890L),
+                                        Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
+                                ),
+                                ReadingProgress(0, 0L, emptyList())
+                        )
+                )
+        )
     }
 
     @Test
     fun testWithSingleReadingProgress() {
         assertEquals("{\n" +
+                "  \"bookmarks\": [],\n" +
+                "  \"highlights\": [],\n" +
+                "  \"notes\": [],\n" +
                 "  \"readingProgress\": {\n" +
                 "    \"continuousReadingDays\": 1,\n" +
                 "    \"lastReadingTimestamp\": 2,\n" +
@@ -209,14 +293,27 @@ class BackupJsonSerializerTest : BaseUnitTest() {
                 "    ]\n" +
                 "  }\n" +
                 "}",
-                serializer.withReadingProgress(ReadingProgress(1, 2L, listOf(
-                        ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L)
-                ))).serialize())
+                serializer.serialize(
+                        BackupManager.Data(
+                                emptyList(),
+                                emptyList(),
+                                emptyList(),
+                                ReadingProgress(1, 2L,
+                                        listOf(
+                                                ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L)
+                                        )
+                                )
+                        )
+                )
+        )
     }
 
     @Test
     fun testWithReadingProgress() {
         assertEquals("{\n" +
+                "  \"bookmarks\": [],\n" +
+                "  \"highlights\": [],\n" +
+                "  \"notes\": [],\n" +
                 "  \"readingProgress\": {\n" +
                 "    \"continuousReadingDays\": 1,\n" +
                 "    \"lastReadingTimestamp\": 2,\n" +
@@ -238,29 +335,20 @@ class BackupJsonSerializerTest : BaseUnitTest() {
                 "    ]\n" +
                 "  }\n" +
                 "}",
-                serializer.withReadingProgress(ReadingProgress(1, 2L, listOf(
-                        ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
-                        ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
-                ))).serialize())
-    }
-
-    @Test
-    fun testWithEverythingEmpty() {
-        assertEquals("{\n" +
-                "  \"bookmarks\": [],\n" +
-                "  \"highlights\": [],\n" +
-                "  \"notes\": [],\n" +
-                "  \"readingProgress\": {\n" +
-                "    \"continuousReadingDays\": 1,\n" +
-                "    \"lastReadingTimestamp\": 2,\n" +
-                "    \"chapterReadingStatus\": []\n" +
-                "  }\n" +
-                "}",
-                serializer.withBookmarks(emptyList())
-                        .withHighlights(emptyList())
-                        .withNotes(emptyList())
-                        .withReadingProgress(ReadingProgress(1, 2L, emptyList()))
-                        .serialize())
+                serializer.serialize(
+                        BackupManager.Data(
+                                emptyList(),
+                                emptyList(),
+                                emptyList(),
+                                ReadingProgress(1, 2L,
+                                        listOf(
+                                                ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
+                                                ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
+                                        )
+                                )
+                        )
+                )
+        )
     }
 
     @Test
@@ -333,18 +421,506 @@ class BackupJsonSerializerTest : BaseUnitTest() {
                 "    ]\n" +
                 "  }\n" +
                 "}",
-                serializer.withBookmarks(listOf(
-                        Bookmark(VerseIndex(1, 2, 3), 4567890L),
-                        Bookmark(VerseIndex(9, 8, 7), 6543210L)
-                )).withHighlights(listOf(
-                        Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
-                        Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
-                )).withNotes(listOf(
-                        Note(VerseIndex(1, 2, 3), "random note", 4567890L),
-                        Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
-                )).withReadingProgress(ReadingProgress(1, 2L, listOf(
+                serializer.serialize(
+                        BackupManager.Data(
+                                listOf(
+                                        Bookmark(VerseIndex(1, 2, 3), 4567890L),
+                                        Bookmark(VerseIndex(9, 8, 7), 6543210L)
+                                ),
+                                listOf(
+                                        Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
+                                        Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
+                                ),
+                                listOf(
+                                        Note(VerseIndex(1, 2, 3), "random note", 4567890L),
+                                        Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
+                                ),
+                                ReadingProgress(1, 2L,
+                                        listOf(
+                                                ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
+                                                ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
+                                        )
+                                )
+                        )
+                )
+        )
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testDeserializeWithoutBookmarks() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  },\n" +
+                        "  \"someUnknownField\": \"Not known yet\"\n" +
+                        "}"))
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testDeserializeWithoutHighlights() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  },\n" +
+                        "  \"someUnknownField\": \"Not known yet\"\n" +
+                        "}"))
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testDeserializeWithoutNotes() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  },\n" +
+                        "  \"someUnknownField\": \"Not known yet\"\n" +
+                        "}"))
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testDeserializeWithoutReadingProgress() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"someUnknownField\": \"Not known yet\"\n" +
+                        "}"))
+    }
+
+    @Test
+    fun testDeserializeWithMinimumContent() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  },\n" +
+                        "  \"someUnknownField\": \"Not known yet\"\n" +
+                        "}"))
+    }
+
+    @Test
+    fun testDeserializeWithBookmarks() {
+        assertEquals(
+                BackupManager.Data(
+                        listOf(
+                                Bookmark(VerseIndex(1, 2, 3), 4567890L),
+                                Bookmark(VerseIndex(9, 8, 7), 6543210L)
+                        ),
+                        emptyList(),
+                        emptyList(),
+                        ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"timestamp\": 4567890,\n" +
+                        "      \"someRandomUnknownField\": 98765\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  }\n" +
+                        "}"))
+    }
+
+    @Test
+    fun testDeserializeWithInvalidBookmarks() {
+        assertEquals(
+                BackupManager.Data(
+                        listOf(
+                                Bookmark(VerseIndex(9, 8, 7), 6543210L)
+                        ),
+                        emptyList(),
+                        emptyList(),
+                        ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [\n" +
+                        "    {\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"timestamp\": 4567890,\n" +
+                        "      \"someRandomUnknownField\": 98765\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  }\n" +
+                        "}"))
+    }
+
+    @Test
+    fun testDeserializeWithHighlights() {
+        assertEquals(
+                BackupManager.Data(
+                        emptyList(),
+                        listOf(
+                                Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
+                                Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
+                        ),
+                        emptyList(),
+                        ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"color\": ${Highlight.COLOR_BLUE},\n" +
+                        "      \"timestamp\": 4567890,\n" +
+                        "      \"someRandomUnknownField\": 98765\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"color\": ${Highlight.COLOR_YELLOW},\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  }\n" +
+                        "}"))
+    }
+
+    @Test
+    fun testDeserializeWithInvalidHighlights() {
+        assertEquals(
+                BackupManager.Data(
+                        emptyList(),
+                        listOf(
+                                Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L)
+                        ),
+                        emptyList(),
+                        ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"color\": ${Highlight.COLOR_BLUE},\n" +
+                        "      \"timestamp\": 4567890,\n" +
+                        "      \"someRandomUnknownField\": 98765\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"color\": ${Highlight.COLOR_YELLOW}\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  }\n" +
+                        "}"))
+    }
+
+    @Test
+    fun testDeserializeWithNotes() {
+        assertEquals(
+                BackupManager.Data(
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                                Note(VerseIndex(1, 2, 3), "random note", 4567890L),
+                                Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
+                        ),
+                        ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"note\": \"random note\",\n" +
+                        "      \"timestamp\": 4567890,\n" +
+                        "      \"someRandomUnknownField\": 98765\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"note\": \"yet another note\",\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  }\n" +
+                        "}"))
+    }
+
+    @Test
+    fun testDeserializeWithInvalidNotes() {
+        assertEquals(
+                BackupManager.Data(
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                                Note(VerseIndex(1, 2, 3), "random note", 4567890L)
+                        ),
+                        ReadingProgress(1, 2L, emptyList())),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"note\": \"random note\",\n" +
+                        "      \"timestamp\": 4567890,\n" +
+                        "      \"someRandomUnknownField\": 98765\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"note\": \"yet another note\"\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": []\n" +
+                        "  }\n" +
+                        "}"))
+    }
+
+    @Test
+    fun testDeserializeWithReadingProgress() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(),
+                ReadingProgress(1, 2L, listOf(
                         ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
                         ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
-                ))).serialize())
+                ))),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": [\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 3,\n" +
+                        "        \"chapterIndex\": 4,\n" +
+                        "        \"readCount\": 5,\n" +
+                        "        \"timeSpentInMillis\": 6,\n" +
+                        "        \"lastReadingTimestamp\": 7,\n" +
+                        "        \"someRandomUnknownField\": 890\n" +
+                        "      },\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 9,\n" +
+                        "        \"chapterIndex\": 8,\n" +
+                        "        \"readCount\": 7,\n" +
+                        "        \"timeSpentInMillis\": 2,\n" +
+                        "        \"lastReadingTimestamp\": 1\n" +
+                        "      }\n" +
+                        "    ],\n" +
+                        "    \"someUnknownField\": \"Known or unknown?\"\n" +
+                        "  }\n" +
+                        "}"))
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testDeserializeWithInvalidReadingProgress() {
+        serializer.deserialize("{\n" +
+                "  \"bookmarks\": [],\n" +
+                "  \"highlights\": [],\n" +
+                "  \"notes\": [],\n" +
+                "  \"readingProgress\": {\n" +
+                "    \"lastReadingTimestamp\": 2,\n" +
+                "    \"chapterReadingStatus\": [\n" +
+                "      {\n" +
+                "        \"bookIndex\": 3,\n" +
+                "        \"chapterIndex\": 4,\n" +
+                "        \"readCount\": 5,\n" +
+                "        \"timeSpentInMillis\": 6,\n" +
+                "        \"lastReadingTimestamp\": 7,\n" +
+                "        \"someRandomUnknownField\": 890\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}")
+    }
+
+    @Test
+    fun testDeserializeWithReadingProgressAndInvalidChapterReadingStatus() {
+        assertEquals(BackupManager.Data(emptyList(), emptyList(), emptyList(),
+                ReadingProgress(1, 2L, listOf(
+                        ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L)
+                ))),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [],\n" +
+                        "  \"highlights\": [],\n" +
+                        "  \"notes\": [],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": [\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 3,\n" +
+                        "        \"chapterIndex\": 4,\n" +
+                        "        \"readCount\": 5,\n" +
+                        "        \"timeSpentInMillis\": 6,\n" +
+                        "        \"lastReadingTimestamp\": 7,\n" +
+                        "        \"someRandomUnknownField\": 890\n" +
+                        "      },\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 9,\n" +
+                        "        \"chapterIndex\": 8,\n" +
+                        "        \"readCount\": 7,\n" +
+                        "        \"timeSpentInMillis\": 2\n" +
+                        "      }\n" +
+                        "    ]\n" +
+                        "  }\n" +
+                        "}"))
+    }
+
+    @Test
+    fun testDeserializeWithEverything() {
+        assertEquals(
+                BackupManager.Data(
+                        listOf(
+                                Bookmark(VerseIndex(1, 2, 3), 4567890L),
+                                Bookmark(VerseIndex(9, 8, 7), 6543210L)
+                        ),
+                        listOf(
+                                Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
+                                Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
+                        ),
+                        listOf(
+                                Note(VerseIndex(1, 2, 3), "random note", 4567890L),
+                                Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
+                        ),
+                        ReadingProgress(1, 2L, listOf(
+                                ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
+                                ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
+                        ))
+                ),
+                serializer.deserialize("{\n" +
+                        "  \"bookmarks\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"timestamp\": 4567890\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"highlights\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"color\": ${Highlight.COLOR_BLUE},\n" +
+                        "      \"timestamp\": 4567890\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"color\": ${Highlight.COLOR_YELLOW},\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"notes\": [\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 1,\n" +
+                        "      \"chapterIndex\": 2,\n" +
+                        "      \"verseIndex\": 3,\n" +
+                        "      \"note\": \"random note\",\n" +
+                        "      \"timestamp\": 4567890\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"bookIndex\": 9,\n" +
+                        "      \"chapterIndex\": 8,\n" +
+                        "      \"verseIndex\": 7,\n" +
+                        "      \"note\": \"yet another note\",\n" +
+                        "      \"timestamp\": 6543210\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"readingProgress\": {\n" +
+                        "    \"continuousReadingDays\": 1,\n" +
+                        "    \"lastReadingTimestamp\": 2,\n" +
+                        "    \"chapterReadingStatus\": [\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 3,\n" +
+                        "        \"chapterIndex\": 4,\n" +
+                        "        \"readCount\": 5,\n" +
+                        "        \"timeSpentInMillis\": 6,\n" +
+                        "        \"lastReadingTimestamp\": 7\n" +
+                        "      },\n" +
+                        "      {\n" +
+                        "        \"bookIndex\": 9,\n" +
+                        "        \"chapterIndex\": 8,\n" +
+                        "        \"readCount\": 7,\n" +
+                        "        \"timeSpentInMillis\": 2,\n" +
+                        "        \"lastReadingTimestamp\": 1\n" +
+                        "      }\n" +
+                        "    ]\n" +
+                        "  }\n" +
+                        "}"))
     }
 }
