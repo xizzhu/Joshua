@@ -78,6 +78,10 @@ class HighlightManager(private val highlightRepository: HighlightRepository) {
         highlightRepository.save(highlight)
     }
 
+    suspend fun save(highlights: List<Highlight>) {
+        highlightRepository.save(highlights)
+    }
+
     suspend fun remove(verseIndex: VerseIndex) {
         highlightRepository.remove(verseIndex)
     }

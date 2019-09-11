@@ -50,6 +50,12 @@ class AndroidHighlightStorage(private val androidDatabase: AndroidDatabase) : Lo
         }
     }
 
+    override suspend fun save(highlights: List<Highlight>) {
+        withContext(Dispatchers.IO) {
+            androidDatabase.highlightDao.save(highlights)
+        }
+    }
+
     override suspend fun remove(verseIndex: VerseIndex) {
         withContext(Dispatchers.IO) {
             androidDatabase.highlightDao.remove(verseIndex)

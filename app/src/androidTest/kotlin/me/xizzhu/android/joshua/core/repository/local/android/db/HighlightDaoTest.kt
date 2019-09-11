@@ -74,9 +74,7 @@ class HighlightDaoTest : BaseSqliteTest() {
         androidDatabase.highlightDao.save(Highlight(VerseIndex(1, 2, 3), 1, 1L))
         androidDatabase.highlightDao.save(Highlight(VerseIndex(1, 2, 4), 2, 2L))
         androidDatabase.highlightDao.save(Highlight(VerseIndex(1, 4, 3), 3, 3L))
-        androidDatabase.highlightDao.save(highlight1)
-        androidDatabase.highlightDao.save(highlight2)
-        androidDatabase.highlightDao.save(highlight3)
+        androidDatabase.highlightDao.save(listOf(highlight1, highlight2, highlight3))
 
         assertEquals(listOf(highlight3, highlight2, highlight1), androidDatabase.highlightDao.read(Constants.SORT_BY_DATE))
         assertEquals(listOf(highlight1, highlight2, highlight3), androidDatabase.highlightDao.read(Constants.SORT_BY_BOOK))
