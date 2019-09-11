@@ -66,6 +66,10 @@ class NoteManager(private val noteRepository: NoteRepository) {
         noteRepository.save(note)
     }
 
+    suspend fun save(notes: List<Note>) {
+        noteRepository.save(notes)
+    }
+
     suspend fun remove(verseIndex: VerseIndex) {
         noteRepository.remove(verseIndex)
     }

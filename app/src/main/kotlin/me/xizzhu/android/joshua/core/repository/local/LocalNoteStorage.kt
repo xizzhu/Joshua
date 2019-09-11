@@ -33,5 +33,7 @@ interface LocalNoteStorage {
 
     suspend fun save(note: Note)
 
+    suspend fun save(notes: List<Note>)
+
     suspend fun remove(verseIndex: VerseIndex)
 }
