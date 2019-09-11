@@ -30,7 +30,7 @@ class ReadingProgressInteractor(private val readingProgressActivity: ReadingProg
 
     suspend fun readBookNames(translationShortName: String): List<String> = bibleReadingManager.readBookNames(translationShortName)
 
-    suspend fun readReadingProgress(): ReadingProgress = readingProgressManager.readReadingProgress()
+    suspend fun readReadingProgress(): ReadingProgress = readingProgressManager.read()
 
     suspend fun openChapter(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)

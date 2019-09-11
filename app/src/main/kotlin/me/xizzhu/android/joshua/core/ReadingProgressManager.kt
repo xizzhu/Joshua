@@ -110,5 +110,9 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
         currentVerseIndexObserver = null
     }
 
-    suspend fun readReadingProgress(): ReadingProgress = readingProgressRepository.readReadingProgress()
+    suspend fun read(): ReadingProgress = readingProgressRepository.read()
+
+    suspend fun save(readingProgress: ReadingProgress) {
+        readingProgressRepository.save(readingProgress)
+    }
 }
