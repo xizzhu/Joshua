@@ -19,7 +19,7 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -46,7 +46,7 @@ class BackupManagerTest : BaseUnitTest() {
             `when`(bookmarkManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
             `when`(highlightManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
             `when`(noteManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
-            `when`(readingProgressManager.readReadingProgress()).thenReturn(ReadingProgress(1, 2L, emptyList()))
+            `when`(readingProgressManager.read()).thenReturn(ReadingProgress(0, 0L, emptyList()))
             backupManager = BackupManager(serializer, bookmarkManager, highlightManager, noteManager, readingProgressManager)
         }
     }
@@ -72,6 +72,68 @@ class BackupManagerTest : BaseUnitTest() {
         runBlocking {
             `when`(bookmarkManager.read(Constants.SORT_BY_DATE)).thenThrow(RuntimeException("Random exception"))
             backupManager.prepareForBackup()
+        }
+    }
+
+    @Test
+    fun testRestoreWithEmptyReadingProgressChoosingBackup() {
+        runBlocking {
+            `when`(readingProgressManager.read()).thenReturn(ReadingProgress(100, 0L, emptyList()))
+            `when`(serializer.deserialize("")).thenReturn(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())))
+            backupManager.restore("")
+            verify(readingProgressManager, times(1)).save(ReadingProgress(1, 2L, emptyList()))
+        }
+    }
+
+    @Test
+    fun testRestoreWithEmptyReadingProgressChoosingCurrent() {
+        runBlocking {
+            `when`(readingProgressManager.read()).thenReturn(ReadingProgress(3, 4L, emptyList()))
+            `when`(serializer.deserialize("")).thenReturn(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(100, 0L, emptyList())))
+            backupManager.restore("")
+            verify(readingProgressManager, times(1)).save(ReadingProgress(3, 4L, emptyList()))
+        }
+    }
+
+    @Test
+    fun testRestoreWithReadingProgress() {
+        runBlocking {
+            `when`(readingProgressManager.read()).thenReturn(ReadingProgress(0, 0L, listOf(
+                    ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
+                    ReadingProgress.ChapterReadingStatus(1, 2, 30, 40L, 5L)
+            )))
+            `when`(serializer.deserialize("")).thenReturn(BackupManager.Data(emptyList(), emptyList(), emptyList(),
+                    ReadingProgress(1, 2L, listOf(
+                            ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 55L),
+                            ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
+                    ))))
+            backupManager.restore("")
+            verify(readingProgressManager, times(1)).save(ReadingProgress(1, 2L, listOf(
+                    ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
+                    ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 55L),
+                    ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
+            )))
+        }
+    }
+
+    @Test
+    fun testRestoreWithReadingProgress2() {
+        runBlocking {
+            `when`(readingProgressManager.read()).thenReturn(ReadingProgress(0, 0L, listOf(
+                    ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 55L),
+                    ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
+            )))
+            `when`(serializer.deserialize("")).thenReturn(BackupManager.Data(emptyList(), emptyList(), emptyList(),
+                    ReadingProgress(1, 2L, listOf(
+                            ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
+                            ReadingProgress.ChapterReadingStatus(1, 2, 30, 40L, 5L)
+                    ))))
+            backupManager.restore("")
+            verify(readingProgressManager, times(1)).save(ReadingProgress(1, 2L, listOf(
+                    ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
+                    ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 55L),
+                    ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
+            )))
         }
     }
 }

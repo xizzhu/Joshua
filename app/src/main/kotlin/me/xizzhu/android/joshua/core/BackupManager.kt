@@ -16,9 +16,8 @@
 
 package me.xizzhu.android.joshua.core
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import me.xizzhu.android.joshua.utils.nextOrNull
 
 class BackupManager(private val serializer: Serializer,
                     private val bookmarkManager: BookmarkManager,
@@ -38,7 +37,7 @@ class BackupManager(private val serializer: Serializer,
         val bookmarksAsync = async { bookmarkManager.read(Constants.SORT_BY_DATE) }
         val highlightsAsync = async { highlightManager.read(Constants.SORT_BY_DATE) }
         val notesAsync = async { noteManager.read(Constants.SORT_BY_DATE) }
-        val readingProgressAsync = async { readingProgressManager.readReadingProgress() }
+        val readingProgressAsync = async { readingProgressManager.read() }
         return@withContext serializer.serialize(
                 Data(bookmarksAsync.await(), highlightsAsync.await(), notesAsync.await(), readingProgressAsync.await()))
     }
@@ -46,8 +45,60 @@ class BackupManager(private val serializer: Serializer,
     suspend fun restore(content: String) {
         withContext(Dispatchers.Default) {
             val data = serializer.deserialize(content)
+            arrayOf(loadAndMergeReadingProgressAsync(data.readingProgress)).forEach { it.await() }
 
             // TODO merge and store data
         }
+    }
+
+    private fun CoroutineScope.loadAndMergeReadingProgressAsync(backupReadingProgress: ReadingProgress): Deferred<Unit> = async {
+        val currentReadingProgress = readingProgressManager.read()
+        val continuousReadingDays: Int
+        val lastReadingTimestamp: Long
+        if (currentReadingProgress.lastReadingTimestamp >= backupReadingProgress.lastReadingTimestamp) {
+            continuousReadingDays = currentReadingProgress.continuousReadingDays
+            lastReadingTimestamp = currentReadingProgress.lastReadingTimestamp
+        } else {
+            continuousReadingDays = backupReadingProgress.continuousReadingDays
+            lastReadingTimestamp = backupReadingProgress.lastReadingTimestamp
+        }
+
+        val chapterReadingStatus = mutableListOf<ReadingProgress.ChapterReadingStatus>()
+        val currentChapterReadingStatusIterator = currentReadingProgress.chapterReadingStatus.iterator()
+        val backupChapterReadingStatusIterator = backupReadingProgress.chapterReadingStatus.toMutableList()
+                .apply { sortBy { it.bookIndex * 1000 + it.chapterIndex } }
+                .iterator()
+        var currentChapterReadingStatus = currentChapterReadingStatusIterator.nextOrNull()
+        var backupChapterReadingStatus = backupChapterReadingStatusIterator.nextOrNull()
+        while (currentChapterReadingStatus != null && backupChapterReadingStatus != null) {
+            if (currentChapterReadingStatus.bookIndex < backupChapterReadingStatus.bookIndex
+                    || (currentChapterReadingStatus.bookIndex == backupChapterReadingStatus.bookIndex
+                            && currentChapterReadingStatus.chapterIndex < backupChapterReadingStatus.chapterIndex)) {
+                chapterReadingStatus.add(currentChapterReadingStatus)
+                currentChapterReadingStatus = currentChapterReadingStatusIterator.nextOrNull()
+            } else if (currentChapterReadingStatus.bookIndex == backupChapterReadingStatus.bookIndex
+                    && currentChapterReadingStatus.chapterIndex == backupChapterReadingStatus.chapterIndex) {
+                if (currentChapterReadingStatus.lastReadingTimestamp >= backupChapterReadingStatus.lastReadingTimestamp) {
+                    chapterReadingStatus.add(currentChapterReadingStatus)
+                } else {
+                    chapterReadingStatus.add(backupChapterReadingStatus)
+                }
+                currentChapterReadingStatus = currentChapterReadingStatusIterator.nextOrNull()
+                backupChapterReadingStatus = backupChapterReadingStatusIterator.nextOrNull()
+            } else {
+                chapterReadingStatus.add(backupChapterReadingStatus)
+                backupChapterReadingStatus = backupChapterReadingStatusIterator.nextOrNull()
+            }
+        }
+        while (currentChapterReadingStatus != null) {
+            chapterReadingStatus.add(currentChapterReadingStatus)
+            currentChapterReadingStatus = currentChapterReadingStatusIterator.nextOrNull()
+        }
+        while (backupChapterReadingStatus != null) {
+            chapterReadingStatus.add(backupChapterReadingStatus)
+            backupChapterReadingStatus = backupChapterReadingStatusIterator.nextOrNull()
+        }
+
+        readingProgressManager.save(ReadingProgress(continuousReadingDays, lastReadingTimestamp, chapterReadingStatus))
     }
 }
