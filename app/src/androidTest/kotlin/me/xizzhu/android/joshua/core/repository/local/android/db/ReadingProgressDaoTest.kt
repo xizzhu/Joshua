@@ -88,12 +88,14 @@ class ReadingProgressDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSaveThenReadAll() {
-        val expected = listOf(ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
-                ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L))
+        val expected = listOf(
+                ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
+                ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 5L),
+                ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
+        )
+        // saves it in a "random" order to make sure sorting works when reading
+        expected.asReversed().forEach { androidDatabase.readingProgressDao.save(it) }
 
-        for (chapterReadingStatus in expected) {
-            androidDatabase.readingProgressDao.save(chapterReadingStatus)
-        }
         val actual = androidDatabase.readingProgressDao.read()
         assertEquals(expected, actual)
     }
