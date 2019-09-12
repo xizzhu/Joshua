@@ -34,9 +34,9 @@ class BackupManager(private val serializer: Serializer,
                     val notes: List<Note>, val readingProgress: ReadingProgress)
 
     suspend fun prepareForBackup(): String = withContext(Dispatchers.Default) {
-        val bookmarksAsync = async { bookmarkManager.read(Constants.SORT_BY_DATE) }
-        val highlightsAsync = async { highlightManager.read(Constants.SORT_BY_DATE) }
-        val notesAsync = async { noteManager.read(Constants.SORT_BY_DATE) }
+        val bookmarksAsync = async { bookmarkManager.read(Constants.SORT_BY_BOOK) }
+        val highlightsAsync = async { highlightManager.read(Constants.SORT_BY_BOOK) }
+        val notesAsync = async { noteManager.read(Constants.SORT_BY_BOOK) }
         val readingProgressAsync = async { readingProgressManager.read() }
         return@withContext serializer.serialize(
                 Data(bookmarksAsync.await(), highlightsAsync.await(), notesAsync.await(), readingProgressAsync.await()))

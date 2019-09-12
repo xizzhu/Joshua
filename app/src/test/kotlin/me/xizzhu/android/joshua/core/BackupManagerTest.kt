@@ -43,9 +43,9 @@ class BackupManagerTest : BaseUnitTest() {
         super.setup()
 
         runBlocking {
-            `when`(bookmarkManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
-            `when`(highlightManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
-            `when`(noteManager.read(Constants.SORT_BY_DATE)).thenReturn(emptyList())
+            `when`(bookmarkManager.read(Constants.SORT_BY_BOOK)).thenReturn(emptyList())
+            `when`(highlightManager.read(Constants.SORT_BY_BOOK)).thenReturn(emptyList())
+            `when`(noteManager.read(Constants.SORT_BY_BOOK)).thenReturn(emptyList())
             `when`(readingProgressManager.read()).thenReturn(ReadingProgress(0, 0L, emptyList()))
             backupManager = BackupManager(serializer, bookmarkManager, highlightManager, noteManager, readingProgressManager)
         }
@@ -70,7 +70,7 @@ class BackupManagerTest : BaseUnitTest() {
     @Test(expected = RuntimeException::class)
     fun testPrepareForBackupWithAsyncFailed() {
         runBlocking {
-            `when`(bookmarkManager.read(Constants.SORT_BY_DATE)).thenThrow(RuntimeException("Random exception"))
+            `when`(bookmarkManager.read(Constants.SORT_BY_BOOK)).thenThrow(RuntimeException("Random exception"))
             backupManager.prepareForBackup()
         }
     }
