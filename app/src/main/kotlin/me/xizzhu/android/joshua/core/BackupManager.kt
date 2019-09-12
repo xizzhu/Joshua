@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.*
-import me.xizzhu.android.joshua.utils.nextOrNull
+import me.xizzhu.android.joshua.utils.mergeSort
 
 class BackupManager(private val serializer: Serializer,
                     private val bookmarkManager: BookmarkManager,
@@ -63,41 +63,10 @@ class BackupManager(private val serializer: Serializer,
             lastReadingTimestamp = backupReadingProgress.lastReadingTimestamp
         }
 
-        val chapterReadingStatus = mutableListOf<ReadingProgress.ChapterReadingStatus>()
-        val currentChapterReadingStatusIterator = currentReadingProgress.chapterReadingStatus.iterator()
-        val backupChapterReadingStatusIterator = backupReadingProgress.chapterReadingStatus.toMutableList()
-                .apply { sortBy { it.bookIndex * 1000 + it.chapterIndex } }
-                .iterator()
-        var currentChapterReadingStatus = currentChapterReadingStatusIterator.nextOrNull()
-        var backupChapterReadingStatus = backupChapterReadingStatusIterator.nextOrNull()
-        while (currentChapterReadingStatus != null && backupChapterReadingStatus != null) {
-            if (currentChapterReadingStatus.bookIndex < backupChapterReadingStatus.bookIndex
-                    || (currentChapterReadingStatus.bookIndex == backupChapterReadingStatus.bookIndex
-                            && currentChapterReadingStatus.chapterIndex < backupChapterReadingStatus.chapterIndex)) {
-                chapterReadingStatus.add(currentChapterReadingStatus)
-                currentChapterReadingStatus = currentChapterReadingStatusIterator.nextOrNull()
-            } else if (currentChapterReadingStatus.bookIndex == backupChapterReadingStatus.bookIndex
-                    && currentChapterReadingStatus.chapterIndex == backupChapterReadingStatus.chapterIndex) {
-                if (currentChapterReadingStatus.lastReadingTimestamp >= backupChapterReadingStatus.lastReadingTimestamp) {
-                    chapterReadingStatus.add(currentChapterReadingStatus)
-                } else {
-                    chapterReadingStatus.add(backupChapterReadingStatus)
-                }
-                currentChapterReadingStatus = currentChapterReadingStatusIterator.nextOrNull()
-                backupChapterReadingStatus = backupChapterReadingStatusIterator.nextOrNull()
-            } else {
-                chapterReadingStatus.add(backupChapterReadingStatus)
-                backupChapterReadingStatus = backupChapterReadingStatusIterator.nextOrNull()
-            }
-        }
-        while (currentChapterReadingStatus != null) {
-            chapterReadingStatus.add(currentChapterReadingStatus)
-            currentChapterReadingStatus = currentChapterReadingStatusIterator.nextOrNull()
-        }
-        while (backupChapterReadingStatus != null) {
-            chapterReadingStatus.add(backupChapterReadingStatus)
-            backupChapterReadingStatus = backupChapterReadingStatusIterator.nextOrNull()
-        }
+        val chapterReadingStatus = mergeSort(currentReadingProgress.chapterReadingStatus,
+                backupReadingProgress.chapterReadingStatus.toMutableList().apply { sortBy { it.bookIndex * 1000 + it.chapterIndex } },
+                { left, right -> left.bookIndex * 1000 + left.chapterIndex - (right.bookIndex * 1000 + right.chapterIndex) },
+                { left, right -> if (left.lastReadingTimestamp > right.lastReadingTimestamp) left else right })
 
         readingProgressManager.save(ReadingProgress(continuousReadingDays, lastReadingTimestamp, chapterReadingStatus))
     }
