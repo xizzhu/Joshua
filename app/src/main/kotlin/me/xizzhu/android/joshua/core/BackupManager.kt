@@ -45,11 +45,31 @@ class BackupManager(private val serializer: Serializer,
     suspend fun restore(content: String) {
         withContext(Dispatchers.Default) {
             val data = serializer.deserialize(content)
-            arrayOf(loadAndMergeReadingProgressAsync(data.readingProgress)).forEach { it.await() }
-
-            // TODO merge and store data
+            arrayOf(loadAndMergeBookmarksAsync(data.bookmarks), loadAndMergeHighlightsAsync(data.highlights),
+                    loadAndMergeNotesAsync(data.notes), loadAndMergeReadingProgressAsync(data.readingProgress)
+            ).forEach { it.await() }
         }
     }
+
+    private fun CoroutineScope.loadAndMergeBookmarksAsync(backupBookmarks: List<Bookmark>): Deferred<Unit> = async {
+        bookmarkManager.save(mergeSort(bookmarkManager.read(Constants.SORT_BY_BOOK), backupBookmarks.sortedBy { it.verseIndex.toComparableValue() },
+                { left, right -> left.verseIndex.toComparableValue() - right.verseIndex.toComparableValue() },
+                { left, right -> if (left.timestamp > right.timestamp) left else right }))
+    }
+
+    private fun CoroutineScope.loadAndMergeHighlightsAsync(backupHighlights: List<Highlight>): Deferred<Unit> = async {
+        highlightManager.save(mergeSort(highlightManager.read(Constants.SORT_BY_BOOK), backupHighlights.sortedBy { it.verseIndex.toComparableValue() },
+                { left, right -> left.verseIndex.toComparableValue() - right.verseIndex.toComparableValue() },
+                { left, right -> if (left.timestamp > right.timestamp) left else right }))
+    }
+
+    private fun CoroutineScope.loadAndMergeNotesAsync(backupNotes: List<Note>): Deferred<Unit> = async {
+        noteManager.save(mergeSort(noteManager.read(Constants.SORT_BY_BOOK), backupNotes.sortedBy { it.verseIndex.toComparableValue() },
+                { left, right -> left.verseIndex.toComparableValue() - right.verseIndex.toComparableValue() },
+                { left, right -> if (left.timestamp > right.timestamp) left else right }))
+    }
+
+    private fun VerseIndex.toComparableValue() = bookIndex * 1000000 + chapterIndex * 1000 + verseIndex
 
     private fun CoroutineScope.loadAndMergeReadingProgressAsync(backupReadingProgress: ReadingProgress): Deferred<Unit> = async {
         val currentReadingProgress = readingProgressManager.read()
@@ -64,7 +84,7 @@ class BackupManager(private val serializer: Serializer,
         }
 
         val chapterReadingStatus = mergeSort(currentReadingProgress.chapterReadingStatus,
-                backupReadingProgress.chapterReadingStatus.toMutableList().apply { sortBy { it.bookIndex * 1000 + it.chapterIndex } },
+                backupReadingProgress.chapterReadingStatus.sortedBy { it.bookIndex * 1000 + it.chapterIndex },
                 { left, right -> left.bookIndex * 1000 + left.chapterIndex - (right.bookIndex * 1000 + right.chapterIndex) },
                 { left, right -> if (left.lastReadingTimestamp > right.lastReadingTimestamp) left else right })
 
