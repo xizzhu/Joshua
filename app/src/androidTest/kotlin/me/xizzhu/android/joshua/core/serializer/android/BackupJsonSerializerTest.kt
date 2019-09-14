@@ -923,4 +923,29 @@ class BackupJsonSerializerTest : BaseUnitTest() {
                         "  }\n" +
                         "}"))
     }
+
+    @Test
+    fun testSerializeThenDeserialize() {
+        val data = BackupManager.Data(
+                listOf(
+                        Bookmark(VerseIndex(1, 2, 3), 4567890L),
+                        Bookmark(VerseIndex(9, 8, 7), 6543210L)
+                ),
+                listOf(
+                        Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 4567890L),
+                        Highlight(VerseIndex(9, 8, 7), Highlight.COLOR_YELLOW, 6543210L)
+                ),
+                listOf(
+                        Note(VerseIndex(1, 2, 3), "random note", 4567890L),
+                        Note(VerseIndex(9, 8, 7), "yet another note", 6543210L)
+                ),
+                ReadingProgress(1, 2L,
+                        listOf(
+                                ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
+                                ReadingProgress.ChapterReadingStatus(9, 8, 7, 2L, 1L)
+                        )
+                )
+        )
+        assertEquals(data, serializer.deserialize(serializer.serialize(data)))
+    }
 }
