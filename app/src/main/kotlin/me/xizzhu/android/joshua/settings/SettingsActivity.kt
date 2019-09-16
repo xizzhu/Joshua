@@ -207,6 +207,7 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
     override fun onRestored() {
         dismissDialog()
+        Toast.makeText(this, R.string.toast_restored, Toast.LENGTH_SHORT).show()
     }
 
     override fun onRestoreFailed() {
