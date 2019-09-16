@@ -71,15 +71,15 @@ class SettingsActivity : BaseActivity(), SettingsView {
     @Inject
     lateinit var presenter: SettingsPresenter
 
-    private val account: SettingSectionHeader by bindView(R.id.account)
-    private val backup: SettingButton by bindView(R.id.backup)
-    private val restore: SettingButton by bindView(R.id.restore)
     private val display: SettingSectionHeader by bindView(R.id.display)
     private val fontSize: SettingButton by bindView(R.id.font_size)
     private val keepScreenOn: SwitchCompat by bindView(R.id.keep_screen_on)
     private val nightModeOn: SwitchCompat by bindView(R.id.night_mode_on)
     private val reading: SettingSectionHeader by bindView(R.id.reading)
     private val simpleReadingMode: SwitchCompat by bindView(R.id.simple_reading_mode)
+    private val backupRestore: SettingSectionHeader by bindView(R.id.backup_restore)
+    private val backup: SettingButton by bindView(R.id.backup)
+    private val restore: SettingButton by bindView(R.id.restore)
     private val about: SettingSectionHeader by bindView(R.id.about)
     private val rate: SettingButton by bindView(R.id.rate)
     private val version: SettingButton by bindView(R.id.version)
@@ -94,22 +94,6 @@ class SettingsActivity : BaseActivity(), SettingsView {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_settings)
-
-        backup.setOnClickListener {
-            presenter.backup()
-        }
-
-        restore.setOnClickListener {
-            try {
-                val chooserIntent = Intent.createChooser(
-                        Intent(Intent.ACTION_GET_CONTENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE),
-                        getString(R.string.text_restore_from))
-                startActivityForResult(chooserIntent, CODE_PICK_CONTENT_FOR_RESTORE)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to start activity to get content for restore", e)
-                Toast.makeText(this@SettingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
-            }
-        }
 
         fontSize.setOnClickListener {
             DialogHelper.showDialog(this@SettingsActivity, R.string.settings_title_font_size,
@@ -132,6 +116,22 @@ class SettingsActivity : BaseActivity(), SettingsView {
         }
 
         simpleReadingMode.setOnCheckedChangeListener { _, isChecked -> presenter.setSimpleReadingModeOn(isChecked) }
+
+        backup.setOnClickListener {
+            presenter.backup()
+        }
+
+        restore.setOnClickListener {
+            try {
+                val chooserIntent = Intent.createChooser(
+                        Intent(Intent.ACTION_GET_CONTENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE),
+                        getString(R.string.text_restore_from))
+                startActivityForResult(chooserIntent, CODE_PICK_CONTENT_FOR_RESTORE)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to start activity to get content for restore", e)
+                Toast.makeText(this@SettingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+            }
+        }
 
         rate.setOnClickListener {
             try {
@@ -267,12 +267,12 @@ class SettingsActivity : BaseActivity(), SettingsView {
                             @ColorInt secondaryTextColor: Int) {
         window.decorView.setBackgroundColor(backgroundColor)
 
-        backup.setTextColor(primaryTextColor, secondaryTextColor)
-        restore.setTextColor(primaryTextColor, secondaryTextColor)
         fontSize.setTextColor(primaryTextColor, secondaryTextColor)
         keepScreenOn.setTextColor(primaryTextColor)
         nightModeOn.setTextColor(primaryTextColor)
         simpleReadingMode.setTextColor(primaryTextColor)
+        backup.setTextColor(primaryTextColor, secondaryTextColor)
+        restore.setTextColor(primaryTextColor, secondaryTextColor)
         rate.setTextColor(primaryTextColor, secondaryTextColor)
         version.setTextColor(primaryTextColor, secondaryTextColor)
     }
@@ -290,15 +290,15 @@ class SettingsActivity : BaseActivity(), SettingsView {
     }
 
     private fun updateTextSize(bodyTextSize: Float, captionTextSize: Float) {
-        account.setTextSize(bodyTextSize.roundToInt())
-        backup.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
-        restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         display.setTextSize(bodyTextSize.roundToInt())
         fontSize.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
         nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
         reading.setTextSize(bodyTextSize.roundToInt())
         simpleReadingMode.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+        backupRestore.setTextSize(bodyTextSize.roundToInt())
+        backup.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+        restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         about.setTextSize(bodyTextSize.roundToInt())
         rate.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         version.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())

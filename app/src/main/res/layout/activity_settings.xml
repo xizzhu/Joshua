@@ -16,24 +16,6 @@
             android:paddingTop="@dimen/padding_small">
 
             <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
-                android:id="@+id/account"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:settingSectionHeaderTitle="@string/settings_header_account" />
-
-            <me.xizzhu.android.joshua.settings.widgets.SettingButton
-                android:id="@+id/backup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:settingButtonTitle="@string/settings_title_backup" />
-
-            <me.xizzhu.android.joshua.settings.widgets.SettingButton
-                android:id="@+id/restore"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:settingButtonTitle="@string/settings_title_restore" />
-
-            <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
                 android:id="@+id/display"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -80,6 +62,24 @@
                 android:paddingStart="@dimen/padding"
                 android:paddingEnd="@dimen/padding"
                 android:text="@string/settings_title_simple_reading" />
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
+                android:id="@+id/backup_restore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingSectionHeaderTitle="@string/settings_header_backup_restore" />
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingButton
+                android:id="@+id/backup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingButtonTitle="@string/settings_title_backup" />
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingButton
+                android:id="@+id/restore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingButtonTitle="@string/settings_title_restore" />
 
             <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
                 android:id="@+id/about"
