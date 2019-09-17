@@ -49,12 +49,12 @@ object Versions {
     object Kotlin {
         const val classpath = "1.3.50"
         const val core = "1.3.50"
-        const val coroutines = "1.3.0"
+        const val coroutines = "1.3.1"
     }
 
     object AndroidX {
         const val annotation = "1.1.0"
-        const val appCompat = "1.0.2"
+        const val appCompat = "1.1.0"
         const val constraintLayout = "1.1.3"
         const val coordinatorLayout = "1.0.0"
         const val drawerLayout = "1.0.0"
@@ -69,7 +69,7 @@ object Versions {
     }
 
     object Firebase {
-        const val classpath = "4.3.1"
+        const val classpath = "4.3.2"
         const val core = "17.2.0"
         const val analytics = "17.2.0"
 

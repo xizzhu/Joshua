@@ -3,6 +3,11 @@ CHANGELOG
 
 #### Next Release
 - Supported backup and restore
+- Updated dependencies:
+  - Gradle to 5.6.2
+  - Kotlin Coroutine to 1.3.1
+  - AndroidX AppCompat to 1.1.0
+  - Play Services plugin to 4.3.2
 
 #### v0.10.1 (2019-09-03)
 - Fixed issue with parallel verses loading (#104)
