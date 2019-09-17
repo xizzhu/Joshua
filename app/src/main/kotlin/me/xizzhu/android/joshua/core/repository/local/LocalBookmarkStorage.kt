@@ -33,5 +33,7 @@ interface LocalBookmarkStorage {
 
     suspend fun save(bookmark: Bookmark)
 
+    suspend fun save(bookmarks: List<Bookmark>)
+
     suspend fun remove(verseIndex: VerseIndex)
 }

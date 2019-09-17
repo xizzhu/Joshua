@@ -21,5 +21,7 @@ import me.xizzhu.android.joshua.core.ReadingProgress
 interface LocalReadingProgressStorage {
     suspend fun trackReadingProgress(bookIndex: Int, chapterIndex: Int, timeSpentInMills: Long, timestamp: Long)
 
-    suspend fun readReadingProgress(): ReadingProgress
+    suspend fun read(): ReadingProgress
+
+    suspend fun save(readingProgress: ReadingProgress)
 }

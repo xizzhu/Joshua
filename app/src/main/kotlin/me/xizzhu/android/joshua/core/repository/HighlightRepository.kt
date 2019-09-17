@@ -40,6 +40,10 @@ class HighlightRepository(private val localHighlightStorage: LocalHighlightStora
         localHighlightStorage.save(highlight)
     }
 
+    suspend fun save(highlights: List<Highlight>) {
+        localHighlightStorage.save(highlights)
+    }
+
     suspend fun remove(verseIndex: VerseIndex) {
         localHighlightStorage.remove(verseIndex)
     }

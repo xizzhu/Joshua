@@ -27,7 +27,7 @@ import me.xizzhu.android.joshua.core.repository.NoteRepository
 import me.xizzhu.android.logger.Log
 
 data class Note(val verseIndex: VerseIndex, val note: String, val timestamp: Long) {
-    fun isValid(): Boolean = timestamp > 0L
+    fun isValid(): Boolean = verseIndex.isValid() && timestamp > 0L
 }
 
 class NoteManager(private val noteRepository: NoteRepository) {
@@ -64,6 +64,10 @@ class NoteManager(private val noteRepository: NoteRepository) {
 
     suspend fun save(note: Note) {
         noteRepository.save(note)
+    }
+
+    suspend fun save(notes: List<Note>) {
+        noteRepository.save(notes)
     }
 
     suspend fun remove(verseIndex: VerseIndex) {

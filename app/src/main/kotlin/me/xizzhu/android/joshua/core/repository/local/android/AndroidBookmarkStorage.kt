@@ -48,6 +48,10 @@ class AndroidBookmarkStorage(private val androidDatabase: AndroidDatabase) : Loc
         withContext(Dispatchers.IO) { androidDatabase.bookmarkDao.save(bookmark) }
     }
 
+    override suspend fun save(bookmarks: List<Bookmark>) {
+        withContext(Dispatchers.IO) { androidDatabase.bookmarkDao.save(bookmarks) }
+    }
+
     override suspend fun remove(verseIndex: VerseIndex) {
         withContext(Dispatchers.IO) { androidDatabase.bookmarkDao.remove(verseIndex) }
     }

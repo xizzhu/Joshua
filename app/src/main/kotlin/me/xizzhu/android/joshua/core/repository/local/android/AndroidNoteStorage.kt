@@ -48,6 +48,10 @@ class AndroidNoteStorage(private val androidDatabase: AndroidDatabase) : LocalNo
         withContext(Dispatchers.IO) { androidDatabase.noteDao.save(note) }
     }
 
+    override suspend fun save(notes: List<Note>) {
+        withContext(Dispatchers.IO) { androidDatabase.noteDao.save(notes) }
+    }
+
     override suspend fun remove(verseIndex: VerseIndex) {
         withContext(Dispatchers.IO) { androidDatabase.noteDao.remove(verseIndex) }
     }

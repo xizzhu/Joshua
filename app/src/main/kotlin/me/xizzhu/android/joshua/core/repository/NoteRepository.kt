@@ -38,6 +38,10 @@ class NoteRepository(private val localNoteStorage: LocalNoteStorage) {
         localNoteStorage.save(note)
     }
 
+    suspend fun save(notes: List<Note>) {
+        localNoteStorage.save(notes)
+    }
+
     suspend fun remove(verseIndex: VerseIndex) {
         localNoteStorage.remove(verseIndex)
     }

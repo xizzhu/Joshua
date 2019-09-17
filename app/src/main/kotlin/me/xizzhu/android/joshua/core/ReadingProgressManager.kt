@@ -29,8 +29,21 @@ import me.xizzhu.android.logger.Log
 
 data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimestamp: Long,
                            val chapterReadingStatus: List<ChapterReadingStatus>) {
+    fun isValid(): Boolean {
+        if (continuousReadingDays < 0 || lastReadingTimestamp < 0L) return false
+        chapterReadingStatus.forEach { if (!it.isValid()) return false }
+        return true
+    }
+
     data class ChapterReadingStatus(val bookIndex: Int, val chapterIndex: Int, val readCount: Int,
-                                    val timeSpentInMillis: Long, val lastReadingTimestamp: Long)
+                                    val timeSpentInMillis: Long, val lastReadingTimestamp: Long) {
+        fun isValid(): Boolean {
+            if (bookIndex < 0 || bookIndex >= Bible.BOOK_COUNT) return false
+            if (chapterIndex < 0 || chapterIndex >= Bible.getChapterCount(bookIndex)) return false
+            if (readCount < 0 || timeSpentInMillis < 0L || lastReadingTimestamp < 0L) return false
+            return true
+        }
+    }
 }
 
 class ReadingProgressManager(private val bibleReadingManager: BibleReadingManager,
@@ -97,5 +110,9 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
         currentVerseIndexObserver = null
     }
 
-    suspend fun readReadingProgress(): ReadingProgress = readingProgressRepository.readReadingProgress()
+    suspend fun read(): ReadingProgress = readingProgressRepository.read()
+
+    suspend fun save(readingProgress: ReadingProgress) {
+        readingProgressRepository.save(readingProgress)
+    }
 }

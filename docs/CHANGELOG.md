@@ -1,6 +1,9 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Supported backup and restore
+
 #### v0.10.1 (2019-09-03)
 - Fixed issue with parallel verses loading (#104)
 - Fixed scrolling position in case of following empty verses

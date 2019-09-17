@@ -72,9 +72,7 @@ class NoteDaoTest : BaseSqliteTest() {
         androidDatabase.noteDao.save(Note(VerseIndex(1, 2, 3), "fake note 1", 1L))
         androidDatabase.noteDao.save(Note(VerseIndex(1, 2, 4), "fake note 2", 2L))
         androidDatabase.noteDao.save(Note(VerseIndex(1, 4, 3), "fake note 3", 3L))
-        androidDatabase.noteDao.save(note1)
-        androidDatabase.noteDao.save(note2)
-        androidDatabase.noteDao.save(note3)
+        androidDatabase.noteDao.save(listOf(note1, note2, note3))
 
         assertEquals(listOf(note3, note2, note1), androidDatabase.noteDao.read(Constants.SORT_BY_DATE))
         assertEquals(listOf(note1, note2, note3), androidDatabase.noteDao.read(Constants.SORT_BY_BOOK))

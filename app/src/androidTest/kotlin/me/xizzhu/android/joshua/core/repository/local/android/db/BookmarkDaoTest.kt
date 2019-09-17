@@ -72,9 +72,7 @@ class BookmarkDaoTest : BaseSqliteTest() {
         androidDatabase.bookmarkDao.save(Bookmark(VerseIndex(1, 2, 3), 1L))
         androidDatabase.bookmarkDao.save(Bookmark(VerseIndex(1, 2, 4), 2L))
         androidDatabase.bookmarkDao.save(Bookmark(VerseIndex(1, 4, 3), 3L))
-        androidDatabase.bookmarkDao.save(bookmark1)
-        androidDatabase.bookmarkDao.save(bookmark2)
-        androidDatabase.bookmarkDao.save(bookmark3)
+        androidDatabase.bookmarkDao.save(listOf(bookmark1, bookmark2, bookmark3))
 
         assertEquals(listOf(bookmark3, bookmark2, bookmark1), androidDatabase.bookmarkDao.read(Constants.SORT_BY_DATE))
         assertEquals(listOf(bookmark1, bookmark2, bookmark3), androidDatabase.bookmarkDao.read(Constants.SORT_BY_BOOK))

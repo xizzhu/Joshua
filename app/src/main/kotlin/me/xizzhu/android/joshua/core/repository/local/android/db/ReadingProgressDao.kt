@@ -59,7 +59,7 @@ class ReadingProgressDao(sqliteHelper: SQLiteOpenHelper) {
     fun read(): List<ReadingProgress.ChapterReadingStatus> {
         db.query(TABLE_READING_PROGRESS, arrayOf(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX,
                 COLUMN_READ_COUNT, COLUMN_TIME_SPENT_IN_MILLS, COLUMN_LAST_READING_TIMESTAMP),
-                null, null, null, null, null).use {
+                null, null, null, null, "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC").use {
             val result = ArrayList<ReadingProgress.ChapterReadingStatus>(it.count)
             if (it.count > 0) {
                 val bookIndex = it.getColumnIndex(COLUMN_BOOK_INDEX)

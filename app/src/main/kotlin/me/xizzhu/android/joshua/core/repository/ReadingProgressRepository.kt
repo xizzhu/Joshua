@@ -24,5 +24,9 @@ class ReadingProgressRepository(private val localReadingProgressStorage: LocalRe
         localReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
     }
 
-    suspend fun readReadingProgress(): ReadingProgress = localReadingProgressStorage.readReadingProgress()
+    suspend fun read(): ReadingProgress = localReadingProgressStorage.read()
+
+    suspend fun save(readingProgress: ReadingProgress) {
+        localReadingProgressStorage.save(readingProgress)
+    }
 }

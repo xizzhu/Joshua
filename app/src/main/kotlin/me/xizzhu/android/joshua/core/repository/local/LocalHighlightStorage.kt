@@ -33,5 +33,7 @@ interface LocalHighlightStorage {
 
     suspend fun save(highlight: Highlight)
 
+    suspend fun save(highlights: List<Highlight>)
+
     suspend fun remove(verseIndex: VerseIndex)
 }

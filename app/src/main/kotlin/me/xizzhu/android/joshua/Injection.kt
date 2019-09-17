@@ -35,6 +35,7 @@ import me.xizzhu.android.joshua.annotated.highlights.HighlightsModule
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.annotated.notes.NotesModule
 import me.xizzhu.android.joshua.core.repository.remote.http.HttpTranslationService
+import me.xizzhu.android.joshua.core.serializer.android.BackupJsonSerializer
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
 import me.xizzhu.android.joshua.progress.ReadingProgressModule
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -64,6 +65,15 @@ class AppModule(private val app: App) {
         @Provides
         @Singleton
         fun provideNavigator(): Navigator = Navigator()
+
+        @JvmStatic
+        @Provides
+        @Singleton
+        fun provideBackupManager(bookmarkManager: BookmarkManager,
+                                 highlightManager: HighlightManager,
+                                 noteManager: NoteManager,
+                                 readingProgressManager: ReadingProgressManager): BackupManager =
+                BackupManager(BackupJsonSerializer(), bookmarkManager, highlightManager, noteManager, readingProgressManager)
 
         @JvmStatic
         @Provides

@@ -21,18 +21,17 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.ReadingProgress
-import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class AndroidReadingProgressStorageTest : BaseSqliteTest() {
     private lateinit var androidReadingProgressStorage: AndroidReadingProgressStorage
 
-    @Before
+    @BeforeTest
     override fun setup() {
         super.setup()
         androidReadingProgressStorage = AndroidReadingProgressStorage(androidDatabase)
@@ -48,7 +47,7 @@ class AndroidReadingProgressStorageTest : BaseSqliteTest() {
             assertEquals(expected, actual)
 
             assertEquals(ReadingProgress(1, 0L, emptyList()),
-                    androidReadingProgressStorage.readReadingProgress())
+                    androidReadingProgressStorage.read())
         }
     }
 
@@ -63,7 +62,7 @@ class AndroidReadingProgressStorageTest : BaseSqliteTest() {
 
             val expected = ReadingProgress(1, timestamp,
                     listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 1, timeSpentInMills, timestamp)))
-            val actual = androidReadingProgressStorage.readReadingProgress()
+            val actual = androidReadingProgressStorage.read()
             assertEquals(expected, actual)
         }
     }
@@ -81,7 +80,7 @@ class AndroidReadingProgressStorageTest : BaseSqliteTest() {
                         chapterReadingStatus.timeSpentInMillis, chapterReadingStatus.lastReadingTimestamp)
             }
 
-            val actual = androidReadingProgressStorage.readReadingProgress()
+            val actual = androidReadingProgressStorage.read()
             assertEquals(expected, actual)
         }
     }
@@ -99,7 +98,7 @@ class AndroidReadingProgressStorageTest : BaseSqliteTest() {
 
             val expected = ReadingProgress(1, timestamp,
                     listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 1, timeSpentInMills, timestamp)))
-            val actual = androidReadingProgressStorage.readReadingProgress()
+            val actual = androidReadingProgressStorage.read()
             assertEquals(expected, actual)
         }
     }
@@ -117,7 +116,7 @@ class AndroidReadingProgressStorageTest : BaseSqliteTest() {
 
             val expected = ReadingProgress(1, updatedTimestamp,
                     listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 2, 2L * timeSpentInMills, updatedTimestamp)))
-            val actual = androidReadingProgressStorage.readReadingProgress()
+            val actual = androidReadingProgressStorage.read()
             assertEquals(expected, actual)
         }
     }
@@ -135,7 +134,7 @@ class AndroidReadingProgressStorageTest : BaseSqliteTest() {
 
             val expected = ReadingProgress(2, updatedTimestamp,
                     listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 2, 2L * timeSpentInMills, updatedTimestamp)))
-            val actual = androidReadingProgressStorage.readReadingProgress()
+            val actual = androidReadingProgressStorage.read()
             assertEquals(expected, actual)
         }
     }
@@ -153,8 +152,20 @@ class AndroidReadingProgressStorageTest : BaseSqliteTest() {
 
             val expected = ReadingProgress(1, updatedTimestamp,
                     listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 2, 2L * timeSpentInMills, updatedTimestamp)))
-            val actual = androidReadingProgressStorage.readReadingProgress()
+            val actual = androidReadingProgressStorage.read()
             assertEquals(expected, actual)
+        }
+    }
+
+    @Test
+    fun testSaveThenRead() {
+        runBlocking {
+            val readingProgress = ReadingProgress(1, 2L, listOf(
+                    ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
+                    ReadingProgress.ChapterReadingStatus(8, 9, 10, 11L, 12L)
+            ))
+            androidReadingProgressStorage.save(readingProgress)
+            assertEquals(readingProgress, androidReadingProgressStorage.read())
         }
     }
 }

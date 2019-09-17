@@ -38,6 +38,10 @@ class BookmarkRepository(private val localBookmarkStorage: LocalBookmarkStorage)
         localBookmarkStorage.save(bookmark)
     }
 
+    suspend fun save(bookmarks: List<Bookmark>) {
+        localBookmarkStorage.save(bookmarks)
+    }
+
     suspend fun remove(verseIndex: VerseIndex) {
         localBookmarkStorage.remove(verseIndex)
     }

@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.settings
 
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
+import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -26,6 +27,8 @@ import android.util.TypedValue
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.SwitchCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
@@ -33,11 +36,24 @@ import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.utils.activities.BaseActivity
 import me.xizzhu.android.joshua.utils.MVPView
+import me.xizzhu.android.joshua.utils.createChooserForSharing
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
 interface SettingsView : MVPView {
+    fun onBackupStarted()
+
+    fun onBackupReady(textForBackup: String)
+
+    fun onBackupFailed()
+
+    fun onRestoreStarted()
+
+    fun onRestored()
+
+    fun onRestoreFailed()
+
     fun onVersionLoaded(version: String)
 
     fun onSettingsUpdated(settings: Settings)
@@ -46,6 +62,10 @@ interface SettingsView : MVPView {
 }
 
 class SettingsActivity : BaseActivity(), SettingsView {
+    companion object {
+        private const val CODE_PICK_CONTENT_FOR_RESTORE = 9999
+    }
+
     private val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
 
     @Inject
@@ -57,6 +77,9 @@ class SettingsActivity : BaseActivity(), SettingsView {
     private val nightModeOn: SwitchCompat by bindView(R.id.night_mode_on)
     private val reading: SettingSectionHeader by bindView(R.id.reading)
     private val simpleReadingMode: SwitchCompat by bindView(R.id.simple_reading_mode)
+    private val backupRestore: SettingSectionHeader by bindView(R.id.backup_restore)
+    private val backup: SettingButton by bindView(R.id.backup)
+    private val restore: SettingButton by bindView(R.id.restore)
     private val about: SettingSectionHeader by bindView(R.id.about)
     private val rate: SettingButton by bindView(R.id.rate)
     private val version: SettingButton by bindView(R.id.version)
@@ -64,6 +87,8 @@ class SettingsActivity : BaseActivity(), SettingsView {
     private var shouldAnimateFontSize = false
     private var shouldAnimateColor = false
     private var originalSettings: Settings? = null
+
+    private var dialog: ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +117,22 @@ class SettingsActivity : BaseActivity(), SettingsView {
 
         simpleReadingMode.setOnCheckedChangeListener { _, isChecked -> presenter.setSimpleReadingModeOn(isChecked) }
 
+        backup.setOnClickListener {
+            presenter.backup()
+        }
+
+        restore.setOnClickListener {
+            try {
+                val chooserIntent = Intent.createChooser(
+                        Intent(Intent.ACTION_GET_CONTENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE),
+                        getString(R.string.text_restore_from))
+                startActivityForResult(chooserIntent, CODE_PICK_CONTENT_FOR_RESTORE)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to start activity to get content for restore", e)
+                Toast.makeText(this@SettingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+            }
+        }
+
         rate.setOnClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_VIEW)
@@ -111,6 +152,67 @@ class SettingsActivity : BaseActivity(), SettingsView {
     override fun onStop() {
         presenter.detachView()
         super.onStop()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            CODE_PICK_CONTENT_FOR_RESTORE -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    data?.data
+                            ?.let {
+                                showDialog()
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    contentResolver.openInputStream(it)?.use {
+                                        presenter.restore(String(it.readBytes(), Charsets.UTF_8))
+                                    }
+                                }
+                            }
+                            ?: Toast.makeText(this, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+                }
+            }
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    override fun onBackupStarted() {
+        showDialog()
+    }
+
+    private fun showDialog() {
+        dismissDialog()
+        dialog = ProgressDialog.showIndeterminateProgressDialog(this, R.string.dialog_wait)
+    }
+
+    private fun dismissDialog() {
+        dialog?.dismiss()
+        dialog = null
+    }
+
+    override fun onBackupReady(textForBackup: String) {
+        dismissDialog()
+        createChooserForSharing(this, getString(R.string.text_backup_with), textForBackup)
+                ?.let { startActivity(it) }
+                ?: Toast.makeText(this, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onBackupFailed() {
+        dismissDialog()
+        DialogHelper.showDialog(this, true, R.string.dialog_backup_error,
+                DialogInterface.OnClickListener { _, _ -> presenter.backup() })
+    }
+
+    override fun onRestoreStarted() {
+        // do nothing
+    }
+
+    override fun onRestored() {
+        dismissDialog()
+        Toast.makeText(this, R.string.toast_restored, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onRestoreFailed() {
+        dismissDialog()
+        Toast.makeText(this, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
     }
 
     override fun onVersionLoaded(version: String) {
@@ -170,6 +272,8 @@ class SettingsActivity : BaseActivity(), SettingsView {
         keepScreenOn.setTextColor(primaryTextColor)
         nightModeOn.setTextColor(primaryTextColor)
         simpleReadingMode.setTextColor(primaryTextColor)
+        backup.setTextColor(primaryTextColor, secondaryTextColor)
+        restore.setTextColor(primaryTextColor, secondaryTextColor)
         rate.setTextColor(primaryTextColor, secondaryTextColor)
         version.setTextColor(primaryTextColor, secondaryTextColor)
     }
@@ -193,6 +297,9 @@ class SettingsActivity : BaseActivity(), SettingsView {
         nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
         reading.setTextSize(bodyTextSize.roundToInt())
         simpleReadingMode.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+        backupRestore.setTextSize(bodyTextSize.roundToInt())
+        backup.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+        restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         about.setTextSize(bodyTextSize.roundToInt())
         rate.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         version.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
