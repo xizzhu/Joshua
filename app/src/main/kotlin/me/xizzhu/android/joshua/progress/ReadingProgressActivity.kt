@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.progress
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject

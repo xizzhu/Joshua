@@ -20,7 +20,6 @@ import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.SwipeRefresher
 import me.xizzhu.android.joshua.ui.SwipeRefresherPresenter
-import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject

@@ -33,7 +33,6 @@ import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewPager
-import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject

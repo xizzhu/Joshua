@@ -71,8 +71,6 @@ fun Context.getActivity(): Activity? {
     return null
 }
 
-fun <V : View> Activity.bindView(@IdRes viewId: Int) = lazy { findViewById<V>(viewId) }
-
 @ColorInt
 fun Settings.getBackgroundColor(): Int = if (nightModeOn) Color.BLACK else Color.WHITE
 
