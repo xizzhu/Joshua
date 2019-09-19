@@ -56,6 +56,7 @@
     <string name="dialog_update_settings_error">Failed to update settings, retry?</string>
     <string name="dialog_load_verse_detail_error">Failed to load verse detail, retry?</string>
     <string name="dialog_backup_error">Failed to backup, retry?</string>
+    <string name="dialog_restore_error">Failed to restore, retry?</string>
 
     <!--
     %1$s: month, %2$d: date, %3$d: year

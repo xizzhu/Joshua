@@ -26,6 +26,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import me.xizzhu.android.joshua.infra.arch.Interactor
+import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.ViewModel
+import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.logger.Log
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -43,6 +47,7 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Log.i(tag, "onStart()")
+        getViewModel()?.start()
     }
 
     @CallSuper
@@ -60,15 +65,22 @@ abstract class BaseActivity : AppCompatActivity() {
     @CallSuper
     override fun onStop() {
         Log.i(tag, "onStop()")
+        getViewModel()?.stop()
         super.onStop()
     }
 
     @CallSuper
     override fun onDestroy() {
         Log.i(tag, "onDestroy()")
+        getViewPresenters()?.forEach { it.unbind() }
         coroutineScope.cancel()
         super.onDestroy()
     }
 
     protected fun <V : View> bindView(@IdRes viewId: Int) = lazy { findViewById<V>(viewId) }
+
+    // TODO change to abstract when all activities are migrated
+    protected open fun getViewModel(): ViewModel? = null
+
+    protected open fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>>? = null
 }
