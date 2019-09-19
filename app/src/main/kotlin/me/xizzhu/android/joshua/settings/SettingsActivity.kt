@@ -54,8 +54,6 @@ interface SettingsView : MVPView {
 
     fun onRestoreFailed()
 
-    fun onVersionLoaded(version: String)
-
     fun onSettingsUpdated(settings: Settings)
 
     fun onSettingsUpdateFailed(settingsToUpdate: Settings)
@@ -142,6 +140,12 @@ class SettingsActivity : BaseActivity(), SettingsView {
                 Toast.makeText(this@SettingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
             }
         }
+
+        try {
+            version.setDescription(packageManager.getPackageInfo(packageName, 0).versionName)
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to load app version", e)
+        }
     }
 
     override fun onStart() {
@@ -213,10 +217,6 @@ class SettingsActivity : BaseActivity(), SettingsView {
     override fun onRestoreFailed() {
         dismissDialog()
         Toast.makeText(this, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onVersionLoaded(version: String) {
-        this.version.setDescription(version)
     }
 
     override fun onSettingsUpdated(settings: Settings) {
