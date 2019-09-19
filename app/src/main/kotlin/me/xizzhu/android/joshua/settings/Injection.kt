@@ -18,15 +18,29 @@ package me.xizzhu.android.joshua.settings
 
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.App
+import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.SettingsManager
 
 @Module
 object SettingsModule {
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideSettingsPresenter(settingsManager: SettingsManager,
-                                 backupManager: BackupManager): SettingsPresenter =
-            SettingsPresenter(settingsManager, backupManager)
+    fun provideSettingsInteractor(settingsManager: SettingsManager,
+                                  backupManager: BackupManager): SettingsInteractor =
+            SettingsInteractor(settingsManager, backupManager)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideSettingsViewPresenter(settingsActivity: SettingsActivity,
+                                     settingsInteractor: SettingsInteractor): SettingsViewPresenter =
+            SettingsViewPresenter(settingsActivity, settingsInteractor)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideSettingsViewModel(settingsInteractor: SettingsInteractor): SettingsViewModel =
+            SettingsViewModel(settingsInteractor)
 }
