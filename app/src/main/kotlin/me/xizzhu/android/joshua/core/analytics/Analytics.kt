@@ -16,10 +16,8 @@
 
 package me.xizzhu.android.joshua.core.analytics
 
-import android.os.Bundle
-
 interface AnalyticsProvider {
-    fun track(event: String, params: Bundle?)
+    fun track(event: String, params: Map<String, Any>?)
 }
 
 object Analytics {
@@ -43,7 +41,7 @@ object Analytics {
         providers.remove(provider)
     }
 
-    fun track(event: String, params: Bundle? = null) {
+    fun track(event: String, params: Map<String, Any>? = null) {
         for (provider in providers) {
             provider.track(event, params)
         }

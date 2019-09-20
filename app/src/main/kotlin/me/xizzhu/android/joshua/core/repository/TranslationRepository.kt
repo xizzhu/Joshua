@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core.repository
 
-import android.os.Bundle
 import android.os.SystemClock
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.SendChannel
@@ -108,20 +107,15 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         Log.i(TAG, "Translation saved to database")
         val installFinished = elapsedRealtime()
 
-        Analytics.track(Analytics.EVENT_DOWNLOAD_TRANSLATION,
-                buildParams(translationInfo, start, downloadFinished, installFinished))
+        Analytics.track(Analytics.EVENT_DOWNLOAD_TRANSLATION, mapOf(
+                Pair(Analytics.PARAM_ITEM_ID, translationInfo.shortName),
+                Pair(Analytics.PARAM_DOWNLOAD_TIME, downloadFinished - start),
+                Pair(Analytics.PARAM_INSTALL_TIME, installFinished - downloadFinished)
+        ))
     }
 
     @VisibleForTesting
     fun elapsedRealtime(): Long = SystemClock.elapsedRealtime()
-
-    @VisibleForTesting
-    fun buildParams(translationInfo: TranslationInfo, start: Long,
-                    downloadFinished: Long, installFinished: Long): Bundle = Bundle().apply {
-        putString(Analytics.PARAM_ITEM_ID, translationInfo.shortName)
-        putLong(Analytics.PARAM_DOWNLOAD_TIME, downloadFinished - start)
-        putLong(Analytics.PARAM_INSTALL_TIME, installFinished - downloadFinished)
-    }
 
     suspend fun removeTranslation(translationInfo: TranslationInfo) {
         Log.i(TAG, "Start removing translation - ${translationInfo.shortName}")
