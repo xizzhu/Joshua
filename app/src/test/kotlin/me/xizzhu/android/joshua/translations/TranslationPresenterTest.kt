@@ -29,10 +29,10 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import org.junit.Before
-import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class TranslationPresenterTest : BaseUnitTest() {
     @Mock
@@ -49,7 +49,7 @@ class TranslationPresenterTest : BaseUnitTest() {
     private lateinit var downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
     private lateinit var currentTranslationChannel: ConflatedBroadcastChannel<String>
 
-    @Before
+    @BeforeTest
     override fun setup() {
         super.setup()
 
@@ -168,6 +168,19 @@ class TranslationPresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testOnTranslationLongClicked() {
+        translationPresenter.attachView(translationView)
+
+        translationPresenter.onTranslationLongClicked(MockContents.kjvDownloadedTranslationInfo, true)
+        verify(translationView, never()).onTranslationDeleteRequested(any())
+
+        translationPresenter.onTranslationLongClicked(MockContents.kjvDownloadedTranslationInfo, false)
+        verify(translationView, times(1)).onTranslationDeleteRequested(MockContents.kjvDownloadedTranslationInfo)
+
+        translationPresenter.detachView()
+    }
+
+    @Test
     fun testDownloadTranslation() {
         runBlocking {
             translationPresenter.attachView(translationView)
@@ -260,6 +273,21 @@ class TranslationPresenterTest : BaseUnitTest() {
             verify(translationView, times(1)).onTranslationDeleteStarted()
             verify(translationView, times(1)).onTranslationDeleteFailed(MockContents.kjvTranslationInfo)
             verify(translationView, never()).onTranslationDeleted()
+
+            translationPresenter.detachView()
+        }
+    }
+
+    @Test
+    fun testUpdateCurrentTranslation() {
+        runBlocking {
+            translationPresenter.attachView(translationView)
+
+            translationPresenter.updateCurrentTranslation(MockContents.kjvShortName)
+            with(inOrder(translationInteractor)) {
+                verify(translationInteractor, times(1)).saveCurrentTranslation(MockContents.kjvShortName)
+                verify(translationInteractor, times(1)).finish()
+            }
 
             translationPresenter.detachView()
         }

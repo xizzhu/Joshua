@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.translations
 
 import android.content.Context
-import android.content.DialogInterface
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -27,7 +26,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -119,10 +117,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
     fun onTranslationLongClicked(translationInfo: TranslationInfo, isCurrentTranslation: Boolean) {
         if (translationInfo.downloaded) {
             if (!isCurrentTranslation) {
-                DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
-                        DialogInterface.OnClickListener { _, _ ->
-                            removeTranslation(translationInfo)
-                        })
+                view?.onTranslationDeleteRequested(translationInfo)
             }
         } else {
             downloadTranslation(translationInfo)
@@ -179,7 +174,7 @@ class TranslationPresenter(private val translationInteractor: TranslationInterac
         coroutineScope.launch(Dispatchers.Main) {
             try {
                 translationInteractor.saveCurrentTranslation(translationShortName)
-                translationInteractor.finish()
+                finish()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select translation and close translation management activity", e)
                 view?.onCurrentTranslationUpdateFailed(translationShortName)
