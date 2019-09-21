@@ -16,9 +16,6 @@
 
 package me.xizzhu.android.joshua.reading
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import androidx.appcompat.view.ActionMode
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
@@ -29,9 +26,7 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
-import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
-import me.xizzhu.android.joshua.utils.createChooserForSharing
 import me.xizzhu.android.logger.Log
 import java.lang.StringBuilder
 
@@ -174,9 +169,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         try {
             val verse = verses.first()
             val bookName = readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
-            // On older devices, this only works on the threads with loopers.
-            (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
-                    ClipData.newPlainText(verse.text.translationShortName + " " + bookName, toStringForSharing(verses, bookName)))
+            readingActivity.copy(verse.text.translationShortName + " " + bookName, toStringForSharing(verses, bookName))
             return true
         } catch (e: Exception) {
             Log.e(TAG, "Failed to copy", e)
@@ -225,12 +218,7 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         try {
             val verse = verses.first()
             val bookName = readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
-            val chooseIntent = createChooserForSharing(readingActivity,
-                    readingActivity.getString(R.string.text_share_with), toStringForSharing(verses, bookName))
-            return chooseIntent?.let {
-                readingActivity.startActivity(it)
-                true
-            } ?: false
+            return readingActivity.share(toStringForSharing(verses, bookName))
         } catch (e: Exception) {
             Log.e(TAG, "Failed to share", e)
             return false

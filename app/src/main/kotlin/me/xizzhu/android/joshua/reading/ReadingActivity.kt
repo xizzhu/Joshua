@@ -16,8 +16,11 @@
 
 package me.xizzhu.android.joshua.reading
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.res.Configuration
 import android.os.Bundle
+import androidx.annotation.UiThread
 import androidx.appcompat.app.ActionBarDrawerToggle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -35,6 +38,7 @@ import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewPager
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
+import me.xizzhu.android.joshua.utils.createChooserForSharing
 import javax.inject.Inject
 
 class ReadingActivity : BaseSettingsActivity() {
@@ -147,4 +151,18 @@ class ReadingActivity : BaseSettingsActivity() {
     }
 
     override fun getBaseSettingsInteractor(): BaseSettingsInteractor = readingInteractor
+
+    @UiThread
+    fun copy(label: String, text: String) {
+        // On older devices, this only works on the threads with loopers.
+        (getSystemService(CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText(label, text))
+    }
+
+    fun share(textToShare: String): Boolean {
+        return createChooserForSharing(this, getString(R.string.text_share_with), textToShare)
+                ?.let {
+                    startActivity(it)
+                    true
+                } ?: false
+    }
 }
