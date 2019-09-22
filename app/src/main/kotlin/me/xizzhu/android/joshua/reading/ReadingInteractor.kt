@@ -16,11 +16,11 @@
 
 package me.xizzhu.android.joshua.reading
 
-import androidx.appcompat.view.ActionMode
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import androidx.annotation.ColorInt
 import androidx.annotation.IntDef
+import androidx.annotation.MenuRes
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -158,8 +158,15 @@ class ReadingInteractor(private val readingActivity: ReadingActivity,
         readingActivity.finish()
     }
 
-    fun startActionMode(callback: ActionMode.Callback): ActionMode? =
-            readingActivity.startSupportActionMode(callback)
+    fun startActionModeIfNeeded(@MenuRes menuRes: Int, onActionItemClicked: (Int) -> Boolean, onDestroyActionMode: () -> Unit) {
+        readingActivity.startActionModeIfNeeded(menuRes, onActionItemClicked, onDestroyActionMode)
+    }
+
+    fun isActionModeStarted(): Boolean = readingActivity.isActionModeStarted()
+
+    fun finishActionMode() {
+        readingActivity.finishActionMode()
+    }
 
     suspend fun copyToClipBoard(verses: Collection<Verse>): Boolean {
         if (verses.isEmpty()) {

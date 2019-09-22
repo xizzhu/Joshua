@@ -16,11 +16,8 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import android.view.Menu
-import android.view.MenuItem
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
@@ -40,51 +37,6 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
     var selectedVerse: VerseIndex = VerseIndex.INVALID
     @VisibleForTesting
     val selectedVerses: HashSet<Verse> = HashSet()
-    private var actionMode: ActionMode? = null
-    @VisibleForTesting
-    val actionModeCallback = object : ActionMode.Callback {
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            mode.menuInflater.inflate(R.menu.menu_verse_selection, menu)
-            return true
-        }
-
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
-
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            return when (item.itemId) {
-                R.id.action_copy -> {
-                    coroutineScope.launch(Dispatchers.Main) {
-                        if (readingInteractor.copyToClipBoard(selectedVerses)) {
-                            view?.onVersesCopied()
-                        } else {
-                            view?.onVersesCopyShareFailed()
-                        }
-                        mode.finish()
-                    }
-                    true
-                }
-                R.id.action_share -> {
-                    coroutineScope.launch(Dispatchers.Main) {
-                        if (!readingInteractor.share(selectedVerses)) {
-                            view?.onVersesCopyShareFailed()
-                        }
-                        mode.finish()
-                    }
-                    true
-                }
-                else -> false
-            }
-        }
-
-        override fun onDestroyActionMode(mode: ActionMode) {
-            for (verse in selectedVerses) {
-                view?.onVerseDeselected(verse.verseIndex)
-            }
-            selectedVerses.clear()
-
-            actionMode = null
-        }
-    }
 
     private var currentTranslation: String by Delegates.observable("") { _, _, new ->
         if (new.isNotEmpty()) {
@@ -95,9 +47,9 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         if (!new.isValid()) {
             return@observable
         }
-        actionMode?.let {
+        if (readingInteractor.isActionModeStarted()) {
             if (old.bookIndex != new.bookIndex || old.chapterIndex != new.chapterIndex) {
-                it.finish()
+                readingInteractor.finishActionMode()
             }
         }
         view?.onCurrentVerseIndexUpdated(new)
@@ -322,7 +274,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
 
     @VisibleForTesting
     fun onVerseClicked(verse: Verse) {
-        if (actionMode == null) {
+        if (!readingInteractor.isActionModeStarted()) {
             readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES)
             return
         }
@@ -331,7 +283,7 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             // de-select the verse
             selectedVerses.remove(verse)
             if (selectedVerses.isEmpty()) {
-                actionMode?.finish()
+                readingInteractor.finishActionMode()
             }
 
             view?.onVerseDeselected(verse.verseIndex)
@@ -345,11 +297,41 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
 
     @VisibleForTesting
     fun onVerseLongClicked(verse: Verse) {
-        if (actionMode == null) {
-            actionMode = readingInteractor.startActionMode(actionModeCallback)
-        }
-
+        readingInteractor.startActionModeIfNeeded(R.menu.menu_verse_selection, this::onActionItemClicked, this::onDestroyActionMode)
         onVerseClicked(verse)
+    }
+
+    @VisibleForTesting
+    fun onActionItemClicked(itemId: Int): Boolean = when (itemId) {
+        R.id.action_copy -> {
+            coroutineScope.launch(Dispatchers.Main) {
+                if (readingInteractor.copyToClipBoard(selectedVerses)) {
+                    view?.onVersesCopied()
+                } else {
+                    view?.onVersesCopyShareFailed()
+                }
+                readingInteractor.finishActionMode()
+            }
+            true
+        }
+        R.id.action_share -> {
+            coroutineScope.launch(Dispatchers.Main) {
+                if (!readingInteractor.share(selectedVerses)) {
+                    view?.onVersesCopyShareFailed()
+                }
+                readingInteractor.finishActionMode()
+            }
+            true
+        }
+        else -> false
+    }
+
+    @VisibleForTesting
+    fun onDestroyActionMode() {
+        for (verse in selectedVerses) {
+            view?.onVerseDeselected(verse.verseIndex)
+        }
+        selectedVerses.clear()
     }
 
     @VisibleForTesting
