@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.annotated
 import android.os.Bundle
 import androidx.annotation.StringRes
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
 import javax.inject.Inject
 

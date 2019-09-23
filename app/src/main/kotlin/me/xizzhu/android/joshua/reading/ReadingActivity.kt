@@ -16,9 +16,16 @@
 
 package me.xizzhu.android.joshua.reading
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import androidx.annotation.MenuRes
+import androidx.annotation.UiThread
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
@@ -33,9 +40,9 @@ import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.ToolbarPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewPager
-import me.xizzhu.android.joshua.ui.bindView
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
+import me.xizzhu.android.joshua.utils.createChooserForSharing
 import javax.inject.Inject
 
 class ReadingActivity : BaseSettingsActivity() {
@@ -73,6 +80,8 @@ class ReadingActivity : BaseSettingsActivity() {
     private val verseViewPager: VerseViewPager by bindView(R.id.verse_view_pager)
     private val verseDetailView: VerseDetailViewLayout by bindView(R.id.verse_detail_view)
     private val search: SearchFloatingActionButton by bindView(R.id.search)
+
+    private var actionMode: ActionMode? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -148,4 +157,44 @@ class ReadingActivity : BaseSettingsActivity() {
     }
 
     override fun getBaseSettingsInteractor(): BaseSettingsInteractor = readingInteractor
+
+    @UiThread
+    fun copy(label: String, text: String) {
+        // On older devices, this only works on the threads with loopers.
+        (getSystemService(CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText(label, text))
+    }
+
+    fun share(textToShare: String): Boolean {
+        return createChooserForSharing(this, getString(R.string.text_share_with), textToShare)
+                ?.let {
+                    startActivity(it)
+                    true
+                } ?: false
+    }
+
+    fun startActionModeIfNeeded(@MenuRes menuRes: Int, onActionItemClicked: (Int) -> Boolean, onDestroyActionMode: () -> Unit) {
+        if (actionMode == null) {
+            actionMode = startSupportActionMode(object : ActionMode.Callback {
+                override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                    mode.menuInflater.inflate(menuRes, menu)
+                    return true
+                }
+
+                override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
+
+                override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = onActionItemClicked(item.itemId)
+
+                override fun onDestroyActionMode(mode: ActionMode) {
+                    onDestroyActionMode()
+                    actionMode = null
+                }
+            })
+        }
+    }
+
+    fun isActionModeStarted(): Boolean = actionMode != null
+
+    fun finishActionMode() {
+        actionMode?.finish()
+    }
 }

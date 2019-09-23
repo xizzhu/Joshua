@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core
 
-import android.graphics.Color
 import androidx.annotation.ColorInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -30,12 +29,12 @@ import me.xizzhu.android.logger.Log
 
 data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val timestamp: Long) {
     companion object {
-        const val COLOR_NONE = Color.TRANSPARENT
-        const val COLOR_YELLOW = Color.YELLOW
+        const val COLOR_NONE = 0
+        const val COLOR_YELLOW = 0xFFFFFF00.toInt()
         const val COLOR_PINK = 0xFFFFC0CB.toInt()
         const val COLOR_PURPLE = 0xFFFF00FF.toInt()
-        const val COLOR_GREEN = Color.GREEN
-        const val COLOR_BLUE = Color.BLUE
+        const val COLOR_GREEN = 0xFF00FF00.toInt()
+        const val COLOR_BLUE = 0xFF0000FF.toInt()
         val AVAILABLE_COLORS = arrayOf(COLOR_NONE, COLOR_YELLOW, COLOR_PINK, COLOR_PURPLE, COLOR_GREEN, COLOR_BLUE)
     }
 

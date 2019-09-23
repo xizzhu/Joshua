@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.settings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.App
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -27,7 +26,7 @@ import me.xizzhu.android.joshua.utils.MVPPresenter
 import me.xizzhu.android.logger.Log
 import kotlin.properties.Delegates
 
-class SettingsPresenter(private val app: App, private val settingsManager: SettingsManager,
+class SettingsPresenter(private val settingsManager: SettingsManager,
                         private val backupManager: BackupManager) : MVPPresenter<SettingsView>() {
     var settings: Settings by Delegates.observable(Settings.DEFAULT) { _, _, new -> view?.onSettingsUpdated(new) }
         private set
@@ -37,13 +36,6 @@ class SettingsPresenter(private val app: App, private val settingsManager: Setti
 
         coroutineScope.launch(Dispatchers.Main) {
             settingsManager.observeSettings().collect { settings = it }
-        }
-
-        try {
-            val version = app.packageManager.getPackageInfo(app.packageName, 0).versionName
-            view?.onVersionLoaded(version)
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to load app version", e)
         }
     }
 

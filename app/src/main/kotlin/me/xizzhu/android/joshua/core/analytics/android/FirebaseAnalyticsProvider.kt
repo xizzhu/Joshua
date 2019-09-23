@@ -18,13 +18,25 @@ package me.xizzhu.android.joshua.core.analytics.android
 
 import android.content.Context
 import android.os.Bundle
+import androidx.annotation.VisibleForTesting
 import com.google.firebase.analytics.FirebaseAnalytics
 import me.xizzhu.android.joshua.core.analytics.AnalyticsProvider
 
 class FirebaseAnalyticsProvider(context: Context) : AnalyticsProvider {
     private val firebaseAnalytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(context) }
 
-    override fun track(event: String, params: Bundle?) {
-        firebaseAnalytics.logEvent(event, params)
+    override fun track(event: String, params: Map<String, Any>?) {
+        firebaseAnalytics.logEvent(event, params?.toBundle())
+    }
+
+    @VisibleForTesting
+    fun Map<String, Any>.toBundle(): Bundle = Bundle().also { bundle ->
+        forEach { (key, value) ->
+            when (value) {
+                is Long -> bundle.putLong(key, value)
+                is String -> bundle.putString(key, value)
+                else -> throw IllegalArgumentException("Unsupported param type, key - $key, value - $value")
+            }
+        }
     }
 }

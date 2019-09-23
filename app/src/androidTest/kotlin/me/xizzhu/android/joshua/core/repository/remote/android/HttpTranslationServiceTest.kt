@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.repository.remote.http
+package me.xizzhu.android.joshua.core.repository.remote.android
 
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.channels.Channel

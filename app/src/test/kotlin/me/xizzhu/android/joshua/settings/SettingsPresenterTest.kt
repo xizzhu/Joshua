@@ -16,13 +16,10 @@
 
 package me.xizzhu.android.joshua.settings
 
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.App
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -35,12 +32,6 @@ import kotlin.test.Test
 
 class SettingsPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var app: App
-    @Mock
-    private lateinit var packageManager: PackageManager
-    @Mock
-    private lateinit var packageInfo: PackageInfo
-    @Mock
     private lateinit var settingsManager: SettingsManager
     @Mock
     private lateinit var backupManager: BackupManager
@@ -50,8 +41,6 @@ class SettingsPresenterTest : BaseUnitTest() {
     private lateinit var currentSettings: BroadcastChannel<Settings>
     private lateinit var settingsPresenter: SettingsPresenter
 
-    private val versionName = "Random Version Name"
-
     @BeforeTest
     override fun setup() {
         super.setup()
@@ -59,7 +48,7 @@ class SettingsPresenterTest : BaseUnitTest() {
         currentSettings = ConflatedBroadcastChannel()
         `when`(settingsManager.observeSettings()).thenReturn(currentSettings.asFlow())
 
-        settingsPresenter = SettingsPresenter(app, settingsManager, backupManager)
+        settingsPresenter = SettingsPresenter(settingsManager, backupManager)
         settingsPresenter.attachView(settingsView)
     }
 
@@ -67,30 +56,6 @@ class SettingsPresenterTest : BaseUnitTest() {
     override fun tearDown() {
         settingsPresenter.detachView()
         super.tearDown()
-    }
-
-    @Test
-    fun testLoadingVersion() {
-        `when`(app.packageManager).thenReturn(packageManager)
-        `when`(app.packageName).thenReturn("packageName")
-        `when`(packageManager.getPackageInfo("packageName", 0)).thenReturn(packageInfo)
-        packageInfo.versionName = versionName
-
-        settingsPresenter = SettingsPresenter(app, settingsManager, backupManager)
-        settingsPresenter.attachView(settingsView)
-
-        // version is loaded when view is attached
-        verify(settingsView, times(1)).onVersionLoaded(versionName)
-    }
-
-    @Test
-    fun testLoadingVersionWithException() {
-        `when`(app.packageManager).thenThrow(RuntimeException("Random exception"))
-        settingsPresenter = SettingsPresenter(app, settingsManager, backupManager)
-        settingsPresenter.attachView(settingsView)
-
-        // version is loaded when view is attached
-        verify(settingsView, never()).onVersionLoaded(anyString())
     }
 
     @Test

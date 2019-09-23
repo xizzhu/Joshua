@@ -17,7 +17,9 @@
 package me.xizzhu.android.joshua.utils.activities
 
 import android.os.Bundle
+import android.view.View
 import androidx.annotation.CallSuper
+import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import dagger.android.AndroidInjection
 import kotlinx.coroutines.CoroutineScope
@@ -67,4 +69,6 @@ abstract class BaseActivity : AppCompatActivity() {
         coroutineScope.cancel()
         super.onDestroy()
     }
+
+    protected fun <V : View> bindView(@IdRes viewId: Int) = lazy { findViewById<V>(viewId) }
 }

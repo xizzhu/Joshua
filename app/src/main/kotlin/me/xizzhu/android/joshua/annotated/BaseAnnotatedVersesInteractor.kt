@@ -16,14 +16,14 @@
 
 package me.xizzhu.android.joshua.annotated
 
-import android.app.Activity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
+import me.xizzhu.android.joshua.utils.activities.BaseActivity
 
-abstract class BaseAnnotatedVersesInteractor(private val activity: Activity,
+abstract class BaseAnnotatedVersesInteractor(private val activity: BaseActivity,
                                              private val bibleReadingManager: BibleReadingManager,
                                              private val navigator: Navigator,
                                              settingsManager: SettingsManager,

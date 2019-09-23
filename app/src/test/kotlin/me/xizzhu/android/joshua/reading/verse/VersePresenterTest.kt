@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import android.view.MenuItem
-import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -42,10 +40,6 @@ class VersePresenterTest : BaseUnitTest() {
     private lateinit var readingInteractor: ReadingInteractor
     @Mock
     private lateinit var verseView: VerseView
-    @Mock
-    private lateinit var actionMode: ActionMode
-    @Mock
-    private lateinit var item: MenuItem
 
     private lateinit var versePresenter: VersePresenter
     private lateinit var settingsChannel: ConflatedBroadcastChannel<Settings>
@@ -90,14 +84,13 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testOnActionCopyItemClickedSuccess() {
         runBlocking {
-            `when`(item.itemId).thenReturn(R.id.action_copy)
             `when`(readingInteractor.copyToClipBoard(any())).thenReturn(true)
 
-            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            assertTrue(versePresenter.onActionItemClicked(R.id.action_copy))
 
-            with(inOrder(verseView, actionMode)) {
+            with(inOrder(verseView, readingInteractor)) {
                 verify(verseView, times(1)).onVersesCopied()
-                verify(actionMode, times(1)).finish()
+                verify(readingInteractor, times(1)).finishActionMode()
             }
             verify(verseView, never()).onVersesCopyShareFailed()
         }
@@ -106,14 +99,13 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testOnActionCopyItemClickedFailure() {
         runBlocking {
-            `when`(item.itemId).thenReturn(R.id.action_copy)
             `when`(readingInteractor.copyToClipBoard(any())).thenReturn(false)
 
-            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            assertTrue(versePresenter.onActionItemClicked(R.id.action_copy))
 
-            with(inOrder(verseView, actionMode)) {
+            with(inOrder(verseView, readingInteractor)) {
                 verify(verseView, times(1)).onVersesCopyShareFailed()
-                verify(actionMode, times(1)).finish()
+                verify(readingInteractor, times(1)).finishActionMode()
             }
             verify(verseView, never()).onVersesCopied()
         }
@@ -122,25 +114,23 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testOnActionShareItemClickedSuccess() {
         runBlocking {
-            `when`(item.itemId).thenReturn(R.id.action_share)
             `when`(readingInteractor.share(any())).thenReturn(true)
-            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            assertTrue(versePresenter.onActionItemClicked(R.id.action_share))
             verify(verseView, never()).onVersesCopyShareFailed()
-            verify(actionMode, times(1)).finish()
+            verify(readingInteractor, times(1)).finishActionMode()
         }
     }
 
     @Test
     fun testOnActionShareItemClickedFailure() {
         runBlocking {
-            `when`(item.itemId).thenReturn(R.id.action_share)
             `when`(readingInteractor.share(any())).thenReturn(false)
 
-            assertTrue(versePresenter.actionModeCallback.onActionItemClicked(actionMode, item))
+            assertTrue(versePresenter.onActionItemClicked(R.id.action_share))
 
-            with(inOrder(verseView, actionMode)) {
+            with(inOrder(verseView, readingInteractor)) {
                 verify(verseView, times(1)).onVersesCopyShareFailed()
-                verify(actionMode, times(1)).finish()
+                verify(readingInteractor, times(1)).finishActionMode()
             }
         }
     }
@@ -148,7 +138,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testDestroyActionMode() {
         versePresenter.selectedVerses.add(MockContents.kjvVerses[0])
-        versePresenter.actionModeCallback.onDestroyActionMode(actionMode)
+        versePresenter.onDestroyActionMode()
         verify(verseView, times(1)).onVerseDeselected(MockContents.kjvVerses[0].verseIndex)
         assertTrue(versePresenter.selectedVerses.isEmpty())
     }
@@ -470,13 +460,13 @@ class VersePresenterTest : BaseUnitTest() {
 
     @Test
     fun testVerseSelectionAndDeselection() {
-        val actionMode = mock(ActionMode::class.java)
-        `when`(readingInteractor.startActionMode(any())).thenReturn(actionMode)
+        `when`(readingInteractor.isActionModeStarted()).thenReturn(true)
 
         val verse = MockContents.kjvVerses[0]
         versePresenter.onVerseLongClicked(verse)
         assertEquals(1, versePresenter.selectedVerses.size)
-        verify(readingInteractor, times(1)).startActionMode(any())
+        verify(readingInteractor, times(1))
+                .startActionModeIfNeeded(R.menu.menu_verse_selection, versePresenter::onActionItemClicked, versePresenter::onDestroyActionMode)
         verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
 
         val anotherVerse = MockContents.kjvVerses[5]
@@ -491,28 +481,28 @@ class VersePresenterTest : BaseUnitTest() {
         versePresenter.onVerseClicked(verse)
         assertTrue(versePresenter.selectedVerses.isEmpty())
         verify(verseView, times(1)).onVerseDeselected(verse.verseIndex)
-        verify(actionMode, times(1)).finish()
+        verify(readingInteractor, times(1)).finishActionMode()
     }
 
     @Test
     fun testVerseSelectionAndUpdateCurrentVerseIndex() {
         runBlocking {
-            val actionMode = mock(ActionMode::class.java)
-            `when`(readingInteractor.startActionMode(any())).thenReturn(actionMode)
+            `when`(readingInteractor.isActionModeStarted()).thenReturn(true)
 
             currentVerseIndexChannel.send(VerseIndex(0, 0, 0))
 
             val verse = MockContents.kjvVerses[0]
             versePresenter.onVerseLongClicked(verse)
             assertEquals(1, versePresenter.selectedVerses.size)
-            verify(readingInteractor, times(1)).startActionMode(any())
+            verify(readingInteractor, times(1))
+                    .startActionModeIfNeeded(R.menu.menu_verse_selection, versePresenter::onActionItemClicked, versePresenter::onDestroyActionMode)
             verify(verseView, times(1)).onVerseSelected(verse.verseIndex)
 
             currentVerseIndexChannel.send(VerseIndex(0, 0, 5))
-            verify(actionMode, never()).finish()
+            verify(readingInteractor, times(1)).finishActionMode()
 
             currentVerseIndexChannel.send(VerseIndex(0, 1, 5))
-            verify(actionMode, times(1)).finish()
+            verify(readingInteractor, times(2)).finishActionMode()
         }
     }
 

@@ -47,6 +47,8 @@ interface TranslationView : BaseSettingsView {
 
     fun onTranslationDownloadFailed(translationToDownload: TranslationInfo)
 
+    fun onTranslationDeleteRequested(translationToDelete: TranslationInfo)
+
     fun onTranslationDeleteStarted()
 
     fun onTranslationDeleted()
@@ -128,6 +130,13 @@ class TranslationListView : BaseRecyclerView, TranslationView {
         DialogHelper.showDialog(context, true, R.string.dialog_download_error,
                 DialogInterface.OnClickListener { _, _ ->
                     presenter.downloadTranslation(translationToDownload)
+                })
+    }
+
+    override fun onTranslationDeleteRequested(translationToDelete: TranslationInfo) {
+        DialogHelper.showDialog(context, true, R.string.dialog_delete_translation_confirmation,
+                DialogInterface.OnClickListener { _, _ ->
+                    presenter.removeTranslation(translationToDelete)
                 })
     }
 

@@ -187,7 +187,6 @@ class TranslationRepositoryTest : BaseUnitTest() {
     fun testDownloadTranslation() {
         runBlocking {
             doReturn(0L).`when`(translationRepository).elapsedRealtime()
-            doReturn(null).`when`(translationRepository).buildParams(any(), anyLong(), anyLong(), anyLong())
 
             val channel = Channel<Int>()
             `when`(remoteTranslationService.fetchTranslation(channel, RemoteTranslationInfo.fromTranslationInfo(MockContents.kjvTranslationInfo)))

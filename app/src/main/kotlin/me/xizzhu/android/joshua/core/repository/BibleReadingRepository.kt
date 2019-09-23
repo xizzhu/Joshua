@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core.repository
 
-import android.os.Bundle
 import androidx.collection.LruCache
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -96,10 +95,10 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
             localReadingStorage.readVerse(translationShortName, verseIndex)
 
     suspend fun search(translationShortName: String, query: String): List<Verse> {
-        Analytics.track(Analytics.EVENT_SEARCH, Bundle().apply {
-            putString(Analytics.PARAM_ITEM_ID, translationShortName)
-            putString(Analytics.PARAM_SEARCH_TERM, query)
-        })
+        Analytics.track(Analytics.EVENT_SEARCH, mapOf(
+                Pair(Analytics.PARAM_ITEM_ID, translationShortName),
+                Pair(Analytics.PARAM_SEARCH_TERM, query)
+        ))
 
         return localReadingStorage.search(translationShortName, query)
     }

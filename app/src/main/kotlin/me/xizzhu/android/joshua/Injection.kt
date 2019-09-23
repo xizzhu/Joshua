@@ -34,7 +34,7 @@ import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsModule
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.annotated.notes.NotesModule
-import me.xizzhu.android.joshua.core.repository.remote.http.HttpTranslationService
+import me.xizzhu.android.joshua.core.repository.remote.android.HttpTranslationService
 import me.xizzhu.android.joshua.core.serializer.android.BackupJsonSerializer
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
 import me.xizzhu.android.joshua.progress.ReadingProgressModule

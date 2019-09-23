@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.core.repository.remote.http
+package me.xizzhu.android.joshua.core.repository.remote.android
 
 import android.util.JsonReader
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
