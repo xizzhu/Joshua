@@ -16,39 +16,72 @@
 
 package me.xizzhu.android.joshua.infra.arch
 
+import kotlinx.coroutines.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ViewModelTest : BaseUnitTest() {
+    private class TestViewModel(interactors: Set<Interactor>, dispatcher: CoroutineDispatcher) : ViewModel(interactors, dispatcher) {
+        var onStartedCalled = false
+        var onStoppedCalled = false
+
+        lateinit var job: Job
+
+        override fun onStarted() {
+            super.onStarted()
+            onStartedCalled = true
+            job = coroutineScope.launch(Dispatchers.Default) {
+                while (isActive) {
+                    delay(1L)
+                }
+            }
+        }
+
+        override fun onStopped() {
+            onStoppedCalled = true
+            super.onStopped()
+        }
+    }
+
     @Mock
     private lateinit var mockInteractor: Interactor
 
-    private lateinit var viewModel: ViewModel
+    private lateinit var testViewModel: TestViewModel
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        viewModel = object : ViewModel(setOf(mockInteractor)) {}
+        testViewModel = TestViewModel(setOf(mockInteractor), testDispatcher)
     }
 
     @Test
-    fun testInteractorCallbacks() {
+    fun testState() {
         // initial state
         verify(mockInteractor, never()).start()
         verify(mockInteractor, never()).stop()
+        assertFalse(testViewModel.onStartedCalled)
+        assertFalse(testViewModel.onStoppedCalled)
 
         // start
-        viewModel.start()
+        testViewModel.start()
         verify(mockInteractor, times(1)).start()
         verify(mockInteractor, never()).stop()
+        assertFalse(testViewModel.job.isCancelled)
+        assertTrue(testViewModel.onStartedCalled)
+        assertFalse(testViewModel.onStoppedCalled)
 
         // stop
-        viewModel.stop()
+        testViewModel.stop()
         verify(mockInteractor, times(1)).start()
         verify(mockInteractor, times(1)).stop()
+        assertTrue(testViewModel.job.isCancelled)
+        assertTrue(testViewModel.onStartedCalled)
+        assertTrue(testViewModel.onStoppedCalled)
     }
 }

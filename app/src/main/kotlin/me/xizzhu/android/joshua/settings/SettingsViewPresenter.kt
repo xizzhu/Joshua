@@ -27,6 +27,7 @@ import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.SwitchCompat
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -49,8 +50,9 @@ data class SettingsViewHolder(val display: SettingSectionHeader, val fontSize: S
                               val restore: SettingButton, val about: SettingSectionHeader,
                               val rate: SettingButton, val version: SettingButton) : ViewHolder
 
-class SettingsViewPresenter(private val settingsActivity: SettingsActivity, interactor: SettingsInteractor)
-    : ViewPresenter<SettingsViewHolder, SettingsInteractor>(interactor) {
+class SettingsViewPresenter(private val settingsActivity: SettingsActivity, interactor: SettingsInteractor,
+                            dispatcher: CoroutineDispatcher = Dispatchers.Main)
+    : ViewPresenter<SettingsViewHolder, SettingsInteractor>(interactor, dispatcher) {
     companion object {
         const val CODE_GET_CONTENT_FOR_RESTORE = 9999
 

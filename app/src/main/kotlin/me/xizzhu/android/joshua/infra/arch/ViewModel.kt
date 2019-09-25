@@ -16,12 +16,33 @@
 
 package me.xizzhu.android.joshua.infra.arch
 
-abstract class ViewModel(private val interactors: Set<Interactor>) {
+import androidx.annotation.CallSuper
+import androidx.annotation.UiThread
+import kotlinx.coroutines.*
+
+abstract class ViewModel(private val interactors: Set<Interactor>, dispatcher: CoroutineDispatcher) {
+    protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + dispatcher)
+
+    @UiThread
     fun start() {
         interactors.forEach { it.start() }
+        onStarted()
     }
 
+    @CallSuper
+    @UiThread
+    protected open fun onStarted() {
+    }
+
+    @UiThread
     fun stop() {
         interactors.forEach { it.stop() }
+        onStopped()
+        coroutineScope.cancel()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onStopped() {
     }
 }

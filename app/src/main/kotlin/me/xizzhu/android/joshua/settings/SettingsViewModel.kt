@@ -16,6 +16,10 @@
 
 package me.xizzhu.android.joshua.settings
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import me.xizzhu.android.joshua.infra.arch.ViewModel
 
-class SettingsViewModel(settingsInteractor: SettingsInteractor) : ViewModel(setOf(settingsInteractor))
+class SettingsViewModel(settingsInteractor: SettingsInteractor,
+                        dispatcher: CoroutineDispatcher = Dispatchers.Default)
+    : ViewModel(setOf(settingsInteractor), dispatcher)
