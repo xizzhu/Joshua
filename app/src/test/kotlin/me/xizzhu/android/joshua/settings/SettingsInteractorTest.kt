@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -40,100 +40,80 @@ class SettingsInteractorTest : BaseUnitTest() {
         super.setup()
 
         `when`(settingsManager.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
-        settingsInteractor = SettingsInteractor(settingsManager, backupManager)
+        settingsInteractor = SettingsInteractor(settingsManager, backupManager, testDispatcher)
     }
 
     @Test
-    fun testSaveSettings() {
-        runBlocking {
-            val settings = Settings(false, true, 1, true)
-            settingsInteractor.saveSettings(settings)
-            verify(settingsManager, times(1)).saveSettings(settings)
-        }
+    fun testSaveSettings() = testDispatcher.runBlockingTest {
+        val settings = Settings(false, true, 1, true)
+        settingsInteractor.saveSettings(settings)
+        verify(settingsManager, times(1)).saveSettings(settings)
     }
 
     @Test
-    fun testSaveSettingsWithException() {
-        runBlocking {
-            `when`(settingsManager.saveSettings(any())).thenThrow(RuntimeException("Random exception"))
-            settingsInteractor.saveSettings(Settings.DEFAULT)
-        }
+    fun testSaveSettingsWithException() = testDispatcher.runBlockingTest {
+        `when`(settingsManager.saveSettings(any())).thenThrow(RuntimeException("Random exception"))
+        settingsInteractor.saveSettings(Settings.DEFAULT)
     }
 
     @Test
-    fun testSetFontSizeScale() {
-        runBlocking {
-            settingsInteractor.setFontSizeScale(Settings.DEFAULT.fontSizeScale)
-            verify(settingsManager, never()).saveSettings(any())
+    fun testSetFontSizeScale() = testDispatcher.runBlockingTest {
+        settingsInteractor.setFontSizeScale(Settings.DEFAULT.fontSizeScale)
+        verify(settingsManager, never()).saveSettings(any())
 
-            settingsInteractor.setFontSizeScale(4)
-            verify(settingsManager, times(1)).saveSettings(Settings.DEFAULT.copy(fontSizeScale = 4))
-        }
+        settingsInteractor.setFontSizeScale(4)
+        verify(settingsManager, times(1)).saveSettings(Settings.DEFAULT.copy(fontSizeScale = 4))
     }
 
     @Test
-    fun testSetKeepScreenOn() {
-        runBlocking {
-            settingsInteractor.setKeepScreenOn(Settings.DEFAULT.keepScreenOn)
-            verify(settingsManager, never()).saveSettings(any())
+    fun testSetKeepScreenOn() = testDispatcher.runBlockingTest {
+        settingsInteractor.setKeepScreenOn(Settings.DEFAULT.keepScreenOn)
+        verify(settingsManager, never()).saveSettings(any())
 
-            settingsInteractor.setKeepScreenOn(false)
-            verify(settingsManager, times(1)).saveSettings(Settings.DEFAULT.copy(keepScreenOn = false))
-        }
+        settingsInteractor.setKeepScreenOn(false)
+        verify(settingsManager, times(1)).saveSettings(Settings.DEFAULT.copy(keepScreenOn = false))
     }
 
     @Test
-    fun testSetNightModeOn() {
-        runBlocking {
-            settingsInteractor.setNightModeOn(Settings.DEFAULT.nightModeOn)
-            verify(settingsManager, never()).saveSettings(any())
+    fun testSetNightModeOn() = testDispatcher.runBlockingTest {
+        settingsInteractor.setNightModeOn(Settings.DEFAULT.nightModeOn)
+        verify(settingsManager, never()).saveSettings(any())
 
-            settingsInteractor.setNightModeOn(true)
-            verify(settingsManager, times(1)).saveSettings(Settings.DEFAULT.copy(nightModeOn = true))
-        }
+        settingsInteractor.setNightModeOn(true)
+        verify(settingsManager, times(1)).saveSettings(Settings.DEFAULT.copy(nightModeOn = true))
     }
 
     @Test
-    fun testSetSimpleReadingModeOn() {
-        runBlocking {
-            settingsInteractor.setSimpleReadingModeOn(Settings.DEFAULT.simpleReadingModeOn)
-            verify(settingsManager, never()).saveSettings(any())
+    fun testSetSimpleReadingModeOn() = testDispatcher.runBlockingTest {
+        settingsInteractor.setSimpleReadingModeOn(Settings.DEFAULT.simpleReadingModeOn)
+        verify(settingsManager, never()).saveSettings(any())
 
-            settingsInteractor.setSimpleReadingModeOn(true)
-            verify(settingsManager, times(1)).saveSettings(Settings.DEFAULT.copy(simpleReadingModeOn = true))
-        }
+        settingsInteractor.setSimpleReadingModeOn(true)
+        verify(settingsManager, times(1)).saveSettings(Settings.DEFAULT.copy(simpleReadingModeOn = true))
     }
 
     @Test
-    fun testPrepareBackupData() {
-        runBlocking {
-            settingsInteractor.prepareBackupData()
-            verify(backupManager, times(1)).prepareForBackup()
-        }
+    fun testPrepareBackupData() = testDispatcher.runBlockingTest {
+        settingsInteractor.prepareBackupData()
+        verify(backupManager, times(1)).prepareForBackup()
     }
 
     @Test
-    fun testPrepareBackupDataWithException() {
-        runBlocking {
-            `when`(backupManager.prepareForBackup()).thenThrow(RuntimeException("Random exception"))
-            settingsInteractor.prepareBackupData()
-        }
+    fun testPrepareBackupDataWithException() = testDispatcher.runBlockingTest {
+        `when`(backupManager.prepareForBackup()).thenThrow(RuntimeException("Random exception"))
+        settingsInteractor.prepareBackupData()
     }
 
     @Test
-    fun testRestore() {
-        runBlocking {
-            val data = "random data"
-            settingsInteractor.restore(data)
-            verify(backupManager, times(1)).restore(data)
-        }
+    fun testRestore() = testDispatcher.runBlockingTest {
+        val data = "random data"
+        settingsInteractor.restore(data)
+        verify(backupManager, times(1)).restore(data)
     }
 
     @Test
-    fun testRestoreWithException() {
-        runBlocking {
-            `when`(backupManager.restore(anyString())).thenThrow(RuntimeException("Random exception"))
-            settingsInteractor.restore("")
-        }
+    fun testRestoreWithException() = testDispatcher.runBlockingTest {
+        `when`(backupManager.restore(anyString())).thenThrow(RuntimeException("Random exception"))
+        settingsInteractor.restore("")
     }
 }

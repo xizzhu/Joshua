@@ -30,7 +30,7 @@ class ViewPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var viewHolder: ViewHolder
 
-    private class TestViewPresenter(interactor: Interactor) : ViewPresenter<ViewHolder, Interactor>(interactor) {
+    private class TestViewPresenter(interactor: Interactor, dispatcher: CoroutineDispatcher) : ViewPresenter<ViewHolder, Interactor>(interactor, dispatcher) {
         var onBindCalled = false
         var onUnbindCalled = false
 
@@ -57,7 +57,7 @@ class ViewPresenterTest : BaseUnitTest() {
     @BeforeTest
     override fun setup() {
         super.setup()
-        viewPresenter = TestViewPresenter(interactor)
+        viewPresenter = TestViewPresenter(interactor, testDispatcher)
     }
 
     @Test
@@ -68,23 +68,14 @@ class ViewPresenterTest : BaseUnitTest() {
 
         // bind
         viewPresenter.bind(viewHolder)
+        assertFalse(viewPresenter.job.isCancelled)
         assertTrue(viewPresenter.onBindCalled)
         assertFalse(viewPresenter.onUnbindCalled)
 
         // unbind
         viewPresenter.unbind()
+        assertTrue(viewPresenter.job.isCancelled)
         assertTrue(viewPresenter.onBindCalled)
         assertTrue(viewPresenter.onUnbindCalled)
-    }
-
-    @Test
-    fun testJobCanceledOnStopped() {
-        // bind
-        viewPresenter.bind(viewHolder)
-        assertFalse(viewPresenter.job.isCancelled)
-
-        // unbind
-        viewPresenter.unbind()
-        assertTrue(viewPresenter.job.isCancelled)
     }
 }

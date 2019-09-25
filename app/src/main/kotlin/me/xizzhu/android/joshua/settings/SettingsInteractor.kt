@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.settings
 
 import androidx.annotation.UiThread
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -34,7 +35,8 @@ import me.xizzhu.android.logger.Log
 import java.io.OutputStream
 
 class SettingsInteractor(private val settingsManager: SettingsManager,
-                         private val backupManager: BackupManager) : Interactor() {
+                         private val backupManager: BackupManager,
+                         dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val settings: ConflatedBroadcastChannel<ViewData<Settings>> = ConflatedBroadcastChannel()
     private val settingsSaved: BroadcastChannel<ViewData<Settings>> = ConflatedBroadcastChannel()
@@ -62,7 +64,7 @@ class SettingsInteractor(private val settingsManager: SettingsManager,
     fun restored(): Flow<ViewData<String>> = restored.asFlow()
 
     fun saveSettings(settings: Settings) {
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch {
             try {
                 settingsManager.saveSettings(settings)
                 settingsSaved.offer(ViewData.success(settings))
@@ -106,7 +108,7 @@ class SettingsInteractor(private val settingsManager: SettingsManager,
     }
 
     fun backup(outputStream: OutputStream) {
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch {
             try {
                 outputStream.write(backupManager.prepareForBackup().toByteArray(Charsets.UTF_8))
 
@@ -119,7 +121,7 @@ class SettingsInteractor(private val settingsManager: SettingsManager,
     }
 
     fun restore(data: String) {
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch {
             try {
                 backupManager.restore(data)
                 restored.offer(ViewData.success(""))

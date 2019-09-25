@@ -19,11 +19,11 @@ package me.xizzhu.android.joshua.settings
 import android.content.Intent
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.infra.activity.BaseActivity
 import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewModel
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
-import me.xizzhu.android.joshua.utils.activities.BaseActivity
 import javax.inject.Inject
 
 class SettingsActivity : BaseActivity() {

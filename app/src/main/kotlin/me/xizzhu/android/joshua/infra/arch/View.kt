@@ -22,9 +22,9 @@ import kotlinx.coroutines.*
 
 interface ViewHolder
 
-abstract class Interactor {
+abstract class Interactor(dispatcher: CoroutineDispatcher) {
     protected val tag: String = javaClass.simpleName
-    protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.Main)
+    protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + dispatcher)
 
     @UiThread
     fun start() {
@@ -48,7 +48,7 @@ abstract class Interactor {
     }
 }
 
-abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val interactor: I) {
+abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val interactor: I, private val dispatcher: CoroutineDispatcher) {
     protected val tag: String = javaClass.simpleName
     protected lateinit var coroutineScope: CoroutineScope
 
@@ -56,7 +56,7 @@ abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val inter
 
     @UiThread
     fun bind(viewHolder: V) {
-        coroutineScope = CoroutineScope(Job() + Dispatchers.Main)
+        coroutineScope = CoroutineScope(Job() + dispatcher)
         this.viewHolder = viewHolder
         onBind(viewHolder)
     }

@@ -17,13 +17,14 @@
 package me.xizzhu.android.joshua.infra.arch
 
 import kotlinx.coroutines.*
+import me.xizzhu.android.joshua.tests.BaseUnitTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class InteractorTest {
-    private class TestInteractor : Interactor() {
+class InteractorTest : BaseUnitTest() {
+    private class TestInteractor(dispatcher: CoroutineDispatcher) : Interactor(dispatcher) {
         var onStartedCalled = false
         var onStoppedCalled = false
 
@@ -48,8 +49,9 @@ class InteractorTest {
     private lateinit var interactor: TestInteractor
 
     @BeforeTest
-    fun setup() {
-        interactor = TestInteractor()
+    override fun setup() {
+        super.setup()
+        interactor = TestInteractor(testDispatcher)
     }
 
     @Test
