@@ -22,10 +22,7 @@ import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewModel
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsActivity
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
 class TranslationManagementActivity : BaseSettingsAwareActivity() {
@@ -45,8 +42,6 @@ class TranslationManagementActivity : BaseSettingsAwareActivity() {
         swipeRefreshPresenter.bind(SwipeRefreshViewHolder(findViewById(R.id.swipe_refresher)))
         translationListPresenter.bind(TranslationListViewHolder(findViewById(R.id.translation_list)))
     }
-
-    override fun getViewModel(): ViewModel = translationViewModel
 
     override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(swipeRefreshPresenter, translationListPresenter)
 
