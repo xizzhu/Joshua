@@ -46,4 +46,12 @@ class ViewDataTest : BaseUnitTest() {
         assertEquals("random data", actual.data)
         assertEquals(exception, actual.exception)
     }
+
+    @Test
+    fun testLoading() {
+        val actual = ViewData.loading("random data")
+        assertEquals(ViewData.STATUS_LOADING, actual.status)
+        assertEquals("random data", actual.data)
+        assertNull(actual.exception)
+    }
 }
