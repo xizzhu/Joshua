@@ -48,6 +48,8 @@ abstract class BaseSettingsAwareActivity : BaseActivity() {
         }
     }
 
+    override fun getViewModel(): ViewModel = getBaseSettingsAwareViewModel()
+
     abstract fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel
 }
 
