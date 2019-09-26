@@ -22,28 +22,40 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.ui.SwipeRefresherPresenter
 
 @Module
 object TranslationManagementModule {
     @JvmStatic
-    @Provides
     @ActivityScope
-    fun provideTranslationViewController(translationManagementActivity: TranslationManagementActivity,
-                                         bibleReadingManager: BibleReadingManager,
+    @Provides
+    fun provideSwipeRefreshInteractor(): SwipeRefreshInteractor = SwipeRefreshInteractor()
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideSwipeRefreshPresenter(swipeRefreshInteractor: SwipeRefreshInteractor): SwipeRefreshPresenter =
+            SwipeRefreshPresenter(swipeRefreshInteractor)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideTranslationListInteractor(bibleReadingManager: BibleReadingManager,
                                          translationManager: TranslationManager,
-                                         settingsManager: SettingsManager): TranslationInteractor =
-            TranslationInteractor(translationManagementActivity, bibleReadingManager,
-                    translationManager, settingsManager)
+                                         settingsManager: SettingsManager): TranslationListInteractor =
+            TranslationListInteractor(bibleReadingManager, translationManager, settingsManager)
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideSwipeRefresherPresenter(translationInteractor: TranslationInteractor): SwipeRefresherPresenter =
-            SwipeRefresherPresenter(translationInteractor.observeLoadingState(), translationInteractor)
+    fun provideTranslationListPresenter(translationManagementActivity: TranslationManagementActivity,
+                                        translationListInteractor: TranslationListInteractor): TranslationListPresenter =
+            TranslationListPresenter(translationManagementActivity, translationListInteractor)
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideTranslationPresenter(translationManagementActivity: TranslationManagementActivity,
-                                    translationInteractor: TranslationInteractor): TranslationPresenter =
-            TranslationPresenter(translationInteractor, translationManagementActivity)
+    fun provideTranslationsViewModel(settingsManager: SettingsManager,
+                                     swipeRefreshInteractor: SwipeRefreshInteractor,
+                                     translationListInteractor: TranslationListInteractor): TranslationsViewModel =
+            TranslationsViewModel(settingsManager, swipeRefreshInteractor, translationListInteractor)
 }

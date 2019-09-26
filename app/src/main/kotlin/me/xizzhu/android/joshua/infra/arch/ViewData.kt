@@ -22,12 +22,16 @@ data class ViewData<T> private constructor(@Status val status: Int, val data: T,
     companion object {
         const val STATUS_SUCCESS = 0
         const val STATUS_ERROR = 1
+        const val STATUS_LOADING = 2
 
-        @IntDef(STATUS_SUCCESS, STATUS_ERROR)
+        @IntDef(STATUS_SUCCESS, STATUS_ERROR, STATUS_LOADING)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Status
 
         fun <T> success(data: T): ViewData<T> = ViewData(STATUS_SUCCESS, data, null)
         fun <T> error(data: T, exception: Throwable? = null): ViewData<T> = ViewData(STATUS_ERROR, data, exception)
+        fun <T> loading(data: T): ViewData<T> = ViewData(STATUS_LOADING, data, null)
     }
+
+    fun toUnit(): ViewData<Unit> = ViewData(status, Unit, exception)
 }

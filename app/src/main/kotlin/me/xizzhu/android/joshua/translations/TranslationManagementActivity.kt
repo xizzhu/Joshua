@@ -18,46 +18,37 @@ package me.xizzhu.android.joshua.translations
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.SwipeRefresher
-import me.xizzhu.android.joshua.ui.SwipeRefresherPresenter
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import me.xizzhu.android.joshua.infra.arch.Interactor
+import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.ViewModel
+import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsActivity
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
 import javax.inject.Inject
 
-class TranslationManagementActivity : BaseSettingsActivity() {
+class TranslationManagementActivity : BaseSettingsAwareActivity() {
     @Inject
-    lateinit var translationInteractor: TranslationInteractor
+    lateinit var translationViewModel: TranslationsViewModel
 
     @Inject
-    lateinit var swipeRefresherPresenter: SwipeRefresherPresenter
+    lateinit var swipeRefreshPresenter: SwipeRefreshPresenter
 
     @Inject
-    lateinit var translationPresenter: TranslationPresenter
-
-    private val swipeRefresher: SwipeRefresher by bindView(R.id.swipe_refresher)
-    private val translationListView: TranslationListView by bindView(R.id.translation_list)
+    lateinit var translationListPresenter: TranslationListPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_translation_management)
-        swipeRefresher.setPresenter(swipeRefresherPresenter)
-        translationListView.setPresenter(translationPresenter)
+        swipeRefreshPresenter.bind(SwipeRefreshViewHolder(findViewById(R.id.swipe_refresher)))
+        translationListPresenter.bind(TranslationListViewHolder(findViewById(R.id.translation_list)))
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun getViewModel(): ViewModel = translationViewModel
 
-        swipeRefresherPresenter.attachView(swipeRefresher)
-        translationPresenter.attachView(translationListView)
-    }
+    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(swipeRefreshPresenter, translationListPresenter)
 
-    override fun onStop() {
-        swipeRefresherPresenter.detachView()
-        translationPresenter.detachView()
-
-        super.onStop()
-    }
-
-    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = translationInteractor
+    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = translationViewModel
 }
