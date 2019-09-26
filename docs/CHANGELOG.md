@@ -5,7 +5,7 @@ CHANGELOG
 - Supported backup and restore
 - Updated dependencies:
   - Gradle to 5.6.2
-  - Kotlin Coroutine to 1.3.1
+  - Kotlin Coroutine to 1.3.2
   - AndroidX AppCompat to 1.1.0
   - Play Services plugin to 4.3.2
 
