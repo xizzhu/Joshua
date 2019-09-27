@@ -39,17 +39,7 @@ class SettingsPresenter(private val settingsManager: SettingsManager,
         }
     }
 
-    fun backup() {
-        coroutineScope.launch(Dispatchers.Main) {
-            try {
-                view?.onBackupStarted()
-                view?.onBackupReady(backupManager.prepareForBackup())
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to backup data", e)
-                view?.onBackupFailed()
-            }
-        }
-    }
+    suspend fun prepareForBackup(): String = backupManager.prepareForBackup()
 
     fun restore(content: String) {
         coroutineScope.launch(Dispatchers.Main) {

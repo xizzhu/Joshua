@@ -65,7 +65,7 @@
     <string name="text_pick_highlight_color">Select highlight color</string>
 
     <string name="text_restore_from">Restore from</string>
-    <string name="text_backup_with">Backup with</string>
+    <string name="text_backup_done">Backup successful</string>
     <string name="text_share_with">Share with</string>
     <string name="text_verse_comparison">Verses</string>
 

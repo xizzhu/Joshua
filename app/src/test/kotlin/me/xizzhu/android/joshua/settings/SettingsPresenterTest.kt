@@ -59,35 +59,6 @@ class SettingsPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testBackup() {
-        runBlocking {
-            val backup = "random backup string"
-            `when`(backupManager.prepareForBackup()).thenReturn(backup)
-
-            settingsPresenter.backup()
-            with(inOrder(settingsView)) {
-                verify(settingsView, times(1)).onBackupStarted()
-                verify(settingsView, times(1)).onBackupReady(backup)
-            }
-            verify(settingsView, never()).onBackupFailed()
-        }
-    }
-
-    @Test
-    fun testBackupWithException() {
-        runBlocking {
-            `when`(backupManager.prepareForBackup()).thenThrow(RuntimeException("Random exception"))
-
-            settingsPresenter.backup()
-            with(inOrder(settingsView)) {
-                verify(settingsView, times(1)).onBackupStarted()
-                verify(settingsView, times(1)).onBackupFailed()
-            }
-            verify(settingsView, never()).onBackupReady(anyString())
-        }
-    }
-
-    @Test
     fun testRestore() {
         runBlocking {
             val content = "random content for restore"

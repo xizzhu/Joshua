@@ -42,12 +42,6 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 interface SettingsView : MVPView {
-    fun onBackupStarted()
-
-    fun onBackupReady(textForBackup: String)
-
-    fun onBackupFailed()
-
     fun onRestoreStarted()
 
     fun onRestored()
@@ -62,6 +56,7 @@ interface SettingsView : MVPView {
 class SettingsActivity : BaseActivity(), SettingsView {
     companion object {
         private const val CODE_PICK_CONTENT_FOR_RESTORE = 9999
+        private const val CODE_CREATE_DOCUMENT_FOR_BACKUP = 9998
     }
 
     private val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
@@ -116,15 +111,26 @@ class SettingsActivity : BaseActivity(), SettingsView {
         simpleReadingMode.setOnCheckedChangeListener { _, isChecked -> presenter.setSimpleReadingModeOn(isChecked) }
 
         backup.setOnClickListener {
-            presenter.backup()
+            try {
+                startActivityForResult(
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).setType("application/json").addCategory(Intent.CATEGORY_OPENABLE),
+                        CODE_CREATE_DOCUMENT_FOR_BACKUP
+                )
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to start activity to create document for backup", e)
+                Toast.makeText(this@SettingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+            }
         }
 
         restore.setOnClickListener {
             try {
-                val chooserIntent = Intent.createChooser(
-                        Intent(Intent.ACTION_GET_CONTENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE),
-                        getString(R.string.text_restore_from))
-                startActivityForResult(chooserIntent, CODE_PICK_CONTENT_FOR_RESTORE)
+                startActivityForResult(
+                        Intent.createChooser(
+                                Intent(Intent.ACTION_GET_CONTENT).setType("application/json").addCategory(Intent.CATEGORY_OPENABLE),
+                                getString(R.string.text_restore_from)
+                        ),
+                        CODE_PICK_CONTENT_FOR_RESTORE
+                )
             } catch (e: Exception) {
                 Log.e(tag, "Failed to start activity to get content for restore", e)
                 Toast.makeText(this@SettingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
@@ -163,11 +169,29 @@ class SettingsActivity : BaseActivity(), SettingsView {
             CODE_PICK_CONTENT_FOR_RESTORE -> {
                 if (resultCode == Activity.RESULT_OK) {
                     data?.data
-                            ?.let {
+                            ?.let { uri ->
                                 showDialog()
                                 coroutineScope.launch(Dispatchers.IO) {
-                                    contentResolver.openInputStream(it)?.use {
-                                        presenter.restore(String(it.readBytes(), Charsets.UTF_8))
+                                    contentResolver.openInputStream(uri)?.use { inputStream ->
+                                        presenter.restore(String(inputStream.readBytes(), Charsets.UTF_8))
+                                    }
+                                }
+                            }
+                            ?: Toast.makeText(this, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+                }
+            }
+            CODE_CREATE_DOCUMENT_FOR_BACKUP -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    data?.data
+                            ?.let { uri ->
+                                showDialog()
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    contentResolver.openOutputStream(uri)?.use { outputStream ->
+                                        outputStream.write(presenter.prepareForBackup().toByteArray(Charsets.UTF_8))
+                                    }
+                                    coroutineScope.launch(Dispatchers.Main) {
+                                        dismissDialog()
+                                        Toast.makeText(this@SettingsActivity, R.string.text_backup_done, Toast.LENGTH_LONG).show()
                                     }
                                 }
                             }
@@ -178,10 +202,6 @@ class SettingsActivity : BaseActivity(), SettingsView {
         }
     }
 
-    override fun onBackupStarted() {
-        showDialog()
-    }
-
     private fun showDialog() {
         dismissDialog()
         dialog = ProgressDialog.showIndeterminateProgressDialog(this, R.string.dialog_wait)
@@ -190,19 +210,6 @@ class SettingsActivity : BaseActivity(), SettingsView {
     private fun dismissDialog() {
         dialog?.dismiss()
         dialog = null
-    }
-
-    override fun onBackupReady(textForBackup: String) {
-        dismissDialog()
-        createChooserForSharing(this, getString(R.string.text_backup_with), textForBackup)
-                ?.let { startActivity(it) }
-                ?: Toast.makeText(this, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onBackupFailed() {
-        dismissDialog()
-        DialogHelper.showDialog(this, true, R.string.dialog_backup_error,
-                DialogInterface.OnClickListener { _, _ -> presenter.backup() })
     }
 
     override fun onRestoreStarted() {

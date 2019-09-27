@@ -1,6 +1,9 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Fixed backup with large data
+
 #### v0.11.0 (2019-09-26)
 - Supported backup and restore
 - Updated dependencies:
