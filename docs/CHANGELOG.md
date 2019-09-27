@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.11.0 (2019-09-26)
 - Supported backup and restore
 - Updated dependencies:
   - Gradle to 5.6.2
