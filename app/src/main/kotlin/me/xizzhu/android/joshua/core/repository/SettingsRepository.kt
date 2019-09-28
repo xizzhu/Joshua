@@ -20,9 +20,11 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.repository.local.LocalSettingsStorage
 
 class SettingsRepository(private val localSettingsStorage: LocalSettingsStorage) {
-    suspend fun readSettings(): Settings = localSettingsStorage.readSettings()
+    private var currentSettings: Settings? = null
 
-    suspend fun saveSettings(settings: Settings) {
-        localSettingsStorage.saveSettings(settings)
-    }
+    suspend fun readSettings(): Settings =
+            currentSettings ?: localSettingsStorage.readSettings().apply { currentSettings = this }
+
+    suspend fun saveSettings(settings: Settings): Settings =
+            localSettingsStorage.saveSettings(settings).also { currentSettings = it }
 }

@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
@@ -23,6 +24,8 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 import me.xizzhu.android.logger.Log
 
@@ -38,13 +41,15 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
         private val TAG = SettingsManager::class.java.simpleName
     }
 
+    private val mutex: Mutex = Mutex()
+
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val currentSettings: BroadcastChannel<Settings> = ConflatedBroadcastChannel()
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                currentSettings.offer(settingsRepository.readSettings())
+                currentSettings.offer(readSettings())
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize settings", e)
                 currentSettings.offer(Settings.DEFAULT)
@@ -54,8 +59,49 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
 
     fun observeSettings(): Flow<Settings> = currentSettings.asFlow()
 
-    suspend fun saveSettings(settings: Settings) {
-        settingsRepository.saveSettings(settings)
-        currentSettings.offer(settings)
+    suspend fun readSettings(): Settings = mutex.withLock { settingsRepository.readSettings() }
+
+    suspend fun saveFontSizeScale(fontSizeScale: Int): Settings = mutex.withLock {
+        return settingsRepository.readSettings().let { settings ->
+            if (fontSizeScale != settings.fontSizeScale) {
+                saveSettings(settings.copy(fontSizeScale = fontSizeScale))
+            } else {
+                settings
+            }
+        }
     }
+
+    suspend fun saveKeepScreenOn(keepScreenOn: Boolean): Settings = mutex.withLock {
+        return settingsRepository.readSettings().let { settings ->
+            if (keepScreenOn != settings.keepScreenOn) {
+                saveSettings(settings.copy(keepScreenOn = keepScreenOn))
+            } else {
+                settings
+            }
+        }
+    }
+
+    suspend fun saveNightModeOn(nightModeOn: Boolean): Settings = mutex.withLock {
+        return settingsRepository.readSettings().let { settings ->
+            if (nightModeOn != settings.nightModeOn) {
+                saveSettings(settings.copy(nightModeOn = nightModeOn))
+            } else {
+                settings
+            }
+        }
+    }
+
+    suspend fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean): Settings = mutex.withLock {
+        return settingsRepository.readSettings().let { settings ->
+            if (simpleReadingModeOn != settings.simpleReadingModeOn) {
+                saveSettings(settings.copy(simpleReadingModeOn = simpleReadingModeOn))
+            } else {
+                settings
+            }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun saveSettings(settings: Settings): Settings =
+            settingsRepository.saveSettings(settings).also { currentSettings.offer(it) }
 }

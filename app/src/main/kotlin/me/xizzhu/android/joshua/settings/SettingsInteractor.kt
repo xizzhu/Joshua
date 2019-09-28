@@ -16,119 +16,37 @@
 
 package me.xizzhu.android.joshua.settings
 
-import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.Interactor
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.logger.Log
+import java.io.InputStream
 import java.io.OutputStream
 
 class SettingsInteractor(private val settingsManager: SettingsManager,
                          private val backupManager: BackupManager,
                          dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val settings: ConflatedBroadcastChannel<ViewData<Settings>> = ConflatedBroadcastChannel()
-    private val settingsSaved: BroadcastChannel<ViewData<Settings>> = ConflatedBroadcastChannel()
-    private val backuped: BroadcastChannel<ViewData<String>> = ConflatedBroadcastChannel()
-    private val restored: BroadcastChannel<ViewData<String>> = ConflatedBroadcastChannel()
+    suspend fun readSettings(): Settings = settingsManager.readSettings()
 
-    @UiThread
-    override fun onStarted() {
-        super.onStarted()
-        coroutineScope.launch {
-            settingsManager.observeSettings().map { ViewData.success(it) }.collect { settings.offer(it) }
-        }
+    suspend fun saveFontSizeScale(fontSizeScale: Int): Settings =
+            settingsManager.saveFontSizeScale(fontSizeScale)
+
+    suspend fun saveKeepScreenOn(keepScreenOn: Boolean): Settings =
+            settingsManager.saveKeepScreenOn(keepScreenOn)
+
+    suspend fun saveNightModeOn(nightModeOn: Boolean): Settings =
+            settingsManager.saveNightModeOn(nightModeOn)
+
+    suspend fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean): Settings =
+            settingsManager.saveSimpleReadingModeOn(simpleReadingModeOn)
+
+    suspend fun backup(to: OutputStream) {
+        to.write(backupManager.prepareForBackup().toByteArray(Charsets.UTF_8))
     }
 
-    suspend fun prepareForBackup(): String = backupManager.prepareForBackup()
-
-    fun getSettings(): Settings = settings.valueOrNull?.data ?: Settings.DEFAULT
-
-    fun settings(): Flow<ViewData<Settings>> = settings.asFlow()
-
-    fun settingsSaved(): Flow<ViewData<Settings>> = settingsSaved.asFlow()
-
-    fun backuped(): Flow<ViewData<String>> = backuped.asFlow()
-
-    fun restored(): Flow<ViewData<String>> = restored.asFlow()
-
-    fun saveSettings(settings: Settings) {
-        coroutineScope.launch {
-            try {
-                settingsManager.saveSettings(settings)
-                settingsSaved.offer(ViewData.success(settings))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to save settings", e)
-                settingsSaved.offer(ViewData.error(settings, e))
-            }
-        }
-    }
-
-    fun setFontSizeScale(fontSizeScale: Int) {
-        getSettings().let { settings ->
-            if (fontSizeScale != settings.fontSizeScale) {
-                saveSettings(settings.copy(fontSizeScale = fontSizeScale))
-            }
-        }
-    }
-
-    fun setKeepScreenOn(keepScreenOn: Boolean) {
-        getSettings().let { settings ->
-            if (keepScreenOn != settings.keepScreenOn) {
-                saveSettings(settings.copy(keepScreenOn = keepScreenOn))
-            }
-        }
-    }
-
-    fun setNightModeOn(nightModeOn: Boolean) {
-        getSettings().let { settings ->
-            if (nightModeOn != settings.nightModeOn) {
-                saveSettings(settings.copy(nightModeOn = nightModeOn))
-            }
-        }
-    }
-
-    fun setSimpleReadingModeOn(simpleReadingModeOn: Boolean) {
-        getSettings().let { settings ->
-            if (simpleReadingModeOn != settings.simpleReadingModeOn) {
-                saveSettings(settings.copy(simpleReadingModeOn = simpleReadingModeOn))
-            }
-        }
-    }
-
-    fun backup(outputStream: OutputStream) {
-        coroutineScope.launch {
-            try {
-                outputStream.write(backupManager.prepareForBackup().toByteArray(Charsets.UTF_8))
-
-                backuped.offer(ViewData.success(backupManager.prepareForBackup()))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to backup data", e)
-                backuped.offer(ViewData.error("", e))
-            }
-        }
-    }
-
-    fun restore(data: String) {
-        coroutineScope.launch {
-            try {
-                backupManager.restore(data)
-                restored.offer(ViewData.success(""))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to backup data", e)
-                restored.offer(ViewData.error(data, e))
-            }
-        }
+    suspend fun restore(from: InputStream) {
+        backupManager.restore(String(from.readBytes(), Charsets.UTF_8))
     }
 }

@@ -47,8 +47,8 @@ class SettingsActivity : BaseActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            SettingsViewPresenter.CODE_GET_CONTENT_FOR_RESTORE -> settingsViewPresenter.onGetContentForRestore(resultCode, data)
             SettingsViewPresenter.CODE_CREATE_DOCUMENT_FOR_BACKUP -> settingsViewPresenter.onCreateDocumentForBackup(resultCode, data)
+            SettingsViewPresenter.CODE_GET_CONTENT_FOR_RESTORE -> settingsViewPresenter.onGetContentForRestore(resultCode, data)
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }

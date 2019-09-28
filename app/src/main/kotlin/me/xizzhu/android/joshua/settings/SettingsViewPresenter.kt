@@ -29,18 +29,16 @@ import androidx.annotation.UiThread
 import androidx.appcompat.widget.SwitchCompat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
 import me.xizzhu.android.joshua.ui.*
-import me.xizzhu.android.joshua.utils.createChooserForSharing
 import me.xizzhu.android.logger.Log
+import java.io.IOException
 import kotlin.math.roundToInt
 
 data class SettingsViewHolder(val display: SettingSectionHeader, val fontSize: SettingButton,
@@ -54,8 +52,8 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                             dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<SettingsViewHolder, SettingsInteractor>(interactor, dispatcher) {
     companion object {
-        const val CODE_GET_CONTENT_FOR_RESTORE = 9999
-        const val CODE_CREATE_DOCUMENT_FOR_BACKUP = 9998
+        const val CODE_CREATE_DOCUMENT_FOR_BACKUP = 9999
+        const val CODE_GET_CONTENT_FOR_RESTORE = 9998
 
         private val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
     }
@@ -76,33 +74,22 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
             Log.e(tag, "Failed to load app version", e)
         }
 
-        setupListeners(viewHolder)
-        observeSettings()
-        observeBackupRestore()
-    }
-
-    private fun setupListeners(viewHolder: SettingsViewHolder) {
         viewHolder.fontSize.setOnClickListener {
-            DialogHelper.showDialog(settingsActivity, R.string.settings_title_font_size,
-                    fontSizeTexts, interactor.getSettings().fontSizeScale - 1,
-                    DialogInterface.OnClickListener { dialog, which ->
-                        originalSettings = interactor.getSettings()
-                        shouldAnimateFontSize = true
-                        interactor.setFontSizeScale(which + 1)
-
-                        dialog.dismiss()
-                    })
+            coroutineScope.launch {
+                DialogHelper.showDialog(settingsActivity, R.string.settings_title_font_size,
+                        fontSizeTexts, interactor.readSettings().fontSizeScale - 1,
+                        DialogInterface.OnClickListener { dialog, which ->
+                            saveFontSizeScale(which + 1)
+                            dialog.dismiss()
+                        })
+            }
         }
 
-        viewHolder.keepScreenOn.setOnCheckedChangeListener { _, isChecked -> interactor.setKeepScreenOn(isChecked) }
+        viewHolder.keepScreenOn.setOnCheckedChangeListener { _, isChecked -> saveKeepScreenOn(isChecked) }
 
-        viewHolder.nightModeOn.setOnCheckedChangeListener { _, isChecked ->
-            originalSettings = interactor.getSettings()
-            shouldAnimateColor = true
-            interactor.setNightModeOn(isChecked)
-        }
+        viewHolder.nightModeOn.setOnCheckedChangeListener { _, isChecked -> saveNightModeOn(isChecked) }
 
-        viewHolder.simpleReadingMode.setOnCheckedChangeListener { _, isChecked -> interactor.setSimpleReadingModeOn(isChecked) }
+        viewHolder.simpleReadingMode.setOnCheckedChangeListener { _, isChecked -> saveSimpleReadingModeOn(isChecked) }
 
         viewHolder.backup.setOnClickListener {
             try {
@@ -140,40 +127,60 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
             }
         }
+
+        coroutineScope.launch { updateSettings(interactor.readSettings()) }
     }
 
-    private fun showBackupRestoreDialog() {
-        dismissBackupRestoreDialog()
-        backupRestoreDialog = ProgressDialog.showIndeterminateProgressDialog(settingsActivity, R.string.dialog_wait)
-    }
+    private fun saveFontSizeScale(fontSizeScale: Int) {
+        coroutineScope.launch {
+            try {
+                originalSettings = interactor.readSettings()
+                shouldAnimateFontSize = true
 
-    private fun dismissBackupRestoreDialog() {
-        backupRestoreDialog?.dismiss()
-        backupRestoreDialog = null
-    }
-
-    private fun observeSettings() {
-        coroutineScope.launch(Dispatchers.Main) {
-            interactor.settings().collect { settings ->
-                when (settings.status) {
-                    ViewData.STATUS_SUCCESS -> updateSettings(settings.data)
-                    else -> Log.e(tag, "", IllegalStateException("Unexpected status (${settings.status}) when observing settings()"))
-                }
+                updateSettings(interactor.saveFontSizeScale(fontSizeScale))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save font size scale", e)
+                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                        DialogInterface.OnClickListener { _, _ -> saveFontSizeScale(fontSizeScale) })
             }
         }
-        coroutineScope.launch(Dispatchers.Main) {
-            interactor.settingsSaved().collect { settings ->
-                when (settings.status) {
-                    ViewData.STATUS_SUCCESS -> {
-                        // when setting is saved, the settings updated observer will be triggered,
-                        // so no need to update here
-                    }
-                    ViewData.STATUS_ERROR -> {
-                        DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
-                                DialogInterface.OnClickListener { _, _ -> interactor.saveSettings(settings.data) })
-                    }
-                    else -> Log.e(tag, "", IllegalStateException("Unexpected status (${settings.status}) when observing settingsSaved()"))
-                }
+    }
+
+    private fun saveKeepScreenOn(keepScreenOn: Boolean) {
+        coroutineScope.launch {
+            try {
+                updateSettings(interactor.saveKeepScreenOn(keepScreenOn))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save keep screen on", e)
+                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                        DialogInterface.OnClickListener { _, _ -> saveKeepScreenOn(keepScreenOn) })
+            }
+        }
+    }
+
+    private fun saveNightModeOn(nightModeOn: Boolean) {
+        coroutineScope.launch {
+            try {
+                originalSettings = interactor.readSettings()
+                shouldAnimateColor = true
+
+                updateSettings(interactor.saveNightModeOn(nightModeOn))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save night mode on", e)
+                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                        DialogInterface.OnClickListener { _, _ -> saveNightModeOn(nightModeOn) })
+            }
+        }
+    }
+
+    private fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean) {
+        coroutineScope.launch {
+            try {
+                updateSettings(interactor.saveSimpleReadingModeOn(simpleReadingModeOn))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save simple reading mode on", e)
+                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                        DialogInterface.OnClickListener { _, _ -> saveSimpleReadingModeOn(simpleReadingModeOn) })
             }
         }
     }
@@ -208,6 +215,8 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
             it.nightModeOn.isChecked = settings.nightModeOn
             it.simpleReadingMode.isChecked = settings.simpleReadingModeOn
         }
+
+        originalSettings = null
     }
 
     private fun animateColor(@ColorInt fromBackgroundColor: Int, @ColorInt toBackgroundColor: Int,
@@ -270,68 +279,59 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
         }
     }
 
-    private fun observeBackupRestore() {
-        coroutineScope.launch(Dispatchers.Main) {
-            interactor.backuped().collect { backup ->
-                when (backup.status) {
-                    ViewData.STATUS_SUCCESS -> {
-                        dismissBackupRestoreDialog()
-                        createChooserForSharing(settingsActivity, settingsActivity.getString(R.string.text_backup_with), backup.data)
-                                ?.let { settingsActivity.startActivity(it) }
-                                ?: Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
-                    }
-                    ViewData.STATUS_ERROR -> {
-                        dismissBackupRestoreDialog()
-                        DialogHelper.showDialog(settingsActivity, true, R.string.dialog_backup_error,
-                                DialogInterface.OnClickListener { _, _ -> interactor.prepareBackupData() })
-                    }
-                    else -> Log.e(tag, "", IllegalStateException("Unexpected status (${backup.status}) when observing backuped()"))
-                }
+    fun onCreateDocumentForBackup(resultCode: Int, data: Intent?) {
+        if (resultCode != Activity.RESULT_OK) return
+        data?.data?.let { backup(it) }
+                ?: Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+    }
+
+    private fun backup(uri: Uri) {
+        coroutineScope.launch {
+            try {
+                showBackupRestoreDialog()
+                settingsActivity.contentResolver.openOutputStream(uri)?.use { interactor.backup(it) }
+                        ?: throw IOException("Failed to open Uri for backup - $uri")
+                dismissBackupRestoreDialog()
+                Toast.makeText(settingsActivity, R.string.toast_backed_up, Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to backup data", e)
+                dismissBackupRestoreDialog()
+                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_backup_error,
+                        DialogInterface.OnClickListener { _, _ -> restore(uri) })
             }
         }
-        coroutineScope.launch(Dispatchers.Main) {
-            interactor.restored().collect { restore ->
-                when (restore.status) {
-                    ViewData.STATUS_SUCCESS -> {
-                        dismissBackupRestoreDialog()
-                        Toast.makeText(settingsActivity, R.string.toast_restored, Toast.LENGTH_SHORT).show()
-                    }
-                    ViewData.STATUS_ERROR -> {
-                        dismissBackupRestoreDialog()
-                        DialogHelper.showDialog(settingsActivity, true, R.string.dialog_restore_error,
-                                DialogInterface.OnClickListener { _, _ -> interactor.restore(restore.data) })
-                    }
-                    else -> Log.e(tag, "", IllegalStateException("Unexpected status (${restore.status}) when observing restored()"))
-                }
-            }
-        }
+    }
+
+    private fun showBackupRestoreDialog() {
+        dismissBackupRestoreDialog()
+        backupRestoreDialog = ProgressDialog.showIndeterminateProgressDialog(settingsActivity, R.string.dialog_wait)
+    }
+
+    private fun dismissBackupRestoreDialog() {
+        backupRestoreDialog?.dismiss()
+        backupRestoreDialog = null
     }
 
     fun onGetContentForRestore(resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) return
-        data?.data
-                ?.let {
-                    showBackupRestoreDialog()
-                    coroutineScope.launch(Dispatchers.IO) {
-                        settingsActivity.contentResolver.openInputStream(it)?.use {
-                            interactor.restore(String(it.readBytes(), Charsets.UTF_8))
-                        }
-                    }
-                }
+        data?.data?.let { restore(it) }
                 ?: Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
     }
 
-    fun onCreateDocumentForBackup(resultCode: Int, data: Intent?) {
-        if (resultCode != Activity.RESULT_OK) return
-        data?.data
-                ?.let {
-                    showBackupRestoreDialog()
-                    coroutineScope.launch(Dispatchers.IO) {
-                        settingsActivity.contentResolver.openInputStream(it)?.use {
-                            interactor.restore(String(it.readBytes(), Charsets.UTF_8))
-                        }
-                    }
-                }
-                ?: Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+    private fun restore(uri: Uri) {
+        coroutineScope.launch {
+            try {
+                showBackupRestoreDialog()
+                settingsActivity.contentResolver.openInputStream(uri)?.use { interactor.restore(it) }
+                        ?: throw IOException("Failed to open Uri for restore - $uri")
+                dismissBackupRestoreDialog()
+                Toast.makeText(settingsActivity, R.string.toast_restored, Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to backup data", e)
+                dismissBackupRestoreDialog()
+                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_restore_error,
+                        DialogInterface.OnClickListener { _, _ -> restore(uri) })
+            }
+        }
     }
 }
