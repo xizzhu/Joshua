@@ -23,8 +23,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
@@ -57,7 +56,6 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
 
         observeSettings()
         observeTranslationList()
-        observeTranslationDownload()
         interactor.loadTranslationList(false)
     }
 
@@ -123,7 +121,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
         if (translationInfo.downloaded) {
             updateCurrentTranslationAndFinishActivity(translationInfo.shortName)
         } else {
-            interactor.downloadTranslation(translationInfo)
+            downloadTranslation(translationInfo)
         }
     }
 
@@ -143,6 +141,43 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
         }
     }
 
+    private fun downloadTranslation(translationToDownload: TranslationInfo) {
+        coroutineScope.launch {
+            interactor.downloadTranslation(translationToDownload)
+                    .catch { cause ->
+                        Log.e(tag, "Failed to download translation", cause)
+                        dismissDownloadTranslationDialog()
+                        DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_download_error,
+                                DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
+                    }
+                    .onStart {
+                        downloadTranslationDialog = ProgressDialog.showProgressDialog(
+                                translationManagementActivity, R.string.dialog_downloading_translation, 100)
+                    }
+                    .onCompletion { cause ->
+                        if (cause != null) return@onCompletion
+
+                        dismissDownloadTranslationDialog()
+                        Toast.makeText(translationManagementActivity, R.string.toast_translation_downloaded, Toast.LENGTH_SHORT).show()
+                    }
+                    .collect { progress ->
+                        downloadTranslationDialog?.let {
+                            if (progress < 100) {
+                                it.setProgress(progress)
+                            } else {
+                                it.setTitle(R.string.dialog_installing_translation)
+                                it.setIsIndeterminate(true)
+                            }
+                        }
+                    }
+        }
+    }
+
+    private fun dismissDownloadTranslationDialog() {
+        downloadTranslationDialog?.dismiss()
+        downloadTranslationDialog = null
+    }
+
     @VisibleForTesting
     fun onTranslationLongClicked(translationInfo: TranslationInfo, isCurrentTranslation: Boolean) {
         if (translationInfo.downloaded) {
@@ -152,7 +187,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                         DialogInterface.OnClickListener { _, _ -> removeTranslation(translationInfo) })
             }
         } else {
-            interactor.downloadTranslation(translationInfo)
+            downloadTranslation(translationInfo)
         }
     }
 
@@ -178,45 +213,5 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     private fun dismissRemoveTranslationDialog() {
         removeTranslationDialog?.dismiss()
         removeTranslationDialog = null
-    }
-
-    private fun observeTranslationDownload() {
-        coroutineScope.launch {
-            interactor.translationDownload().collect { translationDownload ->
-                when (translationDownload.status) {
-                    ViewData.STATUS_SUCCESS -> {
-                        dismissDownloadTranslationDialog()
-                        Toast.makeText(translationManagementActivity, R.string.toast_translation_downloaded, Toast.LENGTH_SHORT).show()
-                    }
-                    ViewData.STATUS_ERROR -> {
-                        dismissDownloadTranslationDialog()
-                        DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_download_error,
-                                DialogInterface.OnClickListener { _, _ ->
-                                    interactor.downloadTranslation(translationDownload.data.translationInfo)
-                                }
-                        )
-                    }
-                    ViewData.STATUS_LOADING -> {
-                        if (downloadTranslationDialog == null) {
-                            downloadTranslationDialog = ProgressDialog.showProgressDialog(
-                                    translationManagementActivity, R.string.dialog_downloading_translation, 100)
-                        }
-                        downloadTranslationDialog?.let {
-                            if (translationDownload.data.progress < 100) {
-                                it.setProgress(translationDownload.data.progress)
-                            } else {
-                                it.setTitle(R.string.dialog_installing_translation)
-                                it.setIsIndeterminate(true)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun dismissDownloadTranslationDialog() {
-        downloadTranslationDialog?.dismiss()
-        downloadTranslationDialog = null
     }
 }

@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.translations
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -99,49 +100,18 @@ class TranslationListInteractorTest : BaseUnitTest() {
     fun testDownloadTranslation() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(""))
 
-        val translationDownloadAsync = async { translationListInteractor.translationDownload().take(3).toList() }
-
         val translationToDownload = MockContents.kjvTranslationInfo
-        val downloadProgressChannel = Channel<Int>()
-        translationListInteractor.downloadTranslation(translationToDownload, downloadProgressChannel)
 
+        val downloadProgressChannel = Channel<Int>()
         val progress = 89
         downloadProgressChannel.send(progress)
-        downloadProgressChannel.close()
 
-        // the loading progress is emitted in a separate coroutine, we can not guarantee the order
-        assertEquals(
-                setOf(
-                        ViewData.loading(TranslationDownload(translationToDownload, 0)),
-                        ViewData.loading(TranslationDownload(translationToDownload, progress)),
-                        ViewData.success(TranslationDownload(translationToDownload, 0))
-                ),
-                translationDownloadAsync.await().toSet()
-        )
+        assertEquals(listOf(progress), translationListInteractor.downloadTranslation(translationToDownload, downloadProgressChannel).toList())
 
         with(inOrder(translationManager, bibleReadingManager)) {
             verify(translationManager, times(1)).downloadTranslation(downloadProgressChannel, translationToDownload)
             verify(bibleReadingManager, times(1)).observeCurrentTranslation()
             verify(bibleReadingManager, times(1)).saveCurrentTranslation(translationToDownload.shortName)
         }
-    }
-
-    @Test
-    fun testDownloadTranslationWithException() = testDispatcher.runBlockingTest {
-        val exception = RuntimeException("random exception")
-        `when`(translationManager.downloadTranslation(any(), any())).thenThrow(exception)
-
-        val translationDownloadAsync = async { translationListInteractor.translationDownload().take(2).toList() }
-
-        val translationToDownload = MockContents.kjvTranslationInfo
-        translationListInteractor.downloadTranslation(translationToDownload)
-
-        assertEquals(
-                listOf(
-                        ViewData.loading(TranslationDownload(translationToDownload, 0)),
-                        ViewData.error(TranslationDownload(translationToDownload, 0))
-                ),
-                translationDownloadAsync.await()
-        )
     }
 }

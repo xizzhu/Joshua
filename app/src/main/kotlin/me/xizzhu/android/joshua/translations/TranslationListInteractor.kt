@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -50,7 +51,6 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
     : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val translationList: BroadcastChannel<ViewData<TranslationList>> = ConflatedBroadcastChannel()
-    private val translationDownload: BroadcastChannel<ViewData<TranslationDownload>> = ConflatedBroadcastChannel()
 
     private var currentTranslation: String? = null
     private var availableTranslations: List<TranslationInfo>? = null
@@ -105,37 +105,17 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
-    fun translationDownload(): Flow<ViewData<TranslationDownload>> = translationDownload.asFlow()
-
-    fun downloadTranslation(translationToDownload: TranslationInfo) {
-        downloadTranslation(translationToDownload, Channel())
-    }
+    fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> =
+            downloadTranslation(translationToDownload, Channel())
 
     @VisibleForTesting
-    fun downloadTranslation(translationToDownload: TranslationInfo, downloadProgressChannel: Channel<Int>) {
-        translationDownload.offer(ViewData.loading(TranslationDownload(translationToDownload, 0)))
+    fun downloadTranslation(translationToDownload: TranslationInfo,
+                            downloadProgressChannel: Channel<Int>): Flow<Int> = channelFlow {
+        coroutineScope.launch { downloadProgressChannel.consumeEach { offer(it) } }
 
-        coroutineScope.launch {
-            downloadProgressChannel.consumeAsFlow().collect { progress ->
-                try {
-                    translationDownload.offer(ViewData.loading(TranslationDownload(translationToDownload, progress)))
-                } catch (e: Exception) {
-                    Log.e(tag, "Error when download progress is updated", e)
-                }
-            }
-        }
-
-        coroutineScope.launch {
-            try {
-                translationManager.downloadTranslation(downloadProgressChannel, translationToDownload)
-                if (bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
-                    bibleReadingManager.saveCurrentTranslation(translationToDownload.shortName)
-                }
-                translationDownload.offer(ViewData.success(TranslationDownload(translationToDownload, 0)))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to download translation", e)
-                translationDownload.offer(ViewData.error(TranslationDownload(translationToDownload, 0)))
-            }
+        translationManager.downloadTranslation(downloadProgressChannel, translationToDownload)
+        if (bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
+            bibleReadingManager.saveCurrentTranslation(translationToDownload.shortName)
         }
     }
 
