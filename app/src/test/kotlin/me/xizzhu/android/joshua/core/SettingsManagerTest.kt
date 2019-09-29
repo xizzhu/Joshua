@@ -32,7 +32,7 @@ class SettingsManagerTest : BaseUnitTest() {
     private lateinit var settingsManager: SettingsManager
 
     @Test
-    fun testObserveInitialSettings() = runBlockingTest {
+    fun testObserveInitialSettings() = testDispatcher.runBlockingTest {
         val settings = Settings(false, true, 3, false)
         `when`(settingsRepository.readSettings()).thenReturn(settings)
         settingsManager = SettingsManager(settingsRepository)
@@ -41,7 +41,7 @@ class SettingsManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveInitialSettingsWithException() = runBlockingTest {
+    fun testObserveInitialSettingsWithException() = testDispatcher.runBlockingTest {
         `when`(settingsRepository.readSettings()).thenThrow(RuntimeException("Random exception"))
         settingsManager = SettingsManager(settingsRepository)
 
@@ -49,7 +49,7 @@ class SettingsManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testUpdateSettings() = runBlockingTest {
+    fun testUpdateSettings() = testDispatcher.runBlockingTest {
         `when`(settingsRepository.readSettings()).thenReturn(Settings.DEFAULT)
         settingsManager = SettingsManager(settingsRepository)
 
@@ -62,7 +62,7 @@ class SettingsManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveFontSizeScale() = runBlockingTest {
+    fun testSaveFontSizeScale() = testDispatcher.runBlockingTest {
         `when`(settingsRepository.readSettings()).thenReturn(Settings.DEFAULT)
         settingsManager = SettingsManager(settingsRepository)
 
@@ -76,7 +76,7 @@ class SettingsManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveKeepScreenOn() = runBlockingTest {
+    fun testSaveKeepScreenOn() = testDispatcher.runBlockingTest {
         `when`(settingsRepository.readSettings()).thenReturn(Settings.DEFAULT)
         settingsManager = SettingsManager(settingsRepository)
 
@@ -90,7 +90,7 @@ class SettingsManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveNightModeOn() = runBlockingTest {
+    fun testSaveNightModeOn() = testDispatcher.runBlockingTest {
         `when`(settingsRepository.readSettings()).thenReturn(Settings.DEFAULT)
         settingsManager = SettingsManager(settingsRepository)
 
@@ -104,7 +104,7 @@ class SettingsManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveSimpleReadingModeOn() = runBlockingTest {
+    fun testSaveSimpleReadingModeOn() = testDispatcher.runBlockingTest {
         `when`(settingsRepository.readSettings()).thenReturn(Settings.DEFAULT)
         settingsManager = SettingsManager(settingsRepository)
 
