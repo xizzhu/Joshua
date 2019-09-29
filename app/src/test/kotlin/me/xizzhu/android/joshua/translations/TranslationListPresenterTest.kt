@@ -43,7 +43,6 @@ class TranslationListPresenterTest : BaseUnitTest() {
         `when`(translationListInteractor.settings()).thenReturn(emptyFlow())
         `when`(translationListInteractor.translationList()).thenReturn(emptyFlow())
         `when`(translationListInteractor.translationDownload()).thenReturn(emptyFlow())
-        `when`(translationListInteractor.translationRemoval()).thenReturn(emptyFlow())
 
         translationListViewHolder = TranslationListViewHolder(translationListView)
         translationListPresenter = TranslationListPresenter(translationManagementActivity, translationListInteractor, testDispatcher)

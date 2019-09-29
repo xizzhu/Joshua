@@ -58,7 +58,6 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
         observeSettings()
         observeTranslationList()
         observeTranslationDownload()
-        observeTranslationRemoval()
         interactor.loadTranslationList(false)
     }
 
@@ -150,14 +149,35 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
             if (!isCurrentTranslation) {
                 DialogHelper.showDialog(translationManagementActivity, true,
                         R.string.dialog_delete_translation_confirmation,
-                        DialogInterface.OnClickListener { _, _ ->
-                            interactor.removeTranslation(translationInfo)
-                        }
-                )
+                        DialogInterface.OnClickListener { _, _ -> removeTranslation(translationInfo) })
             }
         } else {
             interactor.downloadTranslation(translationInfo)
         }
+    }
+
+    private fun removeTranslation(translationToRemove: TranslationInfo) {
+        coroutineScope.launch {
+            try {
+                removeTranslationDialog = ProgressDialog.showIndeterminateProgressDialog(
+                        translationManagementActivity, R.string.dialog_deleting_translation)
+
+                interactor.removeTranslation(translationToRemove)
+
+                dismissRemoveTranslationDialog()
+                Toast.makeText(translationManagementActivity, R.string.toast_translation_deleted, Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to remove translation", e)
+                dismissRemoveTranslationDialog()
+                DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_delete_error,
+                        DialogInterface.OnClickListener { _, _ -> removeTranslation(translationToRemove) })
+            }
+        }
+    }
+
+    private fun dismissRemoveTranslationDialog() {
+        removeTranslationDialog?.dismiss()
+        removeTranslationDialog = null
     }
 
     private fun observeTranslationDownload() {
@@ -198,37 +218,5 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     private fun dismissDownloadTranslationDialog() {
         downloadTranslationDialog?.dismiss()
         downloadTranslationDialog = null
-    }
-
-    private fun observeTranslationRemoval() {
-        coroutineScope.launch {
-            interactor.translationRemoval().collect { translationRemoval ->
-                when (translationRemoval.status) {
-                    ViewData.STATUS_SUCCESS -> {
-                        dismissRemoveTranslationDialog()
-                        Toast.makeText(translationManagementActivity, R.string.toast_translation_deleted, Toast.LENGTH_SHORT).show()
-                    }
-                    ViewData.STATUS_ERROR -> {
-                        dismissRemoveTranslationDialog()
-                        DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_delete_error,
-                                DialogInterface.OnClickListener { _, _ ->
-                                    interactor.removeTranslation(translationRemoval.data)
-                                }
-                        )
-                    }
-                    ViewData.STATUS_LOADING -> {
-                        if (removeTranslationDialog == null) {
-                            removeTranslationDialog = ProgressDialog.showIndeterminateProgressDialog(
-                                    translationManagementActivity, R.string.dialog_deleting_translation)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun dismissRemoveTranslationDialog() {
-        removeTranslationDialog?.dismiss()
-        removeTranslationDialog = null
     }
 }

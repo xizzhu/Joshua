@@ -51,7 +51,6 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val translationList: BroadcastChannel<ViewData<TranslationList>> = ConflatedBroadcastChannel()
     private val translationDownload: BroadcastChannel<ViewData<TranslationDownload>> = ConflatedBroadcastChannel()
-    private val translationRemoval: BroadcastChannel<ViewData<TranslationInfo>> = ConflatedBroadcastChannel()
 
     private var currentTranslation: String? = null
     private var availableTranslations: List<TranslationInfo>? = null
@@ -140,18 +139,7 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
         }
     }
 
-    fun translationRemoval(): Flow<ViewData<TranslationInfo>> = translationRemoval.asFlow()
-
-    fun removeTranslation(translationToRemove: TranslationInfo) {
-        coroutineScope.launch {
-            try {
-                translationRemoval.offer(ViewData.loading(translationToRemove))
-                translationManager.removeTranslation(translationToRemove)
-                translationRemoval.offer(ViewData.success(translationToRemove))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to remove translation", e)
-                translationRemoval.offer(ViewData.error(translationToRemove, e))
-            }
-        }
+    suspend fun removeTranslation(translationToRemove: TranslationInfo) {
+        translationManager.removeTranslation(translationToRemove)
     }
 }

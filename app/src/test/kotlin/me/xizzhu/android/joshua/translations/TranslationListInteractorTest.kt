@@ -144,33 +144,4 @@ class TranslationListInteractorTest : BaseUnitTest() {
                 translationDownloadAsync.await()
         )
     }
-
-    @Test
-    fun testRemoveTranslation() = testDispatcher.runBlockingTest {
-        val translationRemovalAsync = async { translationListInteractor.translationRemoval().take(2).toList() }
-
-        val translationToRemove = MockContents.kjvDownloadedTranslationInfo
-        translationListInteractor.removeTranslation(translationToRemove)
-
-        assertEquals(
-                listOf(ViewData.loading(translationToRemove), ViewData.success(translationToRemove)),
-                translationRemovalAsync.await()
-        )
-        verify(translationManager, times(1)).removeTranslation(translationToRemove)
-    }
-
-    @Test
-    fun testRemoveTranslationWithException() = testDispatcher.runBlockingTest {
-        val translationRemovalAsync = async { translationListInteractor.translationRemoval().take(2).toList() }
-
-        val translationToRemove = MockContents.kjvDownloadedTranslationInfo
-        val exception = RuntimeException("random exception")
-        `when`(translationManager.removeTranslation(translationToRemove)).thenThrow(exception)
-        translationListInteractor.removeTranslation(translationToRemove)
-
-        assertEquals(
-                listOf(ViewData.loading(translationToRemove), ViewData.error(translationToRemove, exception)),
-                translationRemovalAsync.await()
-        )
-    }
 }
