@@ -17,9 +17,7 @@
 package me.xizzhu.android.joshua.translations
 
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -99,17 +97,14 @@ class TranslationListInteractorTest : BaseUnitTest() {
     @Test
     fun testDownloadTranslation() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(""))
-
         val translationToDownload = MockContents.kjvTranslationInfo
-
-        val downloadProgressChannel = Channel<Int>()
         val progress = 89
-        downloadProgressChannel.send(progress)
+        `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flowOf(progress))
 
-        assertEquals(listOf(progress), translationListInteractor.downloadTranslation(translationToDownload, downloadProgressChannel).toList())
+        assertEquals(listOf(progress), translationListInteractor.downloadTranslation(translationToDownload).toList())
 
         with(inOrder(translationManager, bibleReadingManager)) {
-            verify(translationManager, times(1)).downloadTranslation(downloadProgressChannel, translationToDownload)
+            verify(translationManager, times(1)).downloadTranslation(translationToDownload)
             verify(bibleReadingManager, times(1)).observeCurrentTranslation()
             verify(bibleReadingManager, times(1)).saveCurrentTranslation(translationToDownload.shortName)
         }

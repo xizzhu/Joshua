@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
@@ -134,7 +133,7 @@ class TranslationManagerTest : BaseUnitTest() {
             assertTrue(translationManager.observeAvailableTranslations().first().isEmpty())
 
             translationManager.updateTranslations(listOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo))
-            translationManager.downloadTranslation(Channel(), MockContents.kjvTranslationInfo)
+            translationManager.downloadTranslation(MockContents.kjvTranslationInfo).collect()
 
             assertEquals(listOf(MockContents.cuvTranslationInfo),
                     translationManager.observeAvailableTranslations().first())

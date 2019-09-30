@@ -17,13 +17,10 @@
 package me.xizzhu.android.joshua.translations
 
 import androidx.annotation.UiThread
-import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -41,8 +38,6 @@ data class TranslationList(val currentTranslation: String,
         val EMPTY = TranslationList("", emptyList(), emptyList())
     }
 }
-
-data class TranslationDownload(val translationInfo: TranslationInfo, val progress: Int)
 
 class TranslationListInteractor(private val bibleReadingManager: BibleReadingManager,
                                 private val translationManager: TranslationManager,
@@ -106,18 +101,14 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
     }
 
     fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> =
-            downloadTranslation(translationToDownload, Channel())
+            translationManager.downloadTranslation(translationToDownload)
+                    .onCompletion { cause ->
+                        if (cause != null) return@onCompletion
 
-    @VisibleForTesting
-    fun downloadTranslation(translationToDownload: TranslationInfo,
-                            downloadProgressChannel: Channel<Int>): Flow<Int> = channelFlow {
-        coroutineScope.launch { downloadProgressChannel.consumeEach { offer(it) } }
-
-        translationManager.downloadTranslation(downloadProgressChannel, translationToDownload)
-        if (bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
-            bibleReadingManager.saveCurrentTranslation(translationToDownload.shortName)
-        }
-    }
+                        if (bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
+                            bibleReadingManager.saveCurrentTranslation(translationToDownload.shortName)
+                        }
+                    }
 
     suspend fun removeTranslation(translationToRemove: TranslationInfo) {
         translationManager.removeTranslation(translationToRemove)
