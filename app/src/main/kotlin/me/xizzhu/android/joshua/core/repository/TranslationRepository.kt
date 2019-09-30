@@ -30,7 +30,9 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
                             private val remoteTranslationService: RemoteTranslationService) {
     companion object {
         private val TAG: String = TranslationRepository::class.java.simpleName
-        private const val TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS = 7L * 24L * 3600L * 1000L // 7 day
+
+        @VisibleForTesting
+        const val TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS = 7L * 24L * 3600L * 1000L // 7 day
     }
 
     suspend fun reload(forceRefresh: Boolean): List<TranslationInfo> {
@@ -55,8 +57,10 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
     @VisibleForTesting
     suspend fun translationListTooOld(): Boolean =
-            System.currentTimeMillis() - localTranslationStorage.readTranslationListRefreshTimestamp() >=
-                    TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
+            now() - localTranslationStorage.readTranslationListRefreshTimestamp() >= TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
+
+    @VisibleForTesting
+    fun now(): Long = System.currentTimeMillis()
 
     @VisibleForTesting
     suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
