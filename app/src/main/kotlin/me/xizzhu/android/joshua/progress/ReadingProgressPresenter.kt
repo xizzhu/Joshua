@@ -16,51 +16,78 @@
 
 package me.xizzhu.android.joshua.progress
 
+import android.content.DialogInterface
+import android.view.View
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwarePresenter
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.logger.Log
 
-class ReadingProgressPresenter(private val readingProgressInteractor: ReadingProgressInteractor)
-    : BaseSettingsPresenter<ReadingProgressView>(readingProgressInteractor) {
+data class ReadingProgressViewHolder(val readingProgressListView: ReadingProgressListView) : ViewHolder
+
+class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgressActivity,
+                               private val navigator: Navigator,
+                               readingProgressInteractor: ReadingProgressInteractor,
+                               dispatcher: CoroutineDispatcher = Dispatchers.Main)
+    : BaseSettingsAwarePresenter<ReadingProgressViewHolder, ReadingProgressInteractor>(readingProgressInteractor, dispatcher) {
     private val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 
-    override fun onViewAttached() {
-        super.onViewAttached()
+    @UiThread
+    override fun onBind(viewHolder: ReadingProgressViewHolder) {
+        super.onBind(viewHolder)
+
+        observeSettings()
         loadReadingProgress()
     }
 
-    fun loadReadingProgress() {
-        coroutineScope.launch(Dispatchers.Main) {
-            try {
-                readingProgressInteractor.notifyLoadingStarted()
-                view?.onReadingProgressLoadingStarted()
+    private fun observeSettings() {
+        coroutineScope.launch {
+            interactor.settings().collect {
+                if (it.status == ViewData.STATUS_SUCCESS) {
+                    viewHolder?.readingProgressListView?.onSettingsUpdated(it.data)
+                }
+            }
+        }
+    }
 
-                val currentTranslation = readingProgressInteractor.readCurrentTranslation()
-                val bookNames = readingProgressInteractor.readBookNames(currentTranslation)
-                val readingProgress = readingProgressInteractor.readReadingProgress()
-                        .toReadingProgressItems(bookNames, expanded,
-                                this@ReadingProgressPresenter::onBookClicked,
-                                this@ReadingProgressPresenter::openChapter)
-                view?.onReadingProgressLoaded(readingProgress)
-                view?.onReadingProgressLoadingCompleted()
+    private fun loadReadingProgress() {
+        coroutineScope.launch {
+            try {
+                viewHolder?.readingProgressListView?.let { readingProgressListView ->
+                    readingProgressListView.visibility = View.GONE
+                    val (bookNames, readingProgress) = interactor.readReadingProgress()
+                    readingProgressListView.setReadingProgressItems(readingProgress.toReadingProgressItems(bookNames, expanded,
+                            this@ReadingProgressPresenter::onBookClicked,
+                            this@ReadingProgressPresenter::openChapter))
+                    readingProgressListView.fadeIn()
+                }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load reading progress")
-                view?.onReadingProgressLoadFailed()
-            } finally {
-                readingProgressInteractor.notifyLoadingFinished()
+
+                DialogHelper.showDialog(readingProgressActivity, true, R.string.dialog_load_reading_progress_error,
+                        DialogInterface.OnClickListener { _, _ -> loadReadingProgress() })
             }
         }
     }
 
     @VisibleForTesting
     fun openChapter(bookIndex: Int, chapterIndex: Int) {
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch {
             try {
-                readingProgressInteractor.openChapter(VerseIndex(bookIndex, chapterIndex, 0))
+                interactor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+                navigator.navigate(readingProgressActivity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to open chapter for reading", e)
                 // TODO

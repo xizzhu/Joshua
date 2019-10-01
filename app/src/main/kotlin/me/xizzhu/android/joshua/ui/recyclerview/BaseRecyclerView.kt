@@ -68,10 +68,13 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
 
     fun setSettings(settings: Settings) {
         this.settings = settings
-        notifyDataSetChanged()
+
+        if (items.isNotEmpty()) {
+            notifyDataSetChanged()
+        }
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int = if (settings != null) items.size else 0
 
     override fun getItemViewType(position: Int): Int = items[position].viewType
 

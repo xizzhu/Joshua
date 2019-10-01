@@ -17,54 +17,18 @@
 package me.xizzhu.android.joshua.progress
 
 import android.content.Context
-import android.content.DialogInterface
 import android.util.AttributeSet
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 
-interface ReadingProgressView : BaseSettingsView {
-    fun onReadingProgressLoadingStarted()
-
-    fun onReadingProgressLoadingCompleted()
-
-    fun onReadingProgressLoaded(items: List<BaseItem>)
-
-    fun onReadingProgressLoadFailed()
-}
-
-class ReadingProgressListView : BaseRecyclerView, ReadingProgressView {
+class ReadingProgressListView : BaseRecyclerView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private lateinit var presenter: ReadingProgressPresenter
-
-    fun setPresenter(presenter: ReadingProgressPresenter) {
-        this.presenter = presenter
-    }
-
-    override fun onReadingProgressLoadingStarted() {
-        visibility = GONE
-    }
-
-    override fun onReadingProgressLoadingCompleted() {
-        fadeIn()
-    }
-
-    override fun onReadingProgressLoaded(items: List<BaseItem>) {
+    fun setReadingProgressItems(items: List<BaseItem>) {
         setItems(items)
-    }
-
-    override fun onReadingProgressLoadFailed() {
-        DialogHelper.showDialog(context, true, R.string.dialog_load_reading_progress_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.loadReadingProgress()
-                })
     }
 }
