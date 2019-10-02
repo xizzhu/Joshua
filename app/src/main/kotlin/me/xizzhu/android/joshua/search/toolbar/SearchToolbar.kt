@@ -21,51 +21,28 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.hideKeyboard
-import me.xizzhu.android.joshua.utils.MVPView
 
-interface ToolbarView : MVPView
-
-class SearchToolbar : Toolbar, SearchView.OnQueryTextListener, ToolbarView {
+class SearchToolbar : Toolbar {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private val searchView: SearchView
-    private var currentQuery: String = ""
-
     init {
         setLogo(R.drawable.ic_toolbar)
 
         inflateMenu(R.menu.menu_search)
-        val searchMenuItem = menu.findItem(R.id.action_search).apply { expandActionView() }
-
-        searchView = (searchMenuItem.actionView as SearchView).apply {
-            setOnQueryTextListener(this@SearchToolbar)
-            isQueryRefinementEnabled = true
-            isIconified = false
+        with(menu.findItem(R.id.action_search)) {
+            expandActionView()
+            with(actionView as SearchView) {
+                isQueryRefinementEnabled = true
+                isIconified = false
+            }
         }
     }
 
-    private lateinit var presenter: ToolbarPresenter
-
-    fun setPresenter(presenter: ToolbarPresenter) {
-        this.presenter = presenter
+    fun setOnQueryTextListener(listener: SearchView.OnQueryTextListener?) {
+        (menu.findItem(R.id.action_search).actionView as SearchView).setOnQueryTextListener(listener)
     }
-
-    override fun onQueryTextSubmit(query: String): Boolean {
-        if (query == currentQuery) {
-            // Seems there's a bug inside SearchView.mOnEditorActionListener that onEditorAction()
-            // will be called both when the key is down and when the key is up.
-            // Therefore, if the query is the same, we do nothing.
-            return true
-        }
-        currentQuery = query
-
-        return presenter.updateSearchQuery(query).apply { hideKeyboard() }
-    }
-
-    override fun onQueryTextChange(newText: String): Boolean = false
 }

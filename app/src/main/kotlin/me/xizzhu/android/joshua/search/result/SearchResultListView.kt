@@ -17,73 +17,18 @@
 package me.xizzhu.android.joshua.search.result
 
 import android.content.Context
-import android.content.DialogInterface
 import android.util.AttributeSet
-import android.widget.Toast
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 
-interface SearchResultView : BaseSettingsView {
-    fun onSearchStarted()
-
-    fun onSearchCompleted()
-
-    fun onSearchFailed(query: String)
-
-    fun onSearchResultUpdated(searchResult: SearchResult)
-
-    fun onVerseSelectionFailed(verseToSelect: VerseIndex)
-}
-
-class SearchResultListView : BaseRecyclerView, SearchResultView {
+class SearchResultListView : BaseRecyclerView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private lateinit var presenter: SearchResultPresenter
-
-    private var hasSearchStarted = false
-
-    fun setPresenter(presenter: SearchResultPresenter) {
-        this.presenter = presenter
-    }
-
-    override fun onSearchStarted() {
-        visibility = GONE
-        hasSearchStarted = true
-    }
-
-    override fun onSearchCompleted() {
-        fadeIn()
-    }
-
-    override fun onSearchFailed(query: String) {
-        DialogHelper.showDialog(context, true, R.string.dialog_search_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.search(query)
-                })
-    }
-
-    override fun onSearchResultUpdated(searchResult: SearchResult) {
-        if (hasSearchStarted) {
-            hasSearchStarted = false
-            Toast.makeText(context, resources.getString(R.string.toast_verses_searched, searchResult.searchResultCount),
-                    Toast.LENGTH_SHORT).show()
-        }
-        setItems(searchResult.items)
-        scrollToPosition(0)
-    }
-
-    override fun onVerseSelectionFailed(verseToSelect: VerseIndex) {
-        DialogHelper.showDialog(context, true, R.string.dialog_verse_selection_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.selectVerse(verseToSelect)
-                })
+    fun setSearchResult(items: List<BaseItem>) {
+        setItems(items)
     }
 }

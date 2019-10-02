@@ -18,48 +18,42 @@ package me.xizzhu.android.joshua.search
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.search.toolbar.SearchToolbar
-import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
-import me.xizzhu.android.joshua.search.result.SearchResultPresenter
-import me.xizzhu.android.joshua.search.result.SearchResultListView
-import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import me.xizzhu.android.joshua.infra.arch.Interactor
+import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerViewHolder
+import me.xizzhu.android.joshua.search.result.SearchResultListPresenter
+import me.xizzhu.android.joshua.search.result.SearchResultViewHolder
+import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
+import me.xizzhu.android.joshua.search.toolbar.SearchToolbarViewHolder
 import javax.inject.Inject
 
-class SearchActivity : BaseLoadingSpinnerActivity() {
+class SearchActivity : BaseSettingsAwareActivity() {
     @Inject
-    lateinit var searchInteractor: SearchInteractor
+    lateinit var searchViewModel: SearchViewModel
 
     @Inject
-    lateinit var toolbarPresenter: ToolbarPresenter
+    lateinit var searchToolbarPresenter: SearchToolbarPresenter
 
     @Inject
-    lateinit var searchResultPresenter: SearchResultPresenter
+    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
-    private val toolbar: SearchToolbar by bindView(R.id.toolbar)
-    private val searchResultList: SearchResultListView by bindView(R.id.search_result)
+    @Inject
+    lateinit var searchResultListPresenter: SearchResultListPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_search)
-        toolbar.setPresenter(toolbarPresenter)
-        searchResultList.setPresenter(searchResultPresenter)
+        searchToolbarPresenter.bind(SearchToolbarViewHolder(findViewById(R.id.toolbar)))
+        loadingSpinnerPresenter.bind(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
+        searchResultListPresenter.bind(SearchResultViewHolder(findViewById(R.id.search_result)))
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = searchViewModel
 
-        toolbarPresenter.attachView(toolbar)
-        searchResultPresenter.attachView(searchResultList)
-    }
-
-    override fun onStop() {
-        toolbarPresenter.detachView()
-        searchResultPresenter.detachView()
-
-        super.onStop()
-    }
-
-    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = searchInteractor
+    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(searchToolbarPresenter, loadingSpinnerPresenter, searchResultListPresenter)
 }
