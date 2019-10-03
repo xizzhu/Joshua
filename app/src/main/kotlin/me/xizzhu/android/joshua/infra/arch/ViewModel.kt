@@ -26,23 +26,23 @@ abstract class ViewModel(private val interactors: Set<Interactor>, dispatcher: C
     @UiThread
     fun start() {
         interactors.forEach { it.start() }
-        onStarted()
+        onStart()
     }
 
     @CallSuper
     @UiThread
-    protected open fun onStarted() {
+    protected open fun onStart() {
     }
 
     @UiThread
     fun stop() {
         interactors.forEach { it.stop() }
-        onStopped()
+        onStop()
         coroutineScope.coroutineContext[Job]?.cancelChildren()
     }
 
     @CallSuper
     @UiThread
-    protected open fun onStopped() {
+    protected open fun onStop() {
     }
 }

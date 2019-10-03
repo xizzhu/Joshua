@@ -28,8 +28,8 @@ class TranslationsViewModel(settingsManager: SettingsManager,
                             private val translationListInteractor: TranslationListInteractor,
                             dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareViewModel(settingsManager, setOf(swipeRefreshInteractor, translationListInteractor), dispatcher) {
-    override fun onStarted() {
-        super.onStarted()
+    override fun onStart() {
+        super.onStart()
 
         coroutineScope.launch {
             swipeRefreshInteractor.refreshRequested().collect { translationListInteractor.loadTranslationList(true) }

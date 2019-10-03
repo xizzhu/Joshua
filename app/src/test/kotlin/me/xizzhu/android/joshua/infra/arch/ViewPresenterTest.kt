@@ -32,6 +32,8 @@ class ViewPresenterTest : BaseUnitTest() {
 
     private class TestViewPresenter(interactor: Interactor, dispatcher: CoroutineDispatcher) : ViewPresenter<ViewHolder, Interactor>(interactor, dispatcher) {
         var onBindCalled = false
+        var onStartedCalled = false
+        var onStoppedCalled = false
         var onUnbindCalled = false
 
         lateinit var job: Job
@@ -39,11 +41,21 @@ class ViewPresenterTest : BaseUnitTest() {
         override fun onBind(viewHolder: ViewHolder) {
             super.onBind(viewHolder)
             onBindCalled = true
+        }
+
+        override fun onStart() {
+            super.onStart()
+            onStartedCalled = true
             job = coroutineScope.launch(Dispatchers.Default) {
                 while (isActive) {
                     delay(1L)
                 }
             }
+        }
+
+        override fun onStop() {
+            onStoppedCalled = true
+            super.onStop()
         }
 
         override fun onUnbind() {
@@ -64,18 +76,57 @@ class ViewPresenterTest : BaseUnitTest() {
     fun testState() {
         // initial state
         assertFalse(viewPresenter.onBindCalled)
+        assertFalse(viewPresenter.onStartedCalled)
+        assertFalse(viewPresenter.onStoppedCalled)
         assertFalse(viewPresenter.onUnbindCalled)
 
         // bind
         viewPresenter.bind(viewHolder)
+        assertTrue(viewPresenter.onBindCalled)
+        assertFalse(viewPresenter.onStartedCalled)
+        assertFalse(viewPresenter.onStoppedCalled)
+        assertFalse(viewPresenter.onUnbindCalled)
+
+        // start
+        viewPresenter.start()
         assertFalse(viewPresenter.job.isCancelled)
         assertTrue(viewPresenter.onBindCalled)
+        assertTrue(viewPresenter.onStartedCalled)
+        assertFalse(viewPresenter.onStoppedCalled)
+        assertFalse(viewPresenter.onUnbindCalled)
+
+        // stop
+        viewPresenter.stop()
+        assertTrue(viewPresenter.job.isCancelled)
+        assertTrue(viewPresenter.onBindCalled)
+        assertTrue(viewPresenter.onStartedCalled)
+        assertTrue(viewPresenter.onStoppedCalled)
         assertFalse(viewPresenter.onUnbindCalled)
 
         // unbind
         viewPresenter.unbind()
-        assertTrue(viewPresenter.job.isCancelled)
         assertTrue(viewPresenter.onBindCalled)
+        assertTrue(viewPresenter.onStartedCalled)
+        assertTrue(viewPresenter.onStoppedCalled)
         assertTrue(viewPresenter.onUnbindCalled)
+    }
+
+    @Test
+    fun testRestart() {
+        // start
+        viewPresenter.start()
+        assertFalse(viewPresenter.job.isCancelled)
+
+        // stop
+        viewPresenter.stop()
+        assertTrue(viewPresenter.job.isCancelled)
+
+        // start again
+        viewPresenter.start()
+        assertFalse(viewPresenter.job.isCancelled)
+
+        // start again
+        viewPresenter.stop()
+        assertTrue(viewPresenter.job.isCancelled)
     }
 }

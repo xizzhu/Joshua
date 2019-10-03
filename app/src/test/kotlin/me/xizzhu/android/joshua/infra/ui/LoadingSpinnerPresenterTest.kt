@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.ui.fadeIn
 import org.mockito.Mock
 import org.mockito.Mockito.*
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -42,38 +43,45 @@ class LoadingSpinnerPresenterTest : BaseUnitTest() {
 
         loadingSpinnerViewHolder = LoadingSpinnerViewHolder(loadingSpinner)
         loadingSpinnerPresenter = LoadingSpinnerPresenter(loadingSpinnerInteractor, testDispatcher)
+        loadingSpinnerPresenter.bind(loadingSpinnerViewHolder)
+    }
+
+    @AfterTest
+    override fun tearDown() {
+        loadingSpinnerPresenter.unbind()
+        super.tearDown()
     }
 
     @Test
     fun testObserveLoadingStateSuccess() = testDispatcher.runBlockingTest {
         `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.success(Unit)))
 
-        loadingSpinnerPresenter.bind(loadingSpinnerViewHolder)
+        loadingSpinnerPresenter.start()
         verify(loadingSpinnerViewHolder.loadingSpinner, times(1)).visibility = View.GONE
         verify(loadingSpinnerViewHolder.loadingSpinner, never()).fadeIn()
 
-        loadingSpinnerPresenter.unbind()
+        loadingSpinnerPresenter.stop()
     }
 
     @Test
     fun testObserveLoadingStateError() = testDispatcher.runBlockingTest {
         `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.error(Unit)))
 
-        loadingSpinnerPresenter.bind(loadingSpinnerViewHolder)
+        loadingSpinnerPresenter.start()
         verify(loadingSpinnerViewHolder.loadingSpinner, times(1)).visibility = View.GONE
         verify(loadingSpinnerViewHolder.loadingSpinner, never()).fadeIn()
 
-        loadingSpinnerPresenter.unbind()
+        loadingSpinnerPresenter.stop()
     }
 
     @Test
     fun testObserveLoadingStateLoading() = testDispatcher.runBlockingTest {
         `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.loading(Unit)))
 
-        loadingSpinnerPresenter.bind(loadingSpinnerViewHolder)
+        loadingSpinnerPresenter.start()
         verify(loadingSpinnerViewHolder.loadingSpinner, times(1)).fadeIn()
         verify(loadingSpinnerViewHolder.loadingSpinner, never()).visibility = anyInt()
 
-        loadingSpinnerPresenter.unbind()
+        loadingSpinnerPresenter.stop()
     }
 }

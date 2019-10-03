@@ -34,6 +34,8 @@ abstract class BaseActivity : AppCompatActivity() {
     protected val tag: String = javaClass.simpleName
     protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.Main)
 
+    private val presenters: List<ViewPresenter<out ViewHolder, out Interactor>> by lazy { getViewPresenters() }
+
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -46,6 +48,7 @@ abstract class BaseActivity : AppCompatActivity() {
         super.onStart()
         Log.i(tag, "onStart()")
         getViewModel().start()
+        presenters.forEach { it.start() }
     }
 
     @CallSuper
@@ -63,6 +66,7 @@ abstract class BaseActivity : AppCompatActivity() {
     @CallSuper
     override fun onStop() {
         Log.i(tag, "onStop()")
+        presenters.forEach { it.stop() }
         getViewModel().stop()
         super.onStop()
     }
@@ -70,7 +74,7 @@ abstract class BaseActivity : AppCompatActivity() {
     @CallSuper
     override fun onDestroy() {
         Log.i(tag, "onDestroy()")
-        getViewPresenters().forEach { it.unbind() }
+        presenters.forEach { it.unbind() }
         coroutineScope.cancel()
         super.onDestroy()
     }

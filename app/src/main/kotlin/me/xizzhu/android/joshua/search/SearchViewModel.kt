@@ -34,8 +34,8 @@ class SearchViewModel(settingsManager: SettingsManager,
                       dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareViewModel(settingsManager, setOf(searchToolbarInteractor, loadingSpinnerInteractor), dispatcher) {
     @UiThread
-    override fun onStarted() {
-        super.onStarted()
+    override fun onStart() {
+        super.onStart()
 
         coroutineScope.launch { searchToolbarInteractor.query().collect { searchResultInteractor.search(it) } }
         coroutineScope.launch { searchResultInteractor.searchResult().collect { loadingSpinnerInteractor.updateLoadingState(it.toUnit()) } }

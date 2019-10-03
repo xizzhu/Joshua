@@ -52,8 +52,8 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
     private var downloadedTranslations: List<TranslationInfo>? = null
 
     @UiThread
-    override fun onStarted() {
-        super.onStarted()
+    override fun onStart() {
+        super.onStart()
 
         coroutineScope.launch {
             bibleReadingManager.observeCurrentTranslation().collect {

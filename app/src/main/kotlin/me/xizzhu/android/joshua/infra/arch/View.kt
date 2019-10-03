@@ -28,35 +28,34 @@ abstract class Interactor(dispatcher: CoroutineDispatcher) {
 
     @UiThread
     fun start() {
-        onStarted()
+        onStart()
     }
 
     @CallSuper
     @UiThread
-    protected open fun onStarted() {
+    protected open fun onStart() {
     }
 
     @UiThread
     fun stop() {
-        onStopped()
+        onStop()
         coroutineScope.coroutineContext[Job]?.cancelChildren()
     }
 
     @CallSuper
     @UiThread
-    protected open fun onStopped() {
+    protected open fun onStop() {
     }
 }
 
-abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val interactor: I, private val dispatcher: CoroutineDispatcher) {
+abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val interactor: I, dispatcher: CoroutineDispatcher) {
     protected val tag: String = javaClass.simpleName
-    protected lateinit var coroutineScope: CoroutineScope
+    protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + dispatcher)
 
     protected var viewHolder: V? = null
 
     @UiThread
     fun bind(viewHolder: V) {
-        coroutineScope = CoroutineScope(Job() + dispatcher)
         this.viewHolder = viewHolder
         onBind(viewHolder)
     }
@@ -67,9 +66,29 @@ abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val inter
     }
 
     @UiThread
+    fun start() {
+        onStart()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onStart() {
+    }
+
+    @UiThread
+    fun stop() {
+        onStop()
+        coroutineScope.coroutineContext[Job]?.cancelChildren()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onStop() {
+    }
+
+    @UiThread
     fun unbind() {
         onUnbind()
-        coroutineScope.cancel()
         this.viewHolder = null
     }
 

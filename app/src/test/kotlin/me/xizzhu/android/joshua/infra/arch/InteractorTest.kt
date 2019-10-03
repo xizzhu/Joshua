@@ -30,8 +30,8 @@ class InteractorTest : BaseUnitTest() {
 
         lateinit var job: Job
 
-        override fun onStarted() {
-            super.onStarted()
+        override fun onStart() {
+            super.onStart()
             onStartedCalled = true
             job = coroutineScope.launch(Dispatchers.Default) {
                 while (isActive) {
@@ -40,9 +40,9 @@ class InteractorTest : BaseUnitTest() {
             }
         }
 
-        override fun onStopped() {
+        override fun onStop() {
             onStoppedCalled = true
-            super.onStopped()
+            super.onStop()
         }
     }
 

@@ -62,15 +62,15 @@ class LoadingSpinnerPresenter(interactor: LoadingSpinnerInteractor,
                               dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<LoadingSpinnerViewHolder, LoadingSpinnerInteractor>(interactor, dispatcher) {
     @UiThread
-    override fun onBind(viewHolder: LoadingSpinnerViewHolder) {
-        super.onBind(viewHolder)
+    override fun onStart() {
+        super.onStart()
 
         coroutineScope.launch(Dispatchers.Main) {
-            interactor.loadingState().collect {
-                when (it.status) {
-                    ViewData.STATUS_SUCCESS -> viewHolder.loadingSpinner.visibility = View.GONE
-                    ViewData.STATUS_ERROR -> viewHolder.loadingSpinner.visibility = View.GONE
-                    ViewData.STATUS_LOADING -> viewHolder.loadingSpinner.fadeIn()
+            interactor.loadingState().collect { loadingState ->
+                when (loadingState.status) {
+                    ViewData.STATUS_SUCCESS -> viewHolder?.loadingSpinner?.visibility = View.GONE
+                    ViewData.STATUS_ERROR -> viewHolder?.loadingSpinner?.visibility = View.GONE
+                    ViewData.STATUS_LOADING -> viewHolder?.loadingSpinner?.fadeIn()
                 }
             }
         }
