@@ -38,7 +38,7 @@ abstract class ViewModel(private val interactors: Set<Interactor>, dispatcher: C
     fun stop() {
         interactors.forEach { it.stop() }
         onStopped()
-        coroutineScope.cancel()
+        coroutineScope.coroutineContext[Job]?.cancelChildren()
     }
 
     @CallSuper

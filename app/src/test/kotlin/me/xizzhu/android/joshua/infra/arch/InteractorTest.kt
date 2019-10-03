@@ -64,20 +64,30 @@ class InteractorTest : BaseUnitTest() {
         interactor.start()
         assertTrue(interactor.onStartedCalled)
         assertFalse(interactor.onStoppedCalled)
+        assertFalse(interactor.job.isCancelled)
 
         // stop
         interactor.stop()
         assertTrue(interactor.onStartedCalled)
         assertTrue(interactor.onStoppedCalled)
+        assertTrue(interactor.job.isCancelled)
     }
 
     @Test
-    fun testJobCanceledOnStopped() {
+    fun testRestart() {
         // start
         interactor.start()
         assertFalse(interactor.job.isCancelled)
 
         // stop
+        interactor.stop()
+        assertTrue(interactor.job.isCancelled)
+
+        // start again
+        interactor.start()
+        assertFalse(interactor.job.isCancelled)
+
+        // stop again
         interactor.stop()
         assertTrue(interactor.job.isCancelled)
     }

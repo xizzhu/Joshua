@@ -84,4 +84,23 @@ class ViewModelTest : BaseUnitTest() {
         assertTrue(testViewModel.onStartedCalled)
         assertTrue(testViewModel.onStoppedCalled)
     }
+
+    @Test
+    fun testRestart() {
+        // start
+        testViewModel.start()
+        assertFalse(testViewModel.job.isCancelled)
+
+        // stop
+        testViewModel.stop()
+        assertTrue(testViewModel.job.isCancelled)
+
+        // start again
+        testViewModel.start()
+        assertFalse(testViewModel.job.isCancelled)
+
+        // stop again
+        testViewModel.stop()
+        assertTrue(testViewModel.job.isCancelled)
+    }
 }
