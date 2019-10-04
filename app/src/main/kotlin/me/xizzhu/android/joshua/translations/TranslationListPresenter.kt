@@ -51,8 +51,8 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     private var removeTranslationDialog: ProgressDialog? = null
 
     @UiThread
-    override fun onBind(viewHolder: TranslationListViewHolder) {
-        super.onBind(viewHolder)
+    override fun onStart() {
+        super.onStart()
 
         observeSettings()
         observeTranslationList()

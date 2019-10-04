@@ -127,8 +127,6 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
             }
         }
-
-        coroutineScope.launch { updateSettings(interactor.readSettings()) }
     }
 
     private fun saveFontSizeScale(fontSizeScale: Int) {
@@ -333,5 +331,11 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                         DialogInterface.OnClickListener { _, _ -> restore(uri) })
             }
         }
+    }
+
+    @UiThread
+    override fun onStart() {
+        super.onStart()
+        coroutineScope.launch { updateSettings(interactor.readSettings()) }
     }
 }

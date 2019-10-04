@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.mockito.Mock
 import org.mockito.Mockito.*
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,6 +55,13 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
         searchResultViewHolder = SearchResultViewHolder(searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchResultInteractor, testDispatcher)
+        searchResultListPresenter.bind(searchResultViewHolder)
+    }
+
+    @AfterTest
+    override fun tearDown() {
+        searchResultListPresenter.unbind()
+        super.tearDown()
     }
 
     @Test
@@ -65,7 +73,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         )
         `when`(searchResultInteractor.settings()).thenReturn(flow { settings.forEach { emit(it) } })
 
-        searchResultListPresenter.bind(searchResultViewHolder)
+        searchResultListPresenter.start()
         with(inOrder(searchResultViewHolder.searchResultListView)) {
             settings.forEach {
                 if (ViewData.STATUS_SUCCESS == it.status) {
@@ -74,7 +82,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
             }
         }
 
-        searchResultListPresenter.unbind()
+        searchResultListPresenter.stop()
     }
 
     @Test

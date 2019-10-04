@@ -40,10 +40,15 @@ class SwipeRefreshPresenter(swipeRefreshInteractor: SwipeRefreshInteractor,
             setColorSchemeResources(R.color.primary_dark, R.color.primary, R.color.dark_cyan, R.color.dark_lime)
             setOnRefreshListener { interactor.requestRefresh() }
         }
+    }
+
+    @UiThread
+    override fun onStart() {
+        super.onStart()
 
         coroutineScope.launch(Dispatchers.Main) {
             interactor.loadingState().collect {
-                viewHolder.swipeRefreshLayout.isRefreshing = ViewData.STATUS_LOADING == it.status
+                viewHolder?.swipeRefreshLayout?.isRefreshing = ViewData.STATUS_LOADING == it.status
             }
         }
     }

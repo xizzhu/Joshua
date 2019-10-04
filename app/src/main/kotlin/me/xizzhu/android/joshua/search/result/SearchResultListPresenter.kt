@@ -48,13 +48,13 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                                 dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : BaseSettingsAwarePresenter<SearchResultViewHolder, SearchResultInteractor>(searchResultInteractor, dispatcher) {
     @UiThread
-    override fun onBind(viewHolder: SearchResultViewHolder) {
-        super.onBind(viewHolder)
+    override fun onStart() {
+        super.onStart()
 
         coroutineScope.launch {
             interactor.settings().collect {
                 if (it.status == ViewData.STATUS_SUCCESS) {
-                    viewHolder.searchResultListView.onSettingsUpdated(it.data)
+                    viewHolder?.searchResultListView?.onSettingsUpdated(it.data)
                 }
             }
         }
@@ -62,10 +62,10 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
         coroutineScope.launch {
             interactor.searchResult().collect { searchResult ->
                 when (searchResult.status) {
-                    ViewData.STATUS_LOADING -> viewHolder.searchResultListView.visibility = View.GONE
+                    ViewData.STATUS_LOADING -> viewHolder?.searchResultListView?.visibility = View.GONE
                     ViewData.STATUS_SUCCESS -> {
                         try {
-                            with(viewHolder.searchResultListView) {
+                            viewHolder?.searchResultListView?.run {
                                 setSearchResult(searchResult.data.verses.toSearchItems(searchResult.data.query))
                                 scrollToPosition(0)
                                 fadeIn()

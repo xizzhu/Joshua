@@ -30,6 +30,7 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.ui.fadeIn
 import org.mockito.Mock
 import org.mockito.Mockito.*
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -54,6 +55,13 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
 
         readingProgressViewHolder = ReadingProgressViewHolder(readingProgressListView)
         readingProgressPresenter = ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressInteractor, testDispatcher)
+        readingProgressPresenter.bind(readingProgressViewHolder)
+    }
+
+    @AfterTest
+    override fun tearDown() {
+        readingProgressPresenter.unbind()
+        super.tearDown()
     }
 
     @Test
@@ -65,11 +73,11 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
                 ViewData.error(Settings.DEFAULT)
         ))
 
-        readingProgressPresenter.bind(readingProgressViewHolder)
+        readingProgressPresenter.start()
         verify(readingProgressListView, times(1)).onSettingsUpdated(settings)
         verify(readingProgressListView, never()).onSettingsUpdated(Settings.DEFAULT)
 
-        readingProgressPresenter.unbind()
+        readingProgressPresenter.stop()
     }
 
     @Test
@@ -78,21 +86,21 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         val readingProgress = ReadingProgress(5, 4321L, emptyList())
         `when`(readingProgressInteractor.readReadingProgress()).thenReturn(Pair(bookNames, readingProgress))
 
-        readingProgressPresenter.bind(readingProgressViewHolder)
+        readingProgressPresenter.start()
         with(inOrder(readingProgressInteractor, readingProgressListView)) {
             verify(readingProgressListView, times(1)).visibility = View.GONE
             verify(readingProgressListView, times(1)).setReadingProgressItems(any())
             verify(readingProgressListView, times(1)).fadeIn()
         }
 
-        readingProgressPresenter.unbind()
+        readingProgressPresenter.stop()
     }
 
     @Test
     fun testOpenChapter() = testDispatcher.runBlockingTest {
         `when`(readingProgressInteractor.readReadingProgress()).thenReturn(Pair(List(Bible.BOOK_COUNT) { i -> i.toString() }, ReadingProgress(0, 0L, emptyList())))
 
-        readingProgressPresenter.bind(readingProgressViewHolder)
+        readingProgressPresenter.start()
 
         val bookIndex = 1
         val chapterIndex = 2
@@ -100,7 +108,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         verify(readingProgressInteractor, times(1)).saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
         verify(navigator, times(1)).navigate(readingProgressActivity, Navigator.SCREEN_READING)
 
-        readingProgressPresenter.unbind()
+        readingProgressPresenter.stop()
     }
 
     @Test
@@ -108,8 +116,8 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         `when`(readingProgressInteractor.readReadingProgress()).thenReturn(Pair(List(Bible.BOOK_COUNT) { i -> i.toString() }, ReadingProgress(0, 0L, emptyList())))
         `when`(readingProgressInteractor.saveCurrentVerseIndex(any())).thenThrow(RuntimeException("Random exception"))
 
-        readingProgressPresenter.bind(readingProgressViewHolder)
+        readingProgressPresenter.start()
         readingProgressPresenter.openChapter(0, 0)
-        readingProgressPresenter.unbind()
+        readingProgressPresenter.stop()
     }
 }
