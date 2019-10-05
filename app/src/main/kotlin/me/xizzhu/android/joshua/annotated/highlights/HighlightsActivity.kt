@@ -16,21 +16,23 @@
 
 package me.xizzhu.android.joshua.annotated.highlights
 
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.AnnotatedVersePresenter
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewHolder
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesActivity
-import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsPresenter
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
+import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListInteractor
+import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListPresenter
+import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import javax.inject.Inject
 
-class HighlightsActivity : BaseAnnotatedVersesActivity(R.string.title_highlights) {
+class HighlightsActivity : BaseAnnotatedVersesActivity<Highlight>() {
     @Inject
-    lateinit var highlightInteractor: HighlightsInteractor
+    lateinit var highlightsViewModel: HighlightsViewModel
 
     @Inject
-    lateinit var highlightsPresenter: HighlightsPresenter
+    lateinit var highlightsListPresenter: HighlightsListPresenter
 
-    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = highlightInteractor
+    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = highlightsViewModel
 
-    override fun getAnnotatedVersesPresenter(): AnnotatedVersePresenter = highlightsPresenter
+    override fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, HighlightsListInteractor> = highlightsListPresenter
 }

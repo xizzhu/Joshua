@@ -16,20 +16,22 @@
 
 package me.xizzhu.android.joshua.annotated.bookmarks
 
-import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.*
-import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksPresenter
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
+import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListInteractor
+import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListPresenter
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import javax.inject.Inject
 
-class BookmarksActivity : BaseAnnotatedVersesActivity(R.string.title_bookmarks) {
+class BookmarksActivity : BaseAnnotatedVersesActivity<Bookmark>() {
     @Inject
-    lateinit var bookmarksInteractor: BookmarksInteractor
+    lateinit var bookmarksViewModel: BookmarksViewModel
 
     @Inject
-    lateinit var bookmarksPresenter: BookmarksPresenter
+    lateinit var bookmarksListPresenter: BookmarksListPresenter
 
-    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = bookmarksInteractor
+    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = bookmarksViewModel
 
-    override fun getAnnotatedVersesPresenter(): AnnotatedVersePresenter = bookmarksPresenter
+    override fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, BookmarksListInteractor> = bookmarksListPresenter
 }

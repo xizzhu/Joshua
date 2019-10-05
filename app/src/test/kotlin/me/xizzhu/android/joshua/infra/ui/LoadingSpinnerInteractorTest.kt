@@ -26,22 +26,22 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class LoadingSpinnerInteractorInteractorTest : BaseUnitTest() {
-    private lateinit var loadingSpinnerInteractorInteractor: LoadingSpinnerInteractor
+class LoadingSpinnerInteractorTest : BaseUnitTest() {
+    private lateinit var loadingSpinnerInteractor: LoadingSpinnerInteractor
 
     @BeforeTest
     override fun setup() {
         super.setup()
-        loadingSpinnerInteractorInteractor = LoadingSpinnerInteractor(testDispatcher)
+        loadingSpinnerInteractor = LoadingSpinnerInteractor(testDispatcher)
     }
 
     @Test
     fun testLoadingState() = testDispatcher.runBlockingTest {
-        val loadingStateAsync = async { loadingSpinnerInteractorInteractor.loadingState().take(3).toList() }
+        val loadingStateAsync = async { loadingSpinnerInteractor.loadingState().take(3).toList() }
 
-        loadingSpinnerInteractorInteractor.updateLoadingState(ViewData.error(Unit))
-        loadingSpinnerInteractorInteractor.updateLoadingState(ViewData.success(Unit))
-        loadingSpinnerInteractorInteractor.updateLoadingState(ViewData.loading(Unit))
+        loadingSpinnerInteractor.updateLoadingState(ViewData.error(Unit))
+        loadingSpinnerInteractor.updateLoadingState(ViewData.success(Unit))
+        loadingSpinnerInteractor.updateLoadingState(ViewData.loading(Unit))
 
         assertEquals(
                 listOf(ViewData.error(Unit), ViewData.success(Unit), ViewData.loading(Unit)),

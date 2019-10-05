@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.annotated
+package me.xizzhu.android.joshua.annotated.toolbar
 
 import android.content.Context
 import android.util.AttributeSet
@@ -23,60 +23,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.Toolbar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.utils.MVPPresenter
-import me.xizzhu.android.joshua.utils.MVPView
-import me.xizzhu.android.logger.Log
 
-interface AnnotatedVersesToolbarView : MVPView {
-    fun onSortOrderLoaded(@Constants.SortOrder sortOrder: Int)
-
-    fun onSortOrderUpdateFailed(@Constants.SortOrder sortOrder: Int)
-}
-
-class AnnotatedVersesToolbarPresenter(private val getCurrentSortOrder: suspend () -> Int,
-                                      private val updateCurrentSortOrder: suspend (Int) -> Unit)
-    : MVPPresenter<AnnotatedVersesToolbarView>() {
-    override fun onViewAttached() {
-        super.onViewAttached()
-
-        coroutineScope.launch(Dispatchers.Main) {
-            view?.onSortOrderLoaded(getCurrentSortOrder())
-        }
-    }
-
-    fun updateSortOrder(@Constants.SortOrder sortOrder: Int) {
-        coroutineScope.launch(Dispatchers.Main) {
-            try {
-                updateCurrentSortOrder(sortOrder)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to update sort order")
-                view?.onSortOrderUpdateFailed(sortOrder)
-            }
-        }
-    }
-}
-
-class AnnotatedVersesToolbar : Toolbar, AnnotatedVersesToolbarView {
-    constructor(context: Context) : super(context)
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
-    private lateinit var presenter: AnnotatedVersesToolbarPresenter
-
+class AnnotatedVersesToolbar : Toolbar {
+    var sortOrderUpdated: ((Int) -> Unit)? = null
     private val sortOrderSpinnerItemSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            if (position >= Constants.SORT_ORDER_COUNT) {
-                throw IllegalArgumentException("Unsupported sort order, position = $position")
-            }
+            if (sortOrderUpdated == null) throw IllegalStateException("Sort order update listener not set yet")
+            if (position >= Constants.SORT_ORDER_COUNT) throw IllegalArgumentException("Unsupported sort order, position = $position")
 
             sortOrderSpinnerAdapter.sortOrder = position
-            presenter.updateSortOrder(position)
+            sortOrderUpdated!!.invoke(position)
         }
 
         override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -85,27 +43,22 @@ class AnnotatedVersesToolbar : Toolbar, AnnotatedVersesToolbarView {
     }
     private val sortOrderSpinnerAdapter = SortOrderSpinnerAdapter(context)
 
+    constructor(context: Context) : super(context)
+
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
     init {
         inflateMenu(R.menu.menu_annotated)
         (menu.findItem(R.id.action_sort).actionView as Spinner).apply {
             onItemSelectedListener = sortOrderSpinnerItemSelectedListener
-        }
-    }
-
-    fun setPresenter(presenter: AnnotatedVersesToolbarPresenter) {
-        this.presenter = presenter
-    }
-
-
-    override fun onSortOrderLoaded(@Constants.SortOrder sortOrder: Int) {
-        (menu.findItem(R.id.action_sort).actionView as Spinner).apply {
             adapter = sortOrderSpinnerAdapter
-            setSelection(sortOrder)
         }
     }
 
-    override fun onSortOrderUpdateFailed(@Constants.SortOrder sortOrder: Int) {
-        // TODO
+    fun setSortOrder(@Constants.SortOrder sortOrder: Int) {
+        (menu.findItem(R.id.action_sort).actionView as Spinner).setSelection(sortOrder)
     }
 }
 

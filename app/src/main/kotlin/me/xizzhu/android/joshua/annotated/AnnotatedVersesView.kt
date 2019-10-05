@@ -17,94 +17,18 @@
 package me.xizzhu.android.joshua.annotated
 
 import android.content.Context
-import android.content.DialogInterface
 import android.util.AttributeSet
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
-import me.xizzhu.android.logger.Log
 
-interface AnnotatedVersesView : BaseSettingsView {
-    fun onLoadingStarted()
-
-    fun onLoadingCompleted()
-
-    fun onItemsLoaded(items: List<BaseItem>)
-
-    fun onLoadingFailed(@Constants.SortOrder sortOrder: Int)
-
-    fun onVerseSelectionFailed(verseToSelect: VerseIndex)
-}
-
-class AnnotatedVerseListView : BaseRecyclerView, AnnotatedVersesView {
-    private lateinit var presenter: AnnotatedVersePresenter
-
+class AnnotatedVerseListView : BaseRecyclerView {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    fun setPresenter(presenter: AnnotatedVersePresenter) {
-        this.presenter = presenter
-    }
-
-    override fun onLoadingStarted() {
-        visibility = GONE
-    }
-
-    override fun onLoadingCompleted() {
-        fadeIn()
-    }
-
-    override fun onItemsLoaded(items: List<BaseItem>) {
+    fun onItemsLoaded(items: List<BaseItem>) {
         setItems(items)
-    }
-
-    override fun onLoadingFailed(@Constants.SortOrder sortOrder: Int) {
-        DialogHelper.showDialog(context, true, R.string.dialog_load_annotated_verses_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.load(sortOrder)
-                })
-    }
-
-    override fun onVerseSelectionFailed(verseToSelect: VerseIndex) {
-        DialogHelper.showDialog(context, true, R.string.dialog_verse_selection_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.openVerse(verseToSelect)
-                })
-    }
-}
-
-abstract class AnnotatedVersePresenter(private val baseAnnotatedVersesInteractor: BaseAnnotatedVersesInteractor)
-    : BaseSettingsPresenter<AnnotatedVersesView>(baseAnnotatedVersesInteractor) {
-    override fun onViewAttached() {
-        super.onViewAttached()
-
-        coroutineScope.launch(Dispatchers.Main) {
-            baseAnnotatedVersesInteractor.observeSortOrder().collect { load(it) }
-        }
-    }
-
-    abstract fun load(@Constants.SortOrder sortOrder: Int)
-
-    fun openVerse(verseToSelect: VerseIndex) {
-        coroutineScope.launch(Dispatchers.Main) {
-            try {
-                baseAnnotatedVersesInteractor.openVerse(verseToSelect)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to select verse and open reading activity", e)
-                view?.onVerseSelectionFailed(verseToSelect)
-            }
-        }
     }
 }
