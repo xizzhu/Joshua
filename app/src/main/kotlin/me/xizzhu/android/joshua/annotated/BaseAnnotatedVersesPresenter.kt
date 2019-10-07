@@ -28,9 +28,9 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem

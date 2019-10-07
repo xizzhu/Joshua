@@ -14,38 +14,37 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.infra.ui
+package me.xizzhu.android.joshua.infra.interactors
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
+import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class LoadingSpinnerInteractorTest : BaseUnitTest() {
-    private lateinit var loadingSpinnerInteractor: LoadingSpinnerInteractor
+class BaseSettingsAwareInteractorTest : BaseUnitTest() {
+    @Mock
+    private lateinit var settingsManager: SettingsManager
+
+    private lateinit var baseSettingsAwareInteractor: BaseSettingsAwareInteractor
 
     @BeforeTest
     override fun setup() {
         super.setup()
-        loadingSpinnerInteractor = LoadingSpinnerInteractor(testDispatcher)
+        baseSettingsAwareInteractor = object : BaseSettingsAwareInteractor(settingsManager, testDispatcher) {}
     }
 
     @Test
-    fun testLoadingState() = testDispatcher.runBlockingTest {
-        val loadingStateAsync = async { loadingSpinnerInteractor.loadingState().take(3).toList() }
+    fun testObserveSettings() = testDispatcher.runBlockingTest {
+        `when`(settingsManager.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
 
-        loadingSpinnerInteractor.updateLoadingState(ViewData.error(Unit))
-        loadingSpinnerInteractor.updateLoadingState(ViewData.success(Unit))
-        loadingSpinnerInteractor.updateLoadingState(ViewData.loading(Unit))
-
-        assertEquals(
-                listOf(ViewData.error(Unit), ViewData.success(Unit), ViewData.loading(Unit)),
-                loadingStateAsync.await()
-        )
+        assertEquals(ViewData.success(Settings.DEFAULT), baseSettingsAwareInteractor.settings().first())
     }
 }

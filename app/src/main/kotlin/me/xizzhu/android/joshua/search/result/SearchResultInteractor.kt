@@ -28,8 +28,8 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareInteractor
 import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 import me.xizzhu.android.logger.Log
 
 data class SearchResult(val query: String, val verses: List<Verse> = emptyList())

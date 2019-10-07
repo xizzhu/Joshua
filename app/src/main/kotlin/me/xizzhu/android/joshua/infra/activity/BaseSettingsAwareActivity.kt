@@ -52,11 +52,3 @@ abstract class BaseSettingsAwareActivity : BaseActivity() {
 
     abstract fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel
 }
-
-abstract class BaseSettingsAwareInteractor(protected val settingsManager: SettingsManager,
-                                           dispatcher: CoroutineDispatcher) : Interactor(dispatcher) {
-    fun settings(): Flow<ViewData<Settings>> = settingsManager.observeSettings().map { ViewData.success(it) }
-}
-
-abstract class BaseSettingsAwarePresenter<V : ViewHolder, I : BaseSettingsAwareInteractor>(
-        interactor: I, dispatcher: CoroutineDispatcher) : ViewPresenter<V, I>(interactor, dispatcher)

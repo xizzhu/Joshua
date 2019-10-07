@@ -30,9 +30,9 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn

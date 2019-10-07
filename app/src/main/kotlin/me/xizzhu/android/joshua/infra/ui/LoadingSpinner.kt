@@ -23,28 +23,15 @@ import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.interactors.BaseLoadingAwareInteractor
 import me.xizzhu.android.joshua.ui.fadeIn
 
-class LoadingSpinnerInteractor(dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val loadingState: BroadcastChannel<ViewData<Unit>> = ConflatedBroadcastChannel()
-
-    fun loadingState(): Flow<ViewData<Unit>> = loadingState.asFlow()
-
-    fun updateLoadingState(state: ViewData<Unit>) {
-        loadingState.offer(state)
-    }
-}
+class LoadingSpinnerInteractor(dispatcher: CoroutineDispatcher = Dispatchers.Default) : BaseLoadingAwareInteractor(dispatcher)
 
 class LoadingSpinner : ProgressBar {
     constructor(context: Context) : super(context)

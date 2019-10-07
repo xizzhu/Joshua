@@ -27,8 +27,8 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareInteractor
 import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 import me.xizzhu.android.logger.Log
 
 data class TranslationList(val currentTranslation: String,

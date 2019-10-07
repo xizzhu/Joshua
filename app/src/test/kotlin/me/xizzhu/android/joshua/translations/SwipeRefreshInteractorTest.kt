@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.translations
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -34,20 +33,6 @@ class SwipeRefreshInteractorTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
         swipeRefreshInteractor = SwipeRefreshInteractor(testDispatcher)
-    }
-
-    @Test
-    fun testLoadingState() = testDispatcher.runBlockingTest {
-        val loadingStateAsync = async { swipeRefreshInteractor.loadingState().take(3).toList() }
-
-        swipeRefreshInteractor.updateLoadingState(ViewData.error(Unit))
-        swipeRefreshInteractor.updateLoadingState(ViewData.success(Unit))
-        swipeRefreshInteractor.updateLoadingState(ViewData.loading(Unit))
-
-        assertEquals(
-                listOf(ViewData.error(Unit), ViewData.success(Unit), ViewData.loading(Unit)),
-                loadingStateAsync.await()
-        )
     }
 
     @Test

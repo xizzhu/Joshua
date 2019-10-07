@@ -18,26 +18,14 @@ package me.xizzhu.android.joshua.infra.arch
 
 import androidx.annotation.CallSuper
 import androidx.annotation.UiThread
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
 
-interface ViewHolder
-
-abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val interactor: I, dispatcher: CoroutineDispatcher) {
+abstract class Interactor(dispatcher: CoroutineDispatcher) {
     protected val tag: String = javaClass.simpleName
     protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + dispatcher)
-
-    protected var viewHolder: V? = null
-
-    @UiThread
-    fun bind(viewHolder: V) {
-        this.viewHolder = viewHolder
-        onBind(viewHolder)
-    }
-
-    @CallSuper
-    @UiThread
-    protected open fun onBind(viewHolder: V) {
-    }
 
     @UiThread
     fun start() {
@@ -58,16 +46,5 @@ abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val inter
     @CallSuper
     @UiThread
     protected open fun onStop() {
-    }
-
-    @UiThread
-    fun unbind() {
-        onUnbind()
-        this.viewHolder = null
-    }
-
-    @CallSuper
-    @UiThread
-    protected open fun onUnbind() {
     }
 }
