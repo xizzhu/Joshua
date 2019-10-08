@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.translations
 
 import android.content.DialogInterface
 import android.view.View
-import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
@@ -30,10 +29,7 @@ import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.ProgressDialog
-import me.xizzhu.android.joshua.ui.TranslationInfoComparator
-import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.logger.Log
@@ -158,7 +154,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                         if (cause != null) return@onCompletion
 
                         dismissDownloadTranslationDialog()
-                        Toast.makeText(translationManagementActivity, R.string.toast_translation_downloaded, Toast.LENGTH_SHORT).show()
+                        ToastHelper.showToast(translationManagementActivity, R.string.toast_translation_downloaded)
                     }
                     .collect { progress ->
                         downloadTranslationDialog?.let {
@@ -200,7 +196,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                 interactor.removeTranslation(translationToRemove)
 
                 dismissRemoveTranslationDialog()
-                Toast.makeText(translationManagementActivity, R.string.toast_translation_deleted, Toast.LENGTH_SHORT).show()
+                ToastHelper.showToast(translationManagementActivity, R.string.toast_translation_deleted)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to remove translation", e)
                 dismissRemoveTranslationDialog()

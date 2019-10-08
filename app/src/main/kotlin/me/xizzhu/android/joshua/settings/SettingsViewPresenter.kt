@@ -23,7 +23,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.util.TypedValue
-import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.SwitchCompat
@@ -99,7 +98,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 )
             } catch (e: Exception) {
                 Log.e(tag, "Failed to start activity to create document for backup", e)
-                Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+                ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
             }
         }
 
@@ -114,7 +113,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 )
             } catch (e: Exception) {
                 Log.e(tag, "Failed to start activity to get content for restore", e)
-                Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+                ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
             }
         }
 
@@ -124,7 +123,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                         .setData(Uri.parse("market://details?id=me.xizzhu.android.joshua")))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to start activity to rate app", e)
-                Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+                ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
             }
         }
     }
@@ -280,7 +279,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     fun onCreateDocumentForBackup(resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) return
         data?.data?.let { backup(it) }
-                ?: Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+                ?: ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
     }
 
     private fun backup(uri: Uri) {
@@ -290,7 +289,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 settingsActivity.contentResolver.openOutputStream(uri)?.use { interactor.backup(it) }
                         ?: throw IOException("Failed to open Uri for backup - $uri")
                 dismissBackupRestoreDialog()
-                Toast.makeText(settingsActivity, R.string.toast_backed_up, Toast.LENGTH_SHORT).show()
+                ToastHelper.showToast(settingsActivity, R.string.toast_backed_up)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to backup data", e)
                 dismissBackupRestoreDialog()
@@ -313,7 +312,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     fun onGetContentForRestore(resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) return
         data?.data?.let { restore(it) }
-                ?: Toast.makeText(settingsActivity, R.string.toast_unknown_error, Toast.LENGTH_LONG).show()
+                ?: ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
     }
 
     private fun restore(uri: Uri) {
@@ -323,7 +322,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 settingsActivity.contentResolver.openInputStream(uri)?.use { interactor.restore(it) }
                         ?: throw IOException("Failed to open Uri for restore - $uri")
                 dismissBackupRestoreDialog()
-                Toast.makeText(settingsActivity, R.string.toast_restored, Toast.LENGTH_SHORT).show()
+                ToastHelper.showToast(settingsActivity, R.string.toast_restored)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to backup data", e)
                 dismissBackupRestoreDialog()

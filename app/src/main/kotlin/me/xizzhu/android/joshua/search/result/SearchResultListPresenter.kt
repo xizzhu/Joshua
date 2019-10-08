@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.search.result
 
 import android.content.DialogInterface
 import android.view.View
-import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
@@ -35,6 +34,7 @@ import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.ToastHelper
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -73,7 +73,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                     setSearchResult(verses.toSearchItems(query))
                     scrollToPosition(0)
                     fadeIn()
-                    Toast.makeText(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size), Toast.LENGTH_SHORT).show()
+                    ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size))
                 }
 
                 interactor.updateLoadingState(ViewData.success(Unit))

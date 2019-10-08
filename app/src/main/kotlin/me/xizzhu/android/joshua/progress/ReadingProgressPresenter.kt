@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.progress
 
 import android.content.DialogInterface
 import android.view.View
-import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
@@ -33,6 +32,7 @@ import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.ToastHelper
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.logger.Log
 
@@ -91,7 +91,7 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                 navigator.navigate(readingProgressActivity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to open chapter for reading", e)
-                Toast.makeText(readingProgressActivity, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
+                ToastHelper.showToast(readingProgressActivity, R.string.toast_unknown_error)
             }
         }
     }

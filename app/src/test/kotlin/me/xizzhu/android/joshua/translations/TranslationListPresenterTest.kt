@@ -66,9 +66,11 @@ class TranslationListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testOnAvailableTranslationClicked() {
+        val translation = MockContents.kjvTranslationInfo
+        `when`(translationListInteractor.downloadTranslation(translation)).thenReturn(emptyFlow())
+
         translationListPresenter.start()
 
-        val translation = MockContents.kjvTranslationInfo
         translationListPresenter.onTranslationClicked(translation)
         verify(translationListInteractor, times(1)).downloadTranslation(translation)
 
@@ -103,9 +105,11 @@ class TranslationListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testOnAvailableTranslationLongClicked() {
+        val translation = MockContents.kjvTranslationInfo
+        `when`(translationListInteractor.downloadTranslation(translation)).thenReturn(emptyFlow())
+
         translationListPresenter.start()
 
-        val translation = MockContents.kjvTranslationInfo
         translationListPresenter.onTranslationLongClicked(translation, false)
         verify(translationListInteractor, times(1)).downloadTranslation(translation)
 

@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.reading.verse
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
-import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.viewpager.widget.ViewPager
 import me.xizzhu.android.joshua.R
@@ -28,6 +27,7 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.ToastHelper
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 import kotlin.math.max
@@ -166,11 +166,11 @@ class VerseViewPager : ViewPager, VerseView {
     }
 
     override fun onVersesCopied() {
-        Toast.makeText(context, R.string.toast_verses_copied, Toast.LENGTH_SHORT).show()
+        ToastHelper.showToast(context, R.string.toast_verses_copied)
     }
 
     override fun onVersesCopyShareFailed() {
-        Toast.makeText(context, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
+        ToastHelper.showToast(context, R.string.toast_unknown_error)
     }
 
     override fun onVerseUpdated(verseIndex: VerseIndex, update: VerseUpdate) {
