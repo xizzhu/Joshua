@@ -23,37 +23,26 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
-import me.xizzhu.android.logger.Log
-
-data class SearchResult(val query: String, val verses: List<Verse> = emptyList())
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
 
 class SearchResultInteractor(private val bibleReadingManager: BibleReadingManager,
                              settingsManager: SettingsManager,
                              dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
+    : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val searchResult: BroadcastChannel<ViewData<SearchResult>> = ConflatedBroadcastChannel()
+    private val searchRequested: BroadcastChannel<String> = ConflatedBroadcastChannel()
 
-    fun searchResult(): Flow<ViewData<SearchResult>> = searchResult.asFlow()
+    fun searchRequested(): Flow<String> = searchRequested.asFlow()
 
-    fun search(query: String) {
-        coroutineScope.launch {
-            try {
-                searchResult.offer(ViewData.loading(SearchResult(query)))
-                searchResult.offer(ViewData.success(SearchResult(query, bibleReadingManager.search(readCurrentTranslation(), query))))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to search Bible verses", e)
-                searchResult.offer(ViewData.error(SearchResult(query), e))
-            }
-        }
+    fun requestSearch(query: String) {
+        searchRequested.offer(query)
     }
+
+    suspend fun search(query: String): List<Verse> = bibleReadingManager.search(readCurrentTranslation(), query)
 
     suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
 

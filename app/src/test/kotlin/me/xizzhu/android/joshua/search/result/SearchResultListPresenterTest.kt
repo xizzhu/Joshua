@@ -51,7 +51,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         super.setup()
 
         `when`(searchResultInteractor.settings()).thenReturn(emptyFlow())
-        `when`(searchResultInteractor.searchResult()).thenReturn(emptyFlow())
+        `when`(searchResultInteractor.searchRequested()).thenReturn(emptyFlow())
 
         searchResultViewHolder = SearchResultViewHolder(searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchResultInteractor, testDispatcher)

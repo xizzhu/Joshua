@@ -59,30 +59,29 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
             }
         }
 
-        coroutineScope.launch {
-            interactor.searchResult().collect { searchResult ->
-                when (searchResult.status) {
-                    ViewData.STATUS_LOADING -> viewHolder?.searchResultListView?.visibility = View.GONE
-                    ViewData.STATUS_SUCCESS -> {
-                        try {
-                            viewHolder?.searchResultListView?.run {
-                                setSearchResult(searchResult.data.verses.toSearchItems(searchResult.data.query))
-                                scrollToPosition(0)
-                                fadeIn()
-                            }
+        coroutineScope.launch { interactor.searchRequested().collect { search(it) } }
+    }
 
-                            Toast.makeText(searchActivity, searchActivity.getString(R.string.toast_verses_searched, searchResult.data.verses.size), Toast.LENGTH_SHORT).show()
-                        } catch (e: Exception) {
-                            Log.e(tag, "Failed to prepare searched verses", e)
-                            DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
-                                    DialogInterface.OnClickListener { _, _ -> interactor.search(searchResult.data.query) })
-                        }
-                    }
-                    ViewData.STATUS_ERROR -> {
-                        DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
-                                DialogInterface.OnClickListener { _, _ -> interactor.search(searchResult.data.query) })
-                    }
+    private fun search(query: String) {
+        coroutineScope.launch {
+            try {
+                interactor.updateLoadingState(ViewData.loading(Unit))
+
+                viewHolder?.searchResultListView?.run {
+                    visibility = View.GONE
+                    val verses = interactor.search(query)
+                    setSearchResult(verses.toSearchItems(query))
+                    scrollToPosition(0)
+                    fadeIn()
+                    Toast.makeText(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size), Toast.LENGTH_SHORT).show()
                 }
+
+                interactor.updateLoadingState(ViewData.success(Unit))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to prepare searched verses", e)
+                interactor.updateLoadingState(ViewData.error(Unit))
+                DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
+                        DialogInterface.OnClickListener { _, _ -> search(query) })
             }
         }
     }

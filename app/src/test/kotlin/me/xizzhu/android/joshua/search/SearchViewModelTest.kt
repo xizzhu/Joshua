@@ -22,11 +22,9 @@ import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
-import me.xizzhu.android.joshua.search.result.SearchResult
 import me.xizzhu.android.joshua.search.result.SearchResultInteractor
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
@@ -49,7 +47,7 @@ class SearchViewModelTest : BaseUnitTest() {
         super.setup()
 
         `when`(searchToolbarInteractor.query()).thenReturn(emptyFlow())
-        `when`(searchResultInteractor.searchResult()).thenReturn(emptyFlow())
+        `when`(searchResultInteractor.loadingState()).thenReturn(emptyFlow())
 
         searchViewModel = SearchViewModel(settingsManager, searchToolbarInteractor, loadingSpinnerInteractor, searchResultInteractor, testDispatcher)
     }
@@ -61,23 +59,19 @@ class SearchViewModelTest : BaseUnitTest() {
 
         searchViewModel.start()
         with(inOrder(searchResultInteractor)) {
-            queries.forEach { query -> verify(searchResultInteractor, times(1)).search(query) }
+            queries.forEach { query -> verify(searchResultInteractor, times(1)).requestSearch(query) }
         }
         searchViewModel.stop()
     }
 
     @Test
     fun testSearchState() = testDispatcher.runBlockingTest {
-        val searchResults = listOf(
-                ViewData.error(SearchResult("query1", emptyList())),
-                ViewData.loading(SearchResult("query2", emptyList())),
-                ViewData.success(SearchResult("query3", MockContents.kjvVerses))
-        )
-        `when`(searchResultInteractor.searchResult()).thenReturn(flow { searchResults.forEach { emit(it) } })
+        val searchStates = listOf(ViewData.error(Unit), ViewData.loading(Unit), ViewData.success(Unit))
+        `when`(searchResultInteractor.loadingState()).thenReturn(flow { searchStates.forEach { emit(it) } })
 
         searchViewModel.start()
         with(inOrder(loadingSpinnerInteractor)) {
-            searchResults.forEach { searchResult ->
+            searchStates.forEach { searchResult ->
                 verify(loadingSpinnerInteractor, times(1)).updateLoadingState(searchResult.toUnit())
             }
         }

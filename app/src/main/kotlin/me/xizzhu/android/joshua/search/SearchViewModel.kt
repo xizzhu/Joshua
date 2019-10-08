@@ -37,7 +37,7 @@ class SearchViewModel(settingsManager: SettingsManager,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { searchToolbarInteractor.query().collect { searchResultInteractor.search(it) } }
-        coroutineScope.launch { searchResultInteractor.searchResult().collect { loadingSpinnerInteractor.updateLoadingState(it.toUnit()) } }
+        coroutineScope.launch { searchToolbarInteractor.query().collect { searchResultInteractor.requestSearch(it) } }
+        coroutineScope.launch { searchResultInteractor.loadingState().collect { loadingSpinnerInteractor.updateLoadingState(it) } }
     }
 }
