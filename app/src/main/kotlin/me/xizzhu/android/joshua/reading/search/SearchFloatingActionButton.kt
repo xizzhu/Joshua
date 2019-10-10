@@ -14,64 +14,14 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading
+package me.xizzhu.android.joshua.reading.search
 
 import android.content.Context
-import android.content.DialogInterface
 import android.util.AttributeSet
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.utils.MVPPresenter
-import me.xizzhu.android.joshua.utils.MVPView
-import me.xizzhu.android.logger.Log
-
-class SearchButtonPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<SearchButtonView>() {
-    fun openSearch() {
-        try {
-            readingInteractor.openSearch()
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to open search activity", e)
-            view?.onFailedToNavigateToSearch()
-        }
-    }
-}
-
-interface SearchButtonView : MVPView {
-    fun onFailedToNavigateToSearch()
-}
-
-class SearchFloatingActionButton : FloatingActionButton, SearchButtonView, View.OnClickListener {
-    constructor(context: Context) : super(context)
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
-    init {
-        setOnClickListener(this)
-    }
-
-    private lateinit var presenter: SearchButtonPresenter
-
-    fun setPresenter(presenter: SearchButtonPresenter) {
-        this.presenter = presenter
-    }
-
-    override fun onClick(v: View) {
-        presenter.openSearch()
-    }
-
-    override fun onFailedToNavigateToSearch() {
-        DialogHelper.showDialog(context, true, R.string.dialog_navigate_to_search_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.openSearch()
-                })
-    }
-}
 
 class FloatingActionButtonScrollAwareBehavior : FloatingActionButton.Behavior {
     private var isHiding: Boolean = false
@@ -114,4 +64,12 @@ class FloatingActionButtonScrollAwareBehavior : FloatingActionButton.Behavior {
 
         fab.animate().translationY(0.0F)
     }
+}
+
+class SearchFloatingActionButton : FloatingActionButton {
+    constructor(context: Context) : super(context)
+
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 }

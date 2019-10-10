@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+/*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -550,3 +551,5 @@ class VersePresenterTest : BaseUnitTest() {
         }
     }
 }
+
+ */

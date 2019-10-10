@@ -32,12 +32,9 @@ import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
-class VersePagerAdapter(context: Context, private val listener: Listener) : PagerAdapter() {
-    interface Listener {
-        fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
-
-        fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int)
-    }
+class VersePagerAdapter(context: Context) : PagerAdapter() {
+    lateinit var onChapterRequested: (Int, Int) -> Unit
+    lateinit var onCurrentVerseUpdated: (VerseIndex) -> Unit
 
     private val inflater = LayoutInflater.from(context)
     private val pages = ArrayList<Page>()
@@ -79,8 +76,8 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
         findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.deselectVerse(verseIndex)
     }
 
-    fun notifyVerseUpdate(verseIndex: VerseIndex, update: VerseUpdate) {
-        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.notifyVerseUpdate(verseIndex, update)
+    fun notifyVerseUpdate(verseUpdate: VerseUpdate) {
+        findPage(verseUpdate.verseIndex.bookIndex, verseUpdate.verseIndex.chapterIndex)?.notifyVerseUpdate(verseUpdate)
     }
 
     override fun getCount(): Int = if (currentTranslation.isNotEmpty() && settings != null) Bible.TOTAL_CHAPTER_COUNT else 0
@@ -101,7 +98,7 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val page: Page = (pages.firstOrNull { p -> !p.inUse }
-                ?: Page(inflater, container, listener).apply { pages.add(this) })
+                ?: Page(inflater, container, onChapterRequested, onCurrentVerseUpdated).apply { pages.add(this) })
                 .also { page ->
                     page.bind(currentTranslation, parallelTranslations,
                             position.toBookIndex(), position.toChapterIndex(), settings!!)
@@ -117,7 +114,9 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
     }
 }
 
-private class Page(inflater: LayoutInflater, container: ViewGroup, private val listener: VersePagerAdapter.Listener) {
+private class Page(inflater: LayoutInflater, container: ViewGroup,
+                   private val onChapterRequested: (Int, Int) -> Unit,
+                   onCurrentVerseUpdated: (VerseIndex) -> Unit) {
     var currentTranslation = ""
         private set
     var parallelTranslations = emptyList<String>()
@@ -137,8 +136,8 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (inUse && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    listener.onCurrentVerseUpdated(bookIndex, chapterIndex,
-                            (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition())
+                    onCurrentVerseUpdated(VerseIndex(bookIndex, chapterIndex,
+                            (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()))
                 }
             }
         })
@@ -151,7 +150,7 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         this.chapterIndex = chapterIndex
         this.settings = settings.also { verseList.onSettingsUpdated(it) }
 
-        listener.onChapterRequested(bookIndex, chapterIndex)
+        onChapterRequested(bookIndex, chapterIndex)
 
         verseList.visibility = View.GONE
         loadingSpinner.visibility = View.VISIBLE
@@ -190,7 +189,7 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         verseList.deselectVerse(verseIndex)
     }
 
-    fun notifyVerseUpdate(verseIndex: VerseIndex, update: VerseUpdate) {
-        verseList.notifyVerseUpdate(verseIndex, update)
+    fun notifyVerseUpdate(verseUpdate: VerseUpdate) {
+        verseList.notifyVerseUpdate(verseUpdate)
     }
 }

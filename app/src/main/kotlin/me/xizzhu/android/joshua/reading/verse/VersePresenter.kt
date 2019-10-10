@@ -16,266 +16,201 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import androidx.annotation.ColorInt
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.DialogInterface
+import android.view.Menu
+import android.view.MenuItem
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.reading.ReadingInteractor
-import me.xizzhu.android.joshua.reading.detail.VerseDetailPagerAdapter
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
+import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
+import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.VerseDetailRequest
+import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.ToastHelper
+import me.xizzhu.android.joshua.utils.createChooserForSharing
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
-import java.lang.StringBuilder
+import kotlin.math.max
 import kotlin.properties.Delegates
 
-class VersePresenter(private val readingInteractor: ReadingInteractor)
-    : BaseSettingsPresenter<VerseView>(readingInteractor) {
+data class VerseViewHolder(val versePager: VerseViewPager) : ViewHolder
+
+class VersePresenter(private val readingActivity: ReadingActivity,
+                     verseInteractor: VerseInteractor,
+                     dispatcher: CoroutineDispatcher = Dispatchers.Main)
+    : BaseSettingsAwarePresenter<VerseViewHolder, VerseInteractor>(verseInteractor, dispatcher) {
     @VisibleForTesting
     var selectedVerse: VerseIndex = VerseIndex.INVALID
     @VisibleForTesting
     val selectedVerses: HashSet<Verse> = HashSet()
 
+    private var actionMode: ActionMode? = null
+    private val actionModeCallback = object : ActionMode.Callback {
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.menuInflater.inflate(R.menu.menu_verse_selection, menu)
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
+
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = when (item.itemId) {
+            R.id.action_copy -> {
+                copyToClipBoard()
+                true
+            }
+            R.id.action_share -> {
+                share()
+                true
+            }
+            else -> false
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode) {
+            viewHolder?.versePager?.run {
+                selectedVerses.forEach { verse -> onVerseDeselected(verse.verseIndex) }
+            }
+            selectedVerses.clear()
+            actionMode = null
+        }
+    }
+
+    private fun copyToClipBoard() {
+        coroutineScope.launch {
+            try {
+                if (selectedVerses.isNotEmpty()) {
+                    val verse = selectedVerses.first()
+                    val bookName = interactor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
+                    // On older devices, this only works on the threads with loopers.
+                    (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                            .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
+                                    selectedVerses.toStringForSharing(bookName)))
+                    ToastHelper.showToast(readingActivity, R.string.toast_verses_copied)
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to copy", e)
+                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
+            }
+            actionMode?.finish()
+        }
+    }
+
+    private fun share() {
+        coroutineScope.launch {
+            try {
+                if (selectedVerses.isNotEmpty()) {
+                    val verse = selectedVerses.first()
+                    val bookName = interactor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
+
+                    createChooserForSharing(readingActivity, readingActivity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
+                            ?.let { readingActivity.startActivity(it) }
+                            ?: throw RuntimeException("Failed to create chooser for sharing")
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to share", e)
+                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
+            }
+            actionMode?.finish()
+        }
+    }
+
     private var currentTranslation: String by Delegates.observable("") { _, _, new ->
         if (new.isNotEmpty()) {
-            view?.onCurrentTranslationUpdated(new)
+            viewHolder?.versePager?.onCurrentTranslationUpdated(new)
         }
     }
     private var currentVerseIndex: VerseIndex by Delegates.observable(VerseIndex.INVALID) { _, old, new ->
         if (!new.isValid()) {
             return@observable
         }
-        if (readingInteractor.isActionModeStarted()) {
+        if (actionMode != null) {
             if (old.bookIndex != new.bookIndex || old.chapterIndex != new.chapterIndex) {
-                readingInteractor.finishActionMode()
+                actionMode?.finish()
             }
         }
-        view?.onCurrentVerseIndexUpdated(new)
+        viewHolder?.versePager?.onCurrentVerseIndexUpdated(new)
     }
     private var parallelTranslations: List<String> by Delegates.observable(emptyList()) { _, _, new ->
-        view?.onParallelTranslationsUpdated(new)
+        viewHolder?.versePager?.onParallelTranslationsUpdated(new)
     }
 
-    override fun onViewAttached() {
-        super.onViewAttached()
+    @UiThread
+    override fun onBind(viewHolder: VerseViewHolder) {
+        super.onBind(viewHolder)
 
-        coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeCurrentTranslation().collect { currentTranslation = it }
-        }
-        coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeCurrentVerseIndex().collect { currentVerseIndex = it }
-        }
-        coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeParallelTranslations().collect { parallelTranslations = it }
-        }
-        coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeVerseDetailOpenState().collect {
-                if (selectedVerse.isValid()) {
-                    view?.onVerseDeselected(selectedVerse)
-                    selectedVerse = VerseIndex.INVALID
-                }
-                if (it.first.isValid()) {
-                    selectedVerse = it.first
-                    view?.onVerseSelected(selectedVerse)
-                }
-            }
-        }
-        coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeVerseUpdates().collect { (verseIndex, update) ->
-                view?.onVerseUpdated(verseIndex, update)
-            }
-        }
+        viewHolder.versePager.setOnChapterSelectedListener { bookIndex, chapterIndex -> updateCurrentChapter(bookIndex, chapterIndex) }
+        viewHolder.versePager.setOnCurrentVerseUpdatedListener { verseIndex -> updateCurrentVerse(verseIndex) }
+        viewHolder.versePager.setOnChapterRequestedListener { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) }
     }
 
-    fun selectChapter(bookIndex: Int, chapterIndex: Int) {
-        coroutineScope.launch(Dispatchers.Main) {
+    private fun updateCurrentChapter(bookIndex: Int, chapterIndex: Int) {
+        if (currentVerseIndex.bookIndex == bookIndex && currentVerseIndex.chapterIndex == chapterIndex) return
+
+        coroutineScope.launch {
             try {
-                readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+                interactor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
-                Log.e(tag, "Failed to update chapter selection", e)
-                view?.onChapterSelectionFailed(bookIndex, chapterIndex)
+                Log.e(tag, "Failed to current chapter", e)
             }
         }
     }
 
-    fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        coroutineScope.launch(Dispatchers.Main) {
+    private fun updateCurrentVerse(verseIndex: VerseIndex) {
+        if (currentVerseIndex == verseIndex) return
+
+        coroutineScope.launch {
             try {
-                readingInteractor.saveCurrentVerseIndex(verseIndex)
+                interactor.saveCurrentVerseIndex(verseIndex)
             } catch (e: Exception) {
-                Log.e(tag, "Failed to save current verse", e)
+                Log.e(tag, "Failed to update current verse", e)
             }
         }
     }
 
-    fun loadVerses(bookIndex: Int, chapterIndex: Int) {
-        coroutineScope.launch(Dispatchers.Main) {
+    private fun loadVerses(bookIndex: Int, chapterIndex: Int) {
+        coroutineScope.launch {
             try {
                 val versesAsync = supervisedAsync {
                     if (parallelTranslations.isEmpty()) {
-                        readingInteractor.readVerses(currentTranslation, bookIndex, chapterIndex)
+                        interactor.readVerses(currentTranslation, bookIndex, chapterIndex)
                     } else {
-                        readingInteractor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+                        interactor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
                     }
                 }
-                val bookNameAsync = supervisedAsync { readingInteractor.readBookNames(currentTranslation)[bookIndex] }
-                val highlightsAsync = supervisedAsync { readingInteractor.readHighlights(bookIndex, chapterIndex) }
-                val items = if (readingInteractor.observeSettings().first().simpleReadingModeOn) {
-                    toSimpleVerseItems(versesAsync.await(), bookNameAsync.await(), highlightsAsync.await())
+                val bookNameAsync = supervisedAsync { interactor.readBookNames(currentTranslation)[bookIndex] }
+                val highlightsAsync = supervisedAsync { interactor.readHighlights(bookIndex, chapterIndex) }
+                val items = if (interactor.settings().first().data.simpleReadingModeOn) {
+                    versesAsync.await().toSimpleVerseItems(bookNameAsync.await(), highlightsAsync.await(),
+                            this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
                 } else {
-                    val bookmarksAsync = supervisedAsync { readingInteractor.readBookmarks(bookIndex, chapterIndex) }
-                    val notesAsync = supervisedAsync { readingInteractor.readNotes(bookIndex, chapterIndex) }
-                    toVerseItems(versesAsync.await(), bookNameAsync.await(), bookmarksAsync.await(), highlightsAsync.await(), notesAsync.await())
+                    val bookmarksAsync = supervisedAsync { interactor.readBookmarks(bookIndex, chapterIndex) }
+                    val notesAsync = supervisedAsync { interactor.readNotes(bookIndex, chapterIndex) }
+                    versesAsync.await().toVerseItems(bookNameAsync.await(), bookmarksAsync.await(),
+                            highlightsAsync.await(), notesAsync.await(), this@VersePresenter::onVerseClicked,
+                            this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
+                            this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
                 }
-                view?.onVersesLoaded(bookIndex, chapterIndex, items)
+                viewHolder?.versePager?.onVersesLoaded(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verses", e)
-                view?.onVersesLoadFailed(bookIndex, chapterIndex)
+                DialogHelper.showDialog(readingActivity, true, R.string.dialog_verse_load_error,
+                        DialogInterface.OnClickListener { _, _ -> loadVerses(bookIndex, chapterIndex) })
             }
         }
     }
-
-    @VisibleForTesting
-    fun toSimpleVerseItems(verses: List<Verse>, bookName: String, highlights: List<Highlight>): List<SimpleVerseItem> =
-            ArrayList<SimpleVerseItem>(verses.size).apply {
-                val verseIterator = verses.iterator()
-                var verse: Verse? = null
-                val highlightIterator = highlights.iterator()
-                var highlight: Highlight? = null
-                while (verse != null || verseIterator.hasNext()) {
-                    verse = verse ?: verseIterator.next()
-
-                    val (nextVerse, parallel, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
-
-                    val verseIndex = verse.verseIndex.verseIndex
-                    if (highlight == null || highlight.verseIndex.verseIndex < verseIndex) {
-                        while (highlightIterator.hasNext()) {
-                            highlight = highlightIterator.next()
-                            if (highlight.verseIndex.verseIndex >= verseIndex) {
-                                break
-                            }
-                        }
-                    }
-                    val highlightColor = highlight
-                            ?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
-                            ?: Highlight.COLOR_NONE
-
-                    add(SimpleVerseItem(verse.transform(parallel), bookName, verses.size,
-                            followingEmptyVerseCount, highlightColor, this@VersePresenter::onVerseClicked,
-                            this@VersePresenter::onVerseLongClicked))
-
-                    verse = nextVerse
-                }
-            }
-
-    // skips the empty verses, and concatenates the parallels
-    private fun Iterator<Verse>.nextNonEmpty(current: Verse): Triple<Verse?, Array<StringBuilder>, Int> {
-        val parallel = Array(current.parallel.size) { StringBuilder() }.append(current.parallel)
-
-        var nextVerse: Verse? = null
-        while (hasNext()) {
-            nextVerse = next()
-            if (nextVerse.text.text.isEmpty()) {
-                parallel.append(nextVerse.parallel)
-                nextVerse = null
-            } else {
-                break
-            }
-        }
-
-        val followingEmptyVerseCount = nextVerse
-                ?.let { it.verseIndex.verseIndex - 1 - current.verseIndex.verseIndex }
-                ?: 0
-
-        return Triple(nextVerse, parallel, followingEmptyVerseCount)
-    }
-
-    private fun Array<StringBuilder>.append(texts: List<Verse.Text>): Array<StringBuilder> {
-        texts.forEachIndexed { index, text ->
-            with(get(index)) {
-                if (isNotEmpty()) append(' ')
-                append(text.text)
-            }
-        }
-        return this
-    }
-
-    private fun Verse.transform(concatenatedParallel: Array<StringBuilder>): Verse {
-        if (parallel.isEmpty() || concatenatedParallel.isEmpty()) return this
-
-        val parallelTexts = ArrayList<Verse.Text>(concatenatedParallel.size)
-        parallel.forEachIndexed { index, text ->
-            parallelTexts.add(Verse.Text(text.translationShortName, concatenatedParallel[index].toString()))
-        }
-        return copy(parallel = parallelTexts)
-    }
-
-    @VisibleForTesting
-    fun toVerseItems(verses: List<Verse>, bookName: String, bookmarks: List<Bookmark>,
-                     highlights: List<Highlight>, notes: List<Note>): List<VerseItem> =
-            ArrayList<VerseItem>(verses.size).apply {
-                val verseIterator = verses.iterator()
-                var verse: Verse? = null
-                val bookmarkIterator = bookmarks.iterator()
-                var bookmark: Bookmark? = null
-                val highlightIterator = highlights.iterator()
-                var highlight: Highlight? = null
-                val noteIterator = notes.iterator()
-                var note: Note? = null
-                while (verse != null || verseIterator.hasNext()) {
-                    verse = verse ?: verseIterator.next()
-
-                    val (nextVerse, parallel, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
-
-                    val verseIndex = verse.verseIndex.verseIndex
-                    if (note == null || note.verseIndex.verseIndex < verseIndex) {
-                        while (noteIterator.hasNext()) {
-                            note = noteIterator.next()
-                            if (note.verseIndex.verseIndex >= verseIndex) {
-                                break
-                            }
-                        }
-                    }
-                    val hasNote = note?.let { it.verseIndex.verseIndex == verseIndex } ?: false
-
-                    if (highlight == null || highlight.verseIndex.verseIndex < verseIndex) {
-                        while (highlightIterator.hasNext()) {
-                            highlight = highlightIterator.next()
-                            if (highlight.verseIndex.verseIndex >= verseIndex) {
-                                break
-                            }
-                        }
-                    }
-                    val highlightColor = highlight
-                            ?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
-                            ?: Highlight.COLOR_NONE
-
-                    if (bookmark == null || bookmark.verseIndex.verseIndex < verseIndex) {
-                        while (bookmarkIterator.hasNext()) {
-                            bookmark = bookmarkIterator.next()
-                            if (bookmark.verseIndex.verseIndex >= verseIndex) {
-                                break
-                            }
-                        }
-                    }
-                    val hasBookmark = bookmark?.let { it.verseIndex.verseIndex == verseIndex }
-                            ?: false
-
-                    add(VerseItem(verse.transform(parallel), bookName, followingEmptyVerseCount,
-                            hasNote, highlightColor, hasBookmark, this@VersePresenter::onVerseClicked,
-                            this@VersePresenter::onVerseLongClicked, this@VersePresenter::onNoteClicked,
-                            this@VersePresenter::onHighlightClicked, this@VersePresenter::onBookmarkClicked))
-
-                    verse = nextVerse
-                }
-            }
 
     @VisibleForTesting
     fun onVerseClicked(verse: Verse) {
-        if (!readingInteractor.isActionModeStarted()) {
-            readingInteractor.openVerseDetail(verse.verseIndex, VerseDetailPagerAdapter.PAGE_VERSES)
+        if (actionMode == null) {
+            interactor.requestVerseDetail(VerseDetailRequest(verse.verseIndex, VerseDetailRequest.VERSES))
             return
         }
 
@@ -283,75 +218,34 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
             // de-select the verse
             selectedVerses.remove(verse)
             if (selectedVerses.isEmpty()) {
-                readingInteractor.finishActionMode()
+                actionMode?.finish()
             }
 
-            view?.onVerseDeselected(verse.verseIndex)
+            viewHolder?.versePager?.onVerseDeselected(verse.verseIndex)
         } else {
             // select the verse
             selectedVerses.add(verse)
 
-            view?.onVerseSelected(verse.verseIndex)
+            viewHolder?.versePager?.onVerseSelected(verse.verseIndex)
         }
     }
 
     @VisibleForTesting
     fun onVerseLongClicked(verse: Verse) {
-        readingInteractor.startActionModeIfNeeded(R.menu.menu_verse_selection, this::onActionItemClicked, this::onDestroyActionMode)
+        if (actionMode == null) {
+            actionMode = readingActivity.startSupportActionMode(actionModeCallback)
+        }
         onVerseClicked(verse)
     }
 
     @VisibleForTesting
-    fun onActionItemClicked(itemId: Int): Boolean = when (itemId) {
-        R.id.action_copy -> {
-            coroutineScope.launch(Dispatchers.Main) {
-                if (readingInteractor.copyToClipBoard(selectedVerses)) {
-                    view?.onVersesCopied()
-                } else {
-                    view?.onVersesCopyShareFailed()
-                }
-                readingInteractor.finishActionMode()
-            }
-            true
-        }
-        R.id.action_share -> {
-            coroutineScope.launch(Dispatchers.Main) {
-                if (!readingInteractor.share(selectedVerses)) {
-                    view?.onVersesCopyShareFailed()
-                }
-                readingInteractor.finishActionMode()
-            }
-            true
-        }
-        else -> false
-    }
-
-    @VisibleForTesting
-    fun onDestroyActionMode() {
-        for (verse in selectedVerses) {
-            view?.onVerseDeselected(verse.verseIndex)
-        }
-        selectedVerses.clear()
-    }
-
-    @VisibleForTesting
-    fun onNoteClicked(verseIndex: VerseIndex) {
-        readingInteractor.openVerseDetail(verseIndex, VerseDetailPagerAdapter.PAGE_NOTE)
-    }
-
-    @VisibleForTesting
-    fun onHighlightClicked(verseIndex: VerseIndex, @ColorInt currentHighlightColor: Int) {
-        view?.onHighlightColorRequested(verseIndex, currentHighlightColor)
-    }
-
-    @VisibleForTesting
     fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch {
             try {
                 if (hasBookmark) {
-                    readingInteractor.removeBookmark(verseIndex)
+                    interactor.removeBookmark(verseIndex)
                 } else {
-                    readingInteractor.addBookmark(verseIndex)
+                    interactor.addBookmark(verseIndex)
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update bookmark", e)
@@ -360,17 +254,57 @@ class VersePresenter(private val readingInteractor: ReadingInteractor)
         }
     }
 
-    fun updateHighlight(verseIndex: VerseIndex, @ColorInt highlightColor: Int) {
+    @VisibleForTesting
+    fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int) {
+        DialogHelper.showDialog(readingActivity, R.string.text_pick_highlight_color,
+                readingActivity.resources.getStringArray(R.array.text_colors),
+                max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
+                DialogInterface.OnClickListener { dialog, which ->
+                    updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
+
+                    dialog.dismiss()
+                })
+    }
+
+    private fun updateHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
         coroutineScope.launch(Dispatchers.Main) {
             try {
                 if (highlightColor == Highlight.COLOR_NONE) {
-                    readingInteractor.removeHighlight(verseIndex)
+                    interactor.removeHighlight(verseIndex)
                 } else {
-                    readingInteractor.saveHighlight(verseIndex, highlightColor)
+                    interactor.saveHighlight(verseIndex, highlightColor)
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update highlight", e)
                 // TODO
+            }
+        }
+    }
+
+    @VisibleForTesting
+    fun onNoteClicked(verseIndex: VerseIndex) {
+        interactor.requestVerseDetail(VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE))
+    }
+
+    @UiThread
+    override fun onStart() {
+        super.onStart()
+
+        coroutineScope.launch { interactor.settings().collect { viewHolder?.versePager?.onSettingsUpdated(it.data) } }
+        coroutineScope.launch { interactor.currentTranslation().collect { currentTranslation = it } }
+        coroutineScope.launch { interactor.currentVerseIndex().collect { currentVerseIndex = it } }
+        coroutineScope.launch { interactor.parallelTranslations().collect { parallelTranslations = it } }
+        coroutineScope.launch { interactor.verseUpdates().collect { viewHolder?.versePager?.onVerseUpdated(it) } }
+        coroutineScope.launch {
+            interactor.verseDetailRequest().collect {
+                if (selectedVerse.isValid()) {
+                    viewHolder?.versePager?.onVerseDeselected(selectedVerse)
+                    selectedVerse = VerseIndex.INVALID
+                }
+                if (it.verseIndex.isValid()) {
+                    selectedVerse = it.verseIndex
+                    viewHolder?.versePager?.onVerseSelected(selectedVerse)
+                }
             }
         }
     }

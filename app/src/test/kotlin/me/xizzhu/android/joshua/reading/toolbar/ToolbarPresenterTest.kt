@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading.toolbar
 
+/*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOf
@@ -183,3 +184,4 @@ class ToolbarPresenterTest : BaseUnitTest() {
         verify(toolbarView, times(1)).onFailedToNavigateToSettings()
     }
 }
+ */

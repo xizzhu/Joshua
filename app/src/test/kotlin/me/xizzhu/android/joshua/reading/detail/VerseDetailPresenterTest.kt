@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
+/*
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.asFlow
@@ -328,3 +329,5 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         }
     }
 }
+
+ */

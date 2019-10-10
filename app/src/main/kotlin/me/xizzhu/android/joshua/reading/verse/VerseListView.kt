@@ -42,12 +42,12 @@ class VerseListView : BaseRecyclerView {
                     override fun onChanged() {
                         adapter.unregisterAdapterDataObserver(this)
                         Handler().post {
-                            adapter.notifyItemChanged(verseIndex.toItemPosition(), VerseUpdate(VerseUpdate.VERSE_SELECTED))
+                            adapter.notifyItemChanged(verseIndex.toItemPosition(), VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
                         }
                     }
                 })
             } else {
-                adapter.notifyItemChanged(verseIndex.toItemPosition(), VerseUpdate(VerseUpdate.VERSE_SELECTED))
+                adapter.notifyItemChanged(verseIndex.toItemPosition(), VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
             }
         }
     }
@@ -66,11 +66,11 @@ class VerseListView : BaseRecyclerView {
     }
 
     fun deselectVerse(verseIndex: VerseIndex) {
-        adapter?.notifyItemChanged(verseIndex.toItemPosition(), VerseUpdate(VerseUpdate.VERSE_DESELECTED))
+        adapter?.notifyItemChanged(verseIndex.toItemPosition(), VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED))
     }
 
-    fun notifyVerseUpdate(verseIndex: VerseIndex, update: VerseUpdate) {
-        adapter?.notifyItemChanged(verseIndex.toItemPosition(), update)
+    fun notifyVerseUpdate(update: VerseUpdate) {
+        adapter?.notifyItemChanged(update.verseIndex.toItemPosition(), update)
     }
 
     fun setVerses(verses: List<BaseItem>) {

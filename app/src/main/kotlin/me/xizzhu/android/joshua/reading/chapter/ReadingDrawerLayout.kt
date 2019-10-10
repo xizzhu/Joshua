@@ -14,35 +14,14 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading
+package me.xizzhu.android.joshua.reading.chapter
 
 import android.content.Context
 import android.util.AttributeSet
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.utils.MVPPresenter
-import me.xizzhu.android.joshua.utils.MVPView
 
-class ReadingDrawerPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ReadingDrawerView>() {
-    override fun onViewAttached() {
-        super.onViewAttached()
-
-        coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
-                    .collect { view?.hide() }
-        }
-    }
-}
-
-interface ReadingDrawerView : MVPView {
-    fun hide(): Boolean
-}
-
-class ReadingDrawerLayout : DrawerLayout, ReadingDrawerView {
+class ReadingDrawerLayout : DrawerLayout {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -52,7 +31,7 @@ class ReadingDrawerLayout : DrawerLayout, ReadingDrawerView {
     /**
      * @return true if drawer was open, or false otherwise
      * */
-    override fun hide(): Boolean {
+    fun hide(): Boolean {
         if (isDrawerOpen(GravityCompat.START)) {
             closeDrawer(GravityCompat.START)
             return true
