@@ -32,13 +32,13 @@ import me.xizzhu.android.joshua.reading.detail.VerseDetailInteractor
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarInteractor
 import me.xizzhu.android.joshua.reading.verse.VerseInteractor
 
-data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: Int = NO_CONTENT) {
+data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: Int = HIDE) {
     companion object {
-        const val NO_CONTENT = 0
+        const val HIDE = 0
         const val VERSES = 1
         const val NOTE = 2
 
-        @IntDef(NO_CONTENT, VERSES, NOTE)
+        @IntDef(HIDE, VERSES, NOTE)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Content
     }

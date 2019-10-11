@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -48,11 +49,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                      verseInteractor: VerseInteractor,
                      dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : BaseSettingsAwarePresenter<VerseViewHolder, VerseInteractor>(verseInteractor, dispatcher) {
-    @VisibleForTesting
-    var selectedVerse: VerseIndex = VerseIndex.INVALID
-    @VisibleForTesting
-    val selectedVerses: HashSet<Verse> = HashSet()
-
+    private val selectedVerses: MutableSet<Verse> = mutableSetOf()
     private var actionMode: ActionMode? = null
     private val actionModeCallback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
@@ -175,7 +172,8 @@ class VersePresenter(private val readingActivity: ReadingActivity,
         }
     }
 
-    private fun loadVerses(bookIndex: Int, chapterIndex: Int) {
+    @VisibleForTesting
+    fun loadVerses(bookIndex: Int, chapterIndex: Int) {
         coroutineScope.launch {
             try {
                 val versesAsync = supervisedAsync {
@@ -266,7 +264,8 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                 })
     }
 
-    private fun updateHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
+    @VisibleForTesting
+    fun updateHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
         coroutineScope.launch(Dispatchers.Main) {
             try {
                 if (highlightColor == Highlight.COLOR_NONE) {
@@ -290,20 +289,21 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { interactor.settings().collect { viewHolder?.versePager?.onSettingsUpdated(it.data) } }
+        coroutineScope.launch {
+            interactor.settings().collect {
+                if (it.status == ViewData.STATUS_SUCCESS) viewHolder?.versePager?.onSettingsUpdated(it.data)
+            }
+        }
         coroutineScope.launch { interactor.currentTranslation().collect { currentTranslation = it } }
         coroutineScope.launch { interactor.currentVerseIndex().collect { currentVerseIndex = it } }
         coroutineScope.launch { interactor.parallelTranslations().collect { parallelTranslations = it } }
         coroutineScope.launch { interactor.verseUpdates().collect { viewHolder?.versePager?.onVerseUpdated(it) } }
         coroutineScope.launch {
-            interactor.verseDetailRequest().collect {
-                if (selectedVerse.isValid()) {
-                    viewHolder?.versePager?.onVerseDeselected(selectedVerse)
-                    selectedVerse = VerseIndex.INVALID
-                }
-                if (it.verseIndex.isValid()) {
-                    selectedVerse = it.verseIndex
-                    viewHolder?.versePager?.onVerseSelected(selectedVerse)
+            interactor.verseDetailRequest().collect { verseDetailRequest ->
+                if (verseDetailRequest.content == VerseDetailRequest.HIDE) {
+                    viewHolder?.versePager?.onVerseDeselected(verseDetailRequest.verseIndex)
+                } else {
+                    viewHolder?.versePager?.onVerseSelected(verseDetailRequest.verseIndex)
                 }
             }
         }

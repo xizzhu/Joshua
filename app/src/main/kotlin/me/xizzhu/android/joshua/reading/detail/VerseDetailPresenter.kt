@@ -50,8 +50,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     private val translationComparator = TranslationInfoComparator(
             TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
 
-    @VisibleForTesting
-    var verseDetail: VerseDetail? = null
+    private var verseDetail: VerseDetail? = null
     private var updateBookmarkJob: Job? = null
     private var updateHighlightJob: Job? = null
     private var updateNoteJob: Job? = null
@@ -62,7 +61,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
 
         with(viewHolder.verseDetailViewLayout) {
             setOnClickListener {
-                interactor.requestVerseDetail(VerseDetailRequest(VerseIndex.INVALID))
+                interactor.requestVerseDetail(
+                        VerseDetailRequest(verseDetail?.verseIndex ?: VerseIndex.INVALID))
                 viewHolder.verseDetailViewLayout.hide()
             }
             setOnBookmarkClickedListener { updateBookmark() }
@@ -140,7 +140,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
 
         coroutineScope.launch {
             interactor.verseDetailRequest().collect { request ->
-                if (request.verseIndex.isValid()) {
+                if (request.content != VerseDetailRequest.HIDE) {
                     showVerseDetail(request.verseIndex, request.content)
                 } else {
                     viewHolder?.verseDetailViewLayout?.hide()
@@ -239,7 +239,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
             try {
                 if (translation != interactor.currentTranslation()) {
                     interactor.saveCurrentTranslation(translation)
-                    interactor.requestVerseDetail(VerseDetailRequest(VerseIndex.INVALID))
+                    interactor.requestVerseDetail(VerseDetailRequest(
+                            verseDetail?.verseIndex ?: VerseIndex.INVALID))
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select translation", e)
@@ -276,7 +277,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
      * */
     fun close(): Boolean {
         if (verseDetail != null) {
-            interactor.requestVerseDetail(VerseDetailRequest(VerseIndex.INVALID))
+            interactor.requestVerseDetail(VerseDetailRequest(
+                    verseDetail?.verseIndex ?: VerseIndex.INVALID))
             return true
         }
         return false
