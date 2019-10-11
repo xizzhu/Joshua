@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -136,7 +137,11 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { interactor.settings().collect { viewHolder?.verseDetailViewLayout?.setSettings(it.data) } }
+        coroutineScope.launch {
+            interactor.settings().collect {
+                if (it.status == ViewData.Companion.STATUS_SUCCESS) viewHolder?.verseDetailViewLayout?.setSettings(it.data)
+            }
+        }
 
         coroutineScope.launch {
             interactor.verseDetailRequest().collect { request ->
