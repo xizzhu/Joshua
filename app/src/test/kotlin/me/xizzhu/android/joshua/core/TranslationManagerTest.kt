@@ -19,6 +19,9 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -77,50 +80,35 @@ class TranslationManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testNotifyTranslationsUpdated() {
-        runBlocking {
-            withTimeout(5000L) {
-                `when`(translationRepository.readTranslationsFromLocal()).thenReturn(emptyList())
-                val translationManager = TranslationManager(translationRepository)
+    fun testNotifyTranslationsUpdated() = testDispatcher.runBlockingTest {
+        `when`(translationRepository.readTranslationsFromLocal()).thenReturn(emptyList())
+        val translationManager = TranslationManager(translationRepository)
 
-                var availableUpdated = 0
-                val availableJob = launch(Dispatchers.Unconfined) {
-                    val availableReceiver = translationManager.observeAvailableTranslations()
-                    availableReceiver.collect {
-                        if (++availableUpdated == 3) {
-                            cancel()
-                        }
-                    }
-                }
+        val availableAsync = async { translationManager.observeAvailableTranslations().take(3).toList() }
+        val downloadedAsync = async { translationManager.observeDownloadedTranslations().take(4).toList() }
 
-                var downloadedUpdated = 0
-                val downloadedJob = launch(Dispatchers.Unconfined) {
-                    val downloadedReceiver = translationManager.observeDownloadedTranslations()
-                    downloadedReceiver.collect {
-                        if (++downloadedUpdated == 4) {
-                            cancel()
-                        }
-                    }
-                }
+        translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
+        translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
+        translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
 
-                translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
-                translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
-                translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
+        translationManager.notifyTranslationsUpdated(
+                listOf(MockContents.kjvTranslationInfo), listOf(MockContents.kjvDownloadedTranslationInfo))
+        translationManager.notifyTranslationsUpdated(
+                listOf(MockContents.kjvTranslationInfo), listOf(MockContents.kjvDownloadedTranslationInfo))
 
-                translationManager.notifyTranslationsUpdated(
-                        listOf(MockContents.kjvTranslationInfo), listOf(MockContents.kjvDownloadedTranslationInfo))
-                translationManager.notifyTranslationsUpdated(
-                        listOf(MockContents.kjvTranslationInfo), listOf(MockContents.kjvDownloadedTranslationInfo))
+        translationManager.notifyTranslationsUpdated(listOf(MockContents.kjvTranslationInfo), emptyList())
+        translationManager.notifyTranslationsUpdated(listOf(MockContents.kjvTranslationInfo), emptyList())
 
-                translationManager.notifyTranslationsUpdated(listOf(MockContents.kjvTranslationInfo), emptyList())
-                translationManager.notifyTranslationsUpdated(listOf(MockContents.kjvTranslationInfo), emptyList())
+        translationManager.notifyTranslationsUpdated(emptyList(), listOf(MockContents.kjvDownloadedTranslationInfo))
 
-                translationManager.notifyTranslationsUpdated(emptyList(), listOf(MockContents.kjvDownloadedTranslationInfo))
-
-                availableJob.join()
-                downloadedJob.join()
-            }
-        }
+        assertEquals(
+                listOf(emptyList(), listOf(MockContents.kjvTranslationInfo), emptyList()),
+                availableAsync.await()
+        )
+        assertEquals(
+                listOf(emptyList(), listOf(MockContents.kjvDownloadedTranslationInfo), emptyList(), listOf(MockContents.kjvDownloadedTranslationInfo)),
+                downloadedAsync.await()
+        )
     }
 
     @Test
