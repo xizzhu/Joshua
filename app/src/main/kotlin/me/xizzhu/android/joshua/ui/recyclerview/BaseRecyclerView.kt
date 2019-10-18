@@ -24,7 +24,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
 
 abstract class BaseItem protected constructor(val viewType: Int,
                                               viewHolderCreator: (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>) {
@@ -90,7 +89,7 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
     }
 }
 
-abstract class BaseRecyclerView : RecyclerView, BaseSettingsView {
+abstract class BaseRecyclerView : RecyclerView {
     private val adapter: CommonAdapter = CommonAdapter(context).apply { setAdapter(this) }
 
     constructor(context: Context) : super(context)
@@ -103,7 +102,7 @@ abstract class BaseRecyclerView : RecyclerView, BaseSettingsView {
         layoutManager = LinearLayoutManager(context, VERTICAL, false)
     }
 
-    override fun onSettingsUpdated(settings: Settings) {
+    fun onSettingsUpdated(settings: Settings) {
         adapter.setSettings(settings)
     }
 
