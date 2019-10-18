@@ -34,9 +34,10 @@ import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.ToastHelper
 import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.logger.Log
 
-data class ReadingProgressViewHolder(val readingProgressListView: ReadingProgressListView) : ViewHolder
+data class ReadingProgressViewHolder(val readingProgressListView: CommonRecyclerView) : ViewHolder
 
 class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgressActivity,
                                private val navigator: Navigator,
@@ -57,7 +58,7 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
         coroutineScope.launch {
             interactor.settings().collect {
                 if (it.status == ViewData.STATUS_SUCCESS) {
-                    viewHolder?.readingProgressListView?.onSettingsUpdated(it.data)
+                    viewHolder?.readingProgressListView?.setSettings(it.data)
                 }
             }
         }
@@ -69,7 +70,7 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                 viewHolder?.readingProgressListView?.let { readingProgressListView ->
                     readingProgressListView.visibility = View.GONE
                     val (bookNames, readingProgress) = interactor.readReadingProgress()
-                    readingProgressListView.setReadingProgressItems(readingProgress.toReadingProgressItems(bookNames, expanded,
+                    readingProgressListView.setItems(readingProgress.toReadingProgressItems(bookNames, expanded,
                             this@ReadingProgressPresenter::onBookClicked,
                             this@ReadingProgressPresenter::openChapter))
                     readingProgressListView.fadeIn()

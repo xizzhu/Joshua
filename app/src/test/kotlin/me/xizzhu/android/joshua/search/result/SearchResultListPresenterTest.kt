@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.mockito.Mock
 import org.mockito.Mockito.*
@@ -41,7 +42,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var searchResultInteractor: SearchResultInteractor
     @Mock
-    private lateinit var searchResultListView: SearchResultListView
+    private lateinit var searchResultListView: CommonRecyclerView
 
     private lateinit var searchResultViewHolder: SearchResultViewHolder
     private lateinit var searchResultListPresenter: SearchResultListPresenter
@@ -77,7 +78,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         with(inOrder(searchResultViewHolder.searchResultListView)) {
             settings.forEach {
                 if (ViewData.STATUS_SUCCESS == it.status) {
-                    verify(searchResultViewHolder.searchResultListView, times(1)).onSettingsUpdated(it.data)
+                    verify(searchResultViewHolder.searchResultListView, times(1)).setSettings(it.data)
                 }
             }
         }

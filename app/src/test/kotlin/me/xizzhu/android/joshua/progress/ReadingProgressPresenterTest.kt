@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.AfterTest
@@ -42,7 +43,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var readingProgressInteractor: ReadingProgressInteractor
     @Mock
-    private lateinit var readingProgressListView: ReadingProgressListView
+    private lateinit var readingProgressListView: CommonRecyclerView
 
     private lateinit var readingProgressViewHolder: ReadingProgressViewHolder
     private lateinit var readingProgressPresenter: ReadingProgressPresenter
@@ -74,8 +75,8 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         ))
 
         readingProgressPresenter.start()
-        verify(readingProgressListView, times(1)).onSettingsUpdated(settings)
-        verify(readingProgressListView, never()).onSettingsUpdated(Settings.DEFAULT)
+        verify(readingProgressListView, times(1)).setSettings(settings)
+        verify(readingProgressListView, never()).setSettings(Settings.DEFAULT)
 
         readingProgressPresenter.stop()
     }
@@ -89,7 +90,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         readingProgressPresenter.start()
         with(inOrder(readingProgressInteractor, readingProgressListView)) {
             verify(readingProgressListView, times(1)).visibility = View.GONE
-            verify(readingProgressListView, times(1)).setReadingProgressItems(any())
+            verify(readingProgressListView, times(1)).setItems(any())
             verify(readingProgressListView, times(1)).fadeIn()
         }
 

@@ -89,7 +89,7 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
     }
 }
 
-abstract class BaseRecyclerView : RecyclerView {
+class CommonRecyclerView : RecyclerView {
     private val adapter: CommonAdapter = CommonAdapter(context).apply { setAdapter(this) }
 
     constructor(context: Context) : super(context)
@@ -102,11 +102,11 @@ abstract class BaseRecyclerView : RecyclerView {
         layoutManager = LinearLayoutManager(context, VERTICAL, false)
     }
 
-    fun onSettingsUpdated(settings: Settings) {
+    fun setSettings(settings: Settings) {
         adapter.setSettings(settings)
     }
 
-    protected fun setItems(items: Collection<BaseItem>) {
+    fun setItems(items: List<BaseItem>) {
         adapter.setItems(items)
     }
 }

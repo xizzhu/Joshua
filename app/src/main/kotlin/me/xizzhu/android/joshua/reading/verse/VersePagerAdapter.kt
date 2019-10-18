@@ -31,6 +31,7 @@ import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 
 class VersePagerAdapter(context: Context) : PagerAdapter() {
     lateinit var onChapterRequested: (Int, Int) -> Unit
@@ -130,9 +131,11 @@ private class Page(inflater: LayoutInflater, container: ViewGroup,
     var settings: Settings? = null
         private set
 
+    private var verses: List<BaseItem>? = null
+
     val rootView: View = inflater.inflate(R.layout.page_verse, container, false)
     private val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
-    private val verseList = rootView.findViewById<VerseListView>(R.id.verse_list).apply {
+    private val verseList = rootView.findViewById<CommonRecyclerView>(R.id.verse_list).apply {
         addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (inUse && newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -148,7 +151,7 @@ private class Page(inflater: LayoutInflater, container: ViewGroup,
         this.parallelTranslations = parallelTranslations
         this.bookIndex = bookIndex
         this.chapterIndex = chapterIndex
-        this.settings = settings.also { verseList.onSettingsUpdated(it) }
+        this.settings = settings.also { verseList.setSettings(it) }
 
         onChapterRequested(bookIndex, chapterIndex)
 
@@ -165,7 +168,8 @@ private class Page(inflater: LayoutInflater, container: ViewGroup,
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 
-        verseList.setVerses(verses)
+        verseList.setItems(verses)
+        this.verses = verses
 
         if (currentVerseIndex.verseIndex > 0
                 && currentVerseIndex.bookIndex == bookIndex
@@ -181,15 +185,40 @@ private class Page(inflater: LayoutInflater, container: ViewGroup,
         }
     }
 
+    // now we skip empty verses, so need to find the correct position
+    private fun VerseIndex.toItemPosition(): Int {
+        verses?.forEachIndexed { index, item ->
+            when (item) {
+                is SimpleVerseItem -> if (item.verse.verseIndex == this) return index
+                is VerseItem -> if (item.verse.verseIndex == this) return index
+            }
+        }
+        return RecyclerView.NO_POSITION
+    }
+
+
     fun selectVerse(verseIndex: VerseIndex) {
-        verseList.selectVerse(verseIndex)
+        if (verses == null) {
+            // when reading activity is opened from e.g. notes list, this is likely called before
+            // verses are set, therefore postpone notifying update
+            verseList.adapter?.let { adapter ->
+                adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                    override fun onChanged() {
+                        adapter.unregisterAdapterDataObserver(this)
+                        notifyVerseUpdate(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
+                    }
+                })
+            }
+        } else {
+            notifyVerseUpdate(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
+        }
     }
 
     fun deselectVerse(verseIndex: VerseIndex) {
-        verseList.deselectVerse(verseIndex)
+        notifyVerseUpdate(VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED))
     }
 
     fun notifyVerseUpdate(verseUpdate: VerseUpdate) {
-        verseList.notifyVerseUpdate(verseUpdate)
+        verseList.adapter?.notifyItemChanged(verseUpdate.verseIndex.toItemPosition(), verseUpdate)
     }
 }

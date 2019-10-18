@@ -37,10 +37,11 @@ import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.ToastHelper
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.logger.Log
 
-data class SearchResultViewHolder(val searchResultListView: SearchResultListView) : ViewHolder
+data class SearchResultViewHolder(val searchResultListView: CommonRecyclerView) : ViewHolder
 
 class SearchResultListPresenter(private val searchActivity: SearchActivity,
                                 private val navigator: Navigator,
@@ -54,7 +55,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
         coroutineScope.launch {
             interactor.settings().collect {
                 if (it.status == ViewData.STATUS_SUCCESS) {
-                    viewHolder?.searchResultListView?.onSettingsUpdated(it.data)
+                    viewHolder?.searchResultListView?.setSettings(it.data)
                 }
             }
         }
@@ -70,7 +71,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                 viewHolder?.searchResultListView?.run {
                     visibility = View.GONE
                     val verses = interactor.search(query)
-                    setSearchResult(verses.toSearchItems(query))
+                    setItems(verses.toSearchItems(query))
                     scrollToPosition(0)
                     fadeIn()
                     ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size))

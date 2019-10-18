@@ -34,10 +34,11 @@ import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.logger.Log
 
-data class AnnotatedVersesViewHolder(val annotatedVerseListView: AnnotatedVerseListView) : ViewHolder
+data class AnnotatedVersesViewHolder(val annotatedVerseListView: CommonRecyclerView) : ViewHolder
 
 abstract class BaseAnnotatedVersesPresenter
 <VerseAnnotation, Interactor : BaseAnnotatedVersesInteractor<VerseAnnotation>>
@@ -51,7 +52,7 @@ abstract class BaseAnnotatedVersesPresenter
         coroutineScope.launch {
             interactor.settings().collect {
                 if (it.status == ViewData.STATUS_SUCCESS) {
-                    viewHolder?.annotatedVerseListView?.onSettingsUpdated(it.data)
+                    viewHolder?.annotatedVerseListView?.setSettings(it.data)
                 }
             }
         }
@@ -64,7 +65,7 @@ abstract class BaseAnnotatedVersesPresenter
             try {
                 interactor.updateLoadingState(ViewData.loading(Unit))
                 viewHolder?.annotatedVerseListView?.visibility = View.GONE
-                viewHolder?.annotatedVerseListView?.onItemsLoaded(prepareItems(sortOrder))
+                viewHolder?.annotatedVerseListView?.setItems(prepareItems(sortOrder))
                 viewHolder?.annotatedVerseListView?.fadeIn()
                 interactor.updateLoadingState(ViewData.success(Unit))
             } catch (e: Exception) {

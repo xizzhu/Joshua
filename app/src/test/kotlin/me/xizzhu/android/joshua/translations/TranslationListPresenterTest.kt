@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.AfterTest
@@ -32,7 +33,7 @@ class TranslationListPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var translationListInteractor: TranslationListInteractor
     @Mock
-    private lateinit var translationListView: TranslationListView
+    private lateinit var translationListView: CommonRecyclerView
 
     private lateinit var translationListViewHolder: TranslationListViewHolder
     private lateinit var translationListPresenter: TranslationListPresenter

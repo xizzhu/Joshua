@@ -31,11 +31,12 @@ import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.logger.Log
 import java.util.ArrayList
 
-data class TranslationListViewHolder(val translationListView: TranslationListView) : ViewHolder
+data class TranslationListViewHolder(val translationListView: CommonRecyclerView) : ViewHolder
 
 class TranslationListPresenter(private val translationManagementActivity: TranslationManagementActivity,
                                translationListInteractor: TranslationListInteractor,
@@ -59,7 +60,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
         coroutineScope.launch {
             interactor.settings().collect {
                 if (it.status == ViewData.STATUS_SUCCESS) {
-                    viewHolder?.translationListView?.onSettingsUpdated(it.data)
+                    viewHolder?.translationListView?.setSettings(it.data)
                 }
             }
         }
@@ -91,7 +92,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                                             this@TranslationListPresenter::onTranslationLongClicked))
                                 }
 
-                                viewHolder?.translationListView?.setTranslations(items)
+                                viewHolder?.translationListView?.setItems(items)
                                 viewHolder?.translationListView?.fadeIn()
                             }
                             ViewData.STATUS_ERROR -> {

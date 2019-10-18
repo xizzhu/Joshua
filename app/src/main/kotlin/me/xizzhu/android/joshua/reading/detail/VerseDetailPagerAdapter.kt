@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.res.Resources
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -31,7 +30,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
-import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 
 class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     companion object {
@@ -94,33 +93,20 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     override fun getItemPosition(obj: Any): Int = POSITION_NONE
 }
 
-class VerseTextListView : BaseRecyclerView {
-    constructor(context: Context) : super(context)
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
-    init {
-        isNestedScrollingEnabled = false
-    }
-
-    fun setVerseTextItems(verseTextItems: List<VerseTextItem>) {
-        setItems(verseTextItems)
-    }
-}
-
 private abstract class Page(val view: View) {
     abstract fun bind(verseDetail: VerseDetail)
 }
 
 private class VersesPage(inflater: LayoutInflater, container: ViewGroup, settings: Settings)
     : Page(inflater.inflate(R.layout.page_verse_detail_verses, container, false)) {
-    private val verseTextListView: VerseTextListView = view.findViewById<VerseTextListView>(R.id.verse_text_list)
-            .apply { onSettingsUpdated(settings) }
+    private val verseTextListView: CommonRecyclerView = view.findViewById<CommonRecyclerView>(R.id.verse_text_list)
+            .apply {
+                isNestedScrollingEnabled = false
+                setSettings(settings)
+            }
 
     override fun bind(verseDetail: VerseDetail) {
-        verseTextListView.setVerseTextItems(verseDetail.verseTextItems)
+        verseTextListView.setItems(verseDetail.verseTextItems)
     }
 }
 

@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
@@ -42,7 +43,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var interactor: BaseAnnotatedVersesInteractor<Unit>
     @Mock
-    private lateinit var annotatedVerseListView: AnnotatedVerseListView
+    private lateinit var annotatedVerseListView: CommonRecyclerView
 
     private lateinit var annotatedVersesViewHolder: AnnotatedVersesViewHolder
     private lateinit var baseAnnotatedVersesPresenter: BaseAnnotatedVersesPresenter<Unit, BaseAnnotatedVersesInteractor<Unit>>
@@ -89,8 +90,8 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         ))
 
         baseAnnotatedVersesPresenter.start()
-        verify(annotatedVerseListView, times(1)).onSettingsUpdated(settings)
-        verify(annotatedVerseListView, never()).onSettingsUpdated(Settings.DEFAULT)
+        verify(annotatedVerseListView, times(1)).setSettings(settings)
+        verify(annotatedVerseListView, never()).setSettings(Settings.DEFAULT)
 
         baseAnnotatedVersesPresenter.stop()
     }
