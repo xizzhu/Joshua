@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.annotated.notes.list
 
+import android.os.Bundle
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import me.xizzhu.android.joshua.Navigator
@@ -24,6 +25,7 @@ import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.formatDate
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import java.util.*
@@ -81,4 +83,6 @@ class NotesListPresenter(private val notesActivity: NotesActivity,
         }
         return items
     }
+
+    override fun extrasForOpeningVerse(): Bundle? = ReadingActivity.bundleForOpenNote()
 }

@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.annotated
 
 import android.content.DialogInterface
+import android.os.Bundle
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
@@ -102,7 +103,7 @@ abstract class BaseAnnotatedVersesPresenter
         coroutineScope.launch {
             try {
                 interactor.saveCurrentVerseIndex(verseToSelect)
-                navigator.navigate(activity, Navigator.SCREEN_READING)
+                navigator.navigate(activity, Navigator.SCREEN_READING, extrasForOpeningVerse())
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
                 DialogHelper.showDialog(activity, true, R.string.dialog_verse_selection_error,
@@ -110,4 +111,6 @@ abstract class BaseAnnotatedVersesPresenter
             }
         }
     }
+
+    open fun extrasForOpeningVerse(): Bundle? = null
 }
