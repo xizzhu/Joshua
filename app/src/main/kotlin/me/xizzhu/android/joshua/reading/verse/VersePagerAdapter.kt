@@ -168,8 +168,8 @@ private class Page(inflater: LayoutInflater, container: ViewGroup,
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 
-        verseList.setItems(verses)
         this.verses = verses
+        verseList.setItems(verses)
 
         if (currentVerseIndex.verseIndex > 0
                 && currentVerseIndex.bookIndex == bookIndex
@@ -205,7 +205,7 @@ private class Page(inflater: LayoutInflater, container: ViewGroup,
                 adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                     override fun onChanged() {
                         adapter.unregisterAdapterDataObserver(this)
-                        notifyVerseUpdate(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
+                        verseList.post { notifyVerseUpdate(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED)) }
                     }
                 })
             }
