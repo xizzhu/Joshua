@@ -1,6 +1,9 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Major refactoring to use clean architecture
+
 #### v0.11.1 (2019-09-27)
 - Fixed backup with large data
 
