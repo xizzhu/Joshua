@@ -196,7 +196,6 @@ private class Page(inflater: LayoutInflater, container: ViewGroup,
         return RecyclerView.NO_POSITION
     }
 
-
     fun selectVerse(verseIndex: VerseIndex) {
         if (verses == null) {
             // when reading activity is opened from e.g. notes list, this is likely called before
