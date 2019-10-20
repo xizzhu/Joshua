@@ -28,12 +28,9 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.toMap
-import org.junit.Before
-import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class TranslationRepositoryTest : BaseUnitTest() {
     @Mock
@@ -43,7 +40,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
 
     private lateinit var translationRepository: TranslationRepository
 
-    @Before
+    @BeforeTest
     override fun setup() {
         super.setup()
 
@@ -132,6 +129,25 @@ class TranslationRepositoryTest : BaseUnitTest() {
             assertEquals(expected, actual)
             verify(translationRepository, times(1)).readTranslationsFromBackend()
             verify(translationRepository, times(1)).readTranslationsFromLocal()
+        }
+    }
+
+    @Test
+    fun testTranslationListTooOld() {
+        runBlocking {
+            `when`(localTranslationStorage.readTranslationListRefreshTimestamp()).thenReturn(0L)
+
+            `when`(translationRepository.now()).thenReturn(0L)
+            assertFalse(translationRepository.translationListTooOld())
+
+            `when`(translationRepository.now()).thenReturn(TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS - 1L)
+            assertFalse(translationRepository.translationListTooOld())
+
+            `when`(translationRepository.now()).thenReturn(TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS)
+            assertTrue(translationRepository.translationListTooOld())
+
+            `when`(translationRepository.now()).thenReturn(TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS + 1L)
+            assertTrue(translationRepository.translationListTooOld())
         }
     }
 

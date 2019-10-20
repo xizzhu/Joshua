@@ -19,10 +19,14 @@ package me.xizzhu.android.joshua.core
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.logger.Log
@@ -87,25 +91,28 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         updateTranslations(translationRepository.reload(forceRefresh))
     }
 
-    suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
-        translationRepository.downloadTranslation(channel, translationInfo)
+    fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> = channelFlow {
+        val downloadProgressChannel = Channel<Int>(Channel.CONFLATED)
+        launch { downloadProgressChannel.consumeEach { offer(it) } }
+
+        translationRepository.downloadTranslation(downloadProgressChannel, translationToDownload)
 
         val (available, downloaded) = synchronized(translationsLock) {
             val available = mutableListOf<TranslationInfo>().apply {
                 availableTranslationsChannel.valueOrNull?.let { addAll(it) }
-                removeAll { it.shortName == translationInfo.shortName }
+                removeAll { it.shortName == translationToDownload.shortName }
             }
 
             val downloaded = mutableListOf<TranslationInfo>().apply {
                 downloadedTranslationsChannel.valueOrNull?.let { addAll(it) }
-                add(translationInfo.copy(downloaded = true))
+                add(translationToDownload.copy(downloaded = true))
             }
 
             return@synchronized Pair(available, downloaded)
         }
         notifyTranslationsUpdated(available, downloaded)
 
-        channel.close()
+        downloadProgressChannel.close()
     }
 
     suspend fun removeTranslation(translationInfo: TranslationInfo) {

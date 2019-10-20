@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.core
 
 import androidx.annotation.ColorInt
+import androidx.annotation.IntDef
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
@@ -36,6 +37,10 @@ data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val t
         const val COLOR_GREEN = 0xFF00FF00.toInt()
         const val COLOR_BLUE = 0xFF0000FF.toInt()
         val AVAILABLE_COLORS = arrayOf(COLOR_NONE, COLOR_YELLOW, COLOR_PINK, COLOR_PURPLE, COLOR_GREEN, COLOR_BLUE)
+
+        @IntDef(COLOR_NONE, COLOR_YELLOW, COLOR_PINK, COLOR_PURPLE, COLOR_GREEN, COLOR_BLUE)
+        @Retention(AnnotationRetention.SOURCE)
+        annotation class AvailableColor
     }
 
     fun isValid(): Boolean = verseIndex.isValid() && timestamp > 0L

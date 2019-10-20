@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <me.xizzhu.android.joshua.search.result.SearchResultListView
+    <me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
         android:id="@+id/search_result"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <me.xizzhu.android.joshua.ui.LoadingSpinner
+    <me.xizzhu.android.joshua.infra.ui.LoadingSpinner
         android:id="@+id/loading_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

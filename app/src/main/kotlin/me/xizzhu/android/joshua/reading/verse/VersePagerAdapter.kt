@@ -31,13 +31,11 @@ import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.fadeOut
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 
-class VersePagerAdapter(context: Context, private val listener: Listener) : PagerAdapter() {
-    interface Listener {
-        fun onChapterRequested(bookIndex: Int, chapterIndex: Int)
-
-        fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int)
-    }
+class VersePagerAdapter(context: Context) : PagerAdapter() {
+    lateinit var onChapterRequested: (Int, Int) -> Unit
+    lateinit var onCurrentVerseUpdated: (VerseIndex) -> Unit
 
     private val inflater = LayoutInflater.from(context)
     private val pages = ArrayList<Page>()
@@ -79,8 +77,8 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
         findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.deselectVerse(verseIndex)
     }
 
-    fun notifyVerseUpdate(verseIndex: VerseIndex, update: VerseUpdate) {
-        findPage(verseIndex.bookIndex, verseIndex.chapterIndex)?.notifyVerseUpdate(verseIndex, update)
+    fun notifyVerseUpdate(verseUpdate: VerseUpdate) {
+        findPage(verseUpdate.verseIndex.bookIndex, verseUpdate.verseIndex.chapterIndex)?.notifyVerseUpdate(verseUpdate)
     }
 
     override fun getCount(): Int = if (currentTranslation.isNotEmpty() && settings != null) Bible.TOTAL_CHAPTER_COUNT else 0
@@ -101,7 +99,7 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val page: Page = (pages.firstOrNull { p -> !p.inUse }
-                ?: Page(inflater, container, listener).apply { pages.add(this) })
+                ?: Page(inflater, container, onChapterRequested, onCurrentVerseUpdated).apply { pages.add(this) })
                 .also { page ->
                     page.bind(currentTranslation, parallelTranslations,
                             position.toBookIndex(), position.toChapterIndex(), settings!!)
@@ -117,7 +115,9 @@ class VersePagerAdapter(context: Context, private val listener: Listener) : Page
     }
 }
 
-private class Page(inflater: LayoutInflater, container: ViewGroup, private val listener: VersePagerAdapter.Listener) {
+private class Page(inflater: LayoutInflater, container: ViewGroup,
+                   private val onChapterRequested: (Int, Int) -> Unit,
+                   onCurrentVerseUpdated: (VerseIndex) -> Unit) {
     var currentTranslation = ""
         private set
     var parallelTranslations = emptyList<String>()
@@ -131,14 +131,16 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
     var settings: Settings? = null
         private set
 
+    private var verses: List<BaseItem>? = null
+
     val rootView: View = inflater.inflate(R.layout.page_verse, container, false)
     private val loadingSpinner = rootView.findViewById<View>(R.id.loading_spinner)
-    private val verseList = rootView.findViewById<VerseListView>(R.id.verse_list).apply {
+    private val verseList = rootView.findViewById<CommonRecyclerView>(R.id.verse_list).apply {
         addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (inUse && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    listener.onCurrentVerseUpdated(bookIndex, chapterIndex,
-                            (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition())
+                    onCurrentVerseUpdated(VerseIndex(bookIndex, chapterIndex,
+                            (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()))
                 }
             }
         })
@@ -149,9 +151,9 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         this.parallelTranslations = parallelTranslations
         this.bookIndex = bookIndex
         this.chapterIndex = chapterIndex
-        this.settings = settings.also { verseList.onSettingsUpdated(it) }
+        this.settings = settings.also { verseList.setSettings(it) }
 
-        listener.onChapterRequested(bookIndex, chapterIndex)
+        onChapterRequested(bookIndex, chapterIndex)
 
         verseList.visibility = View.GONE
         loadingSpinner.visibility = View.VISIBLE
@@ -166,7 +168,8 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         verseList.fadeIn()
         loadingSpinner.fadeOut()
 
-        verseList.setVerses(verses)
+        this.verses = verses
+        verseList.setItems(verses)
 
         if (currentVerseIndex.verseIndex > 0
                 && currentVerseIndex.bookIndex == bookIndex
@@ -182,15 +185,40 @@ private class Page(inflater: LayoutInflater, container: ViewGroup, private val l
         }
     }
 
+    // now we skip empty verses, so need to find the correct position
+    private fun VerseIndex.toItemPosition(): Int {
+        verses?.forEachIndexed { index, item ->
+            when (item) {
+                is SimpleVerseItem -> if (item.verse.verseIndex == this) return index
+                is VerseItem -> if (item.verse.verseIndex == this) return index
+            }
+        }
+        return RecyclerView.NO_POSITION
+    }
+
+
     fun selectVerse(verseIndex: VerseIndex) {
-        verseList.selectVerse(verseIndex)
+        if (verses == null) {
+            // when reading activity is opened from e.g. notes list, this is likely called before
+            // verses are set, therefore postpone notifying update
+            verseList.adapter?.let { adapter ->
+                adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                    override fun onChanged() {
+                        adapter.unregisterAdapterDataObserver(this)
+                        verseList.post { notifyVerseUpdate(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED)) }
+                    }
+                })
+            }
+        } else {
+            notifyVerseUpdate(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
+        }
     }
 
     fun deselectVerse(verseIndex: VerseIndex) {
-        verseList.deselectVerse(verseIndex)
+        notifyVerseUpdate(VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED))
     }
 
-    fun notifyVerseUpdate(verseIndex: VerseIndex, update: VerseUpdate) {
-        verseList.notifyVerseUpdate(verseIndex, update)
+    fun notifyVerseUpdate(verseUpdate: VerseUpdate) {
+        verseList.adapter?.notifyItemChanged(verseUpdate.verseIndex.toItemPosition(), verseUpdate)
     }
 }

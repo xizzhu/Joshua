@@ -21,38 +21,64 @@ import dagger.Provides
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListInteractor
+import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListPresenter
+import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
+import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.HighlightManager
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbarPresenter
-import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsPresenter
-import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
 @Module
 object HighlightsModule {
     @JvmStatic
-    @Provides
     @ActivityScope
-    fun provideHighlightsInteractor(highlightsActivity: HighlightsActivity,
-                                    bibleReadingManager: BibleReadingManager,
-                                    highlightsManager: HighlightManager,
-                                    navigator: Navigator,
-                                    settingsManager: SettingsManager): HighlightsInteractor =
-            HighlightsInteractor(highlightsActivity, bibleReadingManager, highlightsManager, navigator, settingsManager)
+    @Provides
+    fun provideAnnotatedVersesToolbarInteractor(highlightManager: HighlightManager): AnnotatedVersesToolbarInteractor =
+            AnnotatedVersesToolbarInteractor({ highlightManager.observeSortOrder().first() }, highlightManager::saveSortOrder)
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideLoadingAwarePresenter(highlightsInteractor: HighlightsInteractor): LoadingAwarePresenter =
-            LoadingAwarePresenter(highlightsInteractor.observeLoadingState())
+    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor): AnnotatedVersesToolbarPresenter =
+            AnnotatedVersesToolbarPresenter(R.string.title_highlights, annotatedVersesToolbarInteractor)
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideSortOrderToolbarPresenter(highlightsInteractor: HighlightsInteractor): AnnotatedVersesToolbarPresenter =
-            AnnotatedVersesToolbarPresenter({ highlightsInteractor.observeSortOrder().first() }, highlightsInteractor::saveSortOrder)
+    fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideHighlightsPresenter(highlightsActivity: HighlightsActivity,
-                                   highlightsInteractor: HighlightsInteractor): HighlightsPresenter =
-            HighlightsPresenter(highlightsInteractor, highlightsActivity.resources)
+    fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
+            LoadingSpinnerPresenter(loadingSpinnerInteractor)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideHighlightsListInteractor(highlightManager: HighlightManager,
+                                        bibleReadingManager: BibleReadingManager,
+                                        settingsManager: SettingsManager): HighlightsListInteractor =
+            HighlightsListInteractor(highlightManager, bibleReadingManager, settingsManager)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideHighlightsListPresenter(highlightsActivity: HighlightsActivity,
+                                       navigator: Navigator,
+                                       highlightsListInteractor: HighlightsListInteractor): HighlightsListPresenter =
+            HighlightsListPresenter(highlightsActivity, navigator, highlightsListInteractor)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideHighlightsViewModel(settingsManager: SettingsManager,
+                                   annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
+                                   loadingSpinnerInteractor: LoadingSpinnerInteractor,
+                                   highlightsListInteractor: HighlightsListInteractor): HighlightsViewModel =
+            HighlightsViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, highlightsListInteractor)
 }

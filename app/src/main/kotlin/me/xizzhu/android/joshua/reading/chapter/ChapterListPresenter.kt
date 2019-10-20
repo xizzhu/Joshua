@@ -16,37 +16,62 @@
 
 package me.xizzhu.android.joshua.reading.chapter
 
+import android.content.DialogInterface
+import androidx.annotation.UiThread
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.reading.ReadingInteractor
-import me.xizzhu.android.joshua.utils.MVPPresenter
+import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.logger.Log
 
-class ChapterListPresenter(private val readingInteractor: ReadingInteractor) : MVPPresenter<ChapterView>() {
-    override fun onViewAttached() {
-        super.onViewAttached()
+data class ChapterListViewHolder(val readingDrawerLayout: ReadingDrawerLayout, val chapterListView: ChapterListView) : ViewHolder
 
-        coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeCurrentTranslation().filter { it.isNotEmpty() }
-                    .collect { view?.onBookNamesUpdated(readingInteractor.readBookNames(it)) }
-        }
-        coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeCurrentVerseIndex().filter { it.isValid() }
-                    .collect { view?.onCurrentVerseIndexUpdated(it) }
+class ChapterListPresenter(private val readingActivity: ReadingActivity,
+                           chapterListInteractor: ChapterListInteractor,
+                           dispatcher: CoroutineDispatcher = Dispatchers.Main)
+    : ViewPresenter<ChapterListViewHolder, ChapterListInteractor>(chapterListInteractor, dispatcher) {
+    @UiThread
+    override fun onBind(viewHolder: ChapterListViewHolder) {
+        super.onBind(viewHolder)
+
+        viewHolder.chapterListView.setOnChapterSelectedListener { bookIndex, chapterIndex -> selectChapter(bookIndex, chapterIndex) }
+    }
+
+    private fun selectChapter(bookIndex: Int, chapterIndex: Int) {
+        coroutineScope.launch {
+            try {
+                interactor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to select chapter", e)
+                DialogHelper.showDialog(readingActivity, true, R.string.dialog_chapter_selection_error,
+                        DialogInterface.OnClickListener { _, _ -> selectChapter(bookIndex, chapterIndex) })
+            }
         }
     }
 
-    fun selectChapter(bookIndex: Int, chapterIndex: Int) {
-        coroutineScope.launch(Dispatchers.Main) {
-            try {
-                readingInteractor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to select chapter", e)
-                view?.onChapterSelectionFailed(bookIndex, chapterIndex)
-            }
+    @UiThread
+    override fun onStart() {
+        super.onStart()
+
+        coroutineScope.launch {
+            interactor.currentTranslation().filter { it.isNotEmpty() }
+                    .collect { viewHolder?.chapterListView?.setBookNames(interactor.readBookNames(it)) }
+        }
+        coroutineScope.launch {
+            interactor.currentVerseIndex().filter { it.isValid() }
+                    .collect { verseIndex ->
+                        viewHolder?.run {
+                            chapterListView.setCurrentVerseIndex(verseIndex)
+                            readingDrawerLayout.hide()
+                        }
+                    }
         }
     }
 }

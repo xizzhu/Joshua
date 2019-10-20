@@ -16,12 +16,11 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
-import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
 
 data class VerseDetail(val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
-                       val bookmarked: Boolean, @ColorInt val highlightColor: Int, val note: String) {
+                       val bookmarked: Boolean, @Highlight.Companion.AvailableColor val highlightColor: Int, val note: String) {
     companion object {
         val INVALID: VerseDetail = VerseDetail(VerseIndex.INVALID, emptyList(), false, Highlight.COLOR_NONE, "")
     }

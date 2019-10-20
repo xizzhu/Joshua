@@ -23,27 +23,43 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
 @Module
 object ReadingProgressModule {
     @JvmStatic
-    @Provides
     @ActivityScope
-    fun provideReadingProgressInteractor(readingProgressActivity: ReadingProgressActivity,
-                                         readingProgressManager: ReadingProgressManager,
+    @Provides
+    fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
+            LoadingSpinnerPresenter(loadingSpinnerInteractor)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideReadingProgressInteractor(readingProgressManager: ReadingProgressManager,
                                          bibleReadingManager: BibleReadingManager,
-                                         navigator: Navigator,
                                          settingsManager: SettingsManager): ReadingProgressInteractor =
-            ReadingProgressInteractor(readingProgressActivity, readingProgressManager, bibleReadingManager, navigator, settingsManager)
+            ReadingProgressInteractor(readingProgressManager, bibleReadingManager, settingsManager)
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideLoadingAwarePresenter(readingProgressInteractor: ReadingProgressInteractor): LoadingAwarePresenter =
-            LoadingAwarePresenter(readingProgressInteractor.observeLoadingState())
+    fun provideReadingProgressPresenter(readingProgressActivity: ReadingProgressActivity,
+                                        navigator: Navigator,
+                                        readingProgressInteractor: ReadingProgressInteractor): ReadingProgressPresenter =
+            ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressInteractor)
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideReadingProgressPresenter(readingProgressInteractor: ReadingProgressInteractor): ReadingProgressPresenter =
-            ReadingProgressPresenter(readingProgressInteractor)
+    fun provideReadingProgressViewModel(settingsManager: SettingsManager,
+                                        loadingSpinnerInteractor: LoadingSpinnerInteractor,
+                                        readingProgressInteractor: ReadingProgressInteractor): ReadingProgressViewModel =
+            ReadingProgressViewModel(settingsManager, loadingSpinnerInteractor, readingProgressInteractor)
 }

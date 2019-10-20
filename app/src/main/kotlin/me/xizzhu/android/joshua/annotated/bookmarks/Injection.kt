@@ -21,38 +21,64 @@ import dagger.Provides
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
-import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksPresenter
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListInteractor
+import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListPresenter
+import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
+import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.BookmarkManager
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbarPresenter
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
 @Module
 object BookmarksModule {
     @JvmStatic
-    @Provides
     @ActivityScope
-    fun provideBookmarksInteractor(bookmarksActivity: BookmarksActivity,
-                                   bibleReadingManager: BibleReadingManager,
-                                   bookmarkManager: BookmarkManager,
-                                   navigator: Navigator,
-                                   settingsManager: SettingsManager): BookmarksInteractor =
-            BookmarksInteractor(bookmarksActivity, bibleReadingManager, bookmarkManager, navigator, settingsManager)
+    @Provides
+    fun provideAnnotatedVersesToolbarInteractor(bookmarkManager: BookmarkManager): AnnotatedVersesToolbarInteractor =
+            AnnotatedVersesToolbarInteractor({ bookmarkManager.observeSortOrder().first() }, bookmarkManager::saveSortOrder)
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideLoadingAwarePresenter(bookmarksInteractor: BookmarksInteractor): LoadingAwarePresenter =
-            LoadingAwarePresenter(bookmarksInteractor.observeLoadingState())
+    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor): AnnotatedVersesToolbarPresenter =
+            AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, annotatedVersesToolbarInteractor)
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideSortOrderToolbarPresenter(bookmarksInteractor: BookmarksInteractor): AnnotatedVersesToolbarPresenter =
-            AnnotatedVersesToolbarPresenter({ bookmarksInteractor.observeSortOrder().first() }, bookmarksInteractor::saveSortOrder)
+    fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideBookmarksPresenter(bookmarksActivity: BookmarksActivity,
-                                  bookmarksInteractor: BookmarksInteractor): BookmarksPresenter =
-            BookmarksPresenter(bookmarksInteractor, bookmarksActivity.resources)
+    fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
+            LoadingSpinnerPresenter(loadingSpinnerInteractor)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideBookmarksListInteractor(bookmarkManager: BookmarkManager,
+                                       bibleReadingManager: BibleReadingManager,
+                                       settingsManager: SettingsManager): BookmarksListInteractor =
+            BookmarksListInteractor(bookmarkManager, bibleReadingManager, settingsManager)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideBookmarksListPresenter(bookmarksActivity: BookmarksActivity,
+                                      navigator: Navigator,
+                                      bookmarksListInteractor: BookmarksListInteractor): BookmarksListPresenter =
+            BookmarksListPresenter(bookmarksActivity, navigator, bookmarksListInteractor)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideBookmarksViewModel(settingsManager: SettingsManager,
+                                  annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
+                                  loadingSpinnerInteractor: LoadingSpinnerInteractor,
+                                  bookmarksListInteractor: BookmarksListInteractor): BookmarksViewModel =
+            BookmarksViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, bookmarksListInteractor)
 }

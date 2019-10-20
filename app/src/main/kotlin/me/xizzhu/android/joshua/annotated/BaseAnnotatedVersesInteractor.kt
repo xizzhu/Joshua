@@ -16,36 +16,34 @@
 
 package me.xizzhu.android.joshua.annotated
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.ui.BaseLoadingAwareInteractor
-import me.xizzhu.android.joshua.utils.activities.BaseActivity
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
 
-abstract class BaseAnnotatedVersesInteractor(private val activity: BaseActivity,
-                                             private val bibleReadingManager: BibleReadingManager,
-                                             private val navigator: Navigator,
-                                             settingsManager: SettingsManager,
-                                             @Companion.LoadingState initialLoadingState: Int)
-    : BaseLoadingAwareInteractor(settingsManager, initialLoadingState) {
-    suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
+abstract class BaseAnnotatedVersesInteractor<VerseAnnotation>(private val bibleReadingManager: BibleReadingManager,
+                                                              settingsManager: SettingsManager,
+                                                              dispatcher: CoroutineDispatcher = Dispatchers.Default)
+    : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
+    suspend fun readCurrentTranslation(): String =
+            bibleReadingManager.observeCurrentTranslation().first()
 
-    suspend fun readBookNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookNames(translationShortName)
+    suspend fun readBookNames(translation: String): List<String> =
+            bibleReadingManager.readBookNames(translation)
 
-    suspend fun readBookShortNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookShortNames(translationShortName)
+    suspend fun readBookShortNames(translation: String): List<String> =
+            bibleReadingManager.readBookShortNames(translation)
 
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             bibleReadingManager.readVerse(translationShortName, verseIndex)
 
-    open suspend fun openVerse(verseIndex: VerseIndex) {
+    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-        navigator.navigate(activity, Navigator.SCREEN_READING)
     }
 
-    abstract fun observeSortOrder(): Flow<Int>
+    abstract fun sortOrder(): Flow<Int>
 
-    abstract suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int)
+    abstract suspend fun readVerseAnnotations(@Constants.SortOrder sortOrder: Int): List<VerseAnnotation>
 }

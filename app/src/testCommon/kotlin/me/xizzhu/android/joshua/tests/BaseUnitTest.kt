@@ -18,25 +18,29 @@ package me.xizzhu.android.joshua.tests
 
 import androidx.annotation.CallSuper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 
 abstract class BaseUnitTest {
+    protected val testDispatcher = TestCoroutineDispatcher()
+
     @CallSuper
-    @Before
+    @BeforeTest
     open fun setup() {
         Dispatchers.setMain(Dispatchers.Unconfined)
         MockitoAnnotations.initMocks(this)
     }
 
     @CallSuper
-    @After
+    @AfterTest
     open fun tearDown() {
         Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
     }
 
     protected fun <T> any(): T {

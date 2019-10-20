@@ -16,20 +16,22 @@
 
 package me.xizzhu.android.joshua.annotated.notes
 
-import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.*
-import me.xizzhu.android.joshua.annotated.notes.list.NotesPresenter
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
+import me.xizzhu.android.joshua.annotated.notes.list.NotesListInteractor
+import me.xizzhu.android.joshua.annotated.notes.list.NotesListPresenter
+import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import javax.inject.Inject
 
-class NotesActivity : BaseAnnotatedVersesActivity(R.string.title_notes) {
+class NotesActivity : BaseAnnotatedVersesActivity<Note>() {
     @Inject
-    lateinit var notesInteractor: NotesInteractor
+    lateinit var notesViewModel: NotesViewModel
 
     @Inject
-    lateinit var notesPresenter: NotesPresenter
+    lateinit var notesListPresenter: NotesListPresenter
 
-    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = notesInteractor
+    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = notesViewModel
 
-    override fun getAnnotatedVersesPresenter(): AnnotatedVersePresenter = notesPresenter
+    override fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, NotesListInteractor> = notesListPresenter
 }

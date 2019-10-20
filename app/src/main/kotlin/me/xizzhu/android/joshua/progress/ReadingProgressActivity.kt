@@ -18,37 +18,34 @@ package me.xizzhu.android.joshua.progress
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.utils.activities.BaseLoadingSpinnerActivity
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsInteractor
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import me.xizzhu.android.joshua.infra.arch.Interactor
+import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerViewHolder
 import javax.inject.Inject
 
-class ReadingProgressActivity : BaseLoadingSpinnerActivity() {
+class ReadingProgressActivity : BaseSettingsAwareActivity() {
     @Inject
-    lateinit var readingProgressInteractor: ReadingProgressInteractor
+    lateinit var readingProgressViewModel: ReadingProgressViewModel
+
+    @Inject
+    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
     @Inject
     lateinit var readingProgressPresenter: ReadingProgressPresenter
-
-    private val readingProgressListView: ReadingProgressListView by bindView(R.id.reading_progress_list)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_reading_progress)
-        readingProgressListView.setPresenter(readingProgressPresenter)
+        loadingSpinnerPresenter.bind(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
+        readingProgressPresenter.bind(ReadingProgressViewHolder(findViewById(R.id.reading_progress_list)))
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(loadingSpinnerPresenter, readingProgressPresenter)
 
-        readingProgressPresenter.attachView(readingProgressListView)
-    }
-
-    override fun onStop() {
-        readingProgressPresenter.detachView()
-
-        super.onStop()
-    }
-
-    override fun getBaseSettingsInteractor(): BaseSettingsInteractor = readingProgressInteractor
+    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = readingProgressViewModel
 }

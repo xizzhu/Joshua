@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.res.Resources
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -31,13 +30,9 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
-import me.xizzhu.android.joshua.ui.recyclerview.BaseRecyclerView
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 
-class VerseDetailPagerAdapter(context: Context, private val listener: Listener) : PagerAdapter() {
-    interface Listener {
-        fun onNoteUpdated(note: String)
-    }
-
+class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     companion object {
         const val PAGE_VERSES = 0
         const val PAGE_NOTE = 1
@@ -49,6 +44,7 @@ class VerseDetailPagerAdapter(context: Context, private val listener: Listener) 
 
     private val pages: Array<Page?> = arrayOfNulls(PAGE_COUNT)
     private var settings: Settings? = null
+    private var onNoteUpdated: ((String) -> Unit)? = null
     private var verseDetail: VerseDetail = VerseDetail.INVALID
 
     fun setSettings(settings: Settings) {
@@ -56,17 +52,21 @@ class VerseDetailPagerAdapter(context: Context, private val listener: Listener) 
         notifyDataSetChanged()
     }
 
+    fun setOnNoteUpdatedListener(onNoteUpdated: (String) -> Unit) {
+        this.onNoteUpdated = onNoteUpdated
+    }
+
     fun setVerseDetail(verseDetail: VerseDetail) {
         this.verseDetail = verseDetail
         notifyDataSetChanged()
     }
 
-    override fun getCount(): Int = if (settings != null) PAGE_COUNT else 0
+    override fun getCount(): Int = if (settings != null && onNoteUpdated != null) PAGE_COUNT else 0
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         return pages[position] ?: when (position) {
             PAGE_VERSES -> VersesPage(inflater, container, settings!!)
-            PAGE_NOTE -> NotePage(resources, inflater, container, settings!!, listener)
+            PAGE_NOTE -> NotePage(resources, inflater, container, settings!!, onNoteUpdated!!)
             else -> throw IllegalArgumentException("Unsupported position: $position")
         }.apply {
             bind(verseDetail)
@@ -93,38 +93,25 @@ class VerseDetailPagerAdapter(context: Context, private val listener: Listener) 
     override fun getItemPosition(obj: Any): Int = POSITION_NONE
 }
 
-class VerseTextListView : BaseRecyclerView {
-    constructor(context: Context) : super(context)
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
-    init {
-        isNestedScrollingEnabled = false
-    }
-
-    fun setVerseTextItems(verseTextItems: List<VerseTextItem>) {
-        setItems(verseTextItems)
-    }
-}
-
 private abstract class Page(val view: View) {
     abstract fun bind(verseDetail: VerseDetail)
 }
 
 private class VersesPage(inflater: LayoutInflater, container: ViewGroup, settings: Settings)
     : Page(inflater.inflate(R.layout.page_verse_detail_verses, container, false)) {
-    private val verseTextListView: VerseTextListView = view.findViewById<VerseTextListView>(R.id.verse_text_list)
-            .apply { onSettingsUpdated(settings) }
+    private val verseTextListView: CommonRecyclerView = view.findViewById<CommonRecyclerView>(R.id.verse_text_list)
+            .apply {
+                isNestedScrollingEnabled = false
+                setSettings(settings)
+            }
 
     override fun bind(verseDetail: VerseDetail) {
-        verseTextListView.setVerseTextItems(verseDetail.verseTextItems)
+        verseTextListView.setItems(verseDetail.verseTextItems)
     }
 }
 
 private class NotePage(resources: Resources, inflater: LayoutInflater, container: ViewGroup,
-                       settings: Settings, listener: VerseDetailPagerAdapter.Listener)
+                       settings: Settings, onNoteUpdated: (String) -> Unit)
     : Page(inflater.inflate(R.layout.page_verse_detail_note, container, false)) {
     private val textWatcher = object : TextWatcher {
         override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
@@ -132,7 +119,7 @@ private class NotePage(resources: Resources, inflater: LayoutInflater, container
         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
 
         override fun afterTextChanged(s: Editable) {
-            listener.onNoteUpdated(s.toString())
+            onNoteUpdated(s.toString())
         }
     }
 

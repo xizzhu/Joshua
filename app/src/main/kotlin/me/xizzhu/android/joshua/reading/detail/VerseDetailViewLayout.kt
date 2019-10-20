@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.reading.detail
 
 import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -27,32 +26,15 @@ import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.ui.*
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
-import kotlin.math.max
 
-interface VerseDetailView : BaseSettingsView {
-    fun onVerseDetailLoaded(verseDetail: VerseDetail)
-
-    fun onVerseDetailLoadFailed(verseIndex: VerseIndex)
-
-    fun onVerseTextCopied()
-
-    fun onVerseTextClickFailed()
-
-    fun show(page: Int)
-
-    fun hide()
-}
-
-class VerseDetailViewLayout : FrameLayout, VerseDetailView {
+class VerseDetailViewLayout : FrameLayout {
     companion object {
         private val ON_COLOR_FILTER = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
         private val OFF_COLOR_FILTER = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
@@ -66,13 +48,7 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
-    private lateinit var presenter: VerseDetailPresenter
-
-    private val adapter = VerseDetailPagerAdapter(context, object : VerseDetailPagerAdapter.Listener {
-        override fun onNoteUpdated(note: String) {
-            presenter.updateNote(note)
-        }
-    })
+    private val adapter = VerseDetailPagerAdapter(context)
     private val header: LinearLayout
     private val tabLayout: TabLayout
     private val viewPager: ViewPager
@@ -84,23 +60,8 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
         header = findViewById(R.id.header)
         viewPager = findViewById<ViewPager>(R.id.view_pager).apply { adapter = this@VerseDetailViewLayout.adapter }
         tabLayout = findViewById<TabLayout>(R.id.tab_layout).apply { setupWithViewPager(viewPager) }
-        highlight = findViewById<ImageView>(R.id.highlight).apply {
-            setOnClickListener {
-                DialogHelper.showDialog(context, R.string.text_pick_highlight_color,
-                        resources.getStringArray(R.array.text_colors),
-                        max(0, Highlight.AVAILABLE_COLORS.indexOf(presenter.currentHighlightColor())),
-                        DialogInterface.OnClickListener { dialog, which ->
-                            presenter.updateHighlight(Highlight.AVAILABLE_COLORS[which])
-
-                            dialog.dismiss()
-                        })
-            }
-        }
-        bookmark = findViewById<ImageView>(R.id.bookmark).apply {
-            setOnClickListener { presenter.updateBookmark() }
-        }
-
-        setOnClickListener { presenter.hide() }
+        highlight = findViewById(R.id.highlight)
+        bookmark = findViewById(R.id.bookmark)
 
         viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
@@ -110,11 +71,19 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
         })
     }
 
-    fun setPresenter(presenter: VerseDetailPresenter) {
-        this.presenter = presenter
+    fun setOnBookmarkClickedListener(onBookmarkClicked: () -> Unit) {
+        bookmark.setOnClickListener { onBookmarkClicked() }
     }
 
-    override fun onSettingsUpdated(settings: Settings) {
+    fun setOnHighlightClickedListener(onHighlightClicked: () -> Unit) {
+        highlight.setOnClickListener { onHighlightClicked() }
+    }
+
+    fun setOnNoteUpdatedListener(onNoteUpdated: (String) -> Unit) {
+        adapter.setOnNoteUpdatedListener(onNoteUpdated)
+    }
+
+    fun setSettings(settings: Settings) {
         adapter.setSettings(settings)
 
         header.setBackgroundColor(if (settings.nightModeOn) 0xFF222222.toInt() else 0xFFEEEEEE.toInt())
@@ -122,33 +91,22 @@ class VerseDetailViewLayout : FrameLayout, VerseDetailView {
         resources.let { tabLayout.setTabTextColors(settings.getSecondaryTextColor(it), settings.getPrimaryTextColor(it)) }
     }
 
-    override fun onVerseDetailLoaded(verseDetail: VerseDetail) {
+    fun setVerseDetail(verseDetail: VerseDetail) {
         adapter.setVerseDetail(verseDetail)
         bookmark.colorFilter = if (verseDetail.bookmarked) ON_COLOR_FILTER else OFF_COLOR_FILTER
         highlight.colorFilter = if (verseDetail.highlightColor != Highlight.COLOR_NONE) ON_COLOR_FILTER else OFF_COLOR_FILTER
     }
 
-    override fun onVerseDetailLoadFailed(verseIndex: VerseIndex) {
-        DialogHelper.showDialog(context, true, R.string.dialog_load_verse_detail_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.loadVerseDetail(verseIndex)
-                })
-    }
-
-    override fun onVerseTextCopied() {
-        Toast.makeText(context, R.string.toast_verses_copied, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onVerseTextClickFailed() {
-        Toast.makeText(context, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun show(page: Int) {
+    fun show(@VerseDetailRequest.Companion.Content content: Int) {
         animate().translationY(0.0F)
-        viewPager.currentItem = page
+        viewPager.currentItem = when (content) {
+            VerseDetailRequest.VERSES -> VerseDetailPagerAdapter.PAGE_VERSES
+            VerseDetailRequest.NOTE -> VerseDetailPagerAdapter.PAGE_NOTE
+            else -> 0
+        }
     }
 
-    override fun hide() {
+    fun hide() {
         animate().translationY(height.toFloat())
         hideKeyboard()
     }

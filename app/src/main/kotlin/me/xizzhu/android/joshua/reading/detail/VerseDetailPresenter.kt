@@ -16,66 +16,165 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
-import androidx.annotation.ColorInt
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.DialogInterface
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.reading.ReadingInteractor
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
+import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.VerseDetailRequest
+import me.xizzhu.android.joshua.reading.verse.toStringForSharing
+import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.ToastHelper
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsPresenter
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import java.lang.StringBuilder
+import kotlin.math.max
 
-class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
-    : BaseSettingsPresenter<VerseDetailView>(readingInteractor) {
-    companion object {
-        private val TAG: String = VerseDetailPresenter::class.java.simpleName
-    }
+data class VerseDetailViewHolder(val verseDetailViewLayout: VerseDetailViewLayout) : ViewHolder
 
+class VerseDetailPresenter(private val readingActivity: ReadingActivity,
+                           verseDetailInteractor: VerseDetailInteractor,
+                           dispatcher: CoroutineDispatcher = Dispatchers.Main)
+    : BaseSettingsAwarePresenter<VerseDetailViewHolder, VerseDetailInteractor>(verseDetailInteractor, dispatcher) {
     private val translationComparator = TranslationInfoComparator(
             TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
 
-    @VisibleForTesting
-    var verseDetail: VerseDetail? = null
+    private var verseDetail: VerseDetail? = null
     private var updateBookmarkJob: Job? = null
     private var updateHighlightJob: Job? = null
     private var updateNoteJob: Job? = null
 
-    override fun onViewAttached() {
-        super.onViewAttached()
+    @UiThread
+    override fun onBind(viewHolder: VerseDetailViewHolder) {
+        super.onBind(viewHolder)
 
-        coroutineScope.launch(Dispatchers.Main) {
-            readingInteractor.observeVerseDetailOpenState().collect {
-                if (it.first.isValid()) {
-                    view?.show(it.second)
-                    loadVerseDetail(it.first)
+        with(viewHolder.verseDetailViewLayout) {
+            setOnClickListener {
+                interactor.requestVerseDetail(
+                        VerseDetailRequest(verseDetail?.verseIndex ?: VerseIndex.INVALID))
+                viewHolder.verseDetailViewLayout.hide()
+            }
+            setOnBookmarkClickedListener { updateBookmark() }
+            setOnHighlightClickedListener {
+                DialogHelper.showDialog(context, R.string.text_pick_highlight_color,
+                        resources.getStringArray(R.array.text_colors),
+                        max(0, Highlight.AVAILABLE_COLORS.indexOf(verseDetail?.highlightColor
+                                ?: Highlight.COLOR_NONE)),
+                        DialogInterface.OnClickListener { dialog, which ->
+                            updateHighlight(Highlight.AVAILABLE_COLORS[which])
+
+                            dialog.dismiss()
+                        })
+            }
+            setOnNoteUpdatedListener { updateNote(it) }
+        }
+    }
+
+    private fun updateBookmark() {
+        updateBookmarkJob?.cancel()
+        updateBookmarkJob = coroutineScope.launch {
+            verseDetail?.let { detail ->
+                if (detail.bookmarked) {
+                    interactor.removeBookmark(detail.verseIndex)
+                    verseDetail = detail.copy(bookmarked = false)
                 } else {
-                    view?.hide()
+                    interactor.addBookmark(detail.verseIndex)
+                    verseDetail = detail.copy(bookmarked = true)
+                }
+                viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
+            }
+
+            updateBookmarkJob = null
+        }
+    }
+
+    private fun updateHighlight(@Highlight.Companion.AvailableColor highlightColor: Int) {
+        updateHighlightJob?.cancel()
+        updateHighlightJob = coroutineScope.launch {
+            verseDetail?.let { detail ->
+                if (highlightColor == Highlight.COLOR_NONE) {
+                    interactor.removeHighlight(detail.verseIndex)
+                } else {
+                    interactor.saveHighlight(detail.verseIndex, highlightColor)
+                }
+                verseDetail = detail.copy(highlightColor = highlightColor)
+                viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
+            }
+
+            updateHighlightJob = null
+        }
+    }
+
+    private fun updateNote(note: String) {
+        updateNoteJob?.cancel()
+        updateNoteJob = coroutineScope.launch {
+            verseDetail?.let { detail ->
+                if (note.isEmpty()) {
+                    interactor.removeNote(detail.verseIndex)
+                } else {
+                    interactor.saveNote(detail.verseIndex, note)
+                }
+                verseDetail = detail.copy(note = note)
+            }
+
+            updateNoteJob = null
+        }
+    }
+
+    @UiThread
+    override fun onStart() {
+        super.onStart()
+
+        coroutineScope.launch {
+            interactor.settings().collect {
+                if (it.status == ViewData.Companion.STATUS_SUCCESS) viewHolder?.verseDetailViewLayout?.setSettings(it.data)
+            }
+        }
+
+        coroutineScope.launch {
+            interactor.verseDetailRequest().collect { request ->
+                if (request.content != VerseDetailRequest.HIDE) {
+                    showVerseDetail(request.verseIndex, request.content)
+                } else {
+                    viewHolder?.verseDetailViewLayout?.hide()
+                    verseDetail = null
                 }
             }
         }
     }
 
-    fun loadVerseDetail(verseIndex: VerseIndex) {
-        coroutineScope.launch(Dispatchers.Main) {
-            view?.onVerseDetailLoaded(VerseDetail.INVALID)
+    private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
+        loadVerseDetail(verseIndex)
+        viewHolder?.verseDetailViewLayout?.show(content)
+    }
 
+    private fun loadVerseDetail(verseIndex: VerseIndex) {
+        coroutineScope.launch {
             try {
-                val bookmarkAsync = supervisedAsync { readingInteractor.readBookmark(verseIndex) }
-                val highlightAsync = supervisedAsync { readingInteractor.readHighlight(verseIndex) }
-                val noteAsync = supervisedAsync { readingInteractor.readNote(verseIndex) }
+                viewHolder?.verseDetailViewLayout?.setVerseDetail(VerseDetail.INVALID)
 
-                val currentTranslation = readingInteractor.observeCurrentTranslation().first()
-                val parallelTranslations = readingInteractor.observeDownloadedTranslations().first()
+                val bookmarkAsync = supervisedAsync { interactor.readBookmark(verseIndex) }
+                val highlightAsync = supervisedAsync { interactor.readHighlight(verseIndex) }
+                val noteAsync = supervisedAsync { interactor.readNote(verseIndex) }
+
+                val currentTranslation = interactor.currentTranslation()
+                val parallelTranslations = interactor.downloadedTranslations()
                         .sortedWith(translationComparator)
                         .filter { it.shortName != currentTranslation }
                         .map { it.shortName }
-                val verses = readingInteractor.readVerses(currentTranslation, parallelTranslations,
+                val verses = interactor.readVerses(currentTranslation, parallelTranslations,
                         verseIndex.bookIndex, verseIndex.chapterIndex)
 
                 // 1. finds the verse
@@ -117,108 +216,76 @@ class VerseDetailPresenter(private val readingInteractor: ReadingInteractor)
 
                 // 3. constructs VerseTextItems
                 verseTextItems.add(VerseTextItem(verse.verseIndex, followingEmptyVerseCount, verse.text,
-                        readingInteractor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex],
+                        interactor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex],
                         this@VerseDetailPresenter::onVerseClicked, this@VerseDetailPresenter::onVerseLongClicked))
 
                 parallelTranslations.forEachIndexed { index, translation ->
                     verseTextItems.add(VerseTextItem(verse.verseIndex, followingEmptyVerseCount,
                             Verse.Text(translation, parallel[index].toString()),
-                            readingInteractor.readBookNames(translation)[verse.verseIndex.bookIndex],
+                            interactor.readBookNames(translation)[verse.verseIndex.bookIndex],
                             this@VerseDetailPresenter::onVerseClicked, this@VerseDetailPresenter::onVerseLongClicked))
                 }
 
                 verseDetail = VerseDetail(verseIndex, verseTextItems,
                         bookmarkAsync.await().isValid(), highlightAsync.await().color,
                         noteAsync.await().note)
-                view?.onVerseDetailLoaded(verseDetail!!)
+                viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verse detail", e)
-                view?.onVerseDetailLoadFailed(verseIndex)
+                DialogHelper.showDialog(readingActivity, true, R.string.dialog_load_verse_detail_error,
+                        DialogInterface.OnClickListener { _, _ -> loadVerseDetail(verseIndex) })
             }
         }
     }
 
     @VisibleForTesting
     fun onVerseClicked(translation: String) {
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch {
             try {
-                if (translation != readingInteractor.observeCurrentTranslation().first()) {
-                    readingInteractor.saveCurrentTranslation(translation)
-                    readingInteractor.closeVerseDetail()
+                if (translation != interactor.currentTranslation()) {
+                    interactor.saveCurrentTranslation(translation)
+                    interactor.requestVerseDetail(VerseDetailRequest(
+                            verseDetail?.verseIndex ?: VerseIndex.INVALID))
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to select translation", e)
-                view?.onVerseTextClickFailed()
+                Log.e(tag, "Failed to select translation", e)
+                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
             }
         }
     }
 
     @VisibleForTesting
     fun onVerseLongClicked(verse: Verse) {
-        coroutineScope.launch(Dispatchers.Main) {
-            if (readingInteractor.copyToClipBoard(listOf(verse))) {
-                view?.onVerseTextCopied()
-            } else {
-                view?.onVerseTextClickFailed()
+        coroutineScope.launch {
+            try {
+                val bookName = interactor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
+                // On older devices, this only works on the threads with loopers.
+                (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                        .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
+                                verse.toStringForSharing(bookName)))
+                ToastHelper.showToast(readingActivity, R.string.toast_verses_copied)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to copy", e)
+                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
             }
         }
     }
 
-    fun hide() {
-        readingInteractor.closeVerseDetail()
-    }
-
-    fun updateBookmark() {
-        updateBookmarkJob?.cancel()
-        updateBookmarkJob = coroutineScope.launch(Dispatchers.Main) {
-            verseDetail?.let { detail ->
-                if (detail.bookmarked) {
-                    readingInteractor.removeBookmark(detail.verseIndex)
-                    verseDetail = detail.copy(bookmarked = false)
-                } else {
-                    readingInteractor.addBookmark(detail.verseIndex)
-                    verseDetail = detail.copy(bookmarked = true)
-                }
-                view?.onVerseDetailLoaded(verseDetail!!)
-            }
-
-            updateBookmarkJob = null
+    fun showNote() {
+        coroutineScope.launch {
+            interactor.currentVerseIndex().let { if (it.isValid()) interactor.requestVerseDetail(VerseDetailRequest(it, VerseDetailRequest.NOTE)) }
         }
     }
 
-    @ColorInt
-    fun currentHighlightColor(): Int = verseDetail?.highlightColor ?: Highlight.COLOR_NONE
-
-    fun updateHighlight(@ColorInt highlightColor: Int) {
-        updateHighlightJob?.cancel()
-        updateHighlightJob = coroutineScope.launch(Dispatchers.Main) {
-            verseDetail?.let { detail ->
-                if (highlightColor == Highlight.COLOR_NONE) {
-                    readingInteractor.removeHighlight(detail.verseIndex)
-                } else {
-                    readingInteractor.saveHighlight(detail.verseIndex, highlightColor)
-                }
-                verseDetail = detail.copy(highlightColor = highlightColor)
-                view?.onVerseDetailLoaded(verseDetail!!)
-            }
-
-            updateHighlightJob = null
+    /**
+     * @return true if verse detail view was open, or false otherwise
+     * */
+    fun close(): Boolean {
+        if (verseDetail != null) {
+            interactor.requestVerseDetail(VerseDetailRequest(
+                    verseDetail?.verseIndex ?: VerseIndex.INVALID))
+            return true
         }
-    }
-
-    fun updateNote(note: String) {
-        updateNoteJob?.cancel()
-        updateNoteJob = coroutineScope.launch(Dispatchers.Main) {
-            verseDetail?.let { detail ->
-                if (note.isEmpty()) {
-                    readingInteractor.removeNote(detail.verseIndex)
-                } else {
-                    readingInteractor.saveNote(detail.verseIndex, note)
-                }
-                verseDetail = detail.copy(note = note)
-            }
-
-            updateNoteJob = null
-        }
+        return false
     }
 }

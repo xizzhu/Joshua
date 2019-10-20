@@ -17,96 +17,45 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.content.Context
-import android.content.DialogInterface
 import android.util.AttributeSet
-import android.widget.Toast
-import androidx.annotation.ColorInt
 import androidx.viewpager.widget.ViewPager
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.VerseUpdate
-import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.utils.activities.BaseSettingsView
-import kotlin.math.max
 
-interface VerseView : BaseSettingsView {
-    fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex)
-
-    fun onCurrentTranslationUpdated(currentTranslation: String)
-
-    fun onParallelTranslationsUpdated(parallelTranslations: List<String>)
-
-    fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int)
-
-    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<BaseItem>)
-
-    fun onVersesLoadFailed(bookIndex: Int, chapterIndex: Int)
-
-    fun onVerseSelected(verseIndex: VerseIndex)
-
-    fun onVerseDeselected(verseIndex: VerseIndex)
-
-    fun onVersesCopied()
-
-    fun onVersesCopyShareFailed()
-
-    fun onVerseUpdated(verseIndex: VerseIndex, update: VerseUpdate)
-
-    fun onHighlightColorRequested(verseIndex: VerseIndex, @ColorInt currentHighlightColor: Int)
-}
-
-class VerseViewPager : ViewPager, VerseView {
+class VerseViewPager : ViewPager {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    private val versePagerAdapterListener = object : VersePagerAdapter.Listener {
-        override fun onChapterRequested(bookIndex: Int, chapterIndex: Int) {
-            presenter.loadVerses(bookIndex, chapterIndex)
-        }
-
-        override fun onCurrentVerseUpdated(bookIndex: Int, chapterIndex: Int, verseIndex: Int) {
-            val updatedVerseIndex = VerseIndex(bookIndex, chapterIndex, verseIndex)
-            if (currentVerseIndex == updatedVerseIndex) {
-                return
-            }
-            currentVerseIndex = updatedVerseIndex
-            presenter.saveCurrentVerseIndex(updatedVerseIndex)
-        }
-    }
-    private val adapter = VersePagerAdapter(context, versePagerAdapterListener)
-    private val onPageChangeListener = object : SimpleOnPageChangeListener() {
-        override fun onPageSelected(position: Int) {
-            if (currentVerseIndex.toPagePosition() == position) {
-                return
-            }
-            presenter.selectChapter(position.toBookIndex(), position.toChapterIndex())
-        }
-    }
-
-    init {
-        setAdapter(adapter)
-        addOnPageChangeListener(onPageChangeListener)
-    }
-
-    private lateinit var presenter: VersePresenter
+    private val adapter = VersePagerAdapter(context).apply { setAdapter(this) }
 
     private var currentVerseIndex = VerseIndex.INVALID
     private var currentTranslation = ""
     private var parallelTranslations = emptyList<String>()
 
-    fun setPresenter(presenter: VersePresenter) {
-        this.presenter = presenter
+    fun setOnChapterSelectedListener(onChapterSelected: (Int, Int) -> Unit) {
+        addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
+            override fun onPageSelected(position: Int) {
+                onChapterSelected(position.toBookIndex(), position.toChapterIndex())
+            }
+        })
     }
 
-    override fun onSettingsUpdated(settings: Settings) {
+    fun setOnChapterRequestedListener(onChapterRequested: (Int, Int) -> Unit) {
+        adapter.onChapterRequested = onChapterRequested
+    }
+
+    fun setOnCurrentVerseUpdatedListener(onCurrentVerseUpdated: (VerseIndex) -> Unit) {
+        adapter.onCurrentVerseUpdated = onCurrentVerseUpdated
+    }
+
+    fun onSettingsUpdated(settings: Settings) {
         adapter.settings = settings
     }
 
-    override fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex) {
+    fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex) {
         if (this.currentVerseIndex == currentVerseIndex) {
             return
         }
@@ -123,7 +72,7 @@ class VerseViewPager : ViewPager, VerseView {
         setCurrentItem(currentVerseIndex.toPagePosition(), false)
     }
 
-    override fun onCurrentTranslationUpdated(currentTranslation: String) {
+    fun onCurrentTranslationUpdated(currentTranslation: String) {
         if (this.currentTranslation == currentTranslation) {
             return
         }
@@ -131,7 +80,7 @@ class VerseViewPager : ViewPager, VerseView {
         refreshUi()
     }
 
-    override fun onParallelTranslationsUpdated(parallelTranslations: List<String>) {
+    fun onParallelTranslationsUpdated(parallelTranslations: List<String>) {
         if (this.parallelTranslations == parallelTranslations) {
             return
         }
@@ -139,52 +88,19 @@ class VerseViewPager : ViewPager, VerseView {
         refreshUi()
     }
 
-    override fun onChapterSelectionFailed(bookIndex: Int, chapterIndex: Int) {
-        DialogHelper.showDialog(context, true, R.string.dialog_chapter_selection_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.selectChapter(bookIndex, chapterIndex)
-                })
-    }
-
-    override fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<BaseItem>) {
+    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<BaseItem>) {
         adapter.setVerses(bookIndex, chapterIndex, verses)
     }
 
-    override fun onVersesLoadFailed(bookIndex: Int, chapterIndex: Int) {
-        DialogHelper.showDialog(context, true, R.string.dialog_verse_load_error,
-                DialogInterface.OnClickListener { _, _ ->
-                    presenter.loadVerses(bookIndex, chapterIndex)
-                })
-    }
-
-    override fun onVerseSelected(verseIndex: VerseIndex) {
+    fun onVerseSelected(verseIndex: VerseIndex) {
         adapter.selectVerse(verseIndex)
     }
 
-    override fun onVerseDeselected(verseIndex: VerseIndex) {
+    fun onVerseDeselected(verseIndex: VerseIndex) {
         adapter.deselectVerse(verseIndex)
     }
 
-    override fun onVersesCopied() {
-        Toast.makeText(context, R.string.toast_verses_copied, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onVersesCopyShareFailed() {
-        Toast.makeText(context, R.string.toast_unknown_error, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onVerseUpdated(verseIndex: VerseIndex, update: VerseUpdate) {
-        adapter.notifyVerseUpdate(verseIndex, update)
-    }
-
-    override fun onHighlightColorRequested(verseIndex: VerseIndex, @ColorInt currentHighlightColor: Int) {
-        DialogHelper.showDialog(context, R.string.text_pick_highlight_color,
-                resources.getStringArray(R.array.text_colors),
-                max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
-                DialogInterface.OnClickListener { dialog, which ->
-                    presenter.updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
-
-                    dialog.dismiss()
-                })
+    fun onVerseUpdated(verseUpdate: VerseUpdate) {
+        adapter.notifyVerseUpdate(verseUpdate)
     }
 }

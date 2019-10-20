@@ -21,5 +21,5 @@ import me.xizzhu.android.joshua.core.Settings
 interface LocalSettingsStorage {
     suspend fun readSettings(): Settings
 
-    suspend fun saveSettings(settings: Settings)
+    suspend fun saveSettings(settings: Settings): Settings
 }

@@ -19,36 +19,61 @@ package me.xizzhu.android.joshua.search
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.search.toolbar.ToolbarPresenter
-import me.xizzhu.android.joshua.search.result.SearchResultPresenter
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.ui.LoadingAwarePresenter
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
+import me.xizzhu.android.joshua.search.result.SearchResultInteractor
+import me.xizzhu.android.joshua.search.result.SearchResultListPresenter
+import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
+import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
 
 @Module
 object SearchModule {
     @JvmStatic
     @ActivityScope
     @Provides
-    fun provideSearchViewController(searchActivity: SearchActivity,
-                                    navigator: Navigator,
-                                    bibleReadingManager: BibleReadingManager,
-                                    settingsManager: SettingsManager): SearchInteractor =
-            SearchInteractor(searchActivity, navigator, bibleReadingManager, settingsManager)
+    fun provideSearchToolbarInteractor(): SearchToolbarInteractor = SearchToolbarInteractor()
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideToolbarPresenter(searchInteractor: SearchInteractor): ToolbarPresenter =
-            ToolbarPresenter(searchInteractor)
+    fun provideSearchToolbarPresenter(searchToolbarInteractor: SearchToolbarInteractor): SearchToolbarPresenter =
+            SearchToolbarPresenter(searchToolbarInteractor)
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideLoadingAwarePresenter(searchInteractor: SearchInteractor): LoadingAwarePresenter =
-            LoadingAwarePresenter(searchInteractor.observeLoadingState())
+    fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
 
     @JvmStatic
+    @ActivityScope
     @Provides
-    fun provideSearchResultPresenter(searchInteractor: SearchInteractor): SearchResultPresenter =
-            SearchResultPresenter(searchInteractor)
+    fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
+            LoadingSpinnerPresenter(loadingSpinnerInteractor)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideSearchResultInteractor(bibleReadingManager: BibleReadingManager,
+                                      settingsManager: SettingsManager): SearchResultInteractor =
+            SearchResultInteractor(bibleReadingManager, settingsManager)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideSearchResultListPresenter(searchActivity: SearchActivity,
+                                         navigator: Navigator,
+                                         searchResultInteractor: SearchResultInteractor): SearchResultListPresenter =
+            SearchResultListPresenter(searchActivity, navigator, searchResultInteractor)
+
+    @JvmStatic
+    @ActivityScope
+    @Provides
+    fun provideSearchViewModel(settingsManager: SettingsManager,
+                               searchToolbarInteractor: SearchToolbarInteractor,
+                               loadingSpinnerInteractor: LoadingSpinnerInteractor,
+                               searchResultInteractor: SearchResultInteractor): SearchViewModel =
+            SearchViewModel(settingsManager, searchToolbarInteractor, loadingSpinnerInteractor, searchResultInteractor)
 }
