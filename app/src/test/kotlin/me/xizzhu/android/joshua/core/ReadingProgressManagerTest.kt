@@ -23,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.utils.Clock
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -61,13 +62,16 @@ class ReadingProgressManagerTest : BaseUnitTest() {
             `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(flowOf(VerseIndex(1, 2, 3)))
             `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
 
-            readingProgressManager = spy(readingProgressManager)
-            doReturn(0L).`when`(readingProgressManager).timeSpentThresholdInMillis()
-            doReturn(1L).`when`(readingProgressManager).now()
-
+            Clock.currentTimeMillis = 1L
             readingProgressManager.startTracking()
+
+            Clock.currentTimeMillis = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 2L
             readingProgressManager.stopTracking()
-            verify(readingProgressRepository, times(1)).trackReadingProgress(1, 2, 0L, 1L)
+
+            verify(readingProgressRepository, times(1))
+                    .trackReadingProgress(1, 2,
+                            ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 1L,
+                            ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 2L)
         }
     }
 

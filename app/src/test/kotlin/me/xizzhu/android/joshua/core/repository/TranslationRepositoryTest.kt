@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.toMap
+import me.xizzhu.android.joshua.utils.Clock
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.*
@@ -137,16 +138,16 @@ class TranslationRepositoryTest : BaseUnitTest() {
         runBlocking {
             `when`(localTranslationStorage.readTranslationListRefreshTimestamp()).thenReturn(0L)
 
-            `when`(translationRepository.now()).thenReturn(0L)
+            Clock.currentTimeMillis = 0L
             assertFalse(translationRepository.translationListTooOld())
 
-            `when`(translationRepository.now()).thenReturn(TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS - 1L)
+            Clock.currentTimeMillis = TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS - 1L
             assertFalse(translationRepository.translationListTooOld())
 
-            `when`(translationRepository.now()).thenReturn(TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS)
+            Clock.currentTimeMillis = TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
             assertTrue(translationRepository.translationListTooOld())
 
-            `when`(translationRepository.now()).thenReturn(TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS + 1L)
+            Clock.currentTimeMillis = TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS + 1L
             assertTrue(translationRepository.translationListTooOld())
         }
     }
@@ -202,7 +203,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
     @Test
     fun testDownloadTranslation() {
         runBlocking {
-            doReturn(0L).`when`(translationRepository).elapsedRealtime()
+            Clock.elapsedRealtime = 0L
 
             val channel = Channel<Int>()
             `when`(remoteTranslationService.fetchTranslation(channel, RemoteTranslationInfo.fromTranslationInfo(MockContents.kjvTranslationInfo)))

@@ -49,7 +49,7 @@ class NotesListPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        `when`(resources.getString(anyInt())).thenReturn("")
+        `when`(resources.getString(anyInt(), anyString(), anyInt())).thenReturn("")
         `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
         `when`(resources.getStringArray(anyInt())).thenReturn(Array(12) { "" })
         `when`(notesActivity.resources).thenReturn(resources)

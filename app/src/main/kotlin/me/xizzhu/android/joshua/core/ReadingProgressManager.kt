@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
+import me.xizzhu.android.joshua.utils.Clock
 import me.xizzhu.android.logger.Log
 
 data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimestamp: Long,
@@ -50,7 +51,9 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
                              private val readingProgressRepository: ReadingProgressRepository) {
     companion object {
         private val TAG: String = ReadingProgressManager::class.java.simpleName
-        private const val TIME_SPENT_THRESHOLD_IN_MILLIS = 2500L
+
+        @VisibleForTesting
+        const val TIME_SPENT_THRESHOLD_IN_MILLIS = 2500L
     }
 
     private var currentVerseIndexObserver: Flow<VerseIndex>? = null
@@ -63,20 +66,17 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
             return
         }
 
-        lastTimestamp = System.currentTimeMillis()
+        lastTimestamp = Clock.currentTimeMillis()
         currentVerseIndexObserver = bibleReadingManager.observeCurrentVerseIndex()
         GlobalScope.launch(Dispatchers.Main) {
             currentVerseIndexObserver?.filter { it.isValid() }
                     ?.collect {
                         trackReadingProgress()
                         currentVerseIndex = it
-                        lastTimestamp = now()
+                        lastTimestamp = Clock.currentTimeMillis()
                     }
         }
     }
-
-    @VisibleForTesting
-    fun now() = System.currentTimeMillis()
 
     private suspend fun trackReadingProgress() {
         try {
@@ -87,9 +87,9 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
                 return
             }
 
-            val now = now()
+            val now = Clock.currentTimeMillis()
             val timeSpentInMillis = now - lastTimestamp
-            if (timeSpentInMillis < timeSpentThresholdInMillis()) {
+            if (timeSpentInMillis < TIME_SPENT_THRESHOLD_IN_MILLIS) {
                 return
             }
 
@@ -99,9 +99,6 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
             Log.e(TAG, "Failed to track reading progress", e)
         }
     }
-
-    @VisibleForTesting
-    fun timeSpentThresholdInMillis(): Long = TIME_SPENT_THRESHOLD_IN_MILLIS
 
     suspend fun stopTracking() {
         trackReadingProgress()

@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.reading.VerseUpdate
+import me.xizzhu.android.joshua.utils.Clock
 
 class VerseInteractor(private val bibleReadingManager: BibleReadingManager,
                       private val bookmarkManager: BookmarkManager,
@@ -74,7 +75,7 @@ class VerseInteractor(private val bibleReadingManager: BibleReadingManager,
     suspend fun readBookmarks(bookIndex: Int, chapterIndex: Int): List<Bookmark> = bookmarkManager.read(bookIndex, chapterIndex)
 
     suspend fun addBookmark(verseIndex: VerseIndex) {
-        bookmarkManager.save(Bookmark(verseIndex, System.currentTimeMillis()))
+        bookmarkManager.save(Bookmark(verseIndex, Clock.currentTimeMillis()))
         verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED))
     }
 
@@ -86,7 +87,7 @@ class VerseInteractor(private val bibleReadingManager: BibleReadingManager,
     suspend fun readHighlights(bookIndex: Int, chapterIndex: Int): List<Highlight> = highlightManager.read(bookIndex, chapterIndex)
 
     suspend fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor color: Int) {
-        highlightManager.save(Highlight(verseIndex, color, System.currentTimeMillis()))
+        highlightManager.save(Highlight(verseIndex, color, Clock.currentTimeMillis()))
         verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
     }
 

@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.reading.VerseUpdate
+import me.xizzhu.android.joshua.utils.Clock
 
 class VerseDetailInteractor(private val translationManager: TranslationManager,
                             private val bibleReadingManager: BibleReadingManager,
@@ -69,7 +70,7 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
     suspend fun readBookmark(verseIndex: VerseIndex): Bookmark = bookmarkManager.read(verseIndex)
 
     suspend fun addBookmark(verseIndex: VerseIndex) {
-        bookmarkManager.save(Bookmark(verseIndex, System.currentTimeMillis()))
+        bookmarkManager.save(Bookmark(verseIndex, Clock.currentTimeMillis()))
         verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED))
     }
 
@@ -81,7 +82,7 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
     suspend fun readHighlight(verseIndex: VerseIndex): Highlight = highlightManager.read(verseIndex)
 
     suspend fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor color: Int) {
-        highlightManager.save(Highlight(verseIndex, color, System.currentTimeMillis()))
+        highlightManager.save(Highlight(verseIndex, color, Clock.currentTimeMillis()))
         verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
     }
 
@@ -93,7 +94,7 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
     suspend fun readNote(verseIndex: VerseIndex): Note = noteManager.read(verseIndex)
 
     suspend fun saveNote(verseIndex: VerseIndex, note: String) {
-        noteManager.save(Note(verseIndex, note, System.currentTimeMillis()))
+        noteManager.save(Note(verseIndex, note, Clock.currentTimeMillis()))
         verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED))
     }
 
