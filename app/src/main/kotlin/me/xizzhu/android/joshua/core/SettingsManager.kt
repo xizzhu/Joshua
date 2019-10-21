@@ -49,7 +49,7 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
     init {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                currentSettings.offer(readSettings())
+                currentSettings.offer(mutex.withLock { settingsRepository.readSettings() })
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize settings", e)
                 currentSettings.offer(Settings.DEFAULT)
@@ -58,8 +58,6 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
     }
 
     fun observeSettings(): Flow<Settings> = currentSettings.asFlow()
-
-    suspend fun readSettings(): Settings = mutex.withLock { settingsRepository.readSettings() }
 
     suspend fun saveFontSizeScale(fontSizeScale: Int): Settings = mutex.withLock {
         return settingsRepository.readSettings().let { settings ->

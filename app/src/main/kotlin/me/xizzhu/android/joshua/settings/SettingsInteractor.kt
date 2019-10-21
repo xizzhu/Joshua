@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -28,7 +29,7 @@ import java.io.OutputStream
 class SettingsInteractor(private val settingsManager: SettingsManager,
                          private val backupManager: BackupManager,
                          dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
-    suspend fun readSettings(): Settings = settingsManager.readSettings()
+    suspend fun readSettings(): Settings = settingsManager.observeSettings().first()
 
     suspend fun saveFontSizeScale(fontSizeScale: Int): Settings =
             settingsManager.saveFontSizeScale(fontSizeScale)
