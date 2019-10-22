@@ -276,59 +276,61 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                              @ColorInt fromPrimaryTextColor: Int, @ColorInt toPrimaryTextColor: Int,
                              @ColorInt fromSecondaryTextColor: Int, @ColorInt toSecondaryTextColor: Int) {
         val argbEvaluator = ArgbEvaluator()
-        val colorAnimator = ValueAnimator.ofFloat(0.0F, 1.0F)
-        colorAnimator.addUpdateListener { animator ->
-            val fraction = animator.animatedValue as Float
-            val backgroundColor = argbEvaluator.evaluate(fraction, fromBackgroundColor, toBackgroundColor) as Int
-            val primaryTextColor = argbEvaluator.evaluate(fraction, fromPrimaryTextColor, toPrimaryTextColor) as Int
-            val secondaryTextColor = argbEvaluator.evaluate(fraction, fromSecondaryTextColor, toSecondaryTextColor) as Int
-            updateColor(backgroundColor, primaryTextColor, secondaryTextColor)
+        ValueAnimator.ofFloat(0.0F, 1.0F).run {
+            addUpdateListener { animator ->
+                val fraction = animator.animatedValue as Float
+                val backgroundColor = argbEvaluator.evaluate(fraction, fromBackgroundColor, toBackgroundColor) as Int
+                val primaryTextColor = argbEvaluator.evaluate(fraction, fromPrimaryTextColor, toPrimaryTextColor) as Int
+                val secondaryTextColor = argbEvaluator.evaluate(fraction, fromSecondaryTextColor, toSecondaryTextColor) as Int
+                updateColor(backgroundColor, primaryTextColor, secondaryTextColor)
+            }
+            start()
         }
-        colorAnimator.start()
     }
 
     private fun updateColor(@ColorInt backgroundColor: Int, @ColorInt primaryTextColor: Int,
                             @ColorInt secondaryTextColor: Int) {
         settingsActivity.window.decorView.setBackgroundColor(backgroundColor)
 
-        viewHolder?.let {
-            it.fontSize.setTextColor(primaryTextColor, secondaryTextColor)
-            it.keepScreenOn.setTextColor(primaryTextColor)
-            it.nightModeOn.setTextColor(primaryTextColor)
-            it.simpleReadingMode.setTextColor(primaryTextColor)
-            it.backup.setTextColor(primaryTextColor, secondaryTextColor)
-            it.restore.setTextColor(primaryTextColor, secondaryTextColor)
-            it.rate.setTextColor(primaryTextColor, secondaryTextColor)
-            it.version.setTextColor(primaryTextColor, secondaryTextColor)
+        viewHolder?.run {
+            fontSize.setTextColor(primaryTextColor, secondaryTextColor)
+            keepScreenOn.setTextColor(primaryTextColor)
+            nightModeOn.setTextColor(primaryTextColor)
+            simpleReadingMode.setTextColor(primaryTextColor)
+            backup.setTextColor(primaryTextColor, secondaryTextColor)
+            restore.setTextColor(primaryTextColor, secondaryTextColor)
+            rate.setTextColor(primaryTextColor, secondaryTextColor)
+            version.setTextColor(primaryTextColor, secondaryTextColor)
         }
     }
 
     private fun animateTextSize(fromBodyTextSize: Float, toBodyTextSize: Float,
                                 fromCaptionTextSize: Float, toCaptionTextSize: Float) {
-        val textSizeAnimator = ValueAnimator.ofFloat(0.0F, 1.0F)
-        textSizeAnimator.addUpdateListener { animator ->
-            val fraction = animator.animatedValue as Float
-            val bodyTextSize = fromBodyTextSize + fraction * (toBodyTextSize - fromBodyTextSize)
-            val captionTextSize = fromCaptionTextSize + fraction * (toCaptionTextSize - fromCaptionTextSize)
-            updateTextSize(bodyTextSize, captionTextSize)
+        ValueAnimator.ofFloat(0.0F, 1.0F).run {
+            addUpdateListener { animator ->
+                val fraction = animator.animatedValue as Float
+                val bodyTextSize = fromBodyTextSize + fraction * (toBodyTextSize - fromBodyTextSize)
+                val captionTextSize = fromCaptionTextSize + fraction * (toCaptionTextSize - fromCaptionTextSize)
+                updateTextSize(bodyTextSize, captionTextSize)
+            }
+            start()
         }
-        textSizeAnimator.start()
     }
 
     private fun updateTextSize(bodyTextSize: Float, captionTextSize: Float) {
-        viewHolder?.let {
-            it.display.setTextSize(bodyTextSize.roundToInt())
-            it.fontSize.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
-            it.keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-            it.nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-            it.reading.setTextSize(bodyTextSize.roundToInt())
-            it.simpleReadingMode.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
-            it.backupRestore.setTextSize(bodyTextSize.roundToInt())
-            it.backup.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
-            it.restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
-            it.about.setTextSize(bodyTextSize.roundToInt())
-            it.rate.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
-            it.version.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+        viewHolder?.run {
+            display.setTextSize(bodyTextSize.roundToInt())
+            fontSize.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+            keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+            nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+            reading.setTextSize(bodyTextSize.roundToInt())
+            simpleReadingMode.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+            backupRestore.setTextSize(bodyTextSize.roundToInt())
+            backup.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+            restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+            about.setTextSize(bodyTextSize.roundToInt())
+            rate.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+            version.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         }
     }
 }
