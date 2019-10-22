@@ -17,6 +17,8 @@
 package me.xizzhu.android.joshua.infra.arch
 
 import androidx.annotation.IntDef
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 
 data class ViewData<T> private constructor(@Status val status: Int, val data: T, val exception: Throwable?) {
     companion object {
@@ -34,4 +36,20 @@ data class ViewData<T> private constructor(@Status val status: Int, val data: T,
     }
 
     fun toUnit(): ViewData<Unit> = ViewData(status, Unit, exception)
+}
+
+suspend inline fun <T> Flow<ViewData<T>>.collect(
+        crossinline onLoading: suspend (value: T) -> Unit,
+        crossinline onSuccess: suspend (value: T) -> Unit,
+        crossinline onError: suspend (value: T, exception: Throwable?) -> Unit): Unit = collect { viewData ->
+    when (viewData.status) {
+        ViewData.STATUS_LOADING -> onLoading(viewData.data)
+        ViewData.STATUS_SUCCESS -> onSuccess(viewData.data)
+        ViewData.STATUS_ERROR -> onError(viewData.data, viewData.exception)
+        else -> throw IllegalStateException("Unsupported status: ${viewData.status}")
+    }
+}
+
+suspend inline fun <T> Flow<ViewData<T>>.collectOnSuccess(crossinline action: suspend (value: T) -> Unit): Unit = collect { viewData ->
+    if (viewData.status == ViewData.STATUS_SUCCESS) action(viewData.data)
 }

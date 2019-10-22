@@ -55,11 +55,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
     @Test
     fun testSaveThenReadSettings() = runBlockingTest {
         val settings = Settings(false, true, 1, true)
-        `when`(localSettingsStorage.saveSettings(settings)).thenReturn(settings)
-
-        assertEquals(settings, settingsRepository.saveSettings(settings))
-
-        // saving settings should have updated memory cache
+        settingsRepository.saveSettings(settings)
         assertEquals(settings, settingsRepository.readSettings())
         verify(localSettingsStorage, never()).readSettings()
     }

@@ -32,6 +32,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
@@ -289,11 +290,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch {
-            interactor.settings().collect {
-                if (it.status == ViewData.STATUS_SUCCESS) viewHolder?.versePager?.onSettingsUpdated(it.data)
-            }
-        }
+        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.versePager?.onSettingsUpdated(it) } }
         coroutineScope.launch { interactor.currentTranslation().collect { currentTranslation = it } }
         coroutineScope.launch { interactor.currentVerseIndex().collect { currentVerseIndex = it } }
         coroutineScope.launch { interactor.parallelTranslations().collect { parallelTranslations = it } }

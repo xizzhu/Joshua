@@ -18,29 +18,36 @@ package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.Interactor
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import java.io.InputStream
 import java.io.OutputStream
 
 class SettingsInteractor(private val settingsManager: SettingsManager,
                          private val backupManager: BackupManager,
                          dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
-    suspend fun readSettings(): Settings = settingsManager.readSettings()
+    fun settings(): Flow<ViewData<Settings>> = settingsManager.observeSettings().map { ViewData.success(it) }
 
-    suspend fun saveFontSizeScale(fontSizeScale: Int): Settings =
-            settingsManager.saveFontSizeScale(fontSizeScale)
+    suspend fun saveFontSizeScale(fontSizeScale: Int) {
+        settingsManager.saveFontSizeScale(fontSizeScale)
+    }
 
-    suspend fun saveKeepScreenOn(keepScreenOn: Boolean): Settings =
-            settingsManager.saveKeepScreenOn(keepScreenOn)
+    suspend fun saveKeepScreenOn(keepScreenOn: Boolean) {
+        settingsManager.saveKeepScreenOn(keepScreenOn)
+    }
 
-    suspend fun saveNightModeOn(nightModeOn: Boolean): Settings =
-            settingsManager.saveNightModeOn(nightModeOn)
+    suspend fun saveNightModeOn(nightModeOn: Boolean) {
+        settingsManager.saveNightModeOn(nightModeOn)
+    }
 
-    suspend fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean): Settings =
-            settingsManager.saveSimpleReadingModeOn(simpleReadingModeOn)
+    suspend fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean) {
+        settingsManager.saveSimpleReadingModeOn(simpleReadingModeOn)
+    }
 
     suspend fun backup(to: OutputStream) {
         to.write(backupManager.prepareForBackup().toByteArray(Charsets.UTF_8))

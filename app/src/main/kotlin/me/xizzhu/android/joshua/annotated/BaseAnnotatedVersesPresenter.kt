@@ -31,6 +31,7 @@ import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -50,14 +51,7 @@ abstract class BaseAnnotatedVersesPresenter
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch {
-            interactor.settings().collect {
-                if (it.status == ViewData.STATUS_SUCCESS) {
-                    viewHolder?.annotatedVerseListView?.setSettings(it.data)
-                }
-            }
-        }
-
+        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.annotatedVerseListView?.setSettings(it) } }
         coroutineScope.launch { interactor.sortOrder().collect { load(it) } }
     }
 

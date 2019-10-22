@@ -31,6 +31,7 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
@@ -52,14 +53,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch {
-            interactor.settings().collect {
-                if (it.status == ViewData.STATUS_SUCCESS) {
-                    viewHolder?.searchResultListView?.setSettings(it.data)
-                }
-            }
-        }
-
+        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.searchResultListView?.setSettings(it) } }
         coroutineScope.launch { interactor.searchRequested().collect { search(it) } }
     }
 

@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -57,13 +58,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     }
 
     private fun observeSettings() {
-        coroutineScope.launch {
-            interactor.settings().collect {
-                if (it.status == ViewData.STATUS_SUCCESS) {
-                    viewHolder?.translationListView?.setSettings(it.data)
-                }
-            }
-        }
+        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.translationListView?.setSettings(it) } }
     }
 
     private fun observeTranslationList() {
