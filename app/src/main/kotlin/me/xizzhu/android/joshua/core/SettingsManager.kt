@@ -59,47 +59,49 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
 
     fun observeSettings(): Flow<Settings> = currentSettings.asFlow()
 
-    suspend fun saveFontSizeScale(fontSizeScale: Int): Settings = mutex.withLock {
-        return settingsRepository.readSettings().let { settings ->
-            if (fontSizeScale != settings.fontSizeScale) {
-                saveSettings(settings.copy(fontSizeScale = fontSizeScale))
-            } else {
-                settings
+    suspend fun saveFontSizeScale(fontSizeScale: Int) {
+        mutex.withLock {
+            settingsRepository.readSettings().let { settings ->
+                if (fontSizeScale != settings.fontSizeScale) {
+                    saveSettings(settings.copy(fontSizeScale = fontSizeScale))
+                }
             }
         }
     }
 
-    suspend fun saveKeepScreenOn(keepScreenOn: Boolean): Settings = mutex.withLock {
-        return settingsRepository.readSettings().let { settings ->
-            if (keepScreenOn != settings.keepScreenOn) {
-                saveSettings(settings.copy(keepScreenOn = keepScreenOn))
-            } else {
-                settings
+    suspend fun saveKeepScreenOn(keepScreenOn: Boolean) {
+        mutex.withLock {
+            settingsRepository.readSettings().let { settings ->
+                if (keepScreenOn != settings.keepScreenOn) {
+                    saveSettings(settings.copy(keepScreenOn = keepScreenOn))
+                }
             }
         }
     }
 
-    suspend fun saveNightModeOn(nightModeOn: Boolean): Settings = mutex.withLock {
-        return settingsRepository.readSettings().let { settings ->
-            if (nightModeOn != settings.nightModeOn) {
-                saveSettings(settings.copy(nightModeOn = nightModeOn))
-            } else {
-                settings
+    suspend fun saveNightModeOn(nightModeOn: Boolean) {
+        mutex.withLock {
+            settingsRepository.readSettings().let { settings ->
+                if (nightModeOn != settings.nightModeOn) {
+                    saveSettings(settings.copy(nightModeOn = nightModeOn))
+                }
             }
         }
     }
 
-    suspend fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean): Settings = mutex.withLock {
-        return settingsRepository.readSettings().let { settings ->
-            if (simpleReadingModeOn != settings.simpleReadingModeOn) {
-                saveSettings(settings.copy(simpleReadingModeOn = simpleReadingModeOn))
-            } else {
-                settings
+    suspend fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean) {
+        mutex.withLock {
+            settingsRepository.readSettings().let { settings ->
+                if (simpleReadingModeOn != settings.simpleReadingModeOn) {
+                    saveSettings(settings.copy(simpleReadingModeOn = simpleReadingModeOn))
+                }
             }
         }
     }
 
     @VisibleForTesting
-    suspend fun saveSettings(settings: Settings): Settings =
-            settingsRepository.saveSettings(settings).also { currentSettings.offer(it) }
+    suspend fun saveSettings(settings: Settings) {
+        settingsRepository.saveSettings(settings)
+        currentSettings.offer(settings)
+    }
 }

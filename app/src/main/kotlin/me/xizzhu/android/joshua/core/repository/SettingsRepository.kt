@@ -25,6 +25,8 @@ class SettingsRepository(private val localSettingsStorage: LocalSettingsStorage)
     suspend fun readSettings(): Settings =
             currentSettings ?: localSettingsStorage.readSettings().apply { currentSettings = this }
 
-    suspend fun saveSettings(settings: Settings): Settings =
-            localSettingsStorage.saveSettings(settings).also { currentSettings = it }
+    suspend fun saveSettings(settings: Settings) {
+        localSettingsStorage.saveSettings(settings)
+        currentSettings = settings
+    }
 }

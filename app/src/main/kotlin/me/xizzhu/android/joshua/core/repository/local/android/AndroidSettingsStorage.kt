@@ -40,13 +40,14 @@ class AndroidSettingsStorage(private val androidDatabase: AndroidDatabase) : Loc
         }
     }
 
-    override suspend fun saveSettings(settings: Settings): Settings = withContext(Dispatchers.IO) {
-        androidDatabase.metadataDao.save(listOf(
-                Pair(MetadataDao.KEY_SCREEN_ON, settings.keepScreenOn.toString()),
-                Pair(MetadataDao.KEY_NIGHT_MODE_ON, settings.nightModeOn.toString()),
-                Pair(MetadataDao.KEY_FONT_SIZE_SCALE, settings.fontSizeScale.toString()),
-                Pair(MetadataDao.KEY_SIMPLE_READING_MODE_ON, settings.simpleReadingModeOn.toString())
-        ))
-        return@withContext settings
+    override suspend fun saveSettings(settings: Settings) {
+        withContext(Dispatchers.IO) {
+            androidDatabase.metadataDao.save(listOf(
+                    Pair(MetadataDao.KEY_SCREEN_ON, settings.keepScreenOn.toString()),
+                    Pair(MetadataDao.KEY_NIGHT_MODE_ON, settings.nightModeOn.toString()),
+                    Pair(MetadataDao.KEY_FONT_SIZE_SCALE, settings.fontSizeScale.toString()),
+                    Pair(MetadataDao.KEY_SIMPLE_READING_MODE_ON, settings.simpleReadingModeOn.toString())
+            ))
+        }
     }
 }
