@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
@@ -60,17 +61,35 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
     private fun loadReadingProgress() {
         coroutineScope.launch {
             try {
-                viewHolder?.readingProgressListView?.let { readingProgressListView ->
-                    readingProgressListView.visibility = View.GONE
-                    val (bookNames, readingProgress) = interactor.readReadingProgress()
-                    readingProgressListView.setItems(readingProgress.toReadingProgressItems(bookNames, expanded,
-                            this@ReadingProgressPresenter::onBookClicked,
-                            this@ReadingProgressPresenter::openChapter))
-                    readingProgressListView.fadeIn()
-                }
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to load reading progress")
+                interactor.updateLoadingState(ViewData.loading(Unit))
 
+                viewHolder?.readingProgressListView?.run {
+                    visibility = View.GONE
+
+                    val bookNames = interactor.bookNames().let { viewData ->
+                        if (ViewData.STATUS_SUCCESS != viewData.status) {
+                            throw IllegalStateException("Failed to load book names", viewData.exception)
+                        }
+                        viewData.data
+                    }
+                    val readingProgress = interactor.readingProgress().let { viewData ->
+                        if (ViewData.STATUS_SUCCESS != viewData.status) {
+                            throw IllegalStateException("Failed to load reading progress", viewData.exception)
+                        }
+                        viewData.data
+                    }
+                    val items = readingProgress.toReadingProgressItems(bookNames, expanded,
+                            this@ReadingProgressPresenter::onBookClicked,
+                            this@ReadingProgressPresenter::openChapter)
+                    setItems(items)
+
+                    fadeIn()
+                }
+
+                interactor.updateLoadingState(ViewData.success(Unit))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to load reading progress", e)
+                interactor.updateLoadingState(ViewData.error(Unit, e))
                 DialogHelper.showDialog(readingProgressActivity, true, R.string.dialog_load_reading_progress_error,
                         DialogInterface.OnClickListener { _, _ -> loadReadingProgress() })
             }
