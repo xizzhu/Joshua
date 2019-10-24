@@ -59,9 +59,11 @@ abstract class BaseAnnotatedVersesPresenter
         coroutineScope.launch {
             try {
                 interactor.updateLoadingState(ViewData.loading())
-                viewHolder?.annotatedVerseListView?.visibility = View.GONE
-                viewHolder?.annotatedVerseListView?.setItems(prepareItems(sortOrder))
-                viewHolder?.annotatedVerseListView?.fadeIn()
+                viewHolder?.annotatedVerseListView?.run {
+                    visibility = View.GONE
+                    setItems(prepareItems(sortOrder))
+                    fadeIn()
+                }
                 interactor.updateLoadingState(ViewData.success(null))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load annotated verses", e)
