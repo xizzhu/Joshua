@@ -43,39 +43,20 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val translationList: BroadcastChannel<ViewData<TranslationList>> = ConflatedBroadcastChannel()
 
-    private var currentTranslation: String? = null
-    private var availableTranslations: List<TranslationInfo>? = null
-    private var downloadedTranslations: List<TranslationInfo>? = null
-
     @UiThread
     override fun onStart() {
         super.onStart()
 
         coroutineScope.launch {
-            bibleReadingManager.observeCurrentTranslation().collect {
-                currentTranslation = it
-                onTranslationsUpdated()
+            combine(bibleReadingManager.observeCurrentTranslation(),
+                    translationManager.observeAvailableTranslations(),
+                    translationManager.observeDownloadedTranslations()
+            ) { currentTranslation, availableTranslations, downloadedTranslations ->
+                TranslationList(currentTranslation, availableTranslations, downloadedTranslations)
+            }.collect { translationList ->
+                this@TranslationListInteractor.translationList.offer(ViewData.success(translationList))
             }
         }
-        coroutineScope.launch {
-            translationManager.observeAvailableTranslations().collect {
-                availableTranslations = it
-                onTranslationsUpdated()
-            }
-        }
-        coroutineScope.launch {
-            translationManager.observeDownloadedTranslations().collect {
-                downloadedTranslations = it
-                onTranslationsUpdated()
-            }
-        }
-    }
-
-    private fun onTranslationsUpdated() {
-        if (currentTranslation == null || availableTranslations == null || downloadedTranslations == null) {
-            return
-        }
-        translationList.offer(ViewData.success(TranslationList(currentTranslation!!, availableTranslations!!, downloadedTranslations!!)))
     }
 
     fun translationList(): Flow<ViewData<TranslationList>> = translationList.asFlow()
