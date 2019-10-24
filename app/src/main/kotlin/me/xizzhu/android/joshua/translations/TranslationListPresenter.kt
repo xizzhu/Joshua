@@ -66,50 +66,42 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
             interactor.translationList()
                     .map { viewData ->
                         when (viewData.status) {
-                            ViewData.STATUS_SUCCESS -> {
-                                ViewData.success(TranslationList(
-                                        viewData.data!!.currentTranslation,
-                                        viewData.data.availableTranslations.sortedWith(translationComparator),
-                                        viewData.data.downloadedTranslations.sortedWith(translationComparator)
-                                ))
-                            }
+                            ViewData.STATUS_SUCCESS -> viewData.data
+                                    ?.let { translationList ->
+                                        val availableTranslations = translationList.availableTranslations.sortedWith(translationComparator)
+                                        val downloadedTranslations = translationList.downloadedTranslations.sortedWith(translationComparator)
+                                        val items: ArrayList<BaseItem> = ArrayList()
+                                        items.addAll(downloadedTranslations.toTranslationItems(
+                                                translationList.currentTranslation,
+                                                this@TranslationListPresenter::onTranslationClicked,
+                                                this@TranslationListPresenter::onTranslationLongClicked))
+                                        if (availableTranslations.isNotEmpty()) {
+                                            items.add(TitleItem(translationManagementActivity.getString(R.string.header_available_translations), false))
+                                            items.addAll(availableTranslations.toTranslationItems(
+                                                    translationList.currentTranslation,
+                                                    this@TranslationListPresenter::onTranslationClicked,
+                                                    this@TranslationListPresenter::onTranslationLongClicked))
+                                        }
+                                        ViewData.success(items)
+                                    }
+                                    ?: ViewData.error(exception = IllegalStateException("Missing translation list"))
                             ViewData.STATUS_ERROR -> ViewData.error(exception = viewData.exception)
                             ViewData.STATUS_LOADING -> ViewData.loading()
                             else -> throw IllegalStateException("Unsupported view data status: ${viewData.status}")
                         }
                     }
-                    .collect { translationList ->
-                        when (translationList.status) {
-                            ViewData.STATUS_SUCCESS -> {
-                                val items: ArrayList<BaseItem> = ArrayList()
-                                items.addAll(translationList.data!!.downloadedTranslations.toTranslationItems(
-                                        translationList.data.currentTranslation,
-                                        this@TranslationListPresenter::onTranslationClicked,
-                                        this@TranslationListPresenter::onTranslationLongClicked))
-                                if (translationList.data.availableTranslations.isNotEmpty()) {
-                                    items.add(TitleItem(translationManagementActivity.getString(R.string.header_available_translations), false))
-                                    items.addAll(translationList.data.availableTranslations.toTranslationItems(
-                                            translationList.data.currentTranslation,
-                                            this@TranslationListPresenter::onTranslationClicked,
-                                            this@TranslationListPresenter::onTranslationLongClicked))
-                                }
-
-                                viewHolder?.translationListView?.setItems(items)
-                                viewHolder?.translationListView?.fadeIn()
+                    .collect { viewData ->
+                        when (viewData.status) {
+                            ViewData.STATUS_SUCCESS -> viewHolder?.translationListView?.run {
+                                setItems(viewData.data!!)
+                                fadeIn()
                             }
-                            ViewData.STATUS_ERROR -> {
-                                DialogHelper.showDialog(translationManagementActivity, false, R.string.dialog_load_translation_list_error,
-                                        DialogInterface.OnClickListener { _, _ ->
-                                            interactor.loadTranslationList(false)
-                                        },
-                                        DialogInterface.OnClickListener { _, _ ->
-                                            translationManagementActivity.finish()
-                                        }
-                                )
-                            }
-                            ViewData.STATUS_LOADING -> {
-                                viewHolder?.translationListView?.visibility = View.GONE
-                            }
+                            ViewData.STATUS_ERROR -> DialogHelper.showDialog(
+                                    translationManagementActivity, false, R.string.dialog_load_translation_list_error,
+                                    DialogInterface.OnClickListener { _, _ -> interactor.loadTranslationList(false) },
+                                    DialogInterface.OnClickListener { _, _ -> translationManagementActivity.finish() }
+                            )
+                            ViewData.STATUS_LOADING -> viewHolder?.translationListView?.visibility = View.GONE
                         }
                     }
         }
