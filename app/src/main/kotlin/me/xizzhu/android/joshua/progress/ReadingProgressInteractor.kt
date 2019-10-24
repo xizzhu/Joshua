@@ -36,7 +36,7 @@ class ReadingProgressInteractor(private val readingProgressManager: ReadingProgr
                     ViewData.success(bibleReadingManager.readBookNames(currentTranslation))
                 } catch (e: Exception) {
                     Log.e(tag, "Failed to read book names", e)
-                    ViewData.error(emptyList(), e)
+                    ViewData.error(exception = e)
                 }
             }
 
@@ -44,7 +44,7 @@ class ReadingProgressInteractor(private val readingProgressManager: ReadingProgr
         ViewData.success(readingProgressManager.read())
     } catch (e: Exception) {
         Log.e(tag, "Failed to read reading progress", e)
-        ViewData.error(ReadingProgress.INVALID, e)
+        ViewData.error(exception = e)
     }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) = bibleReadingManager.saveCurrentVerseIndex(verseIndex)

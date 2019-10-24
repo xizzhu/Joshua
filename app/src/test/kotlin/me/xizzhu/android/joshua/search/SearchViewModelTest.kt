@@ -29,6 +29,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.fail
 
 class SearchViewModelTest : BaseUnitTest() {
     @Mock
@@ -66,13 +67,19 @@ class SearchViewModelTest : BaseUnitTest() {
 
     @Test
     fun testSearchState() = testDispatcher.runBlockingTest {
-        val searchStates = listOf(ViewData.error(Unit), ViewData.loading(Unit), ViewData.success(Unit))
+        val searchStates = listOf(ViewData.error(), ViewData.loading(), ViewData.success(null))
         `when`(searchResultInteractor.loadingState()).thenReturn(flow { searchStates.forEach { emit(it) } })
 
         searchViewModel.start()
         with(inOrder(loadingSpinnerInteractor)) {
             searchStates.forEach { searchResult ->
-                verify(loadingSpinnerInteractor, times(1)).updateLoadingState(searchResult.toUnit())
+                verify(loadingSpinnerInteractor, times(1))
+                        .updateLoadingState(when (searchResult.status) {
+                            ViewData.STATUS_SUCCESS -> ViewData.success(null)
+                            ViewData.STATUS_ERROR -> ViewData.error()
+                            ViewData.STATUS_LOADING -> ViewData.loading()
+                            else -> fail()
+                        })
             }
         }
         searchViewModel.stop()

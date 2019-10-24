@@ -115,11 +115,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings(false, true, 1, true)
-        `when`(verseInteractor.settings()).thenReturn(flowOf(
-                ViewData.loading(Settings.DEFAULT),
-                ViewData.success(settings),
-                ViewData.error(Settings.DEFAULT)
-        ))
+        `when`(verseInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
         versePresenter.start()
         verify(verseViewHolder.versePager, times(1)).onSettingsUpdated(settings)

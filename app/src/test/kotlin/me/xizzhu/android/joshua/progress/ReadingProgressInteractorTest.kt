@@ -65,7 +65,7 @@ class ReadingProgressInteractorTest : BaseUnitTest() {
         `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenThrow(exception)
 
-        assertEquals(ViewData.error(emptyList(), exception), readingProgressInteractor.bookNames())
+        assertEquals(ViewData.error(exception = exception), readingProgressInteractor.bookNames())
     }
 
     @Test
@@ -81,6 +81,6 @@ class ReadingProgressInteractorTest : BaseUnitTest() {
         val exception = RuntimeException("Random exception")
         `when`(readingProgressManager.read()).thenThrow(exception)
 
-        assertEquals(ViewData.error(ReadingProgress.INVALID, exception), readingProgressInteractor.readingProgress())
+        assertEquals(ViewData.error(exception = exception), readingProgressInteractor.readingProgress())
     }
 }

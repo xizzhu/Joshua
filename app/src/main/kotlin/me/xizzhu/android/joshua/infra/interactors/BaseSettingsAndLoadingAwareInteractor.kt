@@ -28,11 +28,11 @@ abstract class BaseSettingsAndLoadingAwareInteractor(settingsManager: SettingsMa
                                                      dispatcher: CoroutineDispatcher)
     : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val loadingState: BroadcastChannel<ViewData<Unit>> = ConflatedBroadcastChannel()
+    private val loadingState: BroadcastChannel<ViewData<Nothing?>> = ConflatedBroadcastChannel()
 
-    fun loadingState(): Flow<ViewData<Unit>> = loadingState.asFlow()
+    fun loadingState(): Flow<ViewData<Nothing?>> = loadingState.asFlow()
 
-    fun updateLoadingState(state: ViewData<Unit>) {
+    fun updateLoadingState(state: ViewData<Nothing?>) {
         loadingState.offer(state)
     }
 }

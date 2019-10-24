@@ -83,11 +83,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings(false, true, 1, true)
-        `when`(interactor.settings()).thenReturn(flowOf(
-                ViewData.loading(Settings.DEFAULT),
-                ViewData.success(settings),
-                ViewData.error(Settings.DEFAULT)
-        ))
+        `when`(interactor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
         baseAnnotatedVersesPresenter.start()
         verify(annotatedVerseListView, times(1)).setSettings(settings)

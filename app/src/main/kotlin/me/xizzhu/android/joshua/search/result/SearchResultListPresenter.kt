@@ -60,7 +60,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
     private fun search(query: String) {
         coroutineScope.launch {
             try {
-                interactor.updateLoadingState(ViewData.loading(Unit))
+                interactor.updateLoadingState(ViewData.loading())
 
                 viewHolder?.searchResultListView?.run {
                     visibility = View.GONE
@@ -71,10 +71,10 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                     ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size))
                 }
 
-                interactor.updateLoadingState(ViewData.success(Unit))
+                interactor.updateLoadingState(ViewData.success(null))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to prepare searched verses", e)
-                interactor.updateLoadingState(ViewData.error(Unit))
+                interactor.updateLoadingState(ViewData.error(exception = e))
                 DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
                         DialogInterface.OnClickListener { _, _ -> search(query) })
             }

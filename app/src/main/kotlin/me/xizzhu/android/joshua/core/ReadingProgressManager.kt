@@ -30,10 +30,6 @@ import me.xizzhu.android.logger.Log
 
 data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimestamp: Long,
                            val chapterReadingStatus: List<ChapterReadingStatus>) {
-    companion object {
-        val INVALID = ReadingProgress(-1, -1L, emptyList())
-    }
-
     fun isValid(): Boolean {
         if (continuousReadingDays < 0 || lastReadingTimestamp < 0L) return false
         chapterReadingStatus.forEach { if (!it.isValid()) return false }

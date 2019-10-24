@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
@@ -186,7 +185,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                 }
                 val bookNameAsync = supervisedAsync { interactor.readBookNames(currentTranslation)[bookIndex] }
                 val highlightsAsync = supervisedAsync { interactor.readHighlights(bookIndex, chapterIndex) }
-                val items = if (interactor.settings().first().data.simpleReadingModeOn) {
+                val items = if (interactor.settings().first().data!!.simpleReadingModeOn) {
                     versesAsync.await().toSimpleVerseItems(bookNameAsync.await(), highlightsAsync.await(),
                             this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
                 } else {

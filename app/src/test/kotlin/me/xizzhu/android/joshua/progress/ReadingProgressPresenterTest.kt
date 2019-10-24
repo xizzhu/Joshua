@@ -73,11 +73,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings(false, true, 1, true)
-        `when`(readingProgressInteractor.settings()).thenReturn(flowOf(
-                ViewData.loading(Settings.DEFAULT),
-                ViewData.success(settings),
-                ViewData.error(Settings.DEFAULT)
-        ))
+        `when`(readingProgressInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
         readingProgressPresenter.start()
         verify(readingProgressListView, times(1)).setSettings(settings)
@@ -92,11 +88,11 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
 
         readingProgressPresenter.start()
         with(inOrder(readingProgressInteractor, readingProgressListView)) {
-            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.loading(Unit))
+            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.loading())
             verify(readingProgressListView, times(1)).visibility = View.GONE
             verify(readingProgressListView, times(1)).setItems(any())
             verify(readingProgressListView, times(1)).fadeIn()
-            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.success(Unit))
+            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.success(null))
         }
 
         readingProgressPresenter.stop()
@@ -109,13 +105,13 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
 
         readingProgressPresenter.start()
         with(inOrder(readingProgressInteractor, readingProgressListView)) {
-            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.loading(Unit))
+            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.loading())
             verify(readingProgressListView, times(1)).visibility = View.GONE
-            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.error(Unit, exception))
+            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.error(exception = exception))
         }
         verify(readingProgressListView, never()).setItems(any())
         verify(readingProgressListView, never()).fadeIn()
-        verify(readingProgressInteractor, never()).updateLoadingState(ViewData.success(Unit))
+        verify(readingProgressInteractor, never()).updateLoadingState(ViewData.success(null))
 
         readingProgressPresenter.stop()
     }

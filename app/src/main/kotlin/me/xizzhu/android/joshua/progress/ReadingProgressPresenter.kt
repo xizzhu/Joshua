@@ -61,7 +61,7 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
     private fun loadReadingProgress() {
         coroutineScope.launch {
             try {
-                interactor.updateLoadingState(ViewData.loading(Unit))
+                interactor.updateLoadingState(ViewData.loading())
 
                 viewHolder?.readingProgressListView?.run {
                     visibility = View.GONE
@@ -70,13 +70,13 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                         if (ViewData.STATUS_SUCCESS != viewData.status) {
                             throw IllegalStateException("Failed to load book names", viewData.exception)
                         }
-                        viewData.data
+                        viewData.data!!
                     }
                     val readingProgress = interactor.readingProgress().let { viewData ->
                         if (ViewData.STATUS_SUCCESS != viewData.status) {
                             throw IllegalStateException("Failed to load reading progress", viewData.exception)
                         }
-                        viewData.data
+                        viewData.data!!
                     }
                     val items = readingProgress.toReadingProgressItems(bookNames, expanded,
                             this@ReadingProgressPresenter::onBookClicked,
@@ -86,10 +86,10 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                     fadeIn()
                 }
 
-                interactor.updateLoadingState(ViewData.success(Unit))
+                interactor.updateLoadingState(ViewData.success(null))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load reading progress", e)
-                interactor.updateLoadingState(ViewData.error(Unit, e))
+                interactor.updateLoadingState(ViewData.error(exception = e))
                 DialogHelper.showDialog(readingProgressActivity, true, R.string.dialog_load_reading_progress_error,
                         DialogInterface.OnClickListener { _, _ -> loadReadingProgress() })
             }

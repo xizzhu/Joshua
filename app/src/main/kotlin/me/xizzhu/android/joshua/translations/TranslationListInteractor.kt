@@ -33,11 +33,7 @@ import me.xizzhu.android.logger.Log
 
 data class TranslationList(val currentTranslation: String,
                            val availableTranslations: List<TranslationInfo>,
-                           val downloadedTranslations: List<TranslationInfo>) {
-    companion object {
-        val EMPTY = TranslationList("", emptyList(), emptyList())
-    }
-}
+                           val downloadedTranslations: List<TranslationInfo>)
 
 class TranslationListInteractor(private val bibleReadingManager: BibleReadingManager,
                                 private val translationManager: TranslationManager,
@@ -87,11 +83,11 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
     fun loadTranslationList(forceRefresh: Boolean) {
         coroutineScope.launch {
             try {
-                translationList.offer(ViewData.loading(TranslationList.EMPTY))
+                translationList.offer(ViewData.loading())
                 translationManager.reload(forceRefresh)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load translation list", e)
-                translationList.offer(ViewData.error(TranslationList.EMPTY, e))
+                translationList.offer(ViewData.error(exception = e))
             }
         }
     }

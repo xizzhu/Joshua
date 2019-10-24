@@ -64,18 +64,25 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     private fun observeTranslationList() {
         coroutineScope.launch {
             interactor.translationList()
-                    .map { translationList ->
-                        translationList.copy(data = TranslationList(
-                                translationList.data.currentTranslation,
-                                translationList.data.availableTranslations.sortedWith(translationComparator),
-                                translationList.data.downloadedTranslations.sortedWith(translationComparator)
-                        ))
+                    .map { viewData ->
+                        when (viewData.status) {
+                            ViewData.STATUS_SUCCESS -> {
+                                ViewData.success(TranslationList(
+                                        viewData.data!!.currentTranslation,
+                                        viewData.data.availableTranslations.sortedWith(translationComparator),
+                                        viewData.data.downloadedTranslations.sortedWith(translationComparator)
+                                ))
+                            }
+                            ViewData.STATUS_ERROR -> ViewData.error(exception = viewData.exception)
+                            ViewData.STATUS_LOADING -> ViewData.loading()
+                            else -> throw IllegalStateException("Unsupported view data status: ${viewData.status}")
+                        }
                     }
                     .collect { translationList ->
                         when (translationList.status) {
                             ViewData.STATUS_SUCCESS -> {
                                 val items: ArrayList<BaseItem> = ArrayList()
-                                items.addAll(translationList.data.downloadedTranslations.toTranslationItems(
+                                items.addAll(translationList.data!!.downloadedTranslations.toTranslationItems(
                                         translationList.data.currentTranslation,
                                         this@TranslationListPresenter::onTranslationClicked,
                                         this@TranslationListPresenter::onTranslationLongClicked))

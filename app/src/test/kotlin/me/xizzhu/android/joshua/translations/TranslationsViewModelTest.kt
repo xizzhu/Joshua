@@ -16,11 +16,8 @@
 
 package me.xizzhu.android.joshua.translations
 
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.ViewData
@@ -29,7 +26,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class TranslationsViewModelTest : BaseUnitTest() {
     @Mock
@@ -53,7 +49,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
 
     @Test
     fun testObserveRefreshRequest() = testDispatcher.runBlockingTest {
-        `when`(swipeRefreshInteractor.refreshRequested()).thenReturn(flowOf(ViewData.success(Unit)))
+        `when`(swipeRefreshInteractor.refreshRequested()).thenReturn(flowOf(ViewData.success(null)))
 
         translationsViewModel.start()
         verify(translationListInteractor, times(1)).loadTranslationList(true)
@@ -65,16 +61,16 @@ class TranslationsViewModelTest : BaseUnitTest() {
     @Test
     fun testObserveLoadingState() = testDispatcher.runBlockingTest {
         `when`(translationListInteractor.translationList()).thenReturn(flowOf(
-                ViewData.error(TranslationList.EMPTY),
-                ViewData.success(TranslationList.EMPTY),
-                ViewData.loading(TranslationList.EMPTY)
+                ViewData.error(),
+                ViewData.success(TranslationList("", emptyList(), emptyList())),
+                ViewData.loading()
         ))
 
         translationsViewModel.start()
         with(inOrder(swipeRefreshInteractor)) {
-            verify(swipeRefreshInteractor, times(1)).updateLoadingState(ViewData.error(Unit))
-            verify(swipeRefreshInteractor, times(1)).updateLoadingState(ViewData.success(Unit))
-            verify(swipeRefreshInteractor, times(1)).updateLoadingState(ViewData.loading(Unit))
+            verify(swipeRefreshInteractor, times(1)).updateLoadingState(ViewData.error())
+            verify(swipeRefreshInteractor, times(1)).updateLoadingState(ViewData.success(null))
+            verify(swipeRefreshInteractor, times(1)).updateLoadingState(ViewData.loading())
         }
 
         translationsViewModel.stop()

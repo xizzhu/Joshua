@@ -27,11 +27,11 @@ import me.xizzhu.android.joshua.infra.interactors.BaseLoadingAwareInteractor
 
 class SwipeRefreshInteractor(dispatcher: CoroutineDispatcher = Dispatchers.Default) : BaseLoadingAwareInteractor(dispatcher) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val refreshRequest: BroadcastChannel<ViewData<Unit>> = ConflatedBroadcastChannel()
+    private val refreshRequest: BroadcastChannel<ViewData<Nothing?>> = ConflatedBroadcastChannel()
 
-    fun refreshRequested(): Flow<ViewData<Unit>> = refreshRequest.asFlow()
+    fun refreshRequested(): Flow<ViewData<Nothing?>> = refreshRequest.asFlow()
 
     fun requestRefresh() {
-        refreshRequest.offer(ViewData.success(Unit))
+        refreshRequest.offer(ViewData.success(null))
     }
 }
