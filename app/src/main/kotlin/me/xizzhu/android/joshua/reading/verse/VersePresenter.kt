@@ -26,8 +26,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
@@ -41,7 +40,6 @@ import me.xizzhu.android.joshua.utils.createChooserForSharing
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
-import kotlin.properties.Delegates
 
 data class VerseViewHolder(val versePager: VerseViewPager) : ViewHolder
 
@@ -73,7 +71,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
 
         override fun onDestroyActionMode(mode: ActionMode) {
             viewHolder?.versePager?.run {
-                selectedVerses.forEach { verse -> onVerseDeselected(verse.verseIndex) }
+                selectedVerses.forEach { verse -> deselectVerse(verse.verseIndex) }
             }
             selectedVerses.clear()
             actionMode = null
@@ -119,25 +117,9 @@ class VersePresenter(private val readingActivity: ReadingActivity,
         }
     }
 
-    private var currentTranslation: String by Delegates.observable("") { _, _, new ->
-        if (new.isNotEmpty()) {
-            viewHolder?.versePager?.onCurrentTranslationUpdated(new)
-        }
-    }
-    private var currentVerseIndex: VerseIndex by Delegates.observable(VerseIndex.INVALID) { _, old, new ->
-        if (!new.isValid()) {
-            return@observable
-        }
-        if (actionMode != null) {
-            if (old.bookIndex != new.bookIndex || old.chapterIndex != new.chapterIndex) {
-                actionMode?.finish()
-            }
-        }
-        viewHolder?.versePager?.onCurrentVerseIndexUpdated(new)
-    }
-    private var parallelTranslations: List<String> by Delegates.observable(emptyList()) { _, _, new ->
-        viewHolder?.versePager?.onParallelTranslationsUpdated(new)
-    }
+    private var currentTranslation: String = ""
+    private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
+    private var parallelTranslations: List<String> = emptyList()
 
     @UiThread
     override fun onBind(viewHolder: VerseViewHolder) {
@@ -196,7 +178,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                             this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
                             this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
                 }
-                viewHolder?.versePager?.onVersesLoaded(bookIndex, chapterIndex, items)
+                viewHolder?.versePager?.setVerses(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verses", e)
                 DialogHelper.showDialog(readingActivity, true, R.string.dialog_verse_load_error,
@@ -219,12 +201,12 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                 actionMode?.finish()
             }
 
-            viewHolder?.versePager?.onVerseDeselected(verse.verseIndex)
+            viewHolder?.versePager?.deselectVerse(verse.verseIndex)
         } else {
             // select the verse
             selectedVerses.add(verse)
 
-            viewHolder?.versePager?.onVerseSelected(verse.verseIndex)
+            viewHolder?.versePager?.selectVerse(verse.verseIndex)
         }
     }
 
@@ -289,17 +271,34 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.versePager?.onSettingsUpdated(it) } }
-        coroutineScope.launch { interactor.currentTranslation().collect { currentTranslation = it } }
-        coroutineScope.launch { interactor.currentVerseIndex().collect { currentVerseIndex = it } }
-        coroutineScope.launch { interactor.parallelTranslations().collect { parallelTranslations = it } }
-        coroutineScope.launch { interactor.verseUpdates().collect { viewHolder?.versePager?.onVerseUpdated(it) } }
+        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.versePager?.setSettings(it) } }
+        coroutineScope.launch { interactor.verseUpdates().collect { viewHolder?.versePager?.notifyVerseUpdate(it) } }
+        coroutineScope.launch {
+            combine(interactor.currentTranslation().filter { it.isNotEmpty() },
+                    interactor.currentVerseIndex()
+                            .filter { it.isValid() }
+                            .onEach { newVerseIndex ->
+                                if (actionMode != null) {
+                                    if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex
+                                            || currentVerseIndex.chapterIndex != newVerseIndex.chapterIndex) {
+                                        actionMode?.finish()
+                                    }
+                                }
+                            },
+                    interactor.parallelTranslations()
+            ) { currentTranslation, currentVerseIndex, parallelTranslations ->
+                viewHolder?.versePager?.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
+                this@VersePresenter.currentVerseIndex = currentVerseIndex
+                this@VersePresenter.currentTranslation = currentTranslation
+                this@VersePresenter.parallelTranslations = parallelTranslations
+            }.collect()
+        }
         coroutineScope.launch {
             interactor.verseDetailRequest().collect { verseDetailRequest ->
                 if (verseDetailRequest.content == VerseDetailRequest.HIDE) {
-                    viewHolder?.versePager?.onVerseDeselected(verseDetailRequest.verseIndex)
+                    viewHolder?.versePager?.deselectVerse(verseDetailRequest.verseIndex)
                 } else {
-                    viewHolder?.versePager?.onVerseSelected(verseDetailRequest.verseIndex)
+                    viewHolder?.versePager?.selectVerse(verseDetailRequest.verseIndex)
                 }
             }
         }
