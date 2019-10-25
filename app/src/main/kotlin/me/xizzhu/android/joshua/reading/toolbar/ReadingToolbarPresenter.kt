@@ -55,15 +55,9 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     private var verseIndex = VerseIndex.INVALID
 
 
-    private val translationSpinnerAdapter = TranslationSpinnerAdapter(readingActivity, object : TranslationSpinnerAdapter.Listener {
-        override fun onParallelTranslationRequested(translationShortName: String) {
-            interactor.requestParallelTranslation(translationShortName)
-        }
-
-        override fun onParallelTranslationRemoved(translationShortName: String) {
-            interactor.removeParallelTranslation(translationShortName)
-        }
-    })
+    private val translationSpinnerAdapter = TranslationSpinnerAdapter(context = readingActivity,
+            onParallelTranslationRequested = { interactor.requestParallelTranslation(it) },
+            onParallelTranslationRemoved = { interactor.removeParallelTranslation(it) })
 
     @UiThread
     override fun onBind(viewHolder: ReadingToolbarViewHolder) {
