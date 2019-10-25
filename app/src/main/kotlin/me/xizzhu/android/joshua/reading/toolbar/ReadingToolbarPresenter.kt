@@ -151,13 +151,13 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
         super.onStart()
 
         coroutineScope.launch {
-            interactor.downloadedTranslations().collect {
-                if (it.isEmpty()) {
+            interactor.downloadedTranslations().run {
+                if (isEmpty()) {
                     DialogHelper.showDialog(readingActivity, false, R.string.dialog_no_translation_downloaded,
                             DialogInterface.OnClickListener { _, _ -> startTranslationManagementActivity() },
                             DialogInterface.OnClickListener { _, _ -> readingActivity.finish() })
                 } else {
-                    onDownloadedTranslationsLoaded(it.sortedWith(translationComparator))
+                    onDownloadedTranslationsLoaded(sortedWith(translationComparator))
                 }
             }
         }

@@ -72,13 +72,8 @@ class TranslationManager(private val translationRepository: TranslationRepositor
 
     @VisibleForTesting
     fun notifyTranslationsUpdated(available: List<TranslationInfo>, downloaded: List<TranslationInfo>) {
-        if (available != availableTranslationsChannel.valueOrNull) {
-            availableTranslationsChannel.offer(available)
-        }
-
-        if (downloaded != downloadedTranslationsChannel.valueOrNull) {
-            downloadedTranslationsChannel.offer(downloaded)
-        }
+        availableTranslationsChannel.offer(available)
+        downloadedTranslationsChannel.offer(downloaded)
     }
 
     fun observeAvailableTranslations(): Flow<List<TranslationInfo>> = availableTranslationsChannel.asFlow()

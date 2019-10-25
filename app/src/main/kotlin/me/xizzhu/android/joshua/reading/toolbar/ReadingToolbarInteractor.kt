@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.toolbar
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
@@ -28,7 +29,7 @@ import me.xizzhu.android.joshua.infra.arch.Interactor
 class ReadingToolbarInteractor(private val bibleReadingManager: BibleReadingManager,
                                private val translationManager: TranslationManager,
                                dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
-    fun downloadedTranslations(): Flow<List<TranslationInfo>> = translationManager.observeDownloadedTranslations()
+    suspend fun downloadedTranslations(): List<TranslationInfo> = translationManager.observeDownloadedTranslations().first()
 
     fun currentTranslation(): Flow<String> = bibleReadingManager.observeCurrentTranslation()
 

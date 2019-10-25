@@ -84,25 +84,15 @@ class TranslationManagerTest : BaseUnitTest() {
         `when`(translationRepository.readTranslationsFromLocal()).thenReturn(emptyList())
         val translationManager = TranslationManager(translationRepository)
 
-        val availableAsync = async { translationManager.observeAvailableTranslations().take(3).toList() }
+        val availableAsync = async { translationManager.observeAvailableTranslations().take(4).toList() }
         val downloadedAsync = async { translationManager.observeDownloadedTranslations().take(4).toList() }
 
-        translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
-        translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
-        translationManager.notifyTranslationsUpdated(emptyList(), emptyList())
-
-        translationManager.notifyTranslationsUpdated(
-                listOf(MockContents.kjvTranslationInfo), listOf(MockContents.kjvDownloadedTranslationInfo))
-        translationManager.notifyTranslationsUpdated(
-                listOf(MockContents.kjvTranslationInfo), listOf(MockContents.kjvDownloadedTranslationInfo))
-
+        translationManager.notifyTranslationsUpdated(listOf(MockContents.kjvTranslationInfo), listOf(MockContents.kjvDownloadedTranslationInfo))
         translationManager.notifyTranslationsUpdated(listOf(MockContents.kjvTranslationInfo), emptyList())
-        translationManager.notifyTranslationsUpdated(listOf(MockContents.kjvTranslationInfo), emptyList())
-
         translationManager.notifyTranslationsUpdated(emptyList(), listOf(MockContents.kjvDownloadedTranslationInfo))
 
         assertEquals(
-                listOf(emptyList(), listOf(MockContents.kjvTranslationInfo), emptyList()),
+                listOf(emptyList(), listOf(MockContents.kjvTranslationInfo), listOf(MockContents.kjvTranslationInfo), emptyList()),
                 availableAsync.await()
         )
         assertEquals(
