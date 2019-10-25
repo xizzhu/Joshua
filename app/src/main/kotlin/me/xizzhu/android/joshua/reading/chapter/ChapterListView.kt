@@ -42,9 +42,6 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     private lateinit var adapter: ChapterListAdapter
-
-    private val bookNames = ArrayList<String>()
-    private var currentVerseIndex = VerseIndex.INVALID
     private var lastExpandedGroup: Int = -1
 
     init {
@@ -75,27 +72,13 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
         setAdapter(adapter)
     }
 
-    fun setCurrentVerseIndex(verseIndex: VerseIndex) {
-        this.currentVerseIndex = verseIndex
-        refreshUi()
-    }
-
-    private fun refreshUi() {
-        if (bookNames.isEmpty() || !currentVerseIndex.isValid()) {
-            return
-        }
+    fun setData(currentVerseIndex: VerseIndex, bookNames: List<String>) {
         adapter.setData(currentVerseIndex, bookNames)
 
         val currentBookIndex = currentVerseIndex.bookIndex
         lastExpandedGroup = currentBookIndex
         expandGroup(currentBookIndex)
         setSelectedGroup(currentBookIndex)
-    }
-
-    fun setBookNames(bookNames: List<String>) {
-        this.bookNames.clear()
-        this.bookNames.addAll(bookNames)
-        refreshUi()
     }
 }
 
