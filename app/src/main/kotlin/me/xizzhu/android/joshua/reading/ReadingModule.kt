@@ -33,14 +33,12 @@ import me.xizzhu.android.joshua.reading.verse.VerseInteractor
 
 @Module
 object ReadingModule {
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideReadingToolbarInteractor(bibleReadingManager: BibleReadingManager,
                                         translationManager: TranslationManager): ReadingToolbarInteractor =
             ReadingToolbarInteractor(bibleReadingManager, translationManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideReadingToolbarPresenter(readingActivity: ReadingActivity,
@@ -48,27 +46,23 @@ object ReadingModule {
                                        readingToolbarInteractor: ReadingToolbarInteractor): ReadingToolbarPresenter =
             ReadingToolbarPresenter(readingActivity, navigator, readingToolbarInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideChapterListInteractor(bibleReadingManager: BibleReadingManager): ChapterListInteractor =
             ChapterListInteractor(bibleReadingManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideChapterListPresenter(readingActivity: ReadingActivity,
                                     chapterListInteractor: ChapterListInteractor): ChapterListPresenter =
             ChapterListPresenter(readingActivity, chapterListInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSearchButtonPresenter(readingActivity: ReadingActivity,
                                      navigator: Navigator): SearchButtonPresenter =
             SearchButtonPresenter(readingActivity, navigator)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideVerseInteractor(bibleReadingManager: BibleReadingManager,
@@ -78,14 +72,12 @@ object ReadingModule {
                                settingsManager: SettingsManager): VerseInteractor =
             VerseInteractor(bibleReadingManager, bookmarkManager, highlightManager, noteManager, settingsManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideVersePresenter(readingActivity: ReadingActivity,
                               verseInteractor: VerseInteractor): VersePresenter =
             VersePresenter(readingActivity, verseInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideVerseDetailInteractor(translationManager: TranslationManager,
@@ -96,14 +88,12 @@ object ReadingModule {
                                      settingsManager: SettingsManager): VerseDetailInteractor =
             VerseDetailInteractor(translationManager, bibleReadingManager, bookmarkManager, highlightManager, noteManager, settingsManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideVerseDetailPresenter(readingActivity: ReadingActivity,
                                     verseDetailInteractor: VerseDetailInteractor): VerseDetailPresenter =
             VerseDetailPresenter(readingActivity, verseDetailInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideReadingViewModel(readingProgressManager: ReadingProgressManager,

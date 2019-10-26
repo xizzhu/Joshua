@@ -61,6 +61,8 @@ class AppModule(private val app: App) {
 
     @Module
     companion object {
+        // TODO @JvmStatic is still needed in companion objects https://github.com/google/dagger/issues/1646
+
         @JvmStatic
         @Provides
         @Singleton
@@ -123,95 +125,79 @@ class AppModule(private val app: App) {
 
 @Module
 object RepositoryModule {
-    @JvmStatic
     @Provides
     @Singleton
     fun provideAndroidDatabase(app: App): AndroidDatabase = AndroidDatabase(app)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalBookmarkStorage(androidDatabase: AndroidDatabase): LocalBookmarkStorage =
             AndroidBookmarkStorage(androidDatabase)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalHighlightStorage(androidDatabase: AndroidDatabase): LocalHighlightStorage =
             AndroidHighlightStorage(androidDatabase)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalNoteStorage(androidDatabase: AndroidDatabase): LocalNoteStorage =
             AndroidNoteStorage(androidDatabase)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalReadingProgressStorage(androidDatabase: AndroidDatabase): LocalReadingProgressStorage =
             AndroidReadingProgressStorage(androidDatabase)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalReadingStorage(androidDatabase: AndroidDatabase): LocalReadingStorage =
             AndroidReadingStorage(androidDatabase)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalSettingsStorage(androidDatabase: AndroidDatabase): LocalSettingsStorage =
             AndroidSettingsStorage(androidDatabase)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideLocalTranslationStorage(androidDatabase: AndroidDatabase): LocalTranslationStorage =
             AndroidTranslationStorage(androidDatabase)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideRemoteTranslationService(): RemoteTranslationService = HttpTranslationService()
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideBibleReadingRepository(localReadingStorage: LocalReadingStorage): BibleReadingRepository =
             BibleReadingRepository(localReadingStorage)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideBookmarkRepository(localBookmarkStorage: LocalBookmarkStorage): BookmarkRepository =
             BookmarkRepository(localBookmarkStorage)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideHighlightRepository(localHighlightStorage: LocalHighlightStorage): HighlightRepository =
             HighlightRepository(localHighlightStorage)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideNoteRepository(localNoteStorage: LocalNoteStorage): NoteRepository =
             NoteRepository(localNoteStorage)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideReadingProgressRepository(localReadingProgressStorage: LocalReadingProgressStorage): ReadingProgressRepository =
             ReadingProgressRepository(localReadingProgressStorage)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideSettingsRepository(localSettingsStorage: LocalSettingsStorage): SettingsRepository =
             SettingsRepository(localSettingsStorage)
 
-    @JvmStatic
     @Provides
     @Singleton
     fun provideTranslationRepository(localAndroidStorage: LocalTranslationStorage,

@@ -28,18 +28,15 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
 @Module
 object ReadingProgressModule {
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
             LoadingSpinnerPresenter(loadingSpinnerInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideReadingProgressInteractor(readingProgressManager: ReadingProgressManager,
@@ -47,7 +44,6 @@ object ReadingProgressModule {
                                          settingsManager: SettingsManager): ReadingProgressInteractor =
             ReadingProgressInteractor(readingProgressManager, bibleReadingManager, settingsManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideReadingProgressPresenter(readingProgressActivity: ReadingProgressActivity,
@@ -55,7 +51,6 @@ object ReadingProgressModule {
                                         readingProgressInteractor: ReadingProgressInteractor): ReadingProgressPresenter =
             ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideReadingProgressViewModel(settingsManager: SettingsManager,

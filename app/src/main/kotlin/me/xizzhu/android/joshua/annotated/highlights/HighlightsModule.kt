@@ -34,30 +34,25 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
 @Module
 object HighlightsModule {
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideAnnotatedVersesToolbarInteractor(highlightManager: HighlightManager): AnnotatedVersesToolbarInteractor =
             AnnotatedVersesToolbarInteractor({ highlightManager.observeSortOrder().first() }, highlightManager::saveSortOrder)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor): AnnotatedVersesToolbarPresenter =
             AnnotatedVersesToolbarPresenter(R.string.title_highlights, annotatedVersesToolbarInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
             LoadingSpinnerPresenter(loadingSpinnerInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideHighlightsListInteractor(highlightManager: HighlightManager,
@@ -65,7 +60,6 @@ object HighlightsModule {
                                         settingsManager: SettingsManager): HighlightsListInteractor =
             HighlightsListInteractor(highlightManager, bibleReadingManager, settingsManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideHighlightsListPresenter(highlightsActivity: HighlightsActivity,
@@ -73,7 +67,6 @@ object HighlightsModule {
                                        highlightsListInteractor: HighlightsListInteractor): HighlightsListPresenter =
             HighlightsListPresenter(highlightsActivity, navigator, highlightsListInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideHighlightsViewModel(settingsManager: SettingsManager,
