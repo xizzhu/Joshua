@@ -44,12 +44,12 @@ class BaseSettingsAndLoadingAwareInteractorTest : BaseUnitTest() {
     fun testLoadingState() = testDispatcher.runBlockingTest {
         val loadingStateAsync = async { loadingAwareInteractor.loadingState().take(3).toList() }
 
-        loadingAwareInteractor.updateLoadingState(ViewData.error(Unit))
-        loadingAwareInteractor.updateLoadingState(ViewData.success(Unit))
-        loadingAwareInteractor.updateLoadingState(ViewData.loading(Unit))
+        loadingAwareInteractor.updateLoadingState(ViewData.error())
+        loadingAwareInteractor.updateLoadingState(ViewData.success(null))
+        loadingAwareInteractor.updateLoadingState(ViewData.loading())
 
         assertEquals(
-                listOf(ViewData.error(Unit), ViewData.success(Unit), ViewData.loading(Unit)),
+                listOf(ViewData.error(), ViewData.success(null), ViewData.loading()),
                 loadingStateAsync.await()
         )
     }

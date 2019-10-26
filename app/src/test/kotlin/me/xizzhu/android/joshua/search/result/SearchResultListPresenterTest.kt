@@ -68,8 +68,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = listOf(
-                ViewData.error(Settings.DEFAULT),
-                ViewData.loading(Settings.DEFAULT),
+                ViewData.error(),
+                ViewData.loading(),
                 ViewData.success(Settings(false, true, 1, true))
         )
         `when`(searchResultInteractor.settings()).thenReturn(flow { settings.forEach { emit(it) } })
@@ -78,7 +78,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         with(inOrder(searchResultViewHolder.searchResultListView)) {
             settings.forEach {
                 if (ViewData.STATUS_SUCCESS == it.status) {
-                    verify(searchResultViewHolder.searchResultListView, times(1)).setSettings(it.data)
+                    verify(searchResultViewHolder.searchResultListView, times(1)).setSettings(it.data!!)
                 }
             }
         }

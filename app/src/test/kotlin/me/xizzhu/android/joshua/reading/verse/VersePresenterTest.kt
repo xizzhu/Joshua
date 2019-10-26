@@ -81,7 +81,7 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(verseInteractor.settings()).thenReturn(flowOf(ViewData.success(Settings.DEFAULT.copy(simpleReadingModeOn = true))))
 
         versePresenter.loadVerses(bookIndex, chapterIndex)
-        verify(verseViewHolder.versePager, times(1)).onVersesLoaded(
+        verify(verseViewHolder.versePager, times(1)).setVerses(
                 bookIndex, chapterIndex,
                 MockContents.kjvVerses.toSimpleVerseItems(
                         MockContents.kjvBookNames[0], emptyList(),
@@ -102,7 +102,7 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(verseInteractor.readNotes(bookIndex, chapterIndex)).thenReturn(emptyList())
 
         versePresenter.loadVerses(bookIndex, chapterIndex)
-        verify(verseViewHolder.versePager, times(1)).onVersesLoaded(
+        verify(verseViewHolder.versePager, times(1)).setVerses(
                 bookIndex, chapterIndex,
                 MockContents.kjvVerses.toVerseItems(
                         MockContents.kjvBookNames[0], emptyList(), emptyList(), emptyList(),
@@ -115,48 +115,28 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings(false, true, 1, true)
-        `when`(verseInteractor.settings()).thenReturn(flowOf(
-                ViewData.loading(Settings.DEFAULT),
-                ViewData.success(settings),
-                ViewData.error(Settings.DEFAULT)
-        ))
+        `when`(verseInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
         versePresenter.start()
-        verify(verseViewHolder.versePager, times(1)).onSettingsUpdated(settings)
-        verify(verseViewHolder.versePager, never()).onSettingsUpdated(Settings.DEFAULT)
+        verify(verseViewHolder.versePager, times(1)).setSettings(settings)
+        verify(verseViewHolder.versePager, never()).setSettings(Settings.DEFAULT)
 
         versePresenter.stop()
     }
 
     @Test
-    fun testObserveCurrentTranslation() = testDispatcher.runBlockingTest {
-        val translation = MockContents.kjvShortName
-        `when`(verseInteractor.currentTranslation()).thenReturn(flowOf("", translation, ""))
-
-        versePresenter.start()
-        verify(verseViewHolder.versePager, times(1)).onCurrentTranslationUpdated(translation)
-        versePresenter.stop()
-    }
-
-    @Test
-    fun testObserveCurrentVerseIndex() = testDispatcher.runBlockingTest {
+    fun testObserveCurrent() = testDispatcher.runBlockingTest {
         val verseIndex = VerseIndex(1, 2, 3)
-        `when`(verseInteractor.currentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID, verseIndex, VerseIndex.INVALID))
-
-        versePresenter.start()
-        verify(verseViewHolder.versePager, times(1)).onCurrentVerseIndexUpdated(verseIndex)
-        versePresenter.stop()
-    }
-
-    @Test
-    fun testObserveParallelTranslations() = testDispatcher.runBlockingTest {
+        val translation = MockContents.kjvShortName
         val parallelTranslations = listOf(emptyList(), listOf(MockContents.kjvShortName), emptyList(), listOf(MockContents.bbeShortName, MockContents.cuvShortName))
+        `when`(verseInteractor.currentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID, verseIndex, VerseIndex.INVALID))
+        `when`(verseInteractor.currentTranslation()).thenReturn(flowOf("", translation, ""))
         `when`(verseInteractor.parallelTranslations()).thenReturn(flow { parallelTranslations.forEach { emit(it) } })
 
         versePresenter.start()
         with(inOrder(verseViewHolder.versePager)) {
-            parallelTranslations.forEach {
-                verify(verseViewHolder.versePager, times(1)).onParallelTranslationsUpdated(it)
+            parallelTranslations.forEach { parallel ->
+                verify(verseViewHolder.versePager, times(1)).setCurrent(verseIndex, translation, parallel)
             }
         }
         versePresenter.stop()
@@ -171,9 +151,9 @@ class VersePresenterTest : BaseUnitTest() {
 
         versePresenter.start()
         with(inOrder(verseViewHolder.versePager)) {
-            verify(verseViewHolder.versePager, times(1)).onVerseDeselected(verseIndex)
-            verify(verseViewHolder.versePager, times(1)).onVerseSelected(verseIndex)
-            verify(verseViewHolder.versePager, times(1)).onVerseDeselected(verseIndex)
+            verify(verseViewHolder.versePager, times(1)).deselectVerse(verseIndex)
+            verify(verseViewHolder.versePager, times(1)).selectVerse(verseIndex)
+            verify(verseViewHolder.versePager, times(1)).deselectVerse(verseIndex)
         }
         versePresenter.stop()
     }
@@ -183,8 +163,8 @@ class VersePresenterTest : BaseUnitTest() {
         val verse = MockContents.kjvVerses[0]
         versePresenter.onVerseClicked(verse)
         verify(verseInteractor, times(1)).requestVerseDetail(VerseDetailRequest(verse.verseIndex, VerseDetailRequest.VERSES))
-        verify(verseViewHolder.versePager, never()).onVerseDeselected(any())
-        verify(verseViewHolder.versePager, never()).onVerseSelected(any())
+        verify(verseViewHolder.versePager, never()).deselectVerse(any())
+        verify(verseViewHolder.versePager, never()).selectVerse(any())
     }
 
     @Test
@@ -196,22 +176,22 @@ class VersePresenterTest : BaseUnitTest() {
             // select verse1
             versePresenter.onVerseLongClicked(verse1)
             verify(actionMode, never()).finish()
-            verify(verseViewHolder.versePager, times(1)).onVerseSelected(verse1.verseIndex)
+            verify(verseViewHolder.versePager, times(1)).selectVerse(verse1.verseIndex)
 
             // select verse2
             versePresenter.onVerseClicked(verse2)
             verify(actionMode, never()).finish()
-            verify(verseViewHolder.versePager, times(1)).onVerseSelected(verse2.verseIndex)
+            verify(verseViewHolder.versePager, times(1)).selectVerse(verse2.verseIndex)
 
             // deselect verse2
             versePresenter.onVerseClicked(verse2)
             verify(actionMode, never()).finish()
-            verify(verseViewHolder.versePager, times(1)).onVerseDeselected(verse2.verseIndex)
+            verify(verseViewHolder.versePager, times(1)).deselectVerse(verse2.verseIndex)
 
             // deselect verse1
             versePresenter.onVerseClicked(verse1)
             verify(actionMode, times(1)).finish()
-            verify(verseViewHolder.versePager, times(1)).onVerseDeselected(verse1.verseIndex)
+            verify(verseViewHolder.versePager, times(1)).deselectVerse(verse1.verseIndex)
         }
         verify(verseInteractor, never()).requestVerseDetail(any())
     }

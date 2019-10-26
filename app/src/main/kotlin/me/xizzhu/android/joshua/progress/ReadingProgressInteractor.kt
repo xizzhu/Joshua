@@ -18,27 +18,33 @@ package me.xizzhu.android.joshua.progress
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
+import me.xizzhu.android.logger.Log
 
 class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager,
                                 private val bibleReadingManager: BibleReadingManager,
                                 settingsManager: SettingsManager,
                                 dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
-    suspend fun readReadingProgress(): Pair<List<String>, ReadingProgress> {
-        try {
-            updateLoadingState(ViewData.loading(Unit))
-            val bookNames = bibleReadingManager.readBookNames(bibleReadingManager.observeCurrentTranslation().first())
-            val readingProgress = readingProgressManager.read()
-            updateLoadingState(ViewData.success(Unit))
-            return Pair(bookNames, readingProgress)
-        } catch (e: Exception) {
-            updateLoadingState(ViewData.error(Unit, e))
-            throw e
-        }
+    suspend fun bookNames(): ViewData<List<String>> = bibleReadingManager
+            .observeCurrentTranslation().first()
+            .let { currentTranslation ->
+                try {
+                    ViewData.success(bibleReadingManager.readBookNames(currentTranslation))
+                } catch (e: Exception) {
+                    Log.e(tag, "Failed to read book names", e)
+                    ViewData.error(exception = e)
+                }
+            }
+
+    suspend fun readingProgress(): ViewData<ReadingProgress> = try {
+        ViewData.success(readingProgressManager.read())
+    } catch (e: Exception) {
+        Log.e(tag, "Failed to read reading progress", e)
+        ViewData.error(exception = e)
     }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) = bibleReadingManager.saveCurrentVerseIndex(verseIndex)

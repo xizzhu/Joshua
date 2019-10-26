@@ -19,9 +19,11 @@ package me.xizzhu.android.joshua.translations
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import me.xizzhu.android.joshua.infra.arch.ViewData
 
 class TranslationsViewModel(settingsManager: SettingsManager,
                             private val swipeRefreshInteractor: SwipeRefreshInteractor,
@@ -35,7 +37,16 @@ class TranslationsViewModel(settingsManager: SettingsManager,
             swipeRefreshInteractor.refreshRequested().collect { translationListInteractor.loadTranslationList(true) }
         }
         coroutineScope.launch {
-            translationListInteractor.translationList().collect { swipeRefreshInteractor.updateLoadingState(it.toUnit()) }
+            translationListInteractor.translationList()
+                    .map { viewData ->
+                        when (viewData.status) {
+                            ViewData.STATUS_SUCCESS -> ViewData.success(null)
+                            ViewData.STATUS_ERROR -> ViewData.error(exception = viewData.exception)
+                            ViewData.STATUS_LOADING -> ViewData.loading()
+                            else -> throw IllegalStateException("Unsupported view data status: ${viewData.status}")
+                        }
+                    }
+                    .collect { swipeRefreshInteractor.updateLoadingState(it) }
         }
     }
 }

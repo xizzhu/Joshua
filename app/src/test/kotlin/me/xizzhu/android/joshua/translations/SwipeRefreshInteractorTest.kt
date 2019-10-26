@@ -39,6 +39,6 @@ class SwipeRefreshInteractorTest : BaseUnitTest() {
     fun testRefreshRequest() = testDispatcher.runBlockingTest {
         val refreshRequestAsync = async { swipeRefreshInteractor.refreshRequested().take(1).first() }
         swipeRefreshInteractor.requestRefresh()
-        assertEquals(ViewData.success(Unit), refreshRequestAsync.await())
+        assertEquals(ViewData.success(null), refreshRequestAsync.await())
     }
 }

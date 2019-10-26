@@ -58,14 +58,16 @@ abstract class BaseAnnotatedVersesPresenter
     private fun load(@Constants.SortOrder sortOrder: Int) {
         coroutineScope.launch {
             try {
-                interactor.updateLoadingState(ViewData.loading(Unit))
-                viewHolder?.annotatedVerseListView?.visibility = View.GONE
-                viewHolder?.annotatedVerseListView?.setItems(prepareItems(sortOrder))
-                viewHolder?.annotatedVerseListView?.fadeIn()
-                interactor.updateLoadingState(ViewData.success(Unit))
+                interactor.updateLoadingState(ViewData.loading())
+                viewHolder?.annotatedVerseListView?.run {
+                    visibility = View.GONE
+                    setItems(prepareItems(sortOrder))
+                    fadeIn()
+                }
+                interactor.updateLoadingState(ViewData.success(null))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load annotated verses", e)
-                interactor.updateLoadingState(ViewData.error(Unit, e))
+                interactor.updateLoadingState(ViewData.error(exception = e))
                 DialogHelper.showDialog(activity, true, R.string.dialog_load_annotated_verses_error,
                         DialogInterface.OnClickListener { _, _ -> load(sortOrder) })
             }

@@ -26,21 +26,16 @@ import android.widget.CompoundButton
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 
-class TranslationSpinnerAdapter(context: Context, private val listener: Listener) : BaseAdapter() {
-    interface Listener {
-        fun onParallelTranslationRequested(translationShortName: String)
-
-        fun onParallelTranslationRemoved(translationShortName: String)
-    }
-
+class TranslationSpinnerAdapter(context: Context, onParallelTranslationRequested: (String) -> Unit,
+                                onParallelTranslationRemoved: (String) -> Unit) : BaseAdapter() {
     private val inflater = LayoutInflater.from(context)
 
     private val checkBoxListener = CompoundButton.OnCheckedChangeListener { checkBox, isChecked ->
         val translationShortName = checkBox.tag as String
         if (isChecked) {
-            listener.onParallelTranslationRequested(translationShortName)
+            onParallelTranslationRequested(translationShortName)
         } else {
-            listener.onParallelTranslationRemoved(translationShortName)
+            onParallelTranslationRemoved(translationShortName)
         }
     }
 

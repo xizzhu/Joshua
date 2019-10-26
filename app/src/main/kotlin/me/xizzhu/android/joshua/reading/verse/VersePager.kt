@@ -31,10 +31,6 @@ class VerseViewPager : ViewPager {
 
     private val adapter = VersePagerAdapter(context).apply { setAdapter(this) }
 
-    private var currentVerseIndex = VerseIndex.INVALID
-    private var currentTranslation = ""
-    private var parallelTranslations = emptyList<String>()
-
     fun setOnChapterSelectedListener(onChapterSelected: (Int, Int) -> Unit) {
         addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
@@ -51,56 +47,28 @@ class VerseViewPager : ViewPager {
         adapter.onCurrentVerseUpdated = onCurrentVerseUpdated
     }
 
-    fun onSettingsUpdated(settings: Settings) {
+    fun setSettings(settings: Settings) {
         adapter.settings = settings
     }
 
-    fun onCurrentVerseIndexUpdated(currentVerseIndex: VerseIndex) {
-        if (this.currentVerseIndex == currentVerseIndex) {
-            return
-        }
-        this.currentVerseIndex = currentVerseIndex
-        refreshUi()
-    }
-
-    private fun refreshUi() {
-        if (currentTranslation.isEmpty() || !currentVerseIndex.isValid()) {
-            return
-        }
-
+    fun setCurrent(currentVerseIndex: VerseIndex, currentTranslation: String, parallelTranslations: List<String>) {
         adapter.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
         setCurrentItem(currentVerseIndex.toPagePosition(), false)
     }
 
-    fun onCurrentTranslationUpdated(currentTranslation: String) {
-        if (this.currentTranslation == currentTranslation) {
-            return
-        }
-        this.currentTranslation = currentTranslation
-        refreshUi()
-    }
-
-    fun onParallelTranslationsUpdated(parallelTranslations: List<String>) {
-        if (this.parallelTranslations == parallelTranslations) {
-            return
-        }
-        this.parallelTranslations = parallelTranslations
-        refreshUi()
-    }
-
-    fun onVersesLoaded(bookIndex: Int, chapterIndex: Int, verses: List<BaseItem>) {
+    fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<BaseItem>) {
         adapter.setVerses(bookIndex, chapterIndex, verses)
     }
 
-    fun onVerseSelected(verseIndex: VerseIndex) {
+    fun selectVerse(verseIndex: VerseIndex) {
         adapter.selectVerse(verseIndex)
     }
 
-    fun onVerseDeselected(verseIndex: VerseIndex) {
+    fun deselectVerse(verseIndex: VerseIndex) {
         adapter.deselectVerse(verseIndex)
     }
 
-    fun onVerseUpdated(verseUpdate: VerseUpdate) {
+    fun notifyVerseUpdate(verseUpdate: VerseUpdate) {
         adapter.notifyVerseUpdate(verseUpdate)
     }
 }

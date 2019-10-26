@@ -16,10 +16,7 @@
 
 package me.xizzhu.android.joshua.progress
 
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgress
@@ -33,7 +30,6 @@ import org.mockito.Mockito.`when`
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class ReadingProgressInteractorTest : BaseUnitTest() {
     @Mock
@@ -53,32 +49,38 @@ class ReadingProgressInteractorTest : BaseUnitTest() {
     }
 
     @Test
-    fun testReadReadingProgress() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
+    fun testBookNames() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
-        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(bookNames)
-        val readingProgress = ReadingProgress(0, 0L, emptyList())
-        `when`(readingProgressManager.read()).thenReturn(readingProgress)
+        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(bookNames)
 
-        val loadingStateAsync = async { readingProgressInteractor.loadingState().take(2).toList() }
-        assertEquals(Pair(bookNames, readingProgress), readingProgressInteractor.readReadingProgress())
-        assertEquals(listOf(ViewData.loading(Unit), ViewData.success(Unit)), loadingStateAsync.await())
+        assertEquals(ViewData.success(bookNames), readingProgressInteractor.bookNames())
     }
 
     @Test
-    fun testReadReadingProgressWithException() = testDispatcher.runBlockingTest {
-        val exception = RuntimeException("random exception")
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenThrow(exception)
+    fun testBookNamesWithException() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        val exception = RuntimeException("Random exception")
+        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenThrow(exception)
 
-        val loadingStateAsync = async { readingProgressInteractor.loadingState().take(2).toList() }
-        var exceptionThrown = false
-        try {
-            readingProgressInteractor.readReadingProgress()
-        } catch (e: RuntimeException) {
-            assertEquals(exception, e)
-            exceptionThrown = true
-        }
-        assertTrue(exceptionThrown)
-        assertEquals(listOf(ViewData.loading(Unit), ViewData.error(Unit, exception)), loadingStateAsync.await())
+        assertEquals(ViewData.error(exception = exception), readingProgressInteractor.bookNames())
+    }
+
+    @Test
+    fun testReadingProgress() = testDispatcher.runBlockingTest {
+        val readingProgress = ReadingProgress(0, 0L, emptyList())
+        `when`(readingProgressManager.read()).thenReturn(readingProgress)
+
+        assertEquals(ViewData.success(readingProgress), readingProgressInteractor.readingProgress())
+    }
+
+    @Test
+    fun testReadingProgressWithException() = testDispatcher.runBlockingTest {
+        val exception = RuntimeException("Random exception")
+        `when`(readingProgressManager.read()).thenThrow(exception)
+
+        assertEquals(ViewData.error(exception = exception), readingProgressInteractor.readingProgress())
     }
 }

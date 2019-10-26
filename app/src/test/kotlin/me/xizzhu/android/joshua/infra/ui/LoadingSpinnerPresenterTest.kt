@@ -54,7 +54,7 @@ class LoadingSpinnerPresenterTest : BaseUnitTest() {
 
     @Test
     fun testObserveLoadingStateSuccess() = testDispatcher.runBlockingTest {
-        `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.success(Unit)))
+        `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.success(null)))
 
         loadingSpinnerPresenter.start()
         verify(loadingSpinnerViewHolder.loadingSpinner, times(1)).visibility = View.GONE
@@ -65,7 +65,7 @@ class LoadingSpinnerPresenterTest : BaseUnitTest() {
 
     @Test
     fun testObserveLoadingStateError() = testDispatcher.runBlockingTest {
-        `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.error(Unit)))
+        `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.error()))
 
         loadingSpinnerPresenter.start()
         verify(loadingSpinnerViewHolder.loadingSpinner, times(1)).visibility = View.GONE
@@ -76,7 +76,7 @@ class LoadingSpinnerPresenterTest : BaseUnitTest() {
 
     @Test
     fun testObserveLoadingStateLoading() = testDispatcher.runBlockingTest {
-        `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.loading(Unit)))
+        `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.loading()))
 
         loadingSpinnerPresenter.start()
         verify(loadingSpinnerViewHolder.loadingSpinner, times(1)).fadeIn()

@@ -21,7 +21,9 @@ import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -61,14 +63,13 @@ class ChapterListPresenter(private val readingActivity: ReadingActivity,
         super.onStart()
 
         coroutineScope.launch {
-            interactor.currentTranslation().filter { it.isNotEmpty() }
-                    .collect { viewHolder?.chapterListView?.setBookNames(interactor.readBookNames(it)) }
-        }
-        coroutineScope.launch {
             interactor.currentVerseIndex().filter { it.isValid() }
-                    .collect { verseIndex ->
+                    .combine(interactor.currentTranslation().filter { it.isNotEmpty() }.map { interactor.readBookNames(it) }) { currentVerseIndex, bookNames ->
+                        Pair(currentVerseIndex, bookNames)
+                    }
+                    .collect {
                         viewHolder?.run {
-                            chapterListView.setCurrentVerseIndex(verseIndex)
+                            chapterListView.setData(it.first, it.second)
                             readingDrawerLayout.hide()
                         }
                     }

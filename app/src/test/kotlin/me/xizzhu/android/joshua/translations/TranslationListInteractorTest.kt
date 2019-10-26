@@ -73,10 +73,7 @@ class TranslationListInteractorTest : BaseUnitTest() {
     fun testLoadTranslationList() = testDispatcher.runBlockingTest {
         translationListInteractor.loadTranslationList(true)
 
-        assertEquals(
-                ViewData.loading(TranslationList.EMPTY),
-                translationListInteractor.translationList().first()
-        )
+        assertEquals(ViewData.loading(), translationListInteractor.translationList().first())
         verify(translationManager, times(1)).reload(true)
     }
 
@@ -89,7 +86,7 @@ class TranslationListInteractorTest : BaseUnitTest() {
         translationListInteractor.loadTranslationList(true)
 
         assertEquals(
-                listOf(ViewData.loading(TranslationList.EMPTY), ViewData.error(TranslationList.EMPTY, exception)),
+                listOf(ViewData.loading(), ViewData.error(exception = exception)),
                 translationListAsync.await()
         )
     }

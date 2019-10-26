@@ -35,10 +35,8 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
         }
     }
 
-    override suspend fun readTranslations(): List<TranslationInfo> {
-        return withContext(Dispatchers.IO) {
-            androidDatabase.translationInfoDao.read()
-        }
+    override suspend fun readTranslations(): List<TranslationInfo> = withContext(Dispatchers.IO) {
+        androidDatabase.translationInfoDao.read()
     }
 
     override suspend fun replaceTranslations(translations: List<TranslationInfo>) {
