@@ -6,6 +6,7 @@ CHANGELOG
 - Updated dependencies:
   - Grardle to 5.6.3
   - Android Gradle Plugin to 3.5.1
+  - Firebase Analytics and Core to 17.2.1
   - Mockito to 3.1.0
 
 #### v0.11.1 (2019-09-27)
