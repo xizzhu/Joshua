@@ -24,21 +24,18 @@ import me.xizzhu.android.joshua.core.SettingsManager
 
 @Module
 object SettingsModule {
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSettingsInteractor(settingsManager: SettingsManager,
                                   backupManager: BackupManager): SettingsInteractor =
             SettingsInteractor(settingsManager, backupManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSettingsViewPresenter(settingsActivity: SettingsActivity,
                                      settingsInteractor: SettingsInteractor): SettingsViewPresenter =
             SettingsViewPresenter(settingsActivity, settingsInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSettingsViewModel(settingsInteractor: SettingsInteractor): SettingsViewModel =

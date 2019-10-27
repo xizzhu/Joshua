@@ -34,30 +34,25 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
 @Module
 object NotesModule {
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideAnnotatedVersesToolbarInteractor(noteManager: NoteManager): AnnotatedVersesToolbarInteractor =
             AnnotatedVersesToolbarInteractor({ noteManager.observeSortOrder().first() }, noteManager::saveSortOrder)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor): AnnotatedVersesToolbarPresenter =
             AnnotatedVersesToolbarPresenter(R.string.title_notes, annotatedVersesToolbarInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
             LoadingSpinnerPresenter(loadingSpinnerInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideNotesListInteractor(noteManager: NoteManager,
@@ -65,7 +60,6 @@ object NotesModule {
                                    settingsManager: SettingsManager): NotesListInteractor =
             NotesListInteractor(noteManager, bibleReadingManager, settingsManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideNotesListPresenter(notesActivity: NotesActivity,
@@ -73,7 +67,6 @@ object NotesModule {
                                   notesListInteractor: NotesListInteractor): NotesListPresenter =
             NotesListPresenter(notesActivity, navigator, notesListInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideNotesViewModel(settingsManager: SettingsManager,

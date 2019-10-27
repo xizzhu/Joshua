@@ -31,36 +31,30 @@ import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
 
 @Module
 object SearchModule {
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSearchToolbarInteractor(): SearchToolbarInteractor = SearchToolbarInteractor()
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSearchToolbarPresenter(searchToolbarInteractor: SearchToolbarInteractor): SearchToolbarPresenter =
             SearchToolbarPresenter(searchToolbarInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
             LoadingSpinnerPresenter(loadingSpinnerInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSearchResultInteractor(bibleReadingManager: BibleReadingManager,
                                       settingsManager: SettingsManager): SearchResultInteractor =
             SearchResultInteractor(bibleReadingManager, settingsManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSearchResultListPresenter(searchActivity: SearchActivity,
@@ -68,7 +62,6 @@ object SearchModule {
                                          searchResultInteractor: SearchResultInteractor): SearchResultListPresenter =
             SearchResultListPresenter(searchActivity, navigator, searchResultInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSearchViewModel(settingsManager: SettingsManager,

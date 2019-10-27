@@ -34,30 +34,25 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
 @Module
 object BookmarksModule {
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideAnnotatedVersesToolbarInteractor(bookmarkManager: BookmarkManager): AnnotatedVersesToolbarInteractor =
             AnnotatedVersesToolbarInteractor({ bookmarkManager.observeSortOrder().first() }, bookmarkManager::saveSortOrder)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor): AnnotatedVersesToolbarPresenter =
             AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, annotatedVersesToolbarInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
             LoadingSpinnerPresenter(loadingSpinnerInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideBookmarksListInteractor(bookmarkManager: BookmarkManager,
@@ -65,7 +60,6 @@ object BookmarksModule {
                                        settingsManager: SettingsManager): BookmarksListInteractor =
             BookmarksListInteractor(bookmarkManager, bibleReadingManager, settingsManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideBookmarksListPresenter(bookmarksActivity: BookmarksActivity,
@@ -73,7 +67,6 @@ object BookmarksModule {
                                       bookmarksListInteractor: BookmarksListInteractor): BookmarksListPresenter =
             BookmarksListPresenter(bookmarksActivity, navigator, bookmarksListInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideBookmarksViewModel(settingsManager: SettingsManager,

@@ -25,18 +25,15 @@ import me.xizzhu.android.joshua.core.SettingsManager
 
 @Module
 object TranslationManagementModule {
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSwipeRefreshInteractor(): SwipeRefreshInteractor = SwipeRefreshInteractor()
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideSwipeRefreshPresenter(swipeRefreshInteractor: SwipeRefreshInteractor): SwipeRefreshPresenter =
             SwipeRefreshPresenter(swipeRefreshInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideTranslationListInteractor(bibleReadingManager: BibleReadingManager,
@@ -44,14 +41,12 @@ object TranslationManagementModule {
                                          settingsManager: SettingsManager): TranslationListInteractor =
             TranslationListInteractor(bibleReadingManager, translationManager, settingsManager)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideTranslationListPresenter(translationManagementActivity: TranslationManagementActivity,
                                         translationListInteractor: TranslationListInteractor): TranslationListPresenter =
             TranslationListPresenter(translationManagementActivity, translationListInteractor)
 
-    @JvmStatic
     @ActivityScope
     @Provides
     fun provideTranslationsViewModel(settingsManager: SettingsManager,
