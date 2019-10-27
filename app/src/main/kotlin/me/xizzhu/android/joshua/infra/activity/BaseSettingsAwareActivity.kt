@@ -27,7 +27,7 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.ui.getBackgroundColor
 
-abstract class BaseSettingsAwareViewModel(private val settingsManager: SettingsManager, interactors: Set<Interactor>,
+abstract class BaseSettingsAwareViewModel(private val settingsManager: SettingsManager, interactors: List<Interactor>,
                                           dispatcher: CoroutineDispatcher) : ViewModel(interactors, dispatcher) {
     fun settings(): Flow<ViewData<Settings>> = settingsManager.observeSettings().map { ViewData.success(it) }
 }

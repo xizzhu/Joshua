@@ -68,7 +68,7 @@ class ReadingViewModel(private val readingProgressManager: ReadingProgressManage
                        private val verseInteractor: VerseInteractor,
                        private val verseDetailInteractor: VerseDetailInteractor,
                        dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, setOf(readingToolbarInteractor, chapterListInteractor, verseInteractor, verseDetailInteractor), dispatcher) {
+    : BaseSettingsAwareViewModel(settingsManager, listOf(readingToolbarInteractor, chapterListInteractor, verseInteractor, verseDetailInteractor), dispatcher) {
     @UiThread
     override fun onStart() {
         super.onStart()

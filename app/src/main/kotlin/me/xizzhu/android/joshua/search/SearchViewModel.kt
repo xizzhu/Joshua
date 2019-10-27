@@ -32,7 +32,7 @@ class SearchViewModel(settingsManager: SettingsManager,
                       private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
                       private val searchResultInteractor: SearchResultInteractor,
                       dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, setOf(searchToolbarInteractor, loadingSpinnerInteractor), dispatcher) {
+    : BaseSettingsAwareViewModel(settingsManager, listOf(searchToolbarInteractor, loadingSpinnerInteractor), dispatcher) {
     @UiThread
     override fun onStart() {
         super.onStart()

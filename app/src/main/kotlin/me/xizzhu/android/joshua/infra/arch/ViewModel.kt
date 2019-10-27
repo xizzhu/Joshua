@@ -20,7 +20,7 @@ import androidx.annotation.CallSuper
 import androidx.annotation.UiThread
 import kotlinx.coroutines.*
 
-abstract class ViewModel(private val interactors: Set<Interactor>, dispatcher: CoroutineDispatcher) {
+abstract class ViewModel(private val interactors: List<Interactor>, dispatcher: CoroutineDispatcher) {
     protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + dispatcher)
 
     @UiThread

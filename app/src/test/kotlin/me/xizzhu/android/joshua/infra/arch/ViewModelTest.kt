@@ -26,7 +26,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ViewModelTest : BaseUnitTest() {
-    private class TestViewModel(interactors: Set<Interactor>, dispatcher: CoroutineDispatcher) : ViewModel(interactors, dispatcher) {
+    private class TestViewModel(interactors: List<Interactor>, dispatcher: CoroutineDispatcher) : ViewModel(interactors, dispatcher) {
         var onStartedCalled = false
         var onStoppedCalled = false
 
@@ -57,7 +57,7 @@ class ViewModelTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        testViewModel = TestViewModel(setOf(mockInteractor), testDispatcher)
+        testViewModel = TestViewModel(listOf(mockInteractor), testDispatcher)
     }
 
     @Test
