@@ -98,12 +98,27 @@ class TranslationListInteractorTest : BaseUnitTest() {
         val progress = 89
         `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flowOf(progress))
 
-        assertEquals(listOf(progress), translationListInteractor.downloadTranslation(translationToDownload).toList())
+        assertEquals(listOf(ViewData.loading(progress), ViewData.success(-1)),
+                translationListInteractor.downloadTranslation(translationToDownload).toList())
 
         with(inOrder(translationManager, bibleReadingManager)) {
             verify(translationManager, times(1)).downloadTranslation(translationToDownload)
             verify(bibleReadingManager, times(1)).observeCurrentTranslation()
             verify(bibleReadingManager, times(1)).saveCurrentTranslation(translationToDownload.shortName)
         }
+    }
+
+    @Test
+    fun testDownloadTranslationWithException() = testDispatcher.runBlockingTest {
+        val translationToDownload = MockContents.kjvTranslationInfo
+        val exception = RuntimeException("random exception")
+        `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flow { throw exception })
+
+        assertEquals(listOf(ViewData.error(exception = exception)),
+                translationListInteractor.downloadTranslation(translationToDownload).toList())
+
+        verify(translationManager, times(1)).downloadTranslation(translationToDownload)
+        verify(bibleReadingManager, never()).observeCurrentTranslation()
+        verify(bibleReadingManager, never()).saveCurrentTranslation(translationToDownload.shortName)
     }
 }

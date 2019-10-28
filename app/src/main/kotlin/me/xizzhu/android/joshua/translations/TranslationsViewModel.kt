@@ -29,7 +29,7 @@ class TranslationsViewModel(settingsManager: SettingsManager,
                             private val swipeRefreshInteractor: SwipeRefreshInteractor,
                             private val translationListInteractor: TranslationListInteractor,
                             dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, setOf(swipeRefreshInteractor, translationListInteractor), dispatcher) {
+    : BaseSettingsAwareViewModel(settingsManager, listOf(swipeRefreshInteractor, translationListInteractor), dispatcher) {
     override fun onStart() {
         super.onStart()
 

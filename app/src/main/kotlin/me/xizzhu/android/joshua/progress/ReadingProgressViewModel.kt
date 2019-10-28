@@ -29,7 +29,7 @@ class ReadingProgressViewModel(settingsManager: SettingsManager,
                                private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
                                private val readingProgressInteractor: ReadingProgressInteractor,
                                dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, setOf(loadingSpinnerInteractor, readingProgressInteractor), dispatcher) {
+    : BaseSettingsAwareViewModel(settingsManager, listOf(loadingSpinnerInteractor, readingProgressInteractor), dispatcher) {
     @UiThread
     override fun onStart() {
         super.onStart()

@@ -135,29 +135,32 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     private fun downloadTranslation(translationToDownload: TranslationInfo) {
         coroutineScope.launch {
             interactor.downloadTranslation(translationToDownload)
-                    .catch { cause ->
-                        Log.e(tag, "Failed to download translation", cause)
-                        dismissDownloadTranslationDialog()
-                        DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_download_error,
-                                DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
-                    }
                     .onStart {
                         downloadTranslationDialog = ProgressDialog.showProgressDialog(
                                 translationManagementActivity, R.string.dialog_downloading_translation, 100)
                     }
-                    .onCompletion { cause ->
-                        if (cause != null) return@onCompletion
-
-                        dismissDownloadTranslationDialog()
-                        ToastHelper.showToast(translationManagementActivity, R.string.toast_translation_downloaded)
-                    }
-                    .collect { progress ->
-                        downloadTranslationDialog?.let {
-                            if (progress < 100) {
-                                it.setProgress(progress)
-                            } else {
-                                it.setTitle(R.string.dialog_installing_translation)
-                                it.setIsIndeterminate(true)
+                    .collect { viewData ->
+                        when (viewData.status) {
+                            ViewData.STATUS_LOADING -> viewData.data
+                                    ?.let { progress ->
+                                        downloadTranslationDialog?.run {
+                                            if (progress < 100) {
+                                                setProgress(progress)
+                                            } else {
+                                                setTitle(R.string.dialog_installing_translation)
+                                                setIsIndeterminate(true)
+                                            }
+                                        }
+                                    }
+                                    ?: throw IllegalStateException("Missing progress data when downloading")
+                            ViewData.STATUS_SUCCESS -> {
+                                dismissDownloadTranslationDialog()
+                                ToastHelper.showToast(translationManagementActivity, R.string.toast_translation_downloaded)
+                            }
+                            ViewData.STATUS_ERROR -> {
+                                dismissDownloadTranslationDialog()
+                                DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_download_error,
+                                        DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
                             }
                         }
                     }

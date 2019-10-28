@@ -38,7 +38,7 @@ class BaseSettingsAwareViewModelTest : BaseUnitTest() {
     @BeforeTest
     override fun setup() {
         super.setup()
-        baseSettingsAwareViewModel = object : BaseSettingsAwareViewModel(settingsManager, emptySet(), testDispatcher) {}
+        baseSettingsAwareViewModel = object : BaseSettingsAwareViewModel(settingsManager, emptyList(), testDispatcher) {}
     }
 
     @Test

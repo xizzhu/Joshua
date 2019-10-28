@@ -77,14 +77,21 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
-    fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> =
+    fun downloadTranslation(translationToDownload: TranslationInfo): Flow<ViewData<Int>> =
             translationManager.downloadTranslation(translationToDownload)
+                    .map { ViewData.loading(it) }
                     .onCompletion { cause ->
                         if (cause != null) return@onCompletion
 
                         if (bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
                             bibleReadingManager.saveCurrentTranslation(translationToDownload.shortName)
                         }
+
+                        emit(ViewData.success(-1))
+                    }
+                    .catch { cause ->
+                        Log.e(tag, "Failed to download translation", cause)
+                        emit(ViewData.error(exception = cause))
                     }
 
     suspend fun removeTranslation(translationToRemove: TranslationInfo) {

@@ -22,4 +22,4 @@ import me.xizzhu.android.joshua.infra.arch.ViewModel
 
 class SettingsViewModel(settingsInteractor: SettingsInteractor,
                         dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : ViewModel(setOf(settingsInteractor), dispatcher)
+    : ViewModel(listOf(settingsInteractor), dispatcher)

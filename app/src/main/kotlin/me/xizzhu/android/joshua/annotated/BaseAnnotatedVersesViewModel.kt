@@ -31,7 +31,7 @@ abstract class BaseAnnotatedVersesViewModel<VerseAnnotation>(settingsManager: Se
                                                              private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
                                                              private val baseAnnotatedVersesInteractor: BaseAnnotatedVersesInteractor<VerseAnnotation>,
                                                              dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, setOf(annotatedVersesToolbarInteractor, loadingSpinnerInteractor, baseAnnotatedVersesInteractor), dispatcher) {
+    : BaseSettingsAwareViewModel(settingsManager, listOf(annotatedVersesToolbarInteractor, loadingSpinnerInteractor, baseAnnotatedVersesInteractor), dispatcher) {
     @UiThread
     override fun onStart() {
         super.onStart()
