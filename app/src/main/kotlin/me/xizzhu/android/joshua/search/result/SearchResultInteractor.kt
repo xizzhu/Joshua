@@ -23,42 +23,32 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
 import me.xizzhu.android.logger.Log
-
-data class SearchResult(val query: String, val verses: List<Verse>)
 
 class SearchResultInteractor(private val bibleReadingManager: BibleReadingManager,
                              settingsManager: SettingsManager,
                              dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
+    : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val searchResult: BroadcastChannel<ViewData<SearchResult>> = ConflatedBroadcastChannel()
+    private val query: BroadcastChannel<ViewData<String>> = ConflatedBroadcastChannel()
 
-    fun searchResult(): Flow<ViewData<SearchResult>> = searchResult.asFlow()
+    fun query(): Flow<ViewData<String>> = query.asFlow()
 
     fun updateQuery(query: ViewData<String>) {
-        if (ViewData.STATUS_SUCCESS == query.status) search(query.data!!)
+        this.query.offer(query)
     }
 
-    fun search(query: String) {
-        coroutineScope.launch {
-            try {
-                searchResult.offer(ViewData.loading())
-
-                val verses = bibleReadingManager.search(readCurrentTranslation(), query)
-                searchResult.offer(ViewData.success(SearchResult(query, verses)))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to search verses", e)
-                searchResult.offer(ViewData.error(SearchResult(query, emptyList()), e))
-            }
-        }
+    suspend fun search(query: String): ViewData<List<Verse>> = try {
+        ViewData.success(bibleReadingManager.search(readCurrentTranslation(), query))
+    } catch (e: Exception) {
+        Log.e(tag, "Failed to search verses", e)
+        ViewData.error(exception = e)
     }
 
     private suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()

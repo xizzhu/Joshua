@@ -49,12 +49,11 @@ class SearchResultInteractorTest : BaseUnitTest() {
 
     @Test
     fun testUpdateQuery() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(""))
-        `when`(bibleReadingManager.search(anyString(), anyString())).thenReturn(emptyList())
-        searchResultInteractor = spy(searchResultInteractor)
+        val queryAsync = async { searchResultInteractor.query().take(3).toList() }
 
-        listOf(ViewData.loading(), ViewData.success("query"), ViewData.error()).forEach { searchResultInteractor.updateQuery(it) }
-        verify(searchResultInteractor, times(1)).search("query")
+        val queries = listOf(ViewData.loading(), ViewData.success("query"), ViewData.error())
+        queries.forEach { searchResultInteractor.updateQuery(it) }
+        assertEquals(queries, queryAsync.await())
     }
 
     @Test
@@ -65,12 +64,7 @@ class SearchResultInteractorTest : BaseUnitTest() {
         `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(verses)
 
-        val searchResultAsync = async { searchResultInteractor.searchResult().take(2).toList() }
-        searchResultInteractor.search(query)
-        assertEquals(
-                listOf(ViewData.loading(), ViewData.success(SearchResult(query, verses))),
-                searchResultAsync.await()
-        )
+        assertEquals(ViewData.success(verses), searchResultInteractor.search(query))
     }
 
     @Test
@@ -79,11 +73,6 @@ class SearchResultInteractorTest : BaseUnitTest() {
         val exception = RuntimeException("Random exception")
         `when`(bibleReadingManager.observeCurrentTranslation()).thenThrow(exception)
 
-        val searchResultAsync = async { searchResultInteractor.searchResult().take(2).toList() }
-        searchResultInteractor.search(query)
-        assertEquals(
-                listOf(ViewData.loading(), ViewData.error(SearchResult(query, emptyList()), exception)),
-                searchResultAsync.await()
-        )
+        assertEquals(ViewData.error(exception = exception), searchResultInteractor.search(query))
     }
 }
