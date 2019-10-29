@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.toNothing
 
 class TranslationsViewModel(settingsManager: SettingsManager,
                             private val swipeRefreshInteractor: SwipeRefreshInteractor,
@@ -38,14 +38,7 @@ class TranslationsViewModel(settingsManager: SettingsManager,
         }
         coroutineScope.launch {
             translationListInteractor.translationList()
-                    .map { viewData ->
-                        when (viewData.status) {
-                            ViewData.STATUS_SUCCESS -> ViewData.success(null)
-                            ViewData.STATUS_ERROR -> ViewData.error(exception = viewData.exception)
-                            ViewData.STATUS_LOADING -> ViewData.loading()
-                            else -> throw IllegalStateException("Unsupported view data status: ${viewData.status}")
-                        }
-                    }
+                    .map { it.toNothing() }
                     .collect { swipeRefreshInteractor.updateLoadingState(it) }
         }
     }

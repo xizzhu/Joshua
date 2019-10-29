@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.search.toolbar
 
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
@@ -36,7 +37,7 @@ class SearchToolbarInteractorTest : BaseUnitTest() {
 
     @Test
     fun testUpdateQuery() = testDispatcher.runBlockingTest {
-        val queryAsync = async { searchToolbarInteractor.query().take(3).toList() }
+        val queryAsync = async { searchToolbarInteractor.query().take(3).map { it.data }.toList() }
 
         val queries = listOf("query 1", "", "another one")
         queries.forEach { searchToolbarInteractor.updateQuery(it) }
