@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.arch.toNothing
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 import me.xizzhu.android.joshua.search.result.SearchResultInteractor
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
@@ -39,6 +38,6 @@ class SearchViewModel(settingsManager: SettingsManager,
         super.onStart()
 
         coroutineScope.launch { searchToolbarInteractor.query().collect { searchResultInteractor.updateQuery(it) } }
-        coroutineScope.launch { searchResultInteractor.searchResult().collect { loadingSpinnerInteractor.updateLoadingState(it.toNothing()) } }
+        coroutineScope.launch { searchResultInteractor.loadingState().collect { loadingSpinnerInteractor.updateLoadingState(it) } }
     }
 }

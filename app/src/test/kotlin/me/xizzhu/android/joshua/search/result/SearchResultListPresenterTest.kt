@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.search.SearchActivity
@@ -52,7 +53,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         super.setup()
 
         `when`(searchResultInteractor.settings()).thenReturn(emptyFlow())
-        `when`(searchResultInteractor.searchResult()).thenReturn(emptyFlow())
+        `when`(searchResultInteractor.query()).thenReturn(emptyFlow())
 
         searchResultViewHolder = SearchResultViewHolder(searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchResultInteractor, testDispatcher)
@@ -82,6 +83,47 @@ class SearchResultListPresenterTest : BaseUnitTest() {
                 }
             }
         }
+
+        searchResultListPresenter.stop()
+    }
+
+    @Test
+    fun testSearch() = testDispatcher.runBlockingTest {
+        val query = "query"
+        val verses = MockContents.kjvVerses
+        `when`(searchResultInteractor.search(query)).thenReturn(ViewData.success(verses))
+        `when`(searchResultInteractor.readBookNames()).thenReturn(MockContents.kjvBookNames)
+        `when`(searchResultInteractor.readBookShortNames()).thenReturn(MockContents.kjvBookShortNames)
+        `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
+
+        searchResultListPresenter.start()
+
+        searchResultListPresenter.search(query)
+        with(inOrder(searchResultInteractor, searchResultListView)) {
+            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.loading())
+            verify(searchResultListView, times(1)).setItems(any())
+            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.success(null))
+        }
+        verify(searchResultInteractor, never()).updateLoadingState(ViewData.error())
+
+        searchResultListPresenter.stop()
+    }
+
+    @Test
+    fun testSearchWithException() = testDispatcher.runBlockingTest {
+        val query = "query"
+        val exception = RuntimeException("Random exception")
+        `when`(searchResultInteractor.search(query)).thenThrow(exception)
+
+        searchResultListPresenter.start()
+
+        searchResultListPresenter.search(query)
+        with(inOrder(searchResultInteractor, searchResultListView)) {
+            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.loading())
+            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.error(exception = exception))
+        }
+        verify(searchResultListView, never()).setItems(any())
+        verify(searchResultInteractor, never()).updateLoadingState(ViewData.success(null))
 
         searchResultListPresenter.stop()
     }

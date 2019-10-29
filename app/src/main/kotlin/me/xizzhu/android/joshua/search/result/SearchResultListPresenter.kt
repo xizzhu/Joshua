@@ -23,6 +23,8 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -54,36 +56,50 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
         super.onStart()
 
         observeSettings()
-        observeSearchResult()
+        observeQuery()
     }
 
     private fun observeSettings() {
         coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.searchResultListView?.setSettings(it) } }
     }
 
-    private fun observeSearchResult() {
+    private fun observeQuery() {
         coroutineScope.launch {
-            interactor.searchResult().collect { viewData ->
-                when (viewData.status) {
-                    ViewData.STATUS_LOADING -> viewHolder?.searchResultListView?.visibility = View.GONE
-                    ViewData.STATUS_SUCCESS -> viewData.data
-                            ?.let { searchResult ->
-                                viewHolder?.searchResultListView?.run {
-                                    setItems(searchResult.verses.toSearchItems(searchResult.query))
-                                    scrollToPosition(0)
-                                    fadeIn()
-                                    ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, searchResult.verses.size))
-                                }
-                            }
-                            ?: throw IllegalStateException("Missing search result")
-                    ViewData.STATUS_ERROR -> viewData.data
-                            ?.let { searchResult ->
-                                DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
-                                        DialogInterface.OnClickListener { _, _ -> interactor.search(searchResult.query) })
-                            }
-                            ?: throw IllegalStateException("Missing search result")
-                    else -> throw IllegalStateException("Unsupported view data status: ${viewData.status}")
+            interactor.query()
+                    .filter { ViewData.STATUS_SUCCESS == it.status }
+                    .map { it.data ?: throw IllegalStateException("Missing query") }
+                    .collect { search(it) }
+        }
+    }
+
+    @VisibleForTesting
+    fun search(query: String) {
+        coroutineScope.launch {
+            try {
+                interactor.updateLoadingState(ViewData.loading())
+
+                viewHolder?.searchResultListView?.run {
+                    visibility = View.GONE
+
+                    val verses = interactor.search(query).let { viewData ->
+                        if (ViewData.STATUS_SUCCESS != viewData.status) {
+                            throw IllegalStateException("Failed to search", viewData.exception)
+                        }
+                        viewData.data!!
+                    }
+                    setItems(verses.toSearchItems(query))
+
+                    scrollToPosition(0)
+                    fadeIn()
+                    ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size))
                 }
+
+                interactor.updateLoadingState(ViewData.success(null))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to search verses", e)
+                interactor.updateLoadingState(ViewData.error(exception = e))
+                DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
+                        DialogInterface.OnClickListener { _, _ -> search(query) })
             }
         }
     }
