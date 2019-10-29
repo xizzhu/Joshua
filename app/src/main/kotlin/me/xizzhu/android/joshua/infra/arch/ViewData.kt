@@ -36,6 +36,13 @@ data class ViewData<T> private constructor(@Status val status: Int, val data: T?
     }
 }
 
+fun <T> ViewData<T>.toNothing(): ViewData<Nothing?> = when (status) {
+    ViewData.STATUS_SUCCESS -> ViewData.success(null)
+    ViewData.STATUS_ERROR -> ViewData.error(exception = exception)
+    ViewData.STATUS_LOADING -> ViewData.loading()
+    else -> throw IllegalStateException("Unsupported view data status: $status")
+}
+
 suspend inline fun <T> Flow<ViewData<T>>.collect(
         crossinline onLoading: suspend (value: T?) -> Unit,
         crossinline onSuccess: suspend (value: T) -> Unit,

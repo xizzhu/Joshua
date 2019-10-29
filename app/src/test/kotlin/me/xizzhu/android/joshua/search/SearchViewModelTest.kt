@@ -21,7 +21,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.toNothing
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
+import me.xizzhu.android.joshua.search.result.SearchResult
 import me.xizzhu.android.joshua.search.result.SearchResultInteractor
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -48,38 +50,32 @@ class SearchViewModelTest : BaseUnitTest() {
         super.setup()
 
         `when`(searchToolbarInteractor.query()).thenReturn(emptyFlow())
-        `when`(searchResultInteractor.loadingState()).thenReturn(emptyFlow())
+        `when`(searchResultInteractor.searchResult()).thenReturn(emptyFlow())
 
         searchViewModel = SearchViewModel(settingsManager, searchToolbarInteractor, loadingSpinnerInteractor, searchResultInteractor, testDispatcher)
     }
 
     @Test
-    fun testQueryRequest() = testDispatcher.runBlockingTest {
+    fun testUpdateQuery() = testDispatcher.runBlockingTest {
         val queries = listOf("query1", "query2", "query3")
-        `when`(searchToolbarInteractor.query()).thenReturn(flow { queries.forEach { emit(it) } })
+        `when`(searchToolbarInteractor.query()).thenReturn(flow { queries.forEach { emit(ViewData.success(it)) } })
 
         searchViewModel.start()
         with(inOrder(searchResultInteractor)) {
-            queries.forEach { query -> verify(searchResultInteractor, times(1)).requestSearch(query) }
+            queries.forEach { query -> verify(searchResultInteractor, times(1)).updateQuery(ViewData.success(query)) }
         }
         searchViewModel.stop()
     }
 
     @Test
     fun testSearchState() = testDispatcher.runBlockingTest {
-        val searchStates = listOf(ViewData.error(), ViewData.loading(), ViewData.success(null))
-        `when`(searchResultInteractor.loadingState()).thenReturn(flow { searchStates.forEach { emit(it) } })
+        val searchResult = listOf(ViewData.error(), ViewData.loading(), ViewData.success(SearchResult("", emptyList())))
+        `when`(searchResultInteractor.searchResult()).thenReturn(flow { searchResult.forEach { emit(it) } })
 
         searchViewModel.start()
         with(inOrder(loadingSpinnerInteractor)) {
-            searchStates.forEach { searchResult ->
-                verify(loadingSpinnerInteractor, times(1))
-                        .updateLoadingState(when (searchResult.status) {
-                            ViewData.STATUS_SUCCESS -> ViewData.success(null)
-                            ViewData.STATUS_ERROR -> ViewData.error()
-                            ViewData.STATUS_LOADING -> ViewData.loading()
-                            else -> fail()
-                        })
+            searchResult.forEach {
+                verify(loadingSpinnerInteractor, times(1)).updateLoadingState(it.toNothing())
             }
         }
         searchViewModel.stop()

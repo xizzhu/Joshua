@@ -52,7 +52,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         super.setup()
 
         `when`(searchResultInteractor.settings()).thenReturn(emptyFlow())
-        `when`(searchResultInteractor.searchRequested()).thenReturn(emptyFlow())
+        `when`(searchResultInteractor.searchResult()).thenReturn(emptyFlow())
 
         searchResultViewHolder = SearchResultViewHolder(searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchResultInteractor, testDispatcher)
@@ -88,10 +88,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testToSearchItems() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
-        `when`(searchResultInteractor.readCurrentTranslation()).thenReturn(currentTranslation)
-        `when`(searchResultInteractor.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(searchResultInteractor.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(searchResultInteractor.readBookNames()).thenReturn(MockContents.kjvBookNames)
+        `when`(searchResultInteractor.readBookShortNames()).thenReturn(MockContents.kjvBookShortNames)
 
         with(searchResultListPresenter) {
             val query = "query"

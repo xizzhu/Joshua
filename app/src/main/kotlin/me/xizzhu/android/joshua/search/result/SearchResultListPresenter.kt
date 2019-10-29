@@ -53,39 +53,45 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.searchResultListView?.setSettings(it) } }
-        coroutineScope.launch { interactor.searchRequested().collect { search(it) } }
+        observeSettings()
+        observeSearchResult()
     }
 
-    private fun search(query: String) {
+    private fun observeSettings() {
+        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.searchResultListView?.setSettings(it) } }
+    }
+
+    private fun observeSearchResult() {
         coroutineScope.launch {
-            try {
-                interactor.updateLoadingState(ViewData.loading())
-
-                viewHolder?.searchResultListView?.run {
-                    visibility = View.GONE
-                    val verses = interactor.search(query)
-                    setItems(verses.toSearchItems(query))
-                    scrollToPosition(0)
-                    fadeIn()
-                    ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size))
+            interactor.searchResult().collect { viewData ->
+                when (viewData.status) {
+                    ViewData.STATUS_LOADING -> viewHolder?.searchResultListView?.visibility = View.GONE
+                    ViewData.STATUS_SUCCESS -> viewData.data
+                            ?.let { searchResult ->
+                                viewHolder?.searchResultListView?.run {
+                                    setItems(searchResult.verses.toSearchItems(searchResult.query))
+                                    scrollToPosition(0)
+                                    fadeIn()
+                                    ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, searchResult.verses.size))
+                                }
+                            }
+                            ?: throw IllegalStateException("Missing search result")
+                    ViewData.STATUS_ERROR -> viewData.data
+                            ?.let { searchResult ->
+                                DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
+                                        DialogInterface.OnClickListener { _, _ -> interactor.search(searchResult.query) })
+                            }
+                            ?: throw IllegalStateException("Missing search result")
+                    else -> throw IllegalStateException("Unsupported view data status: ${viewData.status}")
                 }
-
-                interactor.updateLoadingState(ViewData.success(null))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to prepare searched verses", e)
-                interactor.updateLoadingState(ViewData.error(exception = e))
-                DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
-                        DialogInterface.OnClickListener { _, _ -> search(query) })
             }
         }
     }
 
     @VisibleForTesting
     suspend fun List<Verse>.toSearchItems(query: String): List<BaseItem> {
-        val currentTranslation = interactor.readCurrentTranslation()
-        val bookNames = interactor.readBookNames(currentTranslation)
-        val bookShortNames = interactor.readBookShortNames(currentTranslation)
+        val bookNames = interactor.readBookNames()
+        val bookShortNames = interactor.readBookShortNames()
         val items = ArrayList<BaseItem>(size + Bible.BOOK_COUNT)
         var lastVerseBookIndex = -1
         forEach { verse ->

@@ -23,14 +23,15 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import me.xizzhu.android.joshua.infra.arch.Interactor
+import me.xizzhu.android.joshua.infra.arch.ViewData
 
 class SearchToolbarInteractor(dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val query: BroadcastChannel<String> = ConflatedBroadcastChannel()
+    private val query: BroadcastChannel<ViewData<String>> = ConflatedBroadcastChannel()
 
-    fun query(): Flow<String> = query.asFlow()
+    fun query(): Flow<ViewData<String>> = query.asFlow()
 
     fun updateQuery(query: String) {
-        this.query.offer(query)
+        this.query.offer(ViewData.success(query))
     }
 }
