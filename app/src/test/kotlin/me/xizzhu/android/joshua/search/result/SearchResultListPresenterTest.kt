@@ -88,10 +88,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testToSearchItems() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
-        `when`(searchResultInteractor.readCurrentTranslation()).thenReturn(currentTranslation)
-        `when`(searchResultInteractor.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(searchResultInteractor.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(searchResultInteractor.readBookNames()).thenReturn(MockContents.kjvBookNames)
+        `when`(searchResultInteractor.readBookShortNames()).thenReturn(MockContents.kjvBookShortNames)
 
         with(searchResultListPresenter) {
             val query = "query"

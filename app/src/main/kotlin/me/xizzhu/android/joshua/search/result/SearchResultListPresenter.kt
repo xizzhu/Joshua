@@ -90,9 +90,8 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
 
     @VisibleForTesting
     suspend fun List<Verse>.toSearchItems(query: String): List<BaseItem> {
-        val currentTranslation = interactor.readCurrentTranslation()
-        val bookNames = interactor.readBookNames(currentTranslation)
-        val bookShortNames = interactor.readBookShortNames(currentTranslation)
+        val bookNames = interactor.readBookNames()
+        val bookShortNames = interactor.readBookShortNames()
         val items = ArrayList<BaseItem>(size + Bible.BOOK_COUNT)
         var lastVerseBookIndex = -1
         forEach { verse ->

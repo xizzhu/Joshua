@@ -61,13 +61,11 @@ class SearchResultInteractor(private val bibleReadingManager: BibleReadingManage
         }
     }
 
-    suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
+    private suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
 
-    suspend fun readBookNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookNames(translationShortName)
+    suspend fun readBookNames(): List<String> = bibleReadingManager.readBookNames(readCurrentTranslation())
 
-    suspend fun readBookShortNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookShortNames(translationShortName)
+    suspend fun readBookShortNames(): List<String> = bibleReadingManager.readBookShortNames(readCurrentTranslation())
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
