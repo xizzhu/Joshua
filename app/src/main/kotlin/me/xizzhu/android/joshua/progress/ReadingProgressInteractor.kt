@@ -21,8 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
-import me.xizzhu.android.logger.Log
 
 class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager,
                                 private val bibleReadingManager: BibleReadingManager,
@@ -31,21 +31,9 @@ class ReadingProgressInteractor(private val readingProgressManager: ReadingProgr
     : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
     suspend fun bookNames(): ViewData<List<String>> = bibleReadingManager
             .observeCurrentTranslation().first()
-            .let { currentTranslation ->
-                try {
-                    ViewData.success(bibleReadingManager.readBookNames(currentTranslation))
-                } catch (e: Exception) {
-                    Log.e(tag, "Failed to read book names", e)
-                    ViewData.error(exception = e)
-                }
-            }
+            .let { currentTranslation -> viewData { bibleReadingManager.readBookNames(currentTranslation) } }
 
-    suspend fun readingProgress(): ViewData<ReadingProgress> = try {
-        ViewData.success(readingProgressManager.read())
-    } catch (e: Exception) {
-        Log.e(tag, "Failed to read reading progress", e)
-        ViewData.error(exception = e)
-    }
+    suspend fun readingProgress(): ViewData<ReadingProgress> = viewData { readingProgressManager.read() }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) = bibleReadingManager.saveCurrentVerseIndex(verseIndex)
 }

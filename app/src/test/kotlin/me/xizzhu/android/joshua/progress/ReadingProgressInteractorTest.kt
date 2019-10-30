@@ -75,12 +75,4 @@ class ReadingProgressInteractorTest : BaseUnitTest() {
 
         assertEquals(ViewData.success(readingProgress), readingProgressInteractor.readingProgress())
     }
-
-    @Test
-    fun testReadingProgressWithException() = testDispatcher.runBlockingTest {
-        val exception = RuntimeException("Random exception")
-        `when`(readingProgressManager.read()).thenThrow(exception)
-
-        assertEquals(ViewData.error(exception = exception), readingProgressInteractor.readingProgress())
-    }
 }

@@ -68,11 +68,22 @@ class SearchResultInteractorTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSearchWithException() = testDispatcher.runBlockingTest {
-        val query = "query"
-        val exception = RuntimeException("Random exception")
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenThrow(exception)
+    fun testBookNames() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        val bookNames = MockContents.kjvBookNames
+        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(bookNames)
 
-        assertEquals(ViewData.error(exception = exception), searchResultInteractor.search(query))
+        assertEquals(ViewData.success(bookNames), searchResultInteractor.bookNames())
+    }
+
+    @Test
+    fun testBookShortNames() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        val bookShortNames = MockContents.kjvBookShortNames
+        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(bookShortNames)
+
+        assertEquals(ViewData.success(bookShortNames), searchResultInteractor.bookShortNames())
     }
 }

@@ -92,8 +92,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         val query = "query"
         val verses = MockContents.kjvVerses
         `when`(searchResultInteractor.search(query)).thenReturn(ViewData.success(verses))
-        `when`(searchResultInteractor.readBookNames()).thenReturn(MockContents.kjvBookNames)
-        `when`(searchResultInteractor.readBookShortNames()).thenReturn(MockContents.kjvBookShortNames)
+        `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
+        `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
         `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
 
         searchResultListPresenter.start()
@@ -130,8 +130,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testToSearchItems() = testDispatcher.runBlockingTest {
-        `when`(searchResultInteractor.readBookNames()).thenReturn(MockContents.kjvBookNames)
-        `when`(searchResultInteractor.readBookShortNames()).thenReturn(MockContents.kjvBookShortNames)
+        `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
+        `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
 
         with(searchResultListPresenter) {
             val query = "query"
