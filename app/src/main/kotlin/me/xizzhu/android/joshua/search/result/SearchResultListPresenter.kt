@@ -82,7 +82,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                 viewHolder?.searchResultListView?.run {
                     visibility = View.GONE
 
-                    val verses = interactor.search(query).dataOnSuccessOrThrow("Failed to search")
+                    val verses = interactor.search(query).dataOnSuccessOrThrow("Failed to search verses")
                     setItems(verses.toSearchItems(query))
 
                     scrollToPosition(0)
@@ -102,8 +102,8 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
 
     @VisibleForTesting
     suspend fun List<Verse>.toSearchItems(query: String): List<BaseItem> {
-        val bookNames = interactor.readBookNames()
-        val bookShortNames = interactor.readBookShortNames()
+        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
+        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
         val items = ArrayList<BaseItem>(size + Bible.BOOK_COUNT)
         var lastVerseBookIndex = -1
         forEach { verse ->

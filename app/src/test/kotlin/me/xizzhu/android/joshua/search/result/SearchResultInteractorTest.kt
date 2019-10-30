@@ -75,4 +75,44 @@ class SearchResultInteractorTest : BaseUnitTest() {
 
         assertEquals(ViewData.error(exception = exception), searchResultInteractor.search(query))
     }
+
+    @Test
+    fun testBookNames() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        val bookNames = MockContents.kjvBookNames
+        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(bookNames)
+
+        assertEquals(ViewData.success(bookNames), searchResultInteractor.bookNames())
+    }
+
+    @Test
+    fun testBookNamesWithException() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        val exception = RuntimeException("Random exception")
+        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenThrow(exception)
+
+        assertEquals(ViewData.error(exception = exception), searchResultInteractor.bookNames())
+    }
+
+    @Test
+    fun testBookShortNames() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        val bookShortNames = MockContents.kjvBookShortNames
+        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(bookShortNames)
+
+        assertEquals(ViewData.success(bookShortNames), searchResultInteractor.bookShortNames())
+    }
+
+    @Test
+    fun testBookShortNamesWithException() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        val exception = RuntimeException("Random exception")
+        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenThrow(exception)
+
+        assertEquals(ViewData.error(exception = exception), searchResultInteractor.bookShortNames())
+    }
 }
