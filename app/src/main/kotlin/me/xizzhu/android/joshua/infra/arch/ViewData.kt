@@ -43,6 +43,12 @@ fun <T> ViewData<T>.toNothing(): ViewData<Nothing?> = when (status) {
     else -> throw IllegalStateException("Unsupported view data status: $status")
 }
 
+inline fun <R> viewData(block: () -> R): ViewData<R> = try {
+    ViewData.success(block())
+} catch (e: Exception) {
+    ViewData.error(exception = e)
+}
+
 fun <T> ViewData<T>.dataOnSuccessOrThrow(errorMessage: String): T =
         if (ViewData.STATUS_SUCCESS == status) {
             data!!
