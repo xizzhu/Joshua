@@ -14,57 +14,38 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.result
+package me.xizzhu.android.joshua.progress
 
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.ReadingProgress
+import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.`when`
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SearchResultInteractorTest : BaseUnitTest() {
+class ReadingProgressInteractorTest : BaseUnitTest() {
+    @Mock
+    private lateinit var readingProgressManager: ReadingProgressManager
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
     @Mock
     private lateinit var settingsManager: SettingsManager
 
-    private lateinit var searchResultInteractor: SearchResultInteractor
+    private lateinit var readingProgressInteractor: ReadingProgressInteractor
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        searchResultInteractor = SearchResultInteractor(bibleReadingManager, settingsManager, testDispatcher)
-    }
-
-    @Test
-    fun testUpdateQuery() = testDispatcher.runBlockingTest {
-        val queryAsync = async { searchResultInteractor.query().take(3).toList() }
-
-        val queries = listOf(ViewData.loading(), ViewData.success("query"), ViewData.error())
-        queries.forEach { searchResultInteractor.updateQuery(it) }
-        assertEquals(queries, queryAsync.await())
-    }
-
-    @Test
-    fun testSearch() = testDispatcher.runBlockingTest {
-        val query = "query"
-        val currentTranslation = MockContents.kjvShortName
-        val verses = MockContents.kjvVerses
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
-        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(verses)
-
-        assertEquals(ViewData.success(verses), searchResultInteractor.search(query))
+        readingProgressInteractor = ReadingProgressInteractor(readingProgressManager, bibleReadingManager, settingsManager, testDispatcher)
     }
 
     @Test
@@ -74,16 +55,24 @@ class SearchResultInteractorTest : BaseUnitTest() {
         `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(bookNames)
 
-        assertEquals(ViewData.success(bookNames), searchResultInteractor.bookNames())
+        assertEquals(ViewData.success(bookNames), readingProgressInteractor.bookNames())
     }
 
     @Test
-    fun testBookShortNames() = testDispatcher.runBlockingTest {
+    fun testBookNamesWithException() = testDispatcher.runBlockingTest {
         val currentTranslation = MockContents.kjvShortName
-        val bookShortNames = MockContents.kjvBookShortNames
+        val exception = RuntimeException("Random exception")
         `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
-        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(bookShortNames)
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenThrow(exception)
 
-        assertEquals(ViewData.success(bookShortNames), searchResultInteractor.bookShortNames())
+        assertEquals(ViewData.error(exception = exception), readingProgressInteractor.bookNames())
+    }
+
+    @Test
+    fun testReadingProgress() = testDispatcher.runBlockingTest {
+        val readingProgress = ReadingProgress(0, 0L, emptyList())
+        `when`(readingProgressManager.read()).thenReturn(readingProgress)
+
+        assertEquals(ViewData.success(readingProgress), readingProgressInteractor.readingProgress())
     }
 }
