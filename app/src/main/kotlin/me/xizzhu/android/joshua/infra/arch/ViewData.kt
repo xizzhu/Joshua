@@ -43,6 +43,13 @@ fun <T> ViewData<T>.toNothing(): ViewData<Nothing?> = when (status) {
     else -> throw IllegalStateException("Unsupported view data status: $status")
 }
 
+fun <T> ViewData<T>.dataOnSuccessOrThrow(errorMessage: String): T =
+        if (ViewData.STATUS_SUCCESS == status) {
+            data!!
+        } else {
+            throw IllegalStateException(errorMessage, exception)
+        }
+
 suspend inline fun <T> Flow<ViewData<T>>.collect(
         crossinline onLoading: suspend (value: T?) -> Unit,
         crossinline onSuccess: suspend (value: T) -> Unit,

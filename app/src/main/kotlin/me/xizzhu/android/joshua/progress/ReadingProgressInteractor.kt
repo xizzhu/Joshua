@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
-import me.xizzhu.android.logger.Log
 
 class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager,
                                 private val bibleReadingManager: BibleReadingManager,
@@ -35,7 +34,6 @@ class ReadingProgressInteractor(private val readingProgressManager: ReadingProgr
                 try {
                     ViewData.success(bibleReadingManager.readBookNames(currentTranslation))
                 } catch (e: Exception) {
-                    Log.e(tag, "Failed to read book names", e)
                     ViewData.error(exception = e)
                 }
             }
@@ -43,7 +41,6 @@ class ReadingProgressInteractor(private val readingProgressManager: ReadingProgr
     suspend fun readingProgress(): ViewData<ReadingProgress> = try {
         ViewData.success(readingProgressManager.read())
     } catch (e: Exception) {
-        Log.e(tag, "Failed to read reading progress", e)
         ViewData.error(exception = e)
     }
 

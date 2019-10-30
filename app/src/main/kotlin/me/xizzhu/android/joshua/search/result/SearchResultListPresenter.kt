@@ -34,6 +34,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
+import me.xizzhu.android.joshua.infra.arch.dataOnSuccessOrThrow
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
@@ -81,12 +82,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                 viewHolder?.searchResultListView?.run {
                     visibility = View.GONE
 
-                    val verses = interactor.search(query).let { viewData ->
-                        if (ViewData.STATUS_SUCCESS != viewData.status) {
-                            throw IllegalStateException("Failed to search", viewData.exception)
-                        }
-                        viewData.data!!
-                    }
+                    val verses = interactor.search(query).dataOnSuccessOrThrow("Failed to search")
                     setItems(verses.toSearchItems(query))
 
                     scrollToPosition(0)

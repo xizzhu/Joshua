@@ -30,6 +30,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
+import me.xizzhu.android.joshua.infra.arch.dataOnSuccessOrThrow
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.ToastHelper
@@ -66,18 +67,8 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                 viewHolder?.readingProgressListView?.run {
                     visibility = View.GONE
 
-                    val bookNames = interactor.bookNames().let { viewData ->
-                        if (ViewData.STATUS_SUCCESS != viewData.status) {
-                            throw IllegalStateException("Failed to load book names", viewData.exception)
-                        }
-                        viewData.data!!
-                    }
-                    val readingProgress = interactor.readingProgress().let { viewData ->
-                        if (ViewData.STATUS_SUCCESS != viewData.status) {
-                            throw IllegalStateException("Failed to load reading progress", viewData.exception)
-                        }
-                        viewData.data!!
-                    }
+                    val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
+                    val readingProgress = interactor.readingProgress().dataOnSuccessOrThrow("Failed to load reading progress")
                     val items = readingProgress.toReadingProgressItems(bookNames, expanded,
                             this@ReadingProgressPresenter::onBookClicked,
                             this@ReadingProgressPresenter::openChapter)
