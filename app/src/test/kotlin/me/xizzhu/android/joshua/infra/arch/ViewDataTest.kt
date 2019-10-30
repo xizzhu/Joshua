@@ -65,4 +65,19 @@ class ViewDataTest : BaseUnitTest() {
         val exception = RuntimeException("random exception")
         assertEquals(ViewData.error(exception = exception), viewData { throw exception })
     }
+
+    @Test
+    fun testDataOnSuccess() {
+        assertEquals(Unit, ViewData.success(Unit).dataOnSuccessOrThrow(""))
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testDataOnLoading() {
+        ViewData.loading(Unit).dataOnSuccessOrThrow("")
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun testDataOnError() {
+        ViewData.error(Unit).dataOnSuccessOrThrow("")
+    }
 }
