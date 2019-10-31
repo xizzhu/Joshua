@@ -60,14 +60,12 @@ class BookmarksListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testToBaseItemsByDate() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
         val bookShortNames = MockContents.kjvBookShortNames
-        `when`(bookmarksListInteractor.readCurrentTranslation()).thenReturn(currentTranslation)
-        `when`(bookmarksListInteractor.readBookNames(currentTranslation)).thenReturn(bookNames)
-        `when`(bookmarksListInteractor.readBookShortNames(currentTranslation)).thenReturn(bookShortNames)
-        `when`(bookmarksListInteractor.readVerse(anyString(), any())).then { invocation ->
-            return@then MockContents.kjvVerses[(invocation.arguments[1] as VerseIndex).verseIndex]
+        `when`(bookmarksListInteractor.bookNames()).thenReturn(bookNames)
+        `when`(bookmarksListInteractor.bookShortNames()).thenReturn(bookShortNames)
+        `when`(bookmarksListInteractor.verse(any())).then { invocation ->
+            return@then MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex]
         }
 
         val expected = listOf(
@@ -92,14 +90,12 @@ class BookmarksListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testToBaseItemsByBook() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
         val bookShortNames = MockContents.kjvBookShortNames
-        `when`(bookmarksListInteractor.readCurrentTranslation()).thenReturn(currentTranslation)
-        `when`(bookmarksListInteractor.readBookNames(currentTranslation)).thenReturn(bookNames)
-        `when`(bookmarksListInteractor.readBookShortNames(currentTranslation)).thenReturn(bookShortNames)
-        `when`(bookmarksListInteractor.readVerse(anyString(), any())).then { invocation ->
-            return@then MockContents.kjvVerses[(invocation.arguments[1] as VerseIndex).verseIndex]
+        `when`(bookmarksListInteractor.bookNames()).thenReturn(bookNames)
+        `when`(bookmarksListInteractor.bookShortNames()).thenReturn(bookShortNames)
+        `when`(bookmarksListInteractor.verse(any())).then { invocation ->
+            return@then MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex]
         }
 
         val expected = listOf(

@@ -37,9 +37,8 @@ class HighlightsListPresenter(private val highlightsActivity: HighlightsActivity
     : BaseAnnotatedVersesPresenter<Highlight, HighlightsListInteractor>(
         highlightsActivity, navigator, R.string.text_no_highlights, highlightsListInteractor, dispatcher) {
     override suspend fun List<Highlight>.toBaseItemsByDate(): List<BaseItem> {
-        val currentTranslation = interactor.readCurrentTranslation()
-        val bookNames = interactor.readBookNames(currentTranslation)
-        val bookShortNames = interactor.readBookShortNames(currentTranslation)
+        val bookNames = interactor.bookNames()
+        val bookShortNames = interactor.bookShortNames()
 
         val calendar = Calendar.getInstance()
         var previousYear = -1
@@ -59,21 +58,20 @@ class HighlightsListPresenter(private val highlightsActivity: HighlightsActivity
 
             items.add(HighlightItem(highlight.verseIndex, bookNames[highlight.verseIndex.bookIndex],
                     bookShortNames[highlight.verseIndex.bookIndex],
-                    interactor.readVerse(currentTranslation, highlight.verseIndex).text.text,
+                    interactor.verse(highlight.verseIndex).text.text,
                     highlight.color, Constants.SORT_BY_DATE, this@HighlightsListPresenter::openVerse))
         }
         return items
     }
 
     override suspend fun List<Highlight>.toBaseItemsByBook(): List<BaseItem> {
-        val currentTranslation = interactor.readCurrentTranslation()
-        val bookNames = interactor.readBookNames(currentTranslation)
-        val bookShortNames = interactor.readBookShortNames(currentTranslation)
+        val bookNames = interactor.bookNames()
+        val bookShortNames = interactor.bookShortNames()
 
         val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
         forEach { highlight ->
-            val verse = interactor.readVerse(currentTranslation, highlight.verseIndex)
+            val verse = interactor.verse(highlight.verseIndex)
             val bookName = bookNames[highlight.verseIndex.bookIndex]
             if (highlight.verseIndex.bookIndex != currentBookIndex) {
                 items.add(TitleItem(bookName, false))

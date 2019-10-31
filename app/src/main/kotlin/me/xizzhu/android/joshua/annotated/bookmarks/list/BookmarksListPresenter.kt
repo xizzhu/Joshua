@@ -37,9 +37,8 @@ class BookmarksListPresenter(private val bookmarksActivity: BookmarksActivity,
     : BaseAnnotatedVersesPresenter<Bookmark, BookmarksListInteractor>(
         bookmarksActivity, navigator, R.string.text_no_bookmark, bookmarksListInteractor, dispatcher) {
     override suspend fun List<Bookmark>.toBaseItemsByDate(): List<BaseItem> {
-        val currentTranslation = interactor.readCurrentTranslation()
-        val bookNames = interactor.readBookNames(currentTranslation)
-        val bookShortNames = interactor.readBookShortNames(currentTranslation)
+        val bookNames = interactor.bookNames()
+        val bookShortNames = interactor.bookShortNames()
 
         val calendar = Calendar.getInstance()
         var previousYear = -1
@@ -59,21 +58,20 @@ class BookmarksListPresenter(private val bookmarksActivity: BookmarksActivity,
 
             items.add(BookmarkItem(bookmark.verseIndex, bookNames[bookmark.verseIndex.bookIndex],
                     bookShortNames[bookmark.verseIndex.bookIndex],
-                    interactor.readVerse(currentTranslation, bookmark.verseIndex).text.text,
+                    interactor.verse(bookmark.verseIndex).text.text,
                     Constants.SORT_BY_DATE, this@BookmarksListPresenter::openVerse))
         }
         return items
     }
 
     override suspend fun List<Bookmark>.toBaseItemsByBook(): List<BaseItem> {
-        val currentTranslation = interactor.readCurrentTranslation()
-        val bookNames = interactor.readBookNames(currentTranslation)
-        val bookShortNames = interactor.readBookShortNames(currentTranslation)
+        val bookNames = interactor.bookNames()
+        val bookShortNames = interactor.bookShortNames()
 
         val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
         forEach { bookmark ->
-            val verse = interactor.readVerse(currentTranslation, bookmark.verseIndex)
+            val verse = interactor.verse(bookmark.verseIndex)
             val bookName = bookNames[bookmark.verseIndex.bookIndex]
             if (bookmark.verseIndex.bookIndex != currentBookIndex) {
                 items.add(TitleItem(bookName, false))

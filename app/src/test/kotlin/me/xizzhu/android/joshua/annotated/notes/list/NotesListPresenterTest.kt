@@ -59,12 +59,10 @@ class NotesListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testToBaseItemsByDate() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
         val bookShortNames = MockContents.kjvBookShortNames
-        `when`(notesListInteractor.readCurrentTranslation()).thenReturn(currentTranslation)
-        `when`(notesListInteractor.readBookShortNames(currentTranslation)).thenReturn(bookShortNames)
-        `when`(notesListInteractor.readVerse(anyString(), any())).then { invocation ->
-            return@then MockContents.kjvVerses[(invocation.arguments[1] as VerseIndex).verseIndex]
+        `when`(notesListInteractor.bookShortNames()).thenReturn(bookShortNames)
+        `when`(notesListInteractor.verse(any())).then { invocation ->
+            return@then MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex]
         }
 
         val expected = listOf(
@@ -89,14 +87,12 @@ class NotesListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testToBaseItemsByBook() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
         val bookShortNames = MockContents.kjvBookShortNames
-        `when`(notesListInteractor.readCurrentTranslation()).thenReturn(currentTranslation)
-        `when`(notesListInteractor.readBookNames(currentTranslation)).thenReturn(bookNames)
-        `when`(notesListInteractor.readBookShortNames(currentTranslation)).thenReturn(bookShortNames)
-        `when`(notesListInteractor.readVerse(anyString(), any())).then { invocation ->
-            return@then MockContents.kjvVerses[(invocation.arguments[1] as VerseIndex).verseIndex]
+        `when`(notesListInteractor.bookNames()).thenReturn(bookNames)
+        `when`(notesListInteractor.bookShortNames()).thenReturn(bookShortNames)
+        `when`(notesListInteractor.verse(any())).then { invocation ->
+            return@then MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex]
         }
 
         val expected = listOf(

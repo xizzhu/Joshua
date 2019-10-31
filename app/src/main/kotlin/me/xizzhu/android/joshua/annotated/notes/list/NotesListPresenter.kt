@@ -38,8 +38,7 @@ class NotesListPresenter(private val notesActivity: NotesActivity,
     : BaseAnnotatedVersesPresenter<Note, NotesListInteractor>(
         notesActivity, navigator, R.string.text_no_note, notesListInteractor, dispatcher) {
     override suspend fun List<Note>.toBaseItemsByDate(): List<BaseItem> {
-        val currentTranslation = interactor.readCurrentTranslation()
-        val bookShortNames = interactor.readBookShortNames(currentTranslation)
+        val bookShortNames = interactor.bookShortNames()
 
         val calendar = Calendar.getInstance()
         var previousYear = -1
@@ -58,21 +57,20 @@ class NotesListPresenter(private val notesActivity: NotesActivity,
             }
 
             items.add(NoteItem(note.verseIndex, bookShortNames[note.verseIndex.bookIndex],
-                    interactor.readVerse(currentTranslation, note.verseIndex).text.text,
+                    interactor.verse(note.verseIndex).text.text,
                     note.note, this@NotesListPresenter::openVerse))
         }
         return items
     }
 
     override suspend fun List<Note>.toBaseItemsByBook(): List<BaseItem> {
-        val currentTranslation = interactor.readCurrentTranslation()
-        val bookNames = interactor.readBookNames(currentTranslation)
-        val bookShortNames = interactor.readBookShortNames(currentTranslation)
+        val bookNames = interactor.bookNames()
+        val bookShortNames = interactor.bookShortNames()
 
         val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
         forEach { note ->
-            val verse = interactor.readVerse(currentTranslation, note.verseIndex)
+            val verse = interactor.verse(note.verseIndex)
             if (note.verseIndex.bookIndex != currentBookIndex) {
                 items.add(TitleItem(bookNames[note.verseIndex.bookIndex], false))
                 currentBookIndex = note.verseIndex.bookIndex
