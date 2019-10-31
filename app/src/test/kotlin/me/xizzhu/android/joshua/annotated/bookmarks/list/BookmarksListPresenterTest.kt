@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -62,10 +63,10 @@ class BookmarksListPresenterTest : BaseUnitTest() {
     fun testToBaseItemsByDate() = testDispatcher.runBlockingTest {
         val bookNames = MockContents.kjvBookNames
         val bookShortNames = MockContents.kjvBookShortNames
-        `when`(bookmarksListInteractor.bookNames()).thenReturn(bookNames)
-        `when`(bookmarksListInteractor.bookShortNames()).thenReturn(bookShortNames)
+        `when`(bookmarksListInteractor.bookNames()).thenReturn(viewData { bookNames })
+        `when`(bookmarksListInteractor.bookShortNames()).thenReturn(viewData { bookShortNames })
         `when`(bookmarksListInteractor.verse(any())).then { invocation ->
-            return@then MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex]
+            return@then viewData { MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex] }
         }
 
         val expected = listOf(
@@ -92,10 +93,10 @@ class BookmarksListPresenterTest : BaseUnitTest() {
     fun testToBaseItemsByBook() = testDispatcher.runBlockingTest {
         val bookNames = MockContents.kjvBookNames
         val bookShortNames = MockContents.kjvBookShortNames
-        `when`(bookmarksListInteractor.bookNames()).thenReturn(bookNames)
-        `when`(bookmarksListInteractor.bookShortNames()).thenReturn(bookShortNames)
+        `when`(bookmarksListInteractor.bookNames()).thenReturn(viewData { bookNames })
+        `when`(bookmarksListInteractor.bookShortNames()).thenReturn(viewData { bookShortNames })
         `when`(bookmarksListInteractor.verse(any())).then { invocation ->
-            return@then MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex]
+            return@then viewData { MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex] }
         }
 
         val expected = listOf(

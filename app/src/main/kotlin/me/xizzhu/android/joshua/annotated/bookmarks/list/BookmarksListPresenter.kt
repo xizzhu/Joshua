@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity
 import me.xizzhu.android.joshua.annotated.formatDate
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.infra.arch.dataOnSuccessOrThrow
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import java.util.*
@@ -37,8 +38,8 @@ class BookmarksListPresenter(private val bookmarksActivity: BookmarksActivity,
     : BaseAnnotatedVersesPresenter<Bookmark, BookmarksListInteractor>(
         bookmarksActivity, navigator, R.string.text_no_bookmark, bookmarksListInteractor, dispatcher) {
     override suspend fun List<Bookmark>.toBaseItemsByDate(): List<BaseItem> {
-        val bookNames = interactor.bookNames()
-        val bookShortNames = interactor.bookShortNames()
+        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
+        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
 
         val calendar = Calendar.getInstance()
         var previousYear = -1
@@ -56,28 +57,28 @@ class BookmarksListPresenter(private val bookmarksActivity: BookmarksActivity,
                 previousDayOfYear = currentDayOfYear
             }
 
+            val verse = interactor.verse(bookmark.verseIndex).dataOnSuccessOrThrow("Failed to load verse")
             items.add(BookmarkItem(bookmark.verseIndex, bookNames[bookmark.verseIndex.bookIndex],
-                    bookShortNames[bookmark.verseIndex.bookIndex],
-                    interactor.verse(bookmark.verseIndex).text.text,
+                    bookShortNames[bookmark.verseIndex.bookIndex], verse.text.text,
                     Constants.SORT_BY_DATE, this@BookmarksListPresenter::openVerse))
         }
         return items
     }
 
     override suspend fun List<Bookmark>.toBaseItemsByBook(): List<BaseItem> {
-        val bookNames = interactor.bookNames()
-        val bookShortNames = interactor.bookShortNames()
+        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
+        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
 
         val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
         forEach { bookmark ->
-            val verse = interactor.verse(bookmark.verseIndex)
             val bookName = bookNames[bookmark.verseIndex.bookIndex]
             if (bookmark.verseIndex.bookIndex != currentBookIndex) {
                 items.add(TitleItem(bookName, false))
                 currentBookIndex = bookmark.verseIndex.bookIndex
             }
 
+            val verse = interactor.verse(bookmark.verseIndex).dataOnSuccessOrThrow("Failed to load book short names")
             items.add(BookmarkItem(bookmark.verseIndex, bookName, bookShortNames[bookmark.verseIndex.bookIndex],
                     verse.text.text, Constants.SORT_BY_BOOK, this@BookmarksListPresenter::openVerse))
         }

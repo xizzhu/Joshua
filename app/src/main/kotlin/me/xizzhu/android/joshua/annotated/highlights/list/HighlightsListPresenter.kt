@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.annotated.formatDate
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.infra.arch.dataOnSuccessOrThrow
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import java.util.*
@@ -37,8 +38,8 @@ class HighlightsListPresenter(private val highlightsActivity: HighlightsActivity
     : BaseAnnotatedVersesPresenter<Highlight, HighlightsListInteractor>(
         highlightsActivity, navigator, R.string.text_no_highlights, highlightsListInteractor, dispatcher) {
     override suspend fun List<Highlight>.toBaseItemsByDate(): List<BaseItem> {
-        val bookNames = interactor.bookNames()
-        val bookShortNames = interactor.bookShortNames()
+        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
+        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
 
         val calendar = Calendar.getInstance()
         var previousYear = -1
@@ -56,28 +57,28 @@ class HighlightsListPresenter(private val highlightsActivity: HighlightsActivity
                 previousDayOfYear = currentDayOfYear
             }
 
+            val verse = interactor.verse(highlight.verseIndex).dataOnSuccessOrThrow("Failed to load verse")
             items.add(HighlightItem(highlight.verseIndex, bookNames[highlight.verseIndex.bookIndex],
-                    bookShortNames[highlight.verseIndex.bookIndex],
-                    interactor.verse(highlight.verseIndex).text.text,
+                    bookShortNames[highlight.verseIndex.bookIndex], verse.text.text,
                     highlight.color, Constants.SORT_BY_DATE, this@HighlightsListPresenter::openVerse))
         }
         return items
     }
 
     override suspend fun List<Highlight>.toBaseItemsByBook(): List<BaseItem> {
-        val bookNames = interactor.bookNames()
-        val bookShortNames = interactor.bookShortNames()
+        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
+        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
 
         val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
         forEach { highlight ->
-            val verse = interactor.verse(highlight.verseIndex)
             val bookName = bookNames[highlight.verseIndex.bookIndex]
             if (highlight.verseIndex.bookIndex != currentBookIndex) {
                 items.add(TitleItem(bookName, false))
                 currentBookIndex = highlight.verseIndex.bookIndex
             }
 
+            val verse = interactor.verse(highlight.verseIndex).dataOnSuccessOrThrow("Failed to load book short names")
             items.add(HighlightItem(highlight.verseIndex, bookName, bookShortNames[highlight.verseIndex.bookIndex],
                     verse.text.text, highlight.color, Constants.SORT_BY_BOOK, this@HighlightsListPresenter::openVerse))
         }

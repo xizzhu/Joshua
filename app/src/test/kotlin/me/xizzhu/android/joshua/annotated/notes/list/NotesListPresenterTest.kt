@@ -22,6 +22,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -60,9 +61,9 @@ class NotesListPresenterTest : BaseUnitTest() {
     @Test
     fun testToBaseItemsByDate() = testDispatcher.runBlockingTest {
         val bookShortNames = MockContents.kjvBookShortNames
-        `when`(notesListInteractor.bookShortNames()).thenReturn(bookShortNames)
+        `when`(notesListInteractor.bookShortNames()).thenReturn(viewData { bookShortNames })
         `when`(notesListInteractor.verse(any())).then { invocation ->
-            return@then MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex]
+            return@then viewData { MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex] }
         }
 
         val expected = listOf(
@@ -89,10 +90,10 @@ class NotesListPresenterTest : BaseUnitTest() {
     fun testToBaseItemsByBook() = testDispatcher.runBlockingTest {
         val bookNames = MockContents.kjvBookNames
         val bookShortNames = MockContents.kjvBookShortNames
-        `when`(notesListInteractor.bookNames()).thenReturn(bookNames)
-        `when`(notesListInteractor.bookShortNames()).thenReturn(bookShortNames)
+        `when`(notesListInteractor.bookNames()).thenReturn(viewData { bookNames })
+        `when`(notesListInteractor.bookShortNames()).thenReturn(viewData { bookShortNames })
         `when`(notesListInteractor.verse(any())).then { invocation ->
-            return@then MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex]
+            return@then viewData { MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex] }
         }
 
         val expected = listOf(

@@ -23,11 +23,11 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.AfterTest
@@ -73,7 +73,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     @Test
     fun testPrepareItemsWithEmptyBookmarks() = testDispatcher.runBlockingTest {
         val title = "random title"
-        `when`(interactor.readVerseAnnotations(ArgumentMatchers.anyInt())).thenReturn(emptyList())
+        `when`(interactor.verseAnnotations(anyInt())).thenReturn(viewData { emptyList<Unit>() })
         `when`(activity.getString(anyInt())).thenReturn(title)
 
         assertEquals(listOf(TextItem(title)), baseAnnotatedVersesPresenter.prepareItems(Constants.SORT_BY_DATE))

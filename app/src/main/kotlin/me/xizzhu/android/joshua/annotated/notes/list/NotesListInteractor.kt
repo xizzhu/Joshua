@@ -19,15 +19,19 @@ package me.xizzhu.android.joshua.annotated.notes.list
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesInteractor
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.viewData
 
 class NotesListInteractor(private val noteManager: NoteManager,
                           bibleReadingManager: BibleReadingManager,
                           settingsManager: SettingsManager,
                           dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseAnnotatedVersesInteractor<Note>(bibleReadingManager, settingsManager, dispatcher) {
-    override fun sortOrder(): Flow<Int> = noteManager.observeSortOrder()
+    override fun sortOrder(): Flow<ViewData<Int>> = noteManager.observeSortOrder().map { ViewData.success(it) }
 
-    override suspend fun readVerseAnnotations(@Constants.SortOrder sortOrder: Int): List<Note> = noteManager.read(sortOrder)
+    override suspend fun verseAnnotations(@Constants.SortOrder sortOrder: Int): ViewData<List<Note>> =
+            viewData { noteManager.read(sortOrder) }
 }

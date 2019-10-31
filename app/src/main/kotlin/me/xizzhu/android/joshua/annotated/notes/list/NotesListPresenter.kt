@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.formatDate
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.infra.arch.dataOnSuccessOrThrow
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -38,7 +39,7 @@ class NotesListPresenter(private val notesActivity: NotesActivity,
     : BaseAnnotatedVersesPresenter<Note, NotesListInteractor>(
         notesActivity, navigator, R.string.text_no_note, notesListInteractor, dispatcher) {
     override suspend fun List<Note>.toBaseItemsByDate(): List<BaseItem> {
-        val bookShortNames = interactor.bookShortNames()
+        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
 
         val calendar = Calendar.getInstance()
         var previousYear = -1
@@ -56,26 +57,26 @@ class NotesListPresenter(private val notesActivity: NotesActivity,
                 previousDayOfYear = currentDayOfYear
             }
 
+            val verse = interactor.verse(note.verseIndex).dataOnSuccessOrThrow("Failed to load verse")
             items.add(NoteItem(note.verseIndex, bookShortNames[note.verseIndex.bookIndex],
-                    interactor.verse(note.verseIndex).text.text,
-                    note.note, this@NotesListPresenter::openVerse))
+                    verse.text.text, note.note, this@NotesListPresenter::openVerse))
         }
         return items
     }
 
     override suspend fun List<Note>.toBaseItemsByBook(): List<BaseItem> {
-        val bookNames = interactor.bookNames()
-        val bookShortNames = interactor.bookShortNames()
+        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
+        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
 
         val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
         forEach { note ->
-            val verse = interactor.verse(note.verseIndex)
             if (note.verseIndex.bookIndex != currentBookIndex) {
                 items.add(TitleItem(bookNames[note.verseIndex.bookIndex], false))
                 currentBookIndex = note.verseIndex.bookIndex
             }
 
+            val verse = interactor.verse(note.verseIndex).dataOnSuccessOrThrow("Failed to load verse")
             items.add(NoteItem(note.verseIndex, bookShortNames[note.verseIndex.bookIndex],
                     verse.text.text, note.note, this@NotesListPresenter::openVerse))
         }

@@ -23,7 +23,6 @@ import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -32,6 +31,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
+import me.xizzhu.android.joshua.infra.arch.dataOnSuccessOrThrow
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -52,7 +52,7 @@ abstract class BaseAnnotatedVersesPresenter
         super.onStart()
 
         coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.annotatedVerseListView?.setSettings(it) } }
-        coroutineScope.launch { interactor.sortOrder().collect { load(it) } }
+        coroutineScope.launch { interactor.sortOrder().collectOnSuccess { load(it) } }
     }
 
     private fun load(@Constants.SortOrder sortOrder: Int) {
@@ -76,7 +76,7 @@ abstract class BaseAnnotatedVersesPresenter
 
     @VisibleForTesting
     suspend fun prepareItems(@Constants.SortOrder sortOrder: Int): List<BaseItem> {
-        val verseAnnotations = interactor.readVerseAnnotations(sortOrder)
+        val verseAnnotations = interactor.verseAnnotations(sortOrder).dataOnSuccessOrThrow("Failed to load verse annotations")
         return if (verseAnnotations.isEmpty()) {
             listOf(TextItem(activity.getString(noItemText)))
         } else {

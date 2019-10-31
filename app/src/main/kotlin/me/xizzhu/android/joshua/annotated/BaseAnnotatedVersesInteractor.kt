@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
 
 abstract class BaseAnnotatedVersesInteractor<VerseAnnotation>(private val bibleReadingManager: BibleReadingManager,
@@ -38,24 +40,24 @@ abstract class BaseAnnotatedVersesInteractor<VerseAnnotation>(private val bibleR
         coroutineScope.launch { bibleReadingManager.observeCurrentTranslation().collect { currentTranslation = it } }
     }
 
-    suspend fun bookNames(): List<String> =
-            bibleReadingManager.readBookNames(currentTranslation())
+    suspend fun bookNames(): ViewData<List<String>> =
+            viewData { bibleReadingManager.readBookNames(currentTranslation()) }
 
     private suspend fun currentTranslation(): String =
             if (currentTranslation.isNotEmpty()) currentTranslation
             else bibleReadingManager.observeCurrentTranslation().first()
 
-    suspend fun bookShortNames(): List<String> =
-            bibleReadingManager.readBookShortNames(currentTranslation())
+    suspend fun bookShortNames(): ViewData<List<String>> =
+            viewData { bibleReadingManager.readBookShortNames(currentTranslation()) }
 
-    suspend fun verse(verseIndex: VerseIndex): Verse =
-            bibleReadingManager.readVerse(currentTranslation(), verseIndex)
+    suspend fun verse(verseIndex: VerseIndex): ViewData<Verse> =
+            viewData { bibleReadingManager.readVerse(currentTranslation(), verseIndex) }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 
-    abstract fun sortOrder(): Flow<Int>
+    abstract fun sortOrder(): Flow<ViewData<Int>>
 
-    abstract suspend fun readVerseAnnotations(@Constants.SortOrder sortOrder: Int): List<VerseAnnotation>
+    abstract suspend fun verseAnnotations(@Constants.SortOrder sortOrder: Int): ViewData<List<VerseAnnotation>>
 }

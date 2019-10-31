@@ -19,15 +19,19 @@ package me.xizzhu.android.joshua.annotated.bookmarks.list
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesInteractor
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.viewData
 
 class BookmarksListInteractor(private val bookmarkManager: BookmarkManager,
                               bibleReadingManager: BibleReadingManager,
                               settingsManager: SettingsManager,
                               dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseAnnotatedVersesInteractor<Bookmark>(bibleReadingManager, settingsManager, dispatcher) {
-    override fun sortOrder(): Flow<Int> = bookmarkManager.observeSortOrder()
+    override fun sortOrder(): Flow<ViewData<Int>> = bookmarkManager.observeSortOrder().map { ViewData.success(it) }
 
-    override suspend fun readVerseAnnotations(@Constants.SortOrder sortOrder: Int): List<Bookmark> = bookmarkManager.read(sortOrder)
+    override suspend fun verseAnnotations(@Constants.SortOrder sortOrder: Int): ViewData<List<Bookmark>> =
+            viewData { bookmarkManager.read(sortOrder) }
 }
