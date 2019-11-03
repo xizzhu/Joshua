@@ -57,9 +57,9 @@ class HighlightsListPresenter(private val highlightsActivity: HighlightsActivity
                 previousDayOfYear = currentDayOfYear
             }
 
-            val verse = interactor.verse(highlight.verseIndex).dataOnSuccessOrThrow("Failed to load verse")
             items.add(HighlightItem(highlight.verseIndex, bookNames[highlight.verseIndex.bookIndex],
-                    bookShortNames[highlight.verseIndex.bookIndex], verse.text.text,
+                    bookShortNames[highlight.verseIndex.bookIndex],
+                    interactor.verse(highlight.verseIndex).dataOnSuccessOrThrow("Failed to load verse").text.text,
                     highlight.color, Constants.SORT_BY_DATE, this@HighlightsListPresenter::openVerse))
         }
         return items
@@ -78,9 +78,9 @@ class HighlightsListPresenter(private val highlightsActivity: HighlightsActivity
                 currentBookIndex = highlight.verseIndex.bookIndex
             }
 
-            val verse = interactor.verse(highlight.verseIndex).dataOnSuccessOrThrow("Failed to load book short names")
             items.add(HighlightItem(highlight.verseIndex, bookName, bookShortNames[highlight.verseIndex.bookIndex],
-                    verse.text.text, highlight.color, Constants.SORT_BY_BOOK, this@HighlightsListPresenter::openVerse))
+                    interactor.verse(highlight.verseIndex).dataOnSuccessOrThrow("Failed to load book short names").text.text,
+                    highlight.color, Constants.SORT_BY_BOOK, this@HighlightsListPresenter::openVerse))
         }
         return items
     }

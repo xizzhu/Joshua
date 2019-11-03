@@ -57,9 +57,9 @@ class NotesListPresenter(private val notesActivity: NotesActivity,
                 previousDayOfYear = currentDayOfYear
             }
 
-            val verse = interactor.verse(note.verseIndex).dataOnSuccessOrThrow("Failed to load verse")
             items.add(NoteItem(note.verseIndex, bookShortNames[note.verseIndex.bookIndex],
-                    verse.text.text, note.note, this@NotesListPresenter::openVerse))
+                    interactor.verse(note.verseIndex).dataOnSuccessOrThrow("Failed to load verse").text.text,
+                    note.note, this@NotesListPresenter::openVerse))
         }
         return items
     }
@@ -76,9 +76,9 @@ class NotesListPresenter(private val notesActivity: NotesActivity,
                 currentBookIndex = note.verseIndex.bookIndex
             }
 
-            val verse = interactor.verse(note.verseIndex).dataOnSuccessOrThrow("Failed to load verse")
             items.add(NoteItem(note.verseIndex, bookShortNames[note.verseIndex.bookIndex],
-                    verse.text.text, note.note, this@NotesListPresenter::openVerse))
+                    interactor.verse(note.verseIndex).dataOnSuccessOrThrow("Failed to load verse").text.text,
+                    note.note, this@NotesListPresenter::openVerse))
         }
         return items
     }

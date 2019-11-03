@@ -57,9 +57,9 @@ class BookmarksListPresenter(private val bookmarksActivity: BookmarksActivity,
                 previousDayOfYear = currentDayOfYear
             }
 
-            val verse = interactor.verse(bookmark.verseIndex).dataOnSuccessOrThrow("Failed to load verse")
             items.add(BookmarkItem(bookmark.verseIndex, bookNames[bookmark.verseIndex.bookIndex],
-                    bookShortNames[bookmark.verseIndex.bookIndex], verse.text.text,
+                    bookShortNames[bookmark.verseIndex.bookIndex],
+                    interactor.verse(bookmark.verseIndex).dataOnSuccessOrThrow("Failed to load verse").text.text,
                     Constants.SORT_BY_DATE, this@BookmarksListPresenter::openVerse))
         }
         return items
@@ -78,9 +78,9 @@ class BookmarksListPresenter(private val bookmarksActivity: BookmarksActivity,
                 currentBookIndex = bookmark.verseIndex.bookIndex
             }
 
-            val verse = interactor.verse(bookmark.verseIndex).dataOnSuccessOrThrow("Failed to load book short names")
             items.add(BookmarkItem(bookmark.verseIndex, bookName, bookShortNames[bookmark.verseIndex.bookIndex],
-                    verse.text.text, Constants.SORT_BY_BOOK, this@BookmarksListPresenter::openVerse))
+                    interactor.verse(bookmark.verseIndex).dataOnSuccessOrThrow("Failed to load book short names").text.text,
+                    Constants.SORT_BY_BOOK, this@BookmarksListPresenter::openVerse))
         }
         return items
     }
