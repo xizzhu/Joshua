@@ -23,14 +23,15 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 
-abstract class BaseAnnotatedVersesViewModel<VerseAnnotation>(settingsManager: SettingsManager,
-                                                             annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
-                                                             private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                                                             private val baseAnnotatedVersesInteractor: BaseAnnotatedVersesInteractor<VerseAnnotation>,
-                                                             dispatcher: CoroutineDispatcher = Dispatchers.Default)
+abstract class BaseAnnotatedVersesViewModel<V: VerseAnnotation>(settingsManager: SettingsManager,
+                                                                annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
+                                                                private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
+                                                                private val baseAnnotatedVersesInteractor: BaseAnnotatedVersesInteractor<V>,
+                                                                dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareViewModel(settingsManager, listOf(annotatedVersesToolbarInteractor, loadingSpinnerInteractor, baseAnnotatedVersesInteractor), dispatcher) {
     @UiThread
     override fun onStart() {

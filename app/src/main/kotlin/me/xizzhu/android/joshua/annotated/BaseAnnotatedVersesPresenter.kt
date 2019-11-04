@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
@@ -38,13 +39,15 @@ import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.logger.Log
+import java.util.*
+import kotlin.collections.ArrayList
 
 data class AnnotatedVersesViewHolder(val annotatedVerseListView: CommonRecyclerView) : ViewHolder
 
-abstract class BaseAnnotatedVersesPresenter
-<VerseAnnotation, Interactor : BaseAnnotatedVersesInteractor<VerseAnnotation>>
-(private val activity: BaseAnnotatedVersesActivity<VerseAnnotation>, private val navigator: Navigator,
+abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : BaseAnnotatedVersesInteractor<V>>
+(private val activity: BaseAnnotatedVersesActivity<V>, private val navigator: Navigator,
  @StringRes private val noItemText: Int, interactor: Interactor, dispatcher: CoroutineDispatcher)
     : BaseSettingsAwarePresenter<AnnotatedVersesViewHolder, Interactor>(interactor, dispatcher) {
     @UiThread
@@ -89,10 +92,57 @@ abstract class BaseAnnotatedVersesPresenter
     }
 
     @VisibleForTesting
-    abstract suspend fun List<VerseAnnotation>.toBaseItemsByDate(): List<BaseItem>
+    suspend fun List<V>.toBaseItemsByDate(): List<BaseItem> {
+        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
+        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
+
+        val calendar = Calendar.getInstance()
+        var previousYear = -1
+        var previousDayOfYear = -1
+
+        val items: ArrayList<BaseItem> = ArrayList()
+        forEach { verseAnnotation ->
+            calendar.timeInMillis = verseAnnotation.timestamp
+            val currentYear = calendar.get(Calendar.YEAR)
+            val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+            if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
+                items.add(TitleItem(verseAnnotation.timestamp.formatDate(activity.resources, calendar), false))
+
+                previousYear = currentYear
+                previousDayOfYear = currentDayOfYear
+            }
+
+            items.add(verseAnnotation.toBaseItem(bookNames[verseAnnotation.verseIndex.bookIndex],
+                    bookShortNames[verseAnnotation.verseIndex.bookIndex],
+                    interactor.verse(verseAnnotation.verseIndex).dataOnSuccessOrThrow("Failed to load verse").text.text,
+                    Constants.SORT_BY_DATE))
+        }
+        return items
+    }
+
+    abstract fun V.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem
 
     @VisibleForTesting
-    abstract suspend fun List<VerseAnnotation>.toBaseItemsByBook(): List<BaseItem>
+    suspend fun List<V>.toBaseItemsByBook(): List<BaseItem> {
+        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
+        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
+
+        val items: ArrayList<BaseItem> = ArrayList()
+        var currentBookIndex = -1
+        forEach { verseAnnotation ->
+            val bookName = bookNames[verseAnnotation.verseIndex.bookIndex]
+            if (verseAnnotation.verseIndex.bookIndex != currentBookIndex) {
+                items.add(TitleItem(bookName, false))
+                currentBookIndex = verseAnnotation.verseIndex.bookIndex
+            }
+
+            items.add(verseAnnotation.toBaseItem(bookNames[verseAnnotation.verseIndex.bookIndex],
+                    bookShortNames[verseAnnotation.verseIndex.bookIndex],
+                    interactor.verse(verseAnnotation.verseIndex).dataOnSuccessOrThrow("Failed to load verse").text.text,
+                    Constants.SORT_BY_BOOK))
+        }
+        return items
+    }
 
     @VisibleForTesting
     fun openVerse(verseToSelect: VerseIndex) {

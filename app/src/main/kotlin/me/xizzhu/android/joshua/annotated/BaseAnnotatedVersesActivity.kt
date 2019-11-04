@@ -20,6 +20,7 @@ import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarViewHolder
+import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
 import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
@@ -28,7 +29,7 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerViewHolder
 import javax.inject.Inject
 
-abstract class BaseAnnotatedVersesActivity<VerseAnnotation> : BaseSettingsAwareActivity() {
+abstract class BaseAnnotatedVersesActivity<V: VerseAnnotation> : BaseSettingsAwareActivity() {
     @Inject
     lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter
     @Inject
@@ -45,5 +46,5 @@ abstract class BaseAnnotatedVersesActivity<VerseAnnotation> : BaseSettingsAwareA
 
     override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(toolbarPresenter, loadingSpinnerPresenter, listPresenter())
 
-    protected abstract fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, out BaseAnnotatedVersesInteractor<VerseAnnotation>>
+    protected abstract fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, out BaseAnnotatedVersesInteractor<V>>
 }

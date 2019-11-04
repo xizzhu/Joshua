@@ -28,7 +28,7 @@ import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
 
-abstract class BaseAnnotatedVersesInteractor<VerseAnnotation>(private val bibleReadingManager: BibleReadingManager,
+abstract class BaseAnnotatedVersesInteractor<V: VerseAnnotation>(private val bibleReadingManager: BibleReadingManager,
                                                               settingsManager: SettingsManager,
                                                               dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
@@ -59,5 +59,5 @@ abstract class BaseAnnotatedVersesInteractor<VerseAnnotation>(private val bibleR
 
     abstract fun sortOrder(): Flow<ViewData<Int>>
 
-    abstract suspend fun verseAnnotations(@Constants.SortOrder sortOrder: Int): ViewData<List<VerseAnnotation>>
+    abstract suspend fun verseAnnotations(@Constants.SortOrder sortOrder: Int): ViewData<List<V>>
 }

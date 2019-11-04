@@ -26,9 +26,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.NoteRepository
 import me.xizzhu.android.logger.Log
 
-data class Note(val verseIndex: VerseIndex, val note: String, val timestamp: Long) {
-    fun isValid(): Boolean = verseIndex.isValid() && timestamp > 0L
-}
+data class Note(override val verseIndex: VerseIndex, val note: String, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp)
 
 class NoteManager(private val noteRepository: NoteRepository) {
     companion object {

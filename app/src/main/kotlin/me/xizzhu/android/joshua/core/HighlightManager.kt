@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.HighlightRepository
 import me.xizzhu.android.logger.Log
 
-data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val timestamp: Long) {
+data class Highlight(override val verseIndex: VerseIndex, @ColorInt val color: Int, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp) {
     companion object {
         const val COLOR_NONE = 0
         const val COLOR_YELLOW = 0xFFFFFF00.toInt()
@@ -43,7 +43,7 @@ data class Highlight(val verseIndex: VerseIndex, @ColorInt val color: Int, val t
         annotation class AvailableColor
     }
 
-    fun isValid(): Boolean = verseIndex.isValid() && timestamp > 0L
+    override fun isValid(): Boolean = super.isValid() && AVAILABLE_COLORS.contains(color)
 }
 
 class HighlightManager(private val highlightRepository: HighlightRepository) {
