@@ -19,15 +19,19 @@ package me.xizzhu.android.joshua.annotated.highlights.list
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesInteractor
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.viewData
 
 class HighlightsListInteractor(private val highlightManager: HighlightManager,
                                bibleReadingManager: BibleReadingManager,
                                settingsManager: SettingsManager,
                                dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseAnnotatedVersesInteractor<Highlight>(bibleReadingManager, settingsManager, dispatcher) {
-    override fun sortOrder(): Flow<Int> = highlightManager.observeSortOrder()
+    override fun sortOrder(): Flow<ViewData<Int>> = highlightManager.observeSortOrder().map { ViewData.success(it) }
 
-    override suspend fun readVerseAnnotations(@Constants.SortOrder sortOrder: Int): List<Highlight> = highlightManager.read(sortOrder)
+    override suspend fun verseAnnotations(@Constants.SortOrder sortOrder: Int): ViewData<List<Highlight>> =
+            viewData { highlightManager.read(sortOrder) }
 }

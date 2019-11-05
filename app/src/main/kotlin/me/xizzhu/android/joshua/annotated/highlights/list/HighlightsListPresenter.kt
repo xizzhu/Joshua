@@ -21,68 +21,17 @@ import kotlinx.coroutines.Dispatchers
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
-import me.xizzhu.android.joshua.annotated.formatDate
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import java.util.*
-import kotlin.collections.ArrayList
 
-class HighlightsListPresenter(private val highlightsActivity: HighlightsActivity,
+class HighlightsListPresenter(highlightsActivity: HighlightsActivity,
                               navigator: Navigator,
                               highlightsListInteractor: HighlightsListInteractor,
                               dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : BaseAnnotatedVersesPresenter<Highlight, HighlightsListInteractor>(
         highlightsActivity, navigator, R.string.text_no_highlights, highlightsListInteractor, dispatcher) {
-    override suspend fun List<Highlight>.toBaseItemsByDate(): List<BaseItem> {
-        val currentTranslation = interactor.readCurrentTranslation()
-        val bookNames = interactor.readBookNames(currentTranslation)
-        val bookShortNames = interactor.readBookShortNames(currentTranslation)
-
-        val calendar = Calendar.getInstance()
-        var previousYear = -1
-        var previousDayOfYear = -1
-
-        val items: ArrayList<BaseItem> = ArrayList()
-        forEach { highlight ->
-            calendar.timeInMillis = highlight.timestamp
-            val currentYear = calendar.get(Calendar.YEAR)
-            val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
-            if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
-                items.add(TitleItem(highlight.timestamp.formatDate(highlightsActivity.resources, calendar), false))
-
-                previousYear = currentYear
-                previousDayOfYear = currentDayOfYear
-            }
-
-            items.add(HighlightItem(highlight.verseIndex, bookNames[highlight.verseIndex.bookIndex],
-                    bookShortNames[highlight.verseIndex.bookIndex],
-                    interactor.readVerse(currentTranslation, highlight.verseIndex).text.text,
-                    highlight.color, Constants.SORT_BY_DATE, this@HighlightsListPresenter::openVerse))
-        }
-        return items
-    }
-
-    override suspend fun List<Highlight>.toBaseItemsByBook(): List<BaseItem> {
-        val currentTranslation = interactor.readCurrentTranslation()
-        val bookNames = interactor.readBookNames(currentTranslation)
-        val bookShortNames = interactor.readBookShortNames(currentTranslation)
-
-        val items: ArrayList<BaseItem> = ArrayList()
-        var currentBookIndex = -1
-        forEach { highlight ->
-            val verse = interactor.readVerse(currentTranslation, highlight.verseIndex)
-            val bookName = bookNames[highlight.verseIndex.bookIndex]
-            if (highlight.verseIndex.bookIndex != currentBookIndex) {
-                items.add(TitleItem(bookName, false))
-                currentBookIndex = highlight.verseIndex.bookIndex
-            }
-
-            items.add(HighlightItem(highlight.verseIndex, bookName, bookShortNames[highlight.verseIndex.bookIndex],
-                    verse.text.text, highlight.color, Constants.SORT_BY_BOOK, this@HighlightsListPresenter::openVerse))
-        }
-        return items
-    }
+    override fun Highlight.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem =
+            HighlightItem(verseIndex, bookName, bookShortName, verseText, color, sortOrder, ::openVerse)
 }

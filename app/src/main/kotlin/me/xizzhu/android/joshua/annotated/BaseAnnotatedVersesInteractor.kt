@@ -16,34 +16,50 @@
 
 package me.xizzhu.android.joshua.annotated
 
+import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
 
-abstract class BaseAnnotatedVersesInteractor<VerseAnnotation>(private val bibleReadingManager: BibleReadingManager,
-                                                              settingsManager: SettingsManager,
-                                                              dispatcher: CoroutineDispatcher = Dispatchers.Default)
+abstract class BaseAnnotatedVersesInteractor<V : VerseAnnotation>(private val bibleReadingManager: BibleReadingManager,
+                                                                  settingsManager: SettingsManager,
+                                                                  dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
-    suspend fun readCurrentTranslation(): String =
-            bibleReadingManager.observeCurrentTranslation().first()
+    private var currentTranslation: String = ""
 
-    suspend fun readBookNames(translation: String): List<String> =
-            bibleReadingManager.readBookNames(translation)
+    @UiThread
+    override fun onStart() {
+        super.onStart()
+        coroutineScope.launch { bibleReadingManager.observeCurrentTranslation().collect { currentTranslation = it } }
+    }
 
-    suspend fun readBookShortNames(translation: String): List<String> =
-            bibleReadingManager.readBookShortNames(translation)
+    suspend fun bookNames(): ViewData<List<String>> =
+            viewData { bibleReadingManager.readBookNames(currentTranslation()) }
 
-    suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
-            bibleReadingManager.readVerse(translationShortName, verseIndex)
+    @VisibleForTesting
+    suspend fun currentTranslation(): String =
+            if (currentTranslation.isNotEmpty()) currentTranslation
+            else bibleReadingManager.observeCurrentTranslation().first().apply { currentTranslation = this }
+
+    suspend fun bookShortNames(): ViewData<List<String>> =
+            viewData { bibleReadingManager.readBookShortNames(currentTranslation()) }
+
+    suspend fun verse(verseIndex: VerseIndex): ViewData<Verse> =
+            viewData { bibleReadingManager.readVerse(currentTranslation(), verseIndex) }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 
-    abstract fun sortOrder(): Flow<Int>
+    abstract fun sortOrder(): Flow<ViewData<Int>>
 
-    abstract suspend fun readVerseAnnotations(@Constants.SortOrder sortOrder: Int): List<VerseAnnotation>
+    abstract suspend fun verseAnnotations(@Constants.SortOrder sortOrder: Int): ViewData<List<V>>
 }
