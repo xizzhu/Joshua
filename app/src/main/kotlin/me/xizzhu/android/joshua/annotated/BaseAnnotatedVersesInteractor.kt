@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.annotated
 
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -28,9 +29,9 @@ import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
 
-abstract class BaseAnnotatedVersesInteractor<V: VerseAnnotation>(private val bibleReadingManager: BibleReadingManager,
-                                                              settingsManager: SettingsManager,
-                                                              dispatcher: CoroutineDispatcher = Dispatchers.Default)
+abstract class BaseAnnotatedVersesInteractor<V : VerseAnnotation>(private val bibleReadingManager: BibleReadingManager,
+                                                                  settingsManager: SettingsManager,
+                                                                  dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
     private var currentTranslation: String = ""
 
@@ -43,9 +44,10 @@ abstract class BaseAnnotatedVersesInteractor<V: VerseAnnotation>(private val bib
     suspend fun bookNames(): ViewData<List<String>> =
             viewData { bibleReadingManager.readBookNames(currentTranslation()) }
 
-    private suspend fun currentTranslation(): String =
+    @VisibleForTesting
+    suspend fun currentTranslation(): String =
             if (currentTranslation.isNotEmpty()) currentTranslation
-            else bibleReadingManager.observeCurrentTranslation().first()
+            else bibleReadingManager.observeCurrentTranslation().first().apply { currentTranslation = this }
 
     suspend fun bookShortNames(): ViewData<List<String>> =
             viewData { bibleReadingManager.readBookShortNames(currentTranslation()) }

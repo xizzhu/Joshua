@@ -120,7 +120,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : Ba
         return items
     }
 
-    abstract fun V.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem
+    protected abstract fun V.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem
 
     @VisibleForTesting
     suspend fun List<V>.toBaseItemsByBook(): List<BaseItem> {
