@@ -18,20 +18,26 @@ package me.xizzhu.android.joshua.reading.toolbar
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.Interactor
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
+import me.xizzhu.android.joshua.infra.arch.toViewData
 
 class ReadingToolbarInteractor(private val bibleReadingManager: BibleReadingManager,
                                private val translationManager: TranslationManager,
                                dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
-    suspend fun downloadedTranslations(): List<TranslationInfo> = translationManager.observeDownloadedTranslations().first()
+    fun downloadedTranslations(): Flow<ViewData<List<TranslationInfo>>> = translationManager.observeDownloadedTranslations()
+            .distinctUntilChanged()
+            .toViewData()
 
-    fun currentTranslation(): Flow<String> = bibleReadingManager.observeCurrentTranslation()
+    fun currentTranslation(): Flow<ViewData<String>> = bibleReadingManager.observeCurrentTranslation()
+            .filter { it.isNotEmpty() }
+            .toViewData()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
@@ -53,6 +59,7 @@ class ReadingToolbarInteractor(private val bibleReadingManager: BibleReadingMana
 
     fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
 
-    suspend fun readBookShortNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookShortNames(translationShortName)
+    fun bookShortNames(): Flow<List<String>> = currentTranslation()
+            .filterOnSuccess()
+            .map { bibleReadingManager.readBookShortNames(it) }
 }
