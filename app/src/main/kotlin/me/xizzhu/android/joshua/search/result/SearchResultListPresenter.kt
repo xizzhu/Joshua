@@ -22,9 +22,6 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -56,21 +53,8 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
     override fun onStart() {
         super.onStart()
 
-        observeSettings()
-        observeQuery()
-    }
-
-    private fun observeSettings() {
         coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.searchResultListView?.setSettings(it) } }
-    }
-
-    private fun observeQuery() {
-        coroutineScope.launch {
-            interactor.query()
-                    .filter { ViewData.STATUS_SUCCESS == it.status }
-                    .map { it.data ?: throw IllegalStateException("Missing query") }
-                    .collect { search(it) }
-        }
+        coroutineScope.launch { interactor.query().collectOnSuccess { search(it) } }
     }
 
     @VisibleForTesting
