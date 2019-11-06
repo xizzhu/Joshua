@@ -32,8 +32,8 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
 import me.xizzhu.android.joshua.ui.*
@@ -50,7 +50,7 @@ data class SettingsViewHolder(val display: SettingSectionHeader, val fontSize: S
 
 class SettingsViewPresenter(private val settingsActivity: SettingsActivity, interactor: SettingsInteractor,
                             dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : ViewPresenter<SettingsViewHolder, SettingsInteractor>(interactor, dispatcher) {
+    : BaseSettingsAwarePresenter<SettingsViewHolder, SettingsInteractor>(interactor, dispatcher) {
     companion object {
         const val CODE_CREATE_DOCUMENT_FOR_BACKUP = 9999
         const val CODE_GET_CONTENT_FOR_RESTORE = 9998

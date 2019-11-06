@@ -18,21 +18,16 @@ package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import me.xizzhu.android.joshua.core.BackupManager
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.arch.Interactor
-import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 import java.io.InputStream
 import java.io.OutputStream
 
-class SettingsInteractor(private val settingsManager: SettingsManager,
+class SettingsInteractor(settingsManager: SettingsManager,
                          private val backupManager: BackupManager,
-                         dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
-    fun settings(): Flow<ViewData<Settings>> = settingsManager.observeSettings().map { ViewData.success(it) }
-
+                         dispatcher: CoroutineDispatcher = Dispatchers.Default)
+    : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
     suspend fun saveFontSizeScale(fontSizeScale: Int) {
         settingsManager.saveFontSizeScale(fontSizeScale)
     }
