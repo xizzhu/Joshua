@@ -17,8 +17,6 @@
 package me.xizzhu.android.joshua.reading.toolbar
 
 import android.content.DialogInterface
-import android.view.View
-import android.widget.AdapterView
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
@@ -54,33 +52,28 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     private var currentTranslation = ""
     private var verseIndex = VerseIndex.INVALID
 
-
-    private val translationSpinnerAdapter = TranslationSpinnerAdapter(context = readingActivity,
-            onParallelTranslationRequested = { interactor.requestParallelTranslation(it) },
-            onParallelTranslationRemoved = { interactor.removeParallelTranslation(it) })
-
     @UiThread
     override fun onBind(viewHolder: ReadingToolbarViewHolder) {
         super.onBind(viewHolder)
 
-        viewHolder.readingToolbar.initializeSpinner(translationSpinnerAdapter,
-                object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                        if (position == translationSpinnerAdapter.count - 1) {
-                            startTranslationManagementActivity()
-                            return
-                        }
-
-                        val selectedTranslation = downloadedTranslations[position].shortName
-                        if (currentTranslation != selectedTranslation) {
-                            updateCurrentTranslation(selectedTranslation)
+        viewHolder.readingToolbar.initialize(
+                onParallelTranslationRequested = { interactor.requestParallelTranslation(it) },
+                onParallelTranslationRemoved = { interactor.removeParallelTranslation(it) },
+                onSpinnerItemSelected = { translationShortName ->
+                    var isDownloadedTranslation = false
+                    for (translation in downloadedTranslations) {
+                        if (translation.shortName == translationShortName) {
+                            if (currentTranslation != translationShortName) {
+                                updateCurrentTranslation(translationShortName)
+                            }
+                            isDownloadedTranslation = true
+                            break
                         }
                     }
 
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-                        // do nothing
-                    }
-                })
+                    if (!isDownloadedTranslation) startTranslationManagementActivity()
+                }
+        )
 
         viewHolder.readingToolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
@@ -167,7 +160,7 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                     }
         }
         coroutineScope.launch {
-            interactor.parallelTranslations().collect { translationSpinnerAdapter.setParallelTranslations(it) }
+            interactor.parallelTranslations().collect { viewHolder?.readingToolbar?.setParallelTranslations(it) }
         }
     }
 
@@ -186,14 +179,14 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
         }
         names.add(readingActivity.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
 
-        translationSpinnerAdapter.setTranslationShortNames(names)
-
-        viewHolder?.readingToolbar?.setSpinnerSelection(selected)
+        viewHolder?.readingToolbar?.run {
+            setTranslationShortNames(names)
+            setSpinnerSelection(selected)
+        }
     }
 
     private suspend fun onCurrentTranslationUpdated(translationShortName: String) {
         currentTranslation = translationShortName
-        translationSpinnerAdapter.setCurrentTranslation(currentTranslation)
 
         var selected = 0
         for (i in 0 until downloadedTranslations.size) {
@@ -202,7 +195,11 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                 selected = i
             }
         }
-        viewHolder?.readingToolbar?.setSpinnerSelection(selected)
+
+        viewHolder?.readingToolbar?.run {
+            setCurrentTranslation(currentTranslation)
+            setSpinnerSelection(selected)
+        }
 
         bookShortNames.clear()
         bookShortNames.addAll(interactor.readBookShortNames(translationShortName))

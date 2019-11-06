@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.reading.toolbar
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.widget.AdapterView
 import android.widget.Spinner
 import androidx.appcompat.widget.Toolbar
@@ -35,10 +36,22 @@ class ReadingToolbar : Toolbar {
         inflateMenu(R.menu.menu_bible_reading)
     }
 
-    fun initializeSpinner(adapter: TranslationSpinnerAdapter, listener: AdapterView.OnItemSelectedListener) {
+    fun initialize(onParallelTranslationRequested: (String) -> Unit,
+                   onParallelTranslationRemoved: (String) -> Unit,
+                   onSpinnerItemSelected: (String) -> Unit) {
         with(spinner()) {
-            this.adapter = adapter
-            this.onItemSelectedListener = listener
+            this.adapter = TranslationSpinnerAdapter(context = context,
+                    onParallelTranslationRequested = onParallelTranslationRequested,
+                    onParallelTranslationRemoved = onParallelTranslationRemoved)
+            this.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                    onSpinnerItemSelected(spinnerAdapter().getItem(position))
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                    // do nothing
+                }
+            }
         }
     }
 
@@ -46,5 +59,19 @@ class ReadingToolbar : Toolbar {
 
     fun setSpinnerSelection(position: Int) {
         spinner().setSelection(position)
+    }
+
+    fun setCurrentTranslation(currentTranslation: String) {
+        spinnerAdapter().setCurrentTranslation(currentTranslation)
+    }
+
+    private fun spinnerAdapter(): TranslationSpinnerAdapter = spinner().adapter as TranslationSpinnerAdapter
+
+    fun setTranslationShortNames(translationShortNames: List<String>) {
+        spinnerAdapter().setTranslationShortNames(translationShortNames)
+    }
+
+    fun setParallelTranslations(parallelTranslations: List<String>) {
+        spinnerAdapter().setParallelTranslations(parallelTranslations)
     }
 }
