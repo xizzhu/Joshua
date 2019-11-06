@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.collect
 import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.*
@@ -90,20 +91,22 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                             else -> throw IllegalStateException("Unsupported view data status: ${viewData.status}")
                         }
                     }
-                    .collect { viewData ->
-                        when (viewData.status) {
-                            ViewData.STATUS_SUCCESS -> viewHolder?.translationListView?.run {
-                                setItems(viewData.data!!)
-                                fadeIn()
+                    .collect(
+                            onLoading = { viewHolder?.translationListView?.visibility = View.GONE },
+                            onSuccess = { items ->
+                                viewHolder?.translationListView?.run {
+                                    setItems(items)
+                                    fadeIn()
+                                }
+                            },
+                            onError = { _, _ ->
+                                DialogHelper.showDialog(
+                                        translationManagementActivity, false, R.string.dialog_load_translation_list_error,
+                                        DialogInterface.OnClickListener { _, _ -> interactor.loadTranslationList(false) },
+                                        DialogInterface.OnClickListener { _, _ -> translationManagementActivity.finish() }
+                                )
                             }
-                            ViewData.STATUS_ERROR -> DialogHelper.showDialog(
-                                    translationManagementActivity, false, R.string.dialog_load_translation_list_error,
-                                    DialogInterface.OnClickListener { _, _ -> interactor.loadTranslationList(false) },
-                                    DialogInterface.OnClickListener { _, _ -> translationManagementActivity.finish() }
-                            )
-                            ViewData.STATUS_LOADING -> viewHolder?.translationListView?.visibility = View.GONE
-                        }
-                    }
+                    )
         }
     }
 
@@ -139,31 +142,29 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                         downloadTranslationDialog = ProgressDialog.showProgressDialog(
                                 translationManagementActivity, R.string.dialog_downloading_translation, 100)
                     }
-                    .collect { viewData ->
-                        when (viewData.status) {
-                            ViewData.STATUS_LOADING -> viewData.data
-                                    ?.let { progress ->
-                                        downloadTranslationDialog?.run {
-                                            if (progress < 100) {
-                                                setProgress(progress)
-                                            } else {
-                                                setTitle(R.string.dialog_installing_translation)
-                                                setIsIndeterminate(true)
-                                            }
+                    .collect(
+                            onLoading = {
+                                it?.let { progress ->
+                                    downloadTranslationDialog?.run {
+                                        if (progress < 100) {
+                                            setProgress(progress)
+                                        } else {
+                                            setTitle(R.string.dialog_installing_translation)
+                                            setIsIndeterminate(true)
                                         }
                                     }
-                                    ?: throw IllegalStateException("Missing progress data when downloading")
-                            ViewData.STATUS_SUCCESS -> {
+                                } ?: throw IllegalStateException("Missing progress data when downloading")
+                            },
+                            onSuccess = {
                                 dismissDownloadTranslationDialog()
                                 ToastHelper.showToast(translationManagementActivity, R.string.toast_translation_downloaded)
-                            }
-                            ViewData.STATUS_ERROR -> {
+                            },
+                            onError = { _, _ ->
                                 dismissDownloadTranslationDialog()
                                 DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_download_error,
                                         DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
                             }
-                        }
-                    }
+                    )
         }
     }
 
