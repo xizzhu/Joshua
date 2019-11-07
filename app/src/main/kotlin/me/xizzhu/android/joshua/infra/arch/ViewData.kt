@@ -17,10 +17,7 @@
 package me.xizzhu.android.joshua.infra.arch
 
 import androidx.annotation.IntDef
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.*
 
 data class ViewData<T> private constructor(@Status val status: Int, val data: T?, val exception: Throwable?) {
     companion object {
@@ -75,6 +72,9 @@ suspend inline fun <T> Flow<ViewData<T>>.collect(
 fun <T> Flow<ViewData<T>>.filterOnSuccess(): Flow<T> = transform { viewData ->
     if (viewData.status == ViewData.STATUS_SUCCESS) emit(viewData.data!!)
 }
+
+fun <T1, T2, R> Flow<ViewData<T1>>.combineOnSuccess(flow: Flow<ViewData<T2>>, transform: suspend (a: T1, b: T2) -> R): Flow<R> =
+        filterOnSuccess().combine(flow.filterOnSuccess()) { a, b -> transform(a, b) }
 
 suspend inline fun <T> Flow<ViewData<T>>.collectOnSuccess(crossinline action: suspend (value: T) -> Unit): Unit = collect { viewData ->
     if (viewData.status == ViewData.STATUS_SUCCESS) action(viewData.data!!)

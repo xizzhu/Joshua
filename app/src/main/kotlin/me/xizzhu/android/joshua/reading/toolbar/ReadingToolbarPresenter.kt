@@ -176,9 +176,9 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
 
                 var selected = 0
                 for (i in 0 until downloadedTranslations.size) {
-                    val translation = downloadedTranslations[i]
-                    if (currentTranslation == translation.shortName) {
+                    if (currentTranslation == downloadedTranslations[i].shortName) {
                         selected = i
+                        break
                     }
                 }
 
@@ -191,13 +191,17 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     }
 
     private fun observeParallelTranslations() {
-        coroutineScope.launch { interactor.parallelTranslations().collect { viewHolder?.readingToolbar?.setParallelTranslations(it) } }
+        coroutineScope.launch {
+            interactor.parallelTranslations()
+                    .collectOnSuccess { viewHolder?.readingToolbar?.setParallelTranslations(it) }
+        }
     }
 
     private fun observeBookNames() {
-        combine(interactor.currentVerseIndex().filter { it.isValid() },
-                interactor.bookShortNames()) { currentVerseIndex, bookShortNames ->
-            viewHolder?.readingToolbar?.title = "${bookShortNames[currentVerseIndex.bookIndex]}, ${currentVerseIndex.chapterIndex + 1}"
-        }.launchIn(coroutineScope)
+        interactor.currentVerseIndex()
+                .combineOnSuccess(interactor.bookShortNames()) { currentVerseIndex, bookShortNames ->
+                    viewHolder?.readingToolbar?.title =
+                            "${bookShortNames[currentVerseIndex.bookIndex]}, ${currentVerseIndex.chapterIndex + 1}"
+                }.launchIn(coroutineScope)
     }
 }

@@ -20,14 +20,13 @@ import android.content.DialogInterface
 import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.arch.combineOnSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.logger.Log
@@ -61,12 +60,12 @@ class ChapterListPresenter(private val readingActivity: ReadingActivity,
     override fun onStart() {
         super.onStart()
 
-        combine(interactor.currentVerseIndex().filter { it.isValid() },
-                interactor.bookNames()) { currentVerseIndex, bookNames ->
-            viewHolder?.run {
-                chapterListView.setData(currentVerseIndex, bookNames)
-                readingDrawerLayout.hide()
-            }
-        }.launchIn(coroutineScope)
+        interactor.currentVerseIndex()
+                .combineOnSuccess(interactor.bookNames()) { currentVerseIndex, bookNames ->
+                    viewHolder?.run {
+                        chapterListView.setData(currentVerseIndex, bookNames)
+                        readingDrawerLayout.hide()
+                    }
+                }.launchIn(coroutineScope)
     }
 }

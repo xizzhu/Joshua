@@ -43,7 +43,7 @@ class ReadingToolbarInteractor(private val bibleReadingManager: BibleReadingMana
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
-    fun parallelTranslations(): Flow<List<String>> = bibleReadingManager.observeParallelTranslations()
+    fun parallelTranslations(): Flow<ViewData<List<String>>> = bibleReadingManager.observeParallelTranslations().toViewData()
 
     fun requestParallelTranslation(translationShortName: String) {
         bibleReadingManager.requestParallelTranslation(translationShortName)
@@ -57,9 +57,11 @@ class ReadingToolbarInteractor(private val bibleReadingManager: BibleReadingMana
         bibleReadingManager.clearParallelTranslation()
     }
 
-    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
+    fun currentVerseIndex(): Flow<ViewData<VerseIndex>> = bibleReadingManager.observeCurrentVerseIndex()
+            .filter { it.isValid() }
+            .toViewData()
 
-    fun bookShortNames(): Flow<List<String>> = currentTranslation()
+    fun bookShortNames(): Flow<ViewData<List<String>>> = currentTranslation()
             .filterOnSuccess()
-            .map { bibleReadingManager.readBookShortNames(it) }
+            .map { ViewData.success(bibleReadingManager.readBookShortNames(it)) }
 }
