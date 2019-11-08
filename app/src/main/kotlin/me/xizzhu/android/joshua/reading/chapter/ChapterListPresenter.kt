@@ -20,15 +20,13 @@ import android.content.DialogInterface
 import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.arch.combineOnSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.logger.Log
@@ -62,17 +60,12 @@ class ChapterListPresenter(private val readingActivity: ReadingActivity,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch {
-            interactor.currentVerseIndex().filter { it.isValid() }
-                    .combine(interactor.currentTranslation().filter { it.isNotEmpty() }.map { interactor.readBookNames(it) }) { currentVerseIndex, bookNames ->
-                        Pair(currentVerseIndex, bookNames)
+        interactor.currentVerseIndex()
+                .combineOnSuccess(interactor.bookNames()) { currentVerseIndex, bookNames ->
+                    viewHolder?.run {
+                        chapterListView.setData(currentVerseIndex, bookNames)
+                        readingDrawerLayout.hide()
                     }
-                    .collect {
-                        viewHolder?.run {
-                            chapterListView.setData(it.first, it.second)
-                            readingDrawerLayout.hide()
-                        }
-                    }
-        }
+                }.launchIn(coroutineScope)
     }
 }

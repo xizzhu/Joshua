@@ -125,9 +125,11 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     override fun onBind(viewHolder: VerseViewHolder) {
         super.onBind(viewHolder)
 
-        viewHolder.versePager.setOnChapterSelectedListener { bookIndex, chapterIndex -> updateCurrentChapter(bookIndex, chapterIndex) }
-        viewHolder.versePager.setOnCurrentVerseUpdatedListener { verseIndex -> updateCurrentVerse(verseIndex) }
-        viewHolder.versePager.setOnChapterRequestedListener { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) }
+        viewHolder.versePager.setListeners(
+                onChapterSelected = { bookIndex, chapterIndex -> updateCurrentChapter(bookIndex, chapterIndex) },
+                onChapterRequested = { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) },
+                onCurrentVerseUpdated = { verseIndex -> updateCurrentVerse(verseIndex) }
+        )
     }
 
     private fun updateCurrentChapter(bookIndex: Int, chapterIndex: Int) {

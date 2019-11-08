@@ -60,13 +60,8 @@ class VersePagerAdapter(context: Context) : PagerAdapter() {
         findPage(bookIndex, chapterIndex)?.setVerses(verses, currentVerseIndex)
     }
 
-    private fun findPage(bookIndex: Int, chapterIndex: Int): Page? {
-        pages.forEach { page ->
-            if (page.bookIndex == bookIndex && page.chapterIndex == chapterIndex) {
-                return page
-            }
-        }
-        return null
+    private fun findPage(bookIndex: Int, chapterIndex: Int): Page? = pages.firstOrNull { page ->
+        page.bookIndex == bookIndex && page.chapterIndex == chapterIndex
     }
 
     fun selectVerse(verseIndex: VerseIndex) {
@@ -83,9 +78,9 @@ class VersePagerAdapter(context: Context) : PagerAdapter() {
 
     override fun getCount(): Int = if (currentTranslation.isNotEmpty() && settings != null) Bible.TOTAL_CHAPTER_COUNT else 0
 
-    override fun getItemPosition(obj: Any): Int {
-        val page = obj as Page
-        return if (page.currentTranslation == currentTranslation
+    override fun getItemPosition(obj: Any): Int = (obj as Page).let { page ->
+        // if current translation, parallel translations, or settings are updated, need to refresh the page
+        if (page.currentTranslation == currentTranslation
                 && page.parallelTranslations == parallelTranslations
                 && page.settings == settings) {
             indexToPagePosition(page.bookIndex, page.chapterIndex)
@@ -94,24 +89,22 @@ class VersePagerAdapter(context: Context) : PagerAdapter() {
         }
     }
 
-    override fun isViewFromObject(view: View, obj: Any): Boolean =
-            (obj as Page).rootView == view
+    override fun isViewFromObject(view: View, obj: Any): Boolean = (obj as Page).rootView == view
 
-    override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val page: Page = (pages.firstOrNull { p -> !p.inUse }
-                ?: Page(inflater, container, onChapterRequested, onCurrentVerseUpdated).apply { pages.add(this) })
-                .also { page ->
-                    page.bind(currentTranslation, parallelTranslations,
-                            position.toBookIndex(), position.toChapterIndex(), settings!!)
-                }
-        container.addView(page.rootView, 0)
-        return page
-    }
+    override fun instantiateItem(container: ViewGroup, position: Int): Any =
+            (pages.firstOrNull { p -> !p.inUse }
+                    ?: Page(inflater, container, onChapterRequested, onCurrentVerseUpdated).apply { pages.add(this) })
+                    .also { page ->
+                        page.bind(currentTranslation, parallelTranslations,
+                                position.toBookIndex(), position.toChapterIndex(), settings!!)
+                        container.addView(page.rootView, 0)
+                    }
 
     override fun destroyItem(container: ViewGroup, position: Int, obj: Any) {
-        val page = obj as Page
-        container.removeView(page.rootView)
-        page.unbind()
+        (obj as Page).let { page ->
+            container.removeView(page.rootView)
+            page.unbind()
+        }
     }
 }
 

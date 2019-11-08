@@ -31,19 +31,16 @@ class VerseViewPager : ViewPager {
 
     private val adapter = VersePagerAdapter(context).apply { setAdapter(this) }
 
-    fun setOnChapterSelectedListener(onChapterSelected: (Int, Int) -> Unit) {
+    fun setListeners(onChapterSelected: (Int, Int) -> Unit,
+                     onChapterRequested: (Int, Int) -> Unit,
+                     onCurrentVerseUpdated: (VerseIndex) -> Unit) {
         addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 onChapterSelected(position.toBookIndex(), position.toChapterIndex())
             }
         })
-    }
 
-    fun setOnChapterRequestedListener(onChapterRequested: (Int, Int) -> Unit) {
         adapter.onChapterRequested = onChapterRequested
-    }
-
-    fun setOnCurrentVerseUpdatedListener(onCurrentVerseUpdated: (VerseIndex) -> Unit) {
         adapter.onCurrentVerseUpdated = onCurrentVerseUpdated
     }
 

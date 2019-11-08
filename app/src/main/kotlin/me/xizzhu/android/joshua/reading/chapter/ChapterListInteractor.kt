@@ -19,20 +19,25 @@ package me.xizzhu.android.joshua.reading.chapter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.Interactor
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.toViewData
 
 class ChapterListInteractor(private val bibleReadingManager: BibleReadingManager,
                             dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
-    fun currentTranslation(): Flow<String> = bibleReadingManager.observeCurrentTranslation()
+    fun bookNames(): Flow<ViewData<List<String>>> = bibleReadingManager.observeCurrentTranslation()
+            .filter { it.isNotEmpty() }
+            .map { ViewData.success(bibleReadingManager.readBookNames(it)) }
 
-    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
+    fun currentVerseIndex(): Flow<ViewData<VerseIndex>> = bibleReadingManager.observeCurrentVerseIndex()
+            .filter { it.isValid() }
+            .toViewData()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
-
-    suspend fun readBookNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookNames(translationShortName)
 }
