@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.12.0 (2019-11-08)
 - Major refactoring to use clean architecture
 - Updated dependencies:
   - Grardle to 5.6.4
