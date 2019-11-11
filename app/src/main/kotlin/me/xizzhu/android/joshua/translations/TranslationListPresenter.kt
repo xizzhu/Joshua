@@ -209,4 +209,12 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
         removeTranslationDialog?.dismiss()
         removeTranslationDialog = null
     }
+
+    @UiThread
+    override fun onStop() {
+        dismissDownloadTranslationDialog()
+        dismissRemoveTranslationDialog()
+
+        super.onStop()
+    }
 }
