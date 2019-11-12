@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.12.1 (2019-11-11)
 - Should dismiss dialog when translation presenter is stopped
 - Updated dependencies:
   - Grardle to 6.0
