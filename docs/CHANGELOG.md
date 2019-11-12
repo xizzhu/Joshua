@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Updated dependencies:
+  - Play Services plugin to 4.3.3
 
 #### v0.12.1 (2019-11-11)
 - Should dismiss dialog when translation presenter is stopped
