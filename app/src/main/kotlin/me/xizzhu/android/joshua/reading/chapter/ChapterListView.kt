@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.logger.Log
 
 class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListener {
     constructor(context: Context) : super(context)
@@ -87,6 +88,7 @@ private data class ChapterTag(var bookIndex: Int, var chapterIndex: Int)
 private class ChapterListAdapter(context: Context, private val onChapterSelected: (Int, Int) -> Unit)
     : BaseExpandableListAdapter() {
     companion object {
+        private val TAG: String = ChapterListAdapter::class.java.simpleName
         private const val ROW_CHILD_COUNT = 5
     }
 
@@ -104,6 +106,8 @@ private class ChapterListAdapter(context: Context, private val onChapterSelected
     private var currentVerseIndex = VerseIndex.INVALID
 
     fun setData(currentVerseIndex: VerseIndex, bookNames: List<String>) {
+        Log.i(TAG, "setData(): currentVerseIndex - $currentVerseIndex, bookNames count: ${bookNames.size}")
+
         this.currentVerseIndex = currentVerseIndex
 
         this.bookNames.clear()
@@ -114,11 +118,17 @@ private class ChapterListAdapter(context: Context, private val onChapterSelected
 
     override fun hasStableIds(): Boolean = false
 
-    override fun getGroupCount(): Int = bookNames.size
+    override fun getGroupCount(): Int {
+        Log.i(TAG, "getGroupCount(): count - ${bookNames.size}")
+        return bookNames.size
+    }
 
     override fun getGroupId(groupPosition: Int): Long = groupPosition.toLong()
 
-    override fun getGroup(groupPosition: Int): String = bookNames[groupPosition]
+    override fun getGroup(groupPosition: Int): String {
+        Log.i(TAG, "getGroup(): count - ${bookNames.size}, groupPosition: $groupPosition")
+        return if (groupPosition < bookNames.size) bookNames[groupPosition] else ""
+    }
 
     override fun getGroupView(groupPosition: Int, isExpanded: Boolean, convertView: View?, parent: ViewGroup?): View {
         val textView = (convertView
