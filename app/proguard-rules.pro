@@ -13,3 +13,6 @@
 
 -keep class com.crashlytics.** { *; }
 -dontwarn com.crashlytics.**
+
+# Kotlin Intrinsics
+-assumenosideeffects class kotlin.jvm.internal.Intrinsics { *; }
