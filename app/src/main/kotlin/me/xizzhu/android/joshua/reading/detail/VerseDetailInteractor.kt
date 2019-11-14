@@ -58,8 +58,6 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
 
     suspend fun downloadedTranslations(): List<TranslationInfo> = translationManager.observeDownloadedTranslations().first()
 
-    suspend fun currentVerseIndex(): VerseIndex = bibleReadingManager.observeCurrentVerseIndex().first()
-
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)
 

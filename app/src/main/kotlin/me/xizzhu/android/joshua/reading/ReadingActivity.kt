@@ -83,7 +83,7 @@ class ReadingActivity : BaseSettingsAwareActivity() {
         versePresenter.bind(VerseViewHolder(findViewById(R.id.verse_view_pager)))
         verseDetailPresenter.bind(VerseDetailViewHolder(findViewById(R.id.verse_detail_view)))
 
-        if (intent.getBooleanExtra(KEY_OPEN_NOTE, false)) verseDetailPresenter.showNote()
+        if (intent.getBooleanExtra(KEY_OPEN_NOTE, false)) readingViewModel.showNoteInVerseDetail()
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {

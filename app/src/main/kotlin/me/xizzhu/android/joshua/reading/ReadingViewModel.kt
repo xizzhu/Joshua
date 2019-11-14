@@ -22,7 +22,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -61,7 +63,8 @@ data class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int
     }
 }
 
-class ReadingViewModel(private val readingProgressManager: ReadingProgressManager,
+class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
+                       private val readingProgressManager: ReadingProgressManager,
                        settingsManager: SettingsManager,
                        readingToolbarInteractor: ReadingToolbarInteractor,
                        chapterListInteractor: ChapterListInteractor,
@@ -86,5 +89,17 @@ class ReadingViewModel(private val readingProgressManager: ReadingProgressManage
         // uses GlobalScope to make sure this will be executed without being canceled
         // uses Dispatchers.Main.immediate to make sure this will be executed immediately
         GlobalScope.launch(Dispatchers.Main.immediate) { readingProgressManager.stopTracking() }
+    }
+
+    fun showNoteInVerseDetail() {
+        coroutineScope.launch {
+            bibleReadingManager.observeCurrentVerseIndex().first().let { verseIndex ->
+                if (verseIndex.isValid()) {
+                    val request = VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE)
+                    verseDetailInteractor.requestVerseDetail(request)
+                    verseInteractor.requestVerseDetail(request)
+                }
+            }
+        }
     }
 }

@@ -267,12 +267,6 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
         }
     }
 
-    fun showNote() {
-        coroutineScope.launch {
-            interactor.currentVerseIndex().let { if (it.isValid()) interactor.requestVerseDetail(VerseDetailRequest(it, VerseDetailRequest.NOTE)) }
-        }
-    }
-
     /**
      * @return true if verse detail view was open, or false otherwise
      * */

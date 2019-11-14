@@ -96,11 +96,13 @@ object ReadingModule {
 
     @ActivityScope
     @Provides
-    fun provideReadingViewModel(readingProgressManager: ReadingProgressManager,
+    fun provideReadingViewModel(bibleReadingManager: BibleReadingManager,
+                                readingProgressManager: ReadingProgressManager,
                                 settingsManager: SettingsManager,
                                 readingToolbarInteractor: ReadingToolbarInteractor,
                                 chapterListInteractor: ChapterListInteractor,
                                 verseInteractor: VerseInteractor,
                                 verseDetailInteractor: VerseDetailInteractor): ReadingViewModel =
-            ReadingViewModel(readingProgressManager, settingsManager, readingToolbarInteractor, chapterListInteractor, verseInteractor, verseDetailInteractor)
+            ReadingViewModel(bibleReadingManager, readingProgressManager, settingsManager,
+                    readingToolbarInteractor, chapterListInteractor, verseInteractor, verseDetailInteractor)
 }
