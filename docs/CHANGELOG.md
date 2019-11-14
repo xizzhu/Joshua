@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+
+#### v0.12.2 (2019-11-13)
 - Added logs to better understand crash in ChapterListAdapter
 - Updated dependencies:
   - Play Services plugin to 4.3.3
