@@ -145,15 +145,15 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : Ba
     }
 
     @VisibleForTesting
-    fun openVerse(verseToSelect: VerseIndex) {
+    fun openVerse(verseToOpen: VerseIndex) {
         coroutineScope.launch {
             try {
-                interactor.saveCurrentVerseIndex(verseToSelect)
+                interactor.saveCurrentVerseIndex(verseToOpen)
                 navigator.navigate(activity, Navigator.SCREEN_READING, extrasForOpeningVerse())
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
                 DialogHelper.showDialog(activity, true, R.string.dialog_verse_selection_error,
-                        DialogInterface.OnClickListener { _, _ -> openVerse(verseToSelect) })
+                        DialogInterface.OnClickListener { _, _ -> openVerse(verseToOpen) })
             }
         }
     }
