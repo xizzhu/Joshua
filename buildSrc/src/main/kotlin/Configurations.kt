@@ -47,8 +47,8 @@ object Versions {
     val java = JavaVersion.VERSION_1_8
 
     object Kotlin {
-        const val classpath = "1.3.50"
-        const val core = "1.3.50"
+        const val classpath = "1.3.60"
+        const val core = "1.3.60"
         const val coroutines = "1.3.2"
     }
 
@@ -59,7 +59,7 @@ object Versions {
         const val coordinatorLayout = "1.0.0"
         const val drawerLayout = "1.0.0"
         const val material = "1.0.0"
-        const val recyclerView = "1.0.0"
+        const val recyclerView = "1.1.0"
         const val viewPager = "1.0.0"
 
         object Test {

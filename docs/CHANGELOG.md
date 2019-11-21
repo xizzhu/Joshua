@@ -2,6 +2,10 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Updated dependencies:
+  - Gradle to 6.0.1
+  - Kotlin to 1.3.60
+  - AndroidX Recycler View to 1.1.0
 
 #### v0.12.2 (2019-11-13)
 - Added logs to better understand crash in ChapterListAdapter
