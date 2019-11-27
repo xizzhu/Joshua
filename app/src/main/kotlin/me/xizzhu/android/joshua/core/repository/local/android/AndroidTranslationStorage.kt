@@ -30,9 +30,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
     }
 
     override suspend fun saveTranslationListRefreshTimestamp(timestamp: Long) {
-        withContext(Dispatchers.IO) {
-            androidDatabase.metadataDao.save(MetadataDao.KEY_TRANSLATION_LIST_REFRESH_TIMESTAMP, timestamp.toString())
-        }
+        withContext(Dispatchers.IO) { androidDatabase.metadataDao.save(MetadataDao.KEY_TRANSLATION_LIST_REFRESH_TIMESTAMP, timestamp.toString()) }
     }
 
     override suspend fun readTranslations(): List<TranslationInfo> = withContext(Dispatchers.IO) {
@@ -40,9 +38,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
     }
 
     override suspend fun replaceTranslations(translations: List<TranslationInfo>) {
-        withContext(Dispatchers.IO) {
-            androidDatabase.translationInfoDao.replace(translations)
-        }
+        withContext(Dispatchers.IO) { androidDatabase.translationInfoDao.replace(translations) }
     }
 
     override suspend fun saveTranslation(translationInfo: TranslationInfo,
