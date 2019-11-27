@@ -16,9 +16,7 @@
 
 package me.xizzhu.android.joshua.ui
 
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.res.Resources
 import android.content.res.TypedArray
 import android.graphics.Color
@@ -58,17 +56,6 @@ fun View.hideKeyboard() {
         (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                 .hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
     }
-}
-
-fun Context.getActivity(): Activity? {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is Activity) {
-            return context
-        }
-        context = context.baseContext
-    }
-    return null
 }
 
 @ColorInt
