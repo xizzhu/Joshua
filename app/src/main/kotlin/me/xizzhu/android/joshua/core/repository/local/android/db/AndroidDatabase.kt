@@ -42,7 +42,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             bookNamesDao.createTable(db)
             highlightDao.createTable(db)
             metadataDao.createTable(db)
-            NoteDao.createTable(db)
+            noteDao.createTable(db)
             ReadingProgressDao.createTable(db)
             TranslationInfoDao.createTable(db)
         }
