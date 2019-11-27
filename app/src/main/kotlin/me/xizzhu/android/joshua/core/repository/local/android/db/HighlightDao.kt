@@ -16,11 +16,10 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
-import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
-import me.xizzhu.android.ask.db.transaction
+import me.xizzhu.android.ask.db.*
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -33,83 +32,68 @@ class HighlightDao(sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_VERSE_INDEX = "verseIndex"
         private const val COLUMN_COLOR = "color"
         private const val COLUMN_TIMESTAMP = "timestamp"
-
-        @WorkerThread
-        fun createTable(db: SQLiteDatabase) {
-            db.execSQL("CREATE TABLE $TABLE_HIGHLIGHT (" +
-                    "$COLUMN_BOOK_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_VERSE_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_COLOR INTEGER NOT NULL, " +
-                    "$COLUMN_TIMESTAMP INTEGER NOT NULL, " +
-                    "PRIMARY KEY ($COLUMN_BOOK_INDEX, $COLUMN_CHAPTER_INDEX, $COLUMN_VERSE_INDEX));")
-        }
     }
 
     private val db by lazy { sqliteHelper.writableDatabase }
 
-    fun read(@Constants.SortOrder sortOrder: Int): List<Highlight> {
-        val orderBy = when (sortOrder) {
-            Constants.SORT_BY_DATE -> "$COLUMN_TIMESTAMP DESC"
-            Constants.SORT_BY_BOOK -> "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC"
-            else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
-        }
-
-        db.query(TABLE_HIGHLIGHT, null, null, null, null, null, orderBy).use {
-            val highlights = ArrayList<Highlight>(it.count)
-            val bookIndex = it.getColumnIndex(COLUMN_BOOK_INDEX)
-            val chapterIndex = it.getColumnIndex(COLUMN_CHAPTER_INDEX)
-            val verseIndex = it.getColumnIndex(COLUMN_VERSE_INDEX)
-            val color = it.getColumnIndex(COLUMN_COLOR)
-            val timestamp = it.getColumnIndex(COLUMN_TIMESTAMP)
-            while (it.moveToNext()) {
-                highlights.add(Highlight(
-                        VerseIndex(it.getInt(bookIndex), it.getInt(chapterIndex), it.getInt(verseIndex)),
-                        it.getInt(color), it.getLong(timestamp)))
-            }
-            return highlights
+    @WorkerThread
+    fun createTable(db: SQLiteDatabase) {
+        db.createTable(TABLE_HIGHLIGHT) {
+            it[COLUMN_BOOK_INDEX] = INTEGER + PRIMARY_KEY + NOT_NULL
+            it[COLUMN_CHAPTER_INDEX] = INTEGER + PRIMARY_KEY + NOT_NULL
+            it[COLUMN_VERSE_INDEX] = INTEGER + PRIMARY_KEY + NOT_NULL
+            it[COLUMN_COLOR] = INTEGER + NOT_NULL
+            it[COLUMN_TIMESTAMP] = INTEGER + NOT_NULL
         }
     }
 
-    fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> {
-        db.query(TABLE_HIGHLIGHT, arrayOf(COLUMN_VERSE_INDEX, COLUMN_COLOR, COLUMN_TIMESTAMP),
-                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
-                arrayOf(bookIndex.toString(), chapterIndex.toString()),
-                null, null, "$COLUMN_VERSE_INDEX ASC").use {
-            val highlights = ArrayList<Highlight>(it.count)
-            val verseIndex = it.getColumnIndex(COLUMN_VERSE_INDEX)
-            val color = it.getColumnIndex(COLUMN_COLOR)
-            val timestamp = it.getColumnIndex(COLUMN_TIMESTAMP)
-            while (it.moveToNext()) {
-                highlights.add(Highlight(VerseIndex(bookIndex, chapterIndex, it.getInt(verseIndex)),
-                        it.getInt(color), it.getLong(timestamp)))
+    fun read(@Constants.SortOrder sortOrder: Int): List<Highlight> = db.select(TABLE_HIGHLIGHT)
+            .apply {
+                when (sortOrder) {
+                    Constants.SORT_BY_DATE -> orderBy(COLUMN_TIMESTAMP, sortOrder = SortOrder.DESCENDING)
+                    Constants.SORT_BY_BOOK -> orderBy(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX)
+                    else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
+                }
+            }.toList { row ->
+                Highlight(
+                        VerseIndex(
+                                row.getInt(COLUMN_BOOK_INDEX),
+                                row.getInt(COLUMN_CHAPTER_INDEX),
+                                row.getInt(COLUMN_VERSE_INDEX)
+                        ),
+                        row.getInt(COLUMN_COLOR),
+                        row.getLong(COLUMN_TIMESTAMP)
+                )
             }
-            return highlights
-        }
-    }
 
-    fun read(verseIndex: VerseIndex): Highlight {
-        db.query(TABLE_HIGHLIGHT, arrayOf(COLUMN_COLOR, COLUMN_TIMESTAMP),
-                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
-                arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
-                null, null, null).use {
-            return if (it.moveToNext()) {
-                Highlight(verseIndex, it.getInt(it.getColumnIndex(COLUMN_COLOR)), it.getLong(it.getColumnIndex(COLUMN_TIMESTAMP)))
-            } else {
-                Highlight(verseIndex, Highlight.COLOR_NONE, -1L)
+    fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> =
+            db.select(TABLE_HIGHLIGHT, COLUMN_VERSE_INDEX, COLUMN_COLOR, COLUMN_TIMESTAMP) {
+                (COLUMN_BOOK_INDEX eq bookIndex) and (COLUMN_CHAPTER_INDEX eq chapterIndex)
             }
-        }
-    }
+                    .orderBy(COLUMN_VERSE_INDEX)
+                    .toList { row ->
+                        Highlight(
+                                VerseIndex(bookIndex, chapterIndex, row.getInt(COLUMN_VERSE_INDEX)),
+                                row.getInt(COLUMN_COLOR),
+                                row.getLong(COLUMN_TIMESTAMP)
+                        )
+                    }
+
+    fun read(verseIndex: VerseIndex): Highlight =
+            db.select(TABLE_HIGHLIGHT, COLUMN_COLOR, COLUMN_TIMESTAMP) {
+                (COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)
+            }.firstOrDefault({ Highlight(verseIndex, Highlight.COLOR_NONE, -1L) }) { row ->
+                Highlight(verseIndex, row.getInt(COLUMN_COLOR), row.getLong(COLUMN_TIMESTAMP))
+            }
 
     fun save(highlight: Highlight) {
-        val values = ContentValues(4).apply {
-            put(COLUMN_BOOK_INDEX, highlight.verseIndex.bookIndex)
-            put(COLUMN_CHAPTER_INDEX, highlight.verseIndex.chapterIndex)
-            put(COLUMN_VERSE_INDEX, highlight.verseIndex.verseIndex)
-            put(COLUMN_COLOR, highlight.color)
-            put(COLUMN_TIMESTAMP, highlight.timestamp)
+        db.insert(TABLE_HIGHLIGHT, SQLiteDatabase.CONFLICT_REPLACE) {
+            it[COLUMN_BOOK_INDEX] = highlight.verseIndex.bookIndex
+            it[COLUMN_CHAPTER_INDEX] = highlight.verseIndex.chapterIndex
+            it[COLUMN_VERSE_INDEX] = highlight.verseIndex.verseIndex
+            it[COLUMN_COLOR] = highlight.color
+            it[COLUMN_TIMESTAMP] = highlight.timestamp
         }
-        db.insertWithOnConflict(TABLE_HIGHLIGHT, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
     fun save(highlights: List<Highlight>) {
@@ -117,7 +101,8 @@ class HighlightDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     fun remove(verseIndex: VerseIndex) {
-        db.delete(TABLE_HIGHLIGHT, "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
-                arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()))
+        db.delete(TABLE_HIGHLIGHT) {
+            (COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)
+        }
     }
 }

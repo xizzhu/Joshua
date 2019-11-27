@@ -40,7 +40,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         db.transaction {
             bookmarkDao.createTable(db)
             bookNamesDao.createTable(db)
-            HighlightDao.createTable(db)
+            highlightDao.createTable(db)
             MetadataDao.createTable(db)
             NoteDao.createTable(db)
             ReadingProgressDao.createTable(db)
@@ -50,7 +50,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         when (oldVersion) {
-            1 -> HighlightDao.createTable(db)
+            1 -> highlightDao.createTable(db)
         }
     }
 }
