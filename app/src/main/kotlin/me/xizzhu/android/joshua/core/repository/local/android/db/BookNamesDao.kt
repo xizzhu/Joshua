@@ -16,12 +16,10 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
-import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
-import me.xizzhu.android.joshua.core.Bible
-import java.lang.StringBuilder
+import me.xizzhu.android.ask.db.*
 
 class BookNamesDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
@@ -31,63 +29,52 @@ class BookNamesDao(sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_BOOK_INDEX = "bookIndex"
         private const val COLUMN_BOOK_NAME = "bookName"
         private const val COLUMN_BOOK_SHORT_NAME = "bookShortName"
-
-        @WorkerThread
-        fun createTable(db: SQLiteDatabase) {
-            db.execSQL("CREATE TABLE $TABLE_BOOK_NAMES (" +
-                    "$COLUMN_TRANSLATION_SHORT_NAME TEXT NOT NULL, " +
-                    "$COLUMN_BOOK_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_BOOK_NAME TEXT NOT NULL, " +
-                    "$COLUMN_BOOK_SHORT_NAME TEXT NOT NULL, " +
-                    "PRIMARY KEY ($COLUMN_TRANSLATION_SHORT_NAME, $COLUMN_BOOK_INDEX));")
-            db.execSQL("CREATE INDEX $INDEX_BOOK_NAMES ON $TABLE_BOOK_NAMES ($COLUMN_TRANSLATION_SHORT_NAME);")
-        }
     }
 
     private val db by lazy { sqliteHelper.writableDatabase }
 
     @WorkerThread
-    fun read(translationShortName: String): List<String> {
-        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_NAME),
-                "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName), null, null,
-                "$COLUMN_BOOK_INDEX ASC").use {
-            val bookNames = ArrayList<String>(Bible.BOOK_COUNT)
-            while (it.moveToNext()) {
-                bookNames.add(it.getString(0))
-            }
-            return bookNames
+    fun createTable(db: SQLiteDatabase) {
+        db.createTable(TABLE_BOOK_NAMES) {
+            it[COLUMN_TRANSLATION_SHORT_NAME] = TEXT + PRIMARY_KEY + NOT_NULL
+            it[COLUMN_BOOK_INDEX] = INTEGER + PRIMARY_KEY + NOT_NULL
+            it[COLUMN_BOOK_NAME] = TEXT + NOT_NULL
+            it[COLUMN_BOOK_SHORT_NAME] = TEXT + NOT_NULL
         }
+        db.createIndex(INDEX_BOOK_NAMES, TABLE_BOOK_NAMES, COLUMN_TRANSLATION_SHORT_NAME)
     }
 
     @WorkerThread
-    fun readShortName(translationShortName: String): List<String> {
-        db.query(TABLE_BOOK_NAMES, arrayOf(COLUMN_BOOK_SHORT_NAME),
-                "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName), null, null,
-                "$COLUMN_BOOK_INDEX ASC").use {
-            val bookNames = ArrayList<String>(Bible.BOOK_COUNT)
-            while (it.moveToNext()) {
-                bookNames.add(it.getString(0))
-            }
-            return bookNames
-        }
-    }
+    fun read(translationShortName: String): List<String> =
+            db.select(TABLE_BOOK_NAMES, COLUMN_BOOK_NAME) { COLUMN_TRANSLATION_SHORT_NAME eq translationShortName }
+                    .orderBy(COLUMN_BOOK_INDEX)
+                    .toList { it.getString(COLUMN_BOOK_NAME) }
+
+    @WorkerThread
+    fun readShortName(translationShortName: String): List<String> =
+            db.select(TABLE_BOOK_NAMES, COLUMN_BOOK_SHORT_NAME) { COLUMN_TRANSLATION_SHORT_NAME eq translationShortName }
+                    .orderBy(COLUMN_BOOK_INDEX)
+                    .toList { it.getString(COLUMN_BOOK_SHORT_NAME) }
 
     @WorkerThread
     fun save(translationShortName: String, bookNames: List<String>, bookShortNames: List<String>) {
-        val values = ContentValues(4)
-        with(values) {
-            put(COLUMN_TRANSLATION_SHORT_NAME, translationShortName)
-            for ((bookIndex, bookName) in bookNames.withIndex()) {
-                put(COLUMN_BOOK_INDEX, bookIndex)
-                put(COLUMN_BOOK_NAME, bookName)
-                put(COLUMN_BOOK_SHORT_NAME, bookShortNames[bookIndex])
-                db.insertWithOnConflict(TABLE_BOOK_NAMES, null, this, SQLiteDatabase.CONFLICT_REPLACE)
+        db.transaction {
+            val bookNameIterator = bookNames.iterator()
+            val bookShortNameIterator = bookShortNames.iterator()
+            var bookIndex = 0
+            while (bookNameIterator.hasNext() && bookShortNameIterator.hasNext()) {
+                db.insert(TABLE_BOOK_NAMES, SQLiteDatabase.CONFLICT_REPLACE) {
+                    it[COLUMN_TRANSLATION_SHORT_NAME] = translationShortName
+                    it[COLUMN_BOOK_INDEX] = bookIndex++
+                    it[COLUMN_BOOK_NAME] = bookNameIterator.next()
+                    it[COLUMN_BOOK_SHORT_NAME] = bookShortNameIterator.next()
+                }
             }
         }
     }
 
     @WorkerThread
     fun remove(translationShortName: String) {
-        db.delete(TABLE_BOOK_NAMES, "$COLUMN_TRANSLATION_SHORT_NAME = ?", arrayOf(translationShortName))
+        db.delete(TABLE_BOOK_NAMES) { COLUMN_TRANSLATION_SHORT_NAME eq translationShortName }
     }
 }

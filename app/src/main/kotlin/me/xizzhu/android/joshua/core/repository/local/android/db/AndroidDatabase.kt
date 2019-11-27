@@ -39,7 +39,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     override fun onCreate(db: SQLiteDatabase) {
         db.transaction {
             bookmarkDao.createTable(db)
-            BookNamesDao.createTable(db)
+            bookNamesDao.createTable(db)
             HighlightDao.createTable(db)
             MetadataDao.createTable(db)
             NoteDao.createTable(db)
