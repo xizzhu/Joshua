@@ -80,7 +80,7 @@ object Versions {
 
     const val dagger = "2.25.2"
 
-    const val ask = "0.1.0"
+    const val ask = "0.2.0"
 
     const val logger = "0.1.4"
 
