@@ -20,6 +20,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.ask.db.withTransaction
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.logger.Log
@@ -39,21 +40,19 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     private val db by lazy { sqliteHelper.writableDatabase }
 
     @WorkerThread
-    fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
-        db.withTransaction {
-            if (!hasTable(translationShortName)) return emptyList()
+    fun read(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> = db.withTransaction {
+        if (!hasTable(translationShortName)) return emptyList()
 
-            query(translationShortName, arrayOf(COLUMN_TEXT),
-                    "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?", arrayOf(bookIndex.toString(), chapterIndex.toString()),
-                    null, null, "$COLUMN_VERSE_INDEX ASC").use {
-                val verses = ArrayList<Verse>(it.count)
-                var verseIndex = 0
-                while (it.moveToNext()) {
-                    verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
-                            Verse.Text(translationShortName, it.getString(0)), emptyList()))
-                }
-                return verses
+        query(translationShortName, arrayOf(COLUMN_TEXT),
+                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?", arrayOf(bookIndex.toString(), chapterIndex.toString()),
+                null, null, "$COLUMN_VERSE_INDEX ASC").use {
+            val verses = ArrayList<Verse>(it.count)
+            var verseIndex = 0
+            while (it.moveToNext()) {
+                verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex++),
+                        Verse.Text(translationShortName, it.getString(0)), emptyList()))
             }
+            return verses
         }
     }
 
@@ -70,33 +69,31 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun read(translationShortName: String, parallelTranslations: List<String>,
-             bookIndex: Int, chapterIndex: Int): List<Verse> {
-        db.withTransaction {
-            if (!hasTable(translationShortName)) return emptyList()
+             bookIndex: Int, chapterIndex: Int): List<Verse> = db.withTransaction {
+        if (!hasTable(translationShortName)) return emptyList()
 
-            val primaryTexts = readVerseTexts(translationShortName, bookIndex, chapterIndex)
-            var versesCount = primaryTexts.size
-            val parallelTexts = ArrayList<ArrayList<Verse.Text>>(parallelTranslations.size).apply {
-                val countVerses: (List<Verse.Text>) -> Unit = { versesCount = max(versesCount, it.size) }
-                parallelTranslations.forEach { add(readVerseTexts(it, bookIndex, chapterIndex).also(countVerses)) }
-            }
-
-            val verses = ArrayList<Verse>(versesCount)
-            for (verseIndex in 0 until versesCount) {
-                val primary = if (primaryTexts.size > verseIndex) primaryTexts[verseIndex] else Verse.Text(translationShortName, "")
-
-                val parallel = ArrayList<Verse.Text>(parallelTranslations.size)
-                for ((i, translation) in parallelTranslations.withIndex()) {
-                    parallel.add(parallelTexts[i].let {
-                        return@let if (it.size > verseIndex) it[verseIndex] else Verse.Text(translation, "")
-                    })
-                }
-
-                verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex), primary, parallel))
-            }
-
-            return verses
+        val primaryTexts = readVerseTexts(translationShortName, bookIndex, chapterIndex)
+        var versesCount = primaryTexts.size
+        val parallelTexts = ArrayList<ArrayList<Verse.Text>>(parallelTranslations.size).apply {
+            val countVerses: (List<Verse.Text>) -> Unit = { versesCount = max(versesCount, it.size) }
+            parallelTranslations.forEach { add(readVerseTexts(it, bookIndex, chapterIndex).also(countVerses)) }
         }
+
+        val verses = ArrayList<Verse>(versesCount)
+        for (verseIndex in 0 until versesCount) {
+            val primary = if (primaryTexts.size > verseIndex) primaryTexts[verseIndex] else Verse.Text(translationShortName, "")
+
+            val parallel = ArrayList<Verse.Text>(parallelTranslations.size)
+            for ((i, translation) in parallelTranslations.withIndex()) {
+                parallel.add(parallelTexts[i].let {
+                    return@let if (it.size > verseIndex) it[verseIndex] else Verse.Text(translation, "")
+                })
+            }
+
+            verses.add(Verse(VerseIndex(bookIndex, chapterIndex, verseIndex), primary, parallel))
+        }
+
+        return verses
     }
 
     @WorkerThread
@@ -180,27 +177,25 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun save(translationShortName: String, verses: Map<Pair<Int, Int>, List<String>>) {
-        db.withTransaction {
-            if (hasTable(translationShortName, false)) {
-                Log.e(TAG, "", IllegalStateException("Translation $translationShortName already installed"))
-                remove(translationShortName)
-            }
-            execSQL("CREATE TABLE IF NOT EXISTS $translationShortName (" +
-                    "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL, " +
-                    "PRIMARY KEY($COLUMN_BOOK_INDEX, $COLUMN_CHAPTER_INDEX, $COLUMN_VERSE_INDEX));")
+    fun save(translationShortName: String, verses: Map<Pair<Int, Int>, List<String>>) = db.withTransaction {
+        if (hasTable(translationShortName, false)) {
+            Log.e(TAG, "", IllegalStateException("Translation $translationShortName already installed"))
+            remove(translationShortName)
+        }
+        execSQL("CREATE TABLE IF NOT EXISTS $translationShortName (" +
+                "$COLUMN_BOOK_INDEX INTEGER NOT NULL, $COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
+                "$COLUMN_VERSE_INDEX INTEGER NOT NULL, $COLUMN_TEXT TEXT NOT NULL, " +
+                "PRIMARY KEY($COLUMN_BOOK_INDEX, $COLUMN_CHAPTER_INDEX, $COLUMN_VERSE_INDEX));")
 
-            val values = ContentValues(4)
-            for (entry in verses) {
-                with(values) {
-                    put(COLUMN_BOOK_INDEX, entry.key.first)
-                    put(COLUMN_CHAPTER_INDEX, entry.key.second)
-                    for ((verseIndex, verse) in entry.value.withIndex()) {
-                        put(COLUMN_VERSE_INDEX, verseIndex)
-                        put(COLUMN_TEXT, verse)
-                        insertWithOnConflict(translationShortName, null, this, SQLiteDatabase.CONFLICT_REPLACE)
-                    }
+        val values = ContentValues(4)
+        for (entry in verses) {
+            with(values) {
+                put(COLUMN_BOOK_INDEX, entry.key.first)
+                put(COLUMN_CHAPTER_INDEX, entry.key.second)
+                for ((verseIndex, verse) in entry.value.withIndex()) {
+                    put(COLUMN_VERSE_INDEX, verseIndex)
+                    put(COLUMN_TEXT, verse)
+                    insertWithOnConflict(translationShortName, null, this, SQLiteDatabase.CONFLICT_REPLACE)
                 }
             }
         }

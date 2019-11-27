@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import me.xizzhu.android.ask.db.transaction
 
 class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
@@ -36,7 +37,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     val translationInfoDao = TranslationInfoDao(this)
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.withTransaction {
+        db.transaction {
             BookmarkDao.createTable(db)
             BookNamesDao.createTable(db)
             HighlightDao.createTable(db)
@@ -50,23 +51,6 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         when (oldVersion) {
             1 -> HighlightDao.createTable(db)
-        }
-    }
-}
-
-/**
- * Due to limitation that transactions are thread confined, SQLite accessing code inside the block
- * can only run in the current thread.
- */
-inline fun <R> SQLiteDatabase.withTransaction(block: SQLiteDatabase.() -> R): R {
-    try {
-        beginTransaction()
-        val r = block()
-        setTransactionSuccessful()
-        return r
-    } finally {
-        if (inTransaction()) {
-            endTransaction()
         }
     }
 }

@@ -20,6 +20,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.ask.db.transaction
 import me.xizzhu.android.joshua.core.TranslationInfo
 
 class TranslationInfoDao(sqliteHelper: SQLiteOpenHelper) {
@@ -64,7 +65,7 @@ class TranslationInfoDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun replace(translations: List<TranslationInfo>) {
-        db.withTransaction {
+        db.transaction {
             db.delete(TABLE_TRANSLATION_INFO, null, null)
 
             val values = ContentValues(5)

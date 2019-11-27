@@ -20,6 +20,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.ask.db.transaction
 
 class MetadataDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
@@ -107,7 +108,7 @@ class MetadataDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun save(entries: List<Pair<String, String>>) {
-        db.withTransaction {
+        db.transaction {
             val values = ContentValues(2)
             for (entry in entries) {
                 with(values) {

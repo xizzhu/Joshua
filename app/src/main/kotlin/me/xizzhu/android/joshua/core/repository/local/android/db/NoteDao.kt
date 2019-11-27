@@ -20,6 +20,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.ask.db.transaction
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -111,7 +112,7 @@ class NoteDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     fun save(notes: List<Note>) {
-        db.withTransaction { notes.forEach { save(it) } }
+        db.transaction { notes.forEach { save(it) } }
     }
 
     fun remove(verseIndex: VerseIndex) {

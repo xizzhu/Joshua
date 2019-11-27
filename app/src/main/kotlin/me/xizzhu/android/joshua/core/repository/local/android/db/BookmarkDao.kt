@@ -20,6 +20,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.ask.db.transaction
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -107,7 +108,7 @@ class BookmarkDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     fun save(bookmarks: List<Bookmark>) {
-        db.withTransaction { bookmarks.forEach { save(it) } }
+        db.transaction { bookmarks.forEach { save(it) } }
     }
 
     fun remove(verseIndex: VerseIndex) {

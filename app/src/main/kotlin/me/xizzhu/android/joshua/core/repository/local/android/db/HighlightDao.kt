@@ -20,6 +20,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.ask.db.transaction
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -112,7 +113,7 @@ class HighlightDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     fun save(highlights: List<Highlight>) {
-        db.withTransaction { highlights.forEach { save(it) } }
+        db.transaction { highlights.forEach { save(it) } }
     }
 
     fun remove(verseIndex: VerseIndex) {

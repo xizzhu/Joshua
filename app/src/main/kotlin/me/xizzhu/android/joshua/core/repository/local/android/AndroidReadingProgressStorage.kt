@@ -19,17 +19,18 @@ package me.xizzhu.android.joshua.core.repository.local.android
 import android.text.format.DateUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import me.xizzhu.android.ask.db.transaction
+import me.xizzhu.android.ask.db.withTransaction
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingProgressStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
-import me.xizzhu.android.joshua.core.repository.local.android.db.withTransaction
 import kotlin.math.max
 
 class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase) : LocalReadingProgressStorage {
     override suspend fun trackReadingProgress(bookIndex: Int, chapterIndex: Int, timeSpentInMills: Long, timestamp: Long) {
         withContext(Dispatchers.IO) {
-            androidDatabase.writableDatabase.withTransaction {
+            androidDatabase.writableDatabase.transaction {
                 val previousChapterReadingStatus = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
                 if (previousChapterReadingStatus.lastReadingTimestamp < timestamp) {
                     val currentChapterReadingStatus = ReadingProgress.ChapterReadingStatus(
@@ -69,23 +70,21 @@ class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase
         }
     }
 
-    override suspend fun read(): ReadingProgress {
-        return withContext(Dispatchers.IO) {
-            androidDatabase.readableDatabase.withTransaction {
-                val metadata = androidDatabase.metadataDao.read(listOf(
-                        Pair(MetadataDao.KEY_CONTINUOUS_READING_DAYS, "1"),
-                        Pair(MetadataDao.KEY_LAST_READING_TIMESTAMP, "0")
-                ))
-                return@withContext ReadingProgress(
-                        metadata.getValue(MetadataDao.KEY_CONTINUOUS_READING_DAYS).toInt(),
-                        metadata.getValue(MetadataDao.KEY_LAST_READING_TIMESTAMP).toLong(),
-                        androidDatabase.readingProgressDao.read())
-            }
+    override suspend fun read(): ReadingProgress = withContext(Dispatchers.IO) {
+        androidDatabase.readableDatabase.withTransaction {
+            val metadata = androidDatabase.metadataDao.read(listOf(
+                    Pair(MetadataDao.KEY_CONTINUOUS_READING_DAYS, "1"),
+                    Pair(MetadataDao.KEY_LAST_READING_TIMESTAMP, "0")
+            ))
+            return@withContext ReadingProgress(
+                    metadata.getValue(MetadataDao.KEY_CONTINUOUS_READING_DAYS).toInt(),
+                    metadata.getValue(MetadataDao.KEY_LAST_READING_TIMESTAMP).toLong(),
+                    androidDatabase.readingProgressDao.read())
         }
     }
 
     override suspend fun save(readingProgress: ReadingProgress) {
-        androidDatabase.writableDatabase.withTransaction {
+        androidDatabase.writableDatabase.transaction {
             androidDatabase.metadataDao.save(listOf(
                     Pair(MetadataDao.KEY_CONTINUOUS_READING_DAYS, readingProgress.continuousReadingDays.toString()),
                     Pair(MetadataDao.KEY_LAST_READING_TIMESTAMP, readingProgress.lastReadingTimestamp.toString())
