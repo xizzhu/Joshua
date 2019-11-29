@@ -16,10 +16,10 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
-import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.ask.db.*
 
 class MetadataDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
@@ -41,81 +41,48 @@ class MetadataDao(sqliteHelper: SQLiteOpenHelper) {
         const val KEY_BOOKMARKS_SORT_ORDER = "bookmarksSortOrder"
         const val KEY_HIGHLIGHTS_SORT_ORDER = "highlightsSortOrder"
         const val KEY_NOTES_SORT_ORDER = "notesSortOrder"
-
-        @WorkerThread
-        fun createTable(db: SQLiteDatabase) {
-            db.execSQL("CREATE TABLE $TABLE_METADATA (" +
-                    "$COLUMN_KEY TEXT PRIMARY KEY, $COLUMN_VALUE TEXT NOT NULL);")
-        }
     }
 
     private val db by lazy { sqliteHelper.writableDatabase }
 
     @WorkerThread
-    fun read(key: String, defaultValue: String): String {
-        db.query(TABLE_METADATA, arrayOf(COLUMN_VALUE), "$COLUMN_KEY = ?", arrayOf(key), null, null, null)
-                .use {
-                    return if (it.count > 0 && it.moveToNext()) {
-                        it.getString(0)
-                    } else {
-                        defaultValue
-                    }
-                }
+    fun createTable(db: SQLiteDatabase) {
+        db.createTable(TABLE_METADATA) {
+            it[COLUMN_KEY] = TEXT + PRIMARY_KEY
+            it[COLUMN_VALUE] = TEXT + NOT_NULL
+        }
     }
 
     @WorkerThread
-    fun read(keys: List<Pair<String, String>>): Map<String, String> {
-        if (keys.isEmpty()) {
-            return emptyMap()
-        }
+    fun read(key: String, defaultValue: String): String =
+            db.select(TABLE_METADATA, COLUMN_VALUE) { COLUMN_KEY eq key }
+                    .firstOrDefault(defaultValue) { it.getString(COLUMN_VALUE) }
 
-        val results = HashMap<String, String>(keys.size)
+    @WorkerThread
+    fun read(keys: List<Pair<String, String>>): Map<String, String> = HashMap<String, String>(keys.size).apply {
+        if (keys.isEmpty()) return@apply
 
-        val selection = StringBuilder()
-        val selectionArgs = Array(keys.size) { "" }
-        for ((i, key) in keys.withIndex()) {
-            if (i > 0) {
-                selection.append(" OR ")
+        db.select(TABLE_METADATA, COLUMN_KEY, COLUMN_VALUE) {
+            var condition: Condition = noOp()
+            keys.forEach { (key, defaultValue) ->
+                set(key, defaultValue)
+
+                condition = if (condition == Condition.NoOp) COLUMN_KEY eq key else condition or (COLUMN_KEY eq key)
             }
-            selection.append("$COLUMN_KEY = ?")
-            selectionArgs[i] = key.first
-
-            results[key.first] = key.second
-        }
-
-        db.query(TABLE_METADATA, arrayOf(COLUMN_KEY, COLUMN_VALUE),
-                selection.toString(), selectionArgs, null, null, null).use {
-            if (it.count > 0) {
-                val keyIndex = it.getColumnIndex(COLUMN_KEY)
-                val valueIndex = it.getColumnIndex(COLUMN_VALUE)
-                while (it.moveToNext()) {
-                    results[it.getString(keyIndex)] = it.getString(valueIndex)
-                }
-            }
-        }
-        return results
+            condition
+        }.forEach { row -> set(row.getString(COLUMN_KEY), row.getString(COLUMN_VALUE)) }
     }
 
     @WorkerThread
     fun save(key: String, value: String) {
-        val values = ContentValues(2).apply {
-            put(COLUMN_KEY, key)
-            put(COLUMN_VALUE, value)
+        db.insert(TABLE_METADATA, SQLiteDatabase.CONFLICT_REPLACE) {
+            it[COLUMN_KEY] = key
+            it[COLUMN_VALUE] = value
         }
-        db.insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
     @WorkerThread
     fun save(entries: List<Pair<String, String>>) {
-        db.withTransaction {
-            val values = ContentValues(2)
-            for (entry in entries) {
-                with(values) {
-                    put(COLUMN_KEY, entry.first)
-                    put(COLUMN_VALUE, entry.second)
-                }
-                insertWithOnConflict(TABLE_METADATA, null, values, SQLiteDatabase.CONFLICT_REPLACE)
-            }
-        }
+        db.transaction { entries.forEach { save(it.first, it.second) } }
     }
 }

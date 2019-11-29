@@ -16,10 +16,10 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
-import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.ask.db.*
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -32,90 +32,75 @@ class NoteDao(sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_VERSE_INDEX = "verseIndex"
         private const val COLUMN_NOTE = "note"
         private const val COLUMN_TIMESTAMP = "timestamp"
-
-        @WorkerThread
-        fun createTable(db: SQLiteDatabase) {
-            db.execSQL("CREATE TABLE $TABLE_NOTE (" +
-                    "$COLUMN_BOOK_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_CHAPTER_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_VERSE_INDEX INTEGER NOT NULL, " +
-                    "$COLUMN_NOTE TEXT NOT NULL, " +
-                    "$COLUMN_TIMESTAMP INTEGER NOT NULL, " +
-                    "PRIMARY KEY ($COLUMN_BOOK_INDEX, $COLUMN_CHAPTER_INDEX, $COLUMN_VERSE_INDEX));")
-        }
     }
 
     private val db by lazy { sqliteHelper.writableDatabase }
 
-    fun read(@Constants.SortOrder sortOrder: Int): List<Note> {
-        val orderBy = when (sortOrder) {
-            Constants.SORT_BY_DATE -> "$COLUMN_TIMESTAMP DESC"
-            Constants.SORT_BY_BOOK -> "$COLUMN_BOOK_INDEX ASC, $COLUMN_CHAPTER_INDEX ASC, $COLUMN_VERSE_INDEX ASC"
-            else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
-        }
-
-        db.query(TABLE_NOTE, null, null, null, null, null, orderBy).use {
-            val notes = ArrayList<Note>(it.count)
-            val bookIndex = it.getColumnIndex(COLUMN_BOOK_INDEX)
-            val chapterIndex = it.getColumnIndex(COLUMN_CHAPTER_INDEX)
-            val verseIndex = it.getColumnIndex(COLUMN_VERSE_INDEX)
-            val note = it.getColumnIndex(COLUMN_NOTE)
-            val timestamp = it.getColumnIndex(COLUMN_TIMESTAMP)
-            while (it.moveToNext()) {
-                notes.add(Note(VerseIndex(it.getInt(bookIndex), it.getInt(chapterIndex), it.getInt(verseIndex)),
-                        it.getString(note), it.getLong(timestamp)))
-            }
-            return notes
+    @WorkerThread
+    fun createTable(db: SQLiteDatabase) {
+        db.createTable(TABLE_NOTE) {
+            it[COLUMN_BOOK_INDEX] = INTEGER + PRIMARY_KEY + NOT_NULL
+            it[COLUMN_CHAPTER_INDEX] = INTEGER + PRIMARY_KEY + NOT_NULL
+            it[COLUMN_VERSE_INDEX] = INTEGER + PRIMARY_KEY + NOT_NULL
+            it[COLUMN_NOTE] = TEXT + NOT_NULL
+            it[COLUMN_TIMESTAMP] = INTEGER + NOT_NULL
         }
     }
 
-    fun read(bookIndex: Int, chapterIndex: Int): List<Note> {
-        db.query(TABLE_NOTE, arrayOf(COLUMN_NOTE, COLUMN_VERSE_INDEX, COLUMN_TIMESTAMP),
-                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ?",
-                arrayOf(bookIndex.toString(), chapterIndex.toString()),
-                null, null, "$COLUMN_VERSE_INDEX ASC").use {
-            val notes = ArrayList<Note>(it.count)
-            val verseIndex = it.getColumnIndex(COLUMN_VERSE_INDEX)
-            val note = it.getColumnIndex(COLUMN_NOTE)
-            val timestamp = it.getColumnIndex(COLUMN_TIMESTAMP)
-            while (it.moveToNext()) {
-                notes.add(Note(VerseIndex(bookIndex, chapterIndex, it.getInt(verseIndex)),
-                        it.getString(note), it.getLong(timestamp)))
+    fun read(@Constants.SortOrder sortOrder: Int): List<Note> = db.select(TABLE_NOTE)
+            .apply {
+                when (sortOrder) {
+                    Constants.SORT_BY_DATE -> orderBy(COLUMN_TIMESTAMP, sortOrder = SortOrder.DESCENDING)
+                    Constants.SORT_BY_BOOK -> orderBy(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX)
+                    else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
+                }
+            }.toList { row ->
+                Note(
+                        VerseIndex(
+                                row.getInt(COLUMN_BOOK_INDEX),
+                                row.getInt(COLUMN_CHAPTER_INDEX),
+                                row.getInt(COLUMN_VERSE_INDEX)
+                        ),
+                        row.getString(COLUMN_NOTE),
+                        row.getLong(COLUMN_TIMESTAMP)
+                )
             }
-            return notes
-        }
-    }
 
-    fun read(verseIndex: VerseIndex): Note {
-        db.query(TABLE_NOTE, arrayOf(COLUMN_NOTE, COLUMN_TIMESTAMP),
-                "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
-                arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()),
-                null, null, null).use {
-            return if (it.moveToNext()) {
-                Note(verseIndex, it.getString(it.getColumnIndex(COLUMN_NOTE)), it.getLong(it.getColumnIndex(COLUMN_TIMESTAMP)))
-            } else {
-                Note(verseIndex, "", -1L)
+    fun read(bookIndex: Int, chapterIndex: Int): List<Note> =
+            db.select(TABLE_NOTE, COLUMN_VERSE_INDEX, COLUMN_NOTE, COLUMN_TIMESTAMP) {
+                (COLUMN_BOOK_INDEX eq bookIndex) and (COLUMN_CHAPTER_INDEX eq chapterIndex)
             }
-        }
-    }
+                    .orderBy(COLUMN_VERSE_INDEX)
+                    .toList { row ->
+                        Note(
+                                VerseIndex(bookIndex, chapterIndex, row.getInt(COLUMN_VERSE_INDEX)),
+                                row.getString(COLUMN_NOTE),
+                                row.getLong(COLUMN_TIMESTAMP)
+                        )
+                    }
+
+    fun read(verseIndex: VerseIndex): Note =
+            db.select(TABLE_NOTE, COLUMN_NOTE, COLUMN_TIMESTAMP) {
+                (COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)
+            }.firstOrDefault({ Note(verseIndex, "", -1L) }) { Note(verseIndex, it.getString(COLUMN_NOTE), it.getLong(COLUMN_TIMESTAMP)) }
 
     fun save(note: Note) {
-        val values = ContentValues(5).apply {
-            put(COLUMN_BOOK_INDEX, note.verseIndex.bookIndex)
-            put(COLUMN_CHAPTER_INDEX, note.verseIndex.chapterIndex)
-            put(COLUMN_VERSE_INDEX, note.verseIndex.verseIndex)
-            put(COLUMN_NOTE, note.note)
-            put(COLUMN_TIMESTAMP, note.timestamp)
+        db.insert(TABLE_NOTE, SQLiteDatabase.CONFLICT_REPLACE) {
+            it[COLUMN_BOOK_INDEX] = note.verseIndex.bookIndex
+            it[COLUMN_CHAPTER_INDEX] = note.verseIndex.chapterIndex
+            it[COLUMN_VERSE_INDEX] = note.verseIndex.verseIndex
+            it[COLUMN_NOTE] = note.note
+            it[COLUMN_TIMESTAMP] = note.timestamp
         }
-        db.insertWithOnConflict(TABLE_NOTE, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
     fun save(notes: List<Note>) {
-        db.withTransaction { notes.forEach { save(it) } }
+        db.transaction { notes.forEach { save(it) } }
     }
 
     fun remove(verseIndex: VerseIndex) {
-        db.delete(TABLE_NOTE, "$COLUMN_BOOK_INDEX = ? AND $COLUMN_CHAPTER_INDEX = ? AND $COLUMN_VERSE_INDEX = ?",
-                arrayOf(verseIndex.bookIndex.toString(), verseIndex.chapterIndex.toString(), verseIndex.verseIndex.toString()))
+        db.delete(TABLE_NOTE) {
+            (COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)
+        }
     }
 }

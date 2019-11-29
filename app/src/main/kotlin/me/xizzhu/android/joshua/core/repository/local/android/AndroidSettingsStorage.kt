@@ -24,20 +24,18 @@ import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 
 class AndroidSettingsStorage(private val androidDatabase: AndroidDatabase) : LocalSettingsStorage {
-    override suspend fun readSettings(): Settings {
-        return withContext(Dispatchers.IO) {
-            val values = androidDatabase.metadataDao.read(listOf(
-                    Pair(MetadataDao.KEY_SCREEN_ON, Settings.DEFAULT.keepScreenOn.toString()),
-                    Pair(MetadataDao.KEY_NIGHT_MODE_ON, Settings.DEFAULT.nightModeOn.toString()),
-                    Pair(MetadataDao.KEY_FONT_SIZE_SCALE, Settings.DEFAULT.fontSizeScale.toString()),
-                    Pair(MetadataDao.KEY_SIMPLE_READING_MODE_ON, Settings.DEFAULT.simpleReadingModeOn.toString())
-            ))
-            return@withContext Settings(values.getValue(MetadataDao.KEY_SCREEN_ON).toBoolean(),
-                    values.getValue(MetadataDao.KEY_NIGHT_MODE_ON).toBoolean(),
-                    values.getValue(MetadataDao.KEY_FONT_SIZE_SCALE).toInt(),
-                    values.getValue(MetadataDao.KEY_SIMPLE_READING_MODE_ON).toBoolean()
-            )
-        }
+    override suspend fun readSettings(): Settings = withContext(Dispatchers.IO) {
+        val values = androidDatabase.metadataDao.read(listOf(
+                Pair(MetadataDao.KEY_SCREEN_ON, Settings.DEFAULT.keepScreenOn.toString()),
+                Pair(MetadataDao.KEY_NIGHT_MODE_ON, Settings.DEFAULT.nightModeOn.toString()),
+                Pair(MetadataDao.KEY_FONT_SIZE_SCALE, Settings.DEFAULT.fontSizeScale.toString()),
+                Pair(MetadataDao.KEY_SIMPLE_READING_MODE_ON, Settings.DEFAULT.simpleReadingModeOn.toString())
+        ))
+        return@withContext Settings(values.getValue(MetadataDao.KEY_SCREEN_ON).toBoolean(),
+                values.getValue(MetadataDao.KEY_NIGHT_MODE_ON).toBoolean(),
+                values.getValue(MetadataDao.KEY_FONT_SIZE_SCALE).toInt(),
+                values.getValue(MetadataDao.KEY_SIMPLE_READING_MODE_ON).toBoolean()
+        )
     }
 
     override suspend fun saveSettings(settings: Settings) {

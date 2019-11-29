@@ -18,11 +18,11 @@ package me.xizzhu.android.joshua.core.repository.local.android
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import me.xizzhu.android.ask.db.transaction
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
-import me.xizzhu.android.joshua.core.repository.local.android.db.withTransaction
 
 class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : LocalTranslationStorage {
     override suspend fun readTranslationListRefreshTimestamp(): Long = withContext(Dispatchers.IO) {
@@ -30,9 +30,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
     }
 
     override suspend fun saveTranslationListRefreshTimestamp(timestamp: Long) {
-        withContext(Dispatchers.IO) {
-            androidDatabase.metadataDao.save(MetadataDao.KEY_TRANSLATION_LIST_REFRESH_TIMESTAMP, timestamp.toString())
-        }
+        withContext(Dispatchers.IO) { androidDatabase.metadataDao.save(MetadataDao.KEY_TRANSLATION_LIST_REFRESH_TIMESTAMP, timestamp.toString()) }
     }
 
     override suspend fun readTranslations(): List<TranslationInfo> = withContext(Dispatchers.IO) {
@@ -40,9 +38,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
     }
 
     override suspend fun replaceTranslations(translations: List<TranslationInfo>) {
-        withContext(Dispatchers.IO) {
-            androidDatabase.translationInfoDao.replace(translations)
-        }
+        withContext(Dispatchers.IO) { androidDatabase.translationInfoDao.replace(translations) }
     }
 
     override suspend fun saveTranslation(translationInfo: TranslationInfo,
@@ -50,7 +46,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
                                          bookShortNames: List<String>,
                                          verses: Map<Pair<Int, Int>, List<String>>) {
         withContext(Dispatchers.IO) {
-            androidDatabase.writableDatabase.withTransaction {
+            androidDatabase.writableDatabase.transaction {
                 androidDatabase.bookNamesDao.save(translationInfo.shortName, bookNames, bookShortNames)
                 if (translationInfo.downloaded) {
                     androidDatabase.translationInfoDao.save(translationInfo)
@@ -64,7 +60,7 @@ class AndroidTranslationStorage(private val androidDatabase: AndroidDatabase) : 
 
     override suspend fun removeTranslation(translationInfo: TranslationInfo) {
         withContext(Dispatchers.IO) {
-            androidDatabase.writableDatabase.withTransaction {
+            androidDatabase.writableDatabase.transaction {
                 androidDatabase.bookNamesDao.remove(translationInfo.shortName)
                 if (translationInfo.downloaded) {
                     androidDatabase.translationInfoDao.save(translationInfo.copy(downloaded = false))

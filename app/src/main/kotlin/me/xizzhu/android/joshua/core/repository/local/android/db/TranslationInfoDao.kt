@@ -16,10 +16,10 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
-import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
+import me.xizzhu.android.ask.db.*
 import me.xizzhu.android.joshua.core.TranslationInfo
 
 class TranslationInfoDao(sqliteHelper: SQLiteOpenHelper) {
@@ -30,65 +30,44 @@ class TranslationInfoDao(sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_LANGUAGE = "language"
         private const val COLUMN_SIZE = "size"
         private const val COLUMN_DOWNLOADED = "downloaded"
-
-        @WorkerThread
-        fun createTable(db: SQLiteDatabase) {
-            db.execSQL("CREATE TABLE $TABLE_TRANSLATION_INFO (" +
-                    "$COLUMN_SHORT_NAME TEXT PRIMARY KEY, $COLUMN_NAME TEXT NOT NULL, " +
-                    " $COLUMN_LANGUAGE TEXT NOT NULL, $COLUMN_SIZE INTEGER NOT NULL, " +
-                    " $COLUMN_DOWNLOADED INTEGER NOT NULL);")
-        }
     }
 
     private val db by lazy { sqliteHelper.writableDatabase }
 
     @WorkerThread
-    fun read(): List<TranslationInfo> {
-        db.query(TABLE_TRANSLATION_INFO, null, null, null, null, null, null, null)
-                .use {
-                    val translations = ArrayList<TranslationInfo>(it.count)
-                    if (it.count > 0) {
-                        val shortName = it.getColumnIndex(COLUMN_SHORT_NAME)
-                        val name = it.getColumnIndex(COLUMN_NAME)
-                        val language = it.getColumnIndex(COLUMN_LANGUAGE)
-                        val size = it.getColumnIndex(COLUMN_SIZE)
-                        val downloaded = it.getColumnIndex(COLUMN_DOWNLOADED)
-                        while (it.moveToNext()) {
-                            translations.add(TranslationInfo(it.getString(shortName), it.getString(name),
-                                    it.getString(language), it.getLong(size), it.getInt(downloaded) == 1))
-                        }
-                    }
-                    return translations
-                }
-    }
-
-    @WorkerThread
-    fun replace(translations: List<TranslationInfo>) {
-        db.withTransaction {
-            db.delete(TABLE_TRANSLATION_INFO, null, null)
-
-            val values = ContentValues(5)
-            for (t in translations) {
-                t.saveTo(values)
-                insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
-            }
+    fun createTable(db: SQLiteDatabase) {
+        db.createTable(TABLE_TRANSLATION_INFO) {
+            it[COLUMN_SHORT_NAME] = TEXT + PRIMARY_KEY
+            it[COLUMN_NAME] = TEXT + NOT_NULL
+            it[COLUMN_LANGUAGE] = TEXT + NOT_NULL
+            it[COLUMN_SIZE] = INTEGER + NOT_NULL
+            it[COLUMN_DOWNLOADED] = INTEGER + NOT_NULL
         }
     }
 
-    private fun TranslationInfo.saveTo(`out`: ContentValues) {
-        with(`out`) {
-            put(COLUMN_SHORT_NAME, shortName)
-            put(COLUMN_NAME, name)
-            put(COLUMN_LANGUAGE, language)
-            put(COLUMN_SIZE, size)
-            put(COLUMN_DOWNLOADED, if (downloaded) 1 else 0)
+    @WorkerThread
+    fun read(): List<TranslationInfo> = db.select(TABLE_TRANSLATION_INFO)
+            .toList { row ->
+                TranslationInfo(row.getString(COLUMN_SHORT_NAME), row.getString(COLUMN_NAME),
+                        row.getString(COLUMN_LANGUAGE), row.getLong(COLUMN_SIZE), row.getInt(COLUMN_DOWNLOADED) == 1)
+            }
+
+    @WorkerThread
+    fun replace(translations: List<TranslationInfo>) {
+        db.transaction {
+            deleteAll(TABLE_TRANSLATION_INFO)
+            translations.forEach { save(it) }
         }
     }
 
     @WorkerThread
     fun save(translation: TranslationInfo) {
-        val values = ContentValues(5)
-        translation.saveTo(values)
-        db.insertWithOnConflict(TABLE_TRANSLATION_INFO, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+        db.insert(TABLE_TRANSLATION_INFO, SQLiteDatabase.CONFLICT_REPLACE) {
+            it[COLUMN_SHORT_NAME] = translation.shortName
+            it[COLUMN_NAME] = translation.name
+            it[COLUMN_LANGUAGE] = translation.language
+            it[COLUMN_SIZE] = translation.size
+            it[COLUMN_DOWNLOADED] = if (translation.downloaded) 1 else 0
+        }
     }
 }

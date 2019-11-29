@@ -80,6 +80,8 @@ object Versions {
 
     const val dagger = "2.25.2"
 
+    const val ask = "0.4.0"
+
     const val logger = "0.1.4"
 
     const val stetho = "1.5.1"
@@ -139,6 +141,10 @@ object Dependencies {
         const val androidSupport = "com.google.dagger:dagger-android-support:${Versions.dagger}"
         const val compiler = "com.google.dagger:dagger-compiler:${Versions.dagger}"
         const val androidProcessor = "com.google.dagger:dagger-android-processor:${Versions.dagger}"
+    }
+
+    object Ask {
+        const val ask = "com.github.xizzhu:ask:${Versions.ask}"
     }
 
     object Logger {

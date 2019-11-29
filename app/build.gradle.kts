@@ -122,6 +122,8 @@ dependencies {
     kapt(Dependencies.Dagger.compiler)
     kapt(Dependencies.Dagger.androidProcessor)
 
+    implementation(Dependencies.Ask.ask)
+
     implementation(Dependencies.Logger.logger)
 
     debugImplementation(Dependencies.Stetho.stetho)
