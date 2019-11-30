@@ -27,8 +27,9 @@ import me.xizzhu.android.joshua.annotated.notes.list.NotesListPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.NoteManager
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
@@ -36,7 +37,7 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 object NotesModule {
     @ActivityScope
     @Provides
-    fun provideAnnotatedVersesToolbarInteractor(noteManager: NoteManager): AnnotatedVersesToolbarInteractor =
+    fun provideAnnotatedVersesToolbarInteractor(noteManager: VerseAnnotationManager<Note>): AnnotatedVersesToolbarInteractor =
             AnnotatedVersesToolbarInteractor({ noteManager.observeSortOrder().first() }, noteManager::saveSortOrder)
 
     @ActivityScope
@@ -55,7 +56,7 @@ object NotesModule {
 
     @ActivityScope
     @Provides
-    fun provideNotesListInteractor(noteManager: NoteManager,
+    fun provideNotesListInteractor(noteManager: VerseAnnotationManager<Note>,
                                    bibleReadingManager: BibleReadingManager,
                                    settingsManager: SettingsManager): NotesListInteractor =
             NotesListInteractor(noteManager, bibleReadingManager, settingsManager)

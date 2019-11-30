@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
 
-class HighlightsListInteractor(private val highlightManager: HighlightManager,
+class HighlightsListInteractor(private val highlightManager: VerseAnnotationManager<Highlight>,
                                bibleReadingManager: BibleReadingManager,
                                settingsManager: SettingsManager,
                                dispatcher: CoroutineDispatcher = Dispatchers.Default)

@@ -28,6 +28,12 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.logger.Log
 
+abstract class VerseAnnotation(open val verseIndex: VerseIndex, open val timestamp: Long) {
+    open fun isValid(): Boolean = verseIndex.isValid() && timestamp > 0L
+}
+
+data class Bookmark(override val verseIndex: VerseIndex, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp)
+
 data class Highlight(override val verseIndex: VerseIndex, @ColorInt val color: Int, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp) {
     companion object {
         const val COLOR_NONE = 0
@@ -46,9 +52,11 @@ data class Highlight(override val verseIndex: VerseIndex, @ColorInt val color: I
     override fun isValid(): Boolean = super.isValid() && AVAILABLE_COLORS.contains(color)
 }
 
-class HighlightManager(private val highlightRepository: VerseAnnotationRepository<Highlight>) {
+data class Note(override val verseIndex: VerseIndex, val note: String, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp)
+
+class VerseAnnotationManager<T : VerseAnnotation>(private val verseAnnotationRepository: VerseAnnotationRepository<T>) {
     companion object {
-        private val TAG = HighlightManager::class.java.simpleName
+        private val TAG = VerseAnnotationManager::class.java.simpleName
     }
 
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
@@ -57,9 +65,9 @@ class HighlightManager(private val highlightRepository: VerseAnnotationRepositor
     init {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                sortOrder.offer(highlightRepository.readSortOrder())
+                sortOrder.offer(verseAnnotationRepository.readSortOrder())
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to initialize bookmark sort order", e)
+                Log.e(TAG, "Failed to initialize sort order", e)
                 sortOrder.offer(Constants.DEFAULT_SORT_ORDER)
             }
         }
@@ -68,25 +76,25 @@ class HighlightManager(private val highlightRepository: VerseAnnotationRepositor
     fun observeSortOrder(): Flow<Int> = sortOrder.asFlow()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
-        highlightRepository.saveSortOrder(sortOrder)
+        verseAnnotationRepository.saveSortOrder(sortOrder)
         this.sortOrder.offer(sortOrder)
     }
 
-    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Highlight> = highlightRepository.read(sortOrder)
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<T> = verseAnnotationRepository.read(sortOrder)
 
-    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Highlight> = highlightRepository.read(bookIndex, chapterIndex)
+    suspend fun read(bookIndex: Int, chapterIndex: Int): List<T> = verseAnnotationRepository.read(bookIndex, chapterIndex)
 
-    suspend fun read(verseIndex: VerseIndex): Highlight = highlightRepository.read(verseIndex)
+    suspend fun read(verseIndex: VerseIndex): T = verseAnnotationRepository.read(verseIndex)
 
-    suspend fun save(highlight: Highlight) {
-        highlightRepository.save(highlight)
+    suspend fun save(verseAnnotation: T) {
+        verseAnnotationRepository.save(verseAnnotation)
     }
 
-    suspend fun save(highlights: List<Highlight>) {
-        highlightRepository.save(highlights)
+    suspend fun save(verseAnnotations: List<T>) {
+        verseAnnotationRepository.save(verseAnnotations)
     }
 
     suspend fun remove(verseIndex: VerseIndex) {
-        highlightRepository.remove(verseIndex)
+        verseAnnotationRepository.remove(verseIndex)
     }
 }

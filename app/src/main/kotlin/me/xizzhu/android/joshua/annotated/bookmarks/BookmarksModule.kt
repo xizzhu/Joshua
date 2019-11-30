@@ -27,8 +27,9 @@ import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.BookmarkManager
+import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
@@ -36,7 +37,7 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 object BookmarksModule {
     @ActivityScope
     @Provides
-    fun provideAnnotatedVersesToolbarInteractor(bookmarkManager: BookmarkManager): AnnotatedVersesToolbarInteractor =
+    fun provideAnnotatedVersesToolbarInteractor(bookmarkManager: VerseAnnotationManager<Bookmark>): AnnotatedVersesToolbarInteractor =
             AnnotatedVersesToolbarInteractor({ bookmarkManager.observeSortOrder().first() }, bookmarkManager::saveSortOrder)
 
     @ActivityScope
@@ -55,7 +56,7 @@ object BookmarksModule {
 
     @ActivityScope
     @Provides
-    fun provideBookmarksListInteractor(bookmarkManager: BookmarkManager,
+    fun provideBookmarksListInteractor(bookmarkManager: VerseAnnotationManager<Bookmark>,
                                        bibleReadingManager: BibleReadingManager,
                                        settingsManager: SettingsManager): BookmarksListInteractor =
             BookmarksListInteractor(bookmarkManager, bibleReadingManager, settingsManager)

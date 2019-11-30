@@ -27,8 +27,9 @@ import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListPresente
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.HighlightManager
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
@@ -36,7 +37,7 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 object HighlightsModule {
     @ActivityScope
     @Provides
-    fun provideAnnotatedVersesToolbarInteractor(highlightManager: HighlightManager): AnnotatedVersesToolbarInteractor =
+    fun provideAnnotatedVersesToolbarInteractor(highlightManager: VerseAnnotationManager<Highlight>): AnnotatedVersesToolbarInteractor =
             AnnotatedVersesToolbarInteractor({ highlightManager.observeSortOrder().first() }, highlightManager::saveSortOrder)
 
     @ActivityScope
@@ -55,7 +56,7 @@ object HighlightsModule {
 
     @ActivityScope
     @Provides
-    fun provideHighlightsListInteractor(highlightManager: HighlightManager,
+    fun provideHighlightsListInteractor(highlightManager: VerseAnnotationManager<Highlight>,
                                         bibleReadingManager: BibleReadingManager,
                                         settingsManager: SettingsManager): HighlightsListInteractor =
             HighlightsListInteractor(highlightManager, bibleReadingManager, settingsManager)

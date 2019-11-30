@@ -25,17 +25,17 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
 
-class BookmarkManagerTest : BaseUnitTest() {
+class VerseAnnotationManagerTest : BaseUnitTest() {
     @Mock
     private lateinit var bookmarkRepository: VerseAnnotationRepository<Bookmark>
 
-    private lateinit var bookmarkManager: BookmarkManager
+    private lateinit var bookmarkManager: VerseAnnotationManager<Bookmark>
 
     @Test
     fun testObserveInitialSortOrder() {
         runBlocking {
             `when`(bookmarkRepository.readSortOrder()).thenReturn(Constants.SORT_BY_BOOK)
-            bookmarkManager = BookmarkManager(bookmarkRepository)
+            bookmarkManager = VerseAnnotationManager(bookmarkRepository)
 
             assertEquals(Constants.SORT_BY_BOOK, bookmarkManager.observeSortOrder().first())
         }
@@ -45,7 +45,7 @@ class BookmarkManagerTest : BaseUnitTest() {
     fun testObserveInitialSortOrderWithException() {
         runBlocking {
             `when`(bookmarkRepository.readSortOrder()).thenThrow(RuntimeException("Random exception"))
-            bookmarkManager = BookmarkManager(bookmarkRepository)
+            bookmarkManager = VerseAnnotationManager(bookmarkRepository)
 
             assertEquals(Constants.DEFAULT_SORT_ORDER, bookmarkManager.observeSortOrder().first())
         }
@@ -55,7 +55,7 @@ class BookmarkManagerTest : BaseUnitTest() {
     fun testSaveSortOrder() {
         runBlocking {
             `when`(bookmarkRepository.readSortOrder()).thenReturn(Constants.DEFAULT_SORT_ORDER)
-            bookmarkManager = BookmarkManager(bookmarkRepository)
+            bookmarkManager = VerseAnnotationManager(bookmarkRepository)
 
             assertEquals(Constants.DEFAULT_SORT_ORDER, bookmarkManager.observeSortOrder().first())
 

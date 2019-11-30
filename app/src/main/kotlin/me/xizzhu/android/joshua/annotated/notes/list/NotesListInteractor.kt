@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
 
-class NotesListInteractor(private val noteManager: NoteManager,
+class NotesListInteractor(private val noteManager: VerseAnnotationManager<Note>,
                           bibleReadingManager: BibleReadingManager,
                           settingsManager: SettingsManager,
                           dispatcher: CoroutineDispatcher = Dispatchers.Default)

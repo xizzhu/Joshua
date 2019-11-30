@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
 
-class BookmarksListInteractor(private val bookmarkManager: BookmarkManager,
+class BookmarksListInteractor(private val bookmarkManager: VerseAnnotationManager<Bookmark>,
                               bibleReadingManager: BibleReadingManager,
                               settingsManager: SettingsManager,
                               dispatcher: CoroutineDispatcher = Dispatchers.Default)

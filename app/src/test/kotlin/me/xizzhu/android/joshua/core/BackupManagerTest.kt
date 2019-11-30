@@ -28,11 +28,11 @@ class BackupManagerTest : BaseUnitTest() {
     @Mock
     private lateinit var serializer: BackupManager.Serializer
     @Mock
-    private lateinit var bookmarkManager: BookmarkManager
+    private lateinit var bookmarkManager: VerseAnnotationManager<Bookmark>
     @Mock
-    private lateinit var highlightManager: HighlightManager
+    private lateinit var highlightManager: VerseAnnotationManager<Highlight>
     @Mock
-    private lateinit var noteManager: NoteManager
+    private lateinit var noteManager: VerseAnnotationManager<Note>
     @Mock
     private lateinit var readingProgressManager: ReadingProgressManager
 

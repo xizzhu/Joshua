@@ -71,9 +71,9 @@ class AppModule(private val app: App) {
         @JvmStatic
         @Provides
         @Singleton
-        fun provideBackupManager(bookmarkManager: BookmarkManager,
-                                 highlightManager: HighlightManager,
-                                 noteManager: NoteManager,
+        fun provideBackupManager(bookmarkManager: VerseAnnotationManager<Bookmark>,
+                                 highlightManager: VerseAnnotationManager<Highlight>,
+                                 noteManager: VerseAnnotationManager<Note>,
                                  readingProgressManager: ReadingProgressManager): BackupManager =
                 BackupManager(BackupJsonSerializer(), bookmarkManager, highlightManager, noteManager, readingProgressManager)
 
@@ -87,20 +87,20 @@ class AppModule(private val app: App) {
         @JvmStatic
         @Provides
         @Singleton
-        fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): BookmarkManager =
-                BookmarkManager(bookmarkRepository)
+        fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): VerseAnnotationManager<Bookmark> =
+                VerseAnnotationManager(bookmarkRepository)
 
         @JvmStatic
         @Provides
         @Singleton
-        fun provideHighlightManager(highlightRepository: VerseAnnotationRepository<Highlight>): HighlightManager =
-                HighlightManager(highlightRepository)
+        fun provideHighlightManager(highlightRepository: VerseAnnotationRepository<Highlight>): VerseAnnotationManager<Highlight> =
+                VerseAnnotationManager(highlightRepository)
 
         @JvmStatic
         @Provides
         @Singleton
-        fun provideNoteManager(noteRepository: VerseAnnotationRepository<Note>): NoteManager =
-                NoteManager(noteRepository)
+        fun provideNoteManager(noteRepository: VerseAnnotationRepository<Note>): VerseAnnotationManager<Note> =
+                VerseAnnotationManager(noteRepository)
 
         @JvmStatic
         @Provides
