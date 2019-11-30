@@ -17,32 +17,33 @@
 package me.xizzhu.android.joshua.core.repository
 
 import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalVerseAnnotationStorage
 
-class NoteRepository(private val localNoteStorage: LocalVerseAnnotationStorage<Note>) {
-    suspend fun readSortOrder(): Int = localNoteStorage.readSortOrder()
+class VerseAnnotationRepository<T : VerseAnnotation>(
+        private val localVerseAnnotationStorage: LocalVerseAnnotationStorage<T>) {
+    suspend fun readSortOrder(): Int = localVerseAnnotationStorage.readSortOrder()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
-        localNoteStorage.saveSortOrder(sortOrder)
+        localVerseAnnotationStorage.saveSortOrder(sortOrder)
     }
 
-    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Note> = localNoteStorage.read(sortOrder)
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<T> = localVerseAnnotationStorage.read(sortOrder)
 
-    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Note> = localNoteStorage.read(bookIndex, chapterIndex)
+    suspend fun read(bookIndex: Int, chapterIndex: Int): List<T> = localVerseAnnotationStorage.read(bookIndex, chapterIndex)
 
-    suspend fun read(verseIndex: VerseIndex): Note = localNoteStorage.read(verseIndex)
+    suspend fun read(verseIndex: VerseIndex): T = localVerseAnnotationStorage.read(verseIndex)
 
-    suspend fun save(note: Note) {
-        localNoteStorage.save(note)
+    suspend fun save(verseAnnotation: T) {
+        localVerseAnnotationStorage.save(verseAnnotation)
     }
 
-    suspend fun save(notes: List<Note>) {
-        localNoteStorage.save(notes)
+    suspend fun save(verseAnnotations: List<T>) {
+        localVerseAnnotationStorage.save(verseAnnotations)
     }
 
     suspend fun remove(verseIndex: VerseIndex) {
-        localNoteStorage.remove(verseIndex)
+        localVerseAnnotationStorage.remove(verseIndex)
     }
 }

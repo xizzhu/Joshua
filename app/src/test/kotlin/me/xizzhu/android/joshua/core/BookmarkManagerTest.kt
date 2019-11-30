@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.core.repository.BookmarkRepository
+import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -27,7 +27,7 @@ import org.mockito.Mockito.*
 
 class BookmarkManagerTest : BaseUnitTest() {
     @Mock
-    private lateinit var bookmarkRepository: BookmarkRepository
+    private lateinit var bookmarkRepository: VerseAnnotationRepository<Bookmark>
 
     private lateinit var bookmarkManager: BookmarkManager
 

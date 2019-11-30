@@ -25,7 +25,7 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.repository.HighlightRepository
+import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.logger.Log
 
 data class Highlight(override val verseIndex: VerseIndex, @ColorInt val color: Int, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp) {
@@ -46,7 +46,7 @@ data class Highlight(override val verseIndex: VerseIndex, @ColorInt val color: I
     override fun isValid(): Boolean = super.isValid() && AVAILABLE_COLORS.contains(color)
 }
 
-class HighlightManager(private val highlightRepository: HighlightRepository) {
+class HighlightManager(private val highlightRepository: VerseAnnotationRepository<Highlight>) {
     companion object {
         private val TAG = HighlightManager::class.java.simpleName
     }

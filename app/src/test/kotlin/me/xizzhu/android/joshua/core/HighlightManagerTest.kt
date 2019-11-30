@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.core.repository.HighlightRepository
+import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -27,7 +27,7 @@ import org.mockito.Mockito.*
 
 class HighlightManagerTest : BaseUnitTest() {
     @Mock
-    private lateinit var highlightRepository: HighlightRepository
+    private lateinit var highlightRepository: VerseAnnotationRepository<Highlight>
 
     private lateinit var highlightManager: HighlightManager
 

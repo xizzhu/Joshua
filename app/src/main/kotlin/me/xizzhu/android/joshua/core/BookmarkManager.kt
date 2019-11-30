@@ -23,12 +23,12 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.repository.BookmarkRepository
+import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.logger.Log
 
 data class Bookmark(override val verseIndex: VerseIndex, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp)
 
-class BookmarkManager(private val bookmarkRepository: BookmarkRepository) {
+class BookmarkManager(private val bookmarkRepository: VerseAnnotationRepository<Bookmark>) {
     companion object {
         private val TAG = BookmarkManager::class.java.simpleName
     }

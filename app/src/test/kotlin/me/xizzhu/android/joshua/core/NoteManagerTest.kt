@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.core.repository.NoteRepository
+import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -27,7 +27,7 @@ import org.mockito.Mockito.*
 
 class NoteManagerTest : BaseUnitTest() {
     @Mock
-    private lateinit var noteRepository: NoteRepository
+    private lateinit var noteRepository: VerseAnnotationRepository<Note>
 
     private lateinit var noteManager: NoteManager
 

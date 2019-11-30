@@ -87,19 +87,19 @@ class AppModule(private val app: App) {
         @JvmStatic
         @Provides
         @Singleton
-        fun provideBookmarkManager(bookmarkRepository: BookmarkRepository): BookmarkManager =
+        fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): BookmarkManager =
                 BookmarkManager(bookmarkRepository)
 
         @JvmStatic
         @Provides
         @Singleton
-        fun provideHighlightManager(highlightRepository: HighlightRepository): HighlightManager =
+        fun provideHighlightManager(highlightRepository: VerseAnnotationRepository<Highlight>): HighlightManager =
                 HighlightManager(highlightRepository)
 
         @JvmStatic
         @Provides
         @Singleton
-        fun provideNoteManager(noteRepository: NoteRepository): NoteManager =
+        fun provideNoteManager(noteRepository: VerseAnnotationRepository<Note>): NoteManager =
                 NoteManager(noteRepository)
 
         @JvmStatic
@@ -175,18 +175,18 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideBookmarkRepository(localBookmarkStorage: LocalVerseAnnotationStorage<Bookmark>): BookmarkRepository =
-            BookmarkRepository(localBookmarkStorage)
+    fun provideBookmarkRepository(localBookmarkStorage: LocalVerseAnnotationStorage<Bookmark>): VerseAnnotationRepository<Bookmark> =
+            VerseAnnotationRepository(localBookmarkStorage)
 
     @Provides
     @Singleton
-    fun provideHighlightRepository(localHighlightStorage: LocalVerseAnnotationStorage<Highlight>): HighlightRepository =
-            HighlightRepository(localHighlightStorage)
+    fun provideHighlightRepository(localHighlightStorage: LocalVerseAnnotationStorage<Highlight>): VerseAnnotationRepository<Highlight> =
+            VerseAnnotationRepository(localHighlightStorage)
 
     @Provides
     @Singleton
-    fun provideNoteRepository(localNoteStorage: LocalVerseAnnotationStorage<Note>): NoteRepository =
-            NoteRepository(localNoteStorage)
+    fun provideNoteRepository(localNoteStorage: LocalVerseAnnotationStorage<Note>): VerseAnnotationRepository<Note> =
+            VerseAnnotationRepository(localNoteStorage)
 
     @Provides
     @Singleton

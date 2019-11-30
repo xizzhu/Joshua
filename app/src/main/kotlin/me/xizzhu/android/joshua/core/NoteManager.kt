@@ -23,12 +23,12 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.repository.NoteRepository
+import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.logger.Log
 
 data class Note(override val verseIndex: VerseIndex, val note: String, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp)
 
-class NoteManager(private val noteRepository: NoteRepository) {
+class NoteManager(private val noteRepository: VerseAnnotationRepository<Note>) {
     companion object {
         private val TAG = NoteManager::class.java.simpleName
     }
