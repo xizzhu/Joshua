@@ -131,17 +131,17 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideLocalBookmarkStorage(androidDatabase: AndroidDatabase): LocalBookmarkStorage =
+    fun provideLocalBookmarkStorage(androidDatabase: AndroidDatabase): LocalVerseAnnotationStorage<Bookmark> =
             AndroidBookmarkStorage(androidDatabase)
 
     @Provides
     @Singleton
-    fun provideLocalHighlightStorage(androidDatabase: AndroidDatabase): LocalHighlightStorage =
+    fun provideLocalHighlightStorage(androidDatabase: AndroidDatabase): LocalVerseAnnotationStorage<Highlight> =
             AndroidHighlightStorage(androidDatabase)
 
     @Provides
     @Singleton
-    fun provideLocalNoteStorage(androidDatabase: AndroidDatabase): LocalNoteStorage =
+    fun provideLocalNoteStorage(androidDatabase: AndroidDatabase): LocalVerseAnnotationStorage<Note> =
             AndroidNoteStorage(androidDatabase)
 
     @Provides
@@ -175,17 +175,17 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideBookmarkRepository(localBookmarkStorage: LocalBookmarkStorage): BookmarkRepository =
+    fun provideBookmarkRepository(localBookmarkStorage: LocalVerseAnnotationStorage<Bookmark>): BookmarkRepository =
             BookmarkRepository(localBookmarkStorage)
 
     @Provides
     @Singleton
-    fun provideHighlightRepository(localHighlightStorage: LocalHighlightStorage): HighlightRepository =
+    fun provideHighlightRepository(localHighlightStorage: LocalVerseAnnotationStorage<Highlight>): HighlightRepository =
             HighlightRepository(localHighlightStorage)
 
     @Provides
     @Singleton
-    fun provideNoteRepository(localNoteStorage: LocalNoteStorage): NoteRepository =
+    fun provideNoteRepository(localNoteStorage: LocalVerseAnnotationStorage<Note>): NoteRepository =
             NoteRepository(localNoteStorage)
 
     @Provides

@@ -19,9 +19,9 @@ package me.xizzhu.android.joshua.core.repository
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.repository.local.LocalBookmarkStorage
+import me.xizzhu.android.joshua.core.repository.local.LocalVerseAnnotationStorage
 
-class BookmarkRepository(private val localBookmarkStorage: LocalBookmarkStorage) {
+class BookmarkRepository(private val localBookmarkStorage: LocalVerseAnnotationStorage<Bookmark>) {
     suspend fun readSortOrder(): Int = localBookmarkStorage.readSortOrder()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {

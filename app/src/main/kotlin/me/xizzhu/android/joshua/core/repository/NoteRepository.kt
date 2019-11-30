@@ -19,9 +19,9 @@ package me.xizzhu.android.joshua.core.repository
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.repository.local.LocalNoteStorage
+import me.xizzhu.android.joshua.core.repository.local.LocalVerseAnnotationStorage
 
-class NoteRepository(private val localNoteStorage: LocalNoteStorage) {
+class NoteRepository(private val localNoteStorage: LocalVerseAnnotationStorage<Note>) {
     suspend fun readSortOrder(): Int = localNoteStorage.readSortOrder()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
