@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.annotated.notes
 
 import me.xizzhu.android.joshua.annotated.*
-import me.xizzhu.android.joshua.annotated.notes.list.NotesListInteractor
 import me.xizzhu.android.joshua.annotated.notes.list.NotesListPresenter
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
@@ -33,5 +32,5 @@ class NotesActivity : BaseAnnotatedVersesActivity<Note>() {
 
     override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = notesViewModel
 
-    override fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, NotesListInteractor> = notesListPresenter
+    override fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, AnnotatedVersesInteractor<Note>> = notesListPresenter
 }

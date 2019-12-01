@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.annotated.highlights
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
-import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -28,6 +28,6 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 class HighlightsViewModel(settingsManager: SettingsManager,
                           annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
                           loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                          highlightsListInteractor: HighlightsListInteractor,
+                          highlightsListInteractor: AnnotatedVersesInteractor<Highlight>,
                           dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseAnnotatedVersesViewModel<Highlight>(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, highlightsListInteractor, dispatcher)

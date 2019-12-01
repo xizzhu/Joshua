@@ -23,15 +23,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
 
-abstract class BaseAnnotatedVersesInteractor<V : VerseAnnotation>(private val bibleReadingManager: BibleReadingManager,
-                                                                  settingsManager: SettingsManager,
-                                                                  dispatcher: CoroutineDispatcher = Dispatchers.Default)
+class AnnotatedVersesInteractor<V : VerseAnnotation>(private val verseAnnotationManager: VerseAnnotationManager<V>,
+                                                     private val bibleReadingManager: BibleReadingManager,
+                                                     settingsManager: SettingsManager,
+                                                     dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
     private var currentTranslation: String = ""
 
@@ -59,7 +61,8 @@ abstract class BaseAnnotatedVersesInteractor<V : VerseAnnotation>(private val bi
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 
-    abstract fun sortOrder(): Flow<ViewData<Int>>
+    fun sortOrder(): Flow<ViewData<Int>> = verseAnnotationManager.observeSortOrder().map { ViewData.success(it) }
 
-    abstract suspend fun verseAnnotations(@Constants.SortOrder sortOrder: Int): ViewData<List<V>>
+    suspend fun verseAnnotations(@Constants.SortOrder sortOrder: Int): ViewData<List<V>> =
+            viewData { verseAnnotationManager.read(sortOrder) }
 }

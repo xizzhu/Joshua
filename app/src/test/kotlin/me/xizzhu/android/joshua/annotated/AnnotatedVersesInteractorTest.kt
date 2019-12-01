@@ -16,15 +16,12 @@
 
 package me.xizzhu.android.joshua.annotated
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.viewData
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
@@ -33,43 +30,41 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class BaseAnnotatedVersesInteractorTest : BaseUnitTest() {
+class AnnotatedVersesInteractorTest : BaseUnitTest() {
+    @Mock
+    private lateinit var bookmarkManager: VerseAnnotationManager<Bookmark>
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
     @Mock
     private lateinit var settingsManager: SettingsManager
 
-    private lateinit var baseAnnotatedVersesInteractor: BaseAnnotatedVersesInteractor<Bookmark>
+    private lateinit var annotatedVersesInteractor: AnnotatedVersesInteractor<Bookmark>
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        baseAnnotatedVersesInteractor = object : BaseAnnotatedVersesInteractor<Bookmark>(
-                bibleReadingManager, settingsManager, testDispatcher) {
-            override fun sortOrder(): Flow<ViewData<Int>> = emptyFlow()
-
-            override suspend fun verseAnnotations(sortOrder: Int): ViewData<List<Bookmark>> = viewData { emptyList<Bookmark>() }
-        }
+        annotatedVersesInteractor = AnnotatedVersesInteractor(
+                bookmarkManager, bibleReadingManager, settingsManager, testDispatcher)
     }
 
     @Test
     fun testCurrentTranslation() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(""))
 
-        baseAnnotatedVersesInteractor.start()
+        annotatedVersesInteractor.start()
         verify(bibleReadingManager, times(1)).observeCurrentTranslation()
 
-        assertEquals("", baseAnnotatedVersesInteractor.currentTranslation())
+        assertEquals("", annotatedVersesInteractor.currentTranslation())
         verify(bibleReadingManager, times(2)).observeCurrentTranslation()
 
         `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
-        assertEquals(MockContents.kjvShortName, baseAnnotatedVersesInteractor.currentTranslation())
+        assertEquals(MockContents.kjvShortName, annotatedVersesInteractor.currentTranslation())
         verify(bibleReadingManager, times(3)).observeCurrentTranslation()
 
-        assertEquals(MockContents.kjvShortName, baseAnnotatedVersesInteractor.currentTranslation())
+        assertEquals(MockContents.kjvShortName, annotatedVersesInteractor.currentTranslation())
         verify(bibleReadingManager, times(3)).observeCurrentTranslation()
 
-        baseAnnotatedVersesInteractor.stop()
+        annotatedVersesInteractor.stop()
     }
 }

@@ -46,5 +46,5 @@ abstract class BaseAnnotatedVersesActivity<V: VerseAnnotation> : BaseSettingsAwa
 
     override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(toolbarPresenter, loadingSpinnerPresenter, listPresenter())
 
-    protected abstract fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, out BaseAnnotatedVersesInteractor<V>>
+    protected abstract fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, out AnnotatedVersesInteractor<V>>
 }

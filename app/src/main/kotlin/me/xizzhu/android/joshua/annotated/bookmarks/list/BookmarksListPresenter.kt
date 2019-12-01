@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity
 import me.xizzhu.android.joshua.core.Bookmark
@@ -28,9 +29,9 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
 class BookmarksListPresenter(bookmarksActivity: BookmarksActivity,
                              navigator: Navigator,
-                             bookmarksListInteractor: BookmarksListInteractor,
+                             bookmarksListInteractor: AnnotatedVersesInteractor<Bookmark>,
                              dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseAnnotatedVersesPresenter<Bookmark, BookmarksListInteractor>(
+    : BaseAnnotatedVersesPresenter<Bookmark, AnnotatedVersesInteractor<Bookmark>>(
         bookmarksActivity, navigator, R.string.text_no_bookmark, bookmarksListInteractor, dispatcher) {
     override fun Bookmark.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem =
             BookmarkItem(verseIndex, bookName, bookShortName, verseText, sortOrder, ::openVerse)

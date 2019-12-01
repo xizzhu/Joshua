@@ -46,7 +46,7 @@ import kotlin.collections.ArrayList
 
 data class AnnotatedVersesViewHolder(val annotatedVerseListView: CommonRecyclerView) : ViewHolder
 
-abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : BaseAnnotatedVersesInteractor<V>>
+abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : AnnotatedVersesInteractor<V>>
 (private val activity: BaseAnnotatedVersesActivity<V>, private val navigator: Navigator,
  @StringRes private val noItemText: Int, interactor: Interactor, dispatcher: CoroutineDispatcher)
     : BaseSettingsAwarePresenter<AnnotatedVersesViewHolder, Interactor>(interactor, dispatcher) {

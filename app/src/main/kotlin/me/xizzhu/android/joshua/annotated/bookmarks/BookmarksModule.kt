@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListInteractor
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
@@ -58,14 +58,14 @@ object BookmarksModule {
     @Provides
     fun provideBookmarksListInteractor(bookmarkManager: VerseAnnotationManager<Bookmark>,
                                        bibleReadingManager: BibleReadingManager,
-                                       settingsManager: SettingsManager): BookmarksListInteractor =
-            BookmarksListInteractor(bookmarkManager, bibleReadingManager, settingsManager)
+                                       settingsManager: SettingsManager): AnnotatedVersesInteractor<Bookmark> =
+            AnnotatedVersesInteractor(bookmarkManager, bibleReadingManager, settingsManager)
 
     @ActivityScope
     @Provides
     fun provideBookmarksListPresenter(bookmarksActivity: BookmarksActivity,
                                       navigator: Navigator,
-                                      bookmarksListInteractor: BookmarksListInteractor): BookmarksListPresenter =
+                                      bookmarksListInteractor: AnnotatedVersesInteractor<Bookmark>): BookmarksListPresenter =
             BookmarksListPresenter(bookmarksActivity, navigator, bookmarksListInteractor)
 
     @ActivityScope
@@ -73,6 +73,6 @@ object BookmarksModule {
     fun provideBookmarksViewModel(settingsManager: SettingsManager,
                                   annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
                                   loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                                  bookmarksListInteractor: BookmarksListInteractor): BookmarksViewModel =
+                                  bookmarksListInteractor: AnnotatedVersesInteractor<Bookmark>): BookmarksViewModel =
             BookmarksViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, bookmarksListInteractor)
 }

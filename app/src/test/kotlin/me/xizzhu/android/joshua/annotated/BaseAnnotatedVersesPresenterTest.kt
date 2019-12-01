@@ -45,9 +45,9 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
 
     private class TestAnnotatedVersePresenter(activity: BaseAnnotatedVersesActivity<TestVerseAnnotation>,
                                               navigator: Navigator,
-                                              interactor: BaseAnnotatedVersesInteractor<TestVerseAnnotation>,
+                                              interactor: AnnotatedVersesInteractor<TestVerseAnnotation>,
                                               dispatcher: CoroutineDispatcher)
-        : BaseAnnotatedVersesPresenter<TestVerseAnnotation, BaseAnnotatedVersesInteractor<TestVerseAnnotation>>(activity, navigator, R.string.text_no_bookmark, interactor, dispatcher) {
+        : BaseAnnotatedVersesPresenter<TestVerseAnnotation, AnnotatedVersesInteractor<TestVerseAnnotation>>(activity, navigator, R.string.text_no_bookmark, interactor, dispatcher) {
         override fun TestVerseAnnotation.toBaseItem(bookName: String, bookShortName: String, verseText: String, sortOrder: Int): BaseItem =
                 BookmarkItem(verseIndex, bookName, bookShortName, verseText, sortOrder, ::openVerse)
     }
@@ -59,7 +59,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var navigator: Navigator
     @Mock
-    private lateinit var interactor: BaseAnnotatedVersesInteractor<TestVerseAnnotation>
+    private lateinit var interactor: AnnotatedVersesInteractor<TestVerseAnnotation>
     @Mock
     private lateinit var annotatedVerseListView: CommonRecyclerView
 

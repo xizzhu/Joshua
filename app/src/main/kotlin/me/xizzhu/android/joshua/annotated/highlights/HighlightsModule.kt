@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListInteractor
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
@@ -58,14 +58,14 @@ object HighlightsModule {
     @Provides
     fun provideHighlightsListInteractor(highlightManager: VerseAnnotationManager<Highlight>,
                                         bibleReadingManager: BibleReadingManager,
-                                        settingsManager: SettingsManager): HighlightsListInteractor =
-            HighlightsListInteractor(highlightManager, bibleReadingManager, settingsManager)
+                                        settingsManager: SettingsManager): AnnotatedVersesInteractor<Highlight> =
+            AnnotatedVersesInteractor(highlightManager, bibleReadingManager, settingsManager)
 
     @ActivityScope
     @Provides
     fun provideHighlightsListPresenter(highlightsActivity: HighlightsActivity,
                                        navigator: Navigator,
-                                       highlightsListInteractor: HighlightsListInteractor): HighlightsListPresenter =
+                                       highlightsListInteractor: AnnotatedVersesInteractor<Highlight>): HighlightsListPresenter =
             HighlightsListPresenter(highlightsActivity, navigator, highlightsListInteractor)
 
     @ActivityScope
@@ -73,6 +73,6 @@ object HighlightsModule {
     fun provideHighlightsViewModel(settingsManager: SettingsManager,
                                    annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
                                    loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                                   highlightsListInteractor: HighlightsListInteractor): HighlightsViewModel =
+                                   highlightsListInteractor: AnnotatedVersesInteractor<Highlight>): HighlightsViewModel =
             HighlightsViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, highlightsListInteractor)
 }

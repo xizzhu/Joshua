@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.annotated.notes
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
-import me.xizzhu.android.joshua.annotated.notes.list.NotesListInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -28,6 +28,6 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 class NotesViewModel(settingsManager: SettingsManager,
                      annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
                      loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                     notesListInteractor: NotesListInteractor,
+                     notesListInteractor: AnnotatedVersesInteractor<Note>,
                      dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseAnnotatedVersesViewModel<Note>(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, notesListInteractor, dispatcher)

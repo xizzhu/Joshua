@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.annotated.highlights
 
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewHolder
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesActivity
-import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListInteractor
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListPresenter
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
@@ -34,5 +34,5 @@ class HighlightsActivity : BaseAnnotatedVersesActivity<Highlight>() {
 
     override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = highlightsViewModel
 
-    override fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, HighlightsListInteractor> = highlightsListPresenter
+    override fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, AnnotatedVersesInteractor<Highlight>> = highlightsListPresenter
 }

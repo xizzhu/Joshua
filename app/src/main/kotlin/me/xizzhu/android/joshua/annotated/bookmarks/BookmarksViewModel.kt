@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.annotated.bookmarks
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
-import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -28,6 +28,6 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 class BookmarksViewModel(settingsManager: SettingsManager,
                          annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
                          loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                         bookmarksListInteractor: BookmarksListInteractor,
+                         bookmarksListInteractor: AnnotatedVersesInteractor<Bookmark>,
                          dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseAnnotatedVersesViewModel<Bookmark>(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, bookmarksListInteractor, dispatcher)
