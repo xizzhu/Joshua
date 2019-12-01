@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.core.Constants
@@ -30,9 +31,9 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
 class NotesListPresenter(notesActivity: NotesActivity,
                          navigator: Navigator,
-                         notesListInteractor: NotesListInteractor,
+                         notesListInteractor: AnnotatedVersesInteractor<Note>,
                          dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseAnnotatedVersesPresenter<Note, NotesListInteractor>(
+    : BaseAnnotatedVersesPresenter<Note, AnnotatedVersesInteractor<Note>>(
         notesActivity, navigator, R.string.text_no_note, notesListInteractor, dispatcher) {
     override fun Note.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem =
             NoteItem(verseIndex, bookShortName, verseText, note, ::openVerse)

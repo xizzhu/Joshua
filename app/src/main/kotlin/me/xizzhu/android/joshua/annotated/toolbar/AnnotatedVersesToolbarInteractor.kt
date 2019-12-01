@@ -18,8 +18,18 @@ package me.xizzhu.android.joshua.annotated.toolbar
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.core.VerseAnnotation
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.infra.arch.Interactor
 
-class AnnotatedVersesToolbarInteractor(val readCurrentSortOrder: suspend () -> Int,
-                                       val saveCurrentSortOrder: suspend (Int) -> Unit,
-                                       dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher)
+class AnnotatedVersesToolbarInteractor<V : VerseAnnotation>(private val verseAnnotationManager: VerseAnnotationManager<V>,
+                                                            dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
+    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        verseAnnotationManager.saveSortOrder(sortOrder)
+    }
+
+    @Constants.SortOrder
+    suspend fun readSortOrder(): Int = verseAnnotationManager.observeSortOrder().first()
+}

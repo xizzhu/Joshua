@@ -66,9 +66,9 @@ object ReadingModule {
     @ActivityScope
     @Provides
     fun provideVerseInteractor(bibleReadingManager: BibleReadingManager,
-                               bookmarkManager: BookmarkManager,
-                               highlightManager: HighlightManager,
-                               noteManager: NoteManager,
+                               bookmarkManager: VerseAnnotationManager<Bookmark>,
+                               highlightManager: VerseAnnotationManager<Highlight>,
+                               noteManager: VerseAnnotationManager<Note>,
                                settingsManager: SettingsManager): VerseInteractor =
             VerseInteractor(bibleReadingManager, bookmarkManager, highlightManager, noteManager, settingsManager)
 
@@ -82,9 +82,9 @@ object ReadingModule {
     @Provides
     fun provideVerseDetailInteractor(translationManager: TranslationManager,
                                      bibleReadingManager: BibleReadingManager,
-                                     bookmarkManager: BookmarkManager,
-                                     highlightManager: HighlightManager,
-                                     noteManager: NoteManager,
+                                     bookmarkManager: VerseAnnotationManager<Bookmark>,
+                                     highlightManager: VerseAnnotationManager<Highlight>,
+                                     noteManager: VerseAnnotationManager<Note>,
                                      settingsManager: SettingsManager): VerseDetailInteractor =
             VerseDetailInteractor(translationManager, bibleReadingManager, bookmarkManager, highlightManager, noteManager, settingsManager)
 

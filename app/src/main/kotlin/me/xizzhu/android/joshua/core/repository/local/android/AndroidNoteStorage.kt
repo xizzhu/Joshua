@@ -16,45 +16,9 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Note
-import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.repository.local.LocalNoteStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 
-class AndroidNoteStorage(private val androidDatabase: AndroidDatabase) : LocalNoteStorage {
-    override suspend fun readSortOrder(): Int = withContext(Dispatchers.IO) {
-        androidDatabase.metadataDao.read(MetadataDao.KEY_NOTES_SORT_ORDER, "0").toInt()
-    }
-
-    override suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
-        withContext(Dispatchers.IO) { androidDatabase.metadataDao.save(MetadataDao.KEY_NOTES_SORT_ORDER, sortOrder.toString()) }
-    }
-
-    override suspend fun read(@Constants.SortOrder sortOrder: Int): List<Note> = withContext(Dispatchers.IO) {
-        androidDatabase.noteDao.read(sortOrder)
-    }
-
-    override suspend fun read(bookIndex: Int, chapterIndex: Int): List<Note> = withContext(Dispatchers.IO) {
-        androidDatabase.noteDao.read(bookIndex, chapterIndex)
-    }
-
-    override suspend fun read(verseIndex: VerseIndex): Note = withContext(Dispatchers.IO) {
-        androidDatabase.noteDao.read(verseIndex)
-    }
-
-    override suspend fun save(note: Note) {
-        withContext(Dispatchers.IO) { androidDatabase.noteDao.save(note) }
-    }
-
-    override suspend fun save(notes: List<Note>) {
-        withContext(Dispatchers.IO) { androidDatabase.noteDao.save(notes) }
-    }
-
-    override suspend fun remove(verseIndex: VerseIndex) {
-        withContext(Dispatchers.IO) { androidDatabase.noteDao.remove(verseIndex) }
-    }
-}
+class AndroidNoteStorage(androidDatabase: AndroidDatabase) : AndroidVerseAnnotationStorage<Note>(
+        androidDatabase.noteDao, androidDatabase.metadataDao, MetadataDao.KEY_NOTES_SORT_ORDER)

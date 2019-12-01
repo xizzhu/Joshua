@@ -30,9 +30,9 @@ import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.utils.Clock
 
 class VerseInteractor(private val bibleReadingManager: BibleReadingManager,
-                      private val bookmarkManager: BookmarkManager,
-                      private val highlightManager: HighlightManager,
-                      private val noteManager: NoteManager,
+                      private val bookmarkManager: VerseAnnotationManager<Bookmark>,
+                      private val highlightManager: VerseAnnotationManager<Highlight>,
+                      private val noteManager: VerseAnnotationManager<Note>,
                       settingsManager: SettingsManager,
                       dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareInteractor(settingsManager, dispatcher) {

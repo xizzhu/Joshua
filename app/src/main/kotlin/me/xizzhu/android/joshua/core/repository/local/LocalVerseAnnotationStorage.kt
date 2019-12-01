@@ -17,23 +17,23 @@
 package me.xizzhu.android.joshua.core.repository.local
 
 import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseIndex
 
-interface LocalNoteStorage {
+interface LocalVerseAnnotationStorage<T : VerseAnnotation> {
     suspend fun readSortOrder(): Int
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int)
 
-    suspend fun read(@Constants.SortOrder sortOrder: Int): List<Note>
+    suspend fun read(@Constants.SortOrder sortOrder: Int): List<T>
 
-    suspend fun read(bookIndex: Int, chapterIndex: Int): List<Note>
+    suspend fun read(bookIndex: Int, chapterIndex: Int): List<T>
 
-    suspend fun read(verseIndex: VerseIndex): Note
+    suspend fun read(verseIndex: VerseIndex): T
 
-    suspend fun save(note: Note)
+    suspend fun save(verseAnnotation: T)
 
-    suspend fun save(notes: List<Note>)
+    suspend fun save(verseAnnotations: List<T>)
 
     suspend fun remove(verseIndex: VerseIndex)
 }

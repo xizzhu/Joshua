@@ -27,15 +27,15 @@ import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 
-abstract class BaseAnnotatedVersesViewModel<V: VerseAnnotation>(settingsManager: SettingsManager,
-                                                                annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
-                                                                private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                                                                private val baseAnnotatedVersesInteractor: BaseAnnotatedVersesInteractor<V>,
-                                                                dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(annotatedVersesToolbarInteractor, loadingSpinnerInteractor, baseAnnotatedVersesInteractor), dispatcher) {
+class AnnotatedVersesViewModel<V : VerseAnnotation>(settingsManager: SettingsManager,
+                                                    annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<V>,
+                                                    private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
+                                                    private val annotatedVersesInteractor: AnnotatedVersesInteractor<V>,
+                                                    dispatcher: CoroutineDispatcher = Dispatchers.Default)
+    : BaseSettingsAwareViewModel(settingsManager, listOf(annotatedVersesToolbarInteractor, loadingSpinnerInteractor, annotatedVersesInteractor), dispatcher) {
     @UiThread
     override fun onStart() {
         super.onStart()
-        coroutineScope.launch { baseAnnotatedVersesInteractor.loadingState().collect { loadingSpinnerInteractor.updateLoadingState(it) } }
+        coroutineScope.launch { annotatedVersesInteractor.loadingState().collect { loadingSpinnerInteractor.updateLoadingState(it) } }
     }
 }

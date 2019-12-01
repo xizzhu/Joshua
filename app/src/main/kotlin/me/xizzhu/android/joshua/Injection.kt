@@ -26,10 +26,8 @@ import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksModule
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.core.repository.*
-import me.xizzhu.android.joshua.core.repository.local.*
 import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
-import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsModule
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
@@ -71,9 +69,9 @@ class AppModule(private val app: App) {
         @JvmStatic
         @Provides
         @Singleton
-        fun provideBackupManager(bookmarkManager: BookmarkManager,
-                                 highlightManager: HighlightManager,
-                                 noteManager: NoteManager,
+        fun provideBackupManager(bookmarkManager: VerseAnnotationManager<Bookmark>,
+                                 highlightManager: VerseAnnotationManager<Highlight>,
+                                 noteManager: VerseAnnotationManager<Note>,
                                  readingProgressManager: ReadingProgressManager): BackupManager =
                 BackupManager(BackupJsonSerializer(), bookmarkManager, highlightManager, noteManager, readingProgressManager)
 
@@ -87,20 +85,20 @@ class AppModule(private val app: App) {
         @JvmStatic
         @Provides
         @Singleton
-        fun provideBookmarkManager(bookmarkRepository: BookmarkRepository): BookmarkManager =
-                BookmarkManager(bookmarkRepository)
+        fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): VerseAnnotationManager<Bookmark> =
+                VerseAnnotationManager(bookmarkRepository)
 
         @JvmStatic
         @Provides
         @Singleton
-        fun provideHighlightManager(highlightRepository: HighlightRepository): HighlightManager =
-                HighlightManager(highlightRepository)
+        fun provideHighlightManager(highlightRepository: VerseAnnotationRepository<Highlight>): VerseAnnotationManager<Highlight> =
+                VerseAnnotationManager(highlightRepository)
 
         @JvmStatic
         @Provides
         @Singleton
-        fun provideNoteManager(noteRepository: NoteRepository): NoteManager =
-                NoteManager(noteRepository)
+        fun provideNoteManager(noteRepository: VerseAnnotationRepository<Note>): VerseAnnotationManager<Note> =
+                VerseAnnotationManager(noteRepository)
 
         @JvmStatic
         @Provides
@@ -131,78 +129,38 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideLocalBookmarkStorage(androidDatabase: AndroidDatabase): LocalBookmarkStorage =
-            AndroidBookmarkStorage(androidDatabase)
+    fun provideBibleReadingRepository(androidDatabase: AndroidDatabase): BibleReadingRepository =
+            BibleReadingRepository(AndroidReadingStorage(androidDatabase))
 
     @Provides
     @Singleton
-    fun provideLocalHighlightStorage(androidDatabase: AndroidDatabase): LocalHighlightStorage =
-            AndroidHighlightStorage(androidDatabase)
+    fun provideBookmarkRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Bookmark> =
+            VerseAnnotationRepository(AndroidBookmarkStorage(androidDatabase))
 
     @Provides
     @Singleton
-    fun provideLocalNoteStorage(androidDatabase: AndroidDatabase): LocalNoteStorage =
-            AndroidNoteStorage(androidDatabase)
+    fun provideHighlightRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Highlight> =
+            VerseAnnotationRepository(AndroidHighlightStorage(androidDatabase))
 
     @Provides
     @Singleton
-    fun provideLocalReadingProgressStorage(androidDatabase: AndroidDatabase): LocalReadingProgressStorage =
-            AndroidReadingProgressStorage(androidDatabase)
+    fun provideNoteRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Note> =
+            VerseAnnotationRepository(AndroidNoteStorage(androidDatabase))
 
     @Provides
     @Singleton
-    fun provideLocalReadingStorage(androidDatabase: AndroidDatabase): LocalReadingStorage =
-            AndroidReadingStorage(androidDatabase)
+    fun provideReadingProgressRepository(androidDatabase: AndroidDatabase): ReadingProgressRepository =
+            ReadingProgressRepository(AndroidReadingProgressStorage(androidDatabase))
 
     @Provides
     @Singleton
-    fun provideLocalSettingsStorage(androidDatabase: AndroidDatabase): LocalSettingsStorage =
-            AndroidSettingsStorage(androidDatabase)
+    fun provideSettingsRepository(androidDatabase: AndroidDatabase): SettingsRepository =
+            SettingsRepository(AndroidSettingsStorage(androidDatabase))
 
     @Provides
     @Singleton
-    fun provideLocalTranslationStorage(androidDatabase: AndroidDatabase): LocalTranslationStorage =
-            AndroidTranslationStorage(androidDatabase)
-
-    @Provides
-    @Singleton
-    fun provideRemoteTranslationService(): RemoteTranslationService = HttpTranslationService()
-
-    @Provides
-    @Singleton
-    fun provideBibleReadingRepository(localReadingStorage: LocalReadingStorage): BibleReadingRepository =
-            BibleReadingRepository(localReadingStorage)
-
-    @Provides
-    @Singleton
-    fun provideBookmarkRepository(localBookmarkStorage: LocalBookmarkStorage): BookmarkRepository =
-            BookmarkRepository(localBookmarkStorage)
-
-    @Provides
-    @Singleton
-    fun provideHighlightRepository(localHighlightStorage: LocalHighlightStorage): HighlightRepository =
-            HighlightRepository(localHighlightStorage)
-
-    @Provides
-    @Singleton
-    fun provideNoteRepository(localNoteStorage: LocalNoteStorage): NoteRepository =
-            NoteRepository(localNoteStorage)
-
-    @Provides
-    @Singleton
-    fun provideReadingProgressRepository(localReadingProgressStorage: LocalReadingProgressStorage): ReadingProgressRepository =
-            ReadingProgressRepository(localReadingProgressStorage)
-
-    @Provides
-    @Singleton
-    fun provideSettingsRepository(localSettingsStorage: LocalSettingsStorage): SettingsRepository =
-            SettingsRepository(localSettingsStorage)
-
-    @Provides
-    @Singleton
-    fun provideTranslationRepository(localAndroidStorage: LocalTranslationStorage,
-                                     remoteTranslationService: RemoteTranslationService): TranslationRepository =
-            TranslationRepository(localAndroidStorage, remoteTranslationService)
+    fun provideTranslationRepository(androidDatabase: AndroidDatabase): TranslationRepository =
+            TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService())
 }
 
 @Module

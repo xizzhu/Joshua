@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
 import me.xizzhu.android.joshua.core.Constants
@@ -28,9 +29,9 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
 class HighlightsListPresenter(highlightsActivity: HighlightsActivity,
                               navigator: Navigator,
-                              highlightsListInteractor: HighlightsListInteractor,
+                              highlightsListInteractor: AnnotatedVersesInteractor<Highlight>,
                               dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseAnnotatedVersesPresenter<Highlight, HighlightsListInteractor>(
+    : BaseAnnotatedVersesPresenter<Highlight, AnnotatedVersesInteractor<Highlight>>(
         highlightsActivity, navigator, R.string.text_no_highlights, highlightsListInteractor, dispatcher) {
     override fun Highlight.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem =
             HighlightItem(verseIndex, bookName, bookShortName, verseText, color, sortOrder, ::openVerse)

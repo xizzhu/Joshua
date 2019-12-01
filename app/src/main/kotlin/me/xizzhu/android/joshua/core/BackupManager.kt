@@ -20,9 +20,9 @@ import kotlinx.coroutines.*
 import me.xizzhu.android.joshua.utils.mergeSort
 
 class BackupManager(private val serializer: Serializer,
-                    private val bookmarkManager: BookmarkManager,
-                    private val highlightManager: HighlightManager,
-                    private val noteManager: NoteManager,
+                    private val bookmarkManager: VerseAnnotationManager<Bookmark>,
+                    private val highlightManager: VerseAnnotationManager<Highlight>,
+                    private val noteManager: VerseAnnotationManager<Note>,
                     private val readingProgressManager: ReadingProgressManager) {
     interface Serializer {
         fun serialize(data: Data): String

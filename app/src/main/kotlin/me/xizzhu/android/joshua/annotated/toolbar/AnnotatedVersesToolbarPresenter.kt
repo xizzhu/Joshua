@@ -21,27 +21,28 @@ import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 
 data class AnnotatedVersesToolbarViewHolder(val toolbar: AnnotatedVersesToolbar) : ViewHolder
 
-class AnnotatedVersesToolbarPresenter(@StringRes private val title: Int,
-                                      annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
-                                      dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : ViewPresenter<AnnotatedVersesToolbarViewHolder, AnnotatedVersesToolbarInteractor>(annotatedVersesToolbarInteractor, dispatcher) {
+class AnnotatedVersesToolbarPresenter<V : VerseAnnotation>(@StringRes private val title: Int,
+                                                           annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<V>,
+                                                           dispatcher: CoroutineDispatcher = Dispatchers.Main)
+    : ViewPresenter<AnnotatedVersesToolbarViewHolder, AnnotatedVersesToolbarInteractor<V>>(annotatedVersesToolbarInteractor, dispatcher) {
     @UiThread
     override fun onBind(viewHolder: AnnotatedVersesToolbarViewHolder) {
         super.onBind(viewHolder)
 
         viewHolder.toolbar.setTitle(title)
-        viewHolder.toolbar.sortOrderUpdated = { sortOrder -> coroutineScope.launch { interactor.saveCurrentSortOrder(sortOrder) } }
+        viewHolder.toolbar.sortOrderUpdated = { sortOrder -> coroutineScope.launch { interactor.saveSortOrder(sortOrder) } }
     }
 
     @UiThread
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { viewHolder?.toolbar?.setSortOrder(interactor.readCurrentSortOrder()) }
+        coroutineScope.launch { viewHolder?.toolbar?.setSortOrder(interactor.readSortOrder()) }
     }
 }

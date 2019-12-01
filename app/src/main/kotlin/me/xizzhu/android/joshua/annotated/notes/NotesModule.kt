@@ -18,17 +18,19 @@ package me.xizzhu.android.joshua.annotated.notes
 
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.notes.list.NotesListInteractor
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.notes.list.NotesListPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.NoteManager
+import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
@@ -36,12 +38,12 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 object NotesModule {
     @ActivityScope
     @Provides
-    fun provideAnnotatedVersesToolbarInteractor(noteManager: NoteManager): AnnotatedVersesToolbarInteractor =
-            AnnotatedVersesToolbarInteractor({ noteManager.observeSortOrder().first() }, noteManager::saveSortOrder)
+    fun provideAnnotatedVersesToolbarInteractor(noteManager: VerseAnnotationManager<Note>): AnnotatedVersesToolbarInteractor<Note> =
+            AnnotatedVersesToolbarInteractor(noteManager)
 
     @ActivityScope
     @Provides
-    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor): AnnotatedVersesToolbarPresenter =
+    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Note>): AnnotatedVersesToolbarPresenter<Note> =
             AnnotatedVersesToolbarPresenter(R.string.title_notes, annotatedVersesToolbarInteractor)
 
     @ActivityScope
@@ -55,23 +57,23 @@ object NotesModule {
 
     @ActivityScope
     @Provides
-    fun provideNotesListInteractor(noteManager: NoteManager,
+    fun provideNotesListInteractor(noteManager: VerseAnnotationManager<Note>,
                                    bibleReadingManager: BibleReadingManager,
-                                   settingsManager: SettingsManager): NotesListInteractor =
-            NotesListInteractor(noteManager, bibleReadingManager, settingsManager)
+                                   settingsManager: SettingsManager): AnnotatedVersesInteractor<Note> =
+            AnnotatedVersesInteractor(noteManager, bibleReadingManager, settingsManager)
 
     @ActivityScope
     @Provides
     fun provideNotesListPresenter(notesActivity: NotesActivity,
                                   navigator: Navigator,
-                                  notesListInteractor: NotesListInteractor): NotesListPresenter =
+                                  notesListInteractor: AnnotatedVersesInteractor<Note>): BaseAnnotatedVersesPresenter<Note, AnnotatedVersesInteractor<Note>> =
             NotesListPresenter(notesActivity, navigator, notesListInteractor)
 
     @ActivityScope
     @Provides
     fun provideNotesViewModel(settingsManager: SettingsManager,
-                              annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
+                              annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Note>,
                               loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                              notesListInteractor: NotesListInteractor): NotesViewModel =
-            NotesViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, notesListInteractor)
+                              notesListInteractor: AnnotatedVersesInteractor<Note>): AnnotatedVersesViewModel<Note> =
+            AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, notesListInteractor)
 }
