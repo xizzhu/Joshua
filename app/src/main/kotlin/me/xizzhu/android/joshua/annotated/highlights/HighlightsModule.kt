@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
 import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
@@ -73,6 +74,6 @@ object HighlightsModule {
     fun provideHighlightsViewModel(settingsManager: SettingsManager,
                                    annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
                                    loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                                   highlightsListInteractor: AnnotatedVersesInteractor<Highlight>): HighlightsViewModel =
-            HighlightsViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, highlightsListInteractor)
+                                   highlightsListInteractor: AnnotatedVersesInteractor<Highlight>): AnnotatedVersesViewModel<Highlight> =
+            AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, highlightsListInteractor)
 }

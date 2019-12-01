@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 class BookmarksActivity : BaseAnnotatedVersesActivity<Bookmark>() {
     @Inject
-    lateinit var bookmarksViewModel: BookmarksViewModel
+    lateinit var bookmarksViewModel: AnnotatedVersesViewModel<Bookmark>
 
     @Inject
     lateinit var bookmarksListPresenter: BookmarksListPresenter

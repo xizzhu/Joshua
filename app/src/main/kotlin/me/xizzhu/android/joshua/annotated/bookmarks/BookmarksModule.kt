@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
 import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
@@ -73,6 +74,6 @@ object BookmarksModule {
     fun provideBookmarksViewModel(settingsManager: SettingsManager,
                                   annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
                                   loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                                  bookmarksListInteractor: AnnotatedVersesInteractor<Bookmark>): BookmarksViewModel =
-            BookmarksViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, bookmarksListInteractor)
+                                  bookmarksListInteractor: AnnotatedVersesInteractor<Bookmark>): AnnotatedVersesViewModel<Bookmark> =
+            AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, bookmarksListInteractor)
 }

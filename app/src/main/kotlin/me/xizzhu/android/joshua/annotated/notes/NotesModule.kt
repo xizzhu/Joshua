@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
 import me.xizzhu.android.joshua.annotated.notes.list.NotesListPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
@@ -73,6 +74,6 @@ object NotesModule {
     fun provideNotesViewModel(settingsManager: SettingsManager,
                               annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
                               loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                              notesListInteractor: AnnotatedVersesInteractor<Note>): NotesViewModel =
-            NotesViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, notesListInteractor)
+                              notesListInteractor: AnnotatedVersesInteractor<Note>): AnnotatedVersesViewModel<Note> =
+            AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, notesListInteractor)
 }

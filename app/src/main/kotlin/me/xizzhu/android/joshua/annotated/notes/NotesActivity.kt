@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 class NotesActivity : BaseAnnotatedVersesActivity<Note>() {
     @Inject
-    lateinit var notesViewModel: NotesViewModel
+    lateinit var notesViewModel: AnnotatedVersesViewModel<Note>
 
     @Inject
     lateinit var notesListPresenter: NotesListPresenter

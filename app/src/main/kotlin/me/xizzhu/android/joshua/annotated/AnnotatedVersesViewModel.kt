@@ -27,11 +27,11 @@ import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 
-abstract class BaseAnnotatedVersesViewModel<V: VerseAnnotation>(settingsManager: SettingsManager,
-                                                                annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
-                                                                private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                                                                private val annotatedVersesInteractor: AnnotatedVersesInteractor<V>,
-                                                                dispatcher: CoroutineDispatcher = Dispatchers.Default)
+class AnnotatedVersesViewModel<V : VerseAnnotation>(settingsManager: SettingsManager,
+                                                    annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
+                                                    private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
+                                                    private val annotatedVersesInteractor: AnnotatedVersesInteractor<V>,
+                                                    dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareViewModel(settingsManager, listOf(annotatedVersesToolbarInteractor, loadingSpinnerInteractor, annotatedVersesInteractor), dispatcher) {
     @UiThread
     override fun onStart() {
