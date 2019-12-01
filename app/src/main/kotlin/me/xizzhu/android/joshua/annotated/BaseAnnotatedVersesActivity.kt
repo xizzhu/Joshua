@@ -29,9 +29,9 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerViewHolder
 import javax.inject.Inject
 
-abstract class BaseAnnotatedVersesActivity<V: VerseAnnotation> : BaseSettingsAwareActivity() {
+abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation> : BaseSettingsAwareActivity() {
     @Inject
-    lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter
+    lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter<V>
     @Inject
     lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 

@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.annotated.bookmarks
 
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -38,12 +37,12 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 object BookmarksModule {
     @ActivityScope
     @Provides
-    fun provideAnnotatedVersesToolbarInteractor(bookmarkManager: VerseAnnotationManager<Bookmark>): AnnotatedVersesToolbarInteractor =
-            AnnotatedVersesToolbarInteractor({ bookmarkManager.observeSortOrder().first() }, bookmarkManager::saveSortOrder)
+    fun provideAnnotatedVersesToolbarInteractor(bookmarkManager: VerseAnnotationManager<Bookmark>): AnnotatedVersesToolbarInteractor<Bookmark> =
+            AnnotatedVersesToolbarInteractor(bookmarkManager)
 
     @ActivityScope
     @Provides
-    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor): AnnotatedVersesToolbarPresenter =
+    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Bookmark>): AnnotatedVersesToolbarPresenter<Bookmark> =
             AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, annotatedVersesToolbarInteractor)
 
     @ActivityScope
@@ -72,7 +71,7 @@ object BookmarksModule {
     @ActivityScope
     @Provides
     fun provideBookmarksViewModel(settingsManager: SettingsManager,
-                                  annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
+                                  annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Bookmark>,
                                   loadingSpinnerInteractor: LoadingSpinnerInteractor,
                                   bookmarksListInteractor: AnnotatedVersesInteractor<Bookmark>): AnnotatedVersesViewModel<Bookmark> =
             AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, bookmarksListInteractor)

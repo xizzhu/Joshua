@@ -28,7 +28,7 @@ import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 
 class AnnotatedVersesViewModel<V : VerseAnnotation>(settingsManager: SettingsManager,
-                                                    annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
+                                                    annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<V>,
                                                     private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
                                                     private val annotatedVersesInteractor: AnnotatedVersesInteractor<V>,
                                                     dispatcher: CoroutineDispatcher = Dispatchers.Default)

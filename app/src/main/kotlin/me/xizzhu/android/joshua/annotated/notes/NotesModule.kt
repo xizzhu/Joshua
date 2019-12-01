@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.annotated.notes
 
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -38,12 +37,12 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 object NotesModule {
     @ActivityScope
     @Provides
-    fun provideAnnotatedVersesToolbarInteractor(noteManager: VerseAnnotationManager<Note>): AnnotatedVersesToolbarInteractor =
-            AnnotatedVersesToolbarInteractor({ noteManager.observeSortOrder().first() }, noteManager::saveSortOrder)
+    fun provideAnnotatedVersesToolbarInteractor(noteManager: VerseAnnotationManager<Note>): AnnotatedVersesToolbarInteractor<Note> =
+            AnnotatedVersesToolbarInteractor(noteManager)
 
     @ActivityScope
     @Provides
-    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor): AnnotatedVersesToolbarPresenter =
+    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Note>): AnnotatedVersesToolbarPresenter<Note> =
             AnnotatedVersesToolbarPresenter(R.string.title_notes, annotatedVersesToolbarInteractor)
 
     @ActivityScope
@@ -72,7 +71,7 @@ object NotesModule {
     @ActivityScope
     @Provides
     fun provideNotesViewModel(settingsManager: SettingsManager,
-                              annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
+                              annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Note>,
                               loadingSpinnerInteractor: LoadingSpinnerInteractor,
                               notesListInteractor: AnnotatedVersesInteractor<Note>): AnnotatedVersesViewModel<Note> =
             AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, notesListInteractor)

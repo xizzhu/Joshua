@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.annotated.highlights
 
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -38,12 +37,12 @@ import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 object HighlightsModule {
     @ActivityScope
     @Provides
-    fun provideAnnotatedVersesToolbarInteractor(highlightManager: VerseAnnotationManager<Highlight>): AnnotatedVersesToolbarInteractor =
-            AnnotatedVersesToolbarInteractor({ highlightManager.observeSortOrder().first() }, highlightManager::saveSortOrder)
+    fun provideAnnotatedVersesToolbarInteractor(highlightManager: VerseAnnotationManager<Highlight>): AnnotatedVersesToolbarInteractor<Highlight> =
+            AnnotatedVersesToolbarInteractor(highlightManager)
 
     @ActivityScope
     @Provides
-    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor): AnnotatedVersesToolbarPresenter =
+    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Highlight>): AnnotatedVersesToolbarPresenter<Highlight> =
             AnnotatedVersesToolbarPresenter(R.string.title_highlights, annotatedVersesToolbarInteractor)
 
     @ActivityScope
@@ -72,7 +71,7 @@ object HighlightsModule {
     @ActivityScope
     @Provides
     fun provideHighlightsViewModel(settingsManager: SettingsManager,
-                                   annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor,
+                                   annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Highlight>,
                                    loadingSpinnerInteractor: LoadingSpinnerInteractor,
                                    highlightsListInteractor: AnnotatedVersesInteractor<Highlight>): AnnotatedVersesViewModel<Highlight> =
             AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, highlightsListInteractor)
