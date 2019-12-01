@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Used ASK to access SQLite
+- Should not show dialog when activity is destroyed
 - Updated dependencies:
   - Gradle to 6.0.1
   - Kotlin to 1.3.61

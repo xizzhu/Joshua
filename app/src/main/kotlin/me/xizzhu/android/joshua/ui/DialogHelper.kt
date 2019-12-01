@@ -16,29 +16,33 @@
 
 package me.xizzhu.android.joshua.ui
 
-import android.content.Context
+import android.app.Activity
 import android.content.DialogInterface
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 
 object DialogHelper {
-    fun showDialog(context: Context, @StringRes title: Int, items: Array<String>, selected: Int,
+    fun showDialog(activity: Activity, @StringRes title: Int, items: Array<String>, selected: Int,
                    onClicked: DialogInterface.OnClickListener) {
-        AlertDialog.Builder(context)
+        if (activity.isDestroyed) return
+
+        AlertDialog.Builder(activity)
                 .setCancelable(true)
                 .setSingleChoiceItems(items, selected, onClicked)
                 .setTitle(title)
                 .show()
     }
 
-    fun showDialog(context: Context, cancelable: Boolean, @StringRes message: Int,
+    fun showDialog(activity: Activity, cancelable: Boolean, @StringRes message: Int,
                    onPositive: DialogInterface.OnClickListener) {
-        showDialog(context, cancelable, message, onPositive, null)
+        showDialog(activity, cancelable, message, onPositive, null)
     }
 
-    fun showDialog(context: Context, cancelable: Boolean, @StringRes message: Int,
+    fun showDialog(activity: Activity, cancelable: Boolean, @StringRes message: Int,
                    onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener?) {
-        AlertDialog.Builder(context)
+        if (activity.isDestroyed) return
+
+        AlertDialog.Builder(activity)
                 .setCancelable(cancelable)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.yes, onPositive)

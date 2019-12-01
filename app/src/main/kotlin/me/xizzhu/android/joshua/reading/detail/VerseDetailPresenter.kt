@@ -68,7 +68,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
             }
             setOnBookmarkClickedListener { updateBookmark() }
             setOnHighlightClickedListener {
-                DialogHelper.showDialog(context, R.string.text_pick_highlight_color,
+                DialogHelper.showDialog(readingActivity, R.string.text_pick_highlight_color,
                         resources.getStringArray(R.array.text_colors),
                         max(0, Highlight.AVAILABLE_COLORS.indexOf(verseDetail?.highlightColor
                                 ?: Highlight.COLOR_NONE)),
