@@ -22,6 +22,7 @@ import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresente
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarViewHolder
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
@@ -31,9 +32,13 @@ import javax.inject.Inject
 
 abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation> : BaseSettingsAwareActivity() {
     @Inject
+    lateinit var annotatedVersesViewModel: AnnotatedVersesViewModel<V>
+    @Inject
     lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter<V>
     @Inject
     lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
+    @Inject
+    lateinit var annotatedVersesPresenter: BaseAnnotatedVersesPresenter<V, AnnotatedVersesInteractor<V>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,10 +46,10 @@ abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation> : BaseSettingsAw
         setContentView(R.layout.activity_annotated)
         toolbarPresenter.bind(AnnotatedVersesToolbarViewHolder(findViewById(R.id.toolbar)))
         loadingSpinnerPresenter.bind(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
-        listPresenter().bind(AnnotatedVersesViewHolder(findViewById(R.id.verse_list)))
+        annotatedVersesPresenter.bind(AnnotatedVersesViewHolder(findViewById(R.id.verse_list)))
     }
 
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(toolbarPresenter, loadingSpinnerPresenter, listPresenter())
+    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = annotatedVersesViewModel
 
-    protected abstract fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, out AnnotatedVersesInteractor<V>>
+    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(toolbarPresenter, loadingSpinnerPresenter, annotatedVersesPresenter)
 }

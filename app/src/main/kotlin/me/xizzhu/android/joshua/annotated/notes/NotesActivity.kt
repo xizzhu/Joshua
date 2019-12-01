@@ -17,20 +17,6 @@
 package me.xizzhu.android.joshua.annotated.notes
 
 import me.xizzhu.android.joshua.annotated.*
-import me.xizzhu.android.joshua.annotated.notes.list.NotesListPresenter
 import me.xizzhu.android.joshua.core.Note
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
-import javax.inject.Inject
 
-class NotesActivity : BaseAnnotatedVersesActivity<Note>() {
-    @Inject
-    lateinit var notesViewModel: AnnotatedVersesViewModel<Note>
-
-    @Inject
-    lateinit var notesListPresenter: NotesListPresenter
-
-    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = notesViewModel
-
-    override fun listPresenter(): ViewPresenter<AnnotatedVersesViewHolder, AnnotatedVersesInteractor<Note>> = notesListPresenter
-}
+class NotesActivity : BaseAnnotatedVersesActivity<Note>()

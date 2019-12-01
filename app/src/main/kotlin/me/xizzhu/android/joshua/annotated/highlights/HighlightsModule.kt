@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
@@ -65,7 +66,7 @@ object HighlightsModule {
     @Provides
     fun provideHighlightsListPresenter(highlightsActivity: HighlightsActivity,
                                        navigator: Navigator,
-                                       highlightsListInteractor: AnnotatedVersesInteractor<Highlight>): HighlightsListPresenter =
+                                       highlightsListInteractor: AnnotatedVersesInteractor<Highlight>): BaseAnnotatedVersesPresenter<Highlight, AnnotatedVersesInteractor<Highlight>> =
             HighlightsListPresenter(highlightsActivity, navigator, highlightsListInteractor)
 
     @ActivityScope

@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.notes.list.NotesListPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
@@ -65,7 +66,7 @@ object NotesModule {
     @Provides
     fun provideNotesListPresenter(notesActivity: NotesActivity,
                                   navigator: Navigator,
-                                  notesListInteractor: AnnotatedVersesInteractor<Note>): NotesListPresenter =
+                                  notesListInteractor: AnnotatedVersesInteractor<Note>): BaseAnnotatedVersesPresenter<Note, AnnotatedVersesInteractor<Note>> =
             NotesListPresenter(notesActivity, navigator, notesListInteractor)
 
     @ActivityScope
