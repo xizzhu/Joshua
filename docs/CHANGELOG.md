@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.12.3 (2019-12-01)
 - Used ASK to access SQLite
 - Should not show dialog when activity is destroyed
 - Updated dependencies:
