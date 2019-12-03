@@ -16,7 +16,9 @@
 
 package me.xizzhu.android.joshua.core.logger.android
 
+import androidx.annotation.VisibleForTesting
 import com.crashlytics.android.Crashlytics
+import kotlinx.coroutines.CancellationException
 import me.xizzhu.android.logger.Log
 import me.xizzhu.android.logger.Logger
 
@@ -30,9 +32,20 @@ class CrashlyticsLogger : Logger {
     }
 
     override fun log(@Log.Level level: Int, tag: String, msg: String, e: Throwable) {
+        if (e.isCoroutineCancellationException()) return
+
         if (msg.isNotBlank()) {
             crashlyticsCore.log(level, tag, msg)
         }
         crashlyticsCore.logException(e)
+    }
+
+    @VisibleForTesting
+    fun Throwable.isCoroutineCancellationException(): Boolean {
+        var rootCause = this
+        while (rootCause.cause?.let { it != rootCause } == true) rootCause = rootCause.cause!!
+        if (rootCause is CancellationException && rootCause.message == "Job was cancelled") return true
+
+        return false
     }
 }
