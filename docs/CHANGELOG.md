@@ -4,6 +4,9 @@ CHANGELOG
 #### Next Release
 - No longer report coroutine JobCancellationException to Crashlytics
 - Only emit if book names and book short names are loaded
+- Updated dependencies:
+  - AndroidX Coordinator Layout to 1.1.0
+  - Mockito to 3.2.0
 
 #### v0.12.3 (2019-12-01)
 - Used ASK to access SQLite

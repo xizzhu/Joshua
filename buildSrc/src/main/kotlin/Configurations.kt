@@ -55,7 +55,7 @@ object Versions {
         const val annotation = "1.1.0"
         const val appCompat = "1.1.0"
         const val constraintLayout = "1.1.3"
-        const val coordinatorLayout = "1.0.0"
+        const val coordinatorLayout = "1.1.0"
         const val drawerLayout = "1.0.0"
         const val material = "1.0.0"
         const val recyclerView = "1.1.0"
@@ -86,7 +86,7 @@ object Versions {
 
     const val stetho = "1.5.1"
 
-    const val mockito = "3.1.0"
+    const val mockito = "3.2.0"
 }
 
 object Dependencies {
