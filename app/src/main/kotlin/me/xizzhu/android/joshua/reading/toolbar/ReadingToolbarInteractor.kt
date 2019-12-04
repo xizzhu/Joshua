@@ -63,5 +63,7 @@ class ReadingToolbarInteractor(private val bibleReadingManager: BibleReadingMana
 
     fun bookShortNames(): Flow<ViewData<List<String>>> = currentTranslation()
             .filterOnSuccess()
-            .map { ViewData.success(bibleReadingManager.readBookShortNames(it)) }
+            .map { bibleReadingManager.readBookShortNames(it) }
+            .filter { it.isNotEmpty() }
+            .toViewData()
 }
