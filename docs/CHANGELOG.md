@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.12.4 (2019-12-04)
 - No longer report coroutine JobCancellationException to Crashlytics
 - Only emit if book names and book short names are loaded
 - Updated dependencies:
