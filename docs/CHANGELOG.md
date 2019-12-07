@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Do nothing if it's already downloading or removing translations
 - Updated dependencies:
   - Android Gradle plugin to 3.5.3
 
