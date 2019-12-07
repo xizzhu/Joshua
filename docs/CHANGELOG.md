@@ -3,8 +3,10 @@ CHANGELOG
 
 #### Next Release
 - Do nothing if it's already downloading or removing translations
+- Fixed searching with single quote
 - Updated dependencies:
   - Android Gradle plugin to 3.5.3
+  - ASK to 0.5.0
 
 #### v0.12.4 (2019-12-04)
 - No longer report coroutine JobCancellationException to Crashlytics
