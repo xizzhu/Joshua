@@ -137,6 +137,11 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
 
     private fun downloadTranslation(translationToDownload: TranslationInfo) {
         coroutineScope.launch {
+            if (downloadTranslationDialog != null) {
+                // just in case the user clicks too fast
+                return@launch
+            }
+
             interactor.downloadTranslation(translationToDownload)
                     .onStart {
                         downloadTranslationDialog = ProgressDialog.showProgressDialog(
@@ -153,7 +158,8 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                                             setIsIndeterminate(true)
                                         }
                                     }
-                                } ?: throw IllegalStateException("Missing progress data when downloading")
+                                }
+                                        ?: throw IllegalStateException("Missing progress data when downloading")
                             },
                             onSuccess = {
                                 dismissDownloadTranslationDialog()
@@ -188,6 +194,11 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
 
     private fun removeTranslation(translationToRemove: TranslationInfo) {
         coroutineScope.launch {
+            if (removeTranslationDialog != null) {
+                // just in case the user clicks too fast
+                return@launch
+            }
+
             try {
                 removeTranslationDialog = ProgressDialog.showIndeterminateProgressDialog(
                         translationManagementActivity, R.string.dialog_deleting_translation)
