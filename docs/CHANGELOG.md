@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.12.5 (2019-12-07)
 - Do nothing if it's already downloading or removing translations
 - Fixed searching with single quote
 - Updated dependencies:
