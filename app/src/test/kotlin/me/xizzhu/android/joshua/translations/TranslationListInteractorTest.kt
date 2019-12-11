@@ -96,7 +96,7 @@ class TranslationListInteractorTest : BaseUnitTest() {
         `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(""))
         val translationToDownload = MockContents.kjvTranslationInfo
         val progress = 89
-        `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flowOf(progress))
+        `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flowOf(progress, 101))
 
         assertEquals(listOf(ViewData.loading(progress), ViewData.success(-1)),
                 translationListInteractor.downloadTranslation(translationToDownload).toList())

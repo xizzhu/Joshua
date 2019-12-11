@@ -79,15 +79,19 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
 
     fun downloadTranslation(translationToDownload: TranslationInfo): Flow<ViewData<Int>> =
             translationManager.downloadTranslation(translationToDownload)
-                    .map { ViewData.loading(it) }
-                    .onCompletion { cause ->
-                        if (cause != null) return@onCompletion
+                    .map { progress ->
+                        if (progress <= 100) {
+                            ViewData.loading(progress)
+                        } else {
+                            // Ideally, we should use onCompletion() to handle this. However, it doesn't
+                            // distinguish between a successful completion and a cancellation.
+                            // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
+                            if (bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
+                                bibleReadingManager.saveCurrentTranslation(translationToDownload.shortName)
+                            }
 
-                        if (bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
-                            bibleReadingManager.saveCurrentTranslation(translationToDownload.shortName)
+                            ViewData.success(-1)
                         }
-
-                        emit(ViewData.success(-1))
                     }
                     .catch { cause ->
                         Log.e(tag, "Failed to download translation", cause)

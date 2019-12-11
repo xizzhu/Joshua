@@ -85,7 +85,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                                         }
                                         ViewData.success(items)
                                     }
-                                    ?: ViewData.error(exception = IllegalStateException("Missing translation list"))
+                                    ?: throw IllegalStateException("Missing translation list")
                             ViewData.STATUS_ERROR -> ViewData.error(exception = viewData.exception)
                             ViewData.STATUS_LOADING -> ViewData.loading()
                             else -> throw IllegalStateException("Unsupported view data status: ${viewData.status}")
