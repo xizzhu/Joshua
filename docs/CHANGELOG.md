@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Properly handles case when translation downloading is cancelled
+  - As a result, reverted "Only emit if book names and book short names are loaded"
 
 #### v0.12.5 (2019-12-07)
 - Do nothing if it's already downloading or removing translations

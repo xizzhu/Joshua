@@ -31,9 +31,7 @@ class ChapterListInteractor(private val bibleReadingManager: BibleReadingManager
                             dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
     fun bookNames(): Flow<ViewData<List<String>>> = bibleReadingManager.observeCurrentTranslation()
             .filter { it.isNotEmpty() }
-            .map { bibleReadingManager.readBookNames(it) }
-            .filter { it.isNotEmpty() }
-            .toViewData()
+            .map { ViewData.success(bibleReadingManager.readBookNames(it)) }
 
     fun currentVerseIndex(): Flow<ViewData<VerseIndex>> = bibleReadingManager.observeCurrentVerseIndex()
             .filter { it.isValid() }
