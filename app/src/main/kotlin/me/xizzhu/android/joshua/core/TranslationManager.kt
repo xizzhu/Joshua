@@ -105,6 +105,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         }
         notifyTranslationsUpdated(available, downloaded)
 
+        downloadProgressChannel.send(101)
         downloadProgressChannel.close()
     }
 

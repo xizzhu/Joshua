@@ -1,6 +1,9 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Properly handles case when translation downloading is cancelled
+
 #### v0.12.5 (2019-12-07)
 - Do nothing if it's already downloading or removing translations
 - Fixed searching with single quote
