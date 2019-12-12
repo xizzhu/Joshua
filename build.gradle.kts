@@ -40,3 +40,5 @@ allprojects {
         maven("https://jitpack.io")
     }
 }
+
+apply("gradle/coverage.gradle.kts")

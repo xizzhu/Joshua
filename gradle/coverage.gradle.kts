@@ -20,13 +20,26 @@ apply(plugin = "com.github.kt3k.coveralls")
 tasks {
     val debugCoverageReport by registering(JacocoReport::class)
     debugCoverageReport {
-        dependsOn("testDebugUnitTest", "connectedDebugAndroidTest")
+        val dependencies = mutableListOf<String>()
+        val kotlinClasses = mutableListOf<ConfigurableFileTree>()
+        val coverageSourceDirs = mutableListOf<String>()
+        val executionDataDirs = mutableListOf<ConfigurableFileTree>()
+        subprojects.forEach { subproject ->
+            dependencies.add("${subproject.name}:testDebugUnitTest")
+            dependencies.add("${subproject.name}:connectedDebugAndroidTest")
 
-        val kotlinClasses = fileTree("$buildDir/tmp/kotlin-classes/debug")
-        val coverageSourceDirs = arrayOf("src/debug/kotlin", "src/main/kotlin")
-        val executionDataDirs = fileTree("$buildDir") {
-            setIncludes(listOf("jacoco/testDebugUnitTest.exec", "outputs/code_coverage/debugAndroidTest/connected/*.ec"))
+            kotlinClasses.add(fileTree("${subproject.buildDir}/tmp/kotlin-classes/debug"))
+
+            coverageSourceDirs.add("${subproject.name}/src/debug/kotlin")
+            coverageSourceDirs.add("${subproject.name}/src/main/kotlin")
+            coverageSourceDirs.add("${subproject.name}/src/release/kotlin")
+
+            executionDataDirs.add(fileTree("${subproject.buildDir}") {
+                setIncludes(listOf("jacoco/testDebugUnitTest.exec", "outputs/code_coverage/debugAndroidTest/connected/*.ec"))
+            })
         }
+
+        dependsOn(dependencies.toTypedArray())
 
         classDirectories.setFrom(files(kotlinClasses))
         additionalSourceDirs.setFrom(files(coverageSourceDirs))

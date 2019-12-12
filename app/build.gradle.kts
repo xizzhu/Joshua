@@ -24,7 +24,6 @@ plugins {
 apply {
     plugin("io.fabric")
 }
-apply("$rootDir/scripts/coverage.gradle.kts")
 
 android {
     compileOptions {
