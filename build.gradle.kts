@@ -40,3 +40,7 @@ allprojects {
         maven("https://jitpack.io")
     }
 }
+
+subprojects.forEach { subproject ->
+    subproject.apply("$rootDir/gradle/coverage.gradle.kts")
+}

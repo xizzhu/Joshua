@@ -18,25 +18,30 @@ apply(plugin = "jacoco")
 apply(plugin = "com.github.kt3k.coveralls")
 
 tasks {
-    val debugCoverageReport by registering(JacocoReport::class)
-    debugCoverageReport {
-        dependsOn("testDebugUnitTest", "connectedDebugAndroidTest")
-
-        val kotlinClasses = fileTree("$buildDir/tmp/kotlin-classes/debug")
-        val coverageSourceDirs = arrayOf("src/debug/kotlin", "src/main/kotlin")
-        val executionDataDirs = fileTree("$buildDir") {
+    val jacocoMerge by registering(JacocoMerge::class)
+    jacocoMerge {
+        executionData(fileTree("$buildDir") {
             setIncludes(listOf("jacoco/testDebugUnitTest.exec", "outputs/code_coverage/debugAndroidTest/connected/*.ec"))
-        }
+        })
+        dependsOn("testDebugUnitTest", "connectedDebugAndroidTest")
+    }
 
-        classDirectories.setFrom(files(kotlinClasses))
-        additionalSourceDirs.setFrom(files(coverageSourceDirs))
-        sourceDirectories.setFrom(coverageSourceDirs)
-        executionData.setFrom(executionDataDirs)
+    val jacocoReport by registering(JacocoReport::class)
+    jacocoReport {
+        dependsOn(jacocoMerge)
+
+        classDirectories.from(fileTree("${buildDir}/tmp/kotlin-classes/debug"))
+
+        sourceDirectories.from("src/debug/kotlin")
+        sourceDirectories.from("src/main/kotlin")
+        sourceDirectories.from("src/release/kotlin")
+
+        executionData.setFrom(jacocoMerge.get().destinationFile)
 
         reports.xml.isEnabled = true
         reports.xml.destination = file("$buildDir/reports/jacoco/test/jacocoTestReport.xml")
         reports.html.isEnabled = true
     }
 
-    getByName("coveralls").dependsOn(debugCoverageReport)
+    getByName("coveralls").dependsOn(jacocoReport)
 }
