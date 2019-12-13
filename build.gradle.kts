@@ -42,5 +42,11 @@ allprojects {
 }
 
 subprojects.forEach { subproject ->
+    if (subproject.name == "core-tests") return@forEach
+
     subproject.apply("$rootDir/gradle/coverage.gradle.kts")
+
+    subproject.tasks.withType(Test::class.java) {
+        maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+    }
 }

@@ -94,10 +94,6 @@ android {
     }
 }
 
-tasks.withType(Test::class.java) {
-    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
-}
-
 dependencies {
     implementation(Dependencies.Kotlin.stdlib)
     implementation(Dependencies.Kotlin.coroutinesAndroid)
@@ -127,10 +123,12 @@ dependencies {
 
     debugImplementation(Dependencies.Stetho.stetho)
 
+    testImplementation(project(":core-tests"))
     testImplementation(Dependencies.Kotlin.test)
     testImplementation(Dependencies.Kotlin.coroutinesTest)
     testImplementation(Dependencies.Mockito.mockito)
 
+    androidTestImplementation(project(":core-tests"))
     androidTestImplementation(Dependencies.Kotlin.test)
     androidTestImplementation(Dependencies.Kotlin.coroutinesTest)
     androidTestImplementation(Dependencies.AndroidX.Test.junit)
