@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.12.7 (2019-12-13)
 - Should sort search result by book index
 
 #### v0.12.6 (2019-12-11)
