@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-include(":core-tests")
-include("core")
-include(":app")
+package me.xizzhu.android.joshua.utils
+
+object Clock {
+    var currentTimeMillis: Long = 0L
+    var elapsedRealtime: Long = 0L
+
+    fun currentTimeMillis(): Long = currentTimeMillis
+    fun elapsedRealtime(): Long = elapsedRealtime
+}

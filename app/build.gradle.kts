@@ -95,6 +95,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core"))
+
     implementation(Dependencies.Kotlin.stdlib)
     implementation(Dependencies.Kotlin.coroutinesAndroid)
 
