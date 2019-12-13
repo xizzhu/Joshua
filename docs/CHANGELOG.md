@@ -1,6 +1,9 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Should sort search result by book index
+
 #### v0.12.6 (2019-12-11)
 - Properly handles case when translation downloading is cancelled
   - As a result, reverted "Only emit if book names and book short names are loaded"

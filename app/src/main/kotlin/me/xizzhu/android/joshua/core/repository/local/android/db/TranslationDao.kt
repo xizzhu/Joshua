@@ -114,7 +114,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
                 }
             }
             condition
-        }.toList { row ->
+        }.orderBy(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX).toList { row ->
             Verse(
                     VerseIndex(row.getInt(COLUMN_BOOK_INDEX), row.getInt(COLUMN_CHAPTER_INDEX), row.getInt(COLUMN_VERSE_INDEX)),
                     Verse.Text(translationShortName, row.getString(COLUMN_TEXT)), emptyList()
