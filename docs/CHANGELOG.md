@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Updated dependencies:
+  - Kotlin Coroutine to 1.3.3
+  - ASK to 0.5.1
+  - Logger to 0.1.5
+
 #### v0.12.7 (2019-12-13)
 - Should sort search result by book index
 
