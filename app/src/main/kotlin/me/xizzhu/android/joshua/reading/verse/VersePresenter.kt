@@ -289,10 +289,10 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                             },
                     interactor.parallelTranslations()
             ) { currentTranslation, currentVerseIndex, parallelTranslations ->
-                viewHolder?.versePager?.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
                 this@VersePresenter.currentVerseIndex = currentVerseIndex
                 this@VersePresenter.currentTranslation = currentTranslation
                 this@VersePresenter.parallelTranslations = parallelTranslations
+                viewHolder?.versePager?.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
             }.collect()
         }
         coroutineScope.launch {
