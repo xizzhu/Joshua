@@ -20,8 +20,8 @@ import androidx.annotation.UiThread
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
@@ -46,10 +46,8 @@ class SwipeRefreshPresenter(swipeRefreshInteractor: SwipeRefreshInteractor,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch(Dispatchers.Main) {
-            interactor.loadingState().collect {
-                viewHolder?.swipeRefreshLayout?.isRefreshing = ViewData.STATUS_LOADING == it.status
-            }
-        }
+        interactor.loadingState().onEach {
+            viewHolder?.swipeRefreshLayout?.isRefreshing = ViewData.STATUS_LOADING == it.status
+        }.launchIn(coroutineScope)
     }
 }

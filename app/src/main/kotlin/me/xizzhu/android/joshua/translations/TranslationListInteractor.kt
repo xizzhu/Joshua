@@ -47,16 +47,14 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch {
-            combine(bibleReadingManager.observeCurrentTranslation(),
-                    translationManager.observeAvailableTranslations(),
-                    translationManager.observeDownloadedTranslations()
-            ) { currentTranslation, availableTranslations, downloadedTranslations ->
-                TranslationList(currentTranslation, availableTranslations, downloadedTranslations)
-            }.collect { translationList ->
-                this@TranslationListInteractor.translationList.offer(ViewData.success(translationList))
-            }
-        }
+        combine(bibleReadingManager.observeCurrentTranslation(),
+                translationManager.observeAvailableTranslations(),
+                translationManager.observeDownloadedTranslations()
+        ) { currentTranslation, availableTranslations, downloadedTranslations ->
+            TranslationList(currentTranslation, availableTranslations, downloadedTranslations)
+        }.onEach { translationList ->
+            this@TranslationListInteractor.translationList.offer(ViewData.success(translationList))
+        }.launchIn(coroutineScope)
     }
 
     fun translationList(): Flow<ViewData<TranslationList>> = translationList.asFlow()

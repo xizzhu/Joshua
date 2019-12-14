@@ -19,8 +19,8 @@ package me.xizzhu.android.joshua.progress
 import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
@@ -34,8 +34,6 @@ class ReadingProgressViewModel(settingsManager: SettingsManager,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch {
-            readingProgressInteractor.loadingState().collect { loadingSpinnerInteractor.updateLoadingState(it) }
-        }
+        readingProgressInteractor.loadingState().onEach { loadingSpinnerInteractor.updateLoadingState(it) }.launchIn(coroutineScope)
     }
 }

@@ -20,11 +20,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
@@ -40,7 +36,7 @@ class AnnotatedVersesInteractor<V : VerseAnnotation>(private val verseAnnotation
     @UiThread
     override fun onStart() {
         super.onStart()
-        coroutineScope.launch { bibleReadingManager.observeCurrentTranslation().collect { currentTranslation = it } }
+        bibleReadingManager.observeCurrentTranslation().onEach { currentTranslation = it }.launchIn(coroutineScope)
     }
 
     suspend fun bookNames(): ViewData<List<String>> =
