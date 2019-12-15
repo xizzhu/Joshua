@@ -20,11 +20,12 @@ import android.content.DialogInterface
 import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.logger.Log
@@ -33,8 +34,9 @@ data class SearchButtonViewHolder(val searchButton: SearchFloatingActionButton) 
 
 class SearchButtonPresenter(private val readingActivity: ReadingActivity,
                             private val navigator: Navigator,
+                            searchButtonInteractor: SearchButtonInteractor,
                             dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : ViewPresenter<SearchButtonViewHolder, Interactor>(object : Interactor(Dispatchers.Default) {}, dispatcher) {
+    : ViewPresenter<SearchButtonViewHolder, SearchButtonInteractor>(searchButtonInteractor, dispatcher) {
     @UiThread
     override fun onBind(viewHolder: SearchButtonViewHolder) {
         super.onBind(viewHolder)
@@ -49,6 +51,21 @@ class SearchButtonPresenter(private val readingActivity: ReadingActivity,
             Log.e(tag, "Failed to open search activity", e)
             DialogHelper.showDialog(readingActivity, true, R.string.dialog_navigate_to_search_error,
                     DialogInterface.OnClickListener { _, _ -> openSearch() })
+        }
+    }
+
+    @UiThread
+    override fun onStart() {
+        super.onStart()
+
+        coroutineScope.launch {
+            interactor.settings().collectOnSuccess { settings ->
+                if (settings.hideSearchButton) {
+                    viewHolder?.searchButton?.hide()
+                } else {
+                    viewHolder?.searchButton?.show()
+                }
+            }
         }
     }
 }

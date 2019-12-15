@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.chapter.ChapterListInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPresenter
+import me.xizzhu.android.joshua.reading.search.SearchButtonInteractor
 import me.xizzhu.android.joshua.reading.search.SearchButtonPresenter
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarInteractor
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarPresenter
@@ -59,9 +60,14 @@ object ReadingModule {
 
     @ActivityScope
     @Provides
-    fun provideSearchButtonPresenter(readingActivity: ReadingActivity,
-                                     navigator: Navigator): SearchButtonPresenter =
-            SearchButtonPresenter(readingActivity, navigator)
+    fun provideSearchButtonInteractor(settingsManager: SettingsManager): SearchButtonInteractor =
+            SearchButtonInteractor(settingsManager)
+
+    @ActivityScope
+    @Provides
+    fun provideSearchButtonPresenter(readingActivity: ReadingActivity, navigator: Navigator,
+                                     searchButtonInteractor: SearchButtonInteractor): SearchButtonPresenter =
+            SearchButtonPresenter(readingActivity, navigator, searchButtonInteractor)
 
     @ActivityScope
     @Provides
