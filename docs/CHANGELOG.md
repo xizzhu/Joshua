@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Supported hiding search button
 - Properly checked if root exception is JobCancellationException
 
 #### v0.12.8 (2019-12-14)
