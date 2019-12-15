@@ -114,4 +114,16 @@ class SettingsManagerTest : BaseUnitTest() {
         assertEquals(updatedSettings, settingsManager.observeSettings().first())
         verify(settingsRepository, times(1)).saveSettings(updatedSettings)
     }
+
+    @Test
+    fun testSaveHideSearchButton() = testDispatcher.runBlockingTest {
+        settingsManager.saveHideSearchButton(Settings.DEFAULT.simpleReadingModeOn)
+        assertEquals(Settings.DEFAULT, settingsManager.observeSettings().first())
+        verify(settingsRepository, never()).saveSettings(any())
+
+        val updatedSettings = Settings.DEFAULT.copy(hideSearchButton = true)
+        settingsManager.saveHideSearchButton(updatedSettings.hideSearchButton)
+        assertEquals(updatedSettings, settingsManager.observeSettings().first())
+        verify(settingsRepository, times(1)).saveSettings(updatedSettings)
+    }
 }
