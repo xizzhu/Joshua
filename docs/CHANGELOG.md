@@ -1,6 +1,9 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Properly checked if root exception is JobCancellationException
+
 #### v0.12.8 (2019-12-14)
 - Updated dependencies:
   - Kotlin Coroutine to 1.3.3
