@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.12.8 (2019-12-14)
 - Updated dependencies:
   - Kotlin Coroutine to 1.3.3
   - ASK to 0.5.1
