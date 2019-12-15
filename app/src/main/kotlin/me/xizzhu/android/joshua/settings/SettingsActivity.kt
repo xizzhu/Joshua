@@ -40,8 +40,8 @@ class SettingsActivity : BaseActivity() {
         settingsViewPresenter.bind(SettingsViewHolder(
                 findViewById(R.id.display), findViewById(R.id.font_size), findViewById(R.id.keep_screen_on),
                 findViewById(R.id.night_mode_on), findViewById(R.id.reading), findViewById(R.id.simple_reading_mode),
-                findViewById(R.id.backup_restore), findViewById(R.id.backup), findViewById(R.id.restore),
-                findViewById(R.id.about), findViewById(R.id.rate), findViewById(R.id.version)
+                findViewById(R.id.hide_search_button), findViewById(R.id.backup_restore), findViewById(R.id.backup),
+                findViewById(R.id.restore), findViewById(R.id.about), findViewById(R.id.rate), findViewById(R.id.version)
         ))
     }
 

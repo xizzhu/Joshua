@@ -44,8 +44,8 @@ import kotlin.math.roundToInt
 data class SettingsViewHolder(val display: SettingSectionHeader, val fontSize: SettingButton,
                               val keepScreenOn: SwitchCompat, val nightModeOn: SwitchCompat,
                               val reading: SettingSectionHeader, val simpleReadingMode: SwitchCompat,
-                              val backupRestore: SettingSectionHeader, val backup: SettingButton,
-                              val restore: SettingButton, val about: SettingSectionHeader,
+                              val hideSearchButton: SwitchCompat, val backupRestore: SettingSectionHeader,
+                              val backup: SettingButton, val restore: SettingButton, val about: SettingSectionHeader,
                               val rate: SettingButton, val version: SettingButton) : ViewHolder
 
 class SettingsViewPresenter(private val settingsActivity: SettingsActivity, interactor: SettingsInteractor,
@@ -297,6 +297,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
             keepScreenOn.setTextColor(primaryTextColor)
             nightModeOn.setTextColor(primaryTextColor)
             simpleReadingMode.setTextColor(primaryTextColor)
+            hideSearchButton.setTextColor(primaryTextColor)
             backup.setTextColor(primaryTextColor, secondaryTextColor)
             restore.setTextColor(primaryTextColor, secondaryTextColor)
             rate.setTextColor(primaryTextColor, secondaryTextColor)
@@ -325,6 +326,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
             nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
             reading.setTextSize(bodyTextSize.roundToInt())
             simpleReadingMode.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+            hideSearchButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
             backupRestore.setTextSize(bodyTextSize.roundToInt())
             backup.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
             restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
