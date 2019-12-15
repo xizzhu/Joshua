@@ -40,7 +40,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     @Test
     fun testReadSettings() = runBlockingTest {
-        val settings = Settings(false, true, 1, true)
+        val settings = Settings(false, true, 1, true, true)
         `when`(localSettingsStorage.readSettings()).thenReturn(settings)
 
         // for the first time, should read from localSettingsStorage
@@ -54,7 +54,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     @Test
     fun testSaveThenReadSettings() = runBlockingTest {
-        val settings = Settings(false, true, 1, true)
+        val settings = Settings(false, true, 1, true, true)
         settingsRepository.saveSettings(settings)
         assertEquals(settings, settingsRepository.readSettings())
         verify(localSettingsStorage, never()).readSettings()

@@ -45,7 +45,7 @@ class SettingsManagerTest : BaseUnitTest() {
 
     @Test
     fun testObserveInitialSettings() = testDispatcher.runBlockingTest {
-        val settings = Settings(false, true, 3, false)
+        val settings = Settings(false, true, 3, false, false)
         `when`(settingsRepository.readSettings()).thenReturn(settings)
         settingsManager = SettingsManager(settingsRepository)
 
@@ -62,7 +62,7 @@ class SettingsManagerTest : BaseUnitTest() {
 
     @Test
     fun testUpdateSettings() = testDispatcher.runBlockingTest {
-        val updatedSettings = Settings(false, true, 3, false)
+        val updatedSettings = Settings(false, true, 3, false, false)
         settingsManager.saveSettings(updatedSettings)
         assertEquals(updatedSettings, settingsManager.observeSettings().first())
     }

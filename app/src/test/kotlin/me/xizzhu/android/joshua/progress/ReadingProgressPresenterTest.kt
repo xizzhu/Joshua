@@ -72,7 +72,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
 
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
-        val settings = Settings(false, true, 1, true)
+        val settings = Settings(false, true, 1, true, true)
         `when`(readingProgressInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
         readingProgressPresenter.start()

@@ -44,6 +44,10 @@ class SettingsInteractor(settingsManager: SettingsManager,
         settingsManager.saveSimpleReadingModeOn(simpleReadingModeOn)
     }
 
+    suspend fun saveHideSearchButton(hideSearchButton: Boolean) {
+        settingsManager.saveHideSearchButton(hideSearchButton)
+    }
+
     suspend fun backup(to: OutputStream) {
         to.write(backupManager.prepareForBackup().toByteArray(Charsets.UTF_8))
     }

@@ -71,7 +71,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         val settings = listOf(
                 ViewData.error(),
                 ViewData.loading(),
-                ViewData.success(Settings(false, true, 1, true))
+                ViewData.success(Settings(false, true, 1, true, true))
         )
         `when`(searchResultInteractor.settings()).thenReturn(flow { settings.forEach { emit(it) } })
 

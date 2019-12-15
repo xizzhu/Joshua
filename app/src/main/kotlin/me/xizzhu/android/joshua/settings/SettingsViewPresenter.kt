@@ -90,6 +90,8 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
 
         viewHolder.simpleReadingMode.setOnCheckedChangeListener { _, isChecked -> saveSimpleReadingModeOn(isChecked) }
 
+        viewHolder.hideSearchButton.setOnCheckedChangeListener { _, isChecked -> saveHideSearchButton(isChecked) }
+
         viewHolder.backup.setOnClickListener {
             try {
                 settingsActivity.startActivityForResult(
@@ -174,6 +176,18 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 Log.e(tag, "Failed to save simple reading mode on", e)
                 DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveSimpleReadingModeOn(simpleReadingModeOn) })
+            }
+        }
+    }
+
+    private fun saveHideSearchButton(hideSearchButton: Boolean) {
+        coroutineScope.launch {
+            try {
+                interactor.saveHideSearchButton(hideSearchButton)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save hiding search button", e)
+                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                        DialogInterface.OnClickListener { _, _ -> saveHideSearchButton(hideSearchButton) })
             }
         }
     }
@@ -267,6 +281,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
             it.keepScreenOn.isChecked = settings.keepScreenOn
             it.nightModeOn.isChecked = settings.nightModeOn
             it.simpleReadingMode.isChecked = settings.simpleReadingModeOn
+            it.hideSearchButton.isChecked = settings.hideSearchButton
         }
 
         currentSettings = settings
