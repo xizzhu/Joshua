@@ -76,15 +76,21 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { readingProgressManager.startTracking() }
         coroutineScope.launch { verseInteractor.verseDetailRequest().collect { verseDetailInteractor.requestVerseDetail(it) } }
         coroutineScope.launch { verseDetailInteractor.verseDetailRequest().collect { verseInteractor.requestVerseDetail(it) } }
         coroutineScope.launch { verseDetailInteractor.verseUpdates().collect { verseInteractor.updateVerse(it) } }
     }
 
     @UiThread
-    override fun onStop() {
-        super.onStop()
+    override fun onResume() {
+        super.onResume()
+
+        coroutineScope.launch { readingProgressManager.startTracking() }
+    }
+
+    @UiThread
+    override fun onPause() {
+        super.onPause()
 
         // uses GlobalScope to make sure this will be executed without being canceled
         // uses Dispatchers.Main.immediate to make sure this will be executed immediately
