@@ -26,6 +26,8 @@ import kotlin.test.assertTrue
 class InteractorTest : BaseUnitTest() {
     private class TestInteractor(dispatcher: CoroutineDispatcher) : Interactor(dispatcher) {
         var onStartedCalled = false
+        var onResumedCalled = false
+        var onPausedCalled = false
         var onStoppedCalled = false
 
         lateinit var job: Job
@@ -38,6 +40,16 @@ class InteractorTest : BaseUnitTest() {
                     delay(1L)
                 }
             }
+        }
+
+        override fun onResume() {
+            super.onResume()
+            onResumedCalled = true
+        }
+
+        override fun onPause() {
+            onPausedCalled = true
+            super.onPause()
         }
 
         override fun onStop() {
@@ -58,17 +70,39 @@ class InteractorTest : BaseUnitTest() {
     fun testState() {
         // initial state
         assertFalse(interactor.onStartedCalled)
+        assertFalse(interactor.onResumedCalled)
+        assertFalse(interactor.onPausedCalled)
         assertFalse(interactor.onStoppedCalled)
 
         // start
         interactor.start()
         assertTrue(interactor.onStartedCalled)
+        assertFalse(interactor.onResumedCalled)
+        assertFalse(interactor.onPausedCalled)
+        assertFalse(interactor.onStoppedCalled)
+        assertFalse(interactor.job.isCancelled)
+
+        // resume
+        interactor.resume()
+        assertTrue(interactor.onStartedCalled)
+        assertTrue(interactor.onResumedCalled)
+        assertFalse(interactor.onPausedCalled)
+        assertFalse(interactor.onStoppedCalled)
+        assertFalse(interactor.job.isCancelled)
+
+        // pause
+        interactor.pause()
+        assertTrue(interactor.onStartedCalled)
+        assertTrue(interactor.onResumedCalled)
+        assertTrue(interactor.onPausedCalled)
         assertFalse(interactor.onStoppedCalled)
         assertFalse(interactor.job.isCancelled)
 
         // stop
         interactor.stop()
         assertTrue(interactor.onStartedCalled)
+        assertTrue(interactor.onResumedCalled)
+        assertTrue(interactor.onPausedCalled)
         assertTrue(interactor.onStoppedCalled)
         assertTrue(interactor.job.isCancelled)
     }
