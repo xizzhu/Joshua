@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Should start / stop reading progress tracking on resume / pause
 - Supported hiding search button
 - Properly checked if root exception is JobCancellationException
 

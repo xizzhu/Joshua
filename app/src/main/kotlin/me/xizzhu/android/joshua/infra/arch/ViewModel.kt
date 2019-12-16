@@ -35,6 +35,28 @@ abstract class ViewModel(private val interactors: List<Interactor>, dispatcher: 
     }
 
     @UiThread
+    fun resume() {
+        interactors.forEach { it.resume() }
+        onResume()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onResume() {
+    }
+
+    @UiThread
+    fun pause() {
+        interactors.forEach { it.pause() }
+        onPause()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onPause() {
+    }
+
+    @UiThread
     fun stop() {
         interactors.forEach { it.stop() }
         onStop()
