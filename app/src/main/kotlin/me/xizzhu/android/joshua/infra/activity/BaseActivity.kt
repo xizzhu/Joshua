@@ -55,11 +55,13 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.i(tag, "onResume()")
+        presenters.forEach { it.resume() }
     }
 
     @CallSuper
     override fun onPause() {
         Log.i(tag, "onPause()")
+        presenters.forEach { it.pause() }
         super.onPause()
     }
 

@@ -50,6 +50,26 @@ abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val inter
     }
 
     @UiThread
+    fun resume() {
+        onResume()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onResume() {
+    }
+
+    @UiThread
+    fun pause() {
+        onPause()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onPause() {
+    }
+
+    @UiThread
     fun stop() {
         onStop()
         coroutineScope.coroutineContext[Job]?.cancelChildren()

@@ -33,6 +33,8 @@ class ViewPresenterTest : BaseUnitTest() {
     private class TestViewPresenter(interactor: Interactor, dispatcher: CoroutineDispatcher) : ViewPresenter<ViewHolder, Interactor>(interactor, dispatcher) {
         var onBindCalled = false
         var onStartedCalled = false
+        var onResumedCalled = false
+        var onPausedCalled = false
         var onStoppedCalled = false
         var onUnbindCalled = false
 
@@ -51,6 +53,16 @@ class ViewPresenterTest : BaseUnitTest() {
                     delay(1L)
                 }
             }
+        }
+
+        override fun onResume() {
+            super.onResume()
+            onResumedCalled = true
+        }
+
+        override fun onPause() {
+            onPausedCalled = true
+            super.onPause()
         }
 
         override fun onStop() {
@@ -77,6 +89,8 @@ class ViewPresenterTest : BaseUnitTest() {
         // initial state
         assertFalse(viewPresenter.onBindCalled)
         assertFalse(viewPresenter.onStartedCalled)
+        assertFalse(viewPresenter.onResumedCalled)
+        assertFalse(viewPresenter.onPausedCalled)
         assertFalse(viewPresenter.onStoppedCalled)
         assertFalse(viewPresenter.onUnbindCalled)
 
@@ -84,6 +98,8 @@ class ViewPresenterTest : BaseUnitTest() {
         viewPresenter.bind(viewHolder)
         assertTrue(viewPresenter.onBindCalled)
         assertFalse(viewPresenter.onStartedCalled)
+        assertFalse(viewPresenter.onResumedCalled)
+        assertFalse(viewPresenter.onPausedCalled)
         assertFalse(viewPresenter.onStoppedCalled)
         assertFalse(viewPresenter.onUnbindCalled)
 
@@ -92,6 +108,28 @@ class ViewPresenterTest : BaseUnitTest() {
         assertFalse(viewPresenter.job.isCancelled)
         assertTrue(viewPresenter.onBindCalled)
         assertTrue(viewPresenter.onStartedCalled)
+        assertFalse(viewPresenter.onResumedCalled)
+        assertFalse(viewPresenter.onPausedCalled)
+        assertFalse(viewPresenter.onStoppedCalled)
+        assertFalse(viewPresenter.onUnbindCalled)
+
+        // resume
+        viewPresenter.resume()
+        assertFalse(viewPresenter.job.isCancelled)
+        assertTrue(viewPresenter.onBindCalled)
+        assertTrue(viewPresenter.onStartedCalled)
+        assertTrue(viewPresenter.onResumedCalled)
+        assertFalse(viewPresenter.onPausedCalled)
+        assertFalse(viewPresenter.onStoppedCalled)
+        assertFalse(viewPresenter.onUnbindCalled)
+
+        // pause
+        viewPresenter.pause()
+        assertFalse(viewPresenter.job.isCancelled)
+        assertTrue(viewPresenter.onBindCalled)
+        assertTrue(viewPresenter.onStartedCalled)
+        assertTrue(viewPresenter.onResumedCalled)
+        assertTrue(viewPresenter.onPausedCalled)
         assertFalse(viewPresenter.onStoppedCalled)
         assertFalse(viewPresenter.onUnbindCalled)
 
@@ -100,6 +138,8 @@ class ViewPresenterTest : BaseUnitTest() {
         assertTrue(viewPresenter.job.isCancelled)
         assertTrue(viewPresenter.onBindCalled)
         assertTrue(viewPresenter.onStartedCalled)
+        assertTrue(viewPresenter.onResumedCalled)
+        assertTrue(viewPresenter.onPausedCalled)
         assertTrue(viewPresenter.onStoppedCalled)
         assertFalse(viewPresenter.onUnbindCalled)
 
@@ -107,6 +147,8 @@ class ViewPresenterTest : BaseUnitTest() {
         viewPresenter.unbind()
         assertTrue(viewPresenter.onBindCalled)
         assertTrue(viewPresenter.onStartedCalled)
+        assertTrue(viewPresenter.onResumedCalled)
+        assertTrue(viewPresenter.onPausedCalled)
         assertTrue(viewPresenter.onStoppedCalled)
         assertTrue(viewPresenter.onUnbindCalled)
     }
