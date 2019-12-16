@@ -91,7 +91,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
 
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
-        val settings = Settings(false, true, 1, true)
+        val settings = Settings(false, true, 1, true, true)
         `when`(interactor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
         baseAnnotatedVersesPresenter.start()

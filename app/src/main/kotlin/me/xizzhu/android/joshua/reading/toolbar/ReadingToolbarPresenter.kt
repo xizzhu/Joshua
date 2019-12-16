@@ -86,6 +86,10 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                     startActivity(Navigator.SCREEN_NOTES, R.string.dialog_navigate_to_notes_error)
                     true
                 }
+                R.id.action_search -> {
+                    startActivity(Navigator.SCREEN_SEARCH, R.string.dialog_navigate_to_search_error)
+                    true
+                }
                 R.id.action_settings -> {
                     startActivity(Navigator.SCREEN_SETTINGS, R.string.dialog_navigate_to_settings_error)
                     true

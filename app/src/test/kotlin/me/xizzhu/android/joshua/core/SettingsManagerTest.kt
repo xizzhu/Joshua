@@ -45,7 +45,7 @@ class SettingsManagerTest : BaseUnitTest() {
 
     @Test
     fun testObserveInitialSettings() = testDispatcher.runBlockingTest {
-        val settings = Settings(false, true, 3, false)
+        val settings = Settings(false, true, 3, false, false)
         `when`(settingsRepository.readSettings()).thenReturn(settings)
         settingsManager = SettingsManager(settingsRepository)
 
@@ -62,7 +62,7 @@ class SettingsManagerTest : BaseUnitTest() {
 
     @Test
     fun testUpdateSettings() = testDispatcher.runBlockingTest {
-        val updatedSettings = Settings(false, true, 3, false)
+        val updatedSettings = Settings(false, true, 3, false, false)
         settingsManager.saveSettings(updatedSettings)
         assertEquals(updatedSettings, settingsManager.observeSettings().first())
     }
@@ -111,6 +111,18 @@ class SettingsManagerTest : BaseUnitTest() {
 
         val updatedSettings = Settings.DEFAULT.copy(simpleReadingModeOn = true)
         settingsManager.saveSimpleReadingModeOn(updatedSettings.simpleReadingModeOn)
+        assertEquals(updatedSettings, settingsManager.observeSettings().first())
+        verify(settingsRepository, times(1)).saveSettings(updatedSettings)
+    }
+
+    @Test
+    fun testSaveHideSearchButton() = testDispatcher.runBlockingTest {
+        settingsManager.saveHideSearchButton(Settings.DEFAULT.simpleReadingModeOn)
+        assertEquals(Settings.DEFAULT, settingsManager.observeSettings().first())
+        verify(settingsRepository, never()).saveSettings(any())
+
+        val updatedSettings = Settings.DEFAULT.copy(hideSearchButton = true)
+        settingsManager.saveHideSearchButton(updatedSettings.hideSearchButton)
         assertEquals(updatedSettings, settingsManager.observeSettings().first())
         verify(settingsRepository, times(1)).saveSettings(updatedSettings)
     }

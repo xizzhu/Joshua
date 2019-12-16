@@ -27,6 +27,7 @@
     <string name="action_bookmarks">Bookmarks</string>
     <string name="action_highlights">Highlights</string>
     <string name="action_notes">Notes</string>
+    <string name="action_search">Search</string>
     <string name="action_settings">Settings</string>
 
     <string name="dialog_delete_translation_confirmation">Delete now?</string>
@@ -89,6 +90,7 @@
     <string name="settings_title_night_mode_on">Night mode</string>
     <string name="settings_header_reading">Reading</string>
     <string name="settings_title_simple_reading">Simple reading</string>
+    <string name="settings_title_hide_search_button">Hide search button</string>
     <string name="settings_header_backup_restore">Backup &amp; restore</string>
     <string name="settings_title_backup">Backup all my data</string>
     <string name="settings_title_restore">Restore</string>

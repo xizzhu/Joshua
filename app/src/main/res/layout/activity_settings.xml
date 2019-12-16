@@ -63,6 +63,16 @@
                 android:paddingEnd="@dimen/padding"
                 android:text="@string/settings_title_simple_reading" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/hide_search_button"
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/item_height"
+                android:paddingStart="@dimen/padding"
+                android:paddingEnd="@dimen/padding"
+                android:text="@string/settings_title_hide_search_button" />
+
             <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
                 android:id="@+id/backup_restore"
                 android:layout_width="match_parent"

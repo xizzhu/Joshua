@@ -30,9 +30,9 @@ import me.xizzhu.android.joshua.core.repository.SettingsRepository
 import me.xizzhu.android.logger.Log
 
 data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fontSizeScale: Int,
-                    val simpleReadingModeOn: Boolean) {
+                    val simpleReadingModeOn: Boolean, val hideSearchButton: Boolean) {
     companion object {
-        val DEFAULT = Settings(true, false, 2, false)
+        val DEFAULT = Settings(true, false, 2, false, false)
     }
 }
 
@@ -94,6 +94,16 @@ class SettingsManager(private val settingsRepository: SettingsRepository) {
             settingsRepository.readSettings().let { settings ->
                 if (simpleReadingModeOn != settings.simpleReadingModeOn) {
                     saveSettings(settings.copy(simpleReadingModeOn = simpleReadingModeOn))
+                }
+            }
+        }
+    }
+
+    suspend fun saveHideSearchButton(hideSearchButton: Boolean) {
+        mutex.withLock {
+            settingsRepository.readSettings().let { settings ->
+                if (hideSearchButton != settings.hideSearchButton) {
+                    saveSettings(settings.copy(hideSearchButton = hideSearchButton))
                 }
             }
         }
