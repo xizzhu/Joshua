@@ -28,6 +28,8 @@ import kotlin.test.assertTrue
 class ViewModelTest : BaseUnitTest() {
     private class TestViewModel(interactors: List<Interactor>, dispatcher: CoroutineDispatcher) : ViewModel(interactors, dispatcher) {
         var onStartedCalled = false
+        var onResumedCalled = false
+        var onPausedCalled = false
         var onStoppedCalled = false
 
         lateinit var job: Job
@@ -40,6 +42,16 @@ class ViewModelTest : BaseUnitTest() {
                     delay(1L)
                 }
             }
+        }
+
+        override fun onResume() {
+            super.onResume()
+            onResumedCalled = true
+        }
+
+        override fun onPause() {
+            onPausedCalled = true
+            super.onPause()
         }
 
         override fun onStop() {
@@ -66,22 +78,56 @@ class ViewModelTest : BaseUnitTest() {
         verify(mockInteractor, never()).start()
         verify(mockInteractor, never()).stop()
         assertFalse(testViewModel.onStartedCalled)
+        assertFalse(testViewModel.onResumedCalled)
+        assertFalse(testViewModel.onPausedCalled)
         assertFalse(testViewModel.onStoppedCalled)
 
         // start
         testViewModel.start()
         verify(mockInteractor, times(1)).start()
+        verify(mockInteractor, never()).resume()
+        verify(mockInteractor, never()).pause()
         verify(mockInteractor, never()).stop()
         assertFalse(testViewModel.job.isCancelled)
         assertTrue(testViewModel.onStartedCalled)
+        assertFalse(testViewModel.onResumedCalled)
+        assertFalse(testViewModel.onPausedCalled)
+        assertFalse(testViewModel.onStoppedCalled)
+
+        // resume
+        testViewModel.resume()
+        verify(mockInteractor, times(1)).start()
+        verify(mockInteractor, times(1)).resume()
+        verify(mockInteractor, never()).pause()
+        verify(mockInteractor, never()).stop()
+        assertFalse(testViewModel.job.isCancelled)
+        assertTrue(testViewModel.onStartedCalled)
+        assertTrue(testViewModel.onResumedCalled)
+        assertFalse(testViewModel.onPausedCalled)
+        assertFalse(testViewModel.onStoppedCalled)
+
+        // pause
+        testViewModel.pause()
+        verify(mockInteractor, times(1)).start()
+        verify(mockInteractor, times(1)).resume()
+        verify(mockInteractor, times(1)).pause()
+        verify(mockInteractor, never()).stop()
+        assertFalse(testViewModel.job.isCancelled)
+        assertTrue(testViewModel.onStartedCalled)
+        assertTrue(testViewModel.onResumedCalled)
+        assertTrue(testViewModel.onPausedCalled)
         assertFalse(testViewModel.onStoppedCalled)
 
         // stop
         testViewModel.stop()
         verify(mockInteractor, times(1)).start()
+        verify(mockInteractor, times(1)).resume()
+        verify(mockInteractor, times(1)).pause()
         verify(mockInteractor, times(1)).stop()
         assertTrue(testViewModel.job.isCancelled)
         assertTrue(testViewModel.onStartedCalled)
+        assertTrue(testViewModel.onResumedCalled)
+        assertTrue(testViewModel.onPausedCalled)
         assertTrue(testViewModel.onStoppedCalled)
     }
 
