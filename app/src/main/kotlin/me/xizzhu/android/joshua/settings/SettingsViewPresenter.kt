@@ -210,7 +210,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 Log.e(tag, "Failed to backup data", e)
                 dismissBackupRestoreDialog()
                 DialogHelper.showDialog(settingsActivity, true, R.string.dialog_backup_error,
-                        DialogInterface.OnClickListener { _, _ -> restore(uri) })
+                        DialogInterface.OnClickListener { _, _ -> backup(uri) })
             }
         }
     }
