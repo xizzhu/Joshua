@@ -28,6 +28,7 @@
     <string name="action_highlights">Highlights</string>
     <string name="action_notes">Notes</string>
     <string name="action_search">Search</string>
+    <string name="action_clear_search_history">Delete Search History</string>
     <string name="action_settings">Settings</string>
 
     <string name="dialog_delete_translation_confirmation">Delete now?</string>

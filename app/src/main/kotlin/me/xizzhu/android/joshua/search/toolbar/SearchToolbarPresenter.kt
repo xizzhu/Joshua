@@ -24,6 +24,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.SearchView
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.search.SearchActivity
@@ -62,11 +64,20 @@ class SearchToolbarPresenter(private val searchActivity: SearchActivity,
     override fun onBind(viewHolder: SearchToolbarViewHolder) {
         super.onBind(viewHolder)
 
-        viewHolder.searchToolbar.setOnQueryTextListener(onQueryTextListener)
-        viewHolder.searchToolbar.setSearchableInfo(
-                (searchActivity.getSystemService(Context.SEARCH_SERVICE) as SearchManager)
-                        .getSearchableInfo(searchActivity.componentName)
-        )
+        with(viewHolder.searchToolbar) {
+            setOnQueryTextListener(onQueryTextListener)
+            setSearchableInfo((searchActivity.getSystemService(Context.SEARCH_SERVICE) as SearchManager)
+                    .getSearchableInfo(searchActivity.componentName))
+            setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.action_clear_search_history -> {
+                        coroutineScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() }
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }
     }
 
     @UiThread
