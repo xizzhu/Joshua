@@ -78,7 +78,7 @@ object Versions {
         }
     }
 
-    const val dagger = "2.25.2"
+    const val dagger = "2.25.3"
 
     const val ask = "0.5.1"
 
@@ -86,7 +86,7 @@ object Versions {
 
     const val stetho = "1.5.1"
 
-    const val mockito = "3.2.0"
+    const val mockito = "3.2.4"
 }
 
 object Dependencies {
