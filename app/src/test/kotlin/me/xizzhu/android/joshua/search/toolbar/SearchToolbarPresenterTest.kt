@@ -16,16 +16,25 @@
 
 package me.xizzhu.android.joshua.search.toolbar
 
+import android.app.SearchManager
+import android.app.SearchableInfo
+import android.content.Context
+import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.mockito.Mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class SearchToolbarPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var searchToolbar: SearchToolbar
+    @Mock
+    private lateinit var searchActivity: SearchActivity
+    @Mock
+    private lateinit var searchManager: SearchManager
+    @Mock
+    private lateinit var searchable: SearchableInfo
     @Mock
     private lateinit var searchToolbarInteractor: SearchToolbarInteractor
 
@@ -36,14 +45,18 @@ class SearchToolbarPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
+        `when`(searchActivity.getSystemService(Context.SEARCH_SERVICE)).thenReturn(searchManager)
+        `when`(searchManager.getSearchableInfo(any())).thenReturn(searchable)
+
         searchToolbarViewHolder = SearchToolbarViewHolder(searchToolbar)
-        searchToolbarPresenter = SearchToolbarPresenter(searchToolbarInteractor, testDispatcher)
+        searchToolbarPresenter = SearchToolbarPresenter(searchActivity, searchToolbarInteractor, testDispatcher)
     }
 
     @Test
     fun testBindView() {
         searchToolbarPresenter.bind(searchToolbarViewHolder)
         verify(searchToolbar, times(1)).setOnQueryTextListener(searchToolbarPresenter.onQueryTextListener)
+        verify(searchToolbar, times(1)).setSearchableInfo(searchable)
 
         searchToolbarPresenter.unbind()
         verify(searchToolbar, times(1)).setOnQueryTextListener(null)

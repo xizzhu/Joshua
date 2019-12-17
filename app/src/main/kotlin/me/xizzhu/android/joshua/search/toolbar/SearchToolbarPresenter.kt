@@ -16,6 +16,9 @@
 
 package me.xizzhu.android.joshua.search.toolbar
 
+import android.app.SearchManager
+import android.content.Context
+import android.provider.SearchRecentSuggestions
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.SearchView
@@ -23,13 +26,17 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.ui.hideKeyboard
 
 data class SearchToolbarViewHolder(val searchToolbar: SearchToolbar) : ViewHolder
 
-class SearchToolbarPresenter(searchToolbarInteractor: SearchToolbarInteractor,
+class SearchToolbarPresenter(private val searchActivity: SearchActivity,
+                             searchToolbarInteractor: SearchToolbarInteractor,
                              dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<SearchToolbarViewHolder, SearchToolbarInteractor>(searchToolbarInteractor, dispatcher) {
+    private val searchRecentSuggestions: SearchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(searchActivity)
+
     @VisibleForTesting
     val onQueryTextListener = object : SearchView.OnQueryTextListener {
         private var currentQuery: String = ""
@@ -39,6 +46,7 @@ class SearchToolbarPresenter(searchToolbarInteractor: SearchToolbarInteractor,
             // will be called both when the key is down and when the key is up.
             // Therefore, if the query is the same, we do nothing.
             if (currentQuery != query) {
+                searchRecentSuggestions.saveRecentQuery(query, null)
                 interactor.updateQuery(query)
                 viewHolder?.searchToolbar?.hideKeyboard()
                 currentQuery = query
@@ -53,7 +61,12 @@ class SearchToolbarPresenter(searchToolbarInteractor: SearchToolbarInteractor,
     @UiThread
     override fun onBind(viewHolder: SearchToolbarViewHolder) {
         super.onBind(viewHolder)
+
         viewHolder.searchToolbar.setOnQueryTextListener(onQueryTextListener)
+        viewHolder.searchToolbar.setSearchableInfo(
+                (searchActivity.getSystemService(Context.SEARCH_SERVICE) as SearchManager)
+                        .getSearchableInfo(searchActivity.componentName)
+        )
     }
 
     @UiThread
