@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Should call backup() when backup fails
+- Caught OutOfMemoryError when it fails to restore
 - Should start / stop reading progress tracking on resume / pause
 - Supported hiding search button
 - Properly checked if root exception is JobCancellationException

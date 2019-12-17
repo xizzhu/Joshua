@@ -239,11 +239,19 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                         ?: throw IOException("Failed to open Uri for restore - $uri")
                 dismissBackupRestoreDialog()
                 ToastHelper.showToast(settingsActivity, R.string.toast_restored)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to backup data", e)
-                dismissBackupRestoreDialog()
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_restore_error,
-                        DialogInterface.OnClickListener { _, _ -> restore(uri) })
+            } catch (e: Throwable) {
+                when (e) {
+                    is Exception, is OutOfMemoryError -> {
+                        // Catching OutOfMemoryError here, because there're cases when users try to
+                        // open a huge file.
+                        // See https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/e9339c69d6e1856856db88413614d3d3
+                        Log.e(tag, "Failed to backup data", e)
+                        dismissBackupRestoreDialog()
+                        DialogHelper.showDialog(settingsActivity, true, R.string.dialog_restore_error,
+                                DialogInterface.OnClickListener { _, _ -> restore(uri) })
+                    }
+                    else -> throw e
+                }
             }
         }
     }
