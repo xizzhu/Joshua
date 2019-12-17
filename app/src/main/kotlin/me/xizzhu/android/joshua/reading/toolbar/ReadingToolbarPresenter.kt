@@ -141,64 +141,57 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     }
 
     private fun observeDownloadedTranslations() {
-        coroutineScope.launch {
-            interactor.downloadedTranslations()
-                    .filterOnSuccess()
-                    .collect { translations ->
-                        if (translations.isEmpty()) {
-                            DialogHelper.showDialog(readingActivity, false, R.string.dialog_no_translation_downloaded,
-                                    DialogInterface.OnClickListener { _, _ -> startTranslationManagementActivity() },
-                                    DialogInterface.OnClickListener { _, _ -> readingActivity.finish() })
-                        } else {
-                            downloadedTranslations.clear()
-                            downloadedTranslations.addAll(translations.sortedWith(translationComparator))
+        interactor.downloadedTranslations().onEachSuccess { translations ->
+            if (translations.isEmpty()) {
+                DialogHelper.showDialog(readingActivity, false, R.string.dialog_no_translation_downloaded,
+                        DialogInterface.OnClickListener { _, _ -> startTranslationManagementActivity() },
+                        DialogInterface.OnClickListener { _, _ -> readingActivity.finish() })
+            } else {
+                downloadedTranslations.clear()
+                downloadedTranslations.addAll(translations.sortedWith(translationComparator))
 
-                            val names = ArrayList<String>(downloadedTranslations.size + 1)
-                            var selected = 0
-                            for (i in 0 until downloadedTranslations.size) {
-                                val translation = downloadedTranslations[i]
-                                if (currentTranslation == translation.shortName) {
-                                    selected = i
-                                }
-                                names.add(translation.shortName)
-                            }
-                            names.add(readingActivity.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
-
-                            viewHolder?.readingToolbar?.run {
-                                setTranslationShortNames(names)
-                                setSpinnerSelection(selected)
-                            }
-                        }
-                    }
-        }
-    }
-
-    private fun observeCurrentTranslation() {
-        coroutineScope.launch {
-            interactor.currentTranslation().collectOnSuccess { translationShortName ->
-                currentTranslation = translationShortName
-
+                val names = ArrayList<String>(downloadedTranslations.size + 1)
                 var selected = 0
                 for (i in 0 until downloadedTranslations.size) {
-                    if (currentTranslation == downloadedTranslations[i].shortName) {
+                    val translation = downloadedTranslations[i]
+                    if (currentTranslation == translation.shortName) {
                         selected = i
-                        break
                     }
+                    names.add(translation.shortName)
                 }
+                names.add(readingActivity.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
 
                 viewHolder?.readingToolbar?.run {
-                    setCurrentTranslation(currentTranslation)
+                    setTranslationShortNames(names)
                     setSpinnerSelection(selected)
                 }
             }
-        }
+        }.launchIn(coroutineScope)
+    }
+
+    private fun observeCurrentTranslation() {
+        interactor.currentTranslation().onEachSuccess { translationShortName ->
+            currentTranslation = translationShortName
+
+            var selected = 0
+            for (i in 0 until downloadedTranslations.size) {
+                if (currentTranslation == downloadedTranslations[i].shortName) {
+                    selected = i
+                    break
+                }
+            }
+
+            viewHolder?.readingToolbar?.run {
+                setCurrentTranslation(currentTranslation)
+                setSpinnerSelection(selected)
+            }
+        }.launchIn(coroutineScope)
     }
 
     private fun observeParallelTranslations() {
-        coroutineScope.launch {
-            interactor.parallelTranslations()
-                    .collectOnSuccess { viewHolder?.readingToolbar?.setParallelTranslations(it) }
-        }
+        interactor.parallelTranslations()
+                .onEachSuccess { viewHolder?.readingToolbar?.setParallelTranslations(it) }
+                .launchIn(coroutineScope)
     }
 
     private fun observeBookNames() {

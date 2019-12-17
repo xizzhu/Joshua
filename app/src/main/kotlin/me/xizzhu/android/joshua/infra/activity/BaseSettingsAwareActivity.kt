@@ -20,8 +20,8 @@ import android.os.Bundle
 import androidx.annotation.CallSuper
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.*
@@ -37,15 +37,13 @@ abstract class BaseSettingsAwareActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        coroutineScope.launch {
-            getBaseSettingsAwareViewModel().settings()
-                    .collectOnSuccess { settings ->
-                        with(window.decorView) {
-                            keepScreenOn = settings.keepScreenOn
-                            setBackgroundColor(settings.getBackgroundColor())
-                        }
+        getBaseSettingsAwareViewModel().settings()
+                .onEachSuccess { settings ->
+                    with(window.decorView) {
+                        keepScreenOn = settings.keepScreenOn
+                        setBackgroundColor(settings.getBackgroundColor())
                     }
-        }
+                }.launchIn(coroutineScope)
     }
 
     override fun getViewModel(): ViewModel = getBaseSettingsAwareViewModel()

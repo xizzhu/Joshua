@@ -23,13 +23,14 @@ import android.content.DialogInterface
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
+import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
@@ -137,18 +138,16 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.verseDetailViewLayout?.setSettings(it) } }
+        interactor.settings().onEachSuccess { viewHolder?.verseDetailViewLayout?.setSettings(it) }.launchIn(coroutineScope)
 
-        coroutineScope.launch {
-            interactor.verseDetailRequest().collect { request ->
-                if (request.content != VerseDetailRequest.HIDE) {
-                    showVerseDetail(request.verseIndex, request.content)
-                } else {
-                    viewHolder?.verseDetailViewLayout?.hide()
-                    verseDetail = null
-                }
+        interactor.verseDetailRequest().onEach { request ->
+            if (request.content != VerseDetailRequest.HIDE) {
+                showVerseDetail(request.verseIndex, request.content)
+            } else {
+                viewHolder?.verseDetailViewLayout?.hide()
+                verseDetail = null
             }
-        }
+        }.launchIn(coroutineScope)
     }
 
     private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {

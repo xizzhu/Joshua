@@ -23,16 +23,14 @@ import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
-import me.xizzhu.android.joshua.infra.arch.dataOnSuccessOrThrow
+import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -54,8 +52,8 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.annotatedVerseListView?.setSettings(it) } }
-        coroutineScope.launch { interactor.sortOrder().collectOnSuccess { load(it) } }
+        interactor.settings().onEachSuccess { viewHolder?.annotatedVerseListView?.setSettings(it) }.launchIn(coroutineScope)
+        interactor.sortOrder().onEachSuccess { load(it) }.launchIn(coroutineScope)
     }
 
     private fun load(@Constants.SortOrder sortOrder: Int) {

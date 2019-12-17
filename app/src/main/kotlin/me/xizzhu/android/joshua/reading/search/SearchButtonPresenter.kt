@@ -20,12 +20,12 @@ import android.content.DialogInterface
 import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
-import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
+import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.logger.Log
@@ -58,14 +58,12 @@ class SearchButtonPresenter(private val readingActivity: ReadingActivity,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch {
-            interactor.settings().collectOnSuccess { settings ->
-                if (settings.hideSearchButton) {
-                    viewHolder?.searchButton?.hide()
-                } else {
-                    viewHolder?.searchButton?.show()
-                }
+        interactor.settings().onEachSuccess { settings ->
+            if (settings.hideSearchButton) {
+                viewHolder?.searchButton?.hide()
+            } else {
+                viewHolder?.searchButton?.show()
             }
-        }
+        }.launchIn(coroutineScope)
     }
 }

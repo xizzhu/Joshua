@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
+import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
@@ -250,7 +250,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
 
     @VisibleForTesting
     fun updateHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch {
             try {
                 if (highlightColor == Highlight.COLOR_NONE) {
                     interactor.removeHighlight(verseIndex)
@@ -273,36 +273,35 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.versePager?.setSettings(it) } }
-        coroutineScope.launch { interactor.verseUpdates().collect { viewHolder?.versePager?.notifyVerseUpdate(it) } }
-        coroutineScope.launch {
-            combine(interactor.currentTranslation().filter { it.isNotEmpty() },
-                    interactor.currentVerseIndex()
-                            .filter { it.isValid() }
-                            .onEach { newVerseIndex ->
-                                if (actionMode != null) {
-                                    if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex
-                                            || currentVerseIndex.chapterIndex != newVerseIndex.chapterIndex) {
-                                        actionMode?.finish()
-                                    }
+        interactor.settings().onEachSuccess { viewHolder?.versePager?.setSettings(it) }.launchIn(coroutineScope)
+
+        interactor.verseUpdates().onEach { viewHolder?.versePager?.notifyVerseUpdate(it) }.launchIn(coroutineScope)
+
+        combine(interactor.currentTranslation().filter { it.isNotEmpty() },
+                interactor.currentVerseIndex()
+                        .filter { it.isValid() }
+                        .onEach { newVerseIndex ->
+                            if (actionMode != null) {
+                                if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex
+                                        || currentVerseIndex.chapterIndex != newVerseIndex.chapterIndex) {
+                                    actionMode?.finish()
                                 }
-                            },
-                    interactor.parallelTranslations()
-            ) { currentTranslation, currentVerseIndex, parallelTranslations ->
-                this@VersePresenter.currentVerseIndex = currentVerseIndex
-                this@VersePresenter.currentTranslation = currentTranslation
-                this@VersePresenter.parallelTranslations = parallelTranslations
-                viewHolder?.versePager?.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
-            }.collect()
-        }
-        coroutineScope.launch {
-            interactor.verseDetailRequest().collect { verseDetailRequest ->
-                if (verseDetailRequest.content == VerseDetailRequest.HIDE) {
-                    viewHolder?.versePager?.deselectVerse(verseDetailRequest.verseIndex)
-                } else {
-                    viewHolder?.versePager?.selectVerse(verseDetailRequest.verseIndex)
-                }
+                            }
+                        },
+                interactor.parallelTranslations()
+        ) { currentTranslation, currentVerseIndex, parallelTranslations ->
+            this@VersePresenter.currentVerseIndex = currentVerseIndex
+            this@VersePresenter.currentTranslation = currentTranslation
+            this@VersePresenter.parallelTranslations = parallelTranslations
+            viewHolder?.versePager?.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
+        }.launchIn(coroutineScope)
+
+        interactor.verseDetailRequest().onEach { verseDetailRequest ->
+            if (verseDetailRequest.content == VerseDetailRequest.HIDE) {
+                viewHolder?.versePager?.deselectVerse(verseDetailRequest.verseIndex)
+            } else {
+                viewHolder?.versePager?.selectVerse(verseDetailRequest.verseIndex)
             }
-        }
+        }.launchIn(coroutineScope)
     }
 }

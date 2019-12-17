@@ -57,10 +57,10 @@ fun <T> ViewData<T>.dataOnSuccessOrThrow(errorMessage: String): T =
 
 fun <T> Flow<T>.toViewData(): Flow<ViewData<T>> = map { ViewData.success(it) }
 
-suspend inline fun <T> Flow<ViewData<T>>.collect(
+inline fun <T> Flow<ViewData<T>>.onEach(
         crossinline onLoading: suspend (value: T?) -> Unit,
         crossinline onSuccess: suspend (value: T) -> Unit,
-        crossinline onError: suspend (value: T?, exception: Throwable?) -> Unit): Unit = collect { viewData ->
+        crossinline onError: suspend (value: T?, exception: Throwable?) -> Unit): Flow<ViewData<T>> = onEach { viewData ->
     when (viewData.status) {
         ViewData.STATUS_LOADING -> onLoading(viewData.data)
         ViewData.STATUS_SUCCESS -> onSuccess(viewData.data!!)
@@ -69,13 +69,13 @@ suspend inline fun <T> Flow<ViewData<T>>.collect(
     }
 }
 
+inline fun <T> Flow<ViewData<T>>.onEachSuccess(crossinline action: suspend (value: T) -> Unit): Flow<ViewData<T>> = onEach { viewData ->
+    if (viewData.status == ViewData.STATUS_SUCCESS) action(viewData.data!!)
+}
+
 fun <T> Flow<ViewData<T>>.filterOnSuccess(): Flow<T> = transform { viewData ->
     if (viewData.status == ViewData.STATUS_SUCCESS) emit(viewData.data!!)
 }
 
 fun <T1, T2, R> Flow<ViewData<T1>>.combineOnSuccess(flow: Flow<ViewData<T2>>, transform: suspend (a: T1, b: T2) -> R): Flow<R> =
         filterOnSuccess().combine(flow.filterOnSuccess()) { a, b -> transform(a, b) }
-
-suspend inline fun <T> Flow<ViewData<T>>.collectOnSuccess(crossinline action: suspend (value: T) -> Unit): Unit = collect { viewData ->
-    if (viewData.status == ViewData.STATUS_SUCCESS) action(viewData.data!!)
-}

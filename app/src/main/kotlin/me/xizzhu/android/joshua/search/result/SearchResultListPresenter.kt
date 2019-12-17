@@ -22,16 +22,14 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
-import me.xizzhu.android.joshua.infra.arch.dataOnSuccessOrThrow
+import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
@@ -52,9 +50,8 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
     @UiThread
     override fun onStart() {
         super.onStart()
-
-        coroutineScope.launch { interactor.settings().collectOnSuccess { viewHolder?.searchResultListView?.setSettings(it) } }
-        coroutineScope.launch { interactor.query().collectOnSuccess { search(it) } }
+        interactor.settings().onEachSuccess { viewHolder?.searchResultListView?.setSettings(it) }.launchIn(coroutineScope)
+        interactor.query().onEachSuccess { search(it) }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting

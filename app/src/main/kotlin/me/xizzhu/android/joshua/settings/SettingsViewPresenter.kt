@@ -28,11 +28,12 @@ import androidx.annotation.UiThread
 import androidx.appcompat.widget.SwitchCompat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.collectOnSuccess
+import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
@@ -259,7 +260,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     @UiThread
     override fun onStart() {
         super.onStart()
-        coroutineScope.launch { interactor.settings().collectOnSuccess { updateSettings(it) } }
+        interactor.settings().onEachSuccess { updateSettings(it) }.launchIn(coroutineScope)
     }
 
     private fun updateSettings(settings: Settings) {
