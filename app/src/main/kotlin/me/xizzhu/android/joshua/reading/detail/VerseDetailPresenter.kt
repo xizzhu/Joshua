@@ -63,8 +63,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
 
         with(viewHolder.verseDetailViewLayout) {
             setOnClickListener {
-                interactor.requestVerseDetail(
-                        VerseDetailRequest(verseDetail?.verseIndex ?: VerseIndex.INVALID))
+                close()
                 viewHolder.verseDetailViewLayout.hide()
             }
             setOnBookmarkClickedListener { updateBookmark() }
@@ -239,8 +238,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
             try {
                 if (translation != interactor.currentTranslation()) {
                     interactor.saveCurrentTranslation(translation)
-                    interactor.requestVerseDetail(VerseDetailRequest(
-                            verseDetail?.verseIndex ?: VerseIndex.INVALID))
+                    close()
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select translation", e)
