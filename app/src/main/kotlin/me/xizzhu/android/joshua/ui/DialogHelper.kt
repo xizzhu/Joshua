@@ -34,12 +34,7 @@ object DialogHelper {
     }
 
     fun showDialog(activity: Activity, cancelable: Boolean, @StringRes message: Int,
-                   onPositive: DialogInterface.OnClickListener) {
-        showDialog(activity, cancelable, message, onPositive, null)
-    }
-
-    fun showDialog(activity: Activity, cancelable: Boolean, @StringRes message: Int,
-                   onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener?) {
+                   onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {
         if (activity.isDestroyed) return
 
         AlertDialog.Builder(activity)

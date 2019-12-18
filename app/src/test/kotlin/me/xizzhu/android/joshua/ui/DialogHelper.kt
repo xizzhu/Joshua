@@ -26,10 +26,6 @@ object DialogHelper {
     }
 
     fun showDialog(activity: Activity, cancelable: Boolean, @StringRes message: Int,
-                   onPositive: DialogInterface.OnClickListener) {
-    }
-
-    fun showDialog(activity: Activity, cancelable: Boolean, @StringRes message: Int,
-                   onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener?) {
+                   onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {
     }
 }
