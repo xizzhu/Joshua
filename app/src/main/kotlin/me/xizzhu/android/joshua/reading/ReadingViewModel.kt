@@ -34,7 +34,7 @@ import me.xizzhu.android.joshua.reading.detail.VerseDetailInteractor
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarInteractor
 import me.xizzhu.android.joshua.reading.verse.VerseInteractor
 
-data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: Int = HIDE) {
+data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: Int) {
     companion object {
         const val HIDE = 0
         const val VERSES = 1

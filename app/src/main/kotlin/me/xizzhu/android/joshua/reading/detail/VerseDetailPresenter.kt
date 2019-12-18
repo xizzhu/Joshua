@@ -270,7 +270,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     fun close(): Boolean {
         if (verseDetail != null) {
             interactor.requestVerseDetail(VerseDetailRequest(
-                    verseDetail?.verseIndex ?: VerseIndex.INVALID))
+                    verseDetail?.verseIndex ?: VerseIndex.INVALID, VerseDetailRequest.HIDE))
             return true
         }
         return false
