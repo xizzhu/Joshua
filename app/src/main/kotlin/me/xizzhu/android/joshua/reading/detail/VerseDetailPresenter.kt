@@ -63,10 +63,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
         super.onBind(viewHolder)
 
         with(viewHolder.verseDetailViewLayout) {
-            setOnClickListener {
-                close()
-                viewHolder.verseDetailViewLayout.hide()
-            }
+            setOnClickListener { close() }
             setOnBookmarkClickedListener { updateBookmark() }
             setOnHighlightClickedListener {
                 DialogHelper.showDialog(readingActivity, R.string.text_pick_highlight_color,
