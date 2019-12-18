@@ -25,16 +25,21 @@ import me.xizzhu.android.joshua.R
 
 class ProgressDialog private constructor(private val dialog: AlertDialog, private val progressBar: ProgressBar?) {
     companion object {
-        fun showProgressDialog(context: Context, @StringRes title: Int, maxProgress: Int): ProgressDialog {
+        fun showProgressDialog(context: Context, @StringRes title: Int, maxProgress: Int,
+                               onCancel: (() -> Unit)? = null): ProgressDialog {
             val progressBar = View.inflate(context, R.layout.widget_progress_bar, null) as ProgressBar
             progressBar.max = maxProgress
-            val dialog = AlertDialog.Builder(context)
-                    .setCancelable(false)
+            val builder = AlertDialog.Builder(context)
                     .setTitle(title)
                     .setView(progressBar)
-                    .create()
-            dialog.show()
-            return ProgressDialog(dialog, progressBar)
+            if (onCancel != null) {
+                builder.setCancelable(true)
+                        .setOnCancelListener { onCancel() }
+                        .setNegativeButton(android.R.string.cancel, { _, _ -> onCancel() })
+            } else {
+                builder.setCancelable(false)
+            }
+            return ProgressDialog(builder.create().apply { show() }, progressBar)
         }
 
         fun showIndeterminateProgressDialog(context: Context, @StringRes title: Int): ProgressDialog {

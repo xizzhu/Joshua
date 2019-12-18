@@ -22,6 +22,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
@@ -134,10 +135,12 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
             // just in case the user clicks too fast
             return
         }
-        downloadTranslationDialog = ProgressDialog.showProgressDialog(
-                translationManagementActivity, R.string.dialog_downloading_translation, 100)
 
-        interactor.downloadTranslation(translationToDownload)
+        var downloadingJob: Job? = null
+        downloadTranslationDialog = ProgressDialog.showProgressDialog(
+                translationManagementActivity, R.string.dialog_downloading_translation, 100, { downloadingJob?.cancel() })
+
+        downloadingJob = interactor.downloadTranslation(translationToDownload)
                 .onEach(
                         onLoading = {
                             it?.let { progress ->
@@ -161,6 +164,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                         }
                 ).onCompletion {
                     dismissDownloadTranslationDialog()
+                    downloadingJob = null
                 }.launchIn(coroutineScope)
     }
 
