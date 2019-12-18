@@ -139,7 +139,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
         super.onStart()
 
         interactor.settings().onEachSuccess { viewHolder?.verseDetailViewLayout?.setSettings(it) }.launchIn(coroutineScope)
-        interactor.verseDetailRequest().onEach { request -> showVerseDetail(request.verseIndex, request.content) }.launchIn(coroutineScope)
+        interactor.verseDetailRequest().onEach { showVerseDetail(it.verseIndex, it.content) }.launchIn(coroutineScope)
+        interactor.currentVerseIndex().onEach { close() }.launchIn(coroutineScope)
     }
 
     private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
