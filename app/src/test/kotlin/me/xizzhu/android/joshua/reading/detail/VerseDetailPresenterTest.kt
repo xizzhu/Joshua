@@ -46,6 +46,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
         `when`(verseDetailInteractor.settings()).thenReturn(emptyFlow())
         `when`(verseDetailInteractor.verseDetailRequest()).thenReturn(emptyFlow())
+        `when`(verseDetailInteractor.currentVerseIndex()).thenReturn(emptyFlow())
 
         verseDetailViewHolder = VerseDetailViewHolder(verseDetailViewLayout)
         verseDetailPresenter = VerseDetailPresenter(readingActivity, verseDetailInteractor, testDispatcher)
