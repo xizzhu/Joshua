@@ -134,12 +134,10 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
             // just in case the user clicks too fast
             return
         }
+        downloadTranslationDialog = ProgressDialog.showProgressDialog(
+                translationManagementActivity, R.string.dialog_downloading_translation, 100)
 
         interactor.downloadTranslation(translationToDownload)
-                .onStart {
-                    downloadTranslationDialog = ProgressDialog.showProgressDialog(
-                            translationManagementActivity, R.string.dialog_downloading_translation, 100)
-                }
                 .onEach(
                         onLoading = {
                             it?.let { progress ->
