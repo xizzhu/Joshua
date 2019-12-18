@@ -77,6 +77,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                         })
             }
             setOnNoteUpdatedListener { updateNote(it) }
+
+            post { hide() }
         }
     }
 
