@@ -22,7 +22,6 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
@@ -60,7 +59,7 @@ class VerseInteractor(private val bibleReadingManager: BibleReadingManager,
                            bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingManager.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
 
-    fun verseDetailRequest(): Flow<VerseDetailRequest> = verseDetailRequest.asFlow().distinctUntilChanged()
+    fun verseDetailRequest(): Flow<VerseDetailRequest> = verseDetailRequest.asFlow()
 
     fun requestVerseDetail(request: VerseDetailRequest) {
         verseDetailRequest.offer(request)

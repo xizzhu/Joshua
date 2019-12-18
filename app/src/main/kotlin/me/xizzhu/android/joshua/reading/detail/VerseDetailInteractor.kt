@@ -22,7 +22,6 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
@@ -42,10 +41,15 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
     private val verseDetailRequest: BroadcastChannel<VerseDetailRequest> = ConflatedBroadcastChannel()
     private val verseUpdates: BroadcastChannel<VerseUpdate> = ConflatedBroadcastChannel()
 
-    fun verseDetailRequest(): Flow<VerseDetailRequest> = verseDetailRequest.asFlow().distinctUntilChanged()
+    fun verseDetailRequest(): Flow<VerseDetailRequest> = verseDetailRequest.asFlow()
 
     fun requestVerseDetail(request: VerseDetailRequest) {
         verseDetailRequest.offer(request)
+    }
+
+    fun closeVerseDetail(verseIndex: VerseIndex) {
+        // NOTE It's a hack here, because the only thing needed by the other end (verse interactor) is to deselect the verse
+        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED))
     }
 
     fun verseUpdates(): Flow<VerseUpdate> = verseUpdates.asFlow()

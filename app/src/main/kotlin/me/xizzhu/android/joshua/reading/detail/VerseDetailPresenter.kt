@@ -52,7 +52,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     private val translationComparator = TranslationInfoComparator(
             TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
 
-    private var verseDetail: VerseDetail? = null
+    @VisibleForTesting
+    var verseDetail: VerseDetail? = null
     private var updateBookmarkJob: Job? = null
     private var updateHighlightJob: Job? = null
     private var updateNoteJob: Job? = null
@@ -138,15 +139,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
         super.onStart()
 
         interactor.settings().onEachSuccess { viewHolder?.verseDetailViewLayout?.setSettings(it) }.launchIn(coroutineScope)
-
-        interactor.verseDetailRequest().onEach { request ->
-            if (request.content != VerseDetailRequest.HIDE) {
-                showVerseDetail(request.verseIndex, request.content)
-            } else {
-                viewHolder?.verseDetailViewLayout?.hide()
-                verseDetail = null
-            }
-        }.launchIn(coroutineScope)
+        interactor.verseDetailRequest().onEach { request -> showVerseDetail(request.verseIndex, request.content) }.launchIn(coroutineScope)
     }
 
     private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
@@ -268,11 +261,12 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
      * @return true if verse detail view was open, or false otherwise
      * */
     fun close(): Boolean {
-        if (verseDetail != null) {
-            interactor.requestVerseDetail(VerseDetailRequest(
-                    verseDetail?.verseIndex ?: VerseIndex.INVALID, VerseDetailRequest.HIDE))
-            return true
-        }
-        return false
+        viewHolder?.verseDetailViewLayout?.hide()
+
+        return verseDetail?.let {
+            interactor.closeVerseDetail(it.verseIndex)
+            verseDetail = null
+            true
+        } ?: false
     }
 }

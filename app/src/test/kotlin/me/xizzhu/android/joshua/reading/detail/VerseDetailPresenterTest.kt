@@ -27,9 +27,7 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import kotlin.test.*
 
 class VerseDetailPresenterTest : BaseUnitTest() {
     @Mock
@@ -69,16 +67,6 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         verseDetailPresenter.start()
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).setSettings(settings)
         verify(verseDetailViewHolder.verseDetailViewLayout, never()).setSettings(Settings.DEFAULT)
-
-        verseDetailPresenter.stop()
-    }
-
-    @Test
-    fun testObserveVerseDetailRequestHide() = testDispatcher.runBlockingTest {
-        `when`(verseDetailInteractor.verseDetailRequest()).thenReturn(flowOf(VerseDetailRequest(VerseIndex.INVALID, VerseDetailRequest.HIDE)))
-
-        verseDetailPresenter.start()
-        verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).hide()
 
         verseDetailPresenter.stop()
     }
@@ -159,5 +147,22 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         verify(verseDetailViewHolder.verseDetailViewLayout, never()).hide()
 
         verseDetailPresenter.stop()
+    }
+
+    @Test
+    fun testCloseWithoutDetail() {
+        assertFalse(verseDetailPresenter.close())
+        verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).hide()
+        verify(verseDetailInteractor, never()).closeVerseDetail(any())
+    }
+
+    @Test
+    fun testCloseWithDetail() {
+        verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(1, 2, 3), emptyList(), false, Highlight.COLOR_NONE, "")
+
+        assertTrue(verseDetailPresenter.close())
+        verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).hide()
+        verify(verseDetailInteractor, times(1)).closeVerseDetail(VerseIndex(1, 2, 3))
+        assertNull(verseDetailPresenter.verseDetail)
     }
 }

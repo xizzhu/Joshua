@@ -36,11 +36,10 @@ import me.xizzhu.android.joshua.reading.verse.VerseInteractor
 
 data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: Int) {
     companion object {
-        const val HIDE = 0
-        const val VERSES = 1
-        const val NOTE = 2
+        const val VERSES = 0
+        const val NOTE = 1
 
-        @IntDef(HIDE, VERSES, NOTE)
+        @IntDef(VERSES, NOTE)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Content
     }
@@ -77,7 +76,6 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
         super.onStart()
 
         coroutineScope.launch { verseInteractor.verseDetailRequest().collect { verseDetailInteractor.requestVerseDetail(it) } }
-        coroutineScope.launch { verseDetailInteractor.verseDetailRequest().collect { verseInteractor.requestVerseDetail(it) } }
         coroutineScope.launch { verseDetailInteractor.verseUpdates().collect { verseInteractor.updateVerse(it) } }
     }
 
@@ -101,9 +99,10 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
         coroutineScope.launch {
             bibleReadingManager.observeCurrentVerseIndex().first().let { verseIndex ->
                 if (verseIndex.isValid()) {
-                    val request = VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE)
-                    verseDetailInteractor.requestVerseDetail(request)
-                    verseInteractor.requestVerseDetail(request)
+                    // NOTE It's a hack here, because the only thing needed by verse interactor is to select the verse
+                    verseInteractor.updateVerse(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
+
+                    verseDetailInteractor.requestVerseDetail(VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE))
                 }
             }
         }
