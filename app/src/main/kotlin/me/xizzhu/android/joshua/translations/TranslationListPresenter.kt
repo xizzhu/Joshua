@@ -153,15 +153,15 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                                     ?: throw IllegalStateException("Missing progress data when downloading")
                         },
                         onSuccess = {
-                            dismissDownloadTranslationDialog()
                             ToastHelper.showToast(translationManagementActivity, R.string.toast_translation_downloaded)
                         },
                         onError = { _, _ ->
-                            dismissDownloadTranslationDialog()
                             DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_download_error,
                                     DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
                         }
-                ).launchIn(coroutineScope)
+                ).onCompletion {
+                    dismissDownloadTranslationDialog()
+                }.launchIn(coroutineScope)
     }
 
     private fun dismissDownloadTranslationDialog() {
