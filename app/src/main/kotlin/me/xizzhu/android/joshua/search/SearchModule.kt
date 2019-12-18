@@ -37,8 +37,9 @@ object SearchModule {
 
     @ActivityScope
     @Provides
-    fun provideSearchToolbarPresenter(searchToolbarInteractor: SearchToolbarInteractor): SearchToolbarPresenter =
-            SearchToolbarPresenter(searchToolbarInteractor)
+    fun provideSearchToolbarPresenter(searchActivity: SearchActivity,
+                                      searchToolbarInteractor: SearchToolbarInteractor): SearchToolbarPresenter =
+            SearchToolbarPresenter(searchActivity, searchToolbarInteractor)
 
     @ActivityScope
     @Provides

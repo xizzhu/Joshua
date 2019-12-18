@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.search.toolbar
 
+import android.app.SearchableInfo
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.SearchView
@@ -33,16 +34,20 @@ class SearchToolbar : Toolbar {
         setLogo(R.drawable.ic_toolbar)
 
         inflateMenu(R.menu.menu_search)
-        with(menu.findItem(R.id.action_search)) {
-            expandActionView()
-            with(actionView as SearchView) {
-                isQueryRefinementEnabled = true
-                isIconified = false
-            }
+        menu.findItem(R.id.action_search).expandActionView()
+        with(searchView()) {
+            isQueryRefinementEnabled = true
+            isIconified = false
         }
     }
 
+    private fun searchView(): SearchView = menu.findItem(R.id.action_search).actionView as SearchView
+
     fun setOnQueryTextListener(listener: SearchView.OnQueryTextListener?) {
-        (menu.findItem(R.id.action_search).actionView as SearchView).setOnQueryTextListener(listener)
+        searchView().setOnQueryTextListener(listener)
+    }
+
+    fun setSearchableInfo(searchable: SearchableInfo) {
+        searchView().setSearchableInfo(searchable)
     }
 }

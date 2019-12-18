@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Supported search history
 - Should call backup() when backup fails
 - Caught OutOfMemoryError when it fails to restore
 - Should start / stop reading progress tracking on resume / pause

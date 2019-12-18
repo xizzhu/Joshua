@@ -7,4 +7,9 @@
         android:title="@null"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_clear_search_history"
+        android:title="@string/action_clear_search_history"
+        app:showAsAction="never" />
 </menu>

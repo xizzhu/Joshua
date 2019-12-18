@@ -90,6 +90,10 @@ android {
         }
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     packagingOptions {
         exclude("META-INF/atomicfu.kotlin_module")
     }
