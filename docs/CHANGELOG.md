@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Should close verse detail when changing current verse index
 - Supported search history
 - Should call backup() when backup fails
 - Caught OutOfMemoryError when it fails to restore

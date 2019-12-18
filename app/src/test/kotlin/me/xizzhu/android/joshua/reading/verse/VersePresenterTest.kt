@@ -56,7 +56,6 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(verseInteractor.currentVerseIndex()).thenReturn(emptyFlow())
         `when`(verseInteractor.parallelTranslations()).thenReturn(emptyFlow())
         `when`(verseInteractor.verseUpdates()).thenReturn(emptyFlow())
-        `when`(verseInteractor.verseDetailRequest()).thenReturn(emptyFlow())
 
         verseViewHolder = VerseViewHolder(versePager)
         versePresenter = VersePresenter(readingActivity, verseInteractor, testDispatcher)
@@ -143,28 +142,14 @@ class VersePresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveVerseDetailRequest() = testDispatcher.runBlockingTest {
-        val verseIndex = VerseIndex(1, 2, 3)
-        `when`(verseInteractor.verseDetailRequest()).thenReturn(flow {
-            listOf(VerseDetailRequest.HIDE, VerseDetailRequest.VERSES, VerseDetailRequest.HIDE).forEach { emit(VerseDetailRequest(verseIndex, it)) }
-        })
-
-        versePresenter.start()
-        with(inOrder(verseViewHolder.versePager)) {
-            verify(verseViewHolder.versePager, times(1)).deselectVerse(verseIndex)
-            verify(verseViewHolder.versePager, times(1)).selectVerse(verseIndex)
-            verify(verseViewHolder.versePager, times(1)).deselectVerse(verseIndex)
-        }
-        versePresenter.stop()
-    }
-
-    @Test
     fun testOnVerseClickedWithoutActionMode() {
         val verse = MockContents.kjvVerses[0]
         versePresenter.onVerseClicked(verse)
-        verify(verseInteractor, times(1)).requestVerseDetail(VerseDetailRequest(verse.verseIndex, VerseDetailRequest.VERSES))
+        with(inOrder(verseInteractor, verseViewHolder.versePager)) {
+            verify(verseInteractor, times(1)).requestVerseDetail(VerseDetailRequest(verse.verseIndex, VerseDetailRequest.VERSES))
+            verify(verseViewHolder.versePager, times(1)).selectVerse(verse.verseIndex)
+        }
         verify(verseViewHolder.versePager, never()).deselectVerse(any())
-        verify(verseViewHolder.versePager, never()).selectVerse(any())
     }
 
     @Test
@@ -228,5 +213,15 @@ class VersePresenterTest : BaseUnitTest() {
         versePresenter.updateHighlight(verseIndex, highlightColor)
         verify(verseInteractor, times(1)).removeHighlight(verseIndex)
         verify(verseInteractor, never()).saveHighlight(any(), anyInt())
+    }
+
+    @Test
+    fun testOnNoteClicked() {
+        versePresenter.onNoteClicked(VerseIndex(1, 2, 3))
+
+        with(inOrder(verseInteractor, verseViewHolder.versePager)) {
+            verify(verseInteractor, times(1)).requestVerseDetail(VerseDetailRequest(VerseIndex(1, 2, 3), VerseDetailRequest.NOTE))
+            verify(verseViewHolder.versePager, times(1)).selectVerse(VerseIndex(1, 2, 3))
+        }
     }
 }

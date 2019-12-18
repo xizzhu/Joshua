@@ -52,7 +52,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     private val translationComparator = TranslationInfoComparator(
             TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
 
-    private var verseDetail: VerseDetail? = null
+    @VisibleForTesting
+    var verseDetail: VerseDetail? = null
     private var updateBookmarkJob: Job? = null
     private var updateHighlightJob: Job? = null
     private var updateNoteJob: Job? = null
@@ -62,11 +63,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
         super.onBind(viewHolder)
 
         with(viewHolder.verseDetailViewLayout) {
-            setOnClickListener {
-                interactor.requestVerseDetail(
-                        VerseDetailRequest(verseDetail?.verseIndex ?: VerseIndex.INVALID))
-                viewHolder.verseDetailViewLayout.hide()
-            }
+            setOnClickListener { close() }
             setOnBookmarkClickedListener { updateBookmark() }
             setOnHighlightClickedListener {
                 DialogHelper.showDialog(readingActivity, R.string.text_pick_highlight_color,
@@ -80,6 +77,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                         })
             }
             setOnNoteUpdatedListener { updateNote(it) }
+
+            post { hide() }
         }
     }
 
@@ -139,15 +138,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
         super.onStart()
 
         interactor.settings().onEachSuccess { viewHolder?.verseDetailViewLayout?.setSettings(it) }.launchIn(coroutineScope)
-
-        interactor.verseDetailRequest().onEach { request ->
-            if (request.content != VerseDetailRequest.HIDE) {
-                showVerseDetail(request.verseIndex, request.content)
-            } else {
-                viewHolder?.verseDetailViewLayout?.hide()
-                verseDetail = null
-            }
-        }.launchIn(coroutineScope)
+        interactor.verseDetailRequest().onEach { showVerseDetail(it.verseIndex, it.content) }.launchIn(coroutineScope)
+        interactor.currentVerseIndex().onEach { close() }.launchIn(coroutineScope)
     }
 
     private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
@@ -239,8 +231,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
             try {
                 if (translation != interactor.currentTranslation()) {
                     interactor.saveCurrentTranslation(translation)
-                    interactor.requestVerseDetail(VerseDetailRequest(
-                            verseDetail?.verseIndex ?: VerseIndex.INVALID))
+                    close()
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select translation", e)
@@ -270,11 +261,12 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
      * @return true if verse detail view was open, or false otherwise
      * */
     fun close(): Boolean {
-        if (verseDetail != null) {
-            interactor.requestVerseDetail(VerseDetailRequest(
-                    verseDetail?.verseIndex ?: VerseIndex.INVALID))
-            return true
-        }
-        return false
+        viewHolder?.verseDetailViewLayout?.hide()
+
+        return verseDetail?.let {
+            interactor.closeVerseDetail(it.verseIndex)
+            verseDetail = null
+            true
+        } ?: false
     }
 }

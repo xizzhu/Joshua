@@ -192,7 +192,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     @VisibleForTesting
     fun onVerseClicked(verse: Verse) {
         if (actionMode == null) {
-            interactor.requestVerseDetail(VerseDetailRequest(verse.verseIndex, VerseDetailRequest.VERSES))
+            showVerseDetail(verse.verseIndex, VerseDetailRequest.VERSES)
             return
         }
 
@@ -210,6 +210,11 @@ class VersePresenter(private val readingActivity: ReadingActivity,
 
             viewHolder?.versePager?.selectVerse(verse.verseIndex)
         }
+    }
+
+    private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
+        interactor.requestVerseDetail(VerseDetailRequest(verseIndex, content))
+        viewHolder?.versePager?.selectVerse(verseIndex)
     }
 
     @VisibleForTesting
@@ -266,7 +271,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
 
     @VisibleForTesting
     fun onNoteClicked(verseIndex: VerseIndex) {
-        interactor.requestVerseDetail(VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE))
+        showVerseDetail(verseIndex, VerseDetailRequest.NOTE)
     }
 
     @UiThread
@@ -294,14 +299,6 @@ class VersePresenter(private val readingActivity: ReadingActivity,
             this@VersePresenter.currentTranslation = currentTranslation
             this@VersePresenter.parallelTranslations = parallelTranslations
             viewHolder?.versePager?.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
-        }.launchIn(coroutineScope)
-
-        interactor.verseDetailRequest().onEach { verseDetailRequest ->
-            if (verseDetailRequest.content == VerseDetailRequest.HIDE) {
-                viewHolder?.versePager?.deselectVerse(verseDetailRequest.verseIndex)
-            } else {
-                viewHolder?.versePager?.selectVerse(verseDetailRequest.verseIndex)
-            }
         }.launchIn(coroutineScope)
     }
 }
