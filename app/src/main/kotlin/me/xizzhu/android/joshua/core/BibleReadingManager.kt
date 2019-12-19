@@ -76,7 +76,6 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
     private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
     private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
-    private val downloadedTranslations: MutableSet<String> = mutableSetOf()
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
@@ -94,20 +93,13 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
             }
         }
         GlobalScope.launch(Dispatchers.Default) {
-            withContext(Dispatchers.IO) {
-                parallelTranslations.offer(bibleReadingRepository.readParallelTranslations())
-            }
+            withContext(Dispatchers.IO) { parallelTranslations.offer(bibleReadingRepository.readParallelTranslations()) }
 
-            translationManager.observeDownloadedTranslations().collect {
-                downloadedTranslations.clear()
-                it.forEach { translation -> downloadedTranslations.add(translation.shortName) }
-
+            translationManager.observeDownloadedTranslations().collect { translations ->
+                val downloadedTranslations = translations.map { it.shortName }.toSet()
                 parallelTranslations.value.toList().let { current ->
-                    current.filter { parallel -> downloadedTranslations.contains(parallel) }.let { updated ->
-                        if (current != updated) {
-                            parallelTranslations.offer(updated)
-                        }
-                    }
+                    current.filter { parallel -> downloadedTranslations.contains(parallel) }
+                            .let { updated -> if (current != updated) parallelTranslations.offer(updated) }
                 }
             }
         }
