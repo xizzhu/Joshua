@@ -22,6 +22,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
@@ -135,11 +136,11 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
             return
         }
 
-        interactor.downloadTranslation(translationToDownload)
-                .onStart {
-                    downloadTranslationDialog = ProgressDialog.showProgressDialog(
-                            translationManagementActivity, R.string.dialog_downloading_translation, 100)
-                }
+        var downloadingJob: Job? = null
+        downloadTranslationDialog = ProgressDialog.showProgressDialog(
+                translationManagementActivity, R.string.dialog_downloading_translation, 100, { downloadingJob?.cancel() })
+
+        downloadingJob = interactor.downloadTranslation(translationToDownload)
                 .onEach(
                         onLoading = {
                             it?.let { progress ->
@@ -155,15 +156,16 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                                     ?: throw IllegalStateException("Missing progress data when downloading")
                         },
                         onSuccess = {
-                            dismissDownloadTranslationDialog()
                             ToastHelper.showToast(translationManagementActivity, R.string.toast_translation_downloaded)
                         },
                         onError = { _, _ ->
-                            dismissDownloadTranslationDialog()
                             DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_download_error,
                                     DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
                         }
-                ).launchIn(coroutineScope)
+                ).onCompletion {
+                    dismissDownloadTranslationDialog()
+                    downloadingJob = null
+                }.launchIn(coroutineScope)
     }
 
     private fun dismissDownloadTranslationDialog() {

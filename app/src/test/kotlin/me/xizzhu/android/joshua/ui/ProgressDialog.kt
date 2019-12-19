@@ -23,7 +23,7 @@ import androidx.appcompat.app.AlertDialog
 
 class ProgressDialog private constructor(private val dialog: AlertDialog, private val progressBar: ProgressBar?) {
     companion object {
-        fun showProgressDialog(context: Context, @StringRes title: Int, maxProgress: Int): ProgressDialog? = null
+        fun showProgressDialog(context: Context, @StringRes title: Int, maxProgress: Int, onCancel: (() -> Unit)? = null): ProgressDialog? = null
 
         fun showIndeterminateProgressDialog(context: Context, @StringRes title: Int): ProgressDialog? = null
     }
