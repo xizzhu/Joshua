@@ -20,71 +20,81 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.VerseIndex
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class AndroidReadingStorageTest : BaseSqliteTest() {
     private lateinit var androidReadingStorage: AndroidReadingStorage
 
-    @Before
+    @BeforeTest
     override fun setup() {
         super.setup()
         androidReadingStorage = AndroidReadingStorage(androidDatabase)
     }
 
     @Test
-    fun testReadDefaultCurrentVerseIndex() {
-        runBlocking {
-            assertEquals(VerseIndex(0, 0, 0), androidReadingStorage.readCurrentVerseIndex())
-        }
+    fun testReadDefaultCurrentVerseIndex() = runBlocking {
+        assertEquals(VerseIndex(0, 0, 0), androidReadingStorage.readCurrentVerseIndex())
     }
 
     @Test
-    fun testSaveThenReadCurrentVerseIndex() {
-        runBlocking {
-            val expected = VerseIndex(1, 2, 3)
-            androidReadingStorage.saveCurrentVerseIndex(expected)
-            assertEquals(expected, androidReadingStorage.readCurrentVerseIndex())
-        }
+    fun testSaveThenReadCurrentVerseIndex() = runBlocking {
+        val expected = VerseIndex(1, 2, 3)
+        androidReadingStorage.saveCurrentVerseIndex(expected)
+        assertEquals(expected, androidReadingStorage.readCurrentVerseIndex())
     }
 
     @Test
-    fun testSaveOverrideThenReadCurrentVerseIndex() {
-        runBlocking {
-            val expected = VerseIndex(1, 2, 3)
-            androidReadingStorage.saveCurrentVerseIndex(VerseIndex(9, 8, 7))
-            androidReadingStorage.saveCurrentVerseIndex(expected)
-            assertEquals(expected, androidReadingStorage.readCurrentVerseIndex())
-        }
+    fun testSaveOverrideThenReadCurrentVerseIndex() = runBlocking {
+        val expected = VerseIndex(1, 2, 3)
+        androidReadingStorage.saveCurrentVerseIndex(VerseIndex(9, 8, 7))
+        androidReadingStorage.saveCurrentVerseIndex(expected)
+        assertEquals(expected, androidReadingStorage.readCurrentVerseIndex())
     }
 
     @Test
-    fun testReadDefaultCurrentTranslation() {
-        runBlocking {
-            assertEquals("", androidReadingStorage.readCurrentTranslation())
-        }
+    fun testReadDefaultCurrentTranslation() = runBlocking {
+        assertEquals("", androidReadingStorage.readCurrentTranslation())
     }
 
     @Test
-    fun testSaveThenReadCurrentTranslation() {
-        runBlocking {
-            val expected = "KJV"
-            androidReadingStorage.saveCurrentTranslation(expected)
-            assertEquals(expected, androidReadingStorage.readCurrentTranslation())
-        }
+    fun testSaveThenReadCurrentTranslation() = runBlocking {
+        val expected = MockContents.kjvShortName
+        androidReadingStorage.saveCurrentTranslation(expected)
+        assertEquals(expected, androidReadingStorage.readCurrentTranslation())
     }
 
     @Test
-    fun testSaveOverrideThenReadCurrentTranslation() {
-        runBlocking {
-            val expected = "KJV"
-            androidReadingStorage.saveCurrentTranslation("random")
-            androidReadingStorage.saveCurrentTranslation(expected)
-            assertEquals(expected, androidReadingStorage.readCurrentTranslation())
-        }
+    fun testSaveOverrideThenReadCurrentTranslation() = runBlocking {
+        val expected = MockContents.kjvShortName
+        androidReadingStorage.saveCurrentTranslation("random")
+        androidReadingStorage.saveCurrentTranslation(expected)
+        assertEquals(expected, androidReadingStorage.readCurrentTranslation())
+    }
+
+    @Test
+    fun testReadDefaultParallelTranslations() = runBlocking {
+        assertTrue(androidReadingStorage.readParallelTranslations().isEmpty())
+    }
+
+    @Test
+    fun testSaveThenReadParallelTranslations() = runBlocking {
+        val expected = listOf(MockContents.kjvShortName, MockContents.cuvShortName)
+        androidReadingStorage.saveParallelTranslations(expected)
+        assertEquals(expected, androidReadingStorage.readParallelTranslations())
+    }
+
+    @Test
+    fun testSaveOverrideThenReadParallelTranslations() = runBlocking {
+        val expected = listOf(MockContents.kjvShortName, MockContents.cuvShortName)
+        androidReadingStorage.saveParallelTranslations(listOf("random"))
+        androidReadingStorage.saveParallelTranslations(expected)
+        assertEquals(expected, androidReadingStorage.readParallelTranslations())
     }
 }

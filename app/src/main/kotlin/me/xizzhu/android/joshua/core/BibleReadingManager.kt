@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.logger.Log
 
@@ -75,7 +76,6 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
     private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
     private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
-    private val downloadedTranslations: MutableSet<String> = mutableSetOf()
 
     init {
         GlobalScope.launch(Dispatchers.IO) {
@@ -93,16 +93,13 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
             }
         }
         GlobalScope.launch(Dispatchers.Default) {
-            translationManager.observeDownloadedTranslations().collect {
-                downloadedTranslations.clear()
-                it.forEach { translation -> downloadedTranslations.add(translation.shortName) }
+            withContext(Dispatchers.IO) { parallelTranslations.offer(bibleReadingRepository.readParallelTranslations()) }
 
+            translationManager.observeDownloadedTranslations().collect { translations ->
+                val downloadedTranslations = translations.map { it.shortName }.toSet()
                 parallelTranslations.value.toList().let { current ->
-                    current.filter { parallel -> downloadedTranslations.contains(parallel) }.let { updated ->
-                        if (current != updated) {
-                            parallelTranslations.offer(updated)
-                        }
-                    }
+                    current.filter { parallel -> downloadedTranslations.contains(parallel) }
+                            .let { updated -> if (current != updated) parallelTranslations.offer(updated) }
                 }
             }
         }
@@ -124,22 +121,29 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
 
     fun observeParallelTranslations(): Flow<List<String>> = parallelTranslations.asFlow()
 
-    fun requestParallelTranslation(translationShortName: String) {
+    suspend fun requestParallelTranslation(translationShortName: String) {
         val parallel = parallelTranslations.value.toMutableSet()
         if (parallel.add(translationShortName)) {
-            parallelTranslations.offer(parallel.toList())
+            parallel.toList().run {
+                parallelTranslations.offer(this)
+                bibleReadingRepository.saveParallelTranslations(this)
+            }
         }
     }
 
-    fun removeParallelTranslation(translationShortName: String) {
+    suspend fun removeParallelTranslation(translationShortName: String) {
         val parallel = parallelTranslations.value.toMutableSet()
         if (parallel.remove(translationShortName)) {
-            parallelTranslations.offer(parallel.toList())
+            parallel.toList().run {
+                parallelTranslations.offer(this)
+                bibleReadingRepository.saveParallelTranslations(this)
+            }
         }
     }
 
-    fun clearParallelTranslation() {
+    suspend fun clearParallelTranslation() {
         parallelTranslations.offer(emptyList())
+        bibleReadingRepository.saveParallelTranslations(emptyList())
     }
 
     suspend fun readBookNames(translationShortName: String): List<String> =

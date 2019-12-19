@@ -28,6 +28,10 @@ interface LocalReadingStorage {
 
     suspend fun saveCurrentTranslation(translationShortName: String)
 
+    suspend fun readParallelTranslations(): List<String>
+
+    suspend fun saveParallelTranslations(parallelTranslations: List<String>)
+
     suspend fun readBookNames(translationShortName: String): List<String>
 
     suspend fun readBookShortNames(translationShortName: String): List<String>

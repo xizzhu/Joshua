@@ -28,6 +28,7 @@ class MetadataDao(sqliteHelper: SQLiteOpenHelper) {
         private const val COLUMN_VALUE = "value"
 
         const val KEY_CURRENT_TRANSLATION = "currentTranslation"
+        const val KEY_PARALLEL_TRANSLATIONS = "parallelTranslations"
         const val KEY_CURRENT_BOOK_INDEX = "currentBookIndex"
         const val KEY_CURRENT_CHAPTER_INDEX = "currentChapterIndex"
         const val KEY_CURRENT_VERSE_INDEX = "currentVerseIndex"

@@ -45,15 +45,15 @@ class ReadingToolbarInteractor(private val bibleReadingManager: BibleReadingMana
 
     fun parallelTranslations(): Flow<ViewData<List<String>>> = bibleReadingManager.observeParallelTranslations().toViewData()
 
-    fun requestParallelTranslation(translationShortName: String) {
+    suspend fun requestParallelTranslation(translationShortName: String) {
         bibleReadingManager.requestParallelTranslation(translationShortName)
     }
 
-    fun removeParallelTranslation(translationShortName: String) {
+    suspend fun removeParallelTranslation(translationShortName: String) {
         bibleReadingManager.removeParallelTranslation(translationShortName)
     }
 
-    fun clearParallelTranslation() {
+    suspend fun clearParallelTranslation() {
         bibleReadingManager.clearParallelTranslation()
     }
 

@@ -2,6 +2,7 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Saved parallel translations to disk
 - Supported cancelling translation downloading
 - Should close verse detail when changing current verse index
 - Supported search history
