@@ -23,38 +23,7 @@ import me.xizzhu.android.joshua.core.analytics.Analytics
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 
 class BibleReadingRepository(private val localReadingStorage: LocalReadingStorage) {
-    private val maxMemory = Runtime.getRuntime().maxMemory()
-    private val bookNamesCache = object : LruCache<String, List<String>>((maxMemory / 16L).toInt()) {
-        override fun sizeOf(key: String, bookNames: List<String>): Int {
-            // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
-            var length = 0
-            for (bookName in bookNames) {
-                length += bookName.length * 4
-            }
-            return length
-        }
-    }
-    private val bookShortNamesCache = object : LruCache<String, List<String>>((maxMemory / 16L).toInt()) {
-        override fun sizeOf(key: String, bookShortNames: List<String>): Int {
-            // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
-            var length = 0
-            for (bookName in bookShortNames) {
-                length += bookName.length * 4
-            }
-            return length
-        }
-    }
-    private val versesCache = object : LruCache<String, List<Verse>>((maxMemory / 8L).toInt()) {
-        override fun sizeOf(key: String, verses: List<Verse>): Int {
-            // each Verse contains 3 integers and 2 strings (we don't cache parallel translations yet)
-            // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
-            var length = 0
-            for (verse in verses) {
-                length += 12 + (verse.text.translationShortName.length + verse.text.text.length) * 4
-            }
-            return length
-        }
-    }
+    private val cache: BibleReadingCache = BibleReadingCache()
 
     suspend fun readCurrentTranslation(): String = localReadingStorage.readCurrentTranslation()
 
@@ -69,22 +38,19 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
     }
 
     suspend fun readBookNames(translationShortName: String): List<String> {
-        return bookNamesCache.get(translationShortName)
-                ?: localReadingStorage.readBookNames(translationShortName)
-                        .also { bookNamesCache.put(translationShortName, it) }
+        return cache.getBookNames(translationShortName)
+                ?: localReadingStorage.readBookNames(translationShortName).also { cache.putBookNames(translationShortName, it) }
     }
 
     suspend fun readBookShortNames(translationShortName: String): List<String> {
-        return bookShortNamesCache.get(translationShortName)
-                ?: localReadingStorage.readBookShortNames(translationShortName)
-                        .also { bookShortNamesCache.put(translationShortName, it) }
+        return cache.getBookShortNames(translationShortName)
+                ?: localReadingStorage.readBookShortNames(translationShortName).also { cache.putBookShortNames(translationShortName, it) }
     }
 
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> {
         val key = "$translationShortName-$bookIndex-$chapterIndex"
-        return versesCache.get(key)
-                ?: localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex)
-                        .also { versesCache.put(key, it) }
+        return cache.getVerses(key)
+                ?: localReadingStorage.readVerses(translationShortName, bookIndex, chapterIndex).also { cache.putVerses(key, it) }
     }
 
     suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
@@ -95,11 +61,52 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
             localReadingStorage.readVerse(translationShortName, verseIndex)
 
     suspend fun search(translationShortName: String, query: String): List<Verse> {
-        Analytics.track(Analytics.EVENT_SEARCH, mapOf(
-                Pair(Analytics.PARAM_ITEM_ID, translationShortName),
-                Pair(Analytics.PARAM_SEARCH_TERM, query)
-        ))
+        Analytics.track(
+                Analytics.EVENT_SEARCH,
+                mapOf(
+                        Pair(Analytics.PARAM_ITEM_ID, translationShortName),
+                        Pair(Analytics.PARAM_SEARCH_TERM, query)
+                )
+        )
 
         return localReadingStorage.search(translationShortName, query)
+    }
+}
+
+private class LruStringCache(maxSize: Int) : LruCache<String, List<String>>(maxSize) {
+    // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
+    override fun sizeOf(key: String, value: List<String>): Int =
+            key.length * 4 + value.sumBy { it.length * 4 }
+}
+
+private class LruVerseCache(maxSize: Int) : LruCache<String, List<Verse>>(maxSize) {
+    // each Verse contains 3 integers and 2 strings (we don't cache parallel translations yet)
+    // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
+    override fun sizeOf(key: String, verses: List<Verse>): Int =
+            key.length * 4 + verses.sumBy { 12 + (it.text.translationShortName.length + it.text.text.length) * 4 }
+}
+
+private class BibleReadingCache {
+    private val maxMemory = Runtime.getRuntime().maxMemory()
+    private val bookNamesCache: LruStringCache = LruStringCache((maxMemory / 16L).toInt())
+    private val bookShortNamesCache: LruStringCache = LruStringCache((maxMemory / 16L).toInt())
+    private val versesCache: LruVerseCache = LruVerseCache((maxMemory / 8L).toInt())
+
+    fun getBookNames(key: String): List<String>? = bookNamesCache.get(key)
+
+    fun putBookNames(key: String, bookNames: List<String>) {
+        bookNamesCache.put(key, bookNames)
+    }
+
+    fun getBookShortNames(key: String): List<String>? = bookShortNamesCache.get(key)
+
+    fun putBookShortNames(key: String, bookShortNames: List<String>) {
+        bookShortNamesCache.put(key, bookShortNames)
+    }
+
+    fun getVerses(key: String): List<Verse>? = versesCache.get(key)
+
+    fun putVerses(key: String, verses: List<Verse>) {
+        versesCache.put(key, verses)
     }
 }
