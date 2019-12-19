@@ -50,8 +50,8 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
         super.onBind(viewHolder)
 
         viewHolder.readingToolbar.initialize(
-                onParallelTranslationRequested = { interactor.requestParallelTranslation(it) },
-                onParallelTranslationRemoved = { interactor.removeParallelTranslation(it) },
+                onParallelTranslationRequested = { requestParallelTranslation(it) },
+                onParallelTranslationRemoved = { removeParallelTranslation(it) },
                 onSpinnerItemSelected = { translationShortName ->
                     var isDownloadedTranslation = false
                     for (translation in downloadedTranslations) {
@@ -99,6 +99,28 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
         }
     }
 
+    private fun requestParallelTranslation(translationShortName: String) {
+        coroutineScope.launch {
+            try {
+                interactor.requestParallelTranslation(translationShortName)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to request parallel translation", e)
+                // TODO
+            }
+        }
+    }
+
+    private fun removeParallelTranslation(translationShortName: String) {
+        coroutineScope.launch {
+            try {
+                interactor.removeParallelTranslation(translationShortName)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to remove parallel translation", e)
+                // TODO
+            }
+        }
+    }
+
     private fun startTranslationManagementActivity() {
         startActivity(Navigator.SCREEN_TRANSLATION_MANAGEMENT, R.string.dialog_navigate_to_translation_error)
     }
@@ -114,7 +136,7 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     }
 
     private fun updateCurrentTranslation(translationShortName: String) {
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch {
             try {
                 interactor.saveCurrentTranslation(translationShortName)
                 try {

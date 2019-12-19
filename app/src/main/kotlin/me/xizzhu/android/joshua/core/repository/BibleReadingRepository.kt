@@ -30,6 +30,12 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
         localReadingStorage.saveCurrentTranslation(translationShortName)
     }
 
+    suspend fun readParallelTranslations(): List<String> = localReadingStorage.readParallelTranslations()
+
+    suspend fun saveParallelTranslations(parallelTranslations: List<String>) {
+        localReadingStorage.saveParallelTranslations(parallelTranslations)
+    }
+
     suspend fun readCurrentVerseIndex(): VerseIndex = localReadingStorage.readCurrentVerseIndex()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {

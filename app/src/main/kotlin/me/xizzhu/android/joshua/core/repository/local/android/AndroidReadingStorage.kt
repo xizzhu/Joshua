@@ -58,6 +58,15 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
         withContext(Dispatchers.IO) { androidDatabase.metadataDao.save(MetadataDao.KEY_CURRENT_TRANSLATION, translationShortName) }
     }
 
+    override suspend fun readParallelTranslations(): List<String> = withContext(Dispatchers.IO) {
+        androidDatabase.metadataDao.read(MetadataDao.KEY_PARALLEL_TRANSLATIONS, "")
+                .let { if (it.isEmpty()) emptyList() else it.split('-') }
+    }
+
+    override suspend fun saveParallelTranslations(parallelTranslations: List<String>) {
+        withContext(Dispatchers.IO) { androidDatabase.metadataDao.save(MetadataDao.KEY_PARALLEL_TRANSLATIONS, parallelTranslations.joinToString(separator = "-")) }
+    }
+
     override suspend fun readBookNames(translationShortName: String): List<String> = withContext(Dispatchers.IO) {
         androidDatabase.bookNamesDao.read(translationShortName)
     }
