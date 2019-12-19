@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.core.repository
 import androidx.collection.LruCache
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.analytics.Analytics
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 
 class BibleReadingRepository(private val localReadingStorage: LocalReadingStorage) {
@@ -60,17 +59,8 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             localReadingStorage.readVerse(translationShortName, verseIndex)
 
-    suspend fun search(translationShortName: String, query: String): List<Verse> {
-        Analytics.track(
-                Analytics.EVENT_SEARCH,
-                mapOf(
-                        Pair(Analytics.PARAM_ITEM_ID, translationShortName),
-                        Pair(Analytics.PARAM_SEARCH_TERM, query)
-                )
-        )
-
-        return localReadingStorage.search(translationShortName, query)
-    }
+    suspend fun search(translationShortName: String, query: String): List<Verse> =
+            localReadingStorage.search(translationShortName, query)
 }
 
 private class LruStringCache(maxSize: Int) : LruCache<String, List<String>>(maxSize) {

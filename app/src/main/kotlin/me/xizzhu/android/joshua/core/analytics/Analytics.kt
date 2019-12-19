@@ -22,12 +22,10 @@ interface AnalyticsProvider {
 
 object Analytics {
     const val EVENT_DOWNLOAD_TRANSLATION: String = "download_translation"
-    const val EVENT_SEARCH: String = "search"
 
     const val PARAM_ITEM_ID: String = "item_id"
     const val PARAM_DOWNLOAD_TIME: String = "download_time"
     const val PARAM_INSTALL_TIME: String = "install_time"
-    const val PARAM_SEARCH_TERM: String = "search_term"
 
     private val providers: ArrayList<AnalyticsProvider> = ArrayList()
 
