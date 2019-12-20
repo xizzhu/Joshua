@@ -16,11 +16,14 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.asFlow
 
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -41,24 +44,24 @@ class BibleReadingManagerTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        runBlocking {
+        testDispatcher.runBlockingTest {
             `when`(bibleReadingRepository.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
             `when`(bibleReadingRepository.readParallelTranslations()).thenReturn(emptyList())
             `when`(bibleReadingRepository.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
 
-            downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
+            downloadedTranslationsChannel = ConflatedBroadcastChannel(listOf(MockContents.kjvDownloadedTranslationInfo))
             `when`(translationManager.observeDownloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
-            bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
+            bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager, testDispatcher)
         }
     }
 
     @Test
-    fun testObserveInitialCurrentVerseIndex() = runBlocking {
+    fun testObserveInitialCurrentVerseIndex() = testDispatcher.runBlockingTest {
         assertEquals(VerseIndex(1, 2, 3), bibleReadingManager.observeCurrentVerseIndex().first())
     }
 
     @Test
-    fun testObserveInitialCurrentVerseIndexWithException() = runBlocking {
+    fun testObserveInitialCurrentVerseIndexWithException() = testDispatcher.runBlockingTest {
         `when`(bibleReadingRepository.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
         bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
 
@@ -66,24 +69,24 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveCurrentVerseIndex() = runBlocking {
+    fun testSaveCurrentVerseIndex() = testDispatcher.runBlockingTest {
         bibleReadingManager.saveCurrentVerseIndex(VerseIndex(4, 5, 6))
         assertEquals(VerseIndex(4, 5, 6), bibleReadingManager.observeCurrentVerseIndex().first())
     }
 
     @Test
-    fun testSaveCurrentTranslation() = runBlocking {
+    fun testSaveCurrentTranslation() = testDispatcher.runBlockingTest {
         bibleReadingManager.saveCurrentTranslation(MockContents.cuvShortName)
         assertEquals(MockContents.cuvShortName, bibleReadingManager.observeCurrentTranslation().first())
     }
 
     @Test
-    fun testObserveInitialCurrentTranslation() = runBlocking {
+    fun testObserveInitialCurrentTranslation() = testDispatcher.runBlockingTest {
         assertEquals(MockContents.kjvShortName, bibleReadingManager.observeCurrentTranslation().first())
     }
 
     @Test
-    fun testObserveInitialCurrentTranslationWithException() = runBlocking {
+    fun testObserveInitialCurrentTranslationWithException() = testDispatcher.runBlockingTest {
         `when`(bibleReadingRepository.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
         bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
 
@@ -91,12 +94,43 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testDefaultParallelTranslations() = runBlocking {
+    fun testObserveCurrentTranslation() = testDispatcher.runBlockingTest {
+        // removing all downloaded translations
+        downloadedTranslationsChannel.offer(emptyList())
+        assertEquals("", bibleReadingManager.observeCurrentTranslation().first())
+
+        // download a translation
+        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo))
+        assertEquals(MockContents.cuvShortName, bibleReadingManager.observeCurrentTranslation().first())
+
+        // download another translation
+        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo))
+        assertEquals(MockContents.cuvShortName, bibleReadingManager.observeCurrentTranslation().first())
+
+        // download another translation
+        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo, MockContents.kjvTranslationInfo))
+        assertEquals(MockContents.cuvShortName, bibleReadingManager.observeCurrentTranslation().first())
+
+        // remove a translation
+        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo))
+        assertEquals(MockContents.cuvShortName, bibleReadingManager.observeCurrentTranslation().first())
+
+        // remove another translation
+        downloadedTranslationsChannel.offer(listOf(MockContents.bbeTranslationInfo))
+        assertEquals(MockContents.bbeShortName, bibleReadingManager.observeCurrentTranslation().first())
+
+        // removing all downloaded translations
+        downloadedTranslationsChannel.offer(emptyList())
+        assertEquals("", bibleReadingManager.observeCurrentTranslation().first())
+    }
+
+    @Test
+    fun testDefaultParallelTranslations() = testDispatcher.runBlockingTest {
         assertTrue(bibleReadingManager.observeParallelTranslations().first().isEmpty())
     }
 
     @Test
-    fun testParallelTranslations() = runBlocking {
+    fun testParallelTranslations() = testDispatcher.runBlockingTest {
         bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
         assertEquals(listOf(MockContents.kjvShortName),
                 bibleReadingManager.observeParallelTranslations().first())
@@ -115,7 +149,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testRemoveNonExistParallelTranslations() = runBlocking {
+    fun testRemoveNonExistParallelTranslations() = testDispatcher.runBlockingTest {
         bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
         bibleReadingManager.requestParallelTranslation(MockContents.cuvShortName)
         assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),
@@ -127,7 +161,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testClearParallelTranslations() = runBlocking {
+    fun testClearParallelTranslations() = testDispatcher.runBlockingTest {
         bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
         bibleReadingManager.requestParallelTranslation(MockContents.cuvShortName)
         assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),

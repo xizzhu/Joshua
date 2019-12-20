@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.logger.Log
 
@@ -67,18 +67,19 @@ data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<
 }
 
 class BibleReadingManager(private val bibleReadingRepository: BibleReadingRepository,
-                          translationManager: TranslationManager) {
+                          translationManager: TranslationManager,
+                          initDispatcher: CoroutineDispatcher = Dispatchers.IO) {
     companion object {
         private val TAG = BibleReadingManager::class.java.simpleName
     }
 
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
-    private val currentTranslationShortName: BroadcastChannel<String> = ConflatedBroadcastChannel()
+    private val currentTranslationShortName: ConflatedBroadcastChannel<String> = ConflatedBroadcastChannel()
     private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
 
     init {
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(initDispatcher) {
             try {
                 currentVerseIndex.offer(bibleReadingRepository.readCurrentVerseIndex())
             } catch (e: Exception) {
@@ -91,12 +92,27 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
                 Log.e(TAG, "Failed to initialize current translation", e)
                 currentTranslationShortName.offer("")
             }
-        }
-        GlobalScope.launch(Dispatchers.Default) {
-            withContext(Dispatchers.IO) { parallelTranslations.offer(bibleReadingRepository.readParallelTranslations()) }
+            try {
+                parallelTranslations.offer(bibleReadingRepository.readParallelTranslations())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize parallel translations", e)
+                parallelTranslations.offer(emptyList())
+            }
 
             translationManager.observeDownloadedTranslations().collect { translations ->
+                // checks if need to update current translation
                 val downloadedTranslations = translations.map { it.shortName }.toSet()
+                if (downloadedTranslations.isEmpty()) {
+                    currentTranslationShortName.offer("")
+                } else {
+                    currentTranslationShortName.value.let { current ->
+                        if (current.isEmpty() || !downloadedTranslations.contains(current)) {
+                            currentTranslationShortName.offer(translations.first().shortName)
+                        }
+                    }
+                }
+
+                // checks if need to update parallel translations
                 parallelTranslations.value.toList().let { current ->
                     current.filter { parallel -> downloadedTranslations.contains(parallel) }
                             .let { updated -> if (current != updated) parallelTranslations.offer(updated) }

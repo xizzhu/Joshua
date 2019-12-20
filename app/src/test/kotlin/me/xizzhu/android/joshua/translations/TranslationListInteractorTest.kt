@@ -100,12 +100,7 @@ class TranslationListInteractorTest : BaseUnitTest() {
 
         assertEquals(listOf(ViewData.loading(progress), ViewData.success(-1)),
                 translationListInteractor.downloadTranslation(translationToDownload).toList())
-
-        with(inOrder(translationManager, bibleReadingManager)) {
-            verify(translationManager, times(1)).downloadTranslation(translationToDownload)
-            verify(bibleReadingManager, times(1)).observeCurrentTranslation()
-            verify(bibleReadingManager, times(1)).saveCurrentTranslation(translationToDownload.shortName)
-        }
+        verify(translationManager, times(1)).downloadTranslation(translationToDownload)
     }
 
     @Test
@@ -116,9 +111,6 @@ class TranslationListInteractorTest : BaseUnitTest() {
 
         assertEquals(listOf(ViewData.error(exception = exception)),
                 translationListInteractor.downloadTranslation(translationToDownload).toList())
-
         verify(translationManager, times(1)).downloadTranslation(translationToDownload)
-        verify(bibleReadingManager, never()).observeCurrentTranslation()
-        verify(bibleReadingManager, never()).saveCurrentTranslation(translationToDownload.shortName)
     }
 }

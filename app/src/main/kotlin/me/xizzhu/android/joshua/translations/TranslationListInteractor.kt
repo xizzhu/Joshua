@@ -84,10 +84,6 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
                             // Ideally, we should use onCompletion() to handle this. However, it doesn't
                             // distinguish between a successful completion and a cancellation.
                             // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
-                            if (bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
-                                bibleReadingManager.saveCurrentTranslation(translationToDownload.shortName)
-                            }
-
                             ViewData.success(-1)
                         }
                     }
