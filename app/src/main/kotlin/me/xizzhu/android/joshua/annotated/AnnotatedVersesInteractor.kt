@@ -57,7 +57,7 @@ class AnnotatedVersesInteractor<V : VerseAnnotation>(private val verseAnnotation
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 
-    fun sortOrder(): Flow<ViewData<Int>> = verseAnnotationManager.observeSortOrder().map { ViewData.success(it) }
+    fun sortOrder(): Flow<ViewData<Int>> = verseAnnotationManager.sortOrder().map { ViewData.success(it) }
 
     suspend fun verseAnnotations(@Constants.SortOrder sortOrder: Int): ViewData<List<V>> =
             viewData { verseAnnotationManager.read(sortOrder) }

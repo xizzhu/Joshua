@@ -18,15 +18,8 @@ package me.xizzhu.android.joshua.core
 
 import androidx.annotation.ColorInt
 import androidx.annotation.IntDef
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
-import me.xizzhu.android.logger.Log
 
 abstract class VerseAnnotation(open val verseIndex: VerseIndex, open val timestamp: Long) {
     open fun isValid(): Boolean = verseIndex.isValid() && timestamp > 0L
@@ -55,29 +48,10 @@ data class Highlight(override val verseIndex: VerseIndex, @ColorInt val color: I
 data class Note(override val verseIndex: VerseIndex, val note: String, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp)
 
 class VerseAnnotationManager<T : VerseAnnotation>(private val verseAnnotationRepository: VerseAnnotationRepository<T>) {
-    companion object {
-        private val TAG = VerseAnnotationManager::class.java.simpleName
-    }
-
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val sortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
-
-    init {
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                sortOrder.offer(verseAnnotationRepository.readSortOrder())
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to initialize sort order", e)
-                sortOrder.offer(Constants.DEFAULT_SORT_ORDER)
-            }
-        }
-    }
-
-    fun observeSortOrder(): Flow<Int> = sortOrder.asFlow()
+    fun sortOrder(): Flow<Int> = verseAnnotationRepository.sortOrder()
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         verseAnnotationRepository.saveSortOrder(sortOrder)
-        this.sortOrder.offer(sortOrder)
     }
 
     suspend fun read(@Constants.SortOrder sortOrder: Int): List<T> = verseAnnotationRepository.read(sortOrder)
