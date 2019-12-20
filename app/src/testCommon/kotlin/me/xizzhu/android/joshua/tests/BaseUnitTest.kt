@@ -32,7 +32,7 @@ abstract class BaseUnitTest {
     @CallSuper
     @BeforeTest
     open fun setup() {
-        Dispatchers.setMain(Dispatchers.Unconfined)
+        Dispatchers.setMain(testDispatcher)
         MockitoAnnotations.initMocks(this)
     }
 

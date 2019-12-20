@@ -83,7 +83,7 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
     override fun onResume() {
         super.onResume()
 
-        coroutineScope.launch { readingProgressManager.startTracking() }
+        readingProgressManager.startTracking()
     }
 
     @UiThread

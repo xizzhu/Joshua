@@ -19,10 +19,7 @@ package me.xizzhu.android.joshua.core
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.utils.Clock
@@ -61,7 +58,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
     private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
     private var lastTimestamp: Long = 0L
 
-    suspend fun startTracking() {
+    fun startTracking() {
         if (currentVerseIndexObserver != null) {
             return
         }
