@@ -69,11 +69,11 @@ class AppModule(private val app: App) {
         @JvmStatic
         @Provides
         @Singleton
-        fun provideBackupManager(bookmarkManager: VerseAnnotationManager<Bookmark>,
-                                 highlightManager: VerseAnnotationManager<Highlight>,
-                                 noteManager: VerseAnnotationManager<Note>,
-                                 readingProgressManager: ReadingProgressManager): BackupManager =
-                BackupManager(BackupJsonSerializer(), bookmarkManager, highlightManager, noteManager, readingProgressManager)
+        fun provideBackupManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>,
+                                 highlightRepository: VerseAnnotationRepository<Highlight>,
+                                 noteRepository: VerseAnnotationRepository<Note>,
+                                 readingProgressRepository: ReadingProgressRepository): BackupManager =
+                BackupManager(BackupJsonSerializer(), bookmarkRepository, highlightRepository, noteRepository, readingProgressRepository)
 
         @JvmStatic
         @Provides
