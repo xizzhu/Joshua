@@ -18,7 +18,9 @@ package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.BackupManager
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 import java.io.InputStream
@@ -29,23 +31,45 @@ class SettingsInteractor(settingsManager: SettingsManager,
                          dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
     suspend fun saveFontSizeScale(fontSizeScale: Int) {
-        settingsManager.saveFontSizeScale(fontSizeScale)
+        currentSettings().let { current ->
+            if (fontSizeScale != current.fontSizeScale) {
+                settingsManager.saveSettings(current.copy(fontSizeScale = fontSizeScale))
+            }
+        }
     }
 
+    private suspend fun currentSettings(): Settings = settingsManager.settings().first()
+
     suspend fun saveKeepScreenOn(keepScreenOn: Boolean) {
-        settingsManager.saveKeepScreenOn(keepScreenOn)
+        currentSettings().let { current ->
+            if (keepScreenOn != current.keepScreenOn) {
+                settingsManager.saveSettings(current.copy(keepScreenOn = keepScreenOn))
+            }
+        }
     }
 
     suspend fun saveNightModeOn(nightModeOn: Boolean) {
-        settingsManager.saveNightModeOn(nightModeOn)
+        currentSettings().let { current ->
+            if (nightModeOn != current.nightModeOn) {
+                settingsManager.saveSettings(current.copy(nightModeOn = nightModeOn))
+            }
+        }
     }
 
     suspend fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean) {
-        settingsManager.saveSimpleReadingModeOn(simpleReadingModeOn)
+        currentSettings().let { current ->
+            if (simpleReadingModeOn != current.simpleReadingModeOn) {
+                settingsManager.saveSettings(current.copy(simpleReadingModeOn = simpleReadingModeOn))
+            }
+        }
     }
 
     suspend fun saveHideSearchButton(hideSearchButton: Boolean) {
-        settingsManager.saveHideSearchButton(hideSearchButton)
+        currentSettings().let { current ->
+            if (hideSearchButton != current.hideSearchButton) {
+                settingsManager.saveSettings(current.copy(hideSearchButton = hideSearchButton))
+            }
+        }
     }
 
     suspend fun backup(to: OutputStream) {

@@ -43,7 +43,7 @@ class BaseSettingsAwareInteractorTest : BaseUnitTest() {
 
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
-        `when`(settingsManager.observeSettings()).thenReturn(flowOf(Settings.DEFAULT))
+        `when`(settingsManager.settings()).thenReturn(flowOf(Settings.DEFAULT))
 
         assertEquals(ViewData.success(Settings.DEFAULT), baseSettingsAwareInteractor.settings().first())
     }
