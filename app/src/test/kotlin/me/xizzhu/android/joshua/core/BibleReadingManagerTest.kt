@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.flow.asFlow
 
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
@@ -60,7 +61,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     @Test
     fun testObserveInitialCurrentVerseIndexWithException() = testDispatcher.runBlockingTest {
         `when`(bibleReadingRepository.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
-        bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
+        bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager, testDispatcher)
 
         assertFalse(bibleReadingManager.observeCurrentVerseIndex().first().isValid())
     }
@@ -85,7 +86,8 @@ class BibleReadingManagerTest : BaseUnitTest() {
     @Test
     fun testObserveInitialCurrentTranslationWithException() = testDispatcher.runBlockingTest {
         `when`(bibleReadingRepository.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
-        bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
+        `when`(translationManager.downloadedTranslations()).thenReturn(emptyFlow())
+        bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager, testDispatcher)
 
         assertTrue(bibleReadingManager.observeCurrentTranslation().first().isEmpty())
     }
