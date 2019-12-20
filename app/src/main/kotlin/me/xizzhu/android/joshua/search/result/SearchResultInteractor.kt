@@ -47,7 +47,7 @@ class SearchResultInteractor(private val bibleReadingManager: BibleReadingManage
     suspend fun search(query: String): ViewData<List<Verse>> =
             viewData { bibleReadingManager.search(readCurrentTranslation(), query) }
 
-    private suspend fun readCurrentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
+    private suspend fun readCurrentTranslation(): String = bibleReadingManager.currentTranslation().first()
 
     suspend fun bookNames(): ViewData<List<String>> =
             viewData { bibleReadingManager.readBookNames(readCurrentTranslation()) }

@@ -49,7 +49,7 @@ class TranslationListInteractorTest : BaseUnitTest() {
 
     @Test
     fun testTranslationList() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
         `when`(translationManager.availableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
         `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(listOf(MockContents.kjvDownloadedTranslationInfo)))
 
@@ -93,7 +93,7 @@ class TranslationListInteractorTest : BaseUnitTest() {
 
     @Test
     fun testDownloadTranslation() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(""))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(""))
         val translationToDownload = MockContents.kjvTranslationInfo
         val progress = 89
         `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flowOf(progress, 101))

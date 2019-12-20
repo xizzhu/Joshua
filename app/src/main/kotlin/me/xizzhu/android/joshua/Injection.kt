@@ -79,8 +79,8 @@ class AppModule(private val app: App) {
         @Provides
         @Singleton
         fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository,
-                                       translationManager: TranslationManager): BibleReadingManager =
-                BibleReadingManager(bibleReadingRepository, translationManager)
+                                       translationRepository: TranslationRepository): BibleReadingManager =
+                BibleReadingManager(bibleReadingRepository, translationRepository)
 
         @JvmStatic
         @Provides

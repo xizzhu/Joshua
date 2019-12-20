@@ -45,7 +45,7 @@ class ChapterListInteractorTest : BaseUnitTest() {
 
     @Test
     fun testBookNames() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
         `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
 
         assertEquals(
@@ -56,7 +56,7 @@ class ChapterListInteractorTest : BaseUnitTest() {
 
     @Test
     fun testCurrentVerseIndex() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(
                 flowOf(VerseIndex.INVALID, VerseIndex(1, 2, 3), VerseIndex.INVALID, VerseIndex.INVALID)
         )
 

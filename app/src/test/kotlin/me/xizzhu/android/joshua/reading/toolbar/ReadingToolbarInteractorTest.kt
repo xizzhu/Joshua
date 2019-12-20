@@ -70,7 +70,7 @@ class ReadingToolbarInteractorTest : BaseUnitTest() {
 
     @Test
     fun testCurrentTranslation() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
 
         assertEquals(
                 listOf(ViewData.success(MockContents.kjvShortName)),
@@ -80,7 +80,7 @@ class ReadingToolbarInteractorTest : BaseUnitTest() {
 
     @Test
     fun testCurrentVerseIndex() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(
                 flowOf(VerseIndex.INVALID, VerseIndex(1, 2, 3), VerseIndex.INVALID, VerseIndex.INVALID)
         )
 
@@ -92,7 +92,7 @@ class ReadingToolbarInteractorTest : BaseUnitTest() {
 
     @Test
     fun testBookShortNames() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
         `when`(bibleReadingManager.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
 
         assertEquals(

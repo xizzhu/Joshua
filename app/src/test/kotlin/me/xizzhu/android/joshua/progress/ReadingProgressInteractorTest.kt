@@ -52,7 +52,7 @@ class ReadingProgressInteractorTest : BaseUnitTest() {
     fun testBookNames() = testDispatcher.runBlockingTest {
         val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(bookNames)
 
         assertEquals(ViewData.success(bookNames), readingProgressInteractor.bookNames())
@@ -62,7 +62,7 @@ class ReadingProgressInteractorTest : BaseUnitTest() {
     fun testBookNamesWithException() = testDispatcher.runBlockingTest {
         val currentTranslation = MockContents.kjvShortName
         val exception = RuntimeException("Random exception")
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenThrow(exception)
 
         assertEquals(ViewData.error(exception = exception), readingProgressInteractor.bookNames())

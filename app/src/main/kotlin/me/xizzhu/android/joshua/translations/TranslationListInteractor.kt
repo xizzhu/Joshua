@@ -47,7 +47,7 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
     override fun onStart() {
         super.onStart()
 
-        combine(bibleReadingManager.observeCurrentTranslation(),
+        combine(bibleReadingManager.currentTranslation(),
                 translationManager.availableTranslations(),
                 translationManager.downloadedTranslations()
         ) { currentTranslation, availableTranslations, downloadedTranslations ->

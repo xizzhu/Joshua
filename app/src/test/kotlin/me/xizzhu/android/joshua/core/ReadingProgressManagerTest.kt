@@ -45,8 +45,8 @@ class ReadingProgressManagerTest : BaseUnitTest() {
 
     @Test
     fun testTrackingNothing() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(emptyFlow())
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(emptyFlow())
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(emptyFlow())
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(emptyFlow())
 
         readingProgressManager.startTracking()
         readingProgressManager.stopTracking()
@@ -56,8 +56,8 @@ class ReadingProgressManagerTest : BaseUnitTest() {
 
     @Test
     fun testTracking() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(flowOf(VerseIndex(1, 2, 3)))
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex(1, 2, 3)))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
 
         Clock.currentTimeMillis = 1L
         readingProgressManager.startTracking()
@@ -73,30 +73,30 @@ class ReadingProgressManagerTest : BaseUnitTest() {
 
     @Test
     fun testTrackingWithTooLowTimeSpent() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
         readingProgressManager.startTracking()
         verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
 
-        `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(flowOf(VerseIndex(1, 2, 3)))
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex(1, 2, 3)))
         readingProgressManager.stopTracking()
         verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
     }
 
     @Test
     fun testTrackingWithoutCurrentTranslation() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
         readingProgressManager.startTracking()
         verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
 
-        `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(flowOf(VerseIndex(1, 2, 3)))
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex(1, 2, 3)))
         readingProgressManager.stopTracking()
         verify(readingProgressRepository, never()).trackReadingProgress(anyInt(), anyInt(), anyLong(), anyLong())
     }
 
     @Test
     fun testStartTrackingMultipleTimes() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
-        `when`(bibleReadingManager.observeCurrentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID))
 
         launch(Dispatchers.Unconfined) {
             readingProgressManager.startTracking()
@@ -106,6 +106,6 @@ class ReadingProgressManagerTest : BaseUnitTest() {
         }
         readingProgressManager.stopTracking()
 
-        verify(bibleReadingManager, times(1)).observeCurrentVerseIndex()
+        verify(bibleReadingManager, times(1)).currentVerseIndex()
     }
 }

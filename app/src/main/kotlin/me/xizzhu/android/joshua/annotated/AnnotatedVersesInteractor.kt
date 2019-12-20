@@ -36,7 +36,7 @@ class AnnotatedVersesInteractor<V : VerseAnnotation>(private val verseAnnotation
     @UiThread
     override fun onStart() {
         super.onStart()
-        bibleReadingManager.observeCurrentTranslation().onEach { currentTranslation = it }.launchIn(coroutineScope)
+        bibleReadingManager.currentTranslation().onEach { currentTranslation = it }.launchIn(coroutineScope)
     }
 
     suspend fun bookNames(): ViewData<List<String>> =
@@ -45,7 +45,7 @@ class AnnotatedVersesInteractor<V : VerseAnnotation>(private val verseAnnotation
     @VisibleForTesting
     suspend fun currentTranslation(): String =
             if (currentTranslation.isNotEmpty()) currentTranslation
-            else bibleReadingManager.observeCurrentTranslation().first().apply { currentTranslation = this }
+            else bibleReadingManager.currentTranslation().first().apply { currentTranslation = this }
 
     suspend fun bookShortNames(): ViewData<List<String>> =
             viewData { bibleReadingManager.readBookShortNames(currentTranslation()) }

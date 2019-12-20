@@ -54,9 +54,9 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
 
     fun verseUpdates(): Flow<VerseUpdate> = verseUpdates.asFlow()
 
-    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
+    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.currentVerseIndex()
 
-    suspend fun currentTranslation(): String = bibleReadingManager.observeCurrentTranslation().first()
+    suspend fun currentTranslation(): String = bibleReadingManager.currentTranslation().first()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
