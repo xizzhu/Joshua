@@ -48,8 +48,8 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
         super.onStart()
 
         combine(bibleReadingManager.observeCurrentTranslation(),
-                translationManager.observeAvailableTranslations(),
-                translationManager.observeDownloadedTranslations()
+                translationManager.availableTranslations(),
+                translationManager.downloadedTranslations()
         ) { currentTranslation, availableTranslations, downloadedTranslations ->
             TranslationList(currentTranslation, availableTranslations, downloadedTranslations)
         }.onEach { translationList ->

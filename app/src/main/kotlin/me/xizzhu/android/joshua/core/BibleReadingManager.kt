@@ -99,7 +99,7 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
                 parallelTranslations.offer(emptyList())
             }
 
-            translationManager.observeDownloadedTranslations().collect { translations ->
+            translationManager.downloadedTranslations().collect { translations ->
                 // checks if need to update current translation
                 val downloadedTranslations = translations.map { it.shortName }.toSet()
                 if (downloadedTranslations.isEmpty()) {

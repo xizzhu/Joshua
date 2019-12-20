@@ -31,7 +31,7 @@ import me.xizzhu.android.joshua.infra.arch.toViewData
 class ReadingToolbarInteractor(private val bibleReadingManager: BibleReadingManager,
                                private val translationManager: TranslationManager,
                                dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
-    fun downloadedTranslations(): Flow<ViewData<List<TranslationInfo>>> = translationManager.observeDownloadedTranslations()
+    fun downloadedTranslations(): Flow<ViewData<List<TranslationInfo>>> = translationManager.downloadedTranslations()
             .distinctUntilChanged()
             .toViewData()
 

@@ -50,8 +50,8 @@ class TranslationListInteractorTest : BaseUnitTest() {
     @Test
     fun testTranslationList() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
-        `when`(translationManager.observeAvailableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
-        `when`(translationManager.observeDownloadedTranslations()).thenReturn(flowOf(listOf(MockContents.kjvDownloadedTranslationInfo)))
+        `when`(translationManager.availableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
+        `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(listOf(MockContents.kjvDownloadedTranslationInfo)))
 
         translationListInteractor.start()
 

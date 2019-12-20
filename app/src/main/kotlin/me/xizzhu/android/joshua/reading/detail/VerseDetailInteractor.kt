@@ -62,7 +62,7 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
-    suspend fun downloadedTranslations(): List<TranslationInfo> = translationManager.observeDownloadedTranslations().first()
+    suspend fun downloadedTranslations(): List<TranslationInfo> = translationManager.downloadedTranslations().first()
 
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)

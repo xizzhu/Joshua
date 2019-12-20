@@ -48,7 +48,7 @@ class ReadingToolbarInteractorTest : BaseUnitTest() {
 
     @Test
     fun testDownloadedTranslations() = testDispatcher.runBlockingTest {
-        `when`(translationManager.observeDownloadedTranslations()).thenReturn(
+        `when`(translationManager.downloadedTranslations()).thenReturn(
                 flowOf(
                         emptyList(),
                         emptyList(),

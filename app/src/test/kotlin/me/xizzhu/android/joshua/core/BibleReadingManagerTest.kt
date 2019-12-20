@@ -16,13 +16,10 @@
 
 package me.xizzhu.android.joshua.core
 
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.asFlow
 
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -50,7 +47,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
             `when`(bibleReadingRepository.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
 
             downloadedTranslationsChannel = ConflatedBroadcastChannel(listOf(MockContents.kjvDownloadedTranslationInfo))
-            `when`(translationManager.observeDownloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
+            `when`(translationManager.downloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
             bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager, testDispatcher)
         }
     }

@@ -17,7 +17,17 @@
 package me.xizzhu.android.joshua.core.repository
 
 import androidx.annotation.VisibleForTesting
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.analytics.Analytics
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
@@ -27,7 +37,8 @@ import me.xizzhu.android.joshua.utils.Clock
 import me.xizzhu.android.logger.Log
 
 class TranslationRepository(private val localTranslationStorage: LocalTranslationStorage,
-                            private val remoteTranslationService: RemoteTranslationService) {
+                            private val remoteTranslationService: RemoteTranslationService,
+                            initDispatcher: CoroutineDispatcher = Dispatchers.IO) {
     companion object {
         private val TAG: String = TranslationRepository::class.java.simpleName
 
@@ -35,7 +46,49 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         const val TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS = 7L * 24L * 3600L * 1000L // 7 day
     }
 
-    suspend fun reload(forceRefresh: Boolean): List<TranslationInfo> {
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    private val translationsLock: Any = Any()
+    private val availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+    private val downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+
+    init {
+        GlobalScope.launch(initDispatcher) {
+            try {
+                updateTranslations(readTranslationsFromLocal())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize translations", e)
+                updateTranslations(emptyList())
+            }
+        }
+    }
+
+    @VisibleForTesting
+    fun updateTranslations(updatedTranslations: List<TranslationInfo>) {
+        val (available, downloaded) = synchronized(translationsLock) {
+            val available = mutableMapOf<String, TranslationInfo>()
+            val downloaded = mutableMapOf<String, TranslationInfo>()
+            updatedTranslations.forEach { t ->
+                if (t.downloaded) {
+                    downloaded[t.shortName] = t
+                } else {
+                    available[t.shortName] = t
+                }
+            }
+            return@synchronized Pair(available, downloaded)
+        }
+        notifyTranslationsUpdated(available.values.toList(), downloaded.values.toList())
+    }
+
+    private fun notifyTranslationsUpdated(available: List<TranslationInfo>, downloaded: List<TranslationInfo>) {
+        availableTranslationsChannel.offer(available)
+        downloadedTranslationsChannel.offer(downloaded)
+    }
+
+    fun availableTranslations(): Flow<List<TranslationInfo>> = availableTranslationsChannel.asFlow()
+
+    fun downloadedTranslations(): Flow<List<TranslationInfo>> = downloadedTranslationsChannel.asFlow()
+
+    suspend fun reload(forceRefresh: Boolean) {
         val translations = if (forceRefresh || translationListTooOld()) {
             try {
                 readTranslationsFromBackend()
@@ -52,7 +105,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         if (translations.isEmpty()) {
             throw IllegalStateException("Empty translation list")
         }
-        return translations
+        updateTranslations(translations)
     }
 
     @VisibleForTesting
@@ -94,6 +147,36 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
     suspend fun readTranslationsFromLocal(): List<TranslationInfo> = localTranslationStorage.readTranslations()
 
+    fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> = channelFlow {
+        val downloadProgressChannel = Channel<Int>(Channel.CONFLATED)
+        launch { downloadProgressChannel.consumeEach { offer(it) } }
+
+        downloadTranslation(downloadProgressChannel, translationToDownload)
+        addDownloadedTranslation(translationToDownload)
+
+        downloadProgressChannel.send(101)
+        downloadProgressChannel.close()
+    }
+
+    @VisibleForTesting
+    fun addDownloadedTranslation(downloadedTranslation: TranslationInfo) {
+        val (available, downloaded) = synchronized(translationsLock) {
+            val available = mutableListOf<TranslationInfo>().apply {
+                availableTranslationsChannel.valueOrNull?.let { addAll(it) }
+                removeAll { it.shortName == downloadedTranslation.shortName }
+            }
+
+            val downloaded = mutableListOf<TranslationInfo>().apply {
+                downloadedTranslationsChannel.valueOrNull?.let { addAll(it) }
+                add(downloadedTranslation.copy(downloaded = true))
+            }
+
+            return@synchronized Pair(available, downloaded)
+        }
+        notifyTranslationsUpdated(available, downloaded)
+    }
+
+    @VisibleForTesting
     suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
         val start = Clock.elapsedRealtime()
         Log.i(TAG, "Start downloading translation - ${translationInfo.shortName}")
@@ -119,5 +202,23 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         Log.i(TAG, "Start removing translation - ${translationInfo.shortName}")
         localTranslationStorage.removeTranslation(translationInfo)
         Log.i(TAG, "Translation removed")
+
+        val (available, downloaded) = synchronized(translationsLock) {
+            var removed = false
+            val downloaded = mutableListOf<TranslationInfo>().apply {
+                downloadedTranslationsChannel.valueOrNull?.let { addAll(it) }
+                removed = removeAll { it.shortName == translationInfo.shortName }
+            }
+
+            val available = mutableListOf<TranslationInfo>().apply {
+                availableTranslationsChannel.valueOrNull?.let { addAll(it) }
+                if (removed) {
+                    add(translationInfo.copy(downloaded = false))
+                }
+            }
+
+            return@synchronized Pair(available, downloaded)
+        }
+        notifyTranslationsUpdated(available, downloaded)
     }
 }
