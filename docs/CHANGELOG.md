@@ -2,15 +2,19 @@ CHANGELOG
 ---------
 
 #### Next Release
-- Saved parallel translations to disk
-- Supported cancelling translation downloading
-- Should close verse detail when changing current verse index
-- Supported search history
-- Should call backup() when backup fails
-- Caught OutOfMemoryError when it fails to restore
-- Should start / stop reading progress tracking on resume / pause
-- Supported hiding search button
-- Properly checked if root exception is JobCancellationException
+- New features:
+  - Saved parallel translations to disk
+  - Supported cancelling translation downloading
+  - Supported search history
+  - Supported hiding search button
+- Bug fixes:
+  - Should close verse detail when changing current verse index
+  - Should call backup() when backup fails
+  - Caught OutOfMemoryError when it fails to restore
+  - Should start / stop reading progress tracking on resume / pause
+  - Properly checked if root exception is JobCancellationException
+- Refactoring:
+  - Better organized managers and repositories
 - Updated dependencies:
   - Dagger to 2.25.3
   - Mockito to 3.2.4
