@@ -152,28 +152,23 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         launch { downloadProgressChannel.consumeEach { offer(it) } }
 
         downloadTranslation(downloadProgressChannel, translationToDownload)
-        addDownloadedTranslation(translationToDownload)
-
-        downloadProgressChannel.send(101)
-        downloadProgressChannel.close()
-    }
-
-    @VisibleForTesting
-    fun addDownloadedTranslation(downloadedTranslation: TranslationInfo) {
         val (available, downloaded) = synchronized(translationsLock) {
             val available = mutableListOf<TranslationInfo>().apply {
                 availableTranslationsChannel.valueOrNull?.let { addAll(it) }
-                removeAll { it.shortName == downloadedTranslation.shortName }
+                removeAll { it.shortName == translationToDownload.shortName }
             }
 
             val downloaded = mutableListOf<TranslationInfo>().apply {
                 downloadedTranslationsChannel.valueOrNull?.let { addAll(it) }
-                add(downloadedTranslation.copy(downloaded = true))
+                add(translationToDownload.copy(downloaded = true))
             }
 
             return@synchronized Pair(available, downloaded)
         }
         notifyTranslationsUpdated(available, downloaded)
+
+        downloadProgressChannel.send(101)
+        downloadProgressChannel.close()
     }
 
     @VisibleForTesting

@@ -225,21 +225,22 @@ class TranslationRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testAddDownloadedTranslation() = testDispatcher.runBlockingTest {
+    fun testDownloadedTranslation() = testDispatcher.runBlockingTest {
         `when`(localTranslationStorage.readTranslations()).thenReturn(emptyList())
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = spy(TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher))
+        doAnswer { Unit }.`when`(translationRepository).downloadTranslation(any(), any())
 
         translationRepository.updateTranslations(listOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo))
         assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
         assertEquals(setOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo), translationRepository.availableTranslations().first().toSet())
 
-        translationRepository.addDownloadedTranslation(MockContents.kjvTranslationInfo)
+        assertEquals(101, translationRepository.downloadTranslation(MockContents.kjvTranslationInfo).first { it == 101 })
         assertEquals(listOf(MockContents.cuvTranslationInfo), translationRepository.availableTranslations().first())
         assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations().first())
     }
 
     @Test
-    fun testDownloadTranslation() = testDispatcher.runBlockingTest {
+    fun testDownloadTranslationInternal() = testDispatcher.runBlockingTest {
         `when`(localTranslationStorage.readTranslations()).thenReturn(listOf(MockContents.kjvDownloadedTranslationInfo))
 
         val channel = Channel<Int>()
