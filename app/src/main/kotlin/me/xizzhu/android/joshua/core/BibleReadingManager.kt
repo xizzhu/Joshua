@@ -43,13 +43,10 @@ data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<
     }
 
     fun isValid(): Boolean {
-        if (!verseIndex.isValid() || !text.isValid()) {
-            return false
-        }
+        if (!verseIndex.isValid() || !text.isValid()) return false
+
         for (p in parallel) {
-            if (!p.isValid()) {
-                return false
-            }
+            if (!p.isValid()) return false
         }
 
         return true
