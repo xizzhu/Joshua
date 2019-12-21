@@ -103,9 +103,9 @@ class AppModule(private val app: App) {
         @JvmStatic
         @Provides
         @Singleton
-        fun provideReadingProgressManager(bibleReadingManager: BibleReadingManager,
+        fun provideReadingProgressManager(bibleReadingRepository: BibleReadingRepository,
                                           readingProgressRepository: ReadingProgressRepository): ReadingProgressManager =
-                ReadingProgressManager(bibleReadingManager, readingProgressRepository)
+                ReadingProgressManager(bibleReadingRepository, readingProgressRepository)
 
         @JvmStatic
         @Provides

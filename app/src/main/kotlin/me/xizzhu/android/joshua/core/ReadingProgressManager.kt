@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.utils.Clock
 import me.xizzhu.android.logger.Log
@@ -44,7 +45,7 @@ data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimest
     }
 }
 
-class ReadingProgressManager(private val bibleReadingManager: BibleReadingManager,
+class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRepository,
                              private val readingProgressRepository: ReadingProgressRepository) {
     companion object {
         private val TAG: String = ReadingProgressManager::class.java.simpleName
@@ -64,7 +65,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
         }
 
         lastTimestamp = Clock.currentTimeMillis()
-        currentVerseIndexObserver = bibleReadingManager.currentVerseIndex()
+        currentVerseIndexObserver = bibleReadingRepository.currentVerseIndex()
         GlobalScope.launch(Dispatchers.Main) {
             currentVerseIndexObserver?.filter { it.isValid() }
                     ?.collect {
@@ -80,7 +81,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
             val verseIndex = currentVerseIndex
             if (!verseIndex.isValid()
                     || lastTimestamp == 0L
-                    || bibleReadingManager.currentTranslation().first().isEmpty()) {
+                    || bibleReadingRepository.currentTranslation().first().isEmpty()) {
                 return
             }
 
