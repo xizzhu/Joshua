@@ -16,17 +16,42 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.repository.local.LocalSettingsStorage
+import me.xizzhu.android.logger.Log
 
-class SettingsRepository(private val localSettingsStorage: LocalSettingsStorage) {
-    private var currentSettings: Settings? = null
+class SettingsRepository(private val localSettingsStorage: LocalSettingsStorage,
+                         initDispatcher: CoroutineDispatcher = Dispatchers.IO) {
+    companion object {
+        private val TAG = SettingsRepository::class.java.simpleName
+    }
 
-    suspend fun readSettings(): Settings =
-            currentSettings ?: localSettingsStorage.readSettings().apply { currentSettings = this }
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    private val currentSettings: BroadcastChannel<Settings> = ConflatedBroadcastChannel()
+
+    init {
+        GlobalScope.launch(initDispatcher) {
+            try {
+                currentSettings.offer(localSettingsStorage.readSettings())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize settings", e)
+                currentSettings.offer(Settings.DEFAULT)
+            }
+        }
+    }
+
+    fun settings(): Flow<Settings> = currentSettings.asFlow()
 
     suspend fun saveSettings(settings: Settings) {
         localSettingsStorage.saveSettings(settings)
-        currentSettings = settings
+        currentSettings.offer(settings)
     }
 }

@@ -19,11 +19,9 @@ package me.xizzhu.android.joshua.core
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.utils.Clock
 import me.xizzhu.android.logger.Log
@@ -47,7 +45,7 @@ data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimest
     }
 }
 
-class ReadingProgressManager(private val bibleReadingManager: BibleReadingManager,
+class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRepository,
                              private val readingProgressRepository: ReadingProgressRepository) {
     companion object {
         private val TAG: String = ReadingProgressManager::class.java.simpleName
@@ -61,13 +59,13 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
     private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
     private var lastTimestamp: Long = 0L
 
-    suspend fun startTracking() {
+    fun startTracking() {
         if (currentVerseIndexObserver != null) {
             return
         }
 
         lastTimestamp = Clock.currentTimeMillis()
-        currentVerseIndexObserver = bibleReadingManager.observeCurrentVerseIndex()
+        currentVerseIndexObserver = bibleReadingRepository.currentVerseIndex()
         GlobalScope.launch(Dispatchers.Main) {
             currentVerseIndexObserver?.filter { it.isValid() }
                     ?.collect {
@@ -83,7 +81,7 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
             val verseIndex = currentVerseIndex
             if (!verseIndex.isValid()
                     || lastTimestamp == 0L
-                    || bibleReadingManager.observeCurrentTranslation().first().isEmpty()) {
+                    || bibleReadingRepository.currentTranslation().first().isEmpty()) {
                 return
             }
 
@@ -108,8 +106,4 @@ class ReadingProgressManager(private val bibleReadingManager: BibleReadingManage
     }
 
     suspend fun read(): ReadingProgress = readingProgressRepository.read()
-
-    suspend fun save(readingProgress: ReadingProgress) {
-        readingProgressRepository.save(readingProgress)
-    }
 }

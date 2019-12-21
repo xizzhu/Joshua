@@ -31,5 +31,5 @@ class AnnotatedVersesToolbarInteractor<V : VerseAnnotation>(private val verseAnn
     }
 
     @Constants.SortOrder
-    suspend fun readSortOrder(): Int = verseAnnotationManager.observeSortOrder().first()
+    suspend fun readSortOrder(): Int = verseAnnotationManager.sortOrder().first()
 }

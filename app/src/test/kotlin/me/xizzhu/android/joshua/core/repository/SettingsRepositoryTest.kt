@@ -16,13 +16,13 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.repository.local.LocalSettingsStorage
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -32,31 +32,30 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     private lateinit var settingsRepository: SettingsRepository
 
-    @BeforeTest
-    override fun setup() {
-        super.setup()
-        settingsRepository = SettingsRepository(localSettingsStorage)
-    }
-
     @Test
-    fun testReadSettings() = runBlockingTest {
-        val settings = Settings(false, true, 1, true, true)
+    fun testObserveInitialSettings() = testDispatcher.runBlockingTest {
+        val settings = Settings(false, true, 3, false, false)
         `when`(localSettingsStorage.readSettings()).thenReturn(settings)
+        settingsRepository = SettingsRepository(localSettingsStorage)
 
-        // for the first time, should read from localSettingsStorage
-        assertEquals(settings, settingsRepository.readSettings())
-        verify(localSettingsStorage, times(1)).readSettings()
-
-        // for the second time, should read from memory cache
-        assertEquals(settings, settingsRepository.readSettings())
-        verify(localSettingsStorage, times(1)).readSettings()
+        assertEquals(settings, settingsRepository.settings().first())
     }
 
     @Test
-    fun testSaveThenReadSettings() = runBlockingTest {
+    fun testObserveInitialSettingsWithException() = testDispatcher.runBlockingTest {
+        `when`(localSettingsStorage.readSettings()).thenThrow(RuntimeException("Random exception"))
+        settingsRepository = SettingsRepository(localSettingsStorage)
+
+        assertEquals(Settings.DEFAULT, settingsRepository.settings().first())
+    }
+
+    @Test
+    fun testSaveThenReadSettings() = testDispatcher.runBlockingTest {
+        `when`(localSettingsStorage.readSettings()).thenReturn(Settings.DEFAULT)
+        settingsRepository = SettingsRepository(localSettingsStorage)
+
         val settings = Settings(false, true, 1, true, true)
         settingsRepository.saveSettings(settings)
-        assertEquals(settings, settingsRepository.readSettings())
-        verify(localSettingsStorage, never()).readSettings()
+        assertEquals(settings, settingsRepository.settings().first())
     }
 }

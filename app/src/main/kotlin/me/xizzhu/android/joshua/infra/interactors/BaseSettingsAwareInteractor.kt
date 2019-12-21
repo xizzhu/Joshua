@@ -28,7 +28,7 @@ import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 
 abstract class BaseSettingsAwareInteractor(protected val settingsManager: SettingsManager,
                                            dispatcher: CoroutineDispatcher) : Interactor(dispatcher) {
-    fun settings(): Flow<ViewData<Settings>> = settingsManager.observeSettings().map { ViewData.success(it) }
+    fun settings(): Flow<ViewData<Settings>> = settingsManager.settings().map { ViewData.success(it) }
 }
 
 abstract class BaseSettingsAwarePresenter<V : ViewHolder, I : BaseSettingsAwareInteractor>(

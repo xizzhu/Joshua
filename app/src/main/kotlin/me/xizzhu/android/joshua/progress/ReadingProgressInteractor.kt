@@ -30,7 +30,7 @@ class ReadingProgressInteractor(private val readingProgressManager: ReadingProgr
                                 dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
     suspend fun bookNames(): ViewData<List<String>> = bibleReadingManager
-            .observeCurrentTranslation().first()
+            .currentTranslation().first()
             .let { currentTranslation -> viewData { bibleReadingManager.readBookNames(currentTranslation) } }
 
     suspend fun readingProgress(): ViewData<ReadingProgress> = viewData { readingProgressManager.read() }

@@ -49,9 +49,9 @@ class TranslationListInteractorTest : BaseUnitTest() {
 
     @Test
     fun testTranslationList() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
-        `when`(translationManager.observeAvailableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
-        `when`(translationManager.observeDownloadedTranslations()).thenReturn(flowOf(listOf(MockContents.kjvDownloadedTranslationInfo)))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
+        `when`(translationManager.availableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
+        `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(listOf(MockContents.kjvDownloadedTranslationInfo)))
 
         translationListInteractor.start()
 
@@ -93,19 +93,14 @@ class TranslationListInteractorTest : BaseUnitTest() {
 
     @Test
     fun testDownloadTranslation() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(""))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(""))
         val translationToDownload = MockContents.kjvTranslationInfo
         val progress = 89
         `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flowOf(progress, 101))
 
         assertEquals(listOf(ViewData.loading(progress), ViewData.success(-1)),
                 translationListInteractor.downloadTranslation(translationToDownload).toList())
-
-        with(inOrder(translationManager, bibleReadingManager)) {
-            verify(translationManager, times(1)).downloadTranslation(translationToDownload)
-            verify(bibleReadingManager, times(1)).observeCurrentTranslation()
-            verify(bibleReadingManager, times(1)).saveCurrentTranslation(translationToDownload.shortName)
-        }
+        verify(translationManager, times(1)).downloadTranslation(translationToDownload)
     }
 
     @Test
@@ -116,9 +111,6 @@ class TranslationListInteractorTest : BaseUnitTest() {
 
         assertEquals(listOf(ViewData.error(exception = exception)),
                 translationListInteractor.downloadTranslation(translationToDownload).toList())
-
         verify(translationManager, times(1)).downloadTranslation(translationToDownload)
-        verify(bibleReadingManager, never()).observeCurrentTranslation()
-        verify(bibleReadingManager, never()).saveCurrentTranslation(translationToDownload.shortName)
     }
 }

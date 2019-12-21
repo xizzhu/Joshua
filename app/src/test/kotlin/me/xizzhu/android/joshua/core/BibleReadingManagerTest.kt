@@ -16,124 +16,85 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.flow.asFlow
 
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.*
 import kotlin.test.*
 
 class BibleReadingManagerTest : BaseUnitTest() {
     @Mock
     private lateinit var bibleReadingRepository: BibleReadingRepository
     @Mock
-    private lateinit var translationManager: TranslationManager
+    private lateinit var translationRepository: TranslationRepository
 
-    private lateinit var downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>>
-    private lateinit var bibleReadingManager: BibleReadingManager
+    @Test
+    fun testObserveDownloadedTranslations() = testDispatcher.runBlockingTest {
+        `when`(bibleReadingRepository.currentTranslation()).thenReturn(flowOf(""))
+        `when`(bibleReadingRepository.parallelTranslations()).thenReturn(flowOf(emptyList()))
+        val downloadedTranslationsChannel: BroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
+        `when`(translationRepository.downloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
+        val bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, testDispatcher)
 
-    @BeforeTest
-    override fun setup() {
-        super.setup()
+        // downloads a translation
+        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo))
 
-        runBlocking {
-            `when`(bibleReadingRepository.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-            `when`(bibleReadingRepository.readParallelTranslations()).thenReturn(emptyList())
-            `when`(bibleReadingRepository.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
+        // downloads another translation
+        `when`(bibleReadingRepository.currentTranslation()).thenReturn(flowOf(MockContents.cuvShortName))
+        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo))
 
-            downloadedTranslationsChannel = ConflatedBroadcastChannel(emptyList())
-            `when`(translationManager.observeDownloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
-            bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
+        // downloads yet another translation
+        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo, MockContents.kjvTranslationInfo))
+
+        // requests a parallel
+        `when`(bibleReadingRepository.parallelTranslations()).thenReturn(flowOf(listOf(MockContents.bbeShortName)))
+
+        // requests another parallel
+        `when`(bibleReadingRepository.parallelTranslations()).thenReturn(flowOf(listOf(MockContents.bbeShortName, MockContents.kjvShortName)))
+
+        // removes a translation that is selected as parallel
+        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo))
+
+        // removes a translation that is selected as current
+        downloadedTranslationsChannel.offer(listOf(MockContents.kjvTranslationInfo))
+
+        // removes all translations
+        downloadedTranslationsChannel.offer(emptyList())
+
+        with(inOrder(bibleReadingRepository)) {
+            // initial state
+            verify(bibleReadingRepository, times(1)).saveCurrentTranslation("")
+            verify(bibleReadingRepository, times(1)).clearParallelTranslation()
+
+            // downloads a translation
+            verify(bibleReadingRepository, times(1)).saveCurrentTranslation(MockContents.cuvShortName)
+
+            // downloads another translation (nothing here)
+
+            // downloads yet another translation (nothing here)
+
+            // requests a parallel (nothing here)
+
+            // requests another parallel (nothing here)
+
+            // removes a translation that is selected as parallel
+            verify(bibleReadingRepository, times(1)).saveParallelTranslations(listOf(MockContents.kjvShortName))
+
+            // // removes a translation that is selected as current
+            verify(bibleReadingRepository, times(1)).saveCurrentTranslation(MockContents.kjvShortName)
+            verify(bibleReadingRepository, times(1)).saveParallelTranslations(emptyList())
+
+            // removes all translations
+            verify(bibleReadingRepository, times(1)).saveCurrentTranslation("")
+            verify(bibleReadingRepository, times(1)).clearParallelTranslation()
         }
-    }
-
-    @Test
-    fun testObserveInitialCurrentVerseIndex() = runBlocking {
-        assertEquals(VerseIndex(1, 2, 3), bibleReadingManager.observeCurrentVerseIndex().first())
-    }
-
-    @Test
-    fun testObserveInitialCurrentVerseIndexWithException() = runBlocking {
-        `when`(bibleReadingRepository.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
-        bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
-
-        assertFalse(bibleReadingManager.observeCurrentVerseIndex().first().isValid())
-    }
-
-    @Test
-    fun testSaveCurrentVerseIndex() = runBlocking {
-        bibleReadingManager.saveCurrentVerseIndex(VerseIndex(4, 5, 6))
-        assertEquals(VerseIndex(4, 5, 6), bibleReadingManager.observeCurrentVerseIndex().first())
-    }
-
-    @Test
-    fun testSaveCurrentTranslation() = runBlocking {
-        bibleReadingManager.saveCurrentTranslation(MockContents.cuvShortName)
-        assertEquals(MockContents.cuvShortName, bibleReadingManager.observeCurrentTranslation().first())
-    }
-
-    @Test
-    fun testObserveInitialCurrentTranslation() = runBlocking {
-        assertEquals(MockContents.kjvShortName, bibleReadingManager.observeCurrentTranslation().first())
-    }
-
-    @Test
-    fun testObserveInitialCurrentTranslationWithException() = runBlocking {
-        `when`(bibleReadingRepository.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
-        bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationManager)
-
-        assertTrue(bibleReadingManager.observeCurrentTranslation().first().isEmpty())
-    }
-
-    @Test
-    fun testDefaultParallelTranslations() = runBlocking {
-        assertTrue(bibleReadingManager.observeParallelTranslations().first().isEmpty())
-    }
-
-    @Test
-    fun testParallelTranslations() = runBlocking {
-        bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
-        assertEquals(listOf(MockContents.kjvShortName),
-                bibleReadingManager.observeParallelTranslations().first())
-
-        bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
-        bibleReadingManager.requestParallelTranslation(MockContents.cuvShortName)
-        assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),
-                bibleReadingManager.observeParallelTranslations().first().toSet())
-
-        bibleReadingManager.removeParallelTranslation(MockContents.kjvShortName)
-        assertEquals(listOf(MockContents.cuvShortName),
-                bibleReadingManager.observeParallelTranslations().first())
-
-        bibleReadingManager.removeParallelTranslation(MockContents.cuvShortName)
-        assertTrue(bibleReadingManager.observeParallelTranslations().first().isEmpty())
-    }
-
-    @Test
-    fun testRemoveNonExistParallelTranslations() = runBlocking {
-        bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
-        bibleReadingManager.requestParallelTranslation(MockContents.cuvShortName)
-        assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),
-                bibleReadingManager.observeParallelTranslations().first().toSet())
-
-        bibleReadingManager.removeParallelTranslation("not_exist")
-        assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),
-                bibleReadingManager.observeParallelTranslations().first().toSet())
-    }
-
-    @Test
-    fun testClearParallelTranslations() = runBlocking {
-        bibleReadingManager.requestParallelTranslation(MockContents.kjvShortName)
-        bibleReadingManager.requestParallelTranslation(MockContents.cuvShortName)
-        assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName),
-                bibleReadingManager.observeParallelTranslations().first().toSet())
-
-        bibleReadingManager.clearParallelTranslation()
-        assertTrue(bibleReadingManager.observeParallelTranslations().first().isEmpty())
     }
 }

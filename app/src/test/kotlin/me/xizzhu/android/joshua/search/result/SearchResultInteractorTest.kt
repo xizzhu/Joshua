@@ -61,7 +61,7 @@ class SearchResultInteractorTest : BaseUnitTest() {
         val query = "query"
         val currentTranslation = MockContents.kjvShortName
         val verses = MockContents.kjvVerses
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(verses)
 
         assertEquals(ViewData.success(verses), searchResultInteractor.search(query))
@@ -71,7 +71,7 @@ class SearchResultInteractorTest : BaseUnitTest() {
     fun testBookNames() = testDispatcher.runBlockingTest {
         val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(bookNames)
 
         assertEquals(ViewData.success(bookNames), searchResultInteractor.bookNames())
@@ -81,7 +81,7 @@ class SearchResultInteractorTest : BaseUnitTest() {
     fun testBookShortNames() = testDispatcher.runBlockingTest {
         val currentTranslation = MockContents.kjvShortName
         val bookShortNames = MockContents.kjvBookShortNames
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(currentTranslation))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(bookShortNames)
 
         assertEquals(ViewData.success(bookShortNames), searchResultInteractor.bookShortNames())

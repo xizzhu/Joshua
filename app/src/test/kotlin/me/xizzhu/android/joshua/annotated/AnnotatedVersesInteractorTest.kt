@@ -50,20 +50,20 @@ class AnnotatedVersesInteractorTest : BaseUnitTest() {
 
     @Test
     fun testCurrentTranslation() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(""))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(""))
 
         annotatedVersesInteractor.start()
-        verify(bibleReadingManager, times(1)).observeCurrentTranslation()
+        verify(bibleReadingManager, times(1)).currentTranslation()
 
         assertEquals("", annotatedVersesInteractor.currentTranslation())
-        verify(bibleReadingManager, times(2)).observeCurrentTranslation()
+        verify(bibleReadingManager, times(2)).currentTranslation()
 
-        `when`(bibleReadingManager.observeCurrentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
         assertEquals(MockContents.kjvShortName, annotatedVersesInteractor.currentTranslation())
-        verify(bibleReadingManager, times(3)).observeCurrentTranslation()
+        verify(bibleReadingManager, times(3)).currentTranslation()
 
         assertEquals(MockContents.kjvShortName, annotatedVersesInteractor.currentTranslation())
-        verify(bibleReadingManager, times(3)).observeCurrentTranslation()
+        verify(bibleReadingManager, times(3)).currentTranslation()
 
         annotatedVersesInteractor.stop()
     }

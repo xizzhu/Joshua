@@ -29,11 +29,11 @@ import me.xizzhu.android.joshua.infra.arch.toViewData
 
 class ChapterListInteractor(private val bibleReadingManager: BibleReadingManager,
                             dispatcher: CoroutineDispatcher = Dispatchers.Default) : Interactor(dispatcher) {
-    fun bookNames(): Flow<ViewData<List<String>>> = bibleReadingManager.observeCurrentTranslation()
+    fun bookNames(): Flow<ViewData<List<String>>> = bibleReadingManager.currentTranslation()
             .filter { it.isNotEmpty() }
             .map { ViewData.success(bibleReadingManager.readBookNames(it)) }
 
-    fun currentVerseIndex(): Flow<ViewData<VerseIndex>> = bibleReadingManager.observeCurrentVerseIndex()
+    fun currentVerseIndex(): Flow<ViewData<VerseIndex>> = bibleReadingManager.currentVerseIndex()
             .filter { it.isValid() }
             .toViewData()
 

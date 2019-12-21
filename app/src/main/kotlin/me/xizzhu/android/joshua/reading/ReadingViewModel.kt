@@ -83,7 +83,7 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
     override fun onResume() {
         super.onResume()
 
-        coroutineScope.launch { readingProgressManager.startTracking() }
+        readingProgressManager.startTracking()
     }
 
     @UiThread
@@ -97,7 +97,7 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
 
     fun showNoteInVerseDetail() {
         coroutineScope.launch {
-            bibleReadingManager.observeCurrentVerseIndex().first().let { verseIndex ->
+            bibleReadingManager.currentVerseIndex().first().let { verseIndex ->
                 if (verseIndex.isValid()) {
                     // NOTE It's a hack here, because the only thing needed by verse interactor is to select the verse
                     verseInteractor.updateVerse(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))

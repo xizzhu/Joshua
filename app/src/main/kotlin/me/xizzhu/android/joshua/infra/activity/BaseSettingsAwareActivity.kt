@@ -29,7 +29,7 @@ import me.xizzhu.android.joshua.ui.getBackgroundColor
 
 abstract class BaseSettingsAwareViewModel(private val settingsManager: SettingsManager, interactors: List<Interactor>,
                                           dispatcher: CoroutineDispatcher) : ViewModel(interactors, dispatcher) {
-    fun settings(): Flow<ViewData<Settings>> = settingsManager.observeSettings().map { ViewData.success(it) }
+    fun settings(): Flow<ViewData<Settings>> = settingsManager.settings().map { ViewData.success(it) }
 }
 
 abstract class BaseSettingsAwareActivity : BaseActivity() {

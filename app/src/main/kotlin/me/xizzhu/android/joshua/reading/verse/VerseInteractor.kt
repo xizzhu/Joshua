@@ -39,11 +39,11 @@ class VerseInteractor(private val bibleReadingManager: BibleReadingManager,
     private val verseDetailRequest: BroadcastChannel<VerseDetailRequest> = ConflatedBroadcastChannel()
     private val verseUpdates: BroadcastChannel<VerseUpdate> = ConflatedBroadcastChannel()
 
-    fun currentTranslation(): Flow<String> = bibleReadingManager.observeCurrentTranslation()
+    fun currentTranslation(): Flow<String> = bibleReadingManager.currentTranslation()
 
-    fun parallelTranslations(): Flow<List<String>> = bibleReadingManager.observeParallelTranslations()
+    fun parallelTranslations(): Flow<List<String>> = bibleReadingManager.parallelTranslations()
 
-    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.observeCurrentVerseIndex()
+    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.currentVerseIndex()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)

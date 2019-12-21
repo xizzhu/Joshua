@@ -17,13 +17,15 @@
 package me.xizzhu.android.joshua.core
 
 import kotlinx.coroutines.*
+import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
+import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.joshua.utils.mergeSort
 
 class BackupManager(private val serializer: Serializer,
-                    private val bookmarkManager: VerseAnnotationManager<Bookmark>,
-                    private val highlightManager: VerseAnnotationManager<Highlight>,
-                    private val noteManager: VerseAnnotationManager<Note>,
-                    private val readingProgressManager: ReadingProgressManager) {
+                    private val bookmarkRepository: VerseAnnotationRepository<Bookmark>,
+                    private val highlightRepository: VerseAnnotationRepository<Highlight>,
+                    private val noteRepository: VerseAnnotationRepository<Note>,
+                    private val readingProgressRepository: ReadingProgressRepository) {
     interface Serializer {
         fun serialize(data: Data): String
 
@@ -34,10 +36,10 @@ class BackupManager(private val serializer: Serializer,
                     val notes: List<Note>, val readingProgress: ReadingProgress)
 
     suspend fun prepareForBackup(): String = withContext(Dispatchers.Default) {
-        val bookmarksAsync = async { bookmarkManager.read(Constants.SORT_BY_BOOK) }
-        val highlightsAsync = async { highlightManager.read(Constants.SORT_BY_BOOK) }
-        val notesAsync = async { noteManager.read(Constants.SORT_BY_BOOK) }
-        val readingProgressAsync = async { readingProgressManager.read() }
+        val bookmarksAsync = async { bookmarkRepository.read(Constants.SORT_BY_BOOK) }
+        val highlightsAsync = async { highlightRepository.read(Constants.SORT_BY_BOOK) }
+        val notesAsync = async { noteRepository.read(Constants.SORT_BY_BOOK) }
+        val readingProgressAsync = async { readingProgressRepository.read() }
         return@withContext serializer.serialize(
                 Data(bookmarksAsync.await(), highlightsAsync.await(), notesAsync.await(), readingProgressAsync.await()))
     }
@@ -52,19 +54,19 @@ class BackupManager(private val serializer: Serializer,
     }
 
     private fun CoroutineScope.loadAndMergeBookmarksAsync(backupBookmarks: List<Bookmark>): Deferred<Unit> = async {
-        bookmarkManager.save(mergeSort(bookmarkManager.read(Constants.SORT_BY_BOOK), backupBookmarks.sortedBy { it.verseIndex.toComparableValue() },
+        bookmarkRepository.save(mergeSort(bookmarkRepository.read(Constants.SORT_BY_BOOK), backupBookmarks.sortedBy { it.verseIndex.toComparableValue() },
                 { left, right -> left.verseIndex.toComparableValue() - right.verseIndex.toComparableValue() },
                 { left, right -> if (left.timestamp > right.timestamp) left else right }))
     }
 
     private fun CoroutineScope.loadAndMergeHighlightsAsync(backupHighlights: List<Highlight>): Deferred<Unit> = async {
-        highlightManager.save(mergeSort(highlightManager.read(Constants.SORT_BY_BOOK), backupHighlights.sortedBy { it.verseIndex.toComparableValue() },
+        highlightRepository.save(mergeSort(highlightRepository.read(Constants.SORT_BY_BOOK), backupHighlights.sortedBy { it.verseIndex.toComparableValue() },
                 { left, right -> left.verseIndex.toComparableValue() - right.verseIndex.toComparableValue() },
                 { left, right -> if (left.timestamp > right.timestamp) left else right }))
     }
 
     private fun CoroutineScope.loadAndMergeNotesAsync(backupNotes: List<Note>): Deferred<Unit> = async {
-        noteManager.save(mergeSort(noteManager.read(Constants.SORT_BY_BOOK), backupNotes.sortedBy { it.verseIndex.toComparableValue() },
+        noteRepository.save(mergeSort(noteRepository.read(Constants.SORT_BY_BOOK), backupNotes.sortedBy { it.verseIndex.toComparableValue() },
                 { left, right -> left.verseIndex.toComparableValue() - right.verseIndex.toComparableValue() },
                 { left, right -> if (left.timestamp > right.timestamp) left else right }))
     }
@@ -72,7 +74,7 @@ class BackupManager(private val serializer: Serializer,
     private fun VerseIndex.toComparableValue() = bookIndex * 1000000 + chapterIndex * 1000 + verseIndex
 
     private fun CoroutineScope.loadAndMergeReadingProgressAsync(backupReadingProgress: ReadingProgress): Deferred<Unit> = async {
-        val currentReadingProgress = readingProgressManager.read()
+        val currentReadingProgress = readingProgressRepository.read()
         val continuousReadingDays: Int
         val lastReadingTimestamp: Long
         if (currentReadingProgress.lastReadingTimestamp >= backupReadingProgress.lastReadingTimestamp) {
@@ -88,6 +90,6 @@ class BackupManager(private val serializer: Serializer,
                 { left, right -> left.bookIndex * 1000 + left.chapterIndex - (right.bookIndex * 1000 + right.chapterIndex) },
                 { left, right -> if (left.lastReadingTimestamp > right.lastReadingTimestamp) left else right })
 
-        readingProgressManager.save(ReadingProgress(continuousReadingDays, lastReadingTimestamp, chapterReadingStatus))
+        readingProgressRepository.save(ReadingProgress(continuousReadingDays, lastReadingTimestamp, chapterReadingStatus))
     }
 }
