@@ -84,6 +84,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                 visibility = View.VISIBLE
             }
         } catch (e: Exception) {
+            viewHolder?.searchResultListView?.visibility = View.GONE
             Log.e(tag, "Failed to search verses", e)
         }
     }

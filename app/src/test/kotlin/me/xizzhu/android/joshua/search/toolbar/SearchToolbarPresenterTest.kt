@@ -25,6 +25,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class SearchToolbarPresenterTest : BaseUnitTest() {
     @Mock
@@ -64,10 +66,25 @@ class SearchToolbarPresenterTest : BaseUnitTest() {
 
     @Test
     fun testSubmitQuery() {
-        val query = "query"
-        searchToolbarPresenter.onQueryTextListener.onQueryTextSubmit("")
-        searchToolbarPresenter.onQueryTextListener.onQueryTextSubmit(query)
-        searchToolbarPresenter.onQueryTextListener.onQueryTextSubmit(query)
-        verify(searchToolbarInteractor, times(1)).updateQuery(query)
+        assertFalse(searchToolbarPresenter.onQueryTextListener.onQueryTextSubmit(""))
+        assertFalse(searchToolbarPresenter.onQueryTextListener.onQueryTextSubmit("query"))
+
+        with(inOrder(searchToolbarInteractor)) {
+            verify(searchToolbarInteractor, times(1)).submitQuery("")
+            verify(searchToolbarInteractor, times(1)).submitQuery("query")
+        }
+        verify(searchToolbarInteractor, never()).updateQuery(anyString())
+    }
+
+    @Test
+    fun testUpdateQuery() {
+        assertTrue(searchToolbarPresenter.onQueryTextListener.onQueryTextChange(""))
+        assertTrue(searchToolbarPresenter.onQueryTextListener.onQueryTextChange("query"))
+
+        with(inOrder(searchToolbarInteractor)) {
+            verify(searchToolbarInteractor, times(1)).updateQuery("")
+            verify(searchToolbarInteractor, times(1)).updateQuery("query")
+        }
+        verify(searchToolbarInteractor, never()).submitQuery(anyString())
     }
 }

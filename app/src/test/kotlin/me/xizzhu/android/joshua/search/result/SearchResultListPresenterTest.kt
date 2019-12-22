@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.search.result
 
+import android.view.View
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runBlockingTest
@@ -83,6 +84,42 @@ class SearchResultListPresenterTest : BaseUnitTest() {
                 }
             }
         }
+
+        searchResultListPresenter.stop()
+    }
+
+    @Test
+    fun testInstantSearch() = testDispatcher.runBlockingTest {
+        val query = "query"
+        val verses = MockContents.kjvVerses
+        `when`(searchResultInteractor.search(query)).thenReturn(ViewData.success(verses))
+        `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
+        `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
+        `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
+
+        searchResultListPresenter.start()
+
+        searchResultListPresenter.instantSearch(query)
+        with(inOrder(searchResultListView)) {
+            verify(searchResultListView, times(1)).setItems(any())
+            verify(searchResultListView, times(1)).scrollToPosition(0)
+            verify(searchResultListView, times(1)).visibility = View.VISIBLE
+        }
+
+        searchResultListPresenter.stop()
+    }
+
+    @Test
+    fun testInstantSearchWithException() = testDispatcher.runBlockingTest {
+        val query = "query"
+        val exception = RuntimeException("Random exception")
+        `when`(searchResultInteractor.search(query)).thenThrow(exception)
+
+        searchResultListPresenter.start()
+
+        searchResultListPresenter.instantSearch(query)
+        verify(searchResultListView, times(1)).visibility = View.GONE
+        verify(searchResultListView, never()).setItems(any())
 
         searchResultListPresenter.stop()
     }
