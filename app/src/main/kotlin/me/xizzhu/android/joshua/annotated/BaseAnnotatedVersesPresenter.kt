@@ -99,6 +99,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
         var previousDayOfYear = -1
 
         val items: ArrayList<BaseItem> = ArrayList()
+        val verses = interactor.verses(map { it.verseIndex }).dataOnSuccessOrThrow("Failed to load verse")
         forEach { verseAnnotation ->
             calendar.timeInMillis = verseAnnotation.timestamp
             val currentYear = calendar.get(Calendar.YEAR)
@@ -112,7 +113,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
 
             items.add(verseAnnotation.toBaseItem(bookNames[verseAnnotation.verseIndex.bookIndex],
                     bookShortNames[verseAnnotation.verseIndex.bookIndex],
-                    interactor.verse(verseAnnotation.verseIndex).dataOnSuccessOrThrow("Failed to load verse").text.text,
+                    verses.getValue(verseAnnotation.verseIndex).text.text,
                     Constants.SORT_BY_DATE))
         }
         return items
@@ -126,6 +127,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
         val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
 
         val items: ArrayList<BaseItem> = ArrayList()
+        val verses = interactor.verses(map { it.verseIndex }).dataOnSuccessOrThrow("Failed to load verse")
         var currentBookIndex = -1
         forEach { verseAnnotation ->
             val bookName = bookNames[verseAnnotation.verseIndex.bookIndex]
@@ -136,7 +138,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
 
             items.add(verseAnnotation.toBaseItem(bookNames[verseAnnotation.verseIndex.bookIndex],
                     bookShortNames[verseAnnotation.verseIndex.bookIndex],
-                    interactor.verse(verseAnnotation.verseIndex).dataOnSuccessOrThrow("Failed to load verse").text.text,
+                    verses.getValue(verseAnnotation.verseIndex).text.text,
                     Constants.SORT_BY_BOOK))
         }
         return items

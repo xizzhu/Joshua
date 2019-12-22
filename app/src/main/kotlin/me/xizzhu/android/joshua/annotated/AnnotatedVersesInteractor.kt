@@ -50,6 +50,9 @@ class AnnotatedVersesInteractor<V : VerseAnnotation>(private val verseAnnotation
     suspend fun bookShortNames(): ViewData<List<String>> =
             viewData { bibleReadingManager.readBookShortNames(currentTranslation()) }
 
+    suspend fun verses(verseIndexes: List<VerseIndex>): ViewData<Map<VerseIndex, Verse>> =
+            viewData { bibleReadingManager.readVerses(currentTranslation(), verseIndexes) }
+
     suspend fun verse(verseIndex: VerseIndex): ViewData<Verse> =
             viewData { bibleReadingManager.readVerse(currentTranslation(), verseIndex) }
 
