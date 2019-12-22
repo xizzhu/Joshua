@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.annotated
 
 import android.content.res.Resources
+import android.view.View
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
@@ -26,9 +27,11 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarkItem
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.toViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
@@ -77,6 +80,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
 
         `when`(interactor.settings()).thenReturn(emptyFlow())
         `when`(interactor.sortOrder()).thenReturn(emptyFlow())
+        `when`(interactor.currentTranslation()).thenReturn(emptyFlow())
 
         annotatedVersesViewHolder = AnnotatedVersesViewHolder(annotatedVerseListView)
         baseAnnotatedVersesPresenter = TestAnnotatedVersePresenter(activity, navigator, interactor, testDispatcher)
@@ -102,29 +106,49 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testPrepareItems() = testDispatcher.runBlockingTest {
+    fun testLoadWithEmptyVerseAnnotation() = testDispatcher.runBlockingTest {
         val title = "random title"
-        `when`(interactor.verseAnnotations(anyInt())).thenReturn(viewData { emptyList<TestVerseAnnotation>() })
         `when`(activity.getString(anyInt())).thenReturn(title)
+        `when`(interactor.sortOrder()).thenReturn(flowOf(Constants.SORT_BY_DATE).toViewData())
+        `when`(interactor.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName).toViewData())
+        `when`(interactor.verseAnnotations(anyInt())).thenReturn(viewData { emptyList<TestVerseAnnotation>() })
 
-        assertEquals(listOf(TextItem(title)), baseAnnotatedVersesPresenter.prepareItems(Constants.SORT_BY_DATE))
-        assertEquals(listOf(TextItem(title)), baseAnnotatedVersesPresenter.prepareItems(Constants.SORT_BY_BOOK))
+        baseAnnotatedVersesPresenter.start()
+
+        with(inOrder(interactor, annotatedVerseListView)) {
+            verify(interactor, times(1)).updateLoadingState(ViewData.loading())
+            verify(annotatedVerseListView, times(1)).visibility = View.GONE
+            verify(annotatedVerseListView, times(1)).setItems(listOf(TextItem(title)))
+            verify(annotatedVerseListView, times(1)).fadeIn()
+            verify(interactor, times(1)).updateLoadingState(ViewData.success(null))
+        }
+
+        baseAnnotatedVersesPresenter.stop()
     }
 
     @Test
-    fun testToBaseItemsByDate() = testDispatcher.runBlockingTest {
-        val bookNames = MockContents.kjvBookNames
-        val bookShortNames = MockContents.kjvBookShortNames
-        `when`(interactor.bookNames()).thenReturn(viewData { bookNames })
-        `when`(interactor.bookShortNames()).thenReturn(viewData { bookShortNames })
-        `when`(interactor.verses(any())).then { invocation ->
-            val verses = hashMapOf<VerseIndex, Verse>()
-            (invocation.arguments[0] as List<VerseIndex>).forEach { verseIndex ->
-                verses[verseIndex] = MockContents.kjvVerses[verseIndex.verseIndex]
-            }
-            return@then viewData { verses }
-        }
+    fun testLoadWithException() = testDispatcher.runBlockingTest {
+        val exception = RuntimeException("random exception")
+        `when`(interactor.verseAnnotations(anyInt())).thenThrow(exception)
+        `when`(interactor.sortOrder()).thenReturn(flowOf(Constants.SORT_BY_DATE).toViewData())
+        `when`(interactor.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName).toViewData())
 
+        baseAnnotatedVersesPresenter.start()
+
+        with(inOrder(interactor, annotatedVerseListView)) {
+            verify(interactor, times(1)).updateLoadingState(ViewData.loading())
+            verify(annotatedVerseListView, times(1)).visibility = View.GONE
+            verify(interactor, times(1)).updateLoadingState(ViewData.error(exception = exception))
+        }
+        verify(annotatedVerseListView, never()).setItems(any())
+        verify(annotatedVerseListView, never()).fadeIn()
+        verify(interactor, never()).updateLoadingState(ViewData.success(null))
+
+        baseAnnotatedVersesPresenter.stop()
+    }
+
+    @Test
+    fun testToBaseItemsByDate() {
         val expected = listOf(
                 TitleItem("", false),
                 BookmarkItem(VerseIndex(0, 0, 4), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[4].text.text, Constants.SORT_BY_DATE, baseAnnotatedVersesPresenter::openVerse),
@@ -140,25 +164,18 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
                     TestVerseAnnotation(VerseIndex(0, 0, 1), 36L * 3600L * 1000L),
                     TestVerseAnnotation(VerseIndex(0, 0, 3), 36L * 3600L * 1000L - 1000L),
                     TestVerseAnnotation(VerseIndex(0, 0, 2), 0L)
-            ).toBaseItemsByDate()
+            ).toBaseItemsByDate(MockContents.kjvBookNames, MockContents.kjvBookShortNames, mapOf(
+                    Pair(VerseIndex(0, 0, 4), MockContents.kjvVerses[4]),
+                    Pair(VerseIndex(0, 0, 1), MockContents.kjvVerses[1]),
+                    Pair(VerseIndex(0, 0, 3), MockContents.kjvVerses[3]),
+                    Pair(VerseIndex(0, 0, 2), MockContents.kjvVerses[2])
+            ))
         }
         assertEquals(expected, actual)
     }
 
     @Test
-    fun testToBaseItemsByBook() = testDispatcher.runBlockingTest {
-        val bookNames = MockContents.kjvBookNames
-        val bookShortNames = MockContents.kjvBookShortNames
-        `when`(interactor.bookNames()).thenReturn(viewData { bookNames })
-        `when`(interactor.bookShortNames()).thenReturn(viewData { bookShortNames })
-        `when`(interactor.verses(any())).then { invocation ->
-            val verses = hashMapOf<VerseIndex, Verse>()
-            (invocation.arguments[0] as List<VerseIndex>).forEach { verseIndex ->
-                verses[verseIndex] = MockContents.kjvVerses[verseIndex.verseIndex]
-            }
-            return@then viewData { verses }
-        }
-
+    fun testToBaseItemsByBook() {
         val expected = listOf(
                 TitleItem(MockContents.kjvBookNames[0], false),
                 BookmarkItem(VerseIndex(0, 0, 2), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], MockContents.kjvVerses[2].text.text, Constants.SORT_BY_BOOK, baseAnnotatedVersesPresenter::openVerse),
@@ -168,7 +185,10 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
             listOf(
                     TestVerseAnnotation(VerseIndex(0, 0, 2), 0L),
                     TestVerseAnnotation(VerseIndex(0, 0, 4), 2L * 365L * 24L * 3600L * 1000L)
-            ).toBaseItemsByBook()
+            ).toBaseItemsByBook(MockContents.kjvBookNames, MockContents.kjvBookShortNames, mapOf(
+                    Pair(VerseIndex(0, 0, 2), MockContents.kjvVerses[2]),
+                    Pair(VerseIndex(0, 0, 4), MockContents.kjvVerses[4])
+            ))
         }
         assertEquals(expected, actual)
     }
