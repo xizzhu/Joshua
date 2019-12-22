@@ -34,7 +34,6 @@ class TranslationDaoTest : BaseSqliteTest() {
     fun testReadNonExistTranslation() {
         assertTrue(androidDatabase.translationDao.read("not_exist", 0, 0).isEmpty())
         assertTrue(androidDatabase.translationDao.read("not_exist", listOf(), 0, 0).isEmpty())
-        assertFalse(androidDatabase.translationDao.read("not_exist", VerseIndex(0, 0, 0)).isValid())
         assertTrue(androidDatabase.translationDao.read("not_exist", listOf()).isEmpty())
     }
 
@@ -128,11 +127,6 @@ class TranslationDaoTest : BaseSqliteTest() {
     fun testSaveThenReadByVerseIndex() {
         saveKjv()
         saveCuv()
-
-        assertEquals(MockContents.kjvVerses[0], androidDatabase.translationDao.read(
-                MockContents.kjvShortName, VerseIndex(0, 0, 0)))
-        assertFalse(androidDatabase.translationDao.read(MockContents.kjvShortName, VerseIndex(1, 1, 1)).isValid())
-        assertFalse(androidDatabase.translationDao.read(MockContents.kjvShortName, VerseIndex(-1, -1, -1)).isValid())
 
         assertTrue(
                 androidDatabase.translationDao.read(MockContents.kjvShortName,

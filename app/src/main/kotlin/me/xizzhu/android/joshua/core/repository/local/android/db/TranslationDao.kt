@@ -94,15 +94,6 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
             }
 
     @WorkerThread
-    fun read(translationShortName: String, verseIndex: VerseIndex): Verse = db.withTransaction {
-        if (!hasTableAndLogIfNoTable(translationShortName)) return@withTransaction Verse.INVALID
-
-        select(translationShortName, COLUMN_TEXT) {
-            (COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)
-        }.firstOrDefault(Verse.INVALID) { Verse(verseIndex, Verse.Text(translationShortName, it.getString(COLUMN_TEXT)), emptyList()) }
-    }
-
-    @WorkerThread
     fun read(translationShortName: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse> = db.withTransaction {
         if (!hasTableAndLogIfNoTable(translationShortName)) return@withTransaction emptyMap()
 
