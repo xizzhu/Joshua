@@ -41,18 +41,10 @@ class SearchToolbarPresenter(private val searchActivity: SearchActivity,
 
     @VisibleForTesting
     val onQueryTextListener = object : SearchView.OnQueryTextListener {
-        private var currentQuery: String = ""
-
         override fun onQueryTextSubmit(query: String): Boolean {
-            // Seems there's a bug inside SearchView.mOnEditorActionListener that onEditorAction()
-            // will be called both when the key is down and when the key is up.
-            // Therefore, if the query is the same, we do nothing.
-            if (currentQuery != query) {
-                searchRecentSuggestions.saveRecentQuery(query, null)
-                interactor.updateQuery(query)
-                viewHolder?.searchToolbar?.hideKeyboard()
-                currentQuery = query
-            }
+            searchRecentSuggestions.saveRecentQuery(query, null)
+            interactor.updateQuery(query)
+            viewHolder?.searchToolbar?.hideKeyboard()
 
             return true
         }
