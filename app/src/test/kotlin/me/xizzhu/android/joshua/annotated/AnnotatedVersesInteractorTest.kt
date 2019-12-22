@@ -17,11 +17,13 @@
 package me.xizzhu.android.joshua.annotated
 
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
+import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
@@ -50,21 +52,12 @@ class AnnotatedVersesInteractorTest : BaseUnitTest() {
 
     @Test
     fun testCurrentTranslation() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(""))
+        `when`(bibleReadingManager.currentTranslation())
+                .thenReturn(flowOf("", MockContents.kjvShortName, "", "", MockContents.cuvShortName, "", MockContents.bbeShortName))
 
-        annotatedVersesInteractor.start()
-        verify(bibleReadingManager, times(1)).currentTranslation()
-
-        assertEquals("", annotatedVersesInteractor.currentTranslation())
-        verify(bibleReadingManager, times(2)).currentTranslation()
-
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
-        assertEquals(MockContents.kjvShortName, annotatedVersesInteractor.currentTranslation())
-        verify(bibleReadingManager, times(3)).currentTranslation()
-
-        assertEquals(MockContents.kjvShortName, annotatedVersesInteractor.currentTranslation())
-        verify(bibleReadingManager, times(3)).currentTranslation()
-
-        annotatedVersesInteractor.stop()
+        assertEquals(
+                listOf(viewData { MockContents.kjvShortName }, viewData { MockContents.cuvShortName }, viewData { MockContents.bbeShortName }),
+                annotatedVersesInteractor.currentTranslation().toList()
+        )
     }
 }

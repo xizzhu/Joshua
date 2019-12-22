@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.*
@@ -53,53 +54,51 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
         super.onStart()
 
         interactor.settings().onEachSuccess { viewHolder?.annotatedVerseListView?.setSettings(it) }.launchIn(coroutineScope)
-        interactor.sortOrder().onEachSuccess { load(it) }.launchIn(coroutineScope)
+
+        interactor.sortOrder().combineOnSuccess(interactor.currentTranslation()) { sortOrder, currentTranslation ->
+            load(sortOrder, currentTranslation)
+        }.launchIn(coroutineScope)
     }
 
-    private fun load(@Constants.SortOrder sortOrder: Int) {
-        coroutineScope.launch {
-            try {
-                interactor.updateLoadingState(ViewData.loading())
-                viewHolder?.annotatedVerseListView?.run {
-                    visibility = View.GONE
-                    setItems(prepareItems(sortOrder))
-                    fadeIn()
-                }
-                interactor.updateLoadingState(ViewData.success(null))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to load annotated verses", e)
-                interactor.updateLoadingState(ViewData.error(exception = e))
-                DialogHelper.showDialog(activity, true, R.string.dialog_load_annotated_verses_error,
-                        DialogInterface.OnClickListener { _, _ -> load(sortOrder) })
+    private suspend fun load(@Constants.SortOrder sortOrder: Int, currentTranslation: String) {
+        try {
+            interactor.updateLoadingState(ViewData.loading())
+            viewHolder?.annotatedVerseListView?.run {
+                visibility = View.GONE
+                setItems(prepareItems(sortOrder, currentTranslation))
+                fadeIn()
             }
+            interactor.updateLoadingState(ViewData.success(null))
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to load annotated verses", e)
+            interactor.updateLoadingState(ViewData.error(exception = e))
+            DialogHelper.showDialog(activity, true, R.string.dialog_load_annotated_verses_error,
+                    DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { load(sortOrder, currentTranslation) } })
         }
     }
 
-    @VisibleForTesting
-    suspend fun prepareItems(@Constants.SortOrder sortOrder: Int): List<BaseItem> {
+    private suspend fun prepareItems(@Constants.SortOrder sortOrder: Int, currentTranslation: String): List<BaseItem> {
         val verseAnnotations = interactor.verseAnnotations(sortOrder).dataOnSuccessOrThrow("Failed to load verse annotations")
-        return if (verseAnnotations.isEmpty()) {
-            listOf(TextItem(activity.getString(noItemText)))
-        } else {
-            when (sortOrder) {
-                Constants.SORT_BY_DATE -> verseAnnotations.toBaseItemsByDate()
-                Constants.SORT_BY_BOOK -> verseAnnotations.toBaseItemsByBook()
-                else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
-            }
+        if (verseAnnotations.isEmpty()) return listOf(TextItem(activity.getString(noItemText)))
+
+        val bookNames = interactor.bookNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book names")
+        val bookShortNames = interactor.bookShortNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book short names")
+        val verses = interactor.verses(currentTranslation, verseAnnotations.map { it.verseIndex }).dataOnSuccessOrThrow("Failed to load verse")
+
+        return when (sortOrder) {
+            Constants.SORT_BY_DATE -> verseAnnotations.toBaseItemsByDate(bookNames, bookShortNames, verses)
+            Constants.SORT_BY_BOOK -> verseAnnotations.toBaseItemsByBook(bookNames, bookShortNames, verses)
+            else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
         }
     }
 
     @VisibleForTesting
-    suspend fun List<V>.toBaseItemsByDate(): List<BaseItem> {
-        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
-        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
-
+    fun List<V>.toBaseItemsByDate(bookNames: List<String>, bookShortNames: List<String>, verses: Map<VerseIndex, Verse>): List<BaseItem> {
         val calendar = Calendar.getInstance()
         var previousYear = -1
         var previousDayOfYear = -1
 
         val items: ArrayList<BaseItem> = ArrayList()
-        val verses = interactor.verses(map { it.verseIndex }).dataOnSuccessOrThrow("Failed to load verse")
         forEach { verseAnnotation ->
             calendar.timeInMillis = verseAnnotation.timestamp
             val currentYear = calendar.get(Calendar.YEAR)
@@ -122,12 +121,8 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
     protected abstract fun V.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem
 
     @VisibleForTesting
-    suspend fun List<V>.toBaseItemsByBook(): List<BaseItem> {
-        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
-        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
-
+    fun List<V>.toBaseItemsByBook(bookNames: List<String>, bookShortNames: List<String>, verses: Map<VerseIndex, Verse>): List<BaseItem> {
         val items: ArrayList<BaseItem> = ArrayList()
-        val verses = interactor.verses(map { it.verseIndex }).dataOnSuccessOrThrow("Failed to load verse")
         var currentBookIndex = -1
         forEach { verseAnnotation ->
             val bookName = bookNames[verseAnnotation.verseIndex.bookIndex]
