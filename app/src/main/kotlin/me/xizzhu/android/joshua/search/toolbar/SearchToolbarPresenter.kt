@@ -46,7 +46,8 @@ class SearchToolbarPresenter(private val searchActivity: SearchActivity,
             interactor.submitQuery(query)
             viewHolder?.searchToolbar?.hideKeyboard()
 
-            return true
+            // so that the system can close the search suggestion
+            return false
         }
 
         override fun onQueryTextChange(newText: String): Boolean {
