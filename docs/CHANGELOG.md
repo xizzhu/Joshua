@@ -13,8 +13,9 @@ CHANGELOG
   - Caught OutOfMemoryError when it fails to restore
   - Should start / stop reading progress tracking on resume / pause
   - Properly checked if root exception is JobCancellationException
-- Refactoring:
+- Improvements:
   - Better organized managers and repositories
+  - Read verses in verse annotation presenter in batch
 - Updated dependencies:
   - Dagger to 2.25.3
   - Mockito to 3.2.4

@@ -34,7 +34,7 @@ class TranslationDaoTest : BaseSqliteTest() {
     fun testReadNonExistTranslation() {
         assertTrue(androidDatabase.translationDao.read("not_exist", 0, 0).isEmpty())
         assertTrue(androidDatabase.translationDao.read("not_exist", listOf(), 0, 0).isEmpty())
-        assertFalse(androidDatabase.translationDao.read("not_exist", VerseIndex(0, 0, 0)).isValid())
+        assertTrue(androidDatabase.translationDao.read("not_exist", listOf()).isEmpty())
     }
 
     @Test
@@ -128,10 +128,40 @@ class TranslationDaoTest : BaseSqliteTest() {
         saveKjv()
         saveCuv()
 
-        assertEquals(MockContents.kjvVerses[0], androidDatabase.translationDao.read(
-                MockContents.kjvShortName, VerseIndex(0, 0, 0)))
-        assertFalse(androidDatabase.translationDao.read(MockContents.kjvShortName, VerseIndex(1, 1, 1)).isValid())
-        assertFalse(androidDatabase.translationDao.read(MockContents.kjvShortName, VerseIndex(-1, -1, -1)).isValid())
+        assertTrue(
+                androidDatabase.translationDao.read(MockContents.kjvShortName,
+                        listOf(
+                                VerseIndex(1, 1, 1),
+                                VerseIndex(-1, -1, -1)
+                        )
+                ).isEmpty()
+        )
+        assertEquals(
+                mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0])),
+                androidDatabase.translationDao.read(
+                        MockContents.kjvShortName,
+                        listOf(
+                                VerseIndex(1, 1, 1),
+                                VerseIndex(0, 0, 0),
+                                VerseIndex(-1, -1, -1)
+                        )
+                )
+        )
+        assertEquals(
+                mapOf(
+                        Pair(VerseIndex(0, 0, 2), MockContents.kjvVerses[2]),
+                        Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0])
+                ),
+                androidDatabase.translationDao.read(
+                        MockContents.kjvShortName,
+                        listOf(
+                                VerseIndex(1, 1, 1),
+                                VerseIndex(0, 0, 0),
+                                VerseIndex(-1, -1, -1),
+                                VerseIndex(0, 0, 2)
+                        )
+                )
+        )
     }
 
     @Test

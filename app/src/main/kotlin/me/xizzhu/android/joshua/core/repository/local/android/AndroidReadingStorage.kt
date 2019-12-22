@@ -85,8 +85,8 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
         androidDatabase.translationDao.read(translationShortName, parallelTranslations, bookIndex, chapterIndex)
     }
 
-    override suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse = withContext(Dispatchers.IO) {
-        androidDatabase.translationDao.read(translationShortName, verseIndex)
+    override suspend fun readVerses(translationShortName: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse> = withContext(Dispatchers.IO) {
+        androidDatabase.translationDao.read(translationShortName, verseIndexes)
     }
 
     override suspend fun search(translationShortName: String, query: String): List<Verse> = withContext(Dispatchers.IO) {

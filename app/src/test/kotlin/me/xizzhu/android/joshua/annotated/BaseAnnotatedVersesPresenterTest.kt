@@ -117,8 +117,12 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         val bookShortNames = MockContents.kjvBookShortNames
         `when`(interactor.bookNames()).thenReturn(viewData { bookNames })
         `when`(interactor.bookShortNames()).thenReturn(viewData { bookShortNames })
-        `when`(interactor.verse(any())).then { invocation ->
-            return@then viewData { MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex] }
+        `when`(interactor.verses(any())).then { invocation ->
+            val verses = hashMapOf<VerseIndex, Verse>()
+            (invocation.arguments[0] as List<VerseIndex>).forEach { verseIndex ->
+                verses[verseIndex] = MockContents.kjvVerses[verseIndex.verseIndex]
+            }
+            return@then viewData { verses }
         }
 
         val expected = listOf(
@@ -147,8 +151,12 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         val bookShortNames = MockContents.kjvBookShortNames
         `when`(interactor.bookNames()).thenReturn(viewData { bookNames })
         `when`(interactor.bookShortNames()).thenReturn(viewData { bookShortNames })
-        `when`(interactor.verse(any())).then { invocation ->
-            return@then viewData { MockContents.kjvVerses[(invocation.arguments[0] as VerseIndex).verseIndex] }
+        `when`(interactor.verses(any())).then { invocation ->
+            val verses = hashMapOf<VerseIndex, Verse>()
+            (invocation.arguments[0] as List<VerseIndex>).forEach { verseIndex ->
+                verses[verseIndex] = MockContents.kjvVerses[verseIndex.verseIndex]
+            }
+            return@then viewData { verses }
         }
 
         val expected = listOf(
