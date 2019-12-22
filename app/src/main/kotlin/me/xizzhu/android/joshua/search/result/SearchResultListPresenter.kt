@@ -22,7 +22,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -50,8 +50,42 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
     @UiThread
     override fun onStart() {
         super.onStart()
+        observeSettings()
+        observeQuery()
+    }
+
+    private fun observeSettings() {
         interactor.settings().onEachSuccess { viewHolder?.searchResultListView?.setSettings(it) }.launchIn(coroutineScope)
-        interactor.query().onEachSuccess { search(it) }.launchIn(coroutineScope)
+    }
+
+    private fun observeQuery() {
+        interactor.query()
+                .debounce(250L)
+                .distinctUntilChangedBy { if (it.status == ViewData.STATUS_ERROR) "" else it.data!! }
+                .mapLatest { viewData ->
+                    when (viewData.status) {
+                        ViewData.STATUS_LOADING -> instantSearch(viewData.data!!)
+                        ViewData.STATUS_SUCCESS -> search(viewData.dataOnSuccessOrThrow("Missing query when observing"))
+                        ViewData.STATUS_ERROR -> {
+                            Log.e(tag, "Error occurred while observing query",
+                                    viewData.exception
+                                            ?: RuntimeException("Error occurred while observing query"))
+                        }
+                    }
+                }.launchIn(coroutineScope)
+    }
+
+    @VisibleForTesting
+    suspend fun instantSearch(query: String) {
+        try {
+            viewHolder?.searchResultListView?.run {
+                setItems(interactor.search(query).dataOnSuccessOrThrow("Failed to search verses").toSearchItems(query))
+                scrollToPosition(0)
+                visibility = View.VISIBLE
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to search verses", e)
+        }
     }
 
     @VisibleForTesting

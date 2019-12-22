@@ -43,13 +43,16 @@ class SearchToolbarPresenter(private val searchActivity: SearchActivity,
     val onQueryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String): Boolean {
             searchRecentSuggestions.saveRecentQuery(query, null)
-            interactor.updateQuery(query)
+            interactor.submitQuery(query)
             viewHolder?.searchToolbar?.hideKeyboard()
 
             return true
         }
 
-        override fun onQueryTextChange(newText: String): Boolean = false
+        override fun onQueryTextChange(newText: String): Boolean {
+            interactor.updateQuery(newText)
+            return true
+        }
     }
 
     @UiThread

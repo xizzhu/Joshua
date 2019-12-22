@@ -32,6 +32,10 @@ class SearchToolbarInteractor(dispatcher: CoroutineDispatcher = Dispatchers.Defa
     fun query(): Flow<ViewData<String>> = query.asFlow()
 
     fun updateQuery(query: String) {
+        this.query.offer(ViewData.loading(query))
+    }
+
+    fun submitQuery(query: String) {
         this.query.offer(ViewData.success(query))
     }
 }
