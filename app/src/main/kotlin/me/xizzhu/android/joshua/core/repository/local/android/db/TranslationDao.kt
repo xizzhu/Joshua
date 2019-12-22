@@ -103,6 +103,28 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun read(translationShortName: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse> = db.withTransaction {
+        if (!hasTableAndLogIfNoTable(translationShortName)) return@withTransaction emptyMap()
+
+        val verses = hashMapOf<VerseIndex, Verse>()
+        select(translationShortName) {
+            var condition: Condition = noOp()
+            verseIndexes.forEach { verseIndex ->
+                ((COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and
+                        (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and
+                        (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)).run {
+                    condition = if (condition == Condition.NoOp) this else condition or this
+                }
+            }
+            condition
+        }.forEach { row ->
+            val verseIndex = VerseIndex(row.getInt(COLUMN_BOOK_INDEX), row.getInt(COLUMN_CHAPTER_INDEX), row.getInt(COLUMN_VERSE_INDEX))
+            verses[verseIndex] = Verse(verseIndex, Verse.Text(translationShortName, row.getString(COLUMN_TEXT)), emptyList())
+        }
+        verses
+    }
+
+    @WorkerThread
     fun search(translationShortName: String, query: String): List<Verse> = db.withTransaction {
         if (query.isBlank() || !hasTableAndLogIfNoTable(translationShortName)) return@withTransaction emptyList()
 

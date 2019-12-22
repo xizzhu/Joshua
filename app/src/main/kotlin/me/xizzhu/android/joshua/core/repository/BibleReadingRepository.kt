@@ -123,6 +123,9 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
                            bookIndex: Int, chapterIndex: Int): List<Verse> =
             localReadingStorage.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
 
+    suspend fun readVerses(translationShortName: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse> =
+            localReadingStorage.readVerses(translationShortName, verseIndexes)
+
     suspend fun readVerse(translationShortName: String, verseIndex: VerseIndex): Verse =
             localReadingStorage.readVerse(translationShortName, verseIndex)
 
