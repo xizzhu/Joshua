@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -37,10 +38,19 @@ class SearchToolbarInteractorTest : BaseUnitTest() {
 
     @Test
     fun testUpdateQuery() = testDispatcher.runBlockingTest {
-        val queryAsync = async { searchToolbarInteractor.query().take(3).map { it.data }.toList() }
+        val queryAsync = async { searchToolbarInteractor.query().take(3).toList() }
 
         val queries = listOf("query 1", "", "another one")
         queries.forEach { searchToolbarInteractor.updateQuery(it) }
-        assertEquals(queries, queryAsync.await())
+        assertEquals(queries.map { ViewData.loading(it) }, queryAsync.await())
+    }
+
+    @Test
+    fun testSubmitQuery() = testDispatcher.runBlockingTest {
+        val queryAsync = async { searchToolbarInteractor.query().take(3).toList() }
+
+        val queries = listOf("query 1", "", "another one")
+        queries.forEach { searchToolbarInteractor.submitQuery(it) }
+        assertEquals(queries.map { ViewData.success(it) }, queryAsync.await())
     }
 }

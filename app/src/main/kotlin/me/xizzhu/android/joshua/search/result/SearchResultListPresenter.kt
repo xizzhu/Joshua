@@ -22,7 +22,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -50,34 +50,65 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
     @UiThread
     override fun onStart() {
         super.onStart()
-        interactor.settings().onEachSuccess { viewHolder?.searchResultListView?.setSettings(it) }.launchIn(coroutineScope)
-        interactor.query().onEachSuccess { search(it) }.launchIn(coroutineScope)
+        observeSettings()
+        observeQuery()
     }
 
-    @VisibleForTesting
-    fun search(query: String) {
-        coroutineScope.launch {
-            try {
-                interactor.updateLoadingState(ViewData.loading())
+    private fun observeSettings() {
+        interactor.settings().onEachSuccess { viewHolder?.searchResultListView?.setSettings(it) }.launchIn(coroutineScope)
+    }
 
-                viewHolder?.searchResultListView?.run {
-                    visibility = View.GONE
+    private fun observeQuery() {
+        interactor.query()
+                .debounce(250L)
+                .distinctUntilChangedBy { if (it.status == ViewData.STATUS_ERROR) "" else it.data!! }
+                .mapLatest { viewData ->
+                    when (viewData.status) {
+                        ViewData.STATUS_LOADING -> instantSearch(viewData.data!!)
+                        ViewData.STATUS_SUCCESS -> search(viewData.dataOnSuccessOrThrow("Missing query when observing"))
+                        ViewData.STATUS_ERROR -> {
+                            Log.e(tag, "Error occurred while observing query",
+                                    viewData.exception
+                                            ?: RuntimeException("Error occurred while observing query"))
+                        }
+                    }
+                }.launchIn(coroutineScope)
+    }
 
-                    val verses = interactor.search(query).dataOnSuccessOrThrow("Failed to search verses")
-                    setItems(verses.toSearchItems(query))
-
-                    scrollToPosition(0)
-                    fadeIn()
-                    ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size))
-                }
-
-                interactor.updateLoadingState(ViewData.success(null))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to search verses", e)
-                interactor.updateLoadingState(ViewData.error(exception = e))
-                DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
-                        DialogInterface.OnClickListener { _, _ -> search(query) })
+    private suspend fun instantSearch(query: String) {
+        try {
+            viewHolder?.searchResultListView?.run {
+                setItems(interactor.search(query).dataOnSuccessOrThrow("Failed to search verses").toSearchItems(query))
+                scrollToPosition(0)
+                visibility = View.VISIBLE
             }
+        } catch (e: Exception) {
+            viewHolder?.searchResultListView?.visibility = View.GONE
+            Log.e(tag, "Failed to search verses", e)
+        }
+    }
+
+    private suspend fun search(query: String) {
+        try {
+            interactor.updateLoadingState(ViewData.loading())
+
+            viewHolder?.searchResultListView?.run {
+                visibility = View.GONE
+
+                val verses = interactor.search(query).dataOnSuccessOrThrow("Failed to search verses")
+                setItems(verses.toSearchItems(query))
+
+                scrollToPosition(0)
+                fadeIn()
+                ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size))
+            }
+
+            interactor.updateLoadingState(ViewData.success(null))
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to search verses", e)
+            interactor.updateLoadingState(ViewData.error(exception = e))
+            DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
+                    DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { search(query) } })
         }
     }
 

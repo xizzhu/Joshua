@@ -16,8 +16,10 @@
 
 package me.xizzhu.android.joshua.search.result
 
+import android.view.View
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -88,9 +90,21 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSearch() = testDispatcher.runBlockingTest {
+    fun testObserveQueryWithError() = testDispatcher.runBlockingTest {
+        `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.error()))
+
+        searchResultListPresenter.start()
+
+        verify(searchResultListView, never()).setItems(any())
+
+        searchResultListPresenter.stop()
+    }
+
+    @Test
+    fun testInstantSearch() = testDispatcher.runBlockingTest {
         val query = "query"
         val verses = MockContents.kjvVerses
+        `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.loading(query)))
         `when`(searchResultInteractor.search(query)).thenReturn(ViewData.success(verses))
         `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
         `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
@@ -98,7 +112,42 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
         searchResultListPresenter.start()
 
-        searchResultListPresenter.search(query)
+        with(inOrder(searchResultListView)) {
+            verify(searchResultListView, times(1)).setItems(any())
+            verify(searchResultListView, times(1)).scrollToPosition(0)
+            verify(searchResultListView, times(1)).visibility = View.VISIBLE
+        }
+
+        searchResultListPresenter.stop()
+    }
+
+    @Test
+    fun testInstantSearchWithException() = testDispatcher.runBlockingTest {
+        val query = "query"
+        val exception = RuntimeException("Random exception")
+        `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.loading(query)))
+        `when`(searchResultInteractor.search(query)).thenThrow(exception)
+
+        searchResultListPresenter.start()
+
+        verify(searchResultListView, times(1)).visibility = View.GONE
+        verify(searchResultListView, never()).setItems(any())
+
+        searchResultListPresenter.stop()
+    }
+
+    @Test
+    fun testSearch() = testDispatcher.runBlockingTest {
+        val query = "query"
+        val verses = MockContents.kjvVerses
+        `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.success(query)))
+        `when`(searchResultInteractor.search(query)).thenReturn(ViewData.success(verses))
+        `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
+        `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
+        `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
+
+        searchResultListPresenter.start()
+
         with(inOrder(searchResultInteractor, searchResultListView)) {
             verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.loading())
             verify(searchResultListView, times(1)).setItems(any())
@@ -113,11 +162,11 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     fun testSearchWithException() = testDispatcher.runBlockingTest {
         val query = "query"
         val exception = RuntimeException("Random exception")
+        `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.success(query)))
         `when`(searchResultInteractor.search(query)).thenThrow(exception)
 
         searchResultListPresenter.start()
 
-        searchResultListPresenter.search(query)
         with(inOrder(searchResultInteractor, searchResultListView)) {
             verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.loading())
             verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.error(exception = exception))

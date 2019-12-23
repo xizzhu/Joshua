@@ -6,6 +6,7 @@ CHANGELOG
   - Saved parallel translations to disk
   - Supported cancelling translation downloading
   - Supported search history
+  - Supported instant search
   - Supported hiding search button
 - Bug fixes:
   - Should close verse detail when changing current verse index
