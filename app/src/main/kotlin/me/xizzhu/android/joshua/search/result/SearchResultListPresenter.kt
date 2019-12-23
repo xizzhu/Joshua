@@ -75,8 +75,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                 }.launchIn(coroutineScope)
     }
 
-    @VisibleForTesting
-    suspend fun instantSearch(query: String) {
+    private suspend fun instantSearch(query: String) {
         try {
             viewHolder?.searchResultListView?.run {
                 setItems(interactor.search(query).dataOnSuccessOrThrow("Failed to search verses").toSearchItems(query))
@@ -89,30 +88,27 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
         }
     }
 
-    @VisibleForTesting
-    fun search(query: String) {
-        coroutineScope.launch {
-            try {
-                interactor.updateLoadingState(ViewData.loading())
+    private suspend fun search(query: String) {
+        try {
+            interactor.updateLoadingState(ViewData.loading())
 
-                viewHolder?.searchResultListView?.run {
-                    visibility = View.GONE
+            viewHolder?.searchResultListView?.run {
+                visibility = View.GONE
 
-                    val verses = interactor.search(query).dataOnSuccessOrThrow("Failed to search verses")
-                    setItems(verses.toSearchItems(query))
+                val verses = interactor.search(query).dataOnSuccessOrThrow("Failed to search verses")
+                setItems(verses.toSearchItems(query))
 
-                    scrollToPosition(0)
-                    fadeIn()
-                    ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size))
-                }
-
-                interactor.updateLoadingState(ViewData.success(null))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to search verses", e)
-                interactor.updateLoadingState(ViewData.error(exception = e))
-                DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
-                        DialogInterface.OnClickListener { _, _ -> search(query) })
+                scrollToPosition(0)
+                fadeIn()
+                ToastHelper.showToast(searchActivity, searchActivity.getString(R.string.toast_verses_searched, verses.size))
             }
+
+            interactor.updateLoadingState(ViewData.success(null))
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to search verses", e)
+            interactor.updateLoadingState(ViewData.error(exception = e))
+            DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
+                    DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { search(query) } })
         }
     }
 
