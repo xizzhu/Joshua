@@ -19,8 +19,8 @@ package me.xizzhu.android.joshua.annotated
 import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotation
@@ -36,6 +36,6 @@ class AnnotatedVersesViewModel<V : VerseAnnotation>(settingsManager: SettingsMan
     @UiThread
     override fun onStart() {
         super.onStart()
-        coroutineScope.launch { annotatedVersesInteractor.loadingState().collect { loadingSpinnerInteractor.updateLoadingState(it) } }
+        annotatedVersesInteractor.loadingState().onEach { loadingSpinnerInteractor.updateLoadingState(it) }.launchIn(coroutineScope)
     }
 }

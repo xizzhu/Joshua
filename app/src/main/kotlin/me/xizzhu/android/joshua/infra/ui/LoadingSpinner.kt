@@ -23,8 +23,8 @@ import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
@@ -52,14 +52,12 @@ class LoadingSpinnerPresenter(interactor: LoadingSpinnerInteractor,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch(Dispatchers.Main) {
-            interactor.loadingState().collect { loadingState ->
-                when (loadingState.status) {
-                    ViewData.STATUS_SUCCESS -> viewHolder?.loadingSpinner?.visibility = View.GONE
-                    ViewData.STATUS_ERROR -> viewHolder?.loadingSpinner?.visibility = View.GONE
-                    ViewData.STATUS_LOADING -> viewHolder?.loadingSpinner?.fadeIn()
-                }
+        interactor.loadingState().onEach { loadingState ->
+            when (loadingState.status) {
+                ViewData.STATUS_SUCCESS -> viewHolder?.loadingSpinner?.visibility = View.GONE
+                ViewData.STATUS_ERROR -> viewHolder?.loadingSpinner?.visibility = View.GONE
+                ViewData.STATUS_LOADING -> viewHolder?.loadingSpinner?.fadeIn()
             }
-        }
+        }.launchIn(coroutineScope)
     }
 }

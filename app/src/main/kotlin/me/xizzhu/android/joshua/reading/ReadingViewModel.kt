@@ -21,8 +21,9 @@ import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgressManager
@@ -75,8 +76,8 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
     override fun onStart() {
         super.onStart()
 
-        coroutineScope.launch { verseInteractor.verseDetailRequest().collect { verseDetailInteractor.requestVerseDetail(it) } }
-        coroutineScope.launch { verseDetailInteractor.verseUpdates().collect { verseInteractor.updateVerse(it) } }
+        verseInteractor.verseDetailRequest().onEach { verseDetailInteractor.requestVerseDetail(it) }.launchIn(coroutineScope)
+        verseDetailInteractor.verseUpdates().onEach { verseInteractor.updateVerse(it) }.launchIn(coroutineScope)
     }
 
     @UiThread
