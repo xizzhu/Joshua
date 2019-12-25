@@ -18,14 +18,21 @@ package me.xizzhu.android.joshua.infra.arch
 
 import androidx.annotation.CallSuper
 import androidx.annotation.UiThread
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.*
 
 abstract class Interactor(dispatcher: CoroutineDispatcher) {
     protected val tag: String = javaClass.simpleName
     protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + dispatcher)
+
+    @UiThread
+    fun create() {
+        onCreate()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onCreate() {
+    }
 
     @UiThread
     fun start() {
@@ -60,11 +67,21 @@ abstract class Interactor(dispatcher: CoroutineDispatcher) {
     @UiThread
     fun stop() {
         onStop()
-        coroutineScope.coroutineContext[Job]?.cancelChildren()
     }
 
     @CallSuper
     @UiThread
     protected open fun onStop() {
+    }
+
+    @UiThread
+    fun destroy() {
+        onDestroy()
+        coroutineScope.cancel()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onDestroy() {
     }
 }
