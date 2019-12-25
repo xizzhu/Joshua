@@ -59,13 +59,6 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
         searchResultViewHolder = SearchResultViewHolder(searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchResultInteractor, testDispatcher)
-        searchResultListPresenter.create(searchResultViewHolder)
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        searchResultListPresenter.destroy()
-        super.tearDown()
     }
 
     @Test
@@ -77,7 +70,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         )
         `when`(searchResultInteractor.settings()).thenReturn(flow { settings.forEach { emit(it) } })
 
-        searchResultListPresenter.start()
+        searchResultListPresenter.create(searchResultViewHolder)
         with(inOrder(searchResultViewHolder.searchResultListView)) {
             settings.forEach {
                 if (ViewData.STATUS_SUCCESS == it.status) {
@@ -86,18 +79,18 @@ class SearchResultListPresenterTest : BaseUnitTest() {
             }
         }
 
-        searchResultListPresenter.stop()
+        searchResultListPresenter.destroy()
     }
 
     @Test
     fun testObserveQueryWithError() = testDispatcher.runBlockingTest {
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.error()))
 
-        searchResultListPresenter.start()
+        searchResultListPresenter.create(searchResultViewHolder)
 
         verify(searchResultListView, never()).setItems(any())
 
-        searchResultListPresenter.stop()
+        searchResultListPresenter.destroy()
     }
 
     @Test
@@ -110,7 +103,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
         `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
 
-        searchResultListPresenter.start()
+        searchResultListPresenter.create(searchResultViewHolder)
 
         with(inOrder(searchResultListView)) {
             verify(searchResultListView, times(1)).setItems(any())
@@ -118,7 +111,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
             verify(searchResultListView, times(1)).visibility = View.VISIBLE
         }
 
-        searchResultListPresenter.stop()
+        searchResultListPresenter.destroy()
     }
 
     @Test
@@ -128,12 +121,12 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.loading(query)))
         `when`(searchResultInteractor.search(query)).thenThrow(exception)
 
-        searchResultListPresenter.start()
+        searchResultListPresenter.create(searchResultViewHolder)
 
         verify(searchResultListView, times(1)).visibility = View.GONE
         verify(searchResultListView, never()).setItems(any())
 
-        searchResultListPresenter.stop()
+        searchResultListPresenter.destroy()
     }
 
     @Test
@@ -146,7 +139,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
         `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
 
-        searchResultListPresenter.start()
+        searchResultListPresenter.create(searchResultViewHolder)
 
         with(inOrder(searchResultInteractor, searchResultListView)) {
             verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.loading())
@@ -155,7 +148,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         }
         verify(searchResultInteractor, never()).updateLoadingState(ViewData.error())
 
-        searchResultListPresenter.stop()
+        searchResultListPresenter.destroy()
     }
 
     @Test
@@ -165,7 +158,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.success(query)))
         `when`(searchResultInteractor.search(query)).thenThrow(exception)
 
-        searchResultListPresenter.start()
+        searchResultListPresenter.create(searchResultViewHolder)
 
         with(inOrder(searchResultInteractor, searchResultListView)) {
             verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.loading())
@@ -174,7 +167,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         verify(searchResultListView, never()).setItems(any())
         verify(searchResultInteractor, never()).updateLoadingState(ViewData.success(null))
 
-        searchResultListPresenter.stop()
+        searchResultListPresenter.destroy()
     }
 
     @Test

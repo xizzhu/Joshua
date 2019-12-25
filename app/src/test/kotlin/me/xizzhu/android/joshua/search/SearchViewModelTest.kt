@@ -57,11 +57,11 @@ class SearchViewModelTest : BaseUnitTest() {
         val queries = listOf("query1", "query2", "query3")
         `when`(searchToolbarInteractor.query()).thenReturn(flow { queries.forEach { emit(ViewData.success(it)) } })
 
-        searchViewModel.start()
+        searchViewModel.create()
         with(inOrder(searchResultInteractor)) {
             queries.forEach { query -> verify(searchResultInteractor, times(1)).updateQuery(ViewData.success(query)) }
         }
-        searchViewModel.stop()
+        searchViewModel.destroy()
     }
 
     @Test
@@ -69,10 +69,10 @@ class SearchViewModelTest : BaseUnitTest() {
         val loadingState = listOf(ViewData.error(), ViewData.loading(), ViewData.success(null))
         `when`(searchResultInteractor.loadingState()).thenReturn(flow { loadingState.forEach { emit(it) } })
 
-        searchViewModel.start()
+        searchViewModel.create()
         with(inOrder(loadingSpinnerInteractor)) {
             loadingState.forEach { verify(loadingSpinnerInteractor, times(1)).updateLoadingState(it) }
         }
-        searchViewModel.stop()
+        searchViewModel.destroy()
     }
 }

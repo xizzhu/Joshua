@@ -48,8 +48,8 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                                 dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : BaseSettingsAwarePresenter<SearchResultViewHolder, SearchResultInteractor>(searchResultInteractor, dispatcher) {
     @UiThread
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate(viewHolder: SearchResultViewHolder) {
+        super.onCreate(viewHolder)
         observeSettings()
         observeQuery()
     }
