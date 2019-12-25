@@ -46,8 +46,8 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     private var currentTranslation = ""
 
     @UiThread
-    override fun onBind(viewHolder: ReadingToolbarViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: ReadingToolbarViewHolder) {
+        super.onCreate(viewHolder)
 
         viewHolder.readingToolbar.initialize(
                 onParallelTranslationRequested = { requestParallelTranslation(it) },

@@ -43,12 +43,12 @@ class LoadingSpinnerPresenterTest : BaseUnitTest() {
 
         loadingSpinnerViewHolder = LoadingSpinnerViewHolder(loadingSpinner)
         loadingSpinnerPresenter = LoadingSpinnerPresenter(loadingSpinnerInteractor, testDispatcher)
-        loadingSpinnerPresenter.bind(loadingSpinnerViewHolder)
+        loadingSpinnerPresenter.create(loadingSpinnerViewHolder)
     }
 
     @AfterTest
     override fun tearDown() {
-        loadingSpinnerPresenter.unbind()
+        loadingSpinnerPresenter.destroy()
         super.tearDown()
     }
 

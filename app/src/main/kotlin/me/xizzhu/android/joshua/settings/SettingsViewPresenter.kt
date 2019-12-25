@@ -67,8 +67,8 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     private var backupRestoreDialog: ProgressDialog? = null
 
     @UiThread
-    override fun onBind(viewHolder: SettingsViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: SettingsViewHolder) {
+        super.onCreate(viewHolder)
 
         try {
             viewHolder.version.setDescription(settingsActivity.packageManager.getPackageInfo(settingsActivity.packageName, 0).versionName)

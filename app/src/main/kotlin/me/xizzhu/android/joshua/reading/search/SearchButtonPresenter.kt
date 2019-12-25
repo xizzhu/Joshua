@@ -38,8 +38,8 @@ class SearchButtonPresenter(private val readingActivity: ReadingActivity,
                             dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<SearchButtonViewHolder, SearchButtonInteractor>(searchButtonInteractor, dispatcher) {
     @UiThread
-    override fun onBind(viewHolder: SearchButtonViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: SearchButtonViewHolder) {
+        super.onCreate(viewHolder)
 
         viewHolder.searchButton.setOnClickListener { openSearch() }
     }

@@ -59,8 +59,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     private var updateNoteJob: Job? = null
 
     @UiThread
-    override fun onBind(viewHolder: VerseDetailViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: VerseDetailViewHolder) {
+        super.onCreate(viewHolder)
 
         with(viewHolder.verseDetailViewLayout) {
             setOnClickListener { close() }

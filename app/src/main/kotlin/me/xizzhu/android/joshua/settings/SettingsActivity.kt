@@ -37,7 +37,7 @@ class SettingsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_settings)
-        settingsViewPresenter.bind(SettingsViewHolder(
+        settingsViewPresenter.create(SettingsViewHolder(
                 findViewById(R.id.display), findViewById(R.id.font_size), findViewById(R.id.keep_screen_on),
                 findViewById(R.id.night_mode_on), findViewById(R.id.reading), findViewById(R.id.simple_reading_mode),
                 findViewById(R.id.hide_search_button), findViewById(R.id.backup_restore), findViewById(R.id.backup),

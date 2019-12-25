@@ -48,9 +48,9 @@ class SearchActivity : BaseSettingsAwareActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_search)
-        searchToolbarPresenter.bind(SearchToolbarViewHolder(findViewById(R.id.toolbar)))
-        loadingSpinnerPresenter.bind(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
-        searchResultListPresenter.bind(SearchResultViewHolder(findViewById(R.id.search_result)))
+        searchToolbarPresenter.create(SearchToolbarViewHolder(findViewById(R.id.toolbar)))
+        loadingSpinnerPresenter.create(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
+        searchResultListPresenter.create(SearchResultViewHolder(findViewById(R.id.search_result)))
     }
 
     override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = searchViewModel

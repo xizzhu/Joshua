@@ -47,12 +47,12 @@ class TranslationListPresenterTest : BaseUnitTest() {
 
         translationListViewHolder = TranslationListViewHolder(translationListView)
         translationListPresenter = TranslationListPresenter(translationManagementActivity, translationListInteractor, testDispatcher)
-        translationListPresenter.bind(translationListViewHolder)
+        translationListPresenter.create(translationListViewHolder)
     }
 
     @AfterTest
     override fun tearDown() {
-        translationListPresenter.unbind()
+        translationListPresenter.destroy()
         super.tearDown()
     }
 

@@ -84,12 +84,12 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
 
         annotatedVersesViewHolder = AnnotatedVersesViewHolder(annotatedVerseListView)
         baseAnnotatedVersesPresenter = TestAnnotatedVersePresenter(activity, navigator, interactor, testDispatcher)
-        baseAnnotatedVersesPresenter.bind(annotatedVersesViewHolder)
+        baseAnnotatedVersesPresenter.create(annotatedVersesViewHolder)
     }
 
     @AfterTest
     override fun tearDown() {
-        baseAnnotatedVersesPresenter.unbind()
+        baseAnnotatedVersesPresenter.destroy()
         super.tearDown()
     }
 

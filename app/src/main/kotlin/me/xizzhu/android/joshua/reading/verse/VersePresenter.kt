@@ -122,8 +122,8 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     private var parallelTranslations: List<String> = emptyList()
 
     @UiThread
-    override fun onBind(viewHolder: VerseViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: VerseViewHolder) {
+        super.onCreate(viewHolder)
 
         viewHolder.versePager.setListeners(
                 onChapterSelected = { bookIndex, chapterIndex -> updateCurrentChapter(bookIndex, chapterIndex) },

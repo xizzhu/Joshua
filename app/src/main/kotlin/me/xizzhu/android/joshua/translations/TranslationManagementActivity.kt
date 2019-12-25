@@ -39,8 +39,8 @@ class TranslationManagementActivity : BaseSettingsAwareActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_translation_management)
-        swipeRefreshPresenter.bind(SwipeRefreshViewHolder(findViewById(R.id.swipe_refresher)))
-        translationListPresenter.bind(TranslationListViewHolder(findViewById(R.id.translation_list)))
+        swipeRefreshPresenter.create(SwipeRefreshViewHolder(findViewById(R.id.swipe_refresher)))
+        translationListPresenter.create(TranslationListViewHolder(findViewById(R.id.translation_list)))
     }
 
     override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(swipeRefreshPresenter, translationListPresenter)

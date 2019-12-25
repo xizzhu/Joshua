@@ -57,12 +57,12 @@ class ReadingToolbarPresenterTest : BaseUnitTest() {
 
         readingToolbarViewHolder = ReadingToolbarViewHolder(readingToolbar)
         readingToolbarPresenter = ReadingToolbarPresenter(readingActivity, navigator, readingToolbarInteractor, testDispatcher)
-        readingToolbarPresenter.bind(readingToolbarViewHolder)
+        readingToolbarPresenter.create(readingToolbarViewHolder)
     }
 
     @AfterTest
     override fun tearDown() {
-        readingToolbarPresenter.unbind()
+        readingToolbarPresenter.destroy()
 
         super.tearDown()
     }

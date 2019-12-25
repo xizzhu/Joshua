@@ -60,13 +60,13 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
 
             readingProgressViewHolder = ReadingProgressViewHolder(readingProgressListView)
             readingProgressPresenter = ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressInteractor, testDispatcher)
-            readingProgressPresenter.bind(readingProgressViewHolder)
+            readingProgressPresenter.create(readingProgressViewHolder)
         }
     }
 
     @AfterTest
     override fun tearDown() {
-        readingProgressPresenter.unbind()
+        readingProgressPresenter.destroy()
         super.tearDown()
     }
 

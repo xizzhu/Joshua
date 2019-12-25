@@ -59,12 +59,12 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
         searchResultViewHolder = SearchResultViewHolder(searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchResultInteractor, testDispatcher)
-        searchResultListPresenter.bind(searchResultViewHolder)
+        searchResultListPresenter.create(searchResultViewHolder)
     }
 
     @AfterTest
     override fun tearDown() {
-        searchResultListPresenter.unbind()
+        searchResultListPresenter.destroy()
         super.tearDown()
     }
 

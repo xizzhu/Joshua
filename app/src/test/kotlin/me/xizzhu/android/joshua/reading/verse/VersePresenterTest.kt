@@ -59,12 +59,12 @@ class VersePresenterTest : BaseUnitTest() {
 
         verseViewHolder = VerseViewHolder(versePager)
         versePresenter = VersePresenter(readingActivity, verseInteractor, testDispatcher)
-        versePresenter.bind(verseViewHolder)
+        versePresenter.create(verseViewHolder)
     }
 
     @AfterTest
     override fun tearDown() {
-        versePresenter.unbind()
+        versePresenter.destroy()
 
         super.tearDown()
     }

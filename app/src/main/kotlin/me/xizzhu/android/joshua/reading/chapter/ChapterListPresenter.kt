@@ -38,8 +38,8 @@ class ChapterListPresenter(private val readingActivity: ReadingActivity,
                            dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<ChapterListViewHolder, ChapterListInteractor>(chapterListInteractor, dispatcher) {
     @UiThread
-    override fun onBind(viewHolder: ChapterListViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: ChapterListViewHolder) {
+        super.onCreate(viewHolder)
 
         viewHolder.chapterListView.setOnChapterSelectedListener { bookIndex, chapterIndex -> selectChapter(bookIndex, chapterIndex) }
     }

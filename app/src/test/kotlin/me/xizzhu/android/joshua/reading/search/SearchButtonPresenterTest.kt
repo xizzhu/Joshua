@@ -48,12 +48,12 @@ class SearchButtonPresenterTest : BaseUnitTest() {
 
         searchButtonViewHolder = SearchButtonViewHolder(searchButton)
         searchButtonPresenter = SearchButtonPresenter(readingActivity, navigator, searchButtonInteractor, testDispatcher)
-        searchButtonPresenter.bind(searchButtonViewHolder)
+        searchButtonPresenter.create(searchButtonViewHolder)
     }
 
     @AfterTest
     override fun tearDown() {
-        searchButtonPresenter.unbind()
+        searchButtonPresenter.destroy()
 
         super.tearDown()
     }

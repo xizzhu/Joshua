@@ -44,9 +44,9 @@ abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation> : BaseSettingsAw
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_annotated)
-        toolbarPresenter.bind(AnnotatedVersesToolbarViewHolder(findViewById(R.id.toolbar)))
-        loadingSpinnerPresenter.bind(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
-        annotatedVersesPresenter.bind(AnnotatedVersesViewHolder(findViewById(R.id.verse_list)))
+        toolbarPresenter.create(AnnotatedVersesToolbarViewHolder(findViewById(R.id.toolbar)))
+        loadingSpinnerPresenter.create(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
+        annotatedVersesPresenter.create(AnnotatedVersesViewHolder(findViewById(R.id.verse_list)))
     }
 
     override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = annotatedVersesViewModel

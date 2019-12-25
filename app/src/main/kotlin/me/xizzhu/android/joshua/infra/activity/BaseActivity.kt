@@ -79,7 +79,7 @@ abstract class BaseActivity : AppCompatActivity() {
     @CallSuper
     override fun onDestroy() {
         Log.i(tag, "onDestroy()")
-        presenters.forEach { it.unbind() }
+        presenters.forEach { it.destroy() }
         coroutineScope.cancel()
         super.onDestroy()
     }

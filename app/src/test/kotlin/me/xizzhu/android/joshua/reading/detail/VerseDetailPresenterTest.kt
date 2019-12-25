@@ -50,12 +50,12 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
         verseDetailViewHolder = VerseDetailViewHolder(verseDetailViewLayout)
         verseDetailPresenter = VerseDetailPresenter(readingActivity, verseDetailInteractor, testDispatcher)
-        verseDetailPresenter.bind(verseDetailViewHolder)
+        verseDetailPresenter.create(verseDetailViewHolder)
     }
 
     @AfterTest
     override fun tearDown() {
-        verseDetailPresenter.unbind()
+        verseDetailPresenter.destroy()
 
         super.tearDown()
     }
