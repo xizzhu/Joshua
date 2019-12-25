@@ -30,6 +30,9 @@ Available Translations
 * Finnish
   * Raamattu 1938 (PR1938)
   * Raamattu 1992 (PR1992)
+* French
+  * Darby Bible in French (FreJND)
+  * Louis Segond (LSG)
 * German
   * Darby Unrevidierte Elberfelder (Elb1905)
   * Luther's Biblia (Lut1545)
