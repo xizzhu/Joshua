@@ -98,11 +98,11 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         val settings = Settings(false, true, 1, true, true)
         `when`(interactor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
-        baseAnnotatedVersesPresenter.start()
+        baseAnnotatedVersesPresenter.create(annotatedVersesViewHolder)
         verify(annotatedVerseListView, times(1)).setSettings(settings)
         verify(annotatedVerseListView, never()).setSettings(Settings.DEFAULT)
 
-        baseAnnotatedVersesPresenter.stop()
+        baseAnnotatedVersesPresenter.destroy()
     }
 
     @Test
@@ -113,7 +113,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         `when`(interactor.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName).toViewData())
         `when`(interactor.verseAnnotations(anyInt())).thenReturn(viewData { emptyList<TestVerseAnnotation>() })
 
-        baseAnnotatedVersesPresenter.start()
+        baseAnnotatedVersesPresenter.create(annotatedVersesViewHolder)
 
         with(inOrder(interactor, annotatedVerseListView)) {
             verify(interactor, times(1)).updateLoadingState(ViewData.loading())
@@ -123,7 +123,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
             verify(interactor, times(1)).updateLoadingState(ViewData.success(null))
         }
 
-        baseAnnotatedVersesPresenter.stop()
+        baseAnnotatedVersesPresenter.destroy()
     }
 
     @Test
@@ -133,7 +133,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         `when`(interactor.sortOrder()).thenReturn(flowOf(Constants.SORT_BY_DATE).toViewData())
         `when`(interactor.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName).toViewData())
 
-        baseAnnotatedVersesPresenter.start()
+        baseAnnotatedVersesPresenter.create(annotatedVersesViewHolder)
 
         with(inOrder(interactor, annotatedVerseListView)) {
             verify(interactor, times(1)).updateLoadingState(ViewData.loading())
@@ -144,7 +144,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         verify(annotatedVerseListView, never()).fadeIn()
         verify(interactor, never()).updateLoadingState(ViewData.success(null))
 
-        baseAnnotatedVersesPresenter.stop()
+        baseAnnotatedVersesPresenter.destroy()
     }
 
     @Test

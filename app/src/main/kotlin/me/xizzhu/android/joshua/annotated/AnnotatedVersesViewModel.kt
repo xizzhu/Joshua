@@ -34,8 +34,8 @@ class AnnotatedVersesViewModel<V : VerseAnnotation>(settingsManager: SettingsMan
                                                     dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareViewModel(settingsManager, listOf(annotatedVersesToolbarInteractor, loadingSpinnerInteractor, annotatedVersesInteractor), dispatcher) {
     @UiThread
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate() {
+        super.onCreate()
         annotatedVersesInteractor.loadingState().onEach { loadingSpinnerInteractor.updateLoadingState(it) }.launchIn(coroutineScope)
     }
 }
