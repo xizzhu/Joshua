@@ -43,45 +43,38 @@ class LoadingSpinnerPresenterTest : BaseUnitTest() {
 
         loadingSpinnerViewHolder = LoadingSpinnerViewHolder(loadingSpinner)
         loadingSpinnerPresenter = LoadingSpinnerPresenter(loadingSpinnerInteractor, testDispatcher)
-        loadingSpinnerPresenter.bind(loadingSpinnerViewHolder)
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        loadingSpinnerPresenter.unbind()
-        super.tearDown()
     }
 
     @Test
     fun testObserveLoadingStateSuccess() = testDispatcher.runBlockingTest {
         `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.success(null)))
 
-        loadingSpinnerPresenter.start()
+        loadingSpinnerPresenter.create(loadingSpinnerViewHolder)
         verify(loadingSpinnerViewHolder.loadingSpinner, times(1)).visibility = View.GONE
         verify(loadingSpinnerViewHolder.loadingSpinner, never()).fadeIn()
 
-        loadingSpinnerPresenter.stop()
+        loadingSpinnerPresenter.destroy()
     }
 
     @Test
     fun testObserveLoadingStateError() = testDispatcher.runBlockingTest {
         `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.error()))
 
-        loadingSpinnerPresenter.start()
+        loadingSpinnerPresenter.create(loadingSpinnerViewHolder)
         verify(loadingSpinnerViewHolder.loadingSpinner, times(1)).visibility = View.GONE
         verify(loadingSpinnerViewHolder.loadingSpinner, never()).fadeIn()
 
-        loadingSpinnerPresenter.stop()
+        loadingSpinnerPresenter.destroy()
     }
 
     @Test
     fun testObserveLoadingStateLoading() = testDispatcher.runBlockingTest {
         `when`(loadingSpinnerInteractor.loadingState()).thenReturn(flowOf(ViewData.loading()))
 
-        loadingSpinnerPresenter.start()
+        loadingSpinnerPresenter.create(loadingSpinnerViewHolder)
         verify(loadingSpinnerViewHolder.loadingSpinner, times(1)).fadeIn()
         verify(loadingSpinnerViewHolder.loadingSpinner, never()).visibility = anyInt()
 
-        loadingSpinnerPresenter.stop()
+        loadingSpinnerPresenter.destroy()
     }
 }

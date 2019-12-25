@@ -29,8 +29,8 @@ class TranslationsViewModel(settingsManager: SettingsManager,
                             private val translationListInteractor: TranslationListInteractor,
                             dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareViewModel(settingsManager, listOf(swipeRefreshInteractor, translationListInteractor), dispatcher) {
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate() {
+        super.onCreate()
 
         swipeRefreshInteractor.refreshRequested().onEach { translationListInteractor.loadTranslationList(true) }.launchIn(coroutineScope)
         translationListInteractor.translationList().onEach { swipeRefreshInteractor.updateLoadingState(it.toNothing()) }.launchIn(coroutineScope)

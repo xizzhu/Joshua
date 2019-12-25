@@ -38,10 +38,18 @@ class SearchButtonPresenter(private val readingActivity: ReadingActivity,
                             dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<SearchButtonViewHolder, SearchButtonInteractor>(searchButtonInteractor, dispatcher) {
     @UiThread
-    override fun onBind(viewHolder: SearchButtonViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: SearchButtonViewHolder) {
+        super.onCreate(viewHolder)
 
         viewHolder.searchButton.setOnClickListener { openSearch() }
+
+        interactor.settings().onEachSuccess { settings ->
+            if (settings.hideSearchButton) {
+                viewHolder.searchButton.hide()
+            } else {
+                viewHolder.searchButton.show()
+            }
+        }.launchIn(coroutineScope)
     }
 
     private fun openSearch() {
@@ -52,18 +60,5 @@ class SearchButtonPresenter(private val readingActivity: ReadingActivity,
             DialogHelper.showDialog(readingActivity, true, R.string.dialog_navigate_to_search_error,
                     DialogInterface.OnClickListener { _, _ -> openSearch() })
         }
-    }
-
-    @UiThread
-    override fun onStart() {
-        super.onStart()
-
-        interactor.settings().onEachSuccess { settings ->
-            if (settings.hideSearchButton) {
-                viewHolder?.searchButton?.hide()
-            } else {
-                viewHolder?.searchButton?.show()
-            }
-        }.launchIn(coroutineScope)
     }
 }

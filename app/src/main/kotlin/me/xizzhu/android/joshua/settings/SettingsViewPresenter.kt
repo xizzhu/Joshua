@@ -67,8 +67,8 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     private var backupRestoreDialog: ProgressDialog? = null
 
     @UiThread
-    override fun onBind(viewHolder: SettingsViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: SettingsViewHolder) {
+        super.onCreate(viewHolder)
 
         try {
             viewHolder.version.setDescription(settingsActivity.packageManager.getPackageInfo(settingsActivity.packageName, 0).versionName)
@@ -129,6 +129,8 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
             }
         }
+
+        interactor.settings().onEachSuccess { updateSettings(it) }.launchIn(coroutineScope)
     }
 
     private fun saveFontSizeScale(fontSizeScale: Int) {
@@ -255,12 +257,6 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 }
             }
         }
-    }
-
-    @UiThread
-    override fun onStart() {
-        super.onStart()
-        interactor.settings().onEachSuccess { updateSettings(it) }.launchIn(coroutineScope)
     }
 
     private fun updateSettings(settings: Settings) {

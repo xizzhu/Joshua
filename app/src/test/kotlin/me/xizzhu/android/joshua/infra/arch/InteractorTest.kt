@@ -25,16 +25,23 @@ import kotlin.test.assertTrue
 
 class InteractorTest : BaseUnitTest() {
     private class TestInteractor(dispatcher: CoroutineDispatcher) : Interactor(dispatcher) {
-        var onStartedCalled = false
-        var onResumedCalled = false
-        var onPausedCalled = false
-        var onStoppedCalled = false
+        var onCreateCalled = false
+        var onStartCalled = false
+        var onResumeCalled = false
+        var onPauseCalled = false
+        var onStopCalled = false
+        var onDestroyCalled = false
 
         lateinit var job: Job
 
+        override fun onCreate() {
+            super.onCreate()
+            onCreateCalled = true
+        }
+
         override fun onStart() {
             super.onStart()
-            onStartedCalled = true
+            onStartCalled = true
             job = coroutineScope.launch(Dispatchers.Default) {
                 while (isActive) {
                     delay(1L)
@@ -44,17 +51,22 @@ class InteractorTest : BaseUnitTest() {
 
         override fun onResume() {
             super.onResume()
-            onResumedCalled = true
+            onResumeCalled = true
         }
 
         override fun onPause() {
-            onPausedCalled = true
+            onPauseCalled = true
             super.onPause()
         }
 
         override fun onStop() {
-            onStoppedCalled = true
+            onStopCalled = true
             super.onStop()
+        }
+
+        override fun onDestroy() {
+            onDestroyCalled = true
+            super.onDestroy()
         }
     }
 
@@ -69,60 +81,69 @@ class InteractorTest : BaseUnitTest() {
     @Test
     fun testState() {
         // initial state
-        assertFalse(interactor.onStartedCalled)
-        assertFalse(interactor.onResumedCalled)
-        assertFalse(interactor.onPausedCalled)
-        assertFalse(interactor.onStoppedCalled)
+        assertFalse(interactor.onCreateCalled)
+        assertFalse(interactor.onStartCalled)
+        assertFalse(interactor.onResumeCalled)
+        assertFalse(interactor.onPauseCalled)
+        assertFalse(interactor.onStopCalled)
+        assertFalse(interactor.onDestroyCalled)
+
+        // create
+        interactor.create()
+        assertTrue(interactor.onCreateCalled)
+        assertFalse(interactor.onStartCalled)
+        assertFalse(interactor.onResumeCalled)
+        assertFalse(interactor.onPauseCalled)
+        assertFalse(interactor.onStopCalled)
+        assertFalse(interactor.onDestroyCalled)
 
         // start
         interactor.start()
-        assertTrue(interactor.onStartedCalled)
-        assertFalse(interactor.onResumedCalled)
-        assertFalse(interactor.onPausedCalled)
-        assertFalse(interactor.onStoppedCalled)
         assertFalse(interactor.job.isCancelled)
+        assertTrue(interactor.onCreateCalled)
+        assertTrue(interactor.onStartCalled)
+        assertFalse(interactor.onResumeCalled)
+        assertFalse(interactor.onPauseCalled)
+        assertFalse(interactor.onStopCalled)
+        assertFalse(interactor.onDestroyCalled)
 
         // resume
         interactor.resume()
-        assertTrue(interactor.onStartedCalled)
-        assertTrue(interactor.onResumedCalled)
-        assertFalse(interactor.onPausedCalled)
-        assertFalse(interactor.onStoppedCalled)
         assertFalse(interactor.job.isCancelled)
+        assertTrue(interactor.onCreateCalled)
+        assertTrue(interactor.onStartCalled)
+        assertTrue(interactor.onResumeCalled)
+        assertFalse(interactor.onPauseCalled)
+        assertFalse(interactor.onStopCalled)
+        assertFalse(interactor.onDestroyCalled)
 
         // pause
         interactor.pause()
-        assertTrue(interactor.onStartedCalled)
-        assertTrue(interactor.onResumedCalled)
-        assertTrue(interactor.onPausedCalled)
-        assertFalse(interactor.onStoppedCalled)
         assertFalse(interactor.job.isCancelled)
+        assertTrue(interactor.onCreateCalled)
+        assertTrue(interactor.onStartCalled)
+        assertTrue(interactor.onResumeCalled)
+        assertTrue(interactor.onPauseCalled)
+        assertFalse(interactor.onStopCalled)
+        assertFalse(interactor.onDestroyCalled)
 
         // stop
         interactor.stop()
-        assertTrue(interactor.onStartedCalled)
-        assertTrue(interactor.onResumedCalled)
-        assertTrue(interactor.onPausedCalled)
-        assertTrue(interactor.onStoppedCalled)
-        assertTrue(interactor.job.isCancelled)
-    }
-
-    @Test
-    fun testRestart() {
-        // start
-        interactor.start()
         assertFalse(interactor.job.isCancelled)
+        assertTrue(interactor.onCreateCalled)
+        assertTrue(interactor.onStartCalled)
+        assertTrue(interactor.onResumeCalled)
+        assertTrue(interactor.onPauseCalled)
+        assertTrue(interactor.onStopCalled)
+        assertFalse(interactor.onDestroyCalled)
 
-        // stop
-        interactor.stop()
-        assertTrue(interactor.job.isCancelled)
-
-        // start again
-        interactor.start()
-        assertFalse(interactor.job.isCancelled)
-
-        // stop again
-        interactor.stop()
-        assertTrue(interactor.job.isCancelled)
+        // destroy
+        interactor.destroy()
+        assertTrue(interactor.onCreateCalled)
+        assertTrue(interactor.onStartCalled)
+        assertTrue(interactor.onResumeCalled)
+        assertTrue(interactor.onPauseCalled)
+        assertTrue(interactor.onStopCalled)
+        assertTrue(interactor.onDestroyCalled)
     }
 }

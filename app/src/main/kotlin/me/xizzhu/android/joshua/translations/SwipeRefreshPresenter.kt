@@ -33,21 +33,16 @@ class SwipeRefreshPresenter(swipeRefreshInteractor: SwipeRefreshInteractor,
                             dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<SwipeRefreshViewHolder, SwipeRefreshInteractor>(swipeRefreshInteractor, dispatcher) {
     @UiThread
-    override fun onBind(viewHolder: SwipeRefreshViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: SwipeRefreshViewHolder) {
+        super.onCreate(viewHolder)
 
         with(viewHolder.swipeRefreshLayout) {
             setColorSchemeResources(R.color.primary_dark, R.color.primary, R.color.dark_cyan, R.color.dark_lime)
             setOnRefreshListener { interactor.requestRefresh() }
         }
-    }
-
-    @UiThread
-    override fun onStart() {
-        super.onStart()
 
         interactor.loadingState().onEach {
-            viewHolder?.swipeRefreshLayout?.isRefreshing = ViewData.STATUS_LOADING == it.status
+            viewHolder.swipeRefreshLayout.isRefreshing = ViewData.STATUS_LOADING == it.status
         }.launchIn(coroutineScope)
     }
 }

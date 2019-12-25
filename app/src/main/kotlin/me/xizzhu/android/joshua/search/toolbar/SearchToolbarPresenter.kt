@@ -57,8 +57,8 @@ class SearchToolbarPresenter(private val searchActivity: SearchActivity,
     }
 
     @UiThread
-    override fun onBind(viewHolder: SearchToolbarViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: SearchToolbarViewHolder) {
+        super.onCreate(viewHolder)
 
         with(viewHolder.searchToolbar) {
             setOnQueryTextListener(onQueryTextListener)
@@ -77,8 +77,8 @@ class SearchToolbarPresenter(private val searchActivity: SearchActivity,
     }
 
     @UiThread
-    override fun onUnbind() {
+    override fun onDestroy() {
         viewHolder?.searchToolbar?.setOnQueryTextListener(null)
-        super.onUnbind()
+        super.onDestroy()
     }
 }

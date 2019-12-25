@@ -56,11 +56,11 @@ class SearchToolbarPresenterTest : BaseUnitTest() {
 
     @Test
     fun testBindView() {
-        searchToolbarPresenter.bind(searchToolbarViewHolder)
+        searchToolbarPresenter.create(searchToolbarViewHolder)
         verify(searchToolbar, times(1)).setOnQueryTextListener(searchToolbarPresenter.onQueryTextListener)
         verify(searchToolbar, times(1)).setSearchableInfo(searchable)
 
-        searchToolbarPresenter.unbind()
+        searchToolbarPresenter.destroy()
         verify(searchToolbar, times(1)).setOnQueryTextListener(null)
     }
 

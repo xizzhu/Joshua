@@ -25,7 +25,6 @@ import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -48,14 +47,6 @@ class SearchButtonPresenterTest : BaseUnitTest() {
 
         searchButtonViewHolder = SearchButtonViewHolder(searchButton)
         searchButtonPresenter = SearchButtonPresenter(readingActivity, navigator, searchButtonInteractor, testDispatcher)
-        searchButtonPresenter.bind(searchButtonViewHolder)
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        searchButtonPresenter.unbind()
-
-        super.tearDown()
     }
 
     @Test
@@ -69,13 +60,13 @@ class SearchButtonPresenterTest : BaseUnitTest() {
                 ViewData.success(Settings.DEFAULT)
         ))
 
-        searchButtonPresenter.start()
+        searchButtonPresenter.create(searchButtonViewHolder)
         with(inOrder(searchButton)) {
             verify(searchButton, times(1)).show()
             verify(searchButton, times(1)).hide()
             verify(searchButton, times(1)).show()
         }
 
-        searchButtonPresenter.stop()
+        searchButtonPresenter.destroy()
     }
 }

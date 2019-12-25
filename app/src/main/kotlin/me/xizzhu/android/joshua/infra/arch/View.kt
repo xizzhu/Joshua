@@ -29,14 +29,14 @@ abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val inter
     protected var viewHolder: V? = null
 
     @UiThread
-    fun bind(viewHolder: V) {
+    fun create(viewHolder: V) {
         this.viewHolder = viewHolder
-        onBind(viewHolder)
+        onCreate(viewHolder)
     }
 
     @CallSuper
     @UiThread
-    protected open fun onBind(viewHolder: V) {
+    protected open fun onCreate(viewHolder: V) {
     }
 
     @UiThread
@@ -72,7 +72,6 @@ abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val inter
     @UiThread
     fun stop() {
         onStop()
-        coroutineScope.coroutineContext[Job]?.cancelChildren()
     }
 
     @CallSuper
@@ -81,13 +80,14 @@ abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val inter
     }
 
     @UiThread
-    fun unbind() {
-        onUnbind()
-        this.viewHolder = null
+    fun destroy() {
+        onDestroy()
+        viewHolder = null
+        coroutineScope.cancel()
     }
 
     @CallSuper
     @UiThread
-    protected open fun onUnbind() {
+    protected open fun onDestroy() {
     }
 }

@@ -32,8 +32,8 @@ class AnnotatedVersesToolbarPresenter<V : VerseAnnotation>(@StringRes private va
                                                            dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<AnnotatedVersesToolbarViewHolder, AnnotatedVersesToolbarInteractor<V>>(annotatedVersesToolbarInteractor, dispatcher) {
     @UiThread
-    override fun onBind(viewHolder: AnnotatedVersesToolbarViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: AnnotatedVersesToolbarViewHolder) {
+        super.onCreate(viewHolder)
 
         viewHolder.toolbar.setTitle(title)
         viewHolder.toolbar.sortOrderUpdated = { sortOrder -> coroutineScope.launch { interactor.saveSortOrder(sortOrder) } }

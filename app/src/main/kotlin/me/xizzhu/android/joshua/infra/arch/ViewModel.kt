@@ -24,6 +24,17 @@ abstract class ViewModel(private val interactors: List<Interactor>, dispatcher: 
     protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + dispatcher)
 
     @UiThread
+    fun create() {
+        interactors.forEach { it.create() }
+        onCreate()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onCreate() {
+    }
+
+    @UiThread
     fun start() {
         interactors.forEach { it.start() }
         onStart()
@@ -60,11 +71,22 @@ abstract class ViewModel(private val interactors: List<Interactor>, dispatcher: 
     fun stop() {
         interactors.forEach { it.stop() }
         onStop()
-        coroutineScope.coroutineContext[Job]?.cancelChildren()
     }
 
     @CallSuper
     @UiThread
     protected open fun onStop() {
+    }
+
+    @UiThread
+    fun destroy() {
+        interactors.forEach { it.destroy() }
+        onDestroy()
+        coroutineScope.cancel()
+    }
+
+    @CallSuper
+    @UiThread
+    protected open fun onDestroy() {
     }
 }

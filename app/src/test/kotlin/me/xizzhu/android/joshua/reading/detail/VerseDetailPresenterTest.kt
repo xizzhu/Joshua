@@ -50,14 +50,6 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
         verseDetailViewHolder = VerseDetailViewHolder(verseDetailViewLayout)
         verseDetailPresenter = VerseDetailPresenter(readingActivity, verseDetailInteractor, testDispatcher)
-        verseDetailPresenter.bind(verseDetailViewHolder)
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        verseDetailPresenter.unbind()
-
-        super.tearDown()
     }
 
     @Test
@@ -65,11 +57,11 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         val settings = Settings(false, true, 1, true, true)
         `when`(verseDetailInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
-        verseDetailPresenter.start()
+        verseDetailPresenter.create(verseDetailViewHolder)
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).setSettings(settings)
         verify(verseDetailViewHolder.verseDetailViewLayout, never()).setSettings(Settings.DEFAULT)
 
-        verseDetailPresenter.stop()
+        verseDetailPresenter.destroy()
     }
 
     @Test
@@ -87,7 +79,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         `when`(verseDetailInteractor.readBookNames(currentTranslation)).thenReturn(bookNames)
         `when`(verseDetailInteractor.readVerses(currentTranslation, emptyList(), verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(verses)
 
-        verseDetailPresenter.start()
+        verseDetailPresenter.create(verseDetailViewHolder)
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).show(VerseDetailRequest.VERSES)
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).setVerseDetail(
                 VerseDetail(
@@ -105,7 +97,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         )
         verify(verseDetailViewHolder.verseDetailViewLayout, never()).hide()
 
-        verseDetailPresenter.stop()
+        verseDetailPresenter.destroy()
     }
 
     @Test
@@ -122,7 +114,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         `when`(verseDetailInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
         `when`(verseDetailInteractor.readVerses(currentTranslation, listOf(MockContents.kjvShortName), verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(MockContents.msgVersesWithKjvParallel)
 
-        verseDetailPresenter.start()
+        verseDetailPresenter.create(verseDetailViewHolder)
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).show(VerseDetailRequest.VERSES)
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).setVerseDetail(
                 VerseDetail(
@@ -147,23 +139,29 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         )
         verify(verseDetailViewHolder.verseDetailViewLayout, never()).hide()
 
-        verseDetailPresenter.stop()
+        verseDetailPresenter.destroy()
     }
 
     @Test
     fun testCloseWithoutDetail() {
+        verseDetailPresenter.create(verseDetailViewHolder)
         assertFalse(verseDetailPresenter.close())
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).hide()
         verify(verseDetailInteractor, never()).closeVerseDetail(any())
+
+        verseDetailPresenter.destroy()
     }
 
     @Test
     fun testCloseWithDetail() {
+        verseDetailPresenter.create(verseDetailViewHolder)
         verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(1, 2, 3), emptyList(), false, Highlight.COLOR_NONE, "")
 
         assertTrue(verseDetailPresenter.close())
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).hide()
         verify(verseDetailInteractor, times(1)).closeVerseDetail(VerseIndex(1, 2, 3))
         assertNull(verseDetailPresenter.verseDetail)
+
+        verseDetailPresenter.destroy()
     }
 }

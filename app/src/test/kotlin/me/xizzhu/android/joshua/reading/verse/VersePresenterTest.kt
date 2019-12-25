@@ -59,14 +59,6 @@ class VersePresenterTest : BaseUnitTest() {
 
         verseViewHolder = VerseViewHolder(versePager)
         versePresenter = VersePresenter(readingActivity, verseInteractor, testDispatcher)
-        versePresenter.bind(verseViewHolder)
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        versePresenter.unbind()
-
-        super.tearDown()
     }
 
     @Test
@@ -79,6 +71,7 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(verseInteractor.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
         `when`(verseInteractor.settings()).thenReturn(flowOf(ViewData.success(Settings.DEFAULT.copy(simpleReadingModeOn = true))))
 
+        versePresenter.create(verseViewHolder)
         versePresenter.loadVerses(bookIndex, chapterIndex)
         verify(verseViewHolder.versePager, times(1)).setVerses(
                 bookIndex, chapterIndex,
@@ -86,6 +79,8 @@ class VersePresenterTest : BaseUnitTest() {
                         MockContents.kjvBookNames[0], emptyList(),
                         versePresenter::onVerseClicked, versePresenter::onVerseLongClicked
                 ))
+
+        versePresenter.destroy()
     }
 
     @Test
@@ -100,6 +95,7 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(verseInteractor.readBookmarks(bookIndex, chapterIndex)).thenReturn(emptyList())
         `when`(verseInteractor.readNotes(bookIndex, chapterIndex)).thenReturn(emptyList())
 
+        versePresenter.create(verseViewHolder)
         versePresenter.loadVerses(bookIndex, chapterIndex)
         verify(verseViewHolder.versePager, times(1)).setVerses(
                 bookIndex, chapterIndex,
@@ -109,6 +105,8 @@ class VersePresenterTest : BaseUnitTest() {
                         versePresenter::onBookmarkClicked, versePresenter::onHighlightClicked,
                         versePresenter::onNoteClicked
                 ))
+
+        versePresenter.destroy()
     }
 
     @Test
@@ -116,11 +114,11 @@ class VersePresenterTest : BaseUnitTest() {
         val settings = Settings(false, true, 1, true, true)
         `when`(verseInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
-        versePresenter.start()
+        versePresenter.create(verseViewHolder)
         verify(verseViewHolder.versePager, times(1)).setSettings(settings)
         verify(verseViewHolder.versePager, never()).setSettings(Settings.DEFAULT)
 
-        versePresenter.stop()
+        versePresenter.destroy()
     }
 
     @Test
@@ -132,17 +130,19 @@ class VersePresenterTest : BaseUnitTest() {
         `when`(verseInteractor.currentTranslation()).thenReturn(flowOf("", translation, ""))
         `when`(verseInteractor.parallelTranslations()).thenReturn(flow { parallelTranslations.forEach { emit(it) } })
 
-        versePresenter.start()
+        versePresenter.create(verseViewHolder)
         with(inOrder(verseViewHolder.versePager)) {
             parallelTranslations.forEach { parallel ->
                 verify(verseViewHolder.versePager, times(1)).setCurrent(verseIndex, translation, parallel)
             }
         }
-        versePresenter.stop()
+        versePresenter.destroy()
     }
 
     @Test
     fun testOnVerseClickedWithoutActionMode() {
+        versePresenter.create(verseViewHolder)
+
         val verse = MockContents.kjvVerses[0]
         versePresenter.onVerseClicked(verse)
         with(inOrder(verseInteractor, verseViewHolder.versePager)) {
@@ -150,10 +150,14 @@ class VersePresenterTest : BaseUnitTest() {
             verify(verseViewHolder.versePager, times(1)).selectVerse(verse.verseIndex)
         }
         verify(verseViewHolder.versePager, never()).deselectVerse(any())
+
+        versePresenter.destroy()
     }
 
     @Test
     fun testOnVerseClicked() {
+        versePresenter.create(verseViewHolder)
+
         val verse1 = MockContents.kjvVerses[0]
         val verse2 = MockContents.kjvVerses[1]
 
@@ -179,49 +183,71 @@ class VersePresenterTest : BaseUnitTest() {
             verify(verseViewHolder.versePager, times(1)).deselectVerse(verse1.verseIndex)
         }
         verify(verseInteractor, never()).requestVerseDetail(any())
+
+        versePresenter.destroy()
     }
 
     @Test
     fun testOnBookmarkClickedHadBookmark() = testDispatcher.runBlockingTest {
+        versePresenter.create(verseViewHolder)
+
         val verseIndex = VerseIndex(1, 2, 3)
         versePresenter.onBookmarkClicked(verseIndex, true)
         verify(verseInteractor, times(1)).removeBookmark(verseIndex)
         verify(verseInteractor, never()).addBookmark(any())
+
+        versePresenter.destroy()
     }
 
     @Test
     fun testOnBookmarkClickedHadNoBookmark() = testDispatcher.runBlockingTest {
+        versePresenter.create(verseViewHolder)
+
         val verseIndex = VerseIndex(1, 2, 3)
         versePresenter.onBookmarkClicked(verseIndex, false)
         verify(verseInteractor, times(1)).addBookmark(verseIndex)
         verify(verseInteractor, never()).removeBookmark(any())
+
+        versePresenter.destroy()
     }
 
     @Test
     fun testUpdateHighlight() = testDispatcher.runBlockingTest {
+        versePresenter.create(verseViewHolder)
+
         val verseIndex = VerseIndex(1, 2, 3)
         val highlightColor = Highlight.COLOR_BLUE
         versePresenter.updateHighlight(verseIndex, highlightColor)
         verify(verseInteractor, times(1)).saveHighlight(verseIndex, highlightColor)
         verify(verseInteractor, never()).removeHighlight(any())
+
+        versePresenter.destroy()
     }
 
     @Test
     fun testRemoveHighlight() = testDispatcher.runBlockingTest {
+        versePresenter.create(verseViewHolder)
+
         val verseIndex = VerseIndex(1, 2, 3)
         val highlightColor = Highlight.COLOR_NONE
         versePresenter.updateHighlight(verseIndex, highlightColor)
         verify(verseInteractor, times(1)).removeHighlight(verseIndex)
         verify(verseInteractor, never()).saveHighlight(any(), anyInt())
+
+        versePresenter.destroy()
     }
 
     @Test
     fun testOnNoteClicked() {
+        versePresenter.create(verseViewHolder)
+
         versePresenter.onNoteClicked(VerseIndex(1, 2, 3))
 
         with(inOrder(verseInteractor, verseViewHolder.versePager)) {
             verify(verseInteractor, times(1)).requestVerseDetail(VerseDetailRequest(VerseIndex(1, 2, 3), VerseDetailRequest.NOTE))
             verify(verseViewHolder.versePager, times(1)).selectVerse(VerseIndex(1, 2, 3))
         }
+
+        versePresenter.destroy()
     }
 }

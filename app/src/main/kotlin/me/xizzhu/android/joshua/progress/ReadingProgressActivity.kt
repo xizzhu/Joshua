@@ -41,8 +41,8 @@ class ReadingProgressActivity : BaseSettingsAwareActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_reading_progress)
-        loadingSpinnerPresenter.bind(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
-        readingProgressPresenter.bind(ReadingProgressViewHolder(findViewById(R.id.reading_progress_list)))
+        loadingSpinnerPresenter.create(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
+        readingProgressPresenter.create(ReadingProgressViewHolder(findViewById(R.id.reading_progress_list)))
     }
 
     override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(loadingSpinnerPresenter, readingProgressPresenter)

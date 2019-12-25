@@ -77,11 +77,11 @@ class ReadingActivity : BaseSettingsAwareActivity() {
         drawerToggle = ActionBarDrawerToggle(this, readingDrawerLayout, toolbar, 0, 0)
         readingDrawerLayout.addDrawerListener(drawerToggle)
 
-        readingToolbarPresenter.bind(ReadingToolbarViewHolder(toolbar))
-        chapterListPresenter.bind(ChapterListViewHolder(readingDrawerLayout, findViewById(R.id.chapter_list_view)))
-        searchButtonPresenter.bind(SearchButtonViewHolder(findViewById(R.id.search)))
-        versePresenter.bind(VerseViewHolder(findViewById(R.id.verse_view_pager)))
-        verseDetailPresenter.bind(VerseDetailViewHolder(findViewById(R.id.verse_detail_view)))
+        readingToolbarPresenter.create(ReadingToolbarViewHolder(toolbar))
+        chapterListPresenter.create(ChapterListViewHolder(readingDrawerLayout, findViewById(R.id.chapter_list_view)))
+        searchButtonPresenter.create(SearchButtonViewHolder(findViewById(R.id.search)))
+        versePresenter.create(VerseViewHolder(findViewById(R.id.verse_view_pager)))
+        verseDetailPresenter.create(VerseDetailViewHolder(findViewById(R.id.verse_detail_view)))
 
         if (intent.getBooleanExtra(KEY_OPEN_NOTE, false)) readingViewModel.showNoteInVerseDetail()
     }

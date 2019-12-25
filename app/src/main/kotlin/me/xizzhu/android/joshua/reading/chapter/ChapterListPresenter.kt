@@ -38,10 +38,18 @@ class ChapterListPresenter(private val readingActivity: ReadingActivity,
                            dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<ChapterListViewHolder, ChapterListInteractor>(chapterListInteractor, dispatcher) {
     @UiThread
-    override fun onBind(viewHolder: ChapterListViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: ChapterListViewHolder) {
+        super.onCreate(viewHolder)
 
         viewHolder.chapterListView.setOnChapterSelectedListener { bookIndex, chapterIndex -> selectChapter(bookIndex, chapterIndex) }
+
+        interactor.currentVerseIndex()
+                .combineOnSuccess(interactor.bookNames()) { currentVerseIndex, bookNames ->
+                    viewHolder.run {
+                        chapterListView.setData(currentVerseIndex, bookNames)
+                        readingDrawerLayout.hide()
+                    }
+                }.launchIn(coroutineScope)
     }
 
     private fun selectChapter(bookIndex: Int, chapterIndex: Int) {
@@ -54,18 +62,5 @@ class ChapterListPresenter(private val readingActivity: ReadingActivity,
                         DialogInterface.OnClickListener { _, _ -> selectChapter(bookIndex, chapterIndex) })
             }
         }
-    }
-
-    @UiThread
-    override fun onStart() {
-        super.onStart()
-
-        interactor.currentVerseIndex()
-                .combineOnSuccess(interactor.bookNames()) { currentVerseIndex, bookNames ->
-                    viewHolder?.run {
-                        chapterListView.setData(currentVerseIndex, bookNames)
-                        readingDrawerLayout.hide()
-                    }
-                }.launchIn(coroutineScope)
     }
 }

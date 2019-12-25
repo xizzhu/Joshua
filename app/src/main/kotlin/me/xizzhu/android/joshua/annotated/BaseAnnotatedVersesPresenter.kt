@@ -50,10 +50,10 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
  @StringRes private val noItemText: Int, interactor: Interactor, dispatcher: CoroutineDispatcher)
     : BaseSettingsAwarePresenter<AnnotatedVersesViewHolder, Interactor>(interactor, dispatcher) {
     @UiThread
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate(viewHolder: AnnotatedVersesViewHolder) {
+        super.onCreate(viewHolder)
 
-        interactor.settings().onEachSuccess { viewHolder?.annotatedVerseListView?.setSettings(it) }.launchIn(coroutineScope)
+        interactor.settings().onEachSuccess { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(coroutineScope)
 
         interactor.sortOrder().combineOnSuccess(interactor.currentTranslation()) { sortOrder, currentTranslation ->
             load(sortOrder, currentTranslation)

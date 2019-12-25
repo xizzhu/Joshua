@@ -46,8 +46,8 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     private var currentTranslation = ""
 
     @UiThread
-    override fun onBind(viewHolder: ReadingToolbarViewHolder) {
-        super.onBind(viewHolder)
+    override fun onCreate(viewHolder: ReadingToolbarViewHolder) {
+        super.onCreate(viewHolder)
 
         viewHolder.readingToolbar.initialize(
                 onParallelTranslationRequested = { requestParallelTranslation(it) },
@@ -64,7 +64,15 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                         }
                     }
 
-                    if (!isDownloadedTranslation) startTranslationManagementActivity()
+                    if (!isDownloadedTranslation) {
+                        for (i in 0 until downloadedTranslations.size) {
+                            if (currentTranslation == downloadedTranslations[i].shortName) {
+                                viewHolder.readingToolbar.setSpinnerSelection(i)
+                                break
+                            }
+                        }
+                        startTranslationManagementActivity()
+                    }
                 }
         )
 
@@ -97,6 +105,11 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                 else -> false
             }
         }
+
+        observeDownloadedTranslations()
+        observeCurrentTranslation()
+        observeParallelTranslations()
+        observeBookNames()
     }
 
     private fun requestParallelTranslation(translationShortName: String) {
@@ -150,16 +163,6 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                         DialogInterface.OnClickListener { _, _ -> updateCurrentTranslation(translationShortName) })
             }
         }
-    }
-
-    @UiThread
-    override fun onStart() {
-        super.onStart()
-
-        observeDownloadedTranslations()
-        observeCurrentTranslation()
-        observeParallelTranslations()
-        observeBookNames()
     }
 
     private fun observeDownloadedTranslations() {

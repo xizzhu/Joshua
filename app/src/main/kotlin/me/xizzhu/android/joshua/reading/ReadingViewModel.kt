@@ -73,8 +73,8 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
                        dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareViewModel(settingsManager, listOf(readingToolbarInteractor, chapterListInteractor, verseInteractor, verseDetailInteractor), dispatcher) {
     @UiThread
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate() {
+        super.onCreate()
 
         verseInteractor.verseDetailRequest().onEach { verseDetailInteractor.requestVerseDetail(it) }.launchIn(coroutineScope)
         verseDetailInteractor.verseUpdates().onEach { verseInteractor.updateVerse(it) }.launchIn(coroutineScope)

@@ -44,8 +44,8 @@ class TranslationListInteractor(private val bibleReadingManager: BibleReadingMan
     private val translationList: BroadcastChannel<ViewData<TranslationList>> = ConflatedBroadcastChannel()
 
     @UiThread
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate() {
+        super.onCreate()
 
         combine(bibleReadingManager.currentTranslation(),
                 translationManager.availableTranslations(),
