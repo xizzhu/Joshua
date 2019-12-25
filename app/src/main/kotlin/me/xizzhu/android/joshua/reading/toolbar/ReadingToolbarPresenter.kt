@@ -64,7 +64,15 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                         }
                     }
 
-                    if (!isDownloadedTranslation) startTranslationManagementActivity()
+                    if (!isDownloadedTranslation) {
+                        for (i in 0 until downloadedTranslations.size) {
+                            if (currentTranslation == downloadedTranslations[i].shortName) {
+                                viewHolder.readingToolbar.setSpinnerSelection(i)
+                                break
+                            }
+                        }
+                        startTranslationManagementActivity()
+                    }
                 }
         )
 
