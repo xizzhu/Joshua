@@ -32,7 +32,6 @@ import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -60,14 +59,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
 
             readingProgressViewHolder = ReadingProgressViewHolder(readingProgressListView)
             readingProgressPresenter = ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressInteractor, testDispatcher)
-            readingProgressPresenter.create(readingProgressViewHolder)
         }
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        readingProgressPresenter.destroy()
-        super.tearDown()
     }
 
     @Test
@@ -75,18 +67,18 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         val settings = Settings(false, true, 1, true, true)
         `when`(readingProgressInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
-        readingProgressPresenter.start()
+        readingProgressPresenter.create(readingProgressViewHolder)
         verify(readingProgressListView, times(1)).setSettings(settings)
         verify(readingProgressListView, never()).setSettings(Settings.DEFAULT)
 
-        readingProgressPresenter.stop()
+        readingProgressPresenter.destroy()
     }
 
     @Test
     fun testLoadReadingProgress() = testDispatcher.runBlockingTest {
         `when`(readingProgressInteractor.readingProgress()).thenReturn(ViewData.success(ReadingProgress(5, 4321L, emptyList())))
 
-        readingProgressPresenter.start()
+        readingProgressPresenter.create(readingProgressViewHolder)
         with(inOrder(readingProgressInteractor, readingProgressListView)) {
             verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.loading())
             verify(readingProgressListView, times(1)).visibility = View.GONE
@@ -95,7 +87,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
             verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.success(null))
         }
 
-        readingProgressPresenter.stop()
+        readingProgressPresenter.destroy()
     }
 
     @Test
@@ -103,7 +95,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         val exception = RuntimeException("Random exception")
         `when`(readingProgressInteractor.bookNames()).thenThrow(exception)
 
-        readingProgressPresenter.start()
+        readingProgressPresenter.create(readingProgressViewHolder)
         with(inOrder(readingProgressInteractor, readingProgressListView)) {
             verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.loading())
             verify(readingProgressListView, times(1)).visibility = View.GONE
@@ -113,12 +105,12 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         verify(readingProgressListView, never()).fadeIn()
         verify(readingProgressInteractor, never()).updateLoadingState(ViewData.success(null))
 
-        readingProgressPresenter.stop()
+        readingProgressPresenter.destroy()
     }
 
     @Test
     fun testOpenChapter() = testDispatcher.runBlockingTest {
-        readingProgressPresenter.start()
+        readingProgressPresenter.create(readingProgressViewHolder)
 
         val bookIndex = 1
         val chapterIndex = 2
@@ -126,15 +118,15 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         verify(readingProgressInteractor, times(1)).saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
         verify(navigator, times(1)).navigate(readingProgressActivity, Navigator.SCREEN_READING)
 
-        readingProgressPresenter.stop()
+        readingProgressPresenter.destroy()
     }
 
     @Test
     fun testOpenChapterWithException() = testDispatcher.runBlockingTest {
         `when`(readingProgressInteractor.saveCurrentVerseIndex(any())).thenThrow(RuntimeException("Random exception"))
 
-        readingProgressPresenter.start()
+        readingProgressPresenter.create(readingProgressViewHolder)
         readingProgressPresenter.openChapter(0, 0)
-        readingProgressPresenter.stop()
+        readingProgressPresenter.destroy()
     }
 }

@@ -46,8 +46,8 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
     private val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 
     @UiThread
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate(viewHolder: ReadingProgressViewHolder) {
+        super.onCreate(viewHolder)
 
         observeSettings()
         loadReadingProgress()

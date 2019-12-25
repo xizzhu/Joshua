@@ -31,8 +31,8 @@ class ReadingProgressViewModel(settingsManager: SettingsManager,
                                dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareViewModel(settingsManager, listOf(loadingSpinnerInteractor, readingProgressInteractor), dispatcher) {
     @UiThread
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate() {
+        super.onCreate()
 
         readingProgressInteractor.loadingState().onEach { loadingSpinnerInteractor.updateLoadingState(it) }.launchIn(coroutineScope)
     }
