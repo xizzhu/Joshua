@@ -97,6 +97,11 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                 else -> false
             }
         }
+
+        observeDownloadedTranslations()
+        observeCurrentTranslation()
+        observeParallelTranslations()
+        observeBookNames()
     }
 
     private fun requestParallelTranslation(translationShortName: String) {
@@ -150,16 +155,6 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                         DialogInterface.OnClickListener { _, _ -> updateCurrentTranslation(translationShortName) })
             }
         }
-    }
-
-    @UiThread
-    override fun onStart() {
-        super.onStart()
-
-        observeDownloadedTranslations()
-        observeCurrentTranslation()
-        observeParallelTranslations()
-        observeBookNames()
     }
 
     private fun observeDownloadedTranslations() {

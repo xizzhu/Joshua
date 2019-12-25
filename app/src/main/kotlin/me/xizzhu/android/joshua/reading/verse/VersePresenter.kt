@@ -130,6 +130,29 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                 onChapterRequested = { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) },
                 onCurrentVerseUpdated = { verseIndex -> updateCurrentVerse(verseIndex) }
         )
+
+        interactor.settings().onEachSuccess { viewHolder.versePager.setSettings(it) }.launchIn(coroutineScope)
+
+        interactor.verseUpdates().onEach { viewHolder.versePager.notifyVerseUpdate(it) }.launchIn(coroutineScope)
+
+        combine(interactor.currentTranslation().filter { it.isNotEmpty() },
+                interactor.currentVerseIndex()
+                        .filter { it.isValid() }
+                        .onEach { newVerseIndex ->
+                            if (actionMode != null) {
+                                if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex
+                                        || currentVerseIndex.chapterIndex != newVerseIndex.chapterIndex) {
+                                    actionMode?.finish()
+                                }
+                            }
+                        },
+                interactor.parallelTranslations()
+        ) { currentTranslation, currentVerseIndex, parallelTranslations ->
+            this@VersePresenter.currentVerseIndex = currentVerseIndex
+            this@VersePresenter.currentTranslation = currentTranslation
+            this@VersePresenter.parallelTranslations = parallelTranslations
+            viewHolder.versePager.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
+        }.launchIn(coroutineScope)
     }
 
     private fun updateCurrentChapter(bookIndex: Int, chapterIndex: Int) {
@@ -272,33 +295,5 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     @VisibleForTesting
     fun onNoteClicked(verseIndex: VerseIndex) {
         showVerseDetail(verseIndex, VerseDetailRequest.NOTE)
-    }
-
-    @UiThread
-    override fun onStart() {
-        super.onStart()
-
-        interactor.settings().onEachSuccess { viewHolder?.versePager?.setSettings(it) }.launchIn(coroutineScope)
-
-        interactor.verseUpdates().onEach { viewHolder?.versePager?.notifyVerseUpdate(it) }.launchIn(coroutineScope)
-
-        combine(interactor.currentTranslation().filter { it.isNotEmpty() },
-                interactor.currentVerseIndex()
-                        .filter { it.isValid() }
-                        .onEach { newVerseIndex ->
-                            if (actionMode != null) {
-                                if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex
-                                        || currentVerseIndex.chapterIndex != newVerseIndex.chapterIndex) {
-                                    actionMode?.finish()
-                                }
-                            }
-                        },
-                interactor.parallelTranslations()
-        ) { currentTranslation, currentVerseIndex, parallelTranslations ->
-            this@VersePresenter.currentVerseIndex = currentVerseIndex
-            this@VersePresenter.currentTranslation = currentTranslation
-            this@VersePresenter.parallelTranslations = parallelTranslations
-            viewHolder?.versePager?.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
-        }.launchIn(coroutineScope)
     }
 }

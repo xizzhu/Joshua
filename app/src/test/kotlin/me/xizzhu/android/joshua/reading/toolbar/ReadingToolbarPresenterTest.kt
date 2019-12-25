@@ -28,7 +28,6 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -57,14 +56,6 @@ class ReadingToolbarPresenterTest : BaseUnitTest() {
 
         readingToolbarViewHolder = ReadingToolbarViewHolder(readingToolbar)
         readingToolbarPresenter = ReadingToolbarPresenter(readingActivity, navigator, readingToolbarInteractor, testDispatcher)
-        readingToolbarPresenter.create(readingToolbarViewHolder)
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        readingToolbarPresenter.destroy()
-
-        super.tearDown()
     }
 
     @Test
@@ -72,18 +63,22 @@ class ReadingToolbarPresenterTest : BaseUnitTest() {
         `when`(readingToolbarInteractor.downloadedTranslations()).thenReturn(flowOf(ViewData.success(listOf(MockContents.kjvTranslationInfo))))
         `when`(readingActivity.getString(R.string.menu_more_translation)).thenReturn("More")
 
-        readingToolbarPresenter.start()
+        readingToolbarPresenter.create(readingToolbarViewHolder)
         verify(readingToolbar, times(1)).setTranslationShortNames(listOf(MockContents.kjvTranslationInfo.shortName, "More"))
         verify(readingToolbar, times(1)).setSpinnerSelection(0)
+
+        readingToolbarPresenter.destroy()
     }
 
     @Test
     fun testObserveCurrentTranslation() = testDispatcher.runBlockingTest {
         `when`(readingToolbarInteractor.currentTranslation()).thenReturn(flowOf(ViewData.success(MockContents.kjvShortName)))
 
-        readingToolbarPresenter.start()
+        readingToolbarPresenter.create(readingToolbarViewHolder)
         verify(readingToolbar, times(1)).setCurrentTranslation(MockContents.kjvShortName)
         verify(readingToolbar, times(1)).setSpinnerSelection(0)
+
+        readingToolbarPresenter.destroy()
     }
 
     @Test
@@ -91,7 +86,9 @@ class ReadingToolbarPresenterTest : BaseUnitTest() {
         `when`(readingToolbarInteractor.currentVerseIndex()).thenReturn(flowOf(ViewData.success(VerseIndex(1, 2, 3))))
         `when`(readingToolbarInteractor.bookShortNames()).thenReturn(flowOf(ViewData.success(MockContents.kjvBookShortNames)))
 
-        readingToolbarPresenter.start()
+        readingToolbarPresenter.create(readingToolbarViewHolder)
         verify(readingToolbar, times(1)).title = "${MockContents.kjvBookShortNames[1]}, 3"
+
+        readingToolbarPresenter.destroy()
     }
 }

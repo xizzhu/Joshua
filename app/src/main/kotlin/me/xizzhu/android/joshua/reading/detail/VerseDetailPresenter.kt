@@ -78,6 +78,10 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
             }
             setOnNoteUpdatedListener { updateNote(it) }
 
+            interactor.settings().onEachSuccess { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
+            interactor.verseDetailRequest().onEach { showVerseDetail(it.verseIndex, it.content) }.launchIn(coroutineScope)
+            interactor.currentVerseIndex().onEach { close() }.launchIn(coroutineScope)
+
             post { hide() }
         }
     }
@@ -131,15 +135,6 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
 
             updateNoteJob = null
         }
-    }
-
-    @UiThread
-    override fun onStart() {
-        super.onStart()
-
-        interactor.settings().onEachSuccess { viewHolder?.verseDetailViewLayout?.setSettings(it) }.launchIn(coroutineScope)
-        interactor.verseDetailRequest().onEach { showVerseDetail(it.verseIndex, it.content) }.launchIn(coroutineScope)
-        interactor.currentVerseIndex().onEach { close() }.launchIn(coroutineScope)
     }
 
     private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
