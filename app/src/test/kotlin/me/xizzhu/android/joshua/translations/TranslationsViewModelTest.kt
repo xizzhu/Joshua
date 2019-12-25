@@ -51,11 +51,11 @@ class TranslationsViewModelTest : BaseUnitTest() {
     fun testObserveRefreshRequest() = testDispatcher.runBlockingTest {
         `when`(swipeRefreshInteractor.refreshRequested()).thenReturn(flowOf(ViewData.success(null)))
 
-        translationsViewModel.start()
+        translationsViewModel.create()
         verify(translationListInteractor, times(1)).loadTranslationList(true)
         verify(translationListInteractor, never()).loadTranslationList(false)
 
-        translationsViewModel.stop()
+        translationsViewModel.destroy()
     }
 
     @Test
@@ -66,13 +66,13 @@ class TranslationsViewModelTest : BaseUnitTest() {
                 ViewData.loading()
         ))
 
-        translationsViewModel.start()
+        translationsViewModel.create()
         with(inOrder(swipeRefreshInteractor)) {
             verify(swipeRefreshInteractor, times(1)).updateLoadingState(ViewData.error())
             verify(swipeRefreshInteractor, times(1)).updateLoadingState(ViewData.success(null))
             verify(swipeRefreshInteractor, times(1)).updateLoadingState(ViewData.loading())
         }
 
-        translationsViewModel.stop()
+        translationsViewModel.destroy()
     }
 }

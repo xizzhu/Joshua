@@ -53,7 +53,7 @@ class TranslationListInteractorTest : BaseUnitTest() {
         `when`(translationManager.availableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
         `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(listOf(MockContents.kjvDownloadedTranslationInfo)))
 
-        translationListInteractor.start()
+        translationListInteractor.create()
 
         assertEquals(
                 ViewData.success(
@@ -66,7 +66,7 @@ class TranslationListInteractorTest : BaseUnitTest() {
                 translationListInteractor.translationList().first()
         )
 
-        translationListInteractor.stop()
+        translationListInteractor.destroy()
     }
 
     @Test
