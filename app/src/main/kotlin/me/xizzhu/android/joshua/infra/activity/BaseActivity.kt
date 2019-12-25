@@ -41,6 +41,7 @@ abstract class BaseActivity : AppCompatActivity() {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         Log.i(tag, "onCreate()")
+        getViewModel().create()
     }
 
     @CallSuper
@@ -80,6 +81,7 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onDestroy() {
         Log.i(tag, "onDestroy()")
         presenters.forEach { it.destroy() }
+        getViewModel().stop()
         coroutineScope.cancel()
         super.onDestroy()
     }
