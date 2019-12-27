@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.13.0 (2019-12-27)
 - New features:
   - Saved parallel translations to disk
   - Supported cancelling translation downloading
