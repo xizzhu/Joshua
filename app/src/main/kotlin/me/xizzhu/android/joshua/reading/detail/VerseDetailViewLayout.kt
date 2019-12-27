@@ -102,6 +102,7 @@ class VerseDetailViewLayout : FrameLayout {
         viewPager.currentItem = when (content) {
             VerseDetailRequest.VERSES -> VerseDetailPagerAdapter.PAGE_VERSES
             VerseDetailRequest.NOTE -> VerseDetailPagerAdapter.PAGE_NOTE
+            VerseDetailRequest.STRONG_NUMBER -> VerseDetailPagerAdapter.PAGE_STRONG_NUMBER
             else -> 0
         }
     }

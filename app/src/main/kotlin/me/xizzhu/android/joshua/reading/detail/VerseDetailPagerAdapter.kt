@@ -36,7 +36,8 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     companion object {
         const val PAGE_VERSES = 0
         const val PAGE_NOTE = 1
-        private const val PAGE_COUNT = 2
+        const val PAGE_STRONG_NUMBER = 2
+        private const val PAGE_COUNT = 3
     }
 
     private val resources: Resources = context.resources
@@ -63,16 +64,16 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
 
     override fun getCount(): Int = if (settings != null && onNoteUpdated != null) PAGE_COUNT else 0
 
-    override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        return pages[position] ?: when (position) {
-            PAGE_VERSES -> VersesPage(inflater, container, settings!!)
-            PAGE_NOTE -> NotePage(resources, inflater, container, settings!!, onNoteUpdated!!)
-            else -> throw IllegalArgumentException("Unsupported position: $position")
-        }.apply {
-            bind(verseDetail)
-            container.addView(view)
-        }
-    }
+    override fun instantiateItem(container: ViewGroup, position: Int): Any = pages[position]
+            ?: when (position) {
+                PAGE_VERSES -> VersesPage(inflater, container, settings!!)
+                PAGE_NOTE -> NotePage(resources, inflater, container, settings!!, onNoteUpdated!!)
+                PAGE_STRONG_NUMBER -> StrongNumberPage(inflater, container, settings!!)
+                else -> throw IllegalArgumentException("Unsupported position: $position")
+            }.apply {
+                bind(verseDetail)
+                container.addView(view)
+            }
 
     override fun destroyItem(container: ViewGroup, position: Int, obj: Any) {
         container.removeView((obj as Page).view)
@@ -82,12 +83,11 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
         return view == (obj as Page).view
     }
 
-    override fun getPageTitle(position: Int): CharSequence {
-        return when (position) {
-            PAGE_VERSES -> resources.getString(R.string.text_verse_comparison)
-            PAGE_NOTE -> resources.getString(R.string.text_note)
-            else -> ""
-        }
+    override fun getPageTitle(position: Int): CharSequence = when (position) {
+        PAGE_VERSES -> resources.getString(R.string.text_verse_comparison)
+        PAGE_NOTE -> resources.getString(R.string.text_note)
+        PAGE_STRONG_NUMBER -> resources.getString(R.string.text_strong_number)
+        else -> ""
     }
 
     override fun getItemPosition(obj: Any): Int = POSITION_NONE
@@ -135,5 +135,12 @@ private class NotePage(resources: Resources, inflater: LayoutInflater, container
             setText(verseDetail.note)
             addTextChangedListener(textWatcher)
         }
+    }
+}
+
+private class StrongNumberPage(inflater: LayoutInflater, container: ViewGroup, settings: Settings)
+    : Page(inflater.inflate(R.layout.page_verse_detail_strong_number, container, false)) {
+    override fun bind(verseDetail: VerseDetail) {
+        // TODO
     }
 }
