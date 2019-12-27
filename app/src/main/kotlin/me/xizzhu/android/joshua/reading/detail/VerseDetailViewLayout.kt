@@ -32,6 +32,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
+import me.xizzhu.android.joshua.reading.detail.pages.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.ui.*
 
 class VerseDetailViewLayout : FrameLayout {

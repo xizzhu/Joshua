@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading.detail
+package me.xizzhu.android.joshua.reading.detail.pages
 
 import android.content.Context
 import android.content.res.Resources
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.viewpager.widget.PagerAdapter
-import com.google.android.material.textfield.TextInputEditText
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
-import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
+import me.xizzhu.android.joshua.reading.detail.VerseDetail
 
 class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     companion object {
@@ -43,7 +37,7 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     private val resources: Resources = context.resources
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 
-    private val pages: Array<Page?> = arrayOfNulls(PAGE_COUNT)
+    private val verseDetailPages: Array<VerseDetailPage?> = arrayOfNulls(PAGE_COUNT)
     private var settings: Settings? = null
     private var onNoteUpdated: ((String) -> Unit)? = null
     private var verseDetail: VerseDetail = VerseDetail.INVALID
@@ -64,7 +58,7 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
 
     override fun getCount(): Int = if (settings != null && onNoteUpdated != null) PAGE_COUNT else 0
 
-    override fun instantiateItem(container: ViewGroup, position: Int): Any = pages[position]
+    override fun instantiateItem(container: ViewGroup, position: Int): Any = verseDetailPages[position]
             ?: when (position) {
                 PAGE_VERSES -> VersesPage(inflater, container, settings!!)
                 PAGE_NOTE -> NotePage(resources, inflater, container, settings!!, onNoteUpdated!!)
@@ -76,11 +70,11 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
             }
 
     override fun destroyItem(container: ViewGroup, position: Int, obj: Any) {
-        container.removeView((obj as Page).view)
+        container.removeView((obj as VerseDetailPage).view)
     }
 
     override fun isViewFromObject(view: View, obj: Any): Boolean {
-        return view == (obj as Page).view
+        return view == (obj as VerseDetailPage).view
     }
 
     override fun getPageTitle(position: Int): CharSequence = when (position) {
@@ -91,56 +85,4 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     }
 
     override fun getItemPosition(obj: Any): Int = POSITION_NONE
-}
-
-private abstract class Page(val view: View) {
-    abstract fun bind(verseDetail: VerseDetail)
-}
-
-private class VersesPage(inflater: LayoutInflater, container: ViewGroup, settings: Settings)
-    : Page(inflater.inflate(R.layout.page_verse_detail_verses, container, false)) {
-    private val verseTextListView: CommonRecyclerView = view.findViewById<CommonRecyclerView>(R.id.verse_text_list)
-            .apply {
-                isNestedScrollingEnabled = false
-                setSettings(settings)
-            }
-
-    override fun bind(verseDetail: VerseDetail) {
-        verseTextListView.setItems(verseDetail.verseTextItems)
-    }
-}
-
-private class NotePage(resources: Resources, inflater: LayoutInflater, container: ViewGroup,
-                       settings: Settings, onNoteUpdated: (String) -> Unit)
-    : Page(inflater.inflate(R.layout.page_verse_detail_note, container, false)) {
-    private val textWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-
-        override fun afterTextChanged(s: Editable) {
-            onNoteUpdated(s.toString())
-        }
-    }
-
-    private val note: TextInputEditText = view.findViewById<TextInputEditText>(R.id.note).apply {
-        addTextChangedListener(textWatcher)
-        setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
-        setTextColor(settings.getPrimaryTextColor(resources))
-    }
-
-    override fun bind(verseDetail: VerseDetail) {
-        with(note) {
-            removeTextChangedListener(textWatcher)
-            setText(verseDetail.note)
-            addTextChangedListener(textWatcher)
-        }
-    }
-}
-
-private class StrongNumberPage(inflater: LayoutInflater, container: ViewGroup, settings: Settings)
-    : Page(inflater.inflate(R.layout.page_verse_detail_strong_number, container, false)) {
-    override fun bind(verseDetail: VerseDetail) {
-        // TODO
-    }
 }
