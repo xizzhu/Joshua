@@ -74,6 +74,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         `when`(verseDetailInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, 0L))
         `when`(verseDetailInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, 0L))
         `when`(verseDetailInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", 0L))
+        `when`(verseDetailInteractor.readStrongNumber(verseIndex)).thenReturn(emptyList())
         `when`(verseDetailInteractor.currentTranslation()).thenReturn(currentTranslation)
         `when`(verseDetailInteractor.downloadedTranslations()).thenReturn(emptyList())
         `when`(verseDetailInteractor.readBookNames(currentTranslation)).thenReturn(bookNames)
@@ -93,7 +94,8 @@ class VerseDetailPresenterTest : BaseUnitTest() {
                         ),
                         false,
                         Highlight.COLOR_NONE,
-                        "")
+                        "",
+                        emptyList())
         )
         verify(verseDetailViewHolder.verseDetailViewLayout, never()).hide()
 
@@ -108,6 +110,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         `when`(verseDetailInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, 0L))
         `when`(verseDetailInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, 0L))
         `when`(verseDetailInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", 0L))
+        `when`(verseDetailInteractor.readStrongNumber(verseIndex)).thenReturn(emptyList())
         `when`(verseDetailInteractor.currentTranslation()).thenReturn(currentTranslation)
         `when`(verseDetailInteractor.downloadedTranslations()).thenReturn(listOf(MockContents.msgTranslationInfo, MockContents.kjvTranslationInfo))
         `when`(verseDetailInteractor.readBookNames(MockContents.msgShortName)).thenReturn(MockContents.msgBookNames)
@@ -135,7 +138,8 @@ class VerseDetailPresenterTest : BaseUnitTest() {
                         ),
                         false,
                         Highlight.COLOR_NONE,
-                        "")
+                        "",
+                        emptyList())
         )
         verify(verseDetailViewHolder.verseDetailViewLayout, never()).hide()
 
@@ -155,7 +159,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testCloseWithDetail() {
         verseDetailPresenter.create(verseDetailViewHolder)
-        verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(1, 2, 3), emptyList(), false, Highlight.COLOR_NONE, "")
+        verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(1, 2, 3), emptyList(), false, Highlight.COLOR_NONE, "", emptyList())
 
         assertTrue(verseDetailPresenter.close())
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).hide()

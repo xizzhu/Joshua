@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading.detail
+package me.xizzhu.android.joshua.core.repository.local
 
-import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 
-data class VerseDetail(val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
-                       val bookmarked: Boolean, @Highlight.Companion.AvailableColor val highlightColor: Int,
-                       val note: String, val strongNumber: List<StrongNumber>) {
-    companion object {
-        val INVALID: VerseDetail = VerseDetail(VerseIndex.INVALID, emptyList(), false, Highlight.COLOR_NONE, "", emptyList())
-    }
+interface LocalStrongNumberStorage {
+    suspend fun read(verseIndex: VerseIndex): List<StrongNumber>
 }

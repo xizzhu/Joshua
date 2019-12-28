@@ -91,8 +91,10 @@ object ReadingModule {
                                      bookmarkManager: VerseAnnotationManager<Bookmark>,
                                      highlightManager: VerseAnnotationManager<Highlight>,
                                      noteManager: VerseAnnotationManager<Note>,
+                                     strongNumberManager: StrongNumberManager,
                                      settingsManager: SettingsManager): VerseDetailInteractor =
-            VerseDetailInteractor(translationManager, bibleReadingManager, bookmarkManager, highlightManager, noteManager, settingsManager)
+            VerseDetailInteractor(translationManager, bibleReadingManager, bookmarkManager,
+                    highlightManager, noteManager, strongNumberManager, settingsManager)
 
     @ActivityScope
     @Provides

@@ -34,6 +34,7 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
                             private val bookmarkManager: VerseAnnotationManager<Bookmark>,
                             private val highlightManager: VerseAnnotationManager<Highlight>,
                             private val noteManager: VerseAnnotationManager<Note>,
+                            private val strongNumberManager: StrongNumberManager,
                             settingsManager: SettingsManager,
                             dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
@@ -106,4 +107,6 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
         noteManager.remove(verseIndex)
         verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED))
     }
+
+    suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.read(verseIndex)
 }

@@ -150,6 +150,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                 val bookmarkAsync = supervisedAsync { interactor.readBookmark(verseIndex) }
                 val highlightAsync = supervisedAsync { interactor.readHighlight(verseIndex) }
                 val noteAsync = supervisedAsync { interactor.readNote(verseIndex) }
+                val strongNumberAsync = supervisedAsync { interactor.readStrongNumber(verseIndex) }
 
                 val currentTranslation = interactor.currentTranslation()
                 val parallelTranslations = interactor.downloadedTranslations()
@@ -210,7 +211,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
 
                 verseDetail = VerseDetail(verseIndex, verseTextItems,
                         bookmarkAsync.await().isValid(), highlightAsync.await().color,
-                        noteAsync.await().note)
+                        noteAsync.await().note, strongNumberAsync.await())
                 viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verse detail", e)

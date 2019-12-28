@@ -116,6 +116,12 @@ class AppModule(private val app: App) {
         @JvmStatic
         @Provides
         @Singleton
+        fun provideStrongNumberManager(strongNumberRepository: StrongNumberRepository): StrongNumberManager =
+                StrongNumberManager(strongNumberRepository)
+
+        @JvmStatic
+        @Provides
+        @Singleton
         fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
                 TranslationManager(translationRepository)
     }
@@ -156,6 +162,11 @@ object RepositoryModule {
     @Singleton
     fun provideSettingsRepository(androidDatabase: AndroidDatabase): SettingsRepository =
             SettingsRepository(AndroidSettingsStorage(androidDatabase))
+
+    @Provides
+    @Singleton
+    fun provideStrongNumberRepository(androidDatabase: AndroidDatabase): StrongNumberRepository =
+            StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase))
 
     @Provides
     @Singleton
