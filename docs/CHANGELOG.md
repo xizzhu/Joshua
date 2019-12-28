@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.13.1 (2019-12-27)
 - Bug fixes:
   - Disabled R8 full mode due to a crash
 
