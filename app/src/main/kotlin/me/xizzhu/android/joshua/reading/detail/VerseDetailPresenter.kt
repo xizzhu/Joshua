@@ -153,64 +153,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                 val noteAsync = supervisedAsync { interactor.readNote(verseIndex) }
                 val strongNumberAsync = supervisedAsync { interactor.readStrongNumber(verseIndex) }
 
-                val currentTranslation = interactor.currentTranslation()
-                val parallelTranslations = interactor.downloadedTranslations()
-                        .sortedWith(translationComparator)
-                        .filter { it.shortName != currentTranslation }
-                        .map { it.shortName }
-                val verses = interactor.readVerses(currentTranslation, parallelTranslations,
-                        verseIndex.bookIndex, verseIndex.chapterIndex)
-
-                // 1. finds the verse
-                var start: VerseIndex? = null
-                for (verse in verses) {
-                    if (verse.text.text.isNotEmpty()) start = verse.verseIndex // we need to consider the empty verses
-                    if (verse.verseIndex.verseIndex >= verseIndex.verseIndex) break
-                }
-
-                val verseIterator = verses.iterator()
-                var verse: Verse? = null
-                while (verseIterator.hasNext()) {
-                    val v = verseIterator.next()
-                    if (v.verseIndex == start) {
-                        verse = v
-                        break
-                    }
-                }
-                if (verse == null) throw IllegalStateException("Failed to find target verse")
-
-                // 2. builds the parallel
-                val verseTextItems = ArrayList<VerseTextItem>(parallelTranslations.size + 1)
-                val parallel = Array(parallelTranslations.size) { StringBuilder() }
-                val parallelBuilder: (index: Int, Verse.Text) -> Unit = { index, text ->
-                    with(parallel[index]) {
-                        if (isNotEmpty()) append(' ')
-                        append(text.text)
-                    }
-                }
-                verse.parallel.forEachIndexed(parallelBuilder)
-
-                var followingEmptyVerseCount = 0
-                while (verseIterator.hasNext()) {
-                    val v = verseIterator.next()
-                    if (v.text.text.isNotEmpty()) break
-                    v.parallel.forEachIndexed(parallelBuilder)
-                    followingEmptyVerseCount++
-                }
-
-                // 3. constructs VerseTextItems
-                verseTextItems.add(VerseTextItem(verse.verseIndex, followingEmptyVerseCount, verse.text,
-                        interactor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex],
-                        this@VerseDetailPresenter::onVerseClicked, this@VerseDetailPresenter::onVerseLongClicked))
-
-                parallelTranslations.forEachIndexed { index, translation ->
-                    verseTextItems.add(VerseTextItem(verse.verseIndex, followingEmptyVerseCount,
-                            Verse.Text(translation, parallel[index].toString()),
-                            interactor.readBookNames(translation)[verse.verseIndex.bookIndex],
-                            this@VerseDetailPresenter::onVerseClicked, this@VerseDetailPresenter::onVerseLongClicked))
-                }
-
-                verseDetail = VerseDetail(verseIndex, verseTextItems,
+                verseDetail = VerseDetail(verseIndex, buildVerseTextItems(verseIndex),
                         bookmarkAsync.await().isValid(), highlightAsync.await().color,
                         noteAsync.await().note, strongNumberAsync.await().toStrongNumberItems(verseIndex))
                 viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
@@ -220,6 +163,68 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                         DialogInterface.OnClickListener { _, _ -> loadVerseDetail(verseIndex) })
             }
         }
+    }
+
+    @VisibleForTesting
+    suspend fun buildVerseTextItems(verseIndex: VerseIndex): List<VerseTextItem> {
+        val currentTranslation = interactor.currentTranslation()
+        val parallelTranslations = interactor.downloadedTranslations()
+                .sortedWith(translationComparator)
+                .filter { it.shortName != currentTranslation }
+                .map { it.shortName }
+        val verses = interactor.readVerses(currentTranslation, parallelTranslations,
+                verseIndex.bookIndex, verseIndex.chapterIndex)
+
+        // 1. finds the verse
+        var start: VerseIndex? = null
+        for (verse in verses) {
+            if (verse.text.text.isNotEmpty()) start = verse.verseIndex // we need to consider the empty verses
+            if (verse.verseIndex.verseIndex >= verseIndex.verseIndex) break
+        }
+
+        val verseIterator = verses.iterator()
+        var verse: Verse? = null
+        while (verseIterator.hasNext()) {
+            val v = verseIterator.next()
+            if (v.verseIndex == start) {
+                verse = v
+                break
+            }
+        }
+        if (verse == null) throw IllegalStateException("Failed to find target verse")
+
+        // 2. builds the parallel
+        val parallel = Array(parallelTranslations.size) { StringBuilder() }
+        val parallelBuilder: (index: Int, Verse.Text) -> Unit = { index, text ->
+            with(parallel[index]) {
+                if (isNotEmpty()) append(' ')
+                append(text.text)
+            }
+        }
+        verse.parallel.forEachIndexed(parallelBuilder)
+
+        var followingEmptyVerseCount = 0
+        while (verseIterator.hasNext()) {
+            val v = verseIterator.next()
+            if (v.text.text.isNotEmpty()) break
+            v.parallel.forEachIndexed(parallelBuilder)
+            followingEmptyVerseCount++
+        }
+
+        // 3. constructs VerseTextItems
+        val verseTextItems = ArrayList<VerseTextItem>(parallelTranslations.size + 1)
+        verseTextItems.add(VerseTextItem(verse.verseIndex, followingEmptyVerseCount, verse.text,
+                interactor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex],
+                this@VerseDetailPresenter::onVerseClicked, this@VerseDetailPresenter::onVerseLongClicked))
+
+        parallelTranslations.forEachIndexed { index, translation ->
+            verseTextItems.add(VerseTextItem(verse.verseIndex, followingEmptyVerseCount,
+                    Verse.Text(translation, parallel[index].toString()),
+                    interactor.readBookNames(translation)[verse.verseIndex.bookIndex],
+                    this@VerseDetailPresenter::onVerseClicked, this@VerseDetailPresenter::onVerseLongClicked))
+        }
+
+        return verseTextItems
     }
 
     @VisibleForTesting
