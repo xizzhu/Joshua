@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
@@ -211,7 +212,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
 
                 verseDetail = VerseDetail(verseIndex, verseTextItems,
                         bookmarkAsync.await().isValid(), highlightAsync.await().color,
-                        noteAsync.await().note, strongNumberAsync.await())
+                        noteAsync.await().note, strongNumberAsync.await().toStrongNumberItems(verseIndex))
                 viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verse detail", e)
@@ -251,6 +252,11 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                 ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
             }
         }
+    }
+
+    private fun List<StrongNumber>.toStrongNumberItems(verseIndex: VerseIndex): List<StrongNumberItem> {
+        // TODO
+        return map { StrongNumberItem(verseIndex, it) }
     }
 
     /**

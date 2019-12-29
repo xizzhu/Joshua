@@ -16,15 +16,51 @@
 
 package me.xizzhu.android.joshua.reading.detail.pages
 
+import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.reading.detail.StrongNumberItem
 import me.xizzhu.android.joshua.reading.detail.VerseDetail
+import me.xizzhu.android.joshua.ui.getBodyTextSize
+import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 
 class StrongNumberPage(inflater: LayoutInflater, container: ViewGroup, settings: Settings)
     : VerseDetailPage(inflater.inflate(R.layout.page_verse_detail_strong_number, container, false)) {
+    private val emptyStrongNumberList: TextView = view.findViewById<TextView>(R.id.empty_strong_number_list)
+            .apply {
+                setOnClickListener {
+                    // TODO
+                }
+                setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+                setTextColor(settings.getPrimaryTextColor(resources))
+            }
+    private val strongNumberListView: CommonRecyclerView = view.findViewById<CommonRecyclerView>(R.id.strong_number_list)
+            .apply {
+                isNestedScrollingEnabled = false
+                setSettings(settings)
+            }
+
     override fun bind(verseDetail: VerseDetail) {
-        // TODO
+        if (verseDetail.strongNumberItems.isEmpty()) {
+            bindNoStrongNumberView()
+        } else {
+            bindStrongNumberItems(verseDetail.strongNumberItems)
+        }
+    }
+
+    private fun bindNoStrongNumberView() {
+        emptyStrongNumberList.visibility = View.VISIBLE
+        strongNumberListView.visibility = View.GONE
+    }
+
+    private fun bindStrongNumberItems(strongNumberItems: List<StrongNumberItem>) {
+        emptyStrongNumberList.visibility = View.GONE
+        strongNumberListView.visibility = View.VISIBLE
+        strongNumberListView.setItems(strongNumberItems)
     }
 }
