@@ -17,6 +17,9 @@
 package me.xizzhu.android.joshua.core.logger.android
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import kotlin.test.Test
@@ -84,6 +87,40 @@ class CrashlyticsLoggerTest : BaseUnitTest() {
                 }
                 cancel()
             }
+        }
+    }
+
+    @Test
+    fun testIsChildCancelledException() = testDispatcher.runBlockingTest {
+        CrashlyticsLogger().run {
+            flowOf(1, 2, 3)
+                    .mapLatest {
+                        try {
+                            delay(1000L)
+                            if (it != 3) fail()
+                        } catch (e: CancellationException) {
+                            assertTrue(e.isCoroutineCancellationException())
+                        }
+                    }.launchIn(this@runBlockingTest)
+        }
+    }
+
+    @Test
+    fun testRootCauseIsChildCancelledException() = testDispatcher.runBlockingTest {
+        CrashlyticsLogger().run {
+            flowOf(1, 2, 3)
+                    .mapLatest {
+                        try {
+                            try {
+                                delay(1000L)
+                                if (it != 3) fail()
+                            } catch (e: CancellationException) {
+                                throw RuntimeException("", e)
+                            }
+                        } catch (e: RuntimeException) {
+                            assertTrue(e.isCoroutineCancellationException())
+                        }
+                    }.launchIn(this@runBlockingTest)
         }
     }
 }
