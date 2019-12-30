@@ -24,6 +24,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
@@ -31,12 +32,14 @@ import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.onEach
 import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.ui.ToastHelper
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.utils.supervisedAsync
@@ -59,13 +62,17 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     private var updateHighlightJob: Job? = null
     private var updateNoteJob: Job? = null
 
+    private var downloadStrongNumberJob: Job? = null
+    private var downloadStrongNumberDialog: ProgressDialog? = null
+
     @UiThread
     override fun onCreate(viewHolder: VerseDetailViewHolder) {
         super.onCreate(viewHolder)
 
         viewHolder.verseDetailViewLayout.setListeners(
                 onClicked = { close() }, onBookmarkClicked = { updateBookmark() },
-                onHighlightClicked = { updateHighlight() }, onNoteUpdated = { updateNote(it) }
+                onHighlightClicked = { updateHighlight() }, onNoteUpdated = { updateNote(it) },
+                onNoStrongNumberClicked = { downloadStrongNumber() }
         )
         viewHolder.verseDetailViewLayout.post { viewHolder.verseDetailViewLayout.hide() }
 
@@ -135,6 +142,49 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
 
             updateNoteJob = null
         }
+    }
+
+    private fun downloadStrongNumber() {
+        if (downloadStrongNumberJob != null || downloadStrongNumberDialog != null) {
+            // just in case the user clicks too fast
+            return
+        }
+
+        downloadStrongNumberDialog = ProgressDialog.showProgressDialog(
+                readingActivity, R.string.dialog_downloading, 100, { downloadStrongNumberJob?.cancel() })
+        downloadStrongNumberJob = interactor.downloadStrongNumber()
+                .onEach(
+                        onLoading = {
+                            it?.let { progress ->
+                                downloadStrongNumberDialog?.run {
+                                    if (progress < 100) {
+                                        setProgress(progress)
+                                    } else {
+                                        setTitle(R.string.dialog_installing)
+                                        setIsIndeterminate(true)
+                                    }
+                                }
+                            }
+                                    ?: throw IllegalStateException("Missing progress data when downloading")
+                        },
+                        onSuccess = {
+                            ToastHelper.showToast(readingActivity, R.string.toast_downloaded)
+
+                            // TODO reload verse detail
+                        },
+                        onError = { _, _ ->
+                            DialogHelper.showDialog(readingActivity, true, R.string.dialog_download_error,
+                                    DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
+                        }
+                ).onCompletion {
+                    dismissDownloadStrongNumberDialog()
+                    downloadStrongNumberJob = null
+                }.launchIn(coroutineScope)
+    }
+
+    private fun dismissDownloadStrongNumberDialog() {
+        downloadStrongNumberDialog?.dismiss()
+        downloadStrongNumberDialog = null
     }
 
     private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
@@ -261,6 +311,16 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     private fun List<StrongNumber>.toStrongNumberItems(verseIndex: VerseIndex): List<StrongNumberItem> {
         // TODO
         return map { StrongNumberItem(verseIndex, it) }
+    }
+
+    @UiThread
+    override fun onStop() {
+        dismissDownloadStrongNumberDialog()
+
+        downloadStrongNumberJob?.cancel()
+        downloadStrongNumberJob = null
+
+        super.onStop()
     }
 
     /**

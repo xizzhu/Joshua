@@ -39,6 +39,7 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
     private val verseDetailPages: Array<VerseDetailPage?> = arrayOfNulls(PAGE_COUNT)
 
     var onNoteUpdated: ((String) -> Unit)? = null
+    var onNoStrongNumberClicked: (() -> Unit)? = null
     var settings: Settings? = null
         set(value) {
             field = value
@@ -50,13 +51,13 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
             notifyDataSetChanged()
         }
 
-    override fun getCount(): Int = if (settings != null && onNoteUpdated != null) PAGE_COUNT else 0
+    override fun getCount(): Int = if (settings != null && onNoteUpdated != null && onNoStrongNumberClicked != null) PAGE_COUNT else 0
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any = verseDetailPages[position]
             ?: when (position) {
                 PAGE_VERSES -> VersesPage(inflater, container, settings!!)
                 PAGE_NOTE -> NotePage(resources, inflater, container, settings!!, onNoteUpdated!!)
-                PAGE_STRONG_NUMBER -> StrongNumberPage(inflater, container, settings!!)
+                PAGE_STRONG_NUMBER -> StrongNumberPage(inflater, container, settings!!, onNoStrongNumberClicked!!)
                 else -> throw IllegalArgumentException("Unsupported position: $position")
             }.apply {
                 bind(verseDetail)

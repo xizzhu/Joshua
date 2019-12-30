@@ -20,14 +20,14 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.utils.Clock
+import me.xizzhu.android.logger.Log
 
 class VerseDetailInteractor(private val translationManager: TranslationManager,
                             private val bibleReadingManager: BibleReadingManager,
@@ -109,4 +109,21 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
     }
 
     suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.read(verseIndex)
+
+    fun downloadStrongNumber(): Flow<ViewData<Int>> =
+            strongNumberManager.download()
+                    .map { progress ->
+                        if (progress <= 100) {
+                            ViewData.loading(progress)
+                        } else {
+                            // Ideally, we should use onCompletion() to handle this. However, it doesn't
+                            // distinguish between a successful completion and a cancellation.
+                            // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
+                            ViewData.success(-1)
+                        }
+                    }
+                    .catch { cause ->
+                        Log.e(tag, "Failed to download translation", cause)
+                        emit(ViewData.error(exception = cause))
+                    }
 }

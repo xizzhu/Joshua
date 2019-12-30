@@ -72,12 +72,13 @@ class VerseDetailViewLayout : FrameLayout {
         })
     }
 
-    fun setListeners(onClicked: () -> Unit, onBookmarkClicked: () -> Unit,
-                     onHighlightClicked: () -> Unit, onNoteUpdated: (String) -> Unit) {
+    fun setListeners(onClicked: () -> Unit, onBookmarkClicked: () -> Unit, onHighlightClicked: () -> Unit,
+                     onNoteUpdated: (String) -> Unit, onNoStrongNumberClicked: () -> Unit) {
         setOnClickListener { onClicked() }
         bookmark.setOnClickListener { onBookmarkClicked() }
         highlight.setOnClickListener { onHighlightClicked() }
         adapter.onNoteUpdated = onNoteUpdated
+        adapter.onNoStrongNumberClicked = onNoStrongNumberClicked
     }
 
     fun setSettings(settings: Settings) {

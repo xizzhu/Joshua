@@ -16,10 +16,13 @@
 
 package me.xizzhu.android.joshua.core
 
+import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.core.repository.StrongNumberRepository
 
 data class StrongNumber(val sn: String, val meaning: String)
 
 class StrongNumberManager(private val strongNumberRepository: StrongNumberRepository) {
     suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = strongNumberRepository.read(verseIndex)
+
+    fun download(): Flow<Int> = strongNumberRepository.download()
 }

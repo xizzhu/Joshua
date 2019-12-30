@@ -29,13 +29,11 @@ import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 
-class StrongNumberPage(inflater: LayoutInflater, container: ViewGroup, settings: Settings)
+class StrongNumberPage(inflater: LayoutInflater, container: ViewGroup, settings: Settings, onNoStrongNumberClicked: () -> Unit)
     : VerseDetailPage(inflater.inflate(R.layout.page_verse_detail_strong_number, container, false)) {
     private val emptyStrongNumberList: TextView = view.findViewById<TextView>(R.id.empty_strong_number_list)
             .apply {
-                setOnClickListener {
-                    // TODO
-                }
+                setOnClickListener { onNoStrongNumberClicked() }
                 setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
                 setTextColor(settings.getPrimaryTextColor(resources))
             }

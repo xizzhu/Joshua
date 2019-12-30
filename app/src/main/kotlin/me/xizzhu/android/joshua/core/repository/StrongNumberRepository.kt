@@ -16,10 +16,20 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
 
 class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNumberStorage) {
     suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = localStrongNumberStorage.read(verseIndex)
+
+    fun download(): Flow<Int> = flow {
+        (0..101).forEach {
+            emit(it)
+            delay(100L)
+        }
+    }
 }

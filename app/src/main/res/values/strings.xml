@@ -12,8 +12,8 @@
 
     <string name="header_available_translations">Available for download</string>
 
-    <string name="toast_translation_downloaded">Translation downloaded</string>
-    <string name="toast_translation_deleted">Translation deleted</string>
+    <string name="toast_downloaded">Successfully downloaded</string>
+    <string name="toast_deleted">Translation deleted</string>
     <string name="toast_verses_copied">Copied to clipboard.</string>
     <string name="toast_verses_searched">%1$d result(s) found.</string>
     <string name="toast_backed_up">Successfully backed-up.</string>
@@ -34,9 +34,9 @@
     <string name="dialog_delete_translation_confirmation">Delete now?</string>
     <string name="dialog_no_translation_downloaded">No translation, download now?</string>
 
-    <string name="dialog_downloading_translation">Downloading…</string>
-    <string name="dialog_installing_translation">Installing…</string>
-    <string name="dialog_deleting_translation">Deleting…</string>
+    <string name="dialog_downloading">Downloading…</string>
+    <string name="dialog_installing">Installing…</string>
+    <string name="dialog_deleting">Deleting…</string>
     <string name="dialog_wait">Please wait…</string>
 
     <string name="dialog_load_translation_list_error">Failed to load translation list, retry?</string>
