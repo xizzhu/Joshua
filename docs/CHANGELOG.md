@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.13.2 (2019-12-29)
 - Improvements:
   - No longer log ChildCancelledException to Firebase
 - Bug fixes:
