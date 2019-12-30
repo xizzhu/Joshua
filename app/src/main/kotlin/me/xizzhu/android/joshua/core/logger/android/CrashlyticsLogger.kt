@@ -43,6 +43,8 @@ class CrashlyticsLogger : Logger {
     fun Throwable.isCoroutineCancellationException(): Boolean {
         var rootCause = this
         while (rootCause.cause?.let { it != rootCause } == true) rootCause = rootCause.cause!!
-        return rootCause.javaClass.name == "kotlinx.coroutines.JobCancellationException"
+        val name = rootCause.javaClass.name
+        return name == "kotlinx.coroutines.JobCancellationException"
+                || name == "kotlinx.coroutines.flow.internal.ChildCancelledException"
     }
 }
