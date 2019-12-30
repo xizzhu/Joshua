@@ -77,11 +77,11 @@ class VerseDetailViewLayout : FrameLayout {
         setOnClickListener { onClicked() }
         bookmark.setOnClickListener { onBookmarkClicked() }
         highlight.setOnClickListener { onHighlightClicked() }
-        adapter.setOnNoteUpdatedListener(onNoteUpdated)
+        adapter.onNoteUpdated = onNoteUpdated
     }
 
     fun setSettings(settings: Settings) {
-        adapter.setSettings(settings)
+        adapter.settings = settings
 
         header.setBackgroundColor(if (settings.nightModeOn) 0xFF222222.toInt() else 0xFFEEEEEE.toInt())
         viewPager.setBackgroundColor(settings.getBackgroundColor())
@@ -89,7 +89,7 @@ class VerseDetailViewLayout : FrameLayout {
     }
 
     fun setVerseDetail(verseDetail: VerseDetail) {
-        adapter.setVerseDetail(verseDetail)
+        adapter.verseDetail = verseDetail
         bookmark.colorFilter = if (verseDetail.bookmarked) ON_COLOR_FILTER else OFF_COLOR_FILTER
         highlight.colorFilter = if (verseDetail.highlightColor != Highlight.COLOR_NONE) ON_COLOR_FILTER else OFF_COLOR_FILTER
     }

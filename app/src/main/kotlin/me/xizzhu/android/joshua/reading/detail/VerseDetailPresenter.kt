@@ -67,7 +67,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                 onClicked = { close() }, onBookmarkClicked = { updateBookmark() },
                 onHighlightClicked = { updateHighlight() }, onNoteUpdated = { updateNote(it) }
         )
-        coroutineScope.launch { viewHolder.verseDetailViewLayout.hide() }
+        viewHolder.verseDetailViewLayout.post { viewHolder.verseDetailViewLayout.hide() }
 
         interactor.settings().onEachSuccess { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
         interactor.verseDetailRequest().onEach { showVerseDetail(it.verseIndex, it.content) }.launchIn(coroutineScope)

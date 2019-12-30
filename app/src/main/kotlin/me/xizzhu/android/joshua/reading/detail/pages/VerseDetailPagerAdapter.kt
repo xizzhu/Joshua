@@ -36,25 +36,19 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
 
     private val resources: Resources = context.resources
     private val inflater: LayoutInflater = LayoutInflater.from(context)
-
     private val verseDetailPages: Array<VerseDetailPage?> = arrayOfNulls(PAGE_COUNT)
-    private var settings: Settings? = null
-    private var onNoteUpdated: ((String) -> Unit)? = null
-    private var verseDetail: VerseDetail = VerseDetail.INVALID
 
-    fun setSettings(settings: Settings) {
-        this.settings = settings
-        notifyDataSetChanged()
-    }
-
-    fun setOnNoteUpdatedListener(onNoteUpdated: (String) -> Unit) {
-        this.onNoteUpdated = onNoteUpdated
-    }
-
-    fun setVerseDetail(verseDetail: VerseDetail) {
-        this.verseDetail = verseDetail
-        notifyDataSetChanged()
-    }
+    var onNoteUpdated: ((String) -> Unit)? = null
+    var settings: Settings? = null
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+    var verseDetail: VerseDetail = VerseDetail.INVALID
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     override fun getCount(): Int = if (settings != null && onNoteUpdated != null) PAGE_COUNT else 0
 
