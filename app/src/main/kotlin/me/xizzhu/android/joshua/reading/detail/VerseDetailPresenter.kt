@@ -63,28 +63,15 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     override fun onCreate(viewHolder: VerseDetailViewHolder) {
         super.onCreate(viewHolder)
 
-        with(viewHolder.verseDetailViewLayout) {
-            setOnClickListener { close() }
-            setOnBookmarkClickedListener { updateBookmark() }
-            setOnHighlightClickedListener {
-                DialogHelper.showDialog(readingActivity, R.string.text_pick_highlight_color,
-                        resources.getStringArray(R.array.text_colors),
-                        max(0, Highlight.AVAILABLE_COLORS.indexOf(verseDetail?.highlightColor
-                                ?: Highlight.COLOR_NONE)),
-                        DialogInterface.OnClickListener { dialog, which ->
-                            updateHighlight(Highlight.AVAILABLE_COLORS[which])
+        viewHolder.verseDetailViewLayout.setListeners(
+                onClicked = { close() }, onBookmarkClicked = { updateBookmark() },
+                onHighlightClicked = { updateHighlight() }, onNoteUpdated = { updateNote(it) }
+        )
+        coroutineScope.launch { viewHolder.verseDetailViewLayout.hide() }
 
-                            dialog.dismiss()
-                        })
-            }
-            setOnNoteUpdatedListener { updateNote(it) }
-
-            interactor.settings().onEachSuccess { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
-            interactor.verseDetailRequest().onEach { showVerseDetail(it.verseIndex, it.content) }.launchIn(coroutineScope)
-            interactor.currentVerseIndex().onEach { close() }.launchIn(coroutineScope)
-
-            post { hide() }
-        }
+        interactor.settings().onEachSuccess { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
+        interactor.verseDetailRequest().onEach { showVerseDetail(it.verseIndex, it.content) }.launchIn(coroutineScope)
+        interactor.currentVerseIndex().onEach { close() }.launchIn(coroutineScope)
     }
 
     private fun updateBookmark() {
@@ -103,6 +90,18 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
 
             updateBookmarkJob = null
         }
+    }
+
+    private fun updateHighlight() {
+        DialogHelper.showDialog(readingActivity, R.string.text_pick_highlight_color,
+                readingActivity.resources.getStringArray(R.array.text_colors),
+                max(0, Highlight.AVAILABLE_COLORS.indexOf(verseDetail?.highlightColor
+                        ?: Highlight.COLOR_NONE)),
+                DialogInterface.OnClickListener { dialog, which ->
+                    updateHighlight(Highlight.AVAILABLE_COLORS[which])
+
+                    dialog.dismiss()
+                })
     }
 
     private fun updateHighlight(@Highlight.Companion.AvailableColor highlightColor: Int) {
