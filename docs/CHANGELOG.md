@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Bug fixes:
+  - Properly cancel translation download / removal and dismiss dialog on stop
+
 #### v0.13.2 (2019-12-29)
 - Improvements:
   - No longer log ChildCancelledException to Firebase

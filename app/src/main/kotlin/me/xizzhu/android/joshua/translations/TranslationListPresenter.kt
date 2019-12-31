@@ -44,6 +44,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     : BaseSettingsAwarePresenter<TranslationListViewHolder, TranslationListInteractor>(translationListInteractor, dispatcher) {
     private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_NAME)
 
+    private var downloadingJob: Job? = null
     private var downloadTranslationDialog: ProgressDialog? = null
     private var removeTranslationDialog: ProgressDialog? = null
 
@@ -131,12 +132,11 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     }
 
     private fun downloadTranslation(translationToDownload: TranslationInfo) {
-        if (downloadTranslationDialog != null) {
+        if (downloadingJob != null || downloadTranslationDialog != null) {
             // just in case the user clicks too fast
             return
         }
 
-        var downloadingJob: Job? = null
         downloadTranslationDialog = ProgressDialog.showProgressDialog(
                 translationManagementActivity, R.string.dialog_downloading_translation, 100, { downloadingJob?.cancel() })
 
@@ -216,10 +216,13 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     }
 
     @UiThread
-    override fun onDestroy() {
+    override fun onStop() {
         dismissDownloadTranslationDialog()
+        downloadingJob?.cancel()
+        downloadingJob = null
+
         dismissRemoveTranslationDialog()
 
-        super.onDestroy()
+        super.onStop()
     }
 }
