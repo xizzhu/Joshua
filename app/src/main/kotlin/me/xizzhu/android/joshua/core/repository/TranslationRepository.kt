@@ -152,6 +152,8 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         launch { downloadProgressChannel.consumeEach { offer(it) } }
 
         downloadTranslation(downloadProgressChannel, translationToDownload)
+        downloadProgressChannel.close()
+
         val (available, downloaded) = synchronized(translationsLock) {
             val available = mutableListOf<TranslationInfo>().apply {
                 availableTranslationsChannel.valueOrNull?.let { addAll(it) }
@@ -167,8 +169,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         }
         notifyTranslationsUpdated(available, downloaded)
 
-        downloadProgressChannel.send(101)
-        downloadProgressChannel.close()
+        offer(101)
     }
 
     @VisibleForTesting
