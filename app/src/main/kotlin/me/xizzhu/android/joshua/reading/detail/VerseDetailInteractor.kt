@@ -123,7 +123,7 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
                         }
                     }
                     .catch { cause ->
-                        Log.e(tag, "Failed to download translation", cause)
+                        Log.e(tag, "Failed to download Strong number", cause)
                         emit(ViewData.error(exception = cause))
                     }
 }

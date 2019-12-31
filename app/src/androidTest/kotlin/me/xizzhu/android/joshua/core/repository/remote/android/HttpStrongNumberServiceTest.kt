@@ -22,10 +22,12 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.Before
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HttpStrongNumberServiceTest : BaseUnitTest() {
@@ -60,6 +62,28 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
                     assertTrue(actual.verses.containsKey(VerseIndex(bookIndex, chapterIndex, 0)))
                 }
             }
+        }
+    }
+
+    @Test
+    fun testFetchWords() {
+        runBlocking {
+            inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn-en.zip")
+
+            val channel = Channel<Int>()
+            var channelCalled = false
+            launch {
+                channel.consumeEach {
+                    channelCalled = true
+                    assertTrue(it == 50 || it == 100)
+                }
+            }
+
+            val actual = strongNumberService.fetchWords(channel)
+            channel.close()
+            assertTrue(channelCalled)
+            assertEquals(Constants.STRONG_NUMBER_HEBREW_COUNT, actual.hebrew.size)
+            assertEquals(Constants.STRONG_NUMBER_GREEK_COUNT, actual.greek.size)
         }
     }
 }

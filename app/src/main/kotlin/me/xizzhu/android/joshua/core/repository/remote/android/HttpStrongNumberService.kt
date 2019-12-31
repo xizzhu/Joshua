@@ -19,9 +19,11 @@ package me.xizzhu.android.joshua.core.repository.remote.android
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withContext
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberVerses
+import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberWords
 import java.io.BufferedInputStream
 import java.util.zip.ZipInputStream
 
@@ -46,5 +48,34 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                 }
 
         return@withContext RemoteStrongNumberVerses(verses)
+    }
+
+    override suspend fun fetchWords(channel: SendChannel<Int>): RemoteStrongNumberWords = withContext(Dispatchers.IO) {
+        var hebrew: Map<Int, String> = emptyMap()
+        var greek: Map<Int, String> = emptyMap()
+
+        var progress = 0
+        ZipInputStream(BufferedInputStream(getInputStream("tools/sn-en.zip")))
+                .forEachIndexed { index, entryName, contentReader ->
+                    when (entryName) {
+                        "hebrew.json" -> {
+                            hebrew = contentReader.readStrongNumberWords()
+                            progress += 50
+                            channel.offer(progress)
+                        }
+                        "greek.json" -> {
+                            greek = contentReader.readStrongNumberWords()
+                            progress += 50
+                            channel.offer(progress)
+                        }
+                        else -> throw IllegalStateException("Unknown entry ($entryName) in Strong number words")
+                    }
+                }
+
+        if (hebrew.size != Constants.STRONG_NUMBER_HEBREW_COUNT
+                || greek.size != Constants.STRONG_NUMBER_GREEK_COUNT) {
+            throw IllegalStateException("Incorrect Strong number words count: Hebrew - ${hebrew.size}, Greek - ${greek.size}")
+        }
+        return@withContext RemoteStrongNumberWords(hebrew, greek)
     }
 }

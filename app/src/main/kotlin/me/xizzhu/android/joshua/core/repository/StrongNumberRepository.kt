@@ -16,11 +16,10 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import androidx.annotation.VisibleForTesting
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
@@ -30,16 +29,26 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
                              private val remoteStrongNumberStorage: RemoteStrongNumberStorage) {
     suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = localStrongNumberStorage.read(verseIndex)
 
-    fun download(): Flow<Int> = channelFlow {
-        val downloadProgressChannel = Channel<Int>(Channel.CONFLATED)
-        launch { downloadProgressChannel.consumeEach { offer(it) } }
+    fun download(): Flow<Int> = download(Channel<Int>(Channel.CONFLATED), Channel(Channel.CONFLATED))
 
-        val remoteVerses = remoteStrongNumberStorage.fetchVerses(downloadProgressChannel)
-        downloadProgressChannel.send(100)
+    @VisibleForTesting
+    fun download(versesDownloadProgress: Channel<Int>, wordsDownloadProgress: Channel<Int>) = channelFlow {
+        versesDownloadProgress.offer(0)
+        wordsDownloadProgress.offer(0)
+        versesDownloadProgress.consumeAsFlow().combine(wordsDownloadProgress.consumeAsFlow()) { v, w ->
+            offer((v * 0.9 + w * 0.1).toInt())
+        }.launchIn(this)
+
+        val remoteVersesAsync = async { remoteStrongNumberStorage.fetchVerses(versesDownloadProgress) }
+        val remoteWords = remoteStrongNumberStorage.fetchWords(wordsDownloadProgress)
+        val remoteVerses = remoteVersesAsync.await()
+
+        versesDownloadProgress.close()
+        wordsDownloadProgress.close()
+        offer(100)
 
         // TODO saves to local storage
 
-        downloadProgressChannel.send(101)
-        downloadProgressChannel.close()
+        offer(101)
     }
 }

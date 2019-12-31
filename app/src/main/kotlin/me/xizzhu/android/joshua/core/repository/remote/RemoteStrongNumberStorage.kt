@@ -21,6 +21,10 @@ import me.xizzhu.android.joshua.core.VerseIndex
 
 data class RemoteStrongNumberVerses(val verses: Map<VerseIndex, List<Int>>)
 
+data class RemoteStrongNumberWords(val hebrew: Map<Int, String>, val greek: Map<Int, String>)
+
 interface RemoteStrongNumberStorage {
     suspend fun fetchVerses(channel: SendChannel<Int>): RemoteStrongNumberVerses
+
+    suspend fun fetchWords(channel: SendChannel<Int>): RemoteStrongNumberWords
 }

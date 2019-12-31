@@ -138,8 +138,7 @@ fun JsonReader.readStrongNumberVerses(): Map<Int, List<Int>> {
     beginObject()
     while (hasNext()) {
         try {
-            val verseIndex = nextName().toInt() - 1
-            verses[verseIndex] = readIntsArray().apply {
+            verses[nextName().toInt() - 1] = readIntsArray().apply {
                 if (isEmpty()) {
                     throw RuntimeException("Empty verses array in Strong number chapter JSON")
                 }
@@ -164,4 +163,22 @@ fun JsonReader.readIntsArray(): List<Int> {
     }
     endArray()
     return ints
+}
+
+fun JsonReader.readStrongNumberWords(): Map<Int, String> {
+    val words = hashMapOf<Int, String>()
+
+    beginObject()
+    while (hasNext()) {
+        try {
+            words[nextName().toInt()] = nextString()
+        } catch (e: NumberFormatException) {
+            skipValue()
+            Log.w(TAG, "Unsupported JSON format", RuntimeException("Unsupported format in Strong number words JSON"))
+        }
+    }
+    endObject()
+
+    if (words.isEmpty()) throw RuntimeException("Illegal format in Strong number words JSON")
+    return words
 }

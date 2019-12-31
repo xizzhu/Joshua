@@ -506,4 +506,52 @@ class JsonParserTest : BaseUnitTest() {
             assertEquals(listOf(1989, 6, 4), it.readIntsArray())
         }
     }
+
+    @Test
+    fun testReadStrongNumberWords() {
+        JsonReader(StringReader("{\n" +
+                "  \"1\": \"--Alpha\",\n" +
+                "  \"2\": \"Aaron\",\n" +
+                "  \"3\": \"Abaddon\",\n" +
+                "  \"4\": \"from being burdensome\",\n" +
+                "  \"5\": \"Abba\"" +
+                "}\n")).use {
+            assertEquals(
+                    mapOf(
+                            1 to "--Alpha",
+                            2 to "Aaron",
+                            3 to "Abaddon",
+                            4 to "from being burdensome",
+                            5 to "Abba"
+                    ),
+                    it.readStrongNumberWords())
+        }
+    }
+
+    @Test
+    fun testReadStrongNumberWordsWithNonIntField() {
+        JsonReader(StringReader("{\n" +
+                "  \"1\": \"--Alpha\",\n" +
+                "  \"2\": \"Aaron\",\n" +
+                "  \"extra\": \"random field\"," +
+                "  \"3\": \"Abaddon\",\n" +
+                "  \"4\": \"from being burdensome\",\n" +
+                "  \"5\": \"Abba\"" +
+                "}\n")).use {
+            assertEquals(
+                    mapOf(
+                            1 to "--Alpha",
+                            2 to "Aaron",
+                            3 to "Abaddon",
+                            4 to "from being burdensome",
+                            5 to "Abba"
+                    ),
+                    it.readStrongNumberWords())
+        }
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun testReadStrongNumberWordsMissingWords() {
+        JsonReader(StringReader("{}")).use { it.readStrongNumberWords() }
+    }
 }

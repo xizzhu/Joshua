@@ -34,7 +34,7 @@ fun getInputStream(relativeUrl: String): InputStream =
                     readTimeout = TIMEOUT_IN_MILLISECONDS
                 }.getInputStream()
 
-fun ZipInputStream.forEachIndexed(action: (index: Int, entryName: String, contentReader: JsonReader) -> Unit) = use {
+inline fun ZipInputStream.forEachIndexed(action: (index: Int, entryName: String, contentReader: JsonReader) -> Unit) = use {
     var index = 0
     val buffer = ByteArray(4096)
     val os = ByteArrayOutputStream()
