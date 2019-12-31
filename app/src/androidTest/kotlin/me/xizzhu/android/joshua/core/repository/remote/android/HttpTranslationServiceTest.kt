@@ -26,7 +26,6 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Before
-import org.mockito.Mockito.*
 import java.io.ByteArrayInputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,14 +38,14 @@ class HttpTranslationServiceTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        httpTranslationService = spy(HttpTranslationService())
+        httpTranslationService = HttpTranslationService()
     }
 
     @Test
     fun testFetchTranslations() {
         runBlocking {
-            doReturn(ByteArrayInputStream("{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1861134}]}".toByteArray()))
-                    .`when`(httpTranslationService).getInputStream("list.json")
+            inputStream = ByteArrayInputStream("{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1861134}]}".toByteArray())
+
             assertEquals(listOf(RemoteTranslationInfo("KJV", "Authorized King James", "en_gb", 1861134L)),
                     httpTranslationService.fetchTranslations())
         }
@@ -55,8 +54,7 @@ class HttpTranslationServiceTest : BaseUnitTest() {
     @Test
     fun testFetchTranslation() {
         runBlocking {
-            doReturn(InstrumentationRegistry.getInstrumentation().context.assets.open("KJV.zip"))
-                    .`when`(httpTranslationService).getInputStream("KJV.zip")
+            inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("KJV.zip")
 
             val channel = Channel<Int>()
             var channelCalled = false
