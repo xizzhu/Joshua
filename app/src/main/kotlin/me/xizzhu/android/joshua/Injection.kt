@@ -32,6 +32,7 @@ import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsModule
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.annotated.notes.NotesModule
+import me.xizzhu.android.joshua.core.repository.remote.android.HttpStrongNumberService
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpTranslationService
 import me.xizzhu.android.joshua.core.serializer.android.BackupJsonSerializer
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
@@ -166,7 +167,7 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideStrongNumberRepository(androidDatabase: AndroidDatabase): StrongNumberRepository =
-            StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase))
+            StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase), HttpStrongNumberService())
 
     @Provides
     @Singleton
