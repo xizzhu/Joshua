@@ -16,6 +16,9 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import me.xizzhu.android.ask.db.transaction
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
@@ -25,5 +28,13 @@ class AndroidStrongNumberStorage(private val androidDatabase: AndroidDatabase) :
     override suspend fun read(verseIndex: VerseIndex): List<StrongNumber> {
         // TODO
         return emptyList()
+    }
+
+    override suspend fun save(strongNumbers: Map<VerseIndex, List<Int>>, hebrewWords: Map<Int, String>, greekWords: Map<Int, String>) {
+        withContext(Dispatchers.IO) {
+            androidDatabase.writableDatabase.transaction {
+                androidDatabase.strongNumberListDao.replace(strongNumbers)
+            }
+        }
     }
 }

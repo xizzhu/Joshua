@@ -19,13 +19,14 @@ package me.xizzhu.android.joshua.core.repository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberVerses
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberWords
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -49,8 +50,11 @@ class StrongNumberRepositoryTest : BaseUnitTest() {
     fun testDownload() = testDispatcher.runBlockingTest {
         val versesDownloadProgress = Channel<Int>()
         val wordsDownloadProgress = Channel<Int>()
-        `when`(remoteStrongNumberStorage.fetchVerses(versesDownloadProgress)).thenReturn(RemoteStrongNumberVerses(emptyMap()))
-        `when`(remoteStrongNumberStorage.fetchWords(wordsDownloadProgress)).thenReturn(RemoteStrongNumberWords(emptyMap(), emptyMap()))
+        val verses = mapOf(VerseIndex(1, 2, 3) to listOf(1, 2, 3, 4, 5))
+        val hebrew = mapOf(1 to "123")
+        val greek = mapOf(4 to "567")
+        `when`(remoteStrongNumberStorage.fetchVerses(versesDownloadProgress)).thenReturn(RemoteStrongNumberVerses(verses))
+        `when`(remoteStrongNumberStorage.fetchWords(wordsDownloadProgress)).thenReturn(RemoteStrongNumberWords(hebrew, greek))
 
         var called = false
         strongNumberRepository.download(versesDownloadProgress, wordsDownloadProgress)
@@ -61,5 +65,6 @@ class StrongNumberRepositoryTest : BaseUnitTest() {
         assertTrue(called)
         assertTrue(versesDownloadProgress.isClosedForSend && versesDownloadProgress.isClosedForReceive)
         assertTrue(wordsDownloadProgress.isClosedForSend && wordsDownloadProgress.isClosedForReceive)
+        verify(localStrongNumberStorage, times(1)).save(verses, hebrew, greek)
     }
 }

@@ -29,7 +29,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
                              private val remoteStrongNumberStorage: RemoteStrongNumberStorage) {
     suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = localStrongNumberStorage.read(verseIndex)
 
-    fun download(): Flow<Int> = download(Channel<Int>(Channel.CONFLATED), Channel(Channel.CONFLATED))
+    fun download(): Flow<Int> = download(Channel(Channel.CONFLATED), Channel(Channel.CONFLATED))
 
     @VisibleForTesting
     fun download(versesDownloadProgress: Channel<Int>, wordsDownloadProgress: Channel<Int>) = channelFlow {
@@ -47,7 +47,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
         wordsDownloadProgress.close()
         offer(100)
 
-        // TODO saves to local storage
+        localStrongNumberStorage.save(remoteVerses.verses, remoteWords.hebrew, remoteWords.greek)
 
         offer(101)
     }
