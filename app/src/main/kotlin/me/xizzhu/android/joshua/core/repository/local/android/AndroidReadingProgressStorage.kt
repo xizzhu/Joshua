@@ -84,12 +84,14 @@ class AndroidReadingProgressStorage(private val androidDatabase: AndroidDatabase
     }
 
     override suspend fun save(readingProgress: ReadingProgress) {
-        androidDatabase.writableDatabase.transaction {
-            androidDatabase.metadataDao.save(listOf(
-                    Pair(MetadataDao.KEY_CONTINUOUS_READING_DAYS, readingProgress.continuousReadingDays.toString()),
-                    Pair(MetadataDao.KEY_LAST_READING_TIMESTAMP, readingProgress.lastReadingTimestamp.toString())
-            ))
-            readingProgress.chapterReadingStatus.forEach { androidDatabase.readingProgressDao.save(it) }
+        withContext(Dispatchers.IO) {
+            androidDatabase.writableDatabase.transaction {
+                androidDatabase.metadataDao.save(listOf(
+                        Pair(MetadataDao.KEY_CONTINUOUS_READING_DAYS, readingProgress.continuousReadingDays.toString()),
+                        Pair(MetadataDao.KEY_LAST_READING_TIMESTAMP, readingProgress.lastReadingTimestamp.toString())
+                ))
+                readingProgress.chapterReadingStatus.forEach { androidDatabase.readingProgressDao.save(it) }
+            }
         }
     }
 }
