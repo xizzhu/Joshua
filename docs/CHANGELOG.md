@@ -4,6 +4,7 @@ CHANGELOG
 #### Next Release
 - Bug fixes:
   - Properly cancel translation download / removal and dismiss dialog on stop
+  - Should call AndroidReadingProgressStorage.save() on IO thread
 
 #### v0.13.2 (2019-12-29)
 - Improvements:
