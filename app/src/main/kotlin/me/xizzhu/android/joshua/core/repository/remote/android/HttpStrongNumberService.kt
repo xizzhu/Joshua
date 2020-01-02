@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.core.repository.remote.android
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withContext
+import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
@@ -29,14 +30,20 @@ import java.util.zip.ZipInputStream
 
 class HttpStrongNumberService : RemoteStrongNumberStorage {
     override suspend fun fetchVerses(channel: SendChannel<Int>): RemoteStrongNumberVerses = withContext(Dispatchers.IO) {
-        val verses = hashMapOf<VerseIndex, List<Int>>()
+        val verses = hashMapOf<VerseIndex, List<String>>()
 
         var progress = -1
         ZipInputStream(BufferedInputStream(getInputStream("tools/sn_verses.zip")))
                 .forEachIndexed { index, entryName, contentReader ->
-                    val (bookIndex, chapterIndex) = entryName.substring(0, entryName.length - 5).split("-")
-                    contentReader.readStrongNumberVerses().forEach {
-                        verses[VerseIndex(bookIndex.toInt(), chapterIndex.toInt(), it.key)] = it.value
+                    val bookIndex: Int
+                    val chapterIndex: Int
+                    entryName.substring(0, entryName.length - 5).split("-").run {
+                        bookIndex = get(0).toInt()
+                        chapterIndex = get(1).toInt()
+                    }
+                    contentReader.readStrongNumberVerses().forEach { (verseIndex, strongWords) ->
+                        verses[VerseIndex(bookIndex, chapterIndex, verseIndex - 1)] =
+                                strongWords.map { if (bookIndex < Bible.OLD_TESTAMENT_COUNT) "H$it" else "G$it" }
                     }
 
                     // only emits if the progress is actually changed

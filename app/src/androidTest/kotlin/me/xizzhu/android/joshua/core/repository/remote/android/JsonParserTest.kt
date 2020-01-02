@@ -465,8 +465,8 @@ class JsonParserTest : BaseUnitTest() {
                 "}\n")).use {
             assertEquals(
                     mapOf(
-                            0 to listOf(7225, 1254, 430, 853, 8064, 853, 776),
-                            1 to listOf(776, 1961, 8414, 922, 2822, 5921, 6440, 8415, 7307, 430, 7363, 5921, 6440, 4325)
+                            1 to listOf(7225, 1254, 430, 853, 8064, 853, 776),
+                            2 to listOf(776, 1961, 8414, 922, 2822, 5921, 6440, 8415, 7307, 430, 7363, 5921, 6440, 4325)
                     ),
                     it.readStrongNumberVerses())
         }
@@ -481,8 +481,8 @@ class JsonParserTest : BaseUnitTest() {
                 "}\n")).use {
             assertEquals(
                     mapOf(
-                            0 to listOf(7225, 1254, 430, 853, 8064, 853, 776),
-                            1 to listOf(776, 1961, 8414, 922, 2822, 5921, 6440, 8415, 7307, 430, 7363, 5921, 6440, 4325)
+                            1 to listOf(7225, 1254, 430, 853, 8064, 853, 776),
+                            2 to listOf(776, 1961, 8414, 922, 2822, 5921, 6440, 8415, 7307, 430, 7363, 5921, 6440, 4325)
                     ),
                     it.readStrongNumberVerses())
         }

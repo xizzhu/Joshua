@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.tests
 
+import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -110,14 +111,43 @@ object MockContents {
     const val kjvCuvTranslationInfoJson = "{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1860978},{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
 
     val strongNumbersPerVerse = mapOf(
-            VerseIndex(0, 0, 0) to listOf(7225, 1254, 430, 853, 8064, 853, 776),
-            VerseIndex(0, 0, 1) to listOf(776, 1961, 8414, 922, 2822, 5921, 6440, 8415, 7307, 430, 7363, 5921, 6440, 4325)
+            VerseIndex(0, 0, 0) to listOf("H7225", "H1254", "H430", "H853", "H8064", "H776"),
+            VerseIndex(39, 0, 0) to listOf("G976", "G1078", "G2424", "G5547", "G5207", "G1138", "G5207", "G11")
     )
     val strongNumberWords = mapOf(
-            "H1" to "chief, (fore-) father(-less), [idiom] patrimony, principal. Compare names in 'Abi-'.",
-            "H2" to "father.",
-            "G1" to "--Alpha",
-            "G2" to "Aaron"
+            "H7225" to "beginning, chief(-est), first(-fruits, part, time), principal thing.",
+            "H1254" to "choose, create (creator), cut down, dispatch, do, make (fat).",
+            "H430" to "angels, [idiom] exceeding, God (gods) (-dess, -ly), [idiom] (very) great, judges, [idiom] mighty.",
+            "H853" to "(as such unrepresented in English).",
+            "H8064" to "mantle",
+            "H776" to "[idiom] common, country, earth, field, ground, land, [idiom] natins, way, [phrase] wilderness, world.",
+            "G976" to "book",
+            "G1078" to "generation, nature(-ral)",
+            "G2424" to "Jesus",
+            "G5547" to "Christ",
+            "G5207" to "child, foal, son",
+            "G1138" to "David",
+            "G11" to "Abraham"
+    )
+    val strongNumber = mapOf(
+            VerseIndex(0, 0, 0) to listOf(
+                    StrongNumber("H7225", strongNumberWords.getValue("H7225")),
+                    StrongNumber("H1254", strongNumberWords.getValue("H1254")),
+                    StrongNumber("H430", strongNumberWords.getValue("H430")),
+                    StrongNumber("H853", strongNumberWords.getValue("H853")),
+                    StrongNumber("H8064", strongNumberWords.getValue("H8064")),
+                    StrongNumber("H776", strongNumberWords.getValue("H776"))
+            ),
+            VerseIndex(39, 0, 0) to listOf(
+                    StrongNumber("G976", strongNumberWords.getValue("G976")),
+                    StrongNumber("G1078", strongNumberWords.getValue("G1078")),
+                    StrongNumber("G2424", strongNumberWords.getValue("G2424")),
+                    StrongNumber("G5547", strongNumberWords.getValue("G5547")),
+                    StrongNumber("G5207", strongNumberWords.getValue("G5207")),
+                    StrongNumber("G1138", strongNumberWords.getValue("G1138")),
+                    StrongNumber("G5207", strongNumberWords.getValue("G5207")),
+                    StrongNumber("G11", strongNumberWords.getValue("G11"))
+            )
     )
 }
 

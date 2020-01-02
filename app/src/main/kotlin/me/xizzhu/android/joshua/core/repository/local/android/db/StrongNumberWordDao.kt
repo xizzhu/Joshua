@@ -40,16 +40,19 @@ class StrongNumberWordDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(strongNumbers: List<String>): List<StrongNumber> =
-            db.select(TABLE_STRONG_NUMBER_WORD) {
-                var condition: Condition = noOp()
-                strongNumbers.forEach { strongNumber ->
-                    (COLUMN_STRONG_NUMBER eq strongNumber).run {
-                        condition = if (condition == Condition.NoOp) this else condition or this
-                    }
+    fun read(strongNumbers: List<String>): List<StrongNumber> {
+        val words = db.select(TABLE_STRONG_NUMBER_WORD) {
+            var condition: Condition = noOp()
+            strongNumbers.forEach { strongNumber ->
+                (COLUMN_STRONG_NUMBER eq strongNumber).run {
+                    condition = if (condition == Condition.NoOp) this else condition or this
                 }
-                condition
-            }.toList { row -> StrongNumber(row.getString(COLUMN_STRONG_NUMBER), row.getString(COLUMN_MEANING)) }
+            }
+            condition
+        }.toList { row -> StrongNumber(row.getString(COLUMN_STRONG_NUMBER), row.getString(COLUMN_MEANING)) }
+                .associateBy { it.sn }
+        return ArrayList<StrongNumber>(strongNumbers.size).apply { strongNumbers.forEach { add(words.getValue(it)) } }
+    }
 
     @WorkerThread
     fun replace(strongNumberWords: Map<String, String>) {

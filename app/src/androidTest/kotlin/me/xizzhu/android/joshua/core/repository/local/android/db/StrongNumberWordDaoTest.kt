@@ -18,39 +18,27 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class StrongNumberWordDaoTest : BaseSqliteTest() {
-    @Test
+    @Test(expected = NoSuchElementException::class)
     fun testEmptyTable() {
-        assertTrue(androidDatabase.strongNumberWordDao.read(MockContents.strongNumberWords.keys.toList()).isEmpty())
+        androidDatabase.strongNumberWordDao.read(MockContents.strongNumberWords.keys.toList())
     }
 
     @Test
     fun testReplaceThenRead() {
-        androidDatabase.strongNumberWordDao.replace(
-                mapOf(
-                        "H1" to "Value for H1",
-                        "H2" to "Value for H2",
-                        "G1" to "Value for G1",
-                        "G2" to "Value for G2"
-                )
-        )
+        androidDatabase.strongNumberWordDao.replace(MockContents.strongNumberWords.keys.associateWith { "word" })
         androidDatabase.strongNumberWordDao.replace(MockContents.strongNumberWords)
 
-        MockContents.strongNumberWords.keys.forEach { key ->
-            assertEquals(
-                    listOf(StrongNumber(key, MockContents.strongNumberWords.getValue(key))),
-                    androidDatabase.strongNumberWordDao.read(listOf(key))
-            )
+        MockContents.strongNumbersPerVerse.forEach { (verseIndex, list) ->
+            assertEquals(MockContents.strongNumber[verseIndex], androidDatabase.strongNumberWordDao.read(list))
         }
     }
 }

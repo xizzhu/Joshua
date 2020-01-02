@@ -41,17 +41,11 @@ class StrongNumberListDaoTest : BaseSqliteTest() {
 
     @Test
     fun testReplaceThenRead() {
-        androidDatabase.strongNumberListDao.replace(
-                mapOf(
-                        VerseIndex(0, 0, 0) to listOf(1, 2, 3),
-                        VerseIndex(0, 0, 1) to listOf(4, 5, 6)
-                )
-        )
+        androidDatabase.strongNumberListDao.replace(MockContents.strongNumbersPerVerse.keys.associateWith { listOf("1", "2", "3") })
         androidDatabase.strongNumberListDao.replace(MockContents.strongNumbersPerVerse)
 
-        assertEquals(MockContents.strongNumbersPerVerse[VerseIndex(0, 0, 0)],
-                androidDatabase.strongNumberListDao.read(VerseIndex(0, 0, 0)))
-        assertEquals(MockContents.strongNumbersPerVerse[VerseIndex(0, 0, 1)],
-                androidDatabase.strongNumberListDao.read(VerseIndex(0, 0, 1)))
+        MockContents.strongNumbersPerVerse.forEach { (verseIndex, list) ->
+            assertEquals(list, androidDatabase.strongNumberListDao.read(verseIndex))
+        }
     }
 }

@@ -138,7 +138,7 @@ fun JsonReader.readStrongNumberVerses(): Map<Int, List<Int>> {
     beginObject()
     while (hasNext()) {
         try {
-            verses[nextName().toInt() - 1] = readIntsArray().apply {
+            verses[nextName().toInt()] = readIntsArray().apply {
                 if (isEmpty()) {
                     throw RuntimeException("Empty verses array in Strong number chapter JSON")
                 }

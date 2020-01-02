@@ -19,18 +19,21 @@ package me.xizzhu.android.joshua.core.repository.local.android
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.ask.db.transaction
+import me.xizzhu.android.ask.db.withTransaction
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 
 class AndroidStrongNumberStorage(private val androidDatabase: AndroidDatabase) : LocalStrongNumberStorage {
-    override suspend fun read(verseIndex: VerseIndex): List<StrongNumber> {
-        // TODO
-        return emptyList()
+    override suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = withContext(Dispatchers.IO) {
+        return@withContext androidDatabase.writableDatabase.withTransaction {
+            return@withTransaction androidDatabase.strongNumberWordDao.read(
+                    androidDatabase.strongNumberListDao.read(verseIndex))
+        }
     }
 
-    override suspend fun save(strongNumbersPerVerse: Map<VerseIndex, List<Int>>, strongNumberWords: Map<String, String>) {
+    override suspend fun save(strongNumbersPerVerse: Map<VerseIndex, List<String>>, strongNumberWords: Map<String, String>) {
         withContext(Dispatchers.IO) {
             androidDatabase.writableDatabase.transaction {
                 androidDatabase.strongNumberListDao.replace(strongNumbersPerVerse)

@@ -44,15 +44,15 @@ class StrongNumberListDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun read(verseIndex: VerseIndex): List<Int> =
+    fun read(verseIndex: VerseIndex): List<String> =
             db.select(TABLE_STRONG_NUMBER_LIST, COLUMN_STRONG_NUMBER) {
                 (COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and
                         (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and
                         (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)
-            }.firstOrDefault(emptyList()) { row -> row.getString(COLUMN_STRONG_NUMBER).split("-").map { it.toInt() } }
+            }.firstOrDefault(emptyList()) { row -> row.getString(COLUMN_STRONG_NUMBER).split("-") }
 
     @WorkerThread
-    fun replace(strongNumbersPerVerse: Map<VerseIndex, List<Int>>) {
+    fun replace(strongNumbersPerVerse: Map<VerseIndex, List<String>>) {
         db.transaction {
             deleteAll(TABLE_STRONG_NUMBER_LIST)
             strongNumbersPerVerse.forEach { (verseIndex, list) ->

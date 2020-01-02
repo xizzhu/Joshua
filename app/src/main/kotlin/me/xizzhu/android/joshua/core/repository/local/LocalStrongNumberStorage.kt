@@ -22,5 +22,5 @@ import me.xizzhu.android.joshua.core.VerseIndex
 interface LocalStrongNumberStorage {
     suspend fun read(verseIndex: VerseIndex): List<StrongNumber>
 
-    suspend fun save(strongNumbersPerVerse: Map<VerseIndex, List<Int>>, strongNumberWords: Map<String, String>)
+    suspend fun save(strongNumbersPerVerse: Map<VerseIndex, List<String>>, strongNumberWords: Map<String, String>)
 }
