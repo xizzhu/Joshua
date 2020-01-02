@@ -43,7 +43,7 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
     @Test
     fun testFetchVerses() {
         runBlocking {
-            inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn-verses.zip")
+            inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn_verses.zip")
 
             val channel = Channel<Int>()
             var channelCalled = false
@@ -68,7 +68,7 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
     @Test
     fun testFetchWords() {
         runBlocking {
-            inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn-en.zip")
+            inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn_en.zip")
 
             val channel = Channel<Int>()
             var channelCalled = false
@@ -82,8 +82,7 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
             val actual = strongNumberService.fetchWords(channel)
             channel.close()
             assertTrue(channelCalled)
-            assertEquals(Constants.STRONG_NUMBER_HEBREW_COUNT, actual.hebrew.size)
-            assertEquals(Constants.STRONG_NUMBER_GREEK_COUNT, actual.greek.size)
+            assertEquals(Constants.STRONG_NUMBER_HEBREW_COUNT + Constants.STRONG_NUMBER_GREEK_COUNT, actual.words.size)
         }
     }
 }

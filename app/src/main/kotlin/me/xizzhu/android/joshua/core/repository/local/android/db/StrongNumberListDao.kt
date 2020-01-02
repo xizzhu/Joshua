@@ -52,10 +52,10 @@ class StrongNumberListDao(sqliteHelper: SQLiteOpenHelper) {
             }.firstOrDefault(emptyList()) { row -> row.getString(COLUMN_STRONG_NUMBER).split("-").map { it.toInt() } }
 
     @WorkerThread
-    fun replace(strongNumbers: Map<VerseIndex, List<Int>>) {
+    fun replace(strongNumbersPerVerse: Map<VerseIndex, List<Int>>) {
         db.transaction {
             deleteAll(TABLE_STRONG_NUMBER_LIST)
-            strongNumbers.forEach { (verseIndex, list) ->
+            strongNumbersPerVerse.forEach { (verseIndex, list) ->
                 insert(TABLE_STRONG_NUMBER_LIST, SQLiteDatabase.CONFLICT_REPLACE) {
                     it[COLUMN_BOOK_INDEX] = verseIndex.bookIndex
                     it[COLUMN_CHAPTER_INDEX] = verseIndex.chapterIndex

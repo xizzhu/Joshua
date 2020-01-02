@@ -18,8 +18,7 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import me.xizzhu.android.joshua.core.Bible
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
@@ -29,29 +28,29 @@ import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class StrongNumberListDaoTest : BaseSqliteTest() {
+class StrongNumberWordDaoTest : BaseSqliteTest() {
     @Test
     fun testEmptyTable() {
-        (0 until Bible.BOOK_COUNT).forEach { bookIndex ->
-            (0 until Bible.getChapterCount(bookIndex)).forEach { chapterIndex ->
-                assertTrue(androidDatabase.strongNumberListDao.read(VerseIndex(bookIndex, chapterIndex, 0)).isEmpty())
-            }
-        }
+        assertTrue(androidDatabase.strongNumberWordDao.read(MockContents.strongNumberWords.keys.toList()).isEmpty())
     }
 
     @Test
     fun testReplaceThenRead() {
-        androidDatabase.strongNumberListDao.replace(
+        androidDatabase.strongNumberWordDao.replace(
                 mapOf(
-                        VerseIndex(0, 0, 0) to listOf(1, 2, 3),
-                        VerseIndex(0, 0, 1) to listOf(4, 5, 6)
+                        "H1" to "Value for H1",
+                        "H2" to "Value for H2",
+                        "G1" to "Value for G1",
+                        "G2" to "Value for G2"
                 )
         )
-        androidDatabase.strongNumberListDao.replace(MockContents.strongNumbersPerVerse)
+        androidDatabase.strongNumberWordDao.replace(MockContents.strongNumberWords)
 
-        assertEquals(MockContents.strongNumbersPerVerse[VerseIndex(0, 0, 0)],
-                androidDatabase.strongNumberListDao.read(VerseIndex(0, 0, 0)))
-        assertEquals(MockContents.strongNumbersPerVerse[VerseIndex(0, 0, 1)],
-                androidDatabase.strongNumberListDao.read(VerseIndex(0, 0, 1)))
+        MockContents.strongNumberWords.keys.forEach { key ->
+            assertEquals(
+                    listOf(StrongNumber(key, MockContents.strongNumberWords.getValue(key))),
+                    androidDatabase.strongNumberWordDao.read(listOf(key))
+            )
+        }
     }
 }

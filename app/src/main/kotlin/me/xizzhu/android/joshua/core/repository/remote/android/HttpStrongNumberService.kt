@@ -32,7 +32,7 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
         val verses = hashMapOf<VerseIndex, List<Int>>()
 
         var progress = -1
-        ZipInputStream(BufferedInputStream(getInputStream("tools/sn-verses.zip")))
+        ZipInputStream(BufferedInputStream(getInputStream("tools/sn_verses.zip")))
                 .forEachIndexed { index, entryName, contentReader ->
                     val (bookIndex, chapterIndex) = entryName.substring(0, entryName.length - 5).split("-")
                     contentReader.readStrongNumberVerses().forEach {
@@ -51,20 +51,29 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
     }
 
     override suspend fun fetchWords(channel: SendChannel<Int>): RemoteStrongNumberWords = withContext(Dispatchers.IO) {
-        var hebrew: Map<Int, String> = emptyMap()
-        var greek: Map<Int, String> = emptyMap()
+        val words = hashMapOf<String, String>()
 
         var progress = 0
-        ZipInputStream(BufferedInputStream(getInputStream("tools/sn-en.zip")))
+        ZipInputStream(BufferedInputStream(getInputStream("tools/sn_en.zip")))
                 .forEachIndexed { index, entryName, contentReader ->
                     when (entryName) {
                         "hebrew.json" -> {
-                            hebrew = contentReader.readStrongNumberWords()
+                            contentReader.readStrongNumberWords().apply {
+                                if (size != Constants.STRONG_NUMBER_HEBREW_COUNT) {
+                                    throw IllegalStateException("Incorrect Strong number Hebrew words count: $size")
+                                }
+                            }.forEach { (sn, meaning) -> words["H$sn"] = meaning }
+
                             progress += 50
                             channel.offer(progress)
                         }
                         "greek.json" -> {
-                            greek = contentReader.readStrongNumberWords()
+                            contentReader.readStrongNumberWords().apply {
+                                if (size != Constants.STRONG_NUMBER_GREEK_COUNT) {
+                                    throw IllegalStateException("Incorrect Strong number Greek words count: $size")
+                                }
+                            }.forEach { (sn, meaning) -> words["G$sn"] = meaning }
+
                             progress += 50
                             channel.offer(progress)
                         }
@@ -72,10 +81,9 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                     }
                 }
 
-        if (hebrew.size != Constants.STRONG_NUMBER_HEBREW_COUNT
-                || greek.size != Constants.STRONG_NUMBER_GREEK_COUNT) {
-            throw IllegalStateException("Incorrect Strong number words count: Hebrew - ${hebrew.size}, Greek - ${greek.size}")
+        if (words.size != Constants.STRONG_NUMBER_HEBREW_COUNT + Constants.STRONG_NUMBER_GREEK_COUNT) {
+            throw IllegalStateException("Incorrect Strong number words count (${words.size})")
         }
-        return@withContext RemoteStrongNumberWords(hebrew, greek)
+        return@withContext RemoteStrongNumberWords(words)
     }
 }

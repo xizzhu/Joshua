@@ -109,9 +109,15 @@ object MockContents {
 
     const val kjvCuvTranslationInfoJson = "{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1860978},{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
 
-    val strongNumberList = mapOf(
+    val strongNumbersPerVerse = mapOf(
             VerseIndex(0, 0, 0) to listOf(7225, 1254, 430, 853, 8064, 853, 776),
             VerseIndex(0, 0, 1) to listOf(776, 1961, 8414, 922, 2822, 5921, 6440, 8415, 7307, 430, 7363, 5921, 6440, 4325)
+    )
+    val strongNumberWords = mapOf(
+            "H1" to "chief, (fore-) father(-less), [idiom] patrimony, principal. Compare names in 'Abi-'.",
+            "H2" to "father.",
+            "G1" to "--Alpha",
+            "G2" to "Aaron"
     )
 }
 

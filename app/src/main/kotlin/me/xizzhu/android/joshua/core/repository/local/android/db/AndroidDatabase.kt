@@ -34,6 +34,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     val noteDao = NoteDao(this)
     val readingProgressDao = ReadingProgressDao(this)
     val strongNumberListDao = StrongNumberListDao(this)
+    val strongNumberWordDao = StrongNumberWordDao(this)
     val translationDao = TranslationDao(this)
     val translationInfoDao = TranslationInfoDao(this)
 
@@ -46,12 +47,18 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             noteDao.createTable(db)
             readingProgressDao.createTable(db)
             strongNumberListDao.createTable(db)
+            strongNumberWordDao.createTable(db)
             translationInfoDao.createTable(db)
         }
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion <= 1) highlightDao.createTable(db)
-        if (oldVersion <= 2) strongNumberListDao.createTable(db)
+        if (oldVersion <= 1) {
+            highlightDao.createTable(db)
+        }
+        if (oldVersion <= 2) {
+            strongNumberListDao.createTable(db)
+            strongNumberWordDao.createTable(db)
+        }
     }
 }
