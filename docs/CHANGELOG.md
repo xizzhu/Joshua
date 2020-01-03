@@ -5,6 +5,8 @@ CHANGELOG
 - Bug fixes:
   - Properly cancel translation download / removal and dismiss dialog on stop
   - Should call AndroidReadingProgressStorage.save() on IO thread
+- Updated dependencies:
+  - Dagger to 2.25.4
 
 #### v0.13.2 (2019-12-29)
 - Improvements:
