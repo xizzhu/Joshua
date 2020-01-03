@@ -19,7 +19,13 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.core.repository.StrongNumberRepository
 
-data class StrongNumber(val sn: String, val meaning: String)
+data class StrongNumber(val sn: String, val meaning: String) {
+    companion object {
+        val INVALID = StrongNumber("", "")
+    }
+
+    fun isValid(): Boolean = sn.isNotEmpty() && meaning.isNotEmpty()
+}
 
 class StrongNumberManager(private val strongNumberRepository: StrongNumberRepository) {
     suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = strongNumberRepository.read(verseIndex)

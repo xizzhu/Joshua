@@ -170,7 +170,10 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                         onSuccess = {
                             ToastHelper.showToast(readingActivity, R.string.toast_downloaded)
 
-                            // TODO reload verse detail
+                            verseDetail?.let {
+                                verseDetail = it.copy(strongNumberItems = interactor.readStrongNumber(it.verseIndex).toStrongNumberItems())
+                                viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
+                            }
                         },
                         onError = { _, _ ->
                             DialogHelper.showDialog(readingActivity, true, R.string.dialog_download_error,
@@ -204,7 +207,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
 
                 verseDetail = VerseDetail(verseIndex, buildVerseTextItems(verseIndex),
                         bookmarkAsync.await().isValid(), highlightAsync.await().color,
-                        noteAsync.await().note, strongNumberAsync.await().toStrongNumberItems(verseIndex))
+                        noteAsync.await().note, strongNumberAsync.await().toStrongNumberItems())
                 viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verse detail", e)
@@ -308,10 +311,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
         }
     }
 
-    private fun List<StrongNumber>.toStrongNumberItems(verseIndex: VerseIndex): List<StrongNumberItem> {
-        // TODO
-        return map { StrongNumberItem(verseIndex, it) }
-    }
+    private fun List<StrongNumber>.toStrongNumberItems(): List<StrongNumberItem> = map { StrongNumberItem(it) }
 
     @UiThread
     override fun onStop() {

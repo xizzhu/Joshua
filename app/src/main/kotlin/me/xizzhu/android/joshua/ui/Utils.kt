@@ -106,5 +106,5 @@ fun TextView.updateSettingsWithSecondaryText(settings: Settings) {
 
 fun SpannableStringBuilder.append(i: Int): SpannableStringBuilder = append(i.toString())
 
-fun createBookNameSizeSpan() = RelativeSizeSpan(0.85F)
-fun createBookNameStyleSpan() = StyleSpan(Typeface.BOLD)
+fun createTitleSizeSpan() = RelativeSizeSpan(0.85F)
+fun createTitleStyleSpan() = StyleSpan(Typeface.BOLD)

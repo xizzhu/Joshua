@@ -25,8 +25,8 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.createBookNameSizeSpan
-import me.xizzhu.android.joshua.ui.createBookNameStyleSpan
+import me.xizzhu.android.joshua.ui.createTitleSizeSpan
+import me.xizzhu.android.joshua.ui.createTitleStyleSpan
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
@@ -37,8 +37,8 @@ data class BookmarkItem(val verseIndex: VerseIndex, private val bookName: String
                         val onClick: (VerseIndex) -> Unit)
     : BaseItem(R.layout.item_bookmarks, { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_SIZE_SPAN = createBookNameSizeSpan()
-        private val BOOK_NAME_STYLE_SPAN = createBookNameStyleSpan()
+        private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
+        private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
