@@ -21,12 +21,15 @@ import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
 import me.xizzhu.android.ask.db.*
 import me.xizzhu.android.joshua.core.StrongNumber
+import me.xizzhu.android.logger.Log
 
 class StrongNumberWordDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
         private const val TABLE_STRONG_NUMBER_WORD = "sn_en"
         private const val COLUMN_STRONG_NUMBER = "strongNumber"
         private const val COLUMN_MEANING = "meaning"
+
+        private val TAG: String = StrongNumberWordDao::class.java.simpleName
     }
 
     private val db by lazy { sqliteHelper.writableDatabase }
@@ -51,7 +54,12 @@ class StrongNumberWordDao(sqliteHelper: SQLiteOpenHelper) {
             condition
         }.toList { row -> StrongNumber(row.getString(COLUMN_STRONG_NUMBER), row.getString(COLUMN_MEANING)) }
                 .associateBy { it.sn }
-        return ArrayList<StrongNumber>(strongNumbers.size).apply { strongNumbers.forEach { add(words.getValue(it)) } }
+        return ArrayList<StrongNumber>(strongNumbers.size).apply {
+            strongNumbers.forEach { sn ->
+                words[sn]?.let { word -> add(word) }
+                        ?: Log.e(TAG, "", IllegalArgumentException("Strong number $sn is not available"))
+            }
+        }
     }
 
     @WorkerThread

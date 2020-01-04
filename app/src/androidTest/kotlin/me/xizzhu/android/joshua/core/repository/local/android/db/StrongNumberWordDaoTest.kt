@@ -23,13 +23,13 @@ import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class StrongNumberWordDaoTest : BaseSqliteTest() {
-    @Test(expected = NoSuchElementException::class)
     fun testEmptyTable() {
-        androidDatabase.strongNumberWordDao.read(MockContents.strongNumberWords.keys.toList())
+        assertTrue(androidDatabase.strongNumberWordDao.read(MockContents.strongNumberWords.keys.toList()).isEmpty())
     }
 
     @Test
@@ -39,6 +39,24 @@ class StrongNumberWordDaoTest : BaseSqliteTest() {
 
         MockContents.strongNumbersPerVerse.forEach { (verseIndex, list) ->
             assertEquals(MockContents.strongNumber[verseIndex], androidDatabase.strongNumberWordDao.read(list))
+        }
+    }
+
+    @Test
+    fun testReplaceThenReadWithNonExistingStrongNumber() {
+        androidDatabase.strongNumberWordDao.replace(MockContents.strongNumberWords.keys.associateWith { "word" })
+        androidDatabase.strongNumberWordDao.replace(MockContents.strongNumberWords)
+
+        MockContents.strongNumbersPerVerse.forEach { (verseIndex, list) ->
+            val expected = MockContents.strongNumber[verseIndex]
+            val actual = androidDatabase.strongNumberWordDao.read(
+                    list.toMutableList().apply {
+                        add("random")
+                        add("things")
+                        add("added")
+                    }
+            )
+            assertEquals(expected, actual)
         }
     }
 }
