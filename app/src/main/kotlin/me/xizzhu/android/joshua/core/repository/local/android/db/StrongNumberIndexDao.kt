@@ -22,9 +22,9 @@ import androidx.annotation.WorkerThread
 import me.xizzhu.android.ask.db.*
 import me.xizzhu.android.joshua.core.VerseIndex
 
-class StrongNumberListDao(sqliteHelper: SQLiteOpenHelper) {
+class StrongNumberIndexDao(sqliteHelper: SQLiteOpenHelper) {
     companion object {
-        private const val TABLE_STRONG_NUMBER_LIST = "strongNumberList"
+        private const val TABLE_STRONG_NUMBER_INDEX = "strongNumberIndex"
         private const val COLUMN_BOOK_INDEX = "bookIndex"
         private const val COLUMN_CHAPTER_INDEX = "chapterIndex"
         private const val COLUMN_VERSE_INDEX = "verseIndex"
@@ -35,7 +35,7 @@ class StrongNumberListDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun createTable(db: SQLiteDatabase) {
-        db.createTable(TABLE_STRONG_NUMBER_LIST) {
+        db.createTable(TABLE_STRONG_NUMBER_INDEX) {
             it[COLUMN_BOOK_INDEX] = INTEGER + PRIMARY_KEY + NOT_NULL
             it[COLUMN_CHAPTER_INDEX] = INTEGER + PRIMARY_KEY + NOT_NULL
             it[COLUMN_VERSE_INDEX] = INTEGER + PRIMARY_KEY + NOT_NULL
@@ -45,7 +45,7 @@ class StrongNumberListDao(sqliteHelper: SQLiteOpenHelper) {
 
     @WorkerThread
     fun read(verseIndex: VerseIndex): List<String> =
-            db.select(TABLE_STRONG_NUMBER_LIST, COLUMN_STRONG_NUMBER) {
+            db.select(TABLE_STRONG_NUMBER_INDEX, COLUMN_STRONG_NUMBER) {
                 (COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and
                         (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and
                         (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)
@@ -54,9 +54,9 @@ class StrongNumberListDao(sqliteHelper: SQLiteOpenHelper) {
     @WorkerThread
     fun replace(strongNumbersPerVerse: Map<VerseIndex, List<String>>) {
         db.transaction {
-            deleteAll(TABLE_STRONG_NUMBER_LIST)
+            deleteAll(TABLE_STRONG_NUMBER_INDEX)
             strongNumbersPerVerse.forEach { (verseIndex, list) ->
-                insert(TABLE_STRONG_NUMBER_LIST, SQLiteDatabase.CONFLICT_REPLACE) {
+                insert(TABLE_STRONG_NUMBER_INDEX, SQLiteDatabase.CONFLICT_REPLACE) {
                     it[COLUMN_BOOK_INDEX] = verseIndex.bookIndex
                     it[COLUMN_CHAPTER_INDEX] = verseIndex.chapterIndex
                     it[COLUMN_VERSE_INDEX] = verseIndex.verseIndex

@@ -29,7 +29,7 @@ import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class StrongNumberListDaoTest : BaseSqliteTest() {
+class StrongNumberIndexDaoTest : BaseSqliteTest() {
     @Test
     fun testEmptyTable() {
         (0 until Bible.BOOK_COUNT).forEach { bookIndex ->

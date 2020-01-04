@@ -23,17 +23,17 @@ import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
-import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberVerses
+import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberIndexes
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberWords
 import java.io.BufferedInputStream
 import java.util.zip.ZipInputStream
 
 class HttpStrongNumberService : RemoteStrongNumberStorage {
-    override suspend fun fetchVerses(channel: SendChannel<Int>): RemoteStrongNumberVerses = withContext(Dispatchers.IO) {
-        val verses = hashMapOf<VerseIndex, List<String>>()
+    override suspend fun fetchIndexes(channel: SendChannel<Int>): RemoteStrongNumberIndexes = withContext(Dispatchers.IO) {
+        val indexes = hashMapOf<VerseIndex, List<String>>()
 
         var progress = -1
-        ZipInputStream(BufferedInputStream(getInputStream("tools/sn_verses.zip")))
+        ZipInputStream(BufferedInputStream(getInputStream("tools/sn_indexes.zip")))
                 .forEachIndexed { index, entryName, contentReader ->
                     val bookIndex: Int
                     val chapterIndex: Int
@@ -42,7 +42,7 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                         chapterIndex = get(1).toInt()
                     }
                     contentReader.readStrongNumberVerses().forEach { (verseIndex, strongWords) ->
-                        verses[VerseIndex(bookIndex, chapterIndex, verseIndex - 1)] =
+                        indexes[VerseIndex(bookIndex, chapterIndex, verseIndex - 1)] =
                                 strongWords.map { if (bookIndex < Bible.OLD_TESTAMENT_COUNT) "H$it" else "G$it" }
                     }
 
@@ -54,7 +54,7 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                     }
                 }
 
-        return@withContext RemoteStrongNumberVerses(verses)
+        return@withContext RemoteStrongNumberIndexes(indexes)
     }
 
     override suspend fun fetchWords(channel: SendChannel<Int>): RemoteStrongNumberWords = withContext(Dispatchers.IO) {

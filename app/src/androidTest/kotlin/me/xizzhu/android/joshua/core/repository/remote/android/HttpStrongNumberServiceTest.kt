@@ -41,9 +41,9 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
     }
 
     @Test
-    fun testFetchVerses() {
+    fun testFetchIndexes() {
         runBlocking {
-            inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn_verses.zip")
+            inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn_indexes.zip")
 
             val channel = Channel<Int>()
             var channelCalled = false
@@ -54,12 +54,12 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
                 }
             }
 
-            val actual = strongNumberService.fetchVerses(channel)
+            val actual = strongNumberService.fetchIndexes(channel)
             channel.close()
             assertTrue(channelCalled)
             (0 until Bible.BOOK_COUNT).forEach { bookIndex ->
                 (0 until Bible.getChapterCount(bookIndex)).forEach { chapterIndex ->
-                    assertTrue(actual.verses.containsKey(VerseIndex(bookIndex, chapterIndex, 0)))
+                    assertTrue(actual.indexes.containsKey(VerseIndex(bookIndex, chapterIndex, 0)))
                 }
             }
         }

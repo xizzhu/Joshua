@@ -17,15 +17,14 @@
 package me.xizzhu.android.joshua.core.repository.remote
 
 import kotlinx.coroutines.channels.SendChannel
-import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 
-data class RemoteStrongNumberVerses(val verses: Map<VerseIndex, List<String>>)
+data class RemoteStrongNumberIndexes(val indexes: Map<VerseIndex, List<String>>)
 
 data class RemoteStrongNumberWords(val words: Map<String, String>)
 
 interface RemoteStrongNumberStorage {
-    suspend fun fetchVerses(channel: SendChannel<Int>): RemoteStrongNumberVerses
+    suspend fun fetchIndexes(channel: SendChannel<Int>): RemoteStrongNumberIndexes
 
     suspend fun fetchWords(channel: SendChannel<Int>): RemoteStrongNumberWords
 }

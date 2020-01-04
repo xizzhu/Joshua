@@ -39,7 +39,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
             offer((v * 0.9 + w * 0.1).toInt())
         }.launchIn(this)
 
-        val remoteVersesAsync = async { remoteStrongNumberStorage.fetchVerses(versesDownloadProgress) }
+        val remoteVersesAsync = async { remoteStrongNumberStorage.fetchIndexes(versesDownloadProgress) }
         val remoteWords = remoteStrongNumberStorage.fetchWords(wordsDownloadProgress)
         val remoteVerses = remoteVersesAsync.await()
 
@@ -47,7 +47,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
         wordsDownloadProgress.close()
         offer(100)
 
-        localStrongNumberStorage.save(remoteVerses.verses, remoteWords.words)
+        localStrongNumberStorage.save(remoteVerses.indexes, remoteWords.words)
 
         offer(101)
     }

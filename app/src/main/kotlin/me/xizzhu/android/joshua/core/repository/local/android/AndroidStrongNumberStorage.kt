@@ -33,10 +33,10 @@ class AndroidStrongNumberStorage(private val androidDatabase: AndroidDatabase) :
         }
     }
 
-    override suspend fun save(strongNumbersPerVerse: Map<VerseIndex, List<String>>, strongNumberWords: Map<String, String>) {
+    override suspend fun save(strongNumberIndex: Map<VerseIndex, List<String>>, strongNumberWords: Map<String, String>) {
         withContext(Dispatchers.IO) {
             androidDatabase.writableDatabase.transaction {
-                androidDatabase.strongNumberListDao.replace(strongNumbersPerVerse)
+                androidDatabase.strongNumberListDao.replace(strongNumberIndex)
                 androidDatabase.strongNumberWordDao.replace(strongNumberWords)
             }
         }

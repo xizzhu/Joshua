@@ -33,7 +33,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     val metadataDao = MetadataDao(this)
     val noteDao = NoteDao(this)
     val readingProgressDao = ReadingProgressDao(this)
-    val strongNumberListDao = StrongNumberListDao(this)
+    val strongNumberListDao = StrongNumberIndexDao(this)
     val strongNumberWordDao = StrongNumberWordDao(this)
     val translationDao = TranslationDao(this)
     val translationInfoDao = TranslationInfoDao(this)
