@@ -43,6 +43,8 @@ import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.search.SearchModule
 import me.xizzhu.android.joshua.settings.SettingsActivity
 import me.xizzhu.android.joshua.settings.SettingsModule
+import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
+import me.xizzhu.android.joshua.strongnumber.StrongNumberListModule
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementModule
 import javax.inject.Scope
@@ -204,6 +206,10 @@ abstract class ActivityModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = [(SettingsModule::class)])
     abstract fun contributeSettingsActivity(): SettingsActivity
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [(StrongNumberListModule::class)])
+    abstract fun contributeStrongNumberListActivity(): StrongNumberListActivity
 
     @ActivityScope
     @ContributesAndroidInjector(modules = [(TranslationManagementModule::class)])

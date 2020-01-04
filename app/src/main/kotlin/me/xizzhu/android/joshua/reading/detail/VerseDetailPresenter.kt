@@ -26,6 +26,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.StrongNumber
@@ -38,6 +39,7 @@ import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
+import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
 import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.ui.ToastHelper
@@ -50,6 +52,7 @@ import kotlin.math.max
 data class VerseDetailViewHolder(val verseDetailViewLayout: VerseDetailViewLayout) : ViewHolder
 
 class VerseDetailPresenter(private val readingActivity: ReadingActivity,
+                           private val navigator: Navigator,
                            verseDetailInteractor: VerseDetailInteractor,
                            dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : BaseSettingsAwarePresenter<VerseDetailViewHolder, VerseDetailInteractor>(verseDetailInteractor, dispatcher) {
@@ -311,7 +314,20 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
         }
     }
 
-    private fun List<StrongNumber>.toStrongNumberItems(): List<StrongNumberItem> = map { StrongNumberItem(it) }
+    private fun List<StrongNumber>.toStrongNumberItems(): List<StrongNumberItem> = map {
+        StrongNumberItem(it, this@VerseDetailPresenter::onStrongNumberClicked)
+    }
+
+    private fun onStrongNumberClicked(strongNumber: String) {
+        try {
+            navigator.navigate(readingActivity, Navigator.SCREEN_STRONG_NUMBER,
+                    StrongNumberListActivity.bundle(strongNumber))
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to open Strong's number list activity", e)
+            DialogHelper.showDialog(readingActivity, true, R.string.dialog_navigate_to_strong_number_error,
+                    DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
+        }
+    }
 
     @UiThread
     override fun onStop() {

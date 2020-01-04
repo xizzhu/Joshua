@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.detail
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -35,6 +36,8 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var readingActivity: ReadingActivity
     @Mock
+    private lateinit var navigator: Navigator
+    @Mock
     private lateinit var verseDetailInteractor: VerseDetailInteractor
 
     private lateinit var verseDetailViewHolder: VerseDetailViewHolder
@@ -49,7 +52,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         `when`(verseDetailInteractor.currentVerseIndex()).thenReturn(emptyFlow())
 
         verseDetailViewHolder = VerseDetailViewHolder(verseDetailViewLayout)
-        verseDetailPresenter = VerseDetailPresenter(readingActivity, verseDetailInteractor, testDispatcher)
+        verseDetailPresenter = VerseDetailPresenter(readingActivity, navigator, verseDetailInteractor, testDispatcher)
     }
 
     @Test

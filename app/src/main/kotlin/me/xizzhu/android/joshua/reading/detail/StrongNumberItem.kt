@@ -30,7 +30,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class StrongNumberItem(val strongNumber: StrongNumber)
+data class StrongNumberItem(val strongNumber: StrongNumber, val onClicked: (String) -> Unit)
     : BaseItem(R.layout.item_strong_number, { inflater, parent -> StrongNumberItemViewHolder(inflater, parent) }) {
     companion object {
         private val STRONG_NUMBER_SIZE_SPAN = createTitleSizeSpan()
@@ -60,6 +60,10 @@ data class StrongNumberItem(val strongNumber: StrongNumber)
 private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<StrongNumberItem>(inflater.inflate(R.layout.item_strong_number, parent, false)) {
     private val strongNumber: TextView = itemView.findViewById(R.id.strong_number)
+
+    init {
+        itemView.setOnClickListener { item?.let { it.onClicked(it.strongNumber.sn) } }
+    }
 
     override fun bind(settings: Settings, item: StrongNumberItem, payloads: List<Any>) {
         with(strongNumber) {

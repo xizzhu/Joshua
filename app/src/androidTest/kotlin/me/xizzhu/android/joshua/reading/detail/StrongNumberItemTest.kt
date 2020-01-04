@@ -27,20 +27,20 @@ import kotlin.test.assertTrue
 class StrongNumberItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_strong_number, StrongNumberItem(StrongNumber("", "")).viewType)
+        assertEquals(R.layout.item_strong_number, StrongNumberItem(StrongNumber("", ""), {}).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
         val expected = "H7225\nbeginning, chief(-est), first(-fruits, part, time), principal thing."
-        val actual = StrongNumberItem(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225"))).textForDisplay.toString()
+        val actual = StrongNumberItem(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225")), {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 
     @Test
     fun testTextForDisplayWithInvalidStrongNumber() {
-        assertTrue(StrongNumberItem(StrongNumber.INVALID).textForDisplay.isEmpty())
-        assertTrue(StrongNumberItem(StrongNumber("random", "")).textForDisplay.isEmpty())
-        assertTrue(StrongNumberItem(StrongNumber("", "random")).textForDisplay.isEmpty())
+        assertTrue(StrongNumberItem(StrongNumber.INVALID, {}).textForDisplay.isEmpty())
+        assertTrue(StrongNumberItem(StrongNumber("random", ""), {}).textForDisplay.isEmpty())
+        assertTrue(StrongNumberItem(StrongNumber("", "random"), {}).textForDisplay.isEmpty())
     }
 }

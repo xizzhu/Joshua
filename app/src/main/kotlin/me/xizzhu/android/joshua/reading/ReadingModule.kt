@@ -99,8 +99,9 @@ object ReadingModule {
     @ActivityScope
     @Provides
     fun provideVerseDetailPresenter(readingActivity: ReadingActivity,
+                                    navigator: Navigator,
                                     verseDetailInteractor: VerseDetailInteractor): VerseDetailPresenter =
-            VerseDetailPresenter(readingActivity, verseDetailInteractor)
+            VerseDetailPresenter(readingActivity, navigator, verseDetailInteractor)
 
     @ActivityScope
     @Provides
