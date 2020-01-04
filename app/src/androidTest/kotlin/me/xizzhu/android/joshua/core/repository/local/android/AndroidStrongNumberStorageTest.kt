@@ -53,9 +53,9 @@ class AndroidStrongNumberStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenRead() {
         runBlocking {
-            androidStrongNumberStorage.save(MockContents.strongNumbersPerVerse, MockContents.strongNumberWords)
+            androidStrongNumberStorage.save(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex, MockContents.strongNumberWords)
 
-            MockContents.strongNumbersPerVerse.keys.forEach { verseIndex ->
+            MockContents.strongNumberIndex.keys.forEach { verseIndex ->
                 assertEquals(MockContents.strongNumber[verseIndex], androidStrongNumberStorage.read(verseIndex))
             }
         }

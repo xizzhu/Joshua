@@ -19,7 +19,8 @@ package me.xizzhu.android.joshua.core.repository.remote
 import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.VerseIndex
 
-data class RemoteStrongNumberIndexes(val indexes: Map<VerseIndex, List<String>>)
+data class RemoteStrongNumberIndexes(val indexes: Map<VerseIndex, List<String>>,
+                                     val reverseIndexes: Map<String, List<VerseIndex>>)
 
 data class RemoteStrongNumberWords(val words: Map<String, String>)
 

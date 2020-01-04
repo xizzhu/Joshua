@@ -110,9 +110,15 @@ object MockContents {
 
     const val kjvCuvTranslationInfoJson = "{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1860978},{\"name\":\"中文和合本（简体）\",\"shortName\":\"中文和合本\",\"language\":\"zh_cn\",\"size\":1781521}]}"
 
-    val strongNumbersPerVerse = mapOf(
+    val strongNumberIndex = mapOf(
             VerseIndex(0, 0, 0) to listOf("H7225", "H1254", "H430", "H853", "H8064", "H776"),
             VerseIndex(39, 0, 0) to listOf("G976", "G1078", "G2424", "G5547", "G5207", "G1138", "G5207", "G11")
+    )
+    val strongNumberReverseIndex = mapOf(
+            "H7225" to listOf(VerseIndex(0, 0, 0)),
+            "H1254" to listOf(VerseIndex(0, 0, 0)),
+            "G976" to listOf(VerseIndex(39, 0, 0)),
+            "G1078" to listOf(VerseIndex(39, 0, 0))
     )
     val strongNumberWords = mapOf(
             "H7225" to "beginning, chief(-est), first(-fruits, part, time), principal thing.",

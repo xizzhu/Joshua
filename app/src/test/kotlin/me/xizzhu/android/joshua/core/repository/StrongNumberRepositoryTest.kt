@@ -50,7 +50,7 @@ class StrongNumberRepositoryTest : BaseUnitTest() {
     fun testDownload() = testDispatcher.runBlockingTest {
         val versesDownloadProgress = Channel<Int>()
         val wordsDownloadProgress = Channel<Int>()
-        `when`(remoteStrongNumberStorage.fetchIndexes(versesDownloadProgress)).thenReturn(RemoteStrongNumberIndexes(MockContents.strongNumbersPerVerse))
+        `when`(remoteStrongNumberStorage.fetchIndexes(versesDownloadProgress)).thenReturn(RemoteStrongNumberIndexes(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex))
         `when`(remoteStrongNumberStorage.fetchWords(wordsDownloadProgress)).thenReturn(RemoteStrongNumberWords(MockContents.strongNumberWords))
 
         var called = false
@@ -62,6 +62,7 @@ class StrongNumberRepositoryTest : BaseUnitTest() {
         assertTrue(called)
         assertTrue(versesDownloadProgress.isClosedForSend && versesDownloadProgress.isClosedForReceive)
         assertTrue(wordsDownloadProgress.isClosedForSend && wordsDownloadProgress.isClosedForReceive)
-        verify(localStrongNumberStorage, times(1)).save(MockContents.strongNumbersPerVerse, MockContents.strongNumberWords)
+        verify(localStrongNumberStorage, times(1)).save(
+                MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex, MockContents.strongNumberWords)
     }
 }

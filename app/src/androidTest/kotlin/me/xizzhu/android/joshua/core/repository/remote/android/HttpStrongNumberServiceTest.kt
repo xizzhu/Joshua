@@ -62,6 +62,7 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
                     assertTrue(actual.indexes.containsKey(VerseIndex(bookIndex, chapterIndex, 0)))
                 }
             }
+            assertTrue(actual.reverseIndexes.isNotEmpty())
         }
     }
 

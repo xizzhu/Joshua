@@ -31,19 +31,26 @@ import java.util.zip.ZipInputStream
 class HttpStrongNumberService : RemoteStrongNumberStorage {
     override suspend fun fetchIndexes(channel: SendChannel<Int>): RemoteStrongNumberIndexes = withContext(Dispatchers.IO) {
         val indexes = hashMapOf<VerseIndex, List<String>>()
+        val reverseIndexes = hashMapOf<String, ArrayList<VerseIndex>>()
 
         var progress = -1
         ZipInputStream(BufferedInputStream(getInputStream("tools/sn_indexes.zip")))
                 .forEachIndexed { index, entryName, contentReader ->
-                    val bookIndex: Int
-                    val chapterIndex: Int
+                    val book: Int
+                    val chapter: Int
                     entryName.substring(0, entryName.length - 5).split("-").run {
-                        bookIndex = get(0).toInt()
-                        chapterIndex = get(1).toInt()
+                        book = get(0).toInt()
+                        chapter = get(1).toInt()
                     }
-                    contentReader.readStrongNumberVerses().forEach { (verseIndex, strongWords) ->
-                        indexes[VerseIndex(bookIndex, chapterIndex, verseIndex - 1)] =
-                                strongWords.map { if (bookIndex < Bible.OLD_TESTAMENT_COUNT) "H$it" else "G$it" }
+                    contentReader.readStrongNumberVerses().forEach { (verse, strongWords) ->
+                        val verseIndex = VerseIndex(book, chapter, verse - 1)
+                        strongWords.map { if (book < Bible.OLD_TESTAMENT_COUNT) "H$it" else "G$it" }.run {
+                            indexes[verseIndex] = this
+                            forEach { sn ->
+                                (reverseIndexes[sn]
+                                        ?: arrayListOf<VerseIndex>().apply { reverseIndexes[sn] = this }).add(verseIndex)
+                            }
+                        }
                     }
 
                     // only emits if the progress is actually changed
@@ -54,7 +61,7 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                     }
                 }
 
-        return@withContext RemoteStrongNumberIndexes(indexes)
+        return@withContext RemoteStrongNumberIndexes(indexes, reverseIndexes)
     }
 
     override suspend fun fetchWords(channel: SendChannel<Int>): RemoteStrongNumberWords = withContext(Dispatchers.IO) {

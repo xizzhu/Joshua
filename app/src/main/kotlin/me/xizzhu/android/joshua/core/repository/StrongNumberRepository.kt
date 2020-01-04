@@ -47,7 +47,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
         wordsDownloadProgress.close()
         offer(100)
 
-        localStrongNumberStorage.save(remoteVerses.indexes, remoteWords.words)
+        localStrongNumberStorage.save(remoteVerses.indexes, remoteVerses.reverseIndexes, remoteWords.words)
 
         offer(101)
     }

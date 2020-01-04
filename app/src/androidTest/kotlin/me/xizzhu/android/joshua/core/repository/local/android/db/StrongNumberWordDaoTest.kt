@@ -37,7 +37,7 @@ class StrongNumberWordDaoTest : BaseSqliteTest() {
         androidDatabase.strongNumberWordDao.replace(MockContents.strongNumberWords.keys.associateWith { "word" })
         androidDatabase.strongNumberWordDao.replace(MockContents.strongNumberWords)
 
-        MockContents.strongNumbersPerVerse.forEach { (verseIndex, list) ->
+        MockContents.strongNumberIndex.forEach { (verseIndex, list) ->
             assertEquals(MockContents.strongNumber[verseIndex], androidDatabase.strongNumberWordDao.read(list))
         }
     }
@@ -47,7 +47,7 @@ class StrongNumberWordDaoTest : BaseSqliteTest() {
         androidDatabase.strongNumberWordDao.replace(MockContents.strongNumberWords.keys.associateWith { "word" })
         androidDatabase.strongNumberWordDao.replace(MockContents.strongNumberWords)
 
-        MockContents.strongNumbersPerVerse.forEach { (verseIndex, list) ->
+        MockContents.strongNumberIndex.forEach { (verseIndex, list) ->
             val expected = MockContents.strongNumber[verseIndex]
             val actual = androidDatabase.strongNumberWordDao.read(
                     list.toMutableList().apply {
