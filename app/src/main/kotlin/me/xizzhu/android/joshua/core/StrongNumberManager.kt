@@ -30,5 +30,7 @@ data class StrongNumber(val sn: String, val meaning: String) {
 class StrongNumberManager(private val strongNumberRepository: StrongNumberRepository) {
     suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = strongNumberRepository.read(verseIndex)
 
+    suspend fun read(strongNumber: String): List<VerseIndex> = strongNumberRepository.read(strongNumber)
+
     fun download(): Flow<Int> = strongNumberRepository.download()
 }

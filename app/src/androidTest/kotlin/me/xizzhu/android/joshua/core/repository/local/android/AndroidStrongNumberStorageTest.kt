@@ -58,6 +58,9 @@ class AndroidStrongNumberStorageTest : BaseSqliteTest() {
             MockContents.strongNumberIndex.keys.forEach { verseIndex ->
                 assertEquals(MockContents.strongNumber[verseIndex], androidStrongNumberStorage.read(verseIndex))
             }
+            MockContents.strongNumberReverseIndex.forEach { (sn, verseIndexes) ->
+                assertEquals(verseIndexes, androidDatabase.strongNumberReverseIndexDao.read(sn))
+            }
         }
     }
 }

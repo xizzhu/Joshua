@@ -29,8 +29,12 @@ class AndroidStrongNumberStorage(private val androidDatabase: AndroidDatabase) :
     override suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = withContext(Dispatchers.IO) {
         return@withContext androidDatabase.writableDatabase.withTransaction {
             return@withTransaction androidDatabase.strongNumberWordDao.read(
-                    androidDatabase.strongNumberListDao.read(verseIndex))
+                    androidDatabase.strongNumberIndexDao.read(verseIndex))
         }
+    }
+
+    override suspend fun read(strongNumber: String): List<VerseIndex> = withContext(Dispatchers.IO) {
+        androidDatabase.strongNumberReverseIndexDao.read(strongNumber)
     }
 
     override suspend fun save(strongNumberIndex: Map<VerseIndex, List<String>>,
@@ -38,7 +42,8 @@ class AndroidStrongNumberStorage(private val androidDatabase: AndroidDatabase) :
                               strongNumberWords: Map<String, String>) {
         withContext(Dispatchers.IO) {
             androidDatabase.writableDatabase.transaction {
-                androidDatabase.strongNumberListDao.replace(strongNumberIndex)
+                androidDatabase.strongNumberIndexDao.replace(strongNumberIndex)
+                androidDatabase.strongNumberReverseIndexDao.replace(strongNumberReverseIndexes)
                 androidDatabase.strongNumberWordDao.replace(strongNumberWords)
             }
         }

@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -29,23 +29,24 @@ import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class StrongNumberIndexDaoTest : BaseSqliteTest() {
+class StrongNumberReverseIndexDaoTest : BaseSqliteTest() {
     @Test
     fun testEmptyTable() {
-        (0 until Bible.BOOK_COUNT).forEach { bookIndex ->
-            (0 until Bible.getChapterCount(bookIndex)).forEach { chapterIndex ->
-                assertTrue(androidDatabase.strongNumberIndexDao.read(VerseIndex(bookIndex, chapterIndex, 0)).isEmpty())
-            }
+        (1..Constants.STRONG_NUMBER_HEBREW_COUNT).forEach { sn ->
+            assertTrue(androidDatabase.strongNumberReverseIndexDao.read(sn.toString()).isEmpty())
+        }
+        (1..Constants.STRONG_NUMBER_GREEK_COUNT).forEach { sn ->
+            assertTrue(androidDatabase.strongNumberReverseIndexDao.read(sn.toString()).isEmpty())
         }
     }
 
     @Test
     fun testReplaceThenRead() {
-        androidDatabase.strongNumberIndexDao.replace(MockContents.strongNumberIndex.keys.associateWith { listOf("1", "2", "3") })
-        androidDatabase.strongNumberIndexDao.replace(MockContents.strongNumberIndex)
+        androidDatabase.strongNumberReverseIndexDao.replace(MockContents.strongNumberReverseIndex.keys.associateWith { listOf(VerseIndex(1, 2, 3)) })
+        androidDatabase.strongNumberReverseIndexDao.replace(MockContents.strongNumberReverseIndex)
 
-        MockContents.strongNumberIndex.forEach { (verseIndex, list) ->
-            assertEquals(list, androidDatabase.strongNumberIndexDao.read(verseIndex))
+        MockContents.strongNumberReverseIndex.forEach { (sn, verseIndexes) ->
+            assertEquals(verseIndexes, androidDatabase.strongNumberReverseIndexDao.read(sn))
         }
     }
 }

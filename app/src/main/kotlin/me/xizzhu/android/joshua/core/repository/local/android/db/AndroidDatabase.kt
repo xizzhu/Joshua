@@ -33,7 +33,8 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     val metadataDao = MetadataDao(this)
     val noteDao = NoteDao(this)
     val readingProgressDao = ReadingProgressDao(this)
-    val strongNumberListDao = StrongNumberIndexDao(this)
+    val strongNumberIndexDao = StrongNumberIndexDao(this)
+    val strongNumberReverseIndexDao = StrongNumberReverseIndexDao(this)
     val strongNumberWordDao = StrongNumberWordDao(this)
     val translationDao = TranslationDao(this)
     val translationInfoDao = TranslationInfoDao(this)
@@ -46,7 +47,8 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             metadataDao.createTable(db)
             noteDao.createTable(db)
             readingProgressDao.createTable(db)
-            strongNumberListDao.createTable(db)
+            strongNumberIndexDao.createTable(db)
+            strongNumberReverseIndexDao.createTable(db)
             strongNumberWordDao.createTable(db)
             translationInfoDao.createTable(db)
         }
@@ -57,7 +59,8 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             highlightDao.createTable(db)
         }
         if (oldVersion <= 2) {
-            strongNumberListDao.createTable(db)
+            strongNumberIndexDao.createTable(db)
+            strongNumberReverseIndexDao.createTable(db)
             strongNumberWordDao.createTable(db)
         }
     }

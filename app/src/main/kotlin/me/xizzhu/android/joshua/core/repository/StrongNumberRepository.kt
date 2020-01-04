@@ -29,6 +29,8 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
                              private val remoteStrongNumberStorage: RemoteStrongNumberStorage) {
     suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = localStrongNumberStorage.read(verseIndex)
 
+    suspend fun read(strongNumber: String): List<VerseIndex> = localStrongNumberStorage.read(strongNumber)
+
     fun download(): Flow<Int> = download(Channel(Channel.CONFLATED), Channel(Channel.CONFLATED))
 
     @VisibleForTesting
