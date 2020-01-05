@@ -7,7 +7,14 @@
     <me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
         android:id="@+id/strong_number_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <me.xizzhu.android.joshua.infra.ui.LoadingSpinner
+        android:id="@+id/loading_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"

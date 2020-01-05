@@ -35,7 +35,7 @@ data class BookmarkItem(val verseIndex: VerseIndex, private val bookName: String
                         private val bookShortName: String, private val verseText: String,
                         @Constants.SortOrder private val sortOrder: Int,
                         val onClick: (VerseIndex) -> Unit)
-    : BaseItem(R.layout.item_bookmarks, { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }) {
+    : BaseItem(R.layout.item_bookmark, { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
         private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
@@ -72,7 +72,7 @@ data class BookmarkItem(val verseIndex: VerseIndex, private val bookName: String
 }
 
 private class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<BookmarkItem>(inflater.inflate(R.layout.item_bookmarks, parent, false)) {
+    : BaseViewHolder<BookmarkItem>(inflater.inflate(R.layout.item_bookmark, parent, false)) {
     private val text: TextView = itemView.findViewById(R.id.text)
 
     init {

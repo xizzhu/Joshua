@@ -19,26 +19,42 @@ package me.xizzhu.android.joshua.strongnumber
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
+import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.StrongNumberManager
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
 @Module
 object StrongNumberListModule {
     @ActivityScope
     @Provides
+    fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
+
+    @ActivityScope
+    @Provides
+    fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
+            LoadingSpinnerPresenter(loadingSpinnerInteractor)
+
+    @ActivityScope
+    @Provides
     fun provideStrongNumberListInteractor(strongNumberManager: StrongNumberManager,
+                                          bibleReadingManager: BibleReadingManager,
                                           settingsManager: SettingsManager): StrongNumberListInteractor =
-            StrongNumberListInteractor(strongNumberManager, settingsManager)
+            StrongNumberListInteractor(strongNumberManager, bibleReadingManager, settingsManager)
 
     @ActivityScope
     @Provides
     fun provideStrongNumberListPresenter(strongNumberListActivity: StrongNumberListActivity,
+                                         navigator: Navigator,
                                          strongNumberListInteractor: StrongNumberListInteractor): StrongNumberListPresenter =
-            StrongNumberListPresenter(strongNumberListActivity, strongNumberListInteractor)
+            StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListInteractor)
 
     @ActivityScope
     @Provides
     fun provideStrongNumberViewModel(settingsManager: SettingsManager,
+                                     loadingSpinnerInteractor: LoadingSpinnerInteractor,
                                      strongNumberListInteractor: StrongNumberListInteractor): StrongNumberListViewModel =
-            StrongNumberListViewModel(settingsManager, strongNumberListInteractor)
+            StrongNumberListViewModel(settingsManager, loadingSpinnerInteractor, strongNumberListInteractor)
 }

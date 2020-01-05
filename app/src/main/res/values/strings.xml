@@ -54,10 +54,11 @@
     <string name="dialog_navigate_to_bookmarks_error">Failed to open bookmarks, retry?</string>
     <string name="dialog_navigate_to_highlights_error">Failed to open highlights, retry?</string>
     <string name="dialog_navigate_to_notes_error">Failed to open notes, retry?</string>
+    <string name="dialog_navigate_to_settings_error">Failed to open settings, retry?</string>
     <string name="dialog_navigate_to_strong_number_error">Failed to open Strong\'s number, retry?</string>
     <string name="dialog_load_reading_progress_error">Failed to load reading progress, retry?</string>
+    <string name="dialog_load_strong_number_list_error">Failed to load Strong\'s number, retry?</string>
     <string name="dialog_load_annotated_verses_error">Failed to load, retry?</string>
-    <string name="dialog_navigate_to_settings_error">Failed to open settings, retry?</string>
     <string name="dialog_update_settings_error">Failed to update settings, retry?</string>
     <string name="dialog_load_verse_detail_error">Failed to load verse detail, retry?</string>
     <string name="dialog_backup_error">Failed to backup, retry?</string>

@@ -1,0 +1,126 @@
+/*
+ * Copyright (C) 2019 Xizhi Zhu
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package me.xizzhu.android.joshua.strongnumber
+
+import android.content.res.Resources
+import android.view.View
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runBlockingTest
+import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.tests.BaseUnitTest
+import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import org.mockito.Mock
+import org.mockito.Mockito
+import org.mockito.Mockito.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+
+class StrongNumberListPresenterTest : BaseUnitTest() {
+    @Mock
+    private lateinit var resources: Resources
+    @Mock
+    private lateinit var strongNumberListActivity: StrongNumberListActivity
+    @Mock
+    private lateinit var navigator: Navigator
+    @Mock
+    private lateinit var strongNumberListInteractor: StrongNumberListInteractor
+    @Mock
+    private lateinit var strongNumberListView: CommonRecyclerView
+
+    private lateinit var strongNumberListViewHolder: StrongNumberListViewHolder
+    private lateinit var strongNumberListPresenter: StrongNumberListPresenter
+
+    @BeforeTest
+    override fun setup() {
+        super.setup()
+
+        `when`(resources.getString(anyInt(), anyString(), anyInt())).thenReturn("")
+        `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
+        `when`(resources.getStringArray(anyInt())).thenReturn(Array(12) { "" })
+        `when`(strongNumberListActivity.resources).thenReturn(resources)
+
+        `when`(strongNumberListInteractor.settings()).thenReturn(emptyFlow())
+        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(emptyFlow())
+
+        strongNumberListViewHolder = StrongNumberListViewHolder(strongNumberListView)
+        strongNumberListPresenter = StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListInteractor, testDispatcher)
+    }
+
+    @Test
+    fun testObserveSettings() = testDispatcher.runBlockingTest {
+        val settings = Settings(false, true, 1, true, true)
+        `when`(strongNumberListInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
+
+        strongNumberListPresenter.create(strongNumberListViewHolder)
+        verify(strongNumberListView, times(1)).setSettings(settings)
+        verify(strongNumberListView, never()).setSettings(Settings.DEFAULT)
+
+        strongNumberListPresenter.destroy()
+    }
+
+    @Test
+    fun testLoadStrongNumber() = testDispatcher.runBlockingTest {
+        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf("H7225"))
+        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(ViewData.success(MockContents.kjvShortName))
+        `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookNames))
+        `when`(strongNumberListInteractor.bookShortNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
+        `when`(strongNumberListInteractor.readVerseIndexes("H7225")).thenReturn(ViewData.success(MockContents.strongNumberReverseIndex.getValue("H7225")))
+        `when`(strongNumberListInteractor.verses(MockContents.kjvShortName, MockContents.strongNumberReverseIndex.getValue("H7225")))
+                .thenReturn(ViewData.success(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0])))
+
+        strongNumberListPresenter.create(strongNumberListViewHolder)
+
+        with(inOrder(strongNumberListInteractor, strongNumberListView)) {
+            verify(strongNumberListInteractor, times(1)).updateLoadingState(ViewData.loading())
+            verify(strongNumberListView, times(1)).visibility = View.GONE
+            Mockito.verify(strongNumberListView, times(1)).setItems(listOf(
+                    TitleItem(MockContents.kjvBookNames[0], false),
+                    VerseStrongNumberItem(VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, strongNumberListPresenter::openVerse)
+            ))
+            verify(strongNumberListView, times(1)).fadeIn()
+            verify(strongNumberListInteractor, times(1)).updateLoadingState(ViewData.success(null))
+        }
+
+        strongNumberListPresenter.destroy()
+    }
+
+    @Test
+    fun testLoadStrongNumberWithException() = testDispatcher.runBlockingTest {
+        val exception = RuntimeException("random exception")
+        `when`(strongNumberListInteractor.currentTranslation()).thenThrow(exception)
+        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf("sn"))
+
+        strongNumberListPresenter.create(strongNumberListViewHolder)
+
+        with(inOrder(strongNumberListInteractor, strongNumberListView)) {
+            verify(strongNumberListInteractor, times(1)).updateLoadingState(ViewData.loading())
+            verify(strongNumberListView, times(1)).visibility = View.GONE
+            verify(strongNumberListInteractor, times(1)).updateLoadingState(ViewData.error(exception = exception))
+        }
+        verify(strongNumberListView, never()).setItems(any())
+        verify(strongNumberListView, never()).fadeIn()
+        verify(strongNumberListInteractor, never()).updateLoadingState(ViewData.success(null))
+
+        strongNumberListPresenter.destroy()
+    }
+}

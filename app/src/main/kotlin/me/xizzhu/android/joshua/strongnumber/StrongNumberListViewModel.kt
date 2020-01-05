@@ -16,12 +16,29 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
+import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 
 class StrongNumberListViewModel(settingsManager: SettingsManager,
-                                strongNumberListInteractor: StrongNumberListInteractor,
+                                private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
+                                private val strongNumberListInteractor: StrongNumberListInteractor,
                                 dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(strongNumberListInteractor), dispatcher)
+    : BaseSettingsAwareViewModel(settingsManager, listOf(strongNumberListInteractor), dispatcher) {
+    @UiThread
+    override fun onCreate() {
+        super.onCreate()
+
+        strongNumberListInteractor.loadingState().onEach { loadingSpinnerInteractor.updateLoadingState(it) }.launchIn(coroutineScope)
+    }
+
+    fun loadStrongNumber(sn: String) {
+        coroutineScope.launch { strongNumberListInteractor.requestStrongNumber(sn) }
+    }
+}
