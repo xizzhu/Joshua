@@ -112,7 +112,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
 
             items.add(verseAnnotation.toBaseItem(bookNames[verseAnnotation.verseIndex.bookIndex],
                     bookShortNames[verseAnnotation.verseIndex.bookIndex],
-                    verses.getValue(verseAnnotation.verseIndex).text.text,
+                    verses[verseAnnotation.verseIndex]?.text?.text ?: "",
                     Constants.SORT_BY_DATE))
         }
         return items
@@ -133,7 +133,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
 
             items.add(verseAnnotation.toBaseItem(bookNames[verseAnnotation.verseIndex.bookIndex],
                     bookShortNames[verseAnnotation.verseIndex.bookIndex],
-                    verses.getValue(verseAnnotation.verseIndex).text.text,
+                    verses[verseAnnotation.verseIndex]?.text?.text ?: "",
                     Constants.SORT_BY_BOOK))
         }
         return items
