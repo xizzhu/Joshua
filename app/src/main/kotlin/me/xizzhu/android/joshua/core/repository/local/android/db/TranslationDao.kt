@@ -98,19 +98,22 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         if (!hasTableAndLogIfNoTable(translationShortName)) return@withTransaction emptyMap()
 
         val verses = hashMapOf<VerseIndex, Verse>()
-        select(translationShortName) {
-            var condition: Condition = noOp()
-            verseIndexes.forEach { verseIndex ->
-                ((COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and
-                        (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and
-                        (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)).run {
-                    condition = if (condition == Condition.NoOp) this else condition or this
+        // Work-around until https://github.com/xizzhu/ask/issues/8 is solved.
+        verseIndexes.chunked(333).forEach { chunkedVerseIndexes ->
+            select(translationShortName) {
+                var condition: Condition = noOp()
+                chunkedVerseIndexes.forEach { verseIndex ->
+                    ((COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and
+                            (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and
+                            (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)).run {
+                        condition = if (condition == Condition.NoOp) this else condition or this
+                    }
                 }
+                condition
+            }.forEach { row ->
+                val verseIndex = VerseIndex(row.getInt(COLUMN_BOOK_INDEX), row.getInt(COLUMN_CHAPTER_INDEX), row.getInt(COLUMN_VERSE_INDEX))
+                verses[verseIndex] = Verse(verseIndex, Verse.Text(translationShortName, row.getString(COLUMN_TEXT)), emptyList())
             }
-            condition
-        }.forEach { row ->
-            val verseIndex = VerseIndex(row.getInt(COLUMN_BOOK_INDEX), row.getInt(COLUMN_CHAPTER_INDEX), row.getInt(COLUMN_VERSE_INDEX))
-            verses[verseIndex] = Verse(verseIndex, Verse.Text(translationShortName, row.getString(COLUMN_TEXT)), emptyList())
         }
         verses
     }
