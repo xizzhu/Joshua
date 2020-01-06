@@ -124,7 +124,7 @@ class TranslationDaoTest : BaseSqliteTest() {
     }
 
     @Test
-    fun testSaveThenReadByVerseIndex() {
+    fun testSaveThenReadByVerseIndexes() {
         saveKjv()
         saveCuv()
 
@@ -161,6 +161,28 @@ class TranslationDaoTest : BaseSqliteTest() {
                                 VerseIndex(0, 0, 2)
                         )
                 )
+        )
+    }
+
+    @Test
+    fun testSaveThenReadByLargeVerseIndexes() {
+        saveKjv()
+        saveCuv()
+
+        val verseIndexes = arrayListOf(
+                VerseIndex(0, 0, 0),
+                VerseIndex(0, 0, 2)
+        ).apply {
+            (1..10000).forEach {
+                add(VerseIndex(it, 0, 0))
+            }
+        }
+        assertEquals(
+                mapOf(
+                        Pair(VerseIndex(0, 0, 2), MockContents.kjvVerses[2]),
+                        Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0])
+                ),
+                androidDatabase.translationDao.read(MockContents.kjvShortName, verseIndexes)
         )
     }
 

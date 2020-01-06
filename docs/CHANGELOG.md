@@ -6,6 +6,7 @@ CHANGELOG
   - Properly cancel translation download / removal and dismiss dialog on stop
   - Should call AndroidReadingProgressStorage.save() on IO thread
   - Do not fail if the requested verse does not exist when loading annotated verses
+  - Do not fail when reading a large number of verses by verse indexes
 - Updated dependencies:
   - Dagger to 2.25.4
 
