@@ -17,6 +17,8 @@
 package me.xizzhu.android.joshua.strongnumber
 
 import android.content.DialogInterface
+import android.text.Spannable
+import android.text.SpannableStringBuilder
 import android.view.View
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -27,13 +29,17 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.createTitleSizeSpan
+import me.xizzhu.android.joshua.ui.createTitleStyleSpan
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
+import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.logger.Log
 
@@ -74,6 +80,11 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
     }
 
     private suspend fun prepareItems(sn: String): List<BaseItem> {
+        val items: ArrayList<BaseItem> = ArrayList()
+
+        val strongNumber = interactor.strongNumber(sn).dataOnSuccessOrThrow("Failed to load Strong number")
+        items.add(TextItem(formatStrongNumber(strongNumber)))
+
         val currentTranslation = interactor.currentTranslation().dataOnSuccessOrThrow("Failed to load current translation")
         val bookNames = interactor.bookNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book names")
         val bookShortNames = interactor.bookShortNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book short names")
@@ -81,8 +92,6 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
                 .dataOnSuccessOrThrow("Failed to load verse indexes")
                 .sortedBy { it.bookIndex * 100000 + it.chapterIndex * 1000 + it.verseIndex }
         val verses = interactor.verses(currentTranslation, verseIndexes).dataOnSuccessOrThrow("Failed to load verses")
-
-        val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
         verseIndexes.forEach { verseIndex ->
             val bookName = bookNames[verseIndex.bookIndex]
@@ -94,7 +103,21 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
             items.add(VerseStrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex],
                     verses[verseIndex]?.text?.text ?: "", this::openVerse))
         }
+
         return items
+    }
+
+    @VisibleForTesting
+    fun formatStrongNumber(strongNumber: StrongNumber): CharSequence {
+        val builder = SpannableStringBuilder()
+
+        builder.append(strongNumber.sn)
+        builder.setSpan(createTitleStyleSpan(), 0, builder.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+        builder.setSpan(createTitleSizeSpan(), 0, builder.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+
+        builder.append(' ').append(strongNumber.meaning)
+
+        return builder.subSequence(0, builder.length)
     }
 
     @VisibleForTesting

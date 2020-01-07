@@ -28,9 +28,9 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
+import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -81,6 +81,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadStrongNumber() = testDispatcher.runBlockingTest {
         `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf("H7225"))
+        `when`(strongNumberListInteractor.strongNumber("H7225")).thenReturn(ViewData.success(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225"))))
         `when`(strongNumberListInteractor.currentTranslation()).thenReturn(ViewData.success(MockContents.kjvShortName))
         `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookNames))
         `when`(strongNumberListInteractor.bookShortNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
@@ -88,12 +89,16 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
         `when`(strongNumberListInteractor.verses(MockContents.kjvShortName, MockContents.strongNumberReverseIndex.getValue("H7225")))
                 .thenReturn(ViewData.success(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0])))
 
+        strongNumberListPresenter = spy(strongNumberListPresenter)
+        doReturn("formatted strong number").`when`(strongNumberListPresenter).formatStrongNumber(any())
+
         strongNumberListPresenter.create(strongNumberListViewHolder)
 
         with(inOrder(strongNumberListInteractor, strongNumberListView)) {
             verify(strongNumberListInteractor, times(1)).updateLoadingState(ViewData.loading())
             verify(strongNumberListView, times(1)).visibility = View.GONE
-            Mockito.verify(strongNumberListView, times(1)).setItems(listOf(
+            verify(strongNumberListView, times(1)).setItems(listOf(
+                    TextItem("formatted strong number"),
                     TitleItem(MockContents.kjvBookNames[0], false),
                     VerseStrongNumberItem(VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, strongNumberListPresenter::openVerse)
             ))
@@ -107,7 +112,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadStrongNumberWithException() = testDispatcher.runBlockingTest {
         val exception = RuntimeException("random exception")
-        `when`(strongNumberListInteractor.currentTranslation()).thenThrow(exception)
+        `when`(strongNumberListInteractor.strongNumber(anyString())).thenThrow(exception)
         `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf("sn"))
 
         strongNumberListPresenter.create(strongNumberListViewHolder)
