@@ -74,7 +74,7 @@
     <string name="text_restore_from">Restore from</string>
     <string name="text_share_with">Share with</string>
 
-    <string name="text_no_strong_number">Strong\'s number not downloaded yet.\nClick to download now.</string>
+    <string name="text_no_strong_number">Strong\'s number not downloaded yet.\nClick to download now.\n\n(Experimental Feature)</string>
 
     <string name="text_verse_comparison">Verses</string>
     <string name="text_note">Note</string>
