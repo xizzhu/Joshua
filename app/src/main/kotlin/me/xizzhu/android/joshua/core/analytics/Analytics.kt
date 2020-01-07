@@ -22,6 +22,7 @@ interface AnalyticsProvider {
 
 object Analytics {
     const val EVENT_DOWNLOAD_TRANSLATION: String = "download_translation"
+    const val EVENT_DOWNLOAD_STRONG_NUMBER: String = "download_strong_number"
 
     const val PARAM_ITEM_ID: String = "item_id"
     const val PARAM_DOWNLOAD_TIME: String = "download_time"
