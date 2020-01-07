@@ -43,6 +43,11 @@ class StrongNumberWordDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
+    fun read(strongNumber: String): StrongNumber =
+            db.select(TABLE_STRONG_NUMBER_WORD, COLUMN_MEANING) { COLUMN_STRONG_NUMBER eq strongNumber }
+                    .firstOrDefault(StrongNumber.INVALID) { StrongNumber(strongNumber, it.getString(COLUMN_MEANING)) }
+
+    @WorkerThread
     fun read(strongNumbers: List<String>): List<StrongNumber> {
         val words = db.select(TABLE_STRONG_NUMBER_WORD) {
             var condition: Condition = noOp()

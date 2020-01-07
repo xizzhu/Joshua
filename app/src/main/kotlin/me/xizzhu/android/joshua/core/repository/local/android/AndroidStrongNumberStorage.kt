@@ -26,14 +26,18 @@ import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 
 class AndroidStrongNumberStorage(private val androidDatabase: AndroidDatabase) : LocalStrongNumberStorage {
-    override suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = withContext(Dispatchers.IO) {
+    override suspend fun readStrongNumber(strongNumber: String): StrongNumber = withContext(Dispatchers.IO) {
+        androidDatabase.strongNumberWordDao.read(strongNumber)
+    }
+
+    override suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = withContext(Dispatchers.IO) {
         return@withContext androidDatabase.writableDatabase.withTransaction {
             return@withTransaction androidDatabase.strongNumberWordDao.read(
                     androidDatabase.strongNumberIndexDao.read(verseIndex))
         }
     }
 
-    override suspend fun read(strongNumber: String): List<VerseIndex> = withContext(Dispatchers.IO) {
+    override suspend fun readVerseIndexes(strongNumber: String): List<VerseIndex> = withContext(Dispatchers.IO) {
         androidDatabase.strongNumberReverseIndexDao.read(strongNumber)
     }
 

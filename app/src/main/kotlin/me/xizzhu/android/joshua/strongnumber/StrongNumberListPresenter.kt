@@ -77,7 +77,7 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
         val currentTranslation = interactor.currentTranslation().dataOnSuccessOrThrow("Failed to load current translation")
         val bookNames = interactor.bookNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book names")
         val bookShortNames = interactor.bookShortNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book short names")
-        val verseIndexes = interactor.readVerseIndexes(sn)
+        val verseIndexes = interactor.verseIndexes(sn)
                 .dataOnSuccessOrThrow("Failed to load verse indexes")
                 .sortedBy { it.bookIndex * 100000 + it.chapterIndex * 1000 + it.verseIndex }
         val verses = interactor.verses(currentTranslation, verseIndexes).dataOnSuccessOrThrow("Failed to load verses")

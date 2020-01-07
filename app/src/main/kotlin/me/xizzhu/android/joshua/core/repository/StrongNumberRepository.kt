@@ -27,9 +27,11 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
 
 class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNumberStorage,
                              private val remoteStrongNumberStorage: RemoteStrongNumberStorage) {
-    suspend fun read(verseIndex: VerseIndex): List<StrongNumber> = localStrongNumberStorage.read(verseIndex)
+    suspend fun readStrongNumber(strongNumber: String): StrongNumber = localStrongNumberStorage.readStrongNumber(strongNumber)
 
-    suspend fun read(strongNumber: String): List<VerseIndex> = localStrongNumberStorage.read(strongNumber)
+    suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = localStrongNumberStorage.readStrongNumber(verseIndex)
+
+    suspend fun readVerseIndexes(strongNumber: String): List<VerseIndex> = localStrongNumberStorage.readVerseIndexes(strongNumber)
 
     fun download(): Flow<Int> = download(Channel(Channel.CONFLATED), Channel(Channel.CONFLATED))
 

@@ -20,13 +20,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -44,8 +42,12 @@ class AndroidStrongNumberStorageTest : BaseSqliteTest() {
         runBlocking {
             (0 until Bible.BOOK_COUNT).forEach { bookIndex ->
                 (0 until Bible.getChapterCount(bookIndex)).forEach { chapterIndex ->
-                    assertTrue(androidStrongNumberStorage.read(VerseIndex(bookIndex, chapterIndex, 0)).isEmpty())
+                    assertTrue(androidStrongNumberStorage.readStrongNumber(VerseIndex(bookIndex, chapterIndex, 0)).isEmpty())
                 }
+            }
+
+            MockContents.strongNumberWords.keys.forEach {
+                assertFalse(androidStrongNumberStorage.readStrongNumber(it).isValid())
             }
         }
     }
@@ -56,10 +58,13 @@ class AndroidStrongNumberStorageTest : BaseSqliteTest() {
             androidStrongNumberStorage.save(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex, MockContents.strongNumberWords)
 
             MockContents.strongNumberIndex.keys.forEach { verseIndex ->
-                assertEquals(MockContents.strongNumber[verseIndex], androidStrongNumberStorage.read(verseIndex))
+                assertEquals(MockContents.strongNumber[verseIndex], androidStrongNumberStorage.readStrongNumber(verseIndex))
             }
             MockContents.strongNumberReverseIndex.forEach { (sn, verseIndexes) ->
                 assertEquals(verseIndexes, androidDatabase.strongNumberReverseIndexDao.read(sn))
+            }
+            MockContents.strongNumberWords.keys.forEach {
+                assertEquals(StrongNumber(it, MockContents.strongNumberWords.getValue(it)), androidStrongNumberStorage.readStrongNumber(it))
             }
         }
     }

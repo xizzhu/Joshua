@@ -18,11 +18,13 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
@@ -30,6 +32,10 @@ import kotlin.test.assertTrue
 class StrongNumberWordDaoTest : BaseSqliteTest() {
     fun testEmptyTable() {
         assertTrue(androidDatabase.strongNumberWordDao.read(MockContents.strongNumberWords.keys.toList()).isEmpty())
+
+        MockContents.strongNumberWords.keys.forEach {
+            assertFalse(androidDatabase.strongNumberWordDao.read(it).isValid())
+        }
     }
 
     @Test
@@ -39,6 +45,9 @@ class StrongNumberWordDaoTest : BaseSqliteTest() {
 
         MockContents.strongNumberIndex.forEach { (verseIndex, list) ->
             assertEquals(MockContents.strongNumber[verseIndex], androidDatabase.strongNumberWordDao.read(list))
+        }
+        MockContents.strongNumberWords.keys.forEach {
+            assertEquals(StrongNumber(it, MockContents.strongNumberWords.getValue(it)), androidDatabase.strongNumberWordDao.read(it))
         }
     }
 

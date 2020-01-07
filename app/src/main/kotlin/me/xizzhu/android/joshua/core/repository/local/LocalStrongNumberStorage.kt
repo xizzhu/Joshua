@@ -20,9 +20,11 @@ import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 
 interface LocalStrongNumberStorage {
-    suspend fun read(verseIndex: VerseIndex): List<StrongNumber>
+    suspend fun readStrongNumber(strongNumber: String): StrongNumber
 
-    suspend fun read(strongNumber: String): List<VerseIndex>
+    suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber>
+
+    suspend fun readVerseIndexes(strongNumber: String): List<VerseIndex>
 
     suspend fun save(strongNumberIndex: Map<VerseIndex, List<String>>,
                      strongNumberReverseIndexes: Map<String, List<VerseIndex>>,

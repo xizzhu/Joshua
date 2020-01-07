@@ -108,7 +108,7 @@ class VerseDetailInteractor(private val translationManager: TranslationManager,
         verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED))
     }
 
-    suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.read(verseIndex)
+    suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.readStrongNumber(verseIndex)
 
     fun downloadStrongNumber(): Flow<ViewData<Int>> =
             strongNumberManager.download()

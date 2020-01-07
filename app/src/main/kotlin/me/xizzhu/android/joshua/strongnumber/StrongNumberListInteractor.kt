@@ -42,8 +42,11 @@ class StrongNumberListInteractor(private val strongNumberManager: StrongNumberMa
         strongNumberRequest.offer(sn)
     }
 
-    suspend fun readVerseIndexes(sn: String): ViewData<List<VerseIndex>> =
-            viewData { strongNumberManager.read(sn) }
+    suspend fun strongNumber(sn: String): ViewData<StrongNumber> =
+            viewData { strongNumberManager.readStrongNumber(sn) }
+
+    suspend fun verseIndexes(sn: String): ViewData<List<VerseIndex>> =
+            viewData { strongNumberManager.readVerseIndexes(sn) }
 
     suspend fun currentTranslation(): ViewData<String> =
             viewData { bibleReadingManager.currentTranslation().first() }

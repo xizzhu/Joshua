@@ -84,7 +84,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
         `when`(strongNumberListInteractor.currentTranslation()).thenReturn(ViewData.success(MockContents.kjvShortName))
         `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookNames))
         `when`(strongNumberListInteractor.bookShortNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
-        `when`(strongNumberListInteractor.readVerseIndexes("H7225")).thenReturn(ViewData.success(MockContents.strongNumberReverseIndex.getValue("H7225")))
+        `when`(strongNumberListInteractor.verseIndexes("H7225")).thenReturn(ViewData.success(MockContents.strongNumberReverseIndex.getValue("H7225")))
         `when`(strongNumberListInteractor.verses(MockContents.kjvShortName, MockContents.strongNumberReverseIndex.getValue("H7225")))
                 .thenReturn(ViewData.success(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0])))
 
