@@ -31,7 +31,7 @@ import java.util.zip.ZipInputStream
 class HttpStrongNumberService : RemoteStrongNumberStorage {
     override suspend fun fetchIndexes(channel: SendChannel<Int>): RemoteStrongNumberIndexes = withContext(Dispatchers.IO) {
         val indexes = hashMapOf<VerseIndex, List<String>>()
-        val reverseIndexes = hashMapOf<String, ArrayList<VerseIndex>>()
+        val reverseIndexes = hashMapOf<String, HashSet<VerseIndex>>()
 
         var progress = -1
         ZipInputStream(BufferedInputStream(getInputStream("tools/sn_indexes.zip")))
@@ -48,7 +48,7 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                             indexes[verseIndex] = this
                             forEach { sn ->
                                 (reverseIndexes[sn]
-                                        ?: arrayListOf<VerseIndex>().apply { reverseIndexes[sn] = this }).add(verseIndex)
+                                        ?: HashSet<VerseIndex>().apply { reverseIndexes[sn] = this }).add(verseIndex)
                             }
                         }
                     }
@@ -61,7 +61,7 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                     }
                 }
 
-        return@withContext RemoteStrongNumberIndexes(indexes, reverseIndexes)
+        return@withContext RemoteStrongNumberIndexes(indexes, reverseIndexes.mapValues { (_, verseIndexes) -> verseIndexes.toList() })
     }
 
     override suspend fun fetchWords(channel: SendChannel<Int>): RemoteStrongNumberWords = withContext(Dispatchers.IO) {
@@ -69,7 +69,7 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
 
         var progress = 0
         ZipInputStream(BufferedInputStream(getInputStream("tools/sn_en.zip")))
-                .forEachIndexed { index, entryName, contentReader ->
+                .forEachIndexed { _, entryName, contentReader ->
                     when (entryName) {
                         "hebrew.json" -> {
                             contentReader.readStrongNumberWords().apply {
