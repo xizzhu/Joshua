@@ -20,11 +20,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.content.res.TypedArray
 import android.graphics.Color
-import android.graphics.Typeface
-import android.text.SpannableStringBuilder
 import android.text.TextUtils
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -103,8 +99,3 @@ fun TextView.updateSettingsWithSecondaryText(settings: Settings) {
     setTextColor(settings.getSecondaryTextColor(resources))
     setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
 }
-
-fun SpannableStringBuilder.append(i: Int): SpannableStringBuilder = append(i.toString())
-
-fun createTitleSizeSpan() = RelativeSizeSpan(0.85F)
-fun createTitleStyleSpan() = StyleSpan(Typeface.BOLD)

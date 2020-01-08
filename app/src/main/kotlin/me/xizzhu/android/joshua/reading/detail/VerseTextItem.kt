@@ -24,10 +24,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
-import android.text.Spannable
-import me.xizzhu.android.joshua.ui.createTitleSizeSpan
-import me.xizzhu.android.joshua.ui.createTitleStyleSpan
+import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
@@ -46,24 +43,19 @@ data class VerseTextItem(val verseIndex: VerseIndex, private val followingEmptyV
             return@lazy ""
         }
 
-        SPANNABLE_STRING_BUILDER.clear()
-        SPANNABLE_STRING_BUILDER.clearSpans()
-
         // format:
         // <translation short name>, <book name> <chapter verseIndex>:<verse verseIndex>
         // <verse text>
-        SPANNABLE_STRING_BUILDER.append(verseText.translationShortName).append(", ")
+        SPANNABLE_STRING_BUILDER.clearAll()
+                .append(verseText.translationShortName).append(", ")
                 .append(bookName).append(' ')
-                .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
+                .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
         if (followingEmptyVerseCount > 0) {
-            SPANNABLE_STRING_BUILDER.append('-').append((verseIndex.verseIndex + followingEmptyVerseCount + 1).toString())
+            SPANNABLE_STRING_BUILDER.append('-').append(verseIndex.verseIndex + followingEmptyVerseCount + 1)
         }
-        SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-        SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-
-        SPANNABLE_STRING_BUILDER.append('\n').append(verseText.text)
-
-        return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
+        return@lazy SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, BOOK_NAME_SIZE_SPAN)
+                .append('\n').append(verseText.text)
+                .toCharSequence()
     }
 }
 

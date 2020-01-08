@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.reading.verse
 
 import android.graphics.Color
 import android.text.SpannableStringBuilder
-import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
@@ -26,9 +25,7 @@ import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.append
-import me.xizzhu.android.joshua.ui.createTitleSizeSpan
-import me.xizzhu.android.joshua.ui.createTitleStyleSpan
+import me.xizzhu.android.joshua.ui.*
 
 private val bookNameSizeSpan = createTitleSizeSpan()
 private val bookNameStyleSpan = createTitleStyleSpan()
@@ -36,8 +33,7 @@ private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
 
 fun SpannableStringBuilder.format(verse: Verse, bookName: String, followingEmptyVerseCount: Int,
                                   simpleReadingModeOn: Boolean, @ColorInt highlightColor: Int): CharSequence {
-    clear()
-    clearSpans()
+    clearAll()
 
     if (verse.parallel.isEmpty()) {
         if (!simpleReadingModeOn) {
@@ -51,8 +47,7 @@ fun SpannableStringBuilder.format(verse: Verse, bookName: String, followingEmpty
             }
             append('\n')
 
-            setSpan(bookNameStyleSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            setSpan(bookNameSizeSpan, 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            setSpan(bookNameStyleSpan, bookNameSizeSpan, 0, length)
         }
 
         append(verse.text.text).setHighlight(verse, highlightColor)
@@ -68,19 +63,17 @@ fun SpannableStringBuilder.format(verse: Verse, bookName: String, followingEmpty
         for (text in verse.parallel) {
             append(verse.verseIndex, text, followingEmptyVerseCount)
         }
-        setSpan(parallelVerseSizeSpan, primaryTextLength, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        setSpan(parallelVerseSizeSpan, primaryTextLength, length)
     }
 
-    return subSequence(0, length)
+    return toCharSequence()
 }
 
 private fun SpannableStringBuilder.setHighlight(verse: Verse, @ColorInt highlightColor: Int): SpannableStringBuilder {
     if (highlightColor != Highlight.COLOR_NONE) {
-        val end = length
-        val start = end - verse.text.text.length
-        setSpan(BackgroundColorSpan(highlightColor), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-        setSpan(ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK),
-                start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        setSpan(BackgroundColorSpan(highlightColor),
+                ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK),
+                length - verse.text.text.length, length)
     }
     return this
 }
@@ -99,10 +92,6 @@ private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Te
         append('-').append(verseIndex.verseIndex + followingEmptyVerseCount + 1)
     }
     val end = length
-    setSpan(createTitleSizeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-    setSpan(createTitleStyleSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-
-    append('\n').append(text.text)
-
-    return this
+    return setSpan(createTitleSizeSpan(), createTitleStyleSpan(), start, end)
+            .append('\n').append(text.text)
 }
