@@ -132,3 +132,53 @@ fun JsonReader.readChapterJson(): List<String> {
     endObject()
     throw RuntimeException("Illegal format in chapter JSON")
 }
+
+fun JsonReader.readStrongNumberVerses(): Map<Int, List<Int>> {
+    val verses = hashMapOf<Int, List<Int>>()
+    beginObject()
+    while (hasNext()) {
+        try {
+            verses[nextName().toInt()] = readIntsArray().apply {
+                if (isEmpty()) {
+                    throw RuntimeException("Empty verses array in Strong number chapter JSON")
+                }
+            }
+        } catch (e: NumberFormatException) {
+            skipValue()
+            Log.w(TAG, "Unsupported JSON format", RuntimeException("Unsupported format in Strong number chapter JSON"))
+        }
+    }
+    endObject()
+
+    if (verses.isEmpty()) throw RuntimeException("Illegal format in Strong number chapter JSON")
+    return verses
+}
+
+@VisibleForTesting
+fun JsonReader.readIntsArray(): List<Int> {
+    val ints = ArrayList<Int>()
+    beginArray()
+    while (hasNext()) {
+        ints.add(nextInt())
+    }
+    endArray()
+    return ints
+}
+
+fun JsonReader.readStrongNumberWords(): Map<Int, String> {
+    val words = hashMapOf<Int, String>()
+
+    beginObject()
+    while (hasNext()) {
+        try {
+            words[nextName().toInt()] = nextString()
+        } catch (e: NumberFormatException) {
+            skipValue()
+            Log.w(TAG, "Unsupported JSON format", RuntimeException("Unsupported format in Strong number words JSON"))
+        }
+    }
+    endObject()
+
+    if (words.isEmpty()) throw RuntimeException("Illegal format in Strong number words JSON")
+    return words
+}

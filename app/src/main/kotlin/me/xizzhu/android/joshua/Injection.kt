@@ -32,6 +32,7 @@ import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsModule
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.annotated.notes.NotesModule
+import me.xizzhu.android.joshua.core.repository.remote.android.HttpStrongNumberService
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpTranslationService
 import me.xizzhu.android.joshua.core.serializer.android.BackupJsonSerializer
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
@@ -42,6 +43,8 @@ import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.search.SearchModule
 import me.xizzhu.android.joshua.settings.SettingsActivity
 import me.xizzhu.android.joshua.settings.SettingsModule
+import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
+import me.xizzhu.android.joshua.strongnumber.StrongNumberListModule
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementModule
 import javax.inject.Scope
@@ -116,6 +119,12 @@ class AppModule(private val app: App) {
         @JvmStatic
         @Provides
         @Singleton
+        fun provideStrongNumberManager(strongNumberRepository: StrongNumberRepository): StrongNumberManager =
+                StrongNumberManager(strongNumberRepository)
+
+        @JvmStatic
+        @Provides
+        @Singleton
         fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
                 TranslationManager(translationRepository)
     }
@@ -159,6 +168,11 @@ object RepositoryModule {
 
     @Provides
     @Singleton
+    fun provideStrongNumberRepository(androidDatabase: AndroidDatabase): StrongNumberRepository =
+            StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase), HttpStrongNumberService())
+
+    @Provides
+    @Singleton
     fun provideTranslationRepository(androidDatabase: AndroidDatabase): TranslationRepository =
             TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService())
 }
@@ -192,6 +206,10 @@ abstract class ActivityModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = [(SettingsModule::class)])
     abstract fun contributeSettingsActivity(): SettingsActivity
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [(StrongNumberListModule::class)])
+    abstract fun contributeStrongNumberListActivity(): StrongNumberListActivity
 
     @ActivityScope
     @ContributesAndroidInjector(modules = [(TranslationManagementModule::class)])

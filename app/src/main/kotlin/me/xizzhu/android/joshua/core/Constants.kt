@@ -19,6 +19,9 @@ package me.xizzhu.android.joshua.core
 import androidx.annotation.IntDef
 
 object Constants {
+    const val STRONG_NUMBER_HEBREW_COUNT = 8674
+    const val STRONG_NUMBER_GREEK_COUNT = 5523
+
     const val SORT_BY_DATE = 0
     const val SORT_BY_BOOK = 1
     const val SORT_ORDER_COUNT = 2

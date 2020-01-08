@@ -27,11 +27,11 @@ import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.append
-import me.xizzhu.android.joshua.ui.createBookNameSizeSpan
-import me.xizzhu.android.joshua.ui.createBookNameStyleSpan
+import me.xizzhu.android.joshua.ui.createTitleSizeSpan
+import me.xizzhu.android.joshua.ui.createTitleStyleSpan
 
-private val bookNameSizeSpan = createBookNameSizeSpan()
-private val bookNameStyleSpan = createBookNameStyleSpan()
+private val bookNameSizeSpan = createTitleSizeSpan()
+private val bookNameStyleSpan = createTitleStyleSpan()
 private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
 
 fun SpannableStringBuilder.format(verse: Verse, bookName: String, followingEmptyVerseCount: Int,
@@ -99,8 +99,8 @@ private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Te
         append('-').append(verseIndex.verseIndex + followingEmptyVerseCount + 1)
     }
     val end = length
-    setSpan(createBookNameSizeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-    setSpan(createBookNameStyleSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+    setSpan(createTitleSizeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+    setSpan(createTitleStyleSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
 
     append('\n').append(text.text)
 

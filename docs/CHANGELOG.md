@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+- New features:
+  - Initial support for Strong's numbers
 - Bug fixes:
   - Properly cancel translation download / removal and dismiss dialog on stop
   - Should call AndroidReadingProgressStorage.save() on IO thread

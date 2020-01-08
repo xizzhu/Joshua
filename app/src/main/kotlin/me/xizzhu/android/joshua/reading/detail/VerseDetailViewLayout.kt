@@ -32,6 +32,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
+import me.xizzhu.android.joshua.reading.detail.pages.VerseDetailPagerAdapter
 import me.xizzhu.android.joshua.ui.*
 
 class VerseDetailViewLayout : FrameLayout {
@@ -71,20 +72,17 @@ class VerseDetailViewLayout : FrameLayout {
         })
     }
 
-    fun setOnBookmarkClickedListener(onBookmarkClicked: () -> Unit) {
+    fun setListeners(onClicked: () -> Unit, onBookmarkClicked: () -> Unit, onHighlightClicked: () -> Unit,
+                     onNoteUpdated: (String) -> Unit, onNoStrongNumberClicked: () -> Unit) {
+        setOnClickListener { onClicked() }
         bookmark.setOnClickListener { onBookmarkClicked() }
-    }
-
-    fun setOnHighlightClickedListener(onHighlightClicked: () -> Unit) {
         highlight.setOnClickListener { onHighlightClicked() }
-    }
-
-    fun setOnNoteUpdatedListener(onNoteUpdated: (String) -> Unit) {
-        adapter.setOnNoteUpdatedListener(onNoteUpdated)
+        adapter.onNoteUpdated = onNoteUpdated
+        adapter.onNoStrongNumberClicked = onNoStrongNumberClicked
     }
 
     fun setSettings(settings: Settings) {
-        adapter.setSettings(settings)
+        adapter.settings = settings
 
         header.setBackgroundColor(if (settings.nightModeOn) 0xFF222222.toInt() else 0xFFEEEEEE.toInt())
         viewPager.setBackgroundColor(settings.getBackgroundColor())
@@ -92,7 +90,7 @@ class VerseDetailViewLayout : FrameLayout {
     }
 
     fun setVerseDetail(verseDetail: VerseDetail) {
-        adapter.setVerseDetail(verseDetail)
+        adapter.verseDetail = verseDetail
         bookmark.colorFilter = if (verseDetail.bookmarked) ON_COLOR_FILTER else OFF_COLOR_FILTER
         highlight.colorFilter = if (verseDetail.highlightColor != Highlight.COLOR_NONE) ON_COLOR_FILTER else OFF_COLOR_FILTER
     }
@@ -102,6 +100,7 @@ class VerseDetailViewLayout : FrameLayout {
         viewPager.currentItem = when (content) {
             VerseDetailRequest.VERSES -> VerseDetailPagerAdapter.PAGE_VERSES
             VerseDetailRequest.NOTE -> VerseDetailPagerAdapter.PAGE_NOTE
+            VerseDetailRequest.STRONG_NUMBER -> VerseDetailPagerAdapter.PAGE_STRONG_NUMBER
             else -> 0
         }
     }

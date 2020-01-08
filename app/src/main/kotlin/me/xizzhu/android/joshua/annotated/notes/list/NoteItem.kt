@@ -25,7 +25,7 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.createBookNameStyleSpan
+import me.xizzhu.android.joshua.ui.createTitleStyleSpan
 import me.xizzhu.android.joshua.ui.getCaptionTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -37,7 +37,7 @@ data class NoteItem(val verseIndex: VerseIndex, private val bookShortName: Strin
                     val onClicked: (VerseIndex) -> Unit)
     : BaseItem(R.layout.item_note, { inflater, parent -> NoteItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_STYLE_SPAN = createBookNameStyleSpan()
+        private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 

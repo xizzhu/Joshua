@@ -138,7 +138,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
         }
 
         downloadTranslationDialog = ProgressDialog.showProgressDialog(
-                translationManagementActivity, R.string.dialog_downloading_translation, 100, { downloadingJob?.cancel() })
+                translationManagementActivity, R.string.dialog_downloading, 100, { downloadingJob?.cancel() })
 
         downloadingJob = interactor.downloadTranslation(translationToDownload)
                 .onEach(
@@ -148,7 +148,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                                     if (progress < 100) {
                                         setProgress(progress)
                                     } else {
-                                        setTitle(R.string.dialog_installing_translation)
+                                        setTitle(R.string.dialog_installing)
                                         setIsIndeterminate(true)
                                     }
                                 }
@@ -156,7 +156,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                                     ?: throw IllegalStateException("Missing progress data when downloading")
                         },
                         onSuccess = {
-                            ToastHelper.showToast(translationManagementActivity, R.string.toast_translation_downloaded)
+                            ToastHelper.showToast(translationManagementActivity, R.string.toast_downloaded)
                         },
                         onError = { _, _ ->
                             DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_download_error,
@@ -195,12 +195,12 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
 
             try {
                 removeTranslationDialog = ProgressDialog.showIndeterminateProgressDialog(
-                        translationManagementActivity, R.string.dialog_deleting_translation)
+                        translationManagementActivity, R.string.dialog_deleting)
 
                 interactor.removeTranslation(translationToRemove)
 
                 dismissRemoveTranslationDialog()
-                ToastHelper.showToast(translationManagementActivity, R.string.toast_translation_deleted)
+                ToastHelper.showToast(translationManagementActivity, R.string.toast_deleted)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to remove translation", e)
                 dismissRemoveTranslationDialog()

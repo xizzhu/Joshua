@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.progress.ReadingProgressActivity
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.settings.SettingsActivity
+import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
 import me.xizzhu.android.joshua.translations.TranslationManagementActivity
 
 class Navigator {
@@ -39,9 +40,10 @@ class Navigator {
         const val SCREEN_HIGHLIGHTS = 5
         const val SCREEN_NOTES = 6
         const val SCREEN_SETTINGS = 7
+        const val SCREEN_STRONG_NUMBER = 8
 
         @IntDef(SCREEN_READING, SCREEN_SEARCH, SCREEN_TRANSLATION_MANAGEMENT, SCREEN_READING_PROGRESS,
-                SCREEN_BOOKMARKS, SCREEN_HIGHLIGHTS, SCREEN_NOTES, SCREEN_SETTINGS)
+                SCREEN_BOOKMARKS, SCREEN_HIGHLIGHTS, SCREEN_NOTES, SCREEN_SETTINGS, SCREEN_STRONG_NUMBER)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Screen
     }
@@ -56,6 +58,7 @@ class Navigator {
             SCREEN_HIGHLIGHTS -> Intent(activity, HighlightsActivity::class.java)
             SCREEN_NOTES -> Intent(activity, NotesActivity::class.java)
             SCREEN_SETTINGS -> Intent(activity, SettingsActivity::class.java)
+            SCREEN_STRONG_NUMBER -> Intent(activity, StrongNumberListActivity::class.java)
             else -> throw IllegalArgumentException("Unknown screen - $screen")
         }
         extras?.let { intent.putExtras(it) }

@@ -152,6 +152,8 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         launch { downloadProgressChannel.consumeEach { offer(it) } }
 
         downloadTranslation(downloadProgressChannel, translationToDownload)
+        downloadProgressChannel.close()
+
         val (available, downloaded) = synchronized(translationsLock) {
             val available = mutableListOf<TranslationInfo>().apply {
                 availableTranslationsChannel.valueOrNull?.let { addAll(it) }
@@ -167,18 +169,17 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         }
         notifyTranslationsUpdated(available, downloaded)
 
-        downloadProgressChannel.send(101)
-        downloadProgressChannel.close()
+        offer(101)
     }
 
     @VisibleForTesting
-    suspend fun downloadTranslation(channel: SendChannel<Int>, translationInfo: TranslationInfo) {
+    suspend fun downloadTranslation(downloadProgressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
         val start = Clock.elapsedRealtime()
         Log.i(TAG, "Start downloading translation - ${translationInfo.shortName}")
         val translation = remoteTranslationService.fetchTranslation(
-                channel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))
+                downloadProgressChannel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))
         Log.i(TAG, "Translation downloaded")
-        channel.send(100)
+        downloadProgressChannel.send(100)
         val downloadFinished = Clock.elapsedRealtime()
 
         localTranslationStorage.saveTranslation(translation.translationInfo.toTranslationInfo(true),

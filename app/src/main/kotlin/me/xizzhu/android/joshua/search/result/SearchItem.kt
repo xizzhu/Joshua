@@ -28,8 +28,8 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.createBookNameSizeSpan
-import me.xizzhu.android.joshua.ui.createBookNameStyleSpan
+import me.xizzhu.android.joshua.ui.createTitleSizeSpan
+import me.xizzhu.android.joshua.ui.createTitleStyleSpan
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
@@ -44,8 +44,8 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookShortName: Str
         @SuppressLint("ConstantLocale")
         private val DEFAULT_LOCALE = Locale.getDefault()
 
-        private val BOOK_NAME_SIZE_SPAN = createBookNameSizeSpan()
-        private val BOOK_NAME_STYLE_SPAN = createBookNameStyleSpan()
+        private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
+        private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
         private val KEYWORD_SIZE_SPAN = createKeywordSizeSpan()
         private val KEYWORD_STYLE_SPAN = createKeywordStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()

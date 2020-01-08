@@ -3,17 +3,18 @@
 
     <string name="app_name">Bible</string>
 
-    <string name="title_translation_management">Translations</string>
-    <string name="title_reading_progress">Reading progress</string>
     <string name="title_bookmarks">Bookmarks</string>
     <string name="title_highlights">Highlights</string>
     <string name="title_notes">Notes</string>
+    <string name="title_reading_progress">Reading progress</string>
     <string name="title_settings">Settings</string>
+    <string name="title_strong_number">Strong\'s numbers</string>
+    <string name="title_translation_management">Translations</string>
 
     <string name="header_available_translations">Available for download</string>
 
-    <string name="toast_translation_downloaded">Translation downloaded</string>
-    <string name="toast_translation_deleted">Translation deleted</string>
+    <string name="toast_downloaded">Successfully downloaded</string>
+    <string name="toast_deleted">Translation deleted</string>
     <string name="toast_verses_copied">Copied to clipboard.</string>
     <string name="toast_verses_searched">%1$d result(s) found.</string>
     <string name="toast_backed_up">Successfully backed-up.</string>
@@ -34,9 +35,9 @@
     <string name="dialog_delete_translation_confirmation">Delete now?</string>
     <string name="dialog_no_translation_downloaded">No translation, download now?</string>
 
-    <string name="dialog_downloading_translation">Downloading…</string>
-    <string name="dialog_installing_translation">Installing…</string>
-    <string name="dialog_deleting_translation">Deleting…</string>
+    <string name="dialog_downloading">Downloading…</string>
+    <string name="dialog_installing">Installing…</string>
+    <string name="dialog_deleting">Deleting…</string>
     <string name="dialog_wait">Please wait…</string>
 
     <string name="dialog_load_translation_list_error">Failed to load translation list, retry?</string>
@@ -53,9 +54,11 @@
     <string name="dialog_navigate_to_bookmarks_error">Failed to open bookmarks, retry?</string>
     <string name="dialog_navigate_to_highlights_error">Failed to open highlights, retry?</string>
     <string name="dialog_navigate_to_notes_error">Failed to open notes, retry?</string>
-    <string name="dialog_load_reading_progress_error">Failed to load reading progress, retry?</string>
-    <string name="dialog_load_annotated_verses_error">Failed to load, retry?</string>
     <string name="dialog_navigate_to_settings_error">Failed to open settings, retry?</string>
+    <string name="dialog_navigate_to_strong_number_error">Failed to open Strong\'s numbers, retry?</string>
+    <string name="dialog_load_reading_progress_error">Failed to load reading progress, retry?</string>
+    <string name="dialog_load_strong_number_list_error">Failed to load Strong\'s numbers, retry?</string>
+    <string name="dialog_load_annotated_verses_error">Failed to load, retry?</string>
     <string name="dialog_update_settings_error">Failed to update settings, retry?</string>
     <string name="dialog_load_verse_detail_error">Failed to load verse detail, retry?</string>
     <string name="dialog_backup_error">Failed to backup, retry?</string>
@@ -70,16 +73,19 @@
 
     <string name="text_restore_from">Restore from</string>
     <string name="text_share_with">Share with</string>
-    <string name="text_verse_comparison">Verses</string>
 
+    <string name="text_no_strong_number">Strong\'s numbers not downloaded yet.\nClick to download now.\n\n(Experimental Feature)</string>
+
+    <string name="text_verse_comparison">Verses</string>
     <string name="text_note">Note</string>
+    <string name="text_strong_number">Strong\'s numbers</string>
+
     <string name="text_no_bookmark">No bookmarks yet.</string>
     <string name="text_no_highlights">No highlights yet.</string>
-
     <string name="text_no_note">No notes yet.</string>
+
     <string name="text_continuous_reading">Consecutive Reading</string>
     <string name="text_continuous_reading_count">%1$d day(s)</string>
-
     <string name="text_chapters_read">Chapters Read</string>
     <string name="text_finished_books">Books Finished</string>
     <string name="text_finished_old_testament">Old Testament</string>

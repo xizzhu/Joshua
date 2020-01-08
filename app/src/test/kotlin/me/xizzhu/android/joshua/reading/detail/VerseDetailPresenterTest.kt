@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.detail
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -35,6 +36,8 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var readingActivity: ReadingActivity
     @Mock
+    private lateinit var navigator: Navigator
+    @Mock
     private lateinit var verseDetailInteractor: VerseDetailInteractor
 
     private lateinit var verseDetailViewHolder: VerseDetailViewHolder
@@ -49,7 +52,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         `when`(verseDetailInteractor.currentVerseIndex()).thenReturn(emptyFlow())
 
         verseDetailViewHolder = VerseDetailViewHolder(verseDetailViewLayout)
-        verseDetailPresenter = VerseDetailPresenter(readingActivity, verseDetailInteractor, testDispatcher)
+        verseDetailPresenter = VerseDetailPresenter(readingActivity, navigator, verseDetailInteractor, testDispatcher)
     }
 
     @Test
@@ -66,34 +69,29 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
     @Test
     fun testObserveVerseDetailRequestShow() = testDispatcher.runBlockingTest {
+        verseDetailPresenter = spy(verseDetailPresenter)
+
         val verseIndex = VerseIndex(0, 0, 0)
-        val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
         val verses = MockContents.kjvVerses
+        val verseTextItems = listOf(
+                VerseTextItem(
+                        verses[verseIndex.verseIndex].verseIndex, 0,
+                        verses[verseIndex.verseIndex].text, bookNames[verseIndex.verseIndex],
+                        verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked
+                )
+        )
         `when`(verseDetailInteractor.verseDetailRequest()).thenReturn(flowOf(VerseDetailRequest(verseIndex, VerseDetailRequest.VERSES)))
         `when`(verseDetailInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, 0L))
         `when`(verseDetailInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, 0L))
         `when`(verseDetailInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", 0L))
-        `when`(verseDetailInteractor.currentTranslation()).thenReturn(currentTranslation)
-        `when`(verseDetailInteractor.downloadedTranslations()).thenReturn(emptyList())
-        `when`(verseDetailInteractor.readBookNames(currentTranslation)).thenReturn(bookNames)
-        `when`(verseDetailInteractor.readVerses(currentTranslation, emptyList(), verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(verses)
+        `when`(verseDetailInteractor.readStrongNumber(verseIndex)).thenReturn(emptyList())
+        doReturn(verseTextItems).`when`(verseDetailPresenter).buildVerseTextItems(verseIndex)
 
         verseDetailPresenter.create(verseDetailViewHolder)
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).show(VerseDetailRequest.VERSES)
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).setVerseDetail(
-                VerseDetail(
-                        verseIndex,
-                        listOf(
-                                VerseTextItem(
-                                        verses[verseIndex.verseIndex].verseIndex, 0,
-                                        verses[verseIndex.verseIndex].text, bookNames[verseIndex.verseIndex],
-                                        verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked
-                                )
-                        ),
-                        false,
-                        Highlight.COLOR_NONE,
-                        "")
+                VerseDetail(verseIndex, verseTextItems, false, Highlight.COLOR_NONE, "", emptyList())
         )
         verify(verseDetailViewHolder.verseDetailViewLayout, never()).hide()
 
@@ -101,45 +99,55 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveVerseDetailRequestShowWithFollowingEmptyVerses() = testDispatcher.runBlockingTest {
+    fun testBuildVerseTextItems() = testDispatcher.runBlockingTest {
+        val verseIndex = VerseIndex(0, 0, 0)
+        val currentTranslation = MockContents.kjvShortName
+        val bookNames = MockContents.kjvBookNames
+        val verses = MockContents.kjvVerses
+        `when`(verseDetailInteractor.currentTranslation()).thenReturn(currentTranslation)
+        `when`(verseDetailInteractor.downloadedTranslations()).thenReturn(emptyList())
+        `when`(verseDetailInteractor.readBookNames(currentTranslation)).thenReturn(bookNames)
+        `when`(verseDetailInteractor.readVerses(currentTranslation, emptyList(), verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(verses)
+
+        assertEquals(
+                listOf(
+                        VerseTextItem(
+                                verses[verseIndex.verseIndex].verseIndex, 0,
+                                verses[verseIndex.verseIndex].text, bookNames[verseIndex.verseIndex],
+                                verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked
+                        )
+                ),
+                verseDetailPresenter.buildVerseTextItems(verseIndex)
+        )
+    }
+
+    @Test
+    fun testBuildVerseTextItemsWithFollowingEmptyVerses() = testDispatcher.runBlockingTest {
         val verseIndex = VerseIndex(0, 0, 0)
         val currentTranslation = MockContents.msgShortName
-        `when`(verseDetailInteractor.verseDetailRequest()).thenReturn(flowOf(VerseDetailRequest(verseIndex, VerseDetailRequest.VERSES)))
-        `when`(verseDetailInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, 0L))
-        `when`(verseDetailInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, 0L))
-        `when`(verseDetailInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", 0L))
         `when`(verseDetailInteractor.currentTranslation()).thenReturn(currentTranslation)
         `when`(verseDetailInteractor.downloadedTranslations()).thenReturn(listOf(MockContents.msgTranslationInfo, MockContents.kjvTranslationInfo))
         `when`(verseDetailInteractor.readBookNames(MockContents.msgShortName)).thenReturn(MockContents.msgBookNames)
         `when`(verseDetailInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
         `when`(verseDetailInteractor.readVerses(currentTranslation, listOf(MockContents.kjvShortName), verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(MockContents.msgVersesWithKjvParallel)
 
-        verseDetailPresenter.create(verseDetailViewHolder)
-        verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).show(VerseDetailRequest.VERSES)
-        verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).setVerseDetail(
-                VerseDetail(
-                        verseIndex,
-                        listOf(
-                                VerseTextItem(
-                                        verseIndex.copy(verseIndex = 0), 1,
-                                        MockContents.msgVersesWithKjvParallel[0].text, MockContents.msgBookNames[0],
-                                        verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked
-                                ),
-                                VerseTextItem(
-                                        verseIndex.copy(verseIndex = 0), 1,
-                                        Verse.Text(
-                                                MockContents.msgVersesWithKjvParallel[0].parallel[0].translationShortName,
-                                                MockContents.msgVersesWithKjvParallel[0].parallel[0].text + " " + MockContents.msgVersesWithKjvParallel[1].parallel[0].text
-                                        ),
-                                        MockContents.kjvBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)
+        assertEquals(
+                listOf(
+                        VerseTextItem(
+                                verseIndex.copy(verseIndex = 0), 1,
+                                MockContents.msgVersesWithKjvParallel[0].text, MockContents.msgBookNames[0],
+                                verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked
                         ),
-                        false,
-                        Highlight.COLOR_NONE,
-                        "")
+                        VerseTextItem(
+                                verseIndex.copy(verseIndex = 0), 1,
+                                Verse.Text(
+                                        MockContents.msgVersesWithKjvParallel[0].parallel[0].translationShortName,
+                                        MockContents.msgVersesWithKjvParallel[0].parallel[0].text + " " + MockContents.msgVersesWithKjvParallel[1].parallel[0].text
+                                ),
+                                MockContents.kjvBookNames[0], verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked)
+                ),
+                verseDetailPresenter.buildVerseTextItems(verseIndex)
         )
-        verify(verseDetailViewHolder.verseDetailViewLayout, never()).hide()
-
-        verseDetailPresenter.destroy()
     }
 
     @Test
@@ -155,7 +163,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Test
     fun testCloseWithDetail() {
         verseDetailPresenter.create(verseDetailViewHolder)
-        verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(1, 2, 3), emptyList(), false, Highlight.COLOR_NONE, "")
+        verseDetailPresenter.verseDetail = VerseDetail(VerseIndex(1, 2, 3), emptyList(), false, Highlight.COLOR_NONE, "", emptyList())
 
         assertTrue(verseDetailPresenter.close())
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).hide()

@@ -456,4 +456,102 @@ class JsonParserTest : BaseUnitTest() {
                 "  \"verses\": []\n" +
                 "}")).use { it.readChapterJson() }
     }
+
+    @Test
+    fun testReadStrongNumberVerses() {
+        JsonReader(StringReader("{\n" +
+                "  \"1\": [7225, 1254, 430, 853, 8064, 853, 776],\n" +
+                "  \"2\": [776, 1961, 8414, 922, 2822, 5921, 6440, 8415, 7307, 430, 7363, 5921, 6440, 4325]\n" +
+                "}\n")).use {
+            assertEquals(
+                    mapOf(
+                            1 to listOf(7225, 1254, 430, 853, 8064, 853, 776),
+                            2 to listOf(776, 1961, 8414, 922, 2822, 5921, 6440, 8415, 7307, 430, 7363, 5921, 6440, 4325)
+                    ),
+                    it.readStrongNumberVerses())
+        }
+    }
+
+    @Test
+    fun testReadStrongNumberVersesWithNonIntField() {
+        JsonReader(StringReader("{\n" +
+                "  \"extra\": \"random field\"," +
+                "  \"1\": [7225, 1254, 430, 853, 8064, 853, 776],\n" +
+                "  \"2\": [776, 1961, 8414, 922, 2822, 5921, 6440, 8415, 7307, 430, 7363, 5921, 6440, 4325]\n" +
+                "}\n")).use {
+            assertEquals(
+                    mapOf(
+                            1 to listOf(7225, 1254, 430, 853, 8064, 853, 776),
+                            2 to listOf(776, 1961, 8414, 922, 2822, 5921, 6440, 8415, 7307, 430, 7363, 5921, 6440, 4325)
+                    ),
+                    it.readStrongNumberVerses())
+        }
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun testReadStrongNumberVersesMissingVerses() {
+        JsonReader(StringReader("{}")).use { it.readStrongNumberVerses() }
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun testReadStrongNumberVersesEmptyVerses() {
+        JsonReader(StringReader("{" +
+                "  \"1\": []\n" +
+                "}")).use { it.readStrongNumberVerses() }
+    }
+
+    @Test
+    fun testReadIntsArray() {
+        JsonReader(StringReader("[1989, 6, 4]")).use {
+            assertEquals(listOf(1989, 6, 4), it.readIntsArray())
+        }
+    }
+
+    @Test
+    fun testReadStrongNumberWords() {
+        JsonReader(StringReader("{\n" +
+                "  \"1\": \"--Alpha\",\n" +
+                "  \"2\": \"Aaron\",\n" +
+                "  \"3\": \"Abaddon\",\n" +
+                "  \"4\": \"from being burdensome\",\n" +
+                "  \"5\": \"Abba\"" +
+                "}\n")).use {
+            assertEquals(
+                    mapOf(
+                            1 to "--Alpha",
+                            2 to "Aaron",
+                            3 to "Abaddon",
+                            4 to "from being burdensome",
+                            5 to "Abba"
+                    ),
+                    it.readStrongNumberWords())
+        }
+    }
+
+    @Test
+    fun testReadStrongNumberWordsWithNonIntField() {
+        JsonReader(StringReader("{\n" +
+                "  \"1\": \"--Alpha\",\n" +
+                "  \"2\": \"Aaron\",\n" +
+                "  \"extra\": \"random field\"," +
+                "  \"3\": \"Abaddon\",\n" +
+                "  \"4\": \"from being burdensome\",\n" +
+                "  \"5\": \"Abba\"" +
+                "}\n")).use {
+            assertEquals(
+                    mapOf(
+                            1 to "--Alpha",
+                            2 to "Aaron",
+                            3 to "Abaddon",
+                            4 to "from being burdensome",
+                            5 to "Abba"
+                    ),
+                    it.readStrongNumberWords())
+        }
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun testReadStrongNumberWordsMissingWords() {
+        JsonReader(StringReader("{}")).use { it.readStrongNumberWords() }
+    }
 }

@@ -27,7 +27,7 @@ import kotlin.test.assertEquals
 class BookmarkItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_bookmarks, BookmarkItem(VerseIndex.INVALID, "", "", "", Constants.DEFAULT_SORT_ORDER, {}).viewType)
+        assertEquals(R.layout.item_bookmark, BookmarkItem(VerseIndex.INVALID, "", "", "", Constants.DEFAULT_SORT_ORDER, {}).viewType)
     }
 
     @Test

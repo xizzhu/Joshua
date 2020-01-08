@@ -39,8 +39,9 @@ data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: 
     companion object {
         const val VERSES = 0
         const val NOTE = 1
+        const val STRONG_NUMBER = 2
 
-        @IntDef(VERSES, NOTE)
+        @IntDef(VERSES, NOTE, STRONG_NUMBER)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Content
     }

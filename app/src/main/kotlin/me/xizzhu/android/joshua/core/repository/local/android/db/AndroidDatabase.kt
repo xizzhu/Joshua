@@ -24,7 +24,7 @@ import me.xizzhu.android.ask.db.transaction
 class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         const val DATABASE_NAME = "DATABASE_JOSHUA"
-        const val DATABASE_VERSION = 2
+        const val DATABASE_VERSION = 3
     }
 
     val bookmarkDao = BookmarkDao(this)
@@ -33,6 +33,9 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     val metadataDao = MetadataDao(this)
     val noteDao = NoteDao(this)
     val readingProgressDao = ReadingProgressDao(this)
+    val strongNumberIndexDao = StrongNumberIndexDao(this)
+    val strongNumberReverseIndexDao = StrongNumberReverseIndexDao(this)
+    val strongNumberWordDao = StrongNumberWordDao(this)
     val translationDao = TranslationDao(this)
     val translationInfoDao = TranslationInfoDao(this)
 
@@ -44,13 +47,21 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             metadataDao.createTable(db)
             noteDao.createTable(db)
             readingProgressDao.createTable(db)
+            strongNumberIndexDao.createTable(db)
+            strongNumberReverseIndexDao.createTable(db)
+            strongNumberWordDao.createTable(db)
             translationInfoDao.createTable(db)
         }
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        when (oldVersion) {
-            1 -> highlightDao.createTable(db)
+        if (oldVersion <= 1) {
+            highlightDao.createTable(db)
+        }
+        if (oldVersion <= 2) {
+            strongNumberIndexDao.createTable(db)
+            strongNumberReverseIndexDao.createTable(db)
+            strongNumberWordDao.createTable(db)
         }
     }
 }

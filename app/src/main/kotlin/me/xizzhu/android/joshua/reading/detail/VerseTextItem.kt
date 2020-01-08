@@ -26,8 +26,8 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import android.text.Spannable
-import me.xizzhu.android.joshua.ui.createBookNameSizeSpan
-import me.xizzhu.android.joshua.ui.createBookNameStyleSpan
+import me.xizzhu.android.joshua.ui.createTitleSizeSpan
+import me.xizzhu.android.joshua.ui.createTitleStyleSpan
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
@@ -36,8 +36,8 @@ data class VerseTextItem(val verseIndex: VerseIndex, private val followingEmptyV
                          val onClicked: (String) -> Unit, val onLongClicked: (Verse) -> Unit)
     : BaseItem(R.layout.item_verse_text, { inflater, parent -> VerseTextItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_SIZE_SPAN = createBookNameSizeSpan()
-        private val BOOK_NAME_STYLE_SPAN = createBookNameStyleSpan()
+        private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
+        private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 

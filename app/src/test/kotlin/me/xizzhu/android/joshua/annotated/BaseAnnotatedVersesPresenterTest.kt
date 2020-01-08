@@ -38,7 +38,6 @@ import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -84,13 +83,6 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
 
         annotatedVersesViewHolder = AnnotatedVersesViewHolder(annotatedVerseListView)
         baseAnnotatedVersesPresenter = TestAnnotatedVersePresenter(activity, navigator, interactor, testDispatcher)
-        baseAnnotatedVersesPresenter.create(annotatedVersesViewHolder)
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        baseAnnotatedVersesPresenter.destroy()
-        super.tearDown()
     }
 
     @Test
