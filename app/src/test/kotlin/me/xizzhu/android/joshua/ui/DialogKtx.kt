@@ -20,12 +20,6 @@ import android.app.Activity
 import android.content.DialogInterface
 import androidx.annotation.StringRes
 
-object DialogHelper {
-    fun showDialog(activity: Activity, @StringRes title: Int, items: Array<String>, selected: Int,
-                   onClicked: DialogInterface.OnClickListener) {
-    }
+fun Activity.dialog(@StringRes title: Int, items: Array<String>, selected: Int, onClicked: DialogInterface.OnClickListener) {}
 
-    fun showDialog(activity: Activity, cancelable: Boolean, @StringRes message: Int,
-                   onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {
-    }
-}
+fun Activity.dialog(cancelable: Boolean, @StringRes message: Int, onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {}

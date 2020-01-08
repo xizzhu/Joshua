@@ -32,7 +32,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.search.SearchActivity
-import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
@@ -108,7 +108,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
         } catch (e: Exception) {
             Log.e(tag, "Failed to search verses", e)
             interactor.updateLoadingState(ViewData.error(exception = e))
-            DialogHelper.showDialog(searchActivity, true, R.string.dialog_search_error,
+            searchActivity.dialog(true, R.string.dialog_search_error,
                     DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { search(query) } })
         }
     }
@@ -139,7 +139,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                 navigator.navigate(searchActivity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
-                DialogHelper.showDialog(searchActivity, true, R.string.dialog_verse_selection_error,
+                searchActivity.dialog(true, R.string.dialog_verse_selection_error,
                         DialogInterface.OnClickListener { _, _ -> selectVerse(verseToSelect) })
             }
         }

@@ -28,7 +28,7 @@ import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.infra.arch.combineOnSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.logger.Log
 
 data class ChapterListViewHolder(val readingDrawerLayout: ReadingDrawerLayout, val chapterListView: ChapterListView) : ViewHolder
@@ -58,7 +58,7 @@ class ChapterListPresenter(private val readingActivity: ReadingActivity,
                 interactor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select chapter", e)
-                DialogHelper.showDialog(readingActivity, true, R.string.dialog_chapter_selection_error,
+                readingActivity.dialog(true, R.string.dialog_chapter_selection_error,
                         DialogInterface.OnClickListener { _, _ -> selectChapter(bookIndex, chapterIndex) })
             }
         }

@@ -77,7 +77,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
         }
 
         viewHolder.fontSize.setOnClickListener {
-            DialogHelper.showDialog(settingsActivity, R.string.settings_title_font_size,
+            settingsActivity.dialog(R.string.settings_title_font_size,
                     fontSizeTexts, currentSettings!!.fontSizeScale - 1,
                     DialogInterface.OnClickListener { dialog, which ->
                         saveFontSizeScale(which + 1)
@@ -140,7 +140,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 interactor.saveFontSizeScale(fontSizeScale)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save font size scale", e)
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                settingsActivity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveFontSizeScale(fontSizeScale) })
             }
         }
@@ -152,7 +152,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 interactor.saveKeepScreenOn(keepScreenOn)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save keep screen on", e)
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                settingsActivity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveKeepScreenOn(keepScreenOn) })
             }
         }
@@ -165,7 +165,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 interactor.saveNightModeOn(nightModeOn)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save night mode on", e)
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                settingsActivity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveNightModeOn(nightModeOn) })
             }
         }
@@ -177,7 +177,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 interactor.saveSimpleReadingModeOn(simpleReadingModeOn)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save simple reading mode on", e)
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                settingsActivity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveSimpleReadingModeOn(simpleReadingModeOn) })
             }
         }
@@ -189,7 +189,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 interactor.saveHideSearchButton(hideSearchButton)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save hiding search button", e)
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                settingsActivity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveHideSearchButton(hideSearchButton) })
             }
         }
@@ -211,7 +211,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
             } catch (e: Exception) {
                 Log.e(tag, "Failed to backup data", e)
                 dismissBackupRestoreDialog()
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_backup_error,
+                settingsActivity.dialog(true, R.string.dialog_backup_error,
                         DialogInterface.OnClickListener { _, _ -> backup(uri) })
             }
         }
@@ -248,7 +248,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                         // See https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/e9339c69d6e1856856db88413614d3d3
                         Log.e(tag, "Failed to backup data", e)
                         dismissBackupRestoreDialog()
-                        DialogHelper.showDialog(settingsActivity, true, R.string.dialog_restore_error,
+                        settingsActivity.dialog(true, R.string.dialog_restore_error,
                                 DialogInterface.OnClickListener { _, _ -> restore(uri) })
                     }
                     else -> throw e

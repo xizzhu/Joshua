@@ -100,7 +100,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     }
 
     private fun updateHighlight() {
-        DialogHelper.showDialog(readingActivity, R.string.text_pick_highlight_color,
+        readingActivity.dialog(R.string.text_pick_highlight_color,
                 readingActivity.resources.getStringArray(R.array.text_colors),
                 max(0, Highlight.AVAILABLE_COLORS.indexOf(verseDetail?.highlightColor
                         ?: Highlight.COLOR_NONE)),
@@ -176,7 +176,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                             }
                         },
                         onError = { _, _ ->
-                            DialogHelper.showDialog(readingActivity, true, R.string.dialog_download_error,
+                            readingActivity.dialog(true, R.string.dialog_download_error,
                                     DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
                         }
                 ).onCompletion {
@@ -211,7 +211,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                 viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verse detail", e)
-                DialogHelper.showDialog(readingActivity, true, R.string.dialog_load_verse_detail_error,
+                readingActivity.dialog(true, R.string.dialog_load_verse_detail_error,
                         DialogInterface.OnClickListener { _, _ -> loadVerseDetail(verseIndex) })
             }
         }
@@ -321,7 +321,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                     StrongNumberListActivity.bundle(strongNumber))
         } catch (e: Exception) {
             Log.e(tag, "Failed to open Strong's number list activity", e)
-            DialogHelper.showDialog(readingActivity, true, R.string.dialog_navigate_to_strong_number_error,
+            readingActivity.dialog(true, R.string.dialog_navigate_to_strong_number_error,
                     DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
         }
     }

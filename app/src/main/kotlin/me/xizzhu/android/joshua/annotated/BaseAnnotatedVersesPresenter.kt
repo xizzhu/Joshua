@@ -33,7 +33,7 @@ import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
-import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
@@ -72,7 +72,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
         } catch (e: Exception) {
             Log.e(tag, "Failed to load annotated verses", e)
             interactor.updateLoadingState(ViewData.error(exception = e))
-            DialogHelper.showDialog(activity, true, R.string.dialog_load_annotated_verses_error,
+            activity.dialog(true, R.string.dialog_load_annotated_verses_error,
                     DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { load(sortOrder, currentTranslation) } })
         }
     }
@@ -147,7 +147,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
                 navigator.navigate(activity, Navigator.SCREEN_READING, extrasForOpeningVerse())
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
-                DialogHelper.showDialog(activity, true, R.string.dialog_verse_selection_error,
+                activity.dialog(true, R.string.dialog_verse_selection_error,
                         DialogInterface.OnClickListener { _, _ -> openVerse(verseToOpen) })
             }
         }

@@ -69,7 +69,7 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load Strong's number list", e)
                 interactor.updateLoadingState(ViewData.error(exception = e))
-                DialogHelper.showDialog(strongNumberListActivity, true, R.string.dialog_load_strong_number_list_error,
+                strongNumberListActivity.dialog(true, R.string.dialog_load_strong_number_list_error,
                         DialogInterface.OnClickListener { _, _ -> loadStrongNumber(sn) })
             }
         }
@@ -118,7 +118,7 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
                 navigator.navigate(strongNumberListActivity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
-                DialogHelper.showDialog(strongNumberListActivity, true, R.string.dialog_verse_selection_error,
+                strongNumberListActivity.dialog(true, R.string.dialog_verse_selection_error,
                         DialogInterface.OnClickListener { _, _ -> openVerse(verseToOpen) })
             }
         }

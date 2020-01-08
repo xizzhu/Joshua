@@ -27,7 +27,7 @@ import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.ui.DialogHelper
+import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.logger.Log
 
 data class SearchButtonViewHolder(val searchButton: SearchFloatingActionButton) : ViewHolder
@@ -57,7 +57,7 @@ class SearchButtonPresenter(private val readingActivity: ReadingActivity,
             navigator.navigate(readingActivity, Navigator.SCREEN_SEARCH)
         } catch (e: Exception) {
             Log.e(tag, "Failed to open search activity", e)
-            DialogHelper.showDialog(readingActivity, true, R.string.dialog_navigate_to_search_error,
+            readingActivity.dialog(true, R.string.dialog_navigate_to_search_error,
                     DialogInterface.OnClickListener { _, _ -> openSearch() })
         }
     }
