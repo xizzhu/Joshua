@@ -40,10 +40,7 @@ import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.ProgressDialog
-import me.xizzhu.android.joshua.ui.ToastHelper
-import me.xizzhu.android.joshua.ui.TranslationInfoComparator
+import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import java.lang.StringBuilder
@@ -171,7 +168,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                                     ?: throw IllegalStateException("Missing progress data when downloading")
                         },
                         onSuccess = {
-                            ToastHelper.showToast(readingActivity, R.string.toast_downloaded)
+                            readingActivity.toast(R.string.toast_downloaded)
 
                             verseDetail?.let {
                                 verseDetail = it.copy(strongNumberItems = interactor.readStrongNumber(it.verseIndex).toStrongNumberItems())
@@ -292,7 +289,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select translation", e)
-                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
+                readingActivity.toast(R.string.toast_unknown_error)
             }
         }
     }
@@ -306,10 +303,10 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                 (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                         .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
                                 verse.toStringForSharing(bookName)))
-                ToastHelper.showToast(readingActivity, R.string.toast_verses_copied)
+                readingActivity.toast(R.string.toast_verses_copied)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to copy", e)
-                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
+                readingActivity.toast(R.string.toast_unknown_error)
             }
         }
     }

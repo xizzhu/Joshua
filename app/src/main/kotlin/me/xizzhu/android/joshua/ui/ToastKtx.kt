@@ -17,12 +17,13 @@
 package me.xizzhu.android.joshua.ui
 
 import android.content.Context
+import android.widget.Toast
 import androidx.annotation.StringRes
 
-object ToastHelper {
-    fun showToast(context: Context, @StringRes text: Int) {
-    }
+fun Context.toast(@StringRes text: Int) {
+    toast(getText(text))
+}
 
-    fun showToast(context: Context, text: CharSequence) {
-    }
+fun Context.toast(text: CharSequence) {
+    Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
 }

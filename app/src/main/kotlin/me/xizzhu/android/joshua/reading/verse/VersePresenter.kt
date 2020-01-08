@@ -35,7 +35,7 @@ import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.ToastHelper
+import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.joshua.utils.createChooserForSharing
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
@@ -88,11 +88,11 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                     (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                             .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
                                     selectedVerses.toStringForSharing(bookName)))
-                    ToastHelper.showToast(readingActivity, R.string.toast_verses_copied)
+                    readingActivity.toast(R.string.toast_verses_copied)
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to copy", e)
-                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
+                readingActivity.toast(R.string.toast_unknown_error)
             }
             actionMode?.finish()
         }
@@ -111,7 +111,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to share", e)
-                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
+                readingActivity.toast(R.string.toast_unknown_error)
             }
             actionMode?.finish()
         }

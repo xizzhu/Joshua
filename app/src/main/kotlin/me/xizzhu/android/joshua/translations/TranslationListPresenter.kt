@@ -156,7 +156,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                                     ?: throw IllegalStateException("Missing progress data when downloading")
                         },
                         onSuccess = {
-                            ToastHelper.showToast(translationManagementActivity, R.string.toast_downloaded)
+                            translationManagementActivity.toast(R.string.toast_downloaded)
                         },
                         onError = { _, _ ->
                             DialogHelper.showDialog(translationManagementActivity, true, R.string.dialog_download_error,
@@ -200,7 +200,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                 interactor.removeTranslation(translationToRemove)
 
                 dismissRemoveTranslationDialog()
-                ToastHelper.showToast(translationManagementActivity, R.string.toast_deleted)
+                translationManagementActivity.toast(R.string.toast_deleted)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to remove translation", e)
                 dismissRemoveTranslationDialog()

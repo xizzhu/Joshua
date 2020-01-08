@@ -17,15 +17,8 @@
 package me.xizzhu.android.joshua.ui
 
 import android.content.Context
-import android.widget.Toast
 import androidx.annotation.StringRes
 
-object ToastHelper {
-    fun showToast(context: Context, @StringRes text: Int) {
-        showToast(context, context.getText(text))
-    }
+fun Context.toast(@StringRes text: Int) {}
 
-    fun showToast(context: Context, text: CharSequence) {
-        Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
-    }
-}
+fun Context.toast(text: CharSequence) {}
