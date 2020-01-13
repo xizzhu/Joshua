@@ -20,6 +20,7 @@ import android.content.DialogInterface
 import android.view.View
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AlertDialog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -46,7 +47,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
 
     private var downloadingJob: Job? = null
     private var downloadTranslationDialog: ProgressDialog? = null
-    private var removeTranslationDialog: ProgressDialog? = null
+    private var removeTranslationDialog: AlertDialog? = null
 
     @UiThread
     override fun onCreate(viewHolder: TranslationListViewHolder) {
@@ -132,8 +133,8 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
             return
         }
 
-        downloadTranslationDialog = ProgressDialog.showProgressDialog(
-                translationManagementActivity, R.string.dialog_downloading, 100, { downloadingJob?.cancel() })
+        downloadTranslationDialog = translationManagementActivity.progressDialog(
+                R.string.dialog_downloading, 100) { downloadingJob?.cancel() }
 
         downloadingJob = interactor.downloadTranslation(translationToDownload)
                 .onEach(
@@ -188,8 +189,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
             }
 
             try {
-                removeTranslationDialog = ProgressDialog.showIndeterminateProgressDialog(
-                        translationManagementActivity, R.string.dialog_deleting)
+                removeTranslationDialog = translationManagementActivity.indeterminateProgressDialog(R.string.dialog_deleting)
 
                 interactor.removeTranslation(translationToRemove)
 

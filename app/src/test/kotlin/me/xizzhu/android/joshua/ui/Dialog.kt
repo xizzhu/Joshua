@@ -18,8 +18,24 @@ package me.xizzhu.android.joshua.ui
 
 import android.app.Activity
 import android.content.DialogInterface
+import android.widget.ProgressBar
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
+
+class ProgressDialog(private val dialog: AlertDialog, private val progressBar: ProgressBar) {
+    fun setTitle(@StringRes title: Int) {}
+
+    fun setIsIndeterminate(indeterminate: Boolean) {}
+
+    fun setProgress(progress: Int) {}
+
+    fun dismiss() {}
+}
 
 fun Activity.dialog(@StringRes title: Int, items: Array<String>, selected: Int, onClicked: DialogInterface.OnClickListener) {}
 
 fun Activity.dialog(cancelable: Boolean, @StringRes message: Int, onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {}
+
+fun Activity.progressDialog(@StringRes title: Int, maxProgress: Int, onCancel: () -> Unit): ProgressDialog? = null
+
+fun Activity.indeterminateProgressDialog(@StringRes title: Int): AlertDialog? = null

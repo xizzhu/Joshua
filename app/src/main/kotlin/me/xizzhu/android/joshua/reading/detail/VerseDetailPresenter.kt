@@ -150,8 +150,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
             return
         }
 
-        downloadStrongNumberDialog = ProgressDialog.showProgressDialog(
-                readingActivity, R.string.dialog_downloading, 100, { downloadStrongNumberJob?.cancel() })
+        downloadStrongNumberDialog = readingActivity.progressDialog(
+                R.string.dialog_downloading, 100) { downloadStrongNumberJob?.cancel() }
         downloadStrongNumberJob = interactor.downloadStrongNumber()
                 .onEach(
                         onLoading = {

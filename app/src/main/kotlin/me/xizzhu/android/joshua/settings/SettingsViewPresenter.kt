@@ -25,6 +25,7 @@ import android.net.Uri
 import android.util.TypedValue
 import androidx.annotation.ColorInt
 import androidx.annotation.UiThread
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -64,7 +65,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     private var shouldAnimateFontSize = false
     private var shouldAnimateColor = false
 
-    private var backupRestoreDialog: ProgressDialog? = null
+    private var backupRestoreDialog: AlertDialog? = null
 
     @UiThread
     override fun onCreate(viewHolder: SettingsViewHolder) {
@@ -219,7 +220,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
 
     private fun showBackupRestoreDialog() {
         dismissBackupRestoreDialog()
-        backupRestoreDialog = ProgressDialog.showIndeterminateProgressDialog(settingsActivity, R.string.dialog_wait)
+        backupRestoreDialog = settingsActivity.indeterminateProgressDialog(R.string.dialog_wait)
     }
 
     private fun dismissBackupRestoreDialog() {
