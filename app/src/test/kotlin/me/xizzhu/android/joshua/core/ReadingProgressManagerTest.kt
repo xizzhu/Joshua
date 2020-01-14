@@ -24,7 +24,7 @@ import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.utils.Clock
+import me.xizzhu.android.joshua.utils.currentTimeMillis
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
@@ -60,10 +60,10 @@ class ReadingProgressManagerTest : BaseUnitTest() {
         `when`(bibleReadingRepository.currentVerseIndex()).thenReturn(flowOf(VerseIndex(1, 2, 3)))
         `when`(bibleReadingRepository.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
 
-        Clock.currentTimeMillis = 1L
+        currentTimeMillis = 1L
         readingProgressManager.startTracking()
 
-        Clock.currentTimeMillis = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 2L
+        currentTimeMillis = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 2L
         readingProgressManager.stopTracking()
 
         verify(readingProgressRepository, times(1))

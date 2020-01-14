@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.analytics.Analytics
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
-import me.xizzhu.android.joshua.utils.Clock
+import me.xizzhu.android.joshua.utils.elapsedRealtime
 import me.xizzhu.android.logger.Log
 
 class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNumberStorage,
@@ -44,7 +44,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
 
     @VisibleForTesting
     fun download(versesDownloadProgress: Channel<Int>, wordsDownloadProgress: Channel<Int>) = channelFlow {
-        val start = Clock.elapsedRealtime()
+        val start = elapsedRealtime()
         Log.i(TAG, "Start downloading Strong number")
 
         versesDownloadProgress.offer(0)
@@ -57,7 +57,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
         val remoteWords = remoteStrongNumberStorage.fetchWords(wordsDownloadProgress)
         val remoteIndexes = remoteIndexesAsync.await()
         Log.i(TAG, "Strong number downloaded")
-        val downloadFinished = Clock.elapsedRealtime()
+        val downloadFinished = elapsedRealtime()
 
         versesDownloadProgress.close()
         wordsDownloadProgress.close()
@@ -65,7 +65,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
 
         localStrongNumberStorage.save(remoteIndexes.indexes, remoteIndexes.reverseIndexes, remoteWords.words)
         Log.i(TAG, "Strong number saved to database")
-        val installFinished = Clock.elapsedRealtime()
+        val installFinished = elapsedRealtime()
 
         offer(101)
 

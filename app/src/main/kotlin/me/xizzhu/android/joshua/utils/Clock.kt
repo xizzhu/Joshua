@@ -18,8 +18,6 @@ package me.xizzhu.android.joshua.utils
 
 import android.os.SystemClock
 
-object Clock {
-    fun currentTimeMillis(): Long = System.currentTimeMillis()
+fun currentTimeMillis(): Long = System.currentTimeMillis()
 
-    fun elapsedRealtime(): Long = SystemClock.elapsedRealtime()
-}
+fun elapsedRealtime(): Long = SystemClock.elapsedRealtime()

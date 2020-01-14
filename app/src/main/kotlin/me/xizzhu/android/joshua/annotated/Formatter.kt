@@ -18,11 +18,11 @@ package me.xizzhu.android.joshua.annotated
 
 import android.content.res.Resources
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.utils.Clock
+import me.xizzhu.android.joshua.utils.currentTimeMillis
 import java.util.*
 
 fun Long.formatDate(resources: Resources, calendar: Calendar): String {
-    calendar.timeInMillis = Clock.currentTimeMillis()
+    calendar.timeInMillis = currentTimeMillis()
     val currentYear = calendar.get(Calendar.YEAR)
 
     calendar.timeInMillis = this
