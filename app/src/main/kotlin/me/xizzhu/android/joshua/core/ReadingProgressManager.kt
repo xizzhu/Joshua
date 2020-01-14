@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
-import me.xizzhu.android.joshua.utils.currentTimeMillis
+import me.xizzhu.android.joshua.utils.elapsedRealtime
 import me.xizzhu.android.logger.Log
 
 data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimestamp: Long,
@@ -64,14 +64,14 @@ class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRep
             return
         }
 
-        lastTimestamp = currentTimeMillis()
+        lastTimestamp = elapsedRealtime()
         currentVerseIndexObserver = bibleReadingRepository.currentVerseIndex()
         GlobalScope.launch(Dispatchers.Main) {
             currentVerseIndexObserver?.filter { it.isValid() }
                     ?.collect {
                         trackReadingProgress()
                         currentVerseIndex = it
-                        lastTimestamp = currentTimeMillis()
+                        lastTimestamp = elapsedRealtime()
                     }
         }
     }
@@ -85,7 +85,7 @@ class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRep
                 return
             }
 
-            val now = currentTimeMillis()
+            val now = elapsedRealtime()
             val timeSpentInMillis = now - lastTimestamp
             if (timeSpentInMillis < TIME_SPENT_THRESHOLD_IN_MILLIS) {
                 return
