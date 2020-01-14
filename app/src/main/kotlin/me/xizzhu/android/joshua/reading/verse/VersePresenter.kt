@@ -36,7 +36,7 @@ import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.toast
-import me.xizzhu.android.joshua.utils.createChooserForSharing
+import me.xizzhu.android.joshua.utils.chooserForSharing
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
@@ -105,7 +105,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                     val verse = selectedVerses.first()
                     val bookName = interactor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
 
-                    createChooserForSharing(readingActivity, readingActivity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
+                    readingActivity.chooserForSharing(readingActivity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
                             ?.let { readingActivity.startActivity(it) }
                             ?: throw RuntimeException("Failed to create chooser for sharing")
                 }

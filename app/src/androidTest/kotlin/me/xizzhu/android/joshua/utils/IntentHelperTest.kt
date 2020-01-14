@@ -27,7 +27,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.Mockito
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -46,16 +47,16 @@ class IntentHelperTest : BaseUnitTest() {
 
         resolveInfoList = mutableListOf()
         for (i in 0 until 10) {
-            val activityInfo = Mockito.mock(ActivityInfo::class.java)
+            val activityInfo = mock(ActivityInfo::class.java)
             activityInfo.name = "name$i"
             activityInfo.packageName = "packageName$i"
 
-            val resolveInfo = Mockito.mock(ResolveInfo::class.java)
+            val resolveInfo = mock(ResolveInfo::class.java)
             resolveInfo.activityInfo = activityInfo
             resolveInfoList.add(resolveInfo)
         }
 
-        Mockito.`when`(packageManager.queryIntentActivities(any(), ArgumentMatchers.anyInt())).thenReturn(resolveInfoList)
+        `when`(packageManager.queryIntentActivities(any(), ArgumentMatchers.anyInt())).thenReturn(resolveInfoList)
     }
 
     @Test
@@ -63,7 +64,7 @@ class IntentHelperTest : BaseUnitTest() {
         val title = "random Title"
         val textToShare = "Random text to share"
         val packageToExclude = "packageName5"
-        val chooseIntent = createChooserForSharing(packageManager, packageToExclude, title, textToShare)
+        val chooseIntent = packageManager.chooserForSharing(packageToExclude, title, textToShare)
         assertNotNull(chooseIntent)
         assertEquals(Intent.ACTION_CHOOSER, chooseIntent.action)
         assertEquals(title, chooseIntent.getStringExtra(Intent.EXTRA_TITLE))
