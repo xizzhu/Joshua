@@ -24,6 +24,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -61,6 +62,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
 
         `when`(strongNumberListInteractor.settings()).thenReturn(emptyFlow())
         `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(emptyFlow())
+        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(emptyFlow())
 
         strongNumberListViewHolder = StrongNumberListViewHolder(strongNumberListView)
         strongNumberListPresenter = StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListInteractor, testDispatcher)
@@ -80,9 +82,9 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testLoadStrongNumber() = testDispatcher.runBlockingTest {
-        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf("H7225"))
+        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf(viewData { "H7225" }))
         `when`(strongNumberListInteractor.strongNumber("H7225")).thenReturn(ViewData.success(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225"))))
-        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(ViewData.success(MockContents.kjvShortName))
+        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(viewData { MockContents.kjvShortName }))
         `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookNames))
         `when`(strongNumberListInteractor.bookShortNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
         `when`(strongNumberListInteractor.verseIndexes("H7225")).thenReturn(ViewData.success(MockContents.strongNumberReverseIndex.getValue("H7225")))
@@ -113,7 +115,8 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     fun testLoadStrongNumberWithException() = testDispatcher.runBlockingTest {
         val exception = RuntimeException("random exception")
         `when`(strongNumberListInteractor.strongNumber(anyString())).thenThrow(exception)
-        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf("sn"))
+        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf(viewData { "sn" }))
+        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(viewData { MockContents.kjvShortName }))
 
         strongNumberListPresenter.create(strongNumberListViewHolder)
 

@@ -24,7 +24,6 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -51,17 +50,19 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
         super.onCreate(viewHolder)
 
         interactor.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(coroutineScope)
-        interactor.strongNumberRequest().onEach { loadStrongNumber(it) }.launchIn(coroutineScope)
+        interactor.strongNumberRequest().combineOnSuccess(interactor.currentTranslation()) { sn, currentTranslation ->
+            loadStrongNumber(sn, currentTranslation)
+        }.launchIn(coroutineScope)
     }
 
-    private fun loadStrongNumber(sn: String) {
+    private fun loadStrongNumber(sn: String, currentTranslation: String) {
         coroutineScope.launch {
             try {
                 interactor.updateLoadingState(ViewData.loading())
 
                 viewHolder?.strongNumberListView?.run {
                     visibility = View.GONE
-                    setItems(prepareItems(sn))
+                    setItems(prepareItems(sn, currentTranslation))
                     fadeIn()
                 }
 
@@ -70,18 +71,17 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
                 Log.e(tag, "Failed to load Strong's number list", e)
                 interactor.updateLoadingState(ViewData.error(exception = e))
                 strongNumberListActivity.dialog(true, R.string.dialog_load_strong_number_list_error,
-                        DialogInterface.OnClickListener { _, _ -> loadStrongNumber(sn) })
+                        DialogInterface.OnClickListener { _, _ -> loadStrongNumber(sn, currentTranslation) })
             }
         }
     }
 
-    private suspend fun prepareItems(sn: String): List<BaseItem> {
+    private suspend fun prepareItems(sn: String, currentTranslation: String): List<BaseItem> {
         val items: ArrayList<BaseItem> = ArrayList()
 
         val strongNumber = interactor.strongNumber(sn).dataOnSuccessOrThrow("Failed to load Strong number")
         items.add(TextItem(formatStrongNumber(strongNumber)))
 
-        val currentTranslation = interactor.currentTranslation().dataOnSuccessOrThrow("Failed to load current translation")
         val bookNames = interactor.bookNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book names")
         val bookShortNames = interactor.bookShortNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book short names")
         val verseIndexes = interactor.verseIndexes(sn)
