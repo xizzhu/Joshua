@@ -25,6 +25,7 @@ import android.net.Uri
 import android.util.TypedValue
 import androidx.annotation.ColorInt
 import androidx.annotation.UiThread
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -64,7 +65,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     private var shouldAnimateFontSize = false
     private var shouldAnimateColor = false
 
-    private var backupRestoreDialog: ProgressDialog? = null
+    private var backupRestoreDialog: AlertDialog? = null
 
     @UiThread
     override fun onCreate(viewHolder: SettingsViewHolder) {
@@ -77,7 +78,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
         }
 
         viewHolder.fontSize.setOnClickListener {
-            DialogHelper.showDialog(settingsActivity, R.string.settings_title_font_size,
+            settingsActivity.dialog(R.string.settings_title_font_size,
                     fontSizeTexts, currentSettings!!.fontSizeScale - 1,
                     DialogInterface.OnClickListener { dialog, which ->
                         saveFontSizeScale(which + 1)
@@ -101,7 +102,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 )
             } catch (e: Exception) {
                 Log.e(tag, "Failed to start activity to create document for backup", e)
-                ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
+                settingsActivity.toast(R.string.toast_unknown_error)
             }
         }
 
@@ -116,7 +117,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 )
             } catch (e: Exception) {
                 Log.e(tag, "Failed to start activity to get content for restore", e)
-                ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
+                settingsActivity.toast(R.string.toast_unknown_error)
             }
         }
 
@@ -126,7 +127,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                         .setData(Uri.parse("market://details?id=me.xizzhu.android.joshua")))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to start activity to rate app", e)
-                ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
+                settingsActivity.toast(R.string.toast_unknown_error)
             }
         }
 
@@ -140,7 +141,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 interactor.saveFontSizeScale(fontSizeScale)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save font size scale", e)
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                settingsActivity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveFontSizeScale(fontSizeScale) })
             }
         }
@@ -152,7 +153,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 interactor.saveKeepScreenOn(keepScreenOn)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save keep screen on", e)
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                settingsActivity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveKeepScreenOn(keepScreenOn) })
             }
         }
@@ -165,7 +166,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 interactor.saveNightModeOn(nightModeOn)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save night mode on", e)
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                settingsActivity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveNightModeOn(nightModeOn) })
             }
         }
@@ -177,7 +178,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 interactor.saveSimpleReadingModeOn(simpleReadingModeOn)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save simple reading mode on", e)
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                settingsActivity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveSimpleReadingModeOn(simpleReadingModeOn) })
             }
         }
@@ -189,7 +190,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 interactor.saveHideSearchButton(hideSearchButton)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save hiding search button", e)
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_update_settings_error,
+                settingsActivity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveHideSearchButton(hideSearchButton) })
             }
         }
@@ -197,8 +198,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
 
     fun onCreateDocumentForBackup(resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) return
-        data?.data?.let { backup(it) }
-                ?: ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
+        data?.data?.let { backup(it) } ?: settingsActivity.toast(R.string.toast_unknown_error)
     }
 
     private fun backup(uri: Uri) {
@@ -208,11 +208,11 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 settingsActivity.contentResolver.openOutputStream(uri)?.use { interactor.backup(it) }
                         ?: throw IOException("Failed to open Uri for backup - $uri")
                 dismissBackupRestoreDialog()
-                ToastHelper.showToast(settingsActivity, R.string.toast_backed_up)
+                settingsActivity.toast(R.string.toast_backed_up)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to backup data", e)
                 dismissBackupRestoreDialog()
-                DialogHelper.showDialog(settingsActivity, true, R.string.dialog_backup_error,
+                settingsActivity.dialog(true, R.string.dialog_backup_error,
                         DialogInterface.OnClickListener { _, _ -> backup(uri) })
             }
         }
@@ -220,7 +220,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
 
     private fun showBackupRestoreDialog() {
         dismissBackupRestoreDialog()
-        backupRestoreDialog = ProgressDialog.showIndeterminateProgressDialog(settingsActivity, R.string.dialog_wait)
+        backupRestoreDialog = settingsActivity.indeterminateProgressDialog(R.string.dialog_wait)
     }
 
     private fun dismissBackupRestoreDialog() {
@@ -230,8 +230,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
 
     fun onGetContentForRestore(resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) return
-        data?.data?.let { restore(it) }
-                ?: ToastHelper.showToast(settingsActivity, R.string.toast_unknown_error)
+        data?.data?.let { restore(it) } ?: settingsActivity.toast(R.string.toast_unknown_error)
     }
 
     private fun restore(uri: Uri) {
@@ -241,7 +240,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                 settingsActivity.contentResolver.openInputStream(uri)?.use { interactor.restore(it) }
                         ?: throw IOException("Failed to open Uri for restore - $uri")
                 dismissBackupRestoreDialog()
-                ToastHelper.showToast(settingsActivity, R.string.toast_restored)
+                settingsActivity.toast(R.string.toast_restored)
             } catch (e: Throwable) {
                 when (e) {
                     is Exception, is OutOfMemoryError -> {
@@ -250,7 +249,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                         // See https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/e9339c69d6e1856856db88413614d3d3
                         Log.e(tag, "Failed to backup data", e)
                         dismissBackupRestoreDialog()
-                        DialogHelper.showDialog(settingsActivity, true, R.string.dialog_restore_error,
+                        settingsActivity.dialog(true, R.string.dialog_restore_error,
                                 DialogInterface.OnClickListener { _, _ -> restore(uri) })
                     }
                     else -> throw e

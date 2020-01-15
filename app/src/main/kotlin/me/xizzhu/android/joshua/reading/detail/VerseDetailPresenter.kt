@@ -40,10 +40,7 @@ import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.ProgressDialog
-import me.xizzhu.android.joshua.ui.ToastHelper
-import me.xizzhu.android.joshua.ui.TranslationInfoComparator
+import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import java.lang.StringBuilder
@@ -103,7 +100,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     }
 
     private fun updateHighlight() {
-        DialogHelper.showDialog(readingActivity, R.string.text_pick_highlight_color,
+        readingActivity.dialog(R.string.text_pick_highlight_color,
                 readingActivity.resources.getStringArray(R.array.text_colors),
                 max(0, Highlight.AVAILABLE_COLORS.indexOf(verseDetail?.highlightColor
                         ?: Highlight.COLOR_NONE)),
@@ -153,8 +150,8 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
             return
         }
 
-        downloadStrongNumberDialog = ProgressDialog.showProgressDialog(
-                readingActivity, R.string.dialog_downloading, 100, { downloadStrongNumberJob?.cancel() })
+        downloadStrongNumberDialog = readingActivity.progressDialog(
+                R.string.dialog_downloading, 100) { downloadStrongNumberJob?.cancel() }
         downloadStrongNumberJob = interactor.downloadStrongNumber()
                 .onEach(
                         onLoading = {
@@ -171,7 +168,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                                     ?: throw IllegalStateException("Missing progress data when downloading")
                         },
                         onSuccess = {
-                            ToastHelper.showToast(readingActivity, R.string.toast_downloaded)
+                            readingActivity.toast(R.string.toast_downloaded)
 
                             verseDetail?.let {
                                 verseDetail = it.copy(strongNumberItems = interactor.readStrongNumber(it.verseIndex).toStrongNumberItems())
@@ -179,7 +176,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                             }
                         },
                         onError = { _, _ ->
-                            DialogHelper.showDialog(readingActivity, true, R.string.dialog_download_error,
+                            readingActivity.dialog(true, R.string.dialog_download_error,
                                     DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
                         }
                 ).onCompletion {
@@ -214,7 +211,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                 viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verse detail", e)
-                DialogHelper.showDialog(readingActivity, true, R.string.dialog_load_verse_detail_error,
+                readingActivity.dialog(true, R.string.dialog_load_verse_detail_error,
                         DialogInterface.OnClickListener { _, _ -> loadVerseDetail(verseIndex) })
             }
         }
@@ -292,7 +289,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select translation", e)
-                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
+                readingActivity.toast(R.string.toast_unknown_error)
             }
         }
     }
@@ -306,10 +303,10 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                 (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                         .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
                                 verse.toStringForSharing(bookName)))
-                ToastHelper.showToast(readingActivity, R.string.toast_verses_copied)
+                readingActivity.toast(R.string.toast_verses_copied)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to copy", e)
-                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
+                readingActivity.toast(R.string.toast_unknown_error)
             }
         }
     }
@@ -324,7 +321,7 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
                     StrongNumberListActivity.bundle(strongNumber))
         } catch (e: Exception) {
             Log.e(tag, "Failed to open Strong's number list activity", e)
-            DialogHelper.showDialog(readingActivity, true, R.string.dialog_navigate_to_strong_number_error,
+            readingActivity.dialog(true, R.string.dialog_navigate_to_strong_number_error,
                     DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
         }
     }

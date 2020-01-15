@@ -17,26 +17,8 @@
 package me.xizzhu.android.joshua.ui
 
 import android.content.Context
-import android.widget.ProgressBar
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
 
-class ProgressDialog private constructor(private val dialog: AlertDialog, private val progressBar: ProgressBar?) {
-    companion object {
-        fun showProgressDialog(context: Context, @StringRes title: Int, maxProgress: Int, onCancel: (() -> Unit)? = null): ProgressDialog? = null
+fun Context.toast(@StringRes text: Int) {}
 
-        fun showIndeterminateProgressDialog(context: Context, @StringRes title: Int): ProgressDialog? = null
-    }
-
-    fun setTitle(@StringRes title: Int) {
-    }
-
-    fun setIsIndeterminate(indeterminate: Boolean) {
-    }
-
-    fun setProgress(progress: Int) {
-    }
-
-    fun dismiss() {
-    }
-}
+fun Context.toast(text: CharSequence) {}

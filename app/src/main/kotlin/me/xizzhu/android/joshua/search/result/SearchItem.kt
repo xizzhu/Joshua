@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.search.result
 import android.annotation.SuppressLint
 import android.graphics.Typeface
 import android.text.SpannableStringBuilder
-import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.view.LayoutInflater
@@ -28,11 +27,9 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.createTitleSizeSpan
-import me.xizzhu.android.joshua.ui.createTitleStyleSpan
+import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.util.*
 
 data class SearchItem(val verseIndex: VerseIndex, private val bookShortName: String,
@@ -55,42 +52,31 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookShortName: Str
     }
 
     val textForDisplay: CharSequence by lazy {
-        SPANNABLE_STRING_BUILDER.clear()
-        SPANNABLE_STRING_BUILDER.clearSpans()
-
         // format:
         // <short book name> <chapter verseIndex>:<verse verseIndex>
         // <verse text>
-        SPANNABLE_STRING_BUILDER.append(bookShortName)
+        SPANNABLE_STRING_BUILDER.clearAll()
+                .append(bookShortName)
                 .append(' ')
-                .append((verseIndex.chapterIndex + 1).toString())
-                .append(':')
-                .append((verseIndex.verseIndex + 1).toString())
+                .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
+                .setSpan(BOOK_NAME_SIZE_SPAN, BOOK_NAME_STYLE_SPAN)
                 .append('\n')
                 .append(text)
 
-        // makes the book name & verse index smaller
-        val textStartIndex = SPANNABLE_STRING_BUILDER.length - text.length
-        SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, textStartIndex, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-        SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, textStartIndex, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-
         // highlights the keywords
+        val textStartIndex = SPANNABLE_STRING_BUILDER.length - text.length
         val lowerCase = SPANNABLE_STRING_BUILDER.toString().toLowerCase(DEFAULT_LOCALE)
         for ((index, keyword) in query.trim().replace("\\s+", " ").split(" ").withIndex()) {
             val start = lowerCase.indexOf(keyword.toLowerCase(DEFAULT_LOCALE), textStartIndex)
             if (start > 0) {
-                val end = start + keyword.length
-                if (index == 0) {
-                    SPANNABLE_STRING_BUILDER.setSpan(KEYWORD_SIZE_SPAN, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                    SPANNABLE_STRING_BUILDER.setSpan(KEYWORD_STYLE_SPAN, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                } else {
-                    SPANNABLE_STRING_BUILDER.setSpan(createKeywordSizeSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                    SPANNABLE_STRING_BUILDER.setSpan(createKeywordStyleSpan(), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                }
+                SPANNABLE_STRING_BUILDER.setSpan(
+                        if (index == 0) KEYWORD_SIZE_SPAN else createKeywordSizeSpan(),
+                        if (index == 0) KEYWORD_STYLE_SPAN else createKeywordStyleSpan(),
+                        start, start + keyword.length)
             }
         }
 
-        return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
+        return@lazy SPANNABLE_STRING_BUILDER.toCharSequence()
     }
 }
 

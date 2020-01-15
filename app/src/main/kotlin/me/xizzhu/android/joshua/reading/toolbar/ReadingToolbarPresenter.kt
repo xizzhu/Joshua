@@ -28,8 +28,8 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.ui.DialogHelper
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
+import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.logger.Log
 
 data class ReadingToolbarViewHolder(val readingToolbar: ReadingToolbar) : ViewHolder
@@ -143,7 +143,7 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
             navigator.navigate(readingActivity, screen)
         } catch (e: Exception) {
             Log.e(tag, "Failed to open activity", e)
-            DialogHelper.showDialog(readingActivity, true, errorMessage,
+            readingActivity.dialog(true, errorMessage,
                     DialogInterface.OnClickListener { _, _ -> startActivity(screen, errorMessage) })
         }
     }
@@ -159,7 +159,7 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update current translation", e)
-                DialogHelper.showDialog(readingActivity, true, R.string.dialog_update_translation_error,
+                readingActivity.dialog(true, R.string.dialog_update_translation_error,
                         DialogInterface.OnClickListener { _, _ -> updateCurrentTranslation(translationShortName) })
             }
         }
@@ -168,7 +168,7 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     private fun observeDownloadedTranslations() {
         interactor.downloadedTranslations().onEachSuccess { translations ->
             if (translations.isEmpty()) {
-                DialogHelper.showDialog(readingActivity, false, R.string.dialog_no_translation_downloaded,
+                readingActivity.dialog(false, R.string.dialog_no_translation_downloaded,
                         DialogInterface.OnClickListener { _, _ -> startTranslationManagementActivity() },
                         DialogInterface.OnClickListener { _, _ -> readingActivity.finish() })
             } else {

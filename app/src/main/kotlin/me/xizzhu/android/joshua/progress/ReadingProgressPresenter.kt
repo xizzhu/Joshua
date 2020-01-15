@@ -30,10 +30,10 @@ import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.ToastHelper
+import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
+import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 
 data class ReadingProgressViewHolder(val readingProgressListView: CommonRecyclerView) : ViewHolder
@@ -79,7 +79,7 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load reading progress", e)
                 interactor.updateLoadingState(ViewData.error(exception = e))
-                DialogHelper.showDialog(readingProgressActivity, true, R.string.dialog_load_reading_progress_error,
+                readingProgressActivity.dialog(true, R.string.dialog_load_reading_progress_error,
                         DialogInterface.OnClickListener { _, _ -> loadReadingProgress() })
             }
         }
@@ -93,7 +93,7 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                 navigator.navigate(readingProgressActivity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to open chapter for reading", e)
-                ToastHelper.showToast(readingProgressActivity, R.string.toast_unknown_error)
+                readingProgressActivity.toast(R.string.toast_unknown_error)
             }
         }
     }

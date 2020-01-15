@@ -33,7 +33,8 @@ import me.xizzhu.android.joshua.core.analytics.Analytics
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
-import me.xizzhu.android.joshua.utils.Clock
+import me.xizzhu.android.joshua.utils.currentTimeMillis
+import me.xizzhu.android.joshua.utils.elapsedRealtime
 import me.xizzhu.android.logger.Log
 
 class TranslationRepository(private val localTranslationStorage: LocalTranslationStorage,
@@ -110,7 +111,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
     @VisibleForTesting
     suspend fun translationListTooOld(): Boolean =
-            Clock.currentTimeMillis() - localTranslationStorage.readTranslationListRefreshTimestamp() >= TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
+            currentTimeMillis() - localTranslationStorage.readTranslationListRefreshTimestamp() >= TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
 
     @VisibleForTesting
     suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
@@ -135,8 +136,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
         try {
             if (translations.isNotEmpty()) {
-                localTranslationStorage.saveTranslationListRefreshTimestamp(
-                        Clock.currentTimeMillis())
+                localTranslationStorage.saveTranslationListRefreshTimestamp(currentTimeMillis())
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save translation list refresh timestamp", e)
@@ -174,18 +174,18 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
     @VisibleForTesting
     suspend fun downloadTranslation(downloadProgressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
-        val start = Clock.elapsedRealtime()
+        val start = elapsedRealtime()
         Log.i(TAG, "Start downloading translation - ${translationInfo.shortName}")
         val translation = remoteTranslationService.fetchTranslation(
                 downloadProgressChannel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))
         Log.i(TAG, "Translation downloaded")
         downloadProgressChannel.send(100)
-        val downloadFinished = Clock.elapsedRealtime()
+        val downloadFinished = elapsedRealtime()
 
         localTranslationStorage.saveTranslation(translation.translationInfo.toTranslationInfo(true),
                 translation.bookNames, translation.bookShortNames, translation.verses)
         Log.i(TAG, "Translation saved to database")
-        val installFinished = Clock.elapsedRealtime()
+        val installFinished = elapsedRealtime()
 
         Analytics.track(Analytics.EVENT_DOWNLOAD_TRANSLATION, mapOf(
                 Pair(Analytics.PARAM_ITEM_ID, translationInfo.shortName),

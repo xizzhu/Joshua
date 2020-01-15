@@ -34,9 +34,9 @@ import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.ToastHelper
-import me.xizzhu.android.joshua.utils.createChooserForSharing
+import me.xizzhu.android.joshua.ui.dialog
+import me.xizzhu.android.joshua.ui.toast
+import me.xizzhu.android.joshua.utils.chooserForSharing
 import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
@@ -88,11 +88,11 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                     (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                             .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
                                     selectedVerses.toStringForSharing(bookName)))
-                    ToastHelper.showToast(readingActivity, R.string.toast_verses_copied)
+                    readingActivity.toast(R.string.toast_verses_copied)
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to copy", e)
-                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
+                readingActivity.toast(R.string.toast_unknown_error)
             }
             actionMode?.finish()
         }
@@ -105,13 +105,13 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                     val verse = selectedVerses.first()
                     val bookName = interactor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
 
-                    createChooserForSharing(readingActivity, readingActivity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
+                    readingActivity.chooserForSharing(readingActivity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
                             ?.let { readingActivity.startActivity(it) }
                             ?: throw RuntimeException("Failed to create chooser for sharing")
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to share", e)
-                ToastHelper.showToast(readingActivity, R.string.toast_unknown_error)
+                readingActivity.toast(R.string.toast_unknown_error)
             }
             actionMode?.finish()
         }
@@ -206,7 +206,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                 viewHolder?.versePager?.setVerses(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verses", e)
-                DialogHelper.showDialog(readingActivity, true, R.string.dialog_verse_load_error,
+                readingActivity.dialog(true, R.string.dialog_verse_load_error,
                         DialogInterface.OnClickListener { _, _ -> loadVerses(bookIndex, chapterIndex) })
             }
         }
@@ -266,7 +266,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
 
     @VisibleForTesting
     fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int) {
-        DialogHelper.showDialog(readingActivity, R.string.text_pick_highlight_color,
+        readingActivity.dialog(R.string.text_pick_highlight_color,
                 readingActivity.resources.getStringArray(R.array.text_colors),
                 max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
                 DialogInterface.OnClickListener { dialog, which ->

@@ -28,21 +28,20 @@ import androidx.annotation.VisibleForTesting
 // I have to exclude their package from being shown.
 // Rants: it's a horrible way to force developers to use their SDK.
 // ref. https://developers.facebook.com/bugs/332619626816423
-fun createChooserForSharing(context: Context, title: String, text: String): Intent? =
-        createChooserForSharing(context.packageManager, "com.facebook.katana", title, text)
+fun Context.chooserForSharing(title: String, text: String): Intent? =
+        packageManager.chooserForSharing("com.facebook.katana", title, text)
 
 @VisibleForTesting
-fun createChooserForSharing(packageManager: PackageManager, packageToExclude: String,
-                            title: String, text: String): Intent? {
+fun PackageManager.chooserForSharing(packageToExclude: String, title: String, text: String): Intent? {
     val sendIntent = Intent(Intent.ACTION_SEND).setType("text/plain")
-    val resolveInfoList = packageManager.queryIntentActivities(sendIntent, 0)
+    val resolveInfoList = queryIntentActivities(sendIntent, 0)
     if (resolveInfoList.isEmpty()) return null
 
     val filteredIntents = ArrayList<Intent>(resolveInfoList.size)
     for (resolveInfo in resolveInfoList) {
         val packageName = resolveInfo.activityInfo.packageName
         if (packageToExclude != packageName) {
-            val labeledIntent = LabeledIntent(packageName, resolveInfo.loadLabel(packageManager), resolveInfo.iconResource)
+            val labeledIntent = LabeledIntent(packageName, resolveInfo.loadLabel(this), resolveInfo.iconResource)
             labeledIntent.setAction(Intent.ACTION_SEND).setPackage(packageName)
                     .setComponent(ComponentName(packageName, resolveInfo.activityInfo.name))
                     .setType("text/plain")

@@ -16,20 +16,16 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
-import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.createTitleSizeSpan
-import me.xizzhu.android.joshua.ui.createTitleStyleSpan
+import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class VerseStrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: String,
                                  private val verseText: String, val onClick: (VerseIndex) -> Unit)
@@ -41,19 +37,14 @@ data class VerseStrongNumberItem(val verseIndex: VerseIndex, private val bookSho
     }
 
     val textForDisplay: CharSequence by lazy {
-        SPANNABLE_STRING_BUILDER.clear()
-        SPANNABLE_STRING_BUILDER.clearSpans()
-
         // format:
         // <book short name> <chapter verseIndex>:<verse verseIndex> <verse text>
-        SPANNABLE_STRING_BUILDER.append(bookShortName).append(' ')
-                .append((verseIndex.chapterIndex + 1).toString()).append(':').append((verseIndex.verseIndex + 1).toString())
-        SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-        SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_SIZE_SPAN, 0, SPANNABLE_STRING_BUILDER.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-
-        SPANNABLE_STRING_BUILDER.append(' ').append(verseText)
-
-        return@lazy SPANNABLE_STRING_BUILDER.subSequence(0, SPANNABLE_STRING_BUILDER.length)
+        return@lazy SPANNABLE_STRING_BUILDER.clearAll()
+                .append(bookShortName).append(' ')
+                .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
+                .setSpan(BOOK_NAME_STYLE_SPAN, BOOK_NAME_SIZE_SPAN)
+                .append(' ').append(verseText)
+                .toCharSequence()
     }
 }
 

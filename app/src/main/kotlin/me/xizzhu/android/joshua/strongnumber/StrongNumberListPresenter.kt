@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.strongnumber
 
 import android.content.DialogInterface
-import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.view.View
 import androidx.annotation.UiThread
@@ -33,10 +32,7 @@ import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
-import me.xizzhu.android.joshua.ui.DialogHelper
-import me.xizzhu.android.joshua.ui.createTitleSizeSpan
-import me.xizzhu.android.joshua.ui.createTitleStyleSpan
-import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
@@ -73,7 +69,7 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load Strong's number list", e)
                 interactor.updateLoadingState(ViewData.error(exception = e))
-                DialogHelper.showDialog(strongNumberListActivity, true, R.string.dialog_load_strong_number_list_error,
+                strongNumberListActivity.dialog(true, R.string.dialog_load_strong_number_list_error,
                         DialogInterface.OnClickListener { _, _ -> loadStrongNumber(sn) })
             }
         }
@@ -108,17 +104,11 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
     }
 
     @VisibleForTesting
-    fun formatStrongNumber(strongNumber: StrongNumber): CharSequence {
-        val builder = SpannableStringBuilder()
-
-        builder.append(strongNumber.sn)
-        builder.setSpan(createTitleStyleSpan(), 0, builder.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-        builder.setSpan(createTitleSizeSpan(), 0, builder.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-
-        builder.append(' ').append(strongNumber.meaning)
-
-        return builder.subSequence(0, builder.length)
-    }
+    fun formatStrongNumber(strongNumber: StrongNumber): CharSequence =
+            SpannableStringBuilder().append(strongNumber.sn)
+                    .setSpan(createTitleStyleSpan(), createTitleSizeSpan())
+                    .append(' ').append(strongNumber.meaning)
+                    .toCharSequence()
 
     @VisibleForTesting
     fun openVerse(verseToOpen: VerseIndex) {
@@ -128,7 +118,7 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
                 navigator.navigate(strongNumberListActivity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
-                DialogHelper.showDialog(strongNumberListActivity, true, R.string.dialog_verse_selection_error,
+                strongNumberListActivity.dialog(true, R.string.dialog_verse_selection_error,
                         DialogInterface.OnClickListener { _, _ -> openVerse(verseToOpen) })
             }
         }

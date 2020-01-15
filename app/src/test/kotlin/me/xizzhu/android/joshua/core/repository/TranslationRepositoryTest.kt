@@ -29,7 +29,7 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.toMap
-import me.xizzhu.android.joshua.utils.Clock
+import me.xizzhu.android.joshua.utils.currentTimeMillis
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.*
@@ -166,22 +166,22 @@ class TranslationRepositoryTest : BaseUnitTest() {
         `when`(localTranslationStorage.readTranslations()).thenReturn(emptyList())
         val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
 
-        Clock.currentTimeMillis = 0L
+        currentTimeMillis = 0L
         assertFalse(translationRepository.translationListTooOld())
 
-        Clock.currentTimeMillis = TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS - 1L
+        currentTimeMillis = TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS - 1L
         assertFalse(translationRepository.translationListTooOld())
 
-        Clock.currentTimeMillis = TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
+        currentTimeMillis = TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
         assertTrue(translationRepository.translationListTooOld())
 
-        Clock.currentTimeMillis = TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS + 1L
+        currentTimeMillis = TranslationRepository.TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS + 1L
         assertTrue(translationRepository.translationListTooOld())
     }
 
     @Test
     fun testReadTranslationsFromBackend() = testDispatcher.runBlockingTest {
-        Clock.currentTimeMillis = 12345L
+        currentTimeMillis = 12345L
         `when`(localTranslationStorage.readTranslations()).thenReturn(listOf(MockContents.kjvDownloadedTranslationInfo))
         `when`(remoteTranslationService.fetchTranslations()).thenReturn(
                 listOf(RemoteTranslationInfo.fromTranslationInfo(MockContents.kjvTranslationInfo),
@@ -197,7 +197,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
 
     @Test
     fun testReadTranslationsFromBackendWithEmptyList() = testDispatcher.runBlockingTest {
-        Clock.currentTimeMillis = 12345L
+        currentTimeMillis = 12345L
         `when`(localTranslationStorage.readTranslations()).thenReturn(emptyList())
         `when`(remoteTranslationService.fetchTranslations()).thenReturn(emptyList())
         val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
@@ -209,7 +209,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
 
     @Test
     fun testReadTranslationsFromBackendFailedToSaveRefreshTimestamp() = testDispatcher.runBlockingTest {
-        Clock.currentTimeMillis = 12345L
+        currentTimeMillis = 12345L
         `when`(localTranslationStorage.readTranslations()).thenReturn(listOf(MockContents.kjvDownloadedTranslationInfo))
         `when`(localTranslationStorage.saveTranslationListRefreshTimestamp(12345L)).thenThrow(RuntimeException("Random exception"))
         `when`(remoteTranslationService.fetchTranslations()).thenReturn(
