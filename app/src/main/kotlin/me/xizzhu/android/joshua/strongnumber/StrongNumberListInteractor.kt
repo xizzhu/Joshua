@@ -22,9 +22,10 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.filter
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.toViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
 
@@ -36,7 +37,7 @@ class StrongNumberListInteractor(private val strongNumberManager: StrongNumberMa
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val strongNumberRequest: BroadcastChannel<String> = ConflatedBroadcastChannel()
 
-    fun strongNumberRequest(): Flow<String> = strongNumberRequest.asFlow()
+    fun strongNumberRequest(): Flow<ViewData<String>> = strongNumberRequest.asFlow().toViewData()
 
     fun requestStrongNumber(sn: String) {
         strongNumberRequest.offer(sn)
@@ -48,8 +49,8 @@ class StrongNumberListInteractor(private val strongNumberManager: StrongNumberMa
     suspend fun verseIndexes(sn: String): ViewData<List<VerseIndex>> =
             viewData { strongNumberManager.readVerseIndexes(sn) }
 
-    suspend fun currentTranslation(): ViewData<String> =
-            viewData { bibleReadingManager.currentTranslation().first() }
+    fun currentTranslation(): Flow<ViewData<String>> =
+            bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }.toViewData()
 
     suspend fun bookNames(currentTranslation: String): ViewData<List<String>> =
             viewData { bibleReadingManager.readBookNames(currentTranslation) }
