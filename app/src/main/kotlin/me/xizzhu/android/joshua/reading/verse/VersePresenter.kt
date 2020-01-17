@@ -134,9 +134,8 @@ class VersePresenter(private val readingActivity: ReadingActivity,
 
         interactor.verseUpdates().onEach { viewHolder.versePager.notifyVerseUpdate(it) }.launchIn(coroutineScope)
 
-        combine(interactor.currentTranslation().filter { it.isNotEmpty() },
+        combine(interactor.currentTranslation(),
                 interactor.currentVerseIndex()
-                        .filter { it.isValid() }
                         .onEach { newVerseIndex ->
                             if (actionMode != null) {
                                 if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex

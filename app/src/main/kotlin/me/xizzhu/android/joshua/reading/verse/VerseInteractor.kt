@@ -22,6 +22,7 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.filter
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
@@ -39,11 +40,11 @@ class VerseInteractor(private val bibleReadingManager: BibleReadingManager,
     private val verseDetailRequest: BroadcastChannel<VerseDetailRequest> = ConflatedBroadcastChannel()
     private val verseUpdates: BroadcastChannel<VerseUpdate> = ConflatedBroadcastChannel()
 
-    fun currentTranslation(): Flow<String> = bibleReadingManager.currentTranslation()
+    fun currentTranslation(): Flow<String> = bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }
 
     fun parallelTranslations(): Flow<List<String>> = bibleReadingManager.parallelTranslations()
 
-    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.currentVerseIndex()
+    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
