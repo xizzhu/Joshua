@@ -37,7 +37,6 @@ import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.joshua.utils.chooserForSharing
-import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
 
@@ -183,25 +182,27 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     fun loadVerses(bookIndex: Int, chapterIndex: Int) {
         coroutineScope.launch {
             try {
-                val versesAsync = supervisedAsync {
-                    if (parallelTranslations.isEmpty()) {
-                        interactor.readVerses(currentTranslation, bookIndex, chapterIndex)
-                    } else {
-                        interactor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+                val items = coroutineScope {
+                    val bookNameAsync = async { interactor.readBookNames(currentTranslation)[bookIndex] }
+                    val highlightsAsync = async { interactor.readHighlights(bookIndex, chapterIndex) }
+                    val versesAsync = async {
+                        if (parallelTranslations.isEmpty()) {
+                            interactor.readVerses(currentTranslation, bookIndex, chapterIndex)
+                        } else {
+                            interactor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+                        }
                     }
-                }
-                val bookNameAsync = supervisedAsync { interactor.readBookNames(currentTranslation)[bookIndex] }
-                val highlightsAsync = supervisedAsync { interactor.readHighlights(bookIndex, chapterIndex) }
-                val items = if (interactor.settings().first().data!!.simpleReadingModeOn) {
-                    versesAsync.await().toSimpleVerseItems(bookNameAsync.await(), highlightsAsync.await(),
-                            this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
-                } else {
-                    val bookmarksAsync = supervisedAsync { interactor.readBookmarks(bookIndex, chapterIndex) }
-                    val notesAsync = supervisedAsync { interactor.readNotes(bookIndex, chapterIndex) }
-                    versesAsync.await().toVerseItems(bookNameAsync.await(), bookmarksAsync.await(),
-                            highlightsAsync.await(), notesAsync.await(), this@VersePresenter::onVerseClicked,
-                            this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
-                            this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
+                    return@coroutineScope if (interactor.settings().first().data!!.simpleReadingModeOn) {
+                        versesAsync.await().toSimpleVerseItems(bookNameAsync.await(), highlightsAsync.await(),
+                                this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
+                    } else {
+                        val bookmarksAsync = async { interactor.readBookmarks(bookIndex, chapterIndex) }
+                        val notesAsync = async { interactor.readNotes(bookIndex, chapterIndex) }
+                        versesAsync.await().toVerseItems(bookNameAsync.await(), bookmarksAsync.await(),
+                                highlightsAsync.await(), notesAsync.await(), this@VersePresenter::onVerseClicked,
+                                this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
+                                this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
+                    }
                 }
                 viewHolder?.versePager?.setVerses(bookIndex, chapterIndex, items)
             } catch (e: Exception) {

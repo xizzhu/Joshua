@@ -40,7 +40,6 @@ import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
 import me.xizzhu.android.joshua.ui.*
-import me.xizzhu.android.joshua.utils.supervisedAsync
 import me.xizzhu.android.logger.Log
 import java.lang.StringBuilder
 import kotlin.math.max
@@ -196,15 +195,15 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
         coroutineScope.launch {
             try {
                 viewHolder?.verseDetailViewLayout?.setVerseDetail(VerseDetail.INVALID)
-
-                val bookmarkAsync = supervisedAsync { interactor.readBookmark(verseIndex) }
-                val highlightAsync = supervisedAsync { interactor.readHighlight(verseIndex) }
-                val noteAsync = supervisedAsync { interactor.readNote(verseIndex) }
-                val strongNumberAsync = supervisedAsync { interactor.readStrongNumber(verseIndex) }
-
-                verseDetail = VerseDetail(verseIndex, buildVerseTextItems(verseIndex),
-                        bookmarkAsync.await().isValid(), highlightAsync.await().color,
-                        noteAsync.await().note, strongNumberAsync.await().toStrongNumberItems())
+                verseDetail = coroutineScope {
+                    val bookmarkAsync = async { interactor.readBookmark(verseIndex) }
+                    val highlightAsync = async { interactor.readHighlight(verseIndex) }
+                    val noteAsync = async { interactor.readNote(verseIndex) }
+                    val strongNumberAsync = async { interactor.readStrongNumber(verseIndex) }
+                    return@coroutineScope VerseDetail(verseIndex, buildVerseTextItems(verseIndex),
+                            bookmarkAsync.await().isValid(), highlightAsync.await().color,
+                            noteAsync.await().note, strongNumberAsync.await().toStrongNumberItems())
+                }
                 viewHolder?.verseDetailViewLayout?.setVerseDetail(verseDetail!!)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verse detail", e)
