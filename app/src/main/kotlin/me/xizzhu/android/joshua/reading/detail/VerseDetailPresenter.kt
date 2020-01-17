@@ -37,7 +37,6 @@ import me.xizzhu.android.joshua.infra.arch.onEach
 import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
 import me.xizzhu.android.joshua.ui.*
@@ -77,7 +76,10 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
         viewHolder.verseDetailViewLayout.post { viewHolder.verseDetailViewLayout.hide() }
 
         interactor.settings().onEachSuccess { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
-        interactor.verseDetailRequest().onEach { showVerseDetail(it.verseIndex, it.content) }.launchIn(coroutineScope)
+        interactor.verseDetailRequest().onEach {
+            loadVerseDetail(it.verseIndex)
+            viewHolder.verseDetailViewLayout.show(it.content)
+        }.launchIn(coroutineScope)
         interactor.currentVerseIndex().onEach { close() }.launchIn(coroutineScope)
     }
 
@@ -188,11 +190,6 @@ class VerseDetailPresenter(private val readingActivity: ReadingActivity,
     private fun dismissDownloadStrongNumberDialog() {
         downloadStrongNumberDialog?.dismiss()
         downloadStrongNumberDialog = null
-    }
-
-    private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
-        loadVerseDetail(verseIndex)
-        viewHolder?.verseDetailViewLayout?.show(content)
     }
 
     private fun loadVerseDetail(verseIndex: VerseIndex) {
