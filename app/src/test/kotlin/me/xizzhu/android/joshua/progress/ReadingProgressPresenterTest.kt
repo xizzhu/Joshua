@@ -79,6 +79,8 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         `when`(readingProgressInteractor.readingProgress()).thenReturn(ViewData.success(ReadingProgress(5, 4321L, emptyList())))
 
         readingProgressPresenter.create(readingProgressViewHolder)
+        readingProgressPresenter.start()
+
         with(inOrder(readingProgressInteractor, readingProgressListView)) {
             verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.loading())
             verify(readingProgressListView, times(1)).visibility = View.GONE
@@ -87,6 +89,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
             verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.success(null))
         }
 
+        readingProgressPresenter.stop()
         readingProgressPresenter.destroy()
     }
 
@@ -96,6 +99,8 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         `when`(readingProgressInteractor.bookNames()).thenThrow(exception)
 
         readingProgressPresenter.create(readingProgressViewHolder)
+        readingProgressPresenter.start()
+
         with(inOrder(readingProgressInteractor, readingProgressListView)) {
             verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.loading())
             verify(readingProgressListView, times(1)).visibility = View.GONE
@@ -105,6 +110,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         verify(readingProgressListView, never()).fadeIn()
         verify(readingProgressInteractor, never()).updateLoadingState(ViewData.success(null))
 
+        readingProgressPresenter.stop()
         readingProgressPresenter.destroy()
     }
 

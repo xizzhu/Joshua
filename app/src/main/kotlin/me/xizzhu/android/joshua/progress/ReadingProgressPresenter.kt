@@ -48,13 +48,13 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
     @UiThread
     override fun onCreate(viewHolder: ReadingProgressViewHolder) {
         super.onCreate(viewHolder)
-
-        observeSettings()
-        loadReadingProgress()
+        interactor.settings().onEachSuccess { viewHolder.readingProgressListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
-    private fun observeSettings() {
-        interactor.settings().onEachSuccess { viewHolder?.readingProgressListView?.setSettings(it) }.launchIn(coroutineScope)
+    @UiThread
+    override fun onStart() {
+        super.onStart()
+        loadReadingProgress()
     }
 
     private fun loadReadingProgress() {
