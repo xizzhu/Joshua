@@ -12,6 +12,8 @@ CHANGELOG
   - Should use elapsedRealTime() when tracking reading time
   - Used coroutineScope() + async() instead
 - Updated dependencies:
+  - Gradle to 6.1
+  - Firebase Core and Analytics to 17.2.2
   - Dagger to 2.25.4
 
 #### v0.13.2 (2019-12-29)
