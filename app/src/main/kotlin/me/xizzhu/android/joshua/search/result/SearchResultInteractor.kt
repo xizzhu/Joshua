@@ -22,6 +22,7 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -47,7 +48,8 @@ class SearchResultInteractor(private val bibleReadingManager: BibleReadingManage
     suspend fun search(query: String): ViewData<List<Verse>> =
             viewData { bibleReadingManager.search(readCurrentTranslation(), query) }
 
-    private suspend fun readCurrentTranslation(): String = bibleReadingManager.currentTranslation().first()
+    private suspend fun readCurrentTranslation(): String =
+            bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }.first()
 
     suspend fun bookNames(): ViewData<List<String>> =
             viewData { bibleReadingManager.readBookNames(readCurrentTranslation()) }
