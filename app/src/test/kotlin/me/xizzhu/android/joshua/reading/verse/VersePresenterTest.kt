@@ -126,8 +126,8 @@ class VersePresenterTest : BaseUnitTest() {
         val verseIndex = VerseIndex(1, 2, 3)
         val translation = MockContents.kjvShortName
         val parallelTranslations = listOf(emptyList(), listOf(MockContents.kjvShortName), emptyList(), listOf(MockContents.bbeShortName, MockContents.cuvShortName))
-        `when`(verseInteractor.currentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID, verseIndex, VerseIndex.INVALID))
-        `when`(verseInteractor.currentTranslation()).thenReturn(flowOf("", translation, ""))
+        `when`(verseInteractor.currentVerseIndex()).thenReturn(flowOf(verseIndex))
+        `when`(verseInteractor.currentTranslation()).thenReturn(flowOf(translation))
         `when`(verseInteractor.parallelTranslations()).thenReturn(flow { parallelTranslations.forEach { emit(it) } })
 
         versePresenter.create(verseViewHolder)

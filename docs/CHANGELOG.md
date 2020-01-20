@@ -10,6 +10,7 @@ CHANGELOG
   - Do not fail if the requested verse does not exist when loading annotated verses
   - Do not fail when reading a large number of verses by verse indexes
   - Should use elapsedRealTime() when tracking reading time
+  - Used coroutineScope() + async() instead
 - Updated dependencies:
   - Dagger to 2.25.4
 
