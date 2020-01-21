@@ -19,6 +19,7 @@ Main Features
 * Full-text search
 * Add bookmarks and highlights to your favorite verses
 * Add your own notes
+* Study with Strong's Numbers
 * Share verses with friends through your favorite social media, email, SMS, etc.
 * Customize font size
 * Day / night mode
