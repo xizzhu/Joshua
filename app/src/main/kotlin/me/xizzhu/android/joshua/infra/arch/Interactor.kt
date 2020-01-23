@@ -22,7 +22,7 @@ import kotlinx.coroutines.*
 
 abstract class Interactor(dispatcher: CoroutineDispatcher) {
     protected val tag: String = javaClass.simpleName
-    protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + dispatcher)
+    protected val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + dispatcher)
 
     @UiThread
     fun create() {

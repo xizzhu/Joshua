@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Bug fixes:
+  - Used SupervisorJob for parent scope
+
 #### v0.14.0 (2020-01-19)
 - New features:
   - Initial support for Strong's numbers

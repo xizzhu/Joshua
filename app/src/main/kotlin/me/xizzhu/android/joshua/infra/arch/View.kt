@@ -24,7 +24,7 @@ interface ViewHolder
 
 abstract class ViewPresenter<V : ViewHolder, I : Interactor>(protected val interactor: I, dispatcher: CoroutineDispatcher) {
     protected val tag: String = javaClass.simpleName
-    protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + dispatcher)
+    protected val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + dispatcher)
 
     protected var viewHolder: V? = null
 
