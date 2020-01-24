@@ -20,10 +20,7 @@ import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
 import dagger.android.AndroidInjection
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewModel
@@ -32,7 +29,7 @@ import me.xizzhu.android.logger.Log
 
 abstract class BaseActivity : AppCompatActivity() {
     protected val tag: String = javaClass.simpleName
-    protected val coroutineScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.Main)
+    protected val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val presenters: List<ViewPresenter<out ViewHolder, out Interactor>> by lazy { getViewPresenters() }
 
