@@ -4,6 +4,8 @@ CHANGELOG
 #### Next Release
 - Bug fixes:
   - Used SupervisorJob for parent scope
+- Updated dependencies:
+  - Gradle to 6.1.1
 
 #### v0.14.0 (2020-01-19)
 - New features:
