@@ -60,16 +60,11 @@ class AppModule(private val app: App) {
     @Singleton
     fun provideApp(): App = app
 
-    @Module
     companion object {
-        // TODO @JvmStatic is still needed in companion objects https://github.com/google/dagger/issues/1646
-
-        @JvmStatic
         @Provides
         @Singleton
         fun provideNavigator(): Navigator = Navigator()
 
-        @JvmStatic
         @Provides
         @Singleton
         fun provideBackupManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>,
@@ -78,51 +73,43 @@ class AppModule(private val app: App) {
                                  readingProgressRepository: ReadingProgressRepository): BackupManager =
                 BackupManager(BackupJsonSerializer(), bookmarkRepository, highlightRepository, noteRepository, readingProgressRepository)
 
-        @JvmStatic
         @Provides
         @Singleton
         fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository,
                                        translationRepository: TranslationRepository): BibleReadingManager =
                 BibleReadingManager(bibleReadingRepository, translationRepository)
 
-        @JvmStatic
         @Provides
         @Singleton
         fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): VerseAnnotationManager<Bookmark> =
                 VerseAnnotationManager(bookmarkRepository)
 
-        @JvmStatic
         @Provides
         @Singleton
         fun provideHighlightManager(highlightRepository: VerseAnnotationRepository<Highlight>): VerseAnnotationManager<Highlight> =
                 VerseAnnotationManager(highlightRepository)
 
-        @JvmStatic
         @Provides
         @Singleton
         fun provideNoteManager(noteRepository: VerseAnnotationRepository<Note>): VerseAnnotationManager<Note> =
                 VerseAnnotationManager(noteRepository)
 
-        @JvmStatic
         @Provides
         @Singleton
         fun provideReadingProgressManager(bibleReadingRepository: BibleReadingRepository,
                                           readingProgressRepository: ReadingProgressRepository): ReadingProgressManager =
                 ReadingProgressManager(bibleReadingRepository, readingProgressRepository)
 
-        @JvmStatic
         @Provides
         @Singleton
         fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager =
                 SettingsManager(settingsRepository)
 
-        @JvmStatic
         @Provides
         @Singleton
         fun provideStrongNumberManager(strongNumberRepository: StrongNumberRepository): StrongNumberManager =
                 StrongNumberManager(strongNumberRepository)
 
-        @JvmStatic
         @Provides
         @Singleton
         fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
