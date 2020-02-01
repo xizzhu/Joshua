@@ -6,6 +6,7 @@ CHANGELOG
   - Used SupervisorJob for parent scope
 - Updated dependencies:
   - Gradle to 6.1.1
+  - Android build tools to 29.0.3
   - Dagger to 2.26
 
 #### v0.14.0 (2020-01-19)
