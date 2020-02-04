@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.detail.pages
 
-import android.content.res.Resources
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.TypedValue
@@ -29,7 +28,7 @@ import me.xizzhu.android.joshua.reading.detail.VerseDetail
 import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 
-class NotePage(resources: Resources, inflater: LayoutInflater, container: ViewGroup,
+class NotePage(inflater: LayoutInflater, container: ViewGroup,
                settings: Settings, onNoteUpdated: (String) -> Unit)
     : VerseDetailPage(inflater.inflate(R.layout.page_verse_detail_note, container, false)) {
     private val textWatcher = object : TextWatcher {
@@ -42,7 +41,7 @@ class NotePage(resources: Resources, inflater: LayoutInflater, container: ViewGr
         }
     }
 
-    private val note: TextInputEditText = view.findViewById<TextInputEditText>(R.id.note).apply {
+    private val note: TextInputEditText = itemView.findViewById<TextInputEditText>(R.id.note).apply {
         addTextChangedListener(textWatcher)
         setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
         setTextColor(settings.getPrimaryTextColor(resources))

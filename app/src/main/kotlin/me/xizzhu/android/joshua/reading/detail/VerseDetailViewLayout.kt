@@ -26,8 +26,9 @@ import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
@@ -52,15 +53,19 @@ class VerseDetailViewLayout : FrameLayout {
     private val adapter = VerseDetailPagerAdapter(context)
     private val header: LinearLayout
     private val tabLayout: TabLayout
-    private val viewPager: ViewPager
+    private val viewPager: ViewPager2
     private val highlight: ImageView
     private val bookmark: ImageView
 
     init {
         View.inflate(context, R.layout.inner_verse_detail_view, this)
         header = findViewById(R.id.header)
-        viewPager = findViewById<ViewPager>(R.id.view_pager).apply { adapter = this@VerseDetailViewLayout.adapter }
-        tabLayout = findViewById<TabLayout>(R.id.tab_layout).apply { setupWithViewPager(viewPager) }
+        viewPager = findViewById<ViewPager2>(R.id.view_pager).apply { adapter = this@VerseDetailViewLayout.adapter }
+        tabLayout = findViewById<TabLayout>(R.id.tab_layout).apply {
+            TabLayoutMediator(this, viewPager) { tab, position ->
+                tab.text = adapter.pageTitle(position)
+            }.attach()
+        }
         highlight = findViewById(R.id.highlight)
         bookmark = findViewById(R.id.bookmark)
 
