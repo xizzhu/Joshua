@@ -111,6 +111,7 @@ dependencies {
     implementation(Dependencies.AndroidX.appCompat)
     implementation(Dependencies.AndroidX.constraintLayout)
     implementation(Dependencies.AndroidX.coordinatorLayout)
+    implementation(Dependencies.AndroidX.core)
     implementation(Dependencies.AndroidX.drawerLayout)
     implementation(Dependencies.AndroidX.material)
     implementation(Dependencies.AndroidX.recyclerView)
