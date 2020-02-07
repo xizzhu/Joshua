@@ -19,14 +19,13 @@ package me.xizzhu.android.joshua.reading.detail.pages
 import android.content.Context
 import android.content.res.Resources
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.viewpager.widget.PagerAdapter
+import androidx.recyclerview.widget.RecyclerView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.reading.detail.VerseDetail
 
-class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
+class VerseDetailPagerAdapter(context: Context) : RecyclerView.Adapter<VerseDetailPage>() {
     companion object {
         const val PAGE_VERSES = 0
         const val PAGE_NOTE = 1
@@ -36,7 +35,6 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
 
     private val resources: Resources = context.resources
     private val inflater: LayoutInflater = LayoutInflater.from(context)
-    private val verseDetailPages: Array<VerseDetailPage?> = arrayOfNulls(PAGE_COUNT)
 
     var onNoteUpdated: ((String) -> Unit)? = null
     var onNoStrongNumberClicked: (() -> Unit)? = null
@@ -51,33 +49,26 @@ class VerseDetailPagerAdapter(context: Context) : PagerAdapter() {
             notifyDataSetChanged()
         }
 
-    override fun getCount(): Int = if (settings != null && onNoteUpdated != null && onNoStrongNumberClicked != null) PAGE_COUNT else 0
+    override fun getItemCount(): Int = if (settings != null && onNoteUpdated != null && onNoStrongNumberClicked != null) PAGE_COUNT else 0
 
-    override fun instantiateItem(container: ViewGroup, position: Int): Any = verseDetailPages[position]
-            ?: when (position) {
-                PAGE_VERSES -> VersesPage(inflater, container, settings!!)
-                PAGE_NOTE -> NotePage(resources, inflater, container, settings!!, onNoteUpdated!!)
-                PAGE_STRONG_NUMBER -> StrongNumberPage(inflater, container, settings!!, onNoStrongNumberClicked!!)
-                else -> throw IllegalArgumentException("Unsupported position: $position")
-            }.apply {
-                bind(verseDetail)
-                container.addView(view)
+    override fun getItemViewType(position: Int): Int = position
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerseDetailPage =
+            when (viewType) {
+                PAGE_VERSES -> VersesPage(inflater, parent, settings!!)
+                PAGE_NOTE -> NotePage(inflater, parent, settings!!, onNoteUpdated!!)
+                PAGE_STRONG_NUMBER -> StrongNumberPage(inflater, parent, settings!!, onNoStrongNumberClicked!!)
+                else -> throw IllegalArgumentException("Unsupported view type: $viewType")
             }
 
-    override fun destroyItem(container: ViewGroup, position: Int, obj: Any) {
-        container.removeView((obj as VerseDetailPage).view)
+    override fun onBindViewHolder(holder: VerseDetailPage, position: Int) {
+        holder.bind(verseDetail)
     }
 
-    override fun isViewFromObject(view: View, obj: Any): Boolean {
-        return view == (obj as VerseDetailPage).view
-    }
-
-    override fun getPageTitle(position: Int): CharSequence = when (position) {
+    fun pageTitle(position: Int): CharSequence = when (position) {
         PAGE_VERSES -> resources.getString(R.string.text_verse_comparison)
         PAGE_NOTE -> resources.getString(R.string.text_note)
         PAGE_STRONG_NUMBER -> resources.getString(R.string.text_strong_number)
-        else -> ""
+        else -> throw IllegalArgumentException("Unsupported position: $position")
     }
-
-    override fun getItemPosition(obj: Any): Int = POSITION_NONE
 }

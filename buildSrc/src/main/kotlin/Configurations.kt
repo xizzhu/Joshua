@@ -38,7 +38,7 @@ object Versions {
 
     object Sdk {
         const val classpath = "3.5.3"
-        const val buildTools = "29.0.2"
+        const val buildTools = "29.0.3"
         const val compile = 29
         const val min = 21
         const val target = 29
@@ -56,10 +56,12 @@ object Versions {
         const val appCompat = "1.1.0"
         const val constraintLayout = "1.1.3"
         const val coordinatorLayout = "1.1.0"
+        const val core = "1.2.0"
         const val drawerLayout = "1.0.0"
-        const val material = "1.0.0"
+        const val material = "1.1.0"
         const val recyclerView = "1.1.0"
-        const val viewPager = "1.0.0"
+        const val swipeRefreshLayout = "1.0.0"
+        const val viewPager2 = "1.0.0"
 
         object Test {
             const val junit = "1.1.1"
@@ -111,10 +113,12 @@ object Dependencies {
         const val appCompat = "androidx.appcompat:appcompat:${Versions.AndroidX.appCompat}"
         const val constraintLayout = "androidx.constraintlayout:constraintlayout:${Versions.AndroidX.constraintLayout}"
         const val coordinatorLayout = "androidx.coordinatorlayout:coordinatorlayout:${Versions.AndroidX.coordinatorLayout}"
+        const val core = "androidx.core:core:${Versions.AndroidX.core}"
         const val drawerLayout = "androidx.drawerlayout:drawerlayout:${Versions.AndroidX.drawerLayout}"
         const val material = "com.google.android.material:material:${Versions.AndroidX.material}"
         const val recyclerView = "androidx.recyclerview:recyclerview:${Versions.AndroidX.recyclerView}"
-        const val viewPager = "androidx.viewpager:viewpager:${Versions.AndroidX.viewPager}"
+        const val swipeRefreshLayout = "androidx.swiperefreshlayout:swiperefreshlayout:${Versions.AndroidX.swipeRefreshLayout}"
+        const val viewPager2 = "androidx.viewpager2:viewpager2:${Versions.AndroidX.viewPager2}"
 
         object Test {
             const val junit = "androidx.test.ext:junit:${Versions.AndroidX.Test.junit}"

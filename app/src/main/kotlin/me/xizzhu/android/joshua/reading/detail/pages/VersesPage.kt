@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 
 class VersesPage(inflater: LayoutInflater, container: ViewGroup, settings: Settings)
     : VerseDetailPage(inflater.inflate(R.layout.page_verse_detail_verses, container, false)) {
-    private val verseTextListView: CommonRecyclerView = view.findViewById<CommonRecyclerView>(R.id.verse_text_list)
+    private val verseTextListView: CommonRecyclerView = itemView.findViewById<CommonRecyclerView>(R.id.verse_text_list)
             .apply {
                 isNestedScrollingEnabled = false
                 setSettings(settings)

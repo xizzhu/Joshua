@@ -289,4 +289,3 @@ class BackupJsonSerializer : BackupManager.Serializer {
         return ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, readCount, timeSpentInMillis, lastReadingTimestamp)
     }
 }
-

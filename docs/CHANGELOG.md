@@ -4,8 +4,12 @@ CHANGELOG
 #### Next Release
 - Bug fixes:
   - Used SupervisorJob for parent scope
+- Refactoring
+  - Used ViewPager2 instead of ViewPager
 - Updated dependencies:
   - Gradle to 6.1.1
+  - Android build tools to 29.0.3
+  - AndroidX Core to 1.2.0, Material to 1.1.0, ViewPager2 to 1.0.0
   - Dagger to 2.26
 
 #### v0.14.0 (2020-01-19)

@@ -25,6 +25,7 @@ import android.view.MenuItem
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
+import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.R
@@ -40,7 +41,7 @@ import me.xizzhu.android.joshua.utils.chooserForSharing
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
 
-data class VerseViewHolder(val versePager: VerseViewPager) : ViewHolder
+data class VerseViewHolder(val versePager: ViewPager2) : ViewHolder
 
 class VersePresenter(private val readingActivity: ReadingActivity,
                      verseInteractor: VerseInteractor,
@@ -69,9 +70,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-            viewHolder?.versePager?.run {
-                selectedVerses.forEach { verse -> deselectVerse(verse.verseIndex) }
-            }
+            selectedVerses.forEach { verse -> adapter.deselectVerse(verse.verseIndex) }
             selectedVerses.clear()
             actionMode = null
         }
@@ -116,6 +115,11 @@ class VersePresenter(private val readingActivity: ReadingActivity,
         }
     }
 
+    @VisibleForTesting
+    var adapter: VersePagerAdapter = VersePagerAdapter(readingActivity,
+            { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) },
+            { verseIndex -> updateCurrentVerse(verseIndex) })
+
     private var currentTranslation: String = ""
     private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
     private var parallelTranslations: List<String> = emptyList()
@@ -124,33 +128,34 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     override fun onCreate(viewHolder: VerseViewHolder) {
         super.onCreate(viewHolder)
 
-        viewHolder.versePager.setListeners(
-                onChapterSelected = { bookIndex, chapterIndex -> updateCurrentChapter(bookIndex, chapterIndex) },
-                onChapterRequested = { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) },
-                onCurrentVerseUpdated = { verseIndex -> updateCurrentVerse(verseIndex) }
-        )
+        viewHolder.versePager.offscreenPageLimit = 1
+        viewHolder.versePager.adapter = adapter
+        viewHolder.versePager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                updateCurrentChapter(position.toBookIndex(), position.toChapterIndex())
+            }
+        })
 
-        interactor.settings().onEachSuccess { viewHolder.versePager.setSettings(it) }.launchIn(coroutineScope)
+        interactor.settings().onEachSuccess { adapter.settings = it }.launchIn(coroutineScope)
 
-        interactor.verseUpdates().onEach { viewHolder.versePager.notifyVerseUpdate(it) }.launchIn(coroutineScope)
+        combine(interactor.currentVerseIndex(), interactor.currentTranslation(),
+                interactor.parallelTranslations()) { newVerseIndex, newTranslation, newParallelTranslations ->
+            if (actionMode != null) {
+                if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex
+                        || currentVerseIndex.chapterIndex != newVerseIndex.chapterIndex) {
+                    actionMode?.finish()
+                }
+            }
 
-        combine(interactor.currentTranslation(),
-                interactor.currentVerseIndex()
-                        .onEach { newVerseIndex ->
-                            if (actionMode != null) {
-                                if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex
-                                        || currentVerseIndex.chapterIndex != newVerseIndex.chapterIndex) {
-                                    actionMode?.finish()
-                                }
-                            }
-                        },
-                interactor.parallelTranslations()
-        ) { currentTranslation, currentVerseIndex, parallelTranslations ->
-            this@VersePresenter.currentVerseIndex = currentVerseIndex
-            this@VersePresenter.currentTranslation = currentTranslation
-            this@VersePresenter.parallelTranslations = parallelTranslations
-            viewHolder.versePager.setCurrent(currentVerseIndex, currentTranslation, parallelTranslations)
+            currentVerseIndex = newVerseIndex
+            currentTranslation = newTranslation
+            parallelTranslations = newParallelTranslations
+
+            adapter.setCurrent(newVerseIndex, newTranslation, newParallelTranslations)
+            viewHolder.versePager.setCurrentItem(newVerseIndex.toPagePosition(), false)
         }.launchIn(coroutineScope)
+
+        interactor.verseUpdates().onEach { adapter.notifyVerseUpdate(it) }.launchIn(coroutineScope)
     }
 
     private fun updateCurrentChapter(bookIndex: Int, chapterIndex: Int) {
@@ -203,7 +208,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                                 this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
                     }
                 }
-                viewHolder?.versePager?.setVerses(bookIndex, chapterIndex, items)
+                adapter.setVerses(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verses", e)
                 readingActivity.dialog(true, R.string.dialog_verse_load_error,
@@ -226,18 +231,17 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                 actionMode?.finish()
             }
 
-            viewHolder?.versePager?.deselectVerse(verse.verseIndex)
+            adapter.deselectVerse(verse.verseIndex)
         } else {
             // select the verse
             selectedVerses.add(verse)
-
-            viewHolder?.versePager?.selectVerse(verse.verseIndex)
+            adapter.selectVerse(verse.verseIndex)
         }
     }
 
     private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
         interactor.requestVerseDetail(VerseDetailRequest(verseIndex, content))
-        viewHolder?.versePager?.selectVerse(verseIndex)
+        adapter.selectVerse(verseIndex)
     }
 
     @VisibleForTesting
