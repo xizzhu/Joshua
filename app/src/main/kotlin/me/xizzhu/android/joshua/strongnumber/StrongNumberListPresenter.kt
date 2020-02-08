@@ -70,8 +70,9 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load Strong's number list", e)
                 interactor.updateLoadingState(ViewData.error(exception = e))
-                strongNumberListActivity.dialog(true, R.string.dialog_load_strong_number_list_error,
-                        DialogInterface.OnClickListener { _, _ -> loadStrongNumber(sn, currentTranslation) })
+                strongNumberListActivity.dialog(false, R.string.dialog_load_strong_number_list_error,
+                        DialogInterface.OnClickListener { _, _ -> loadStrongNumber(sn, currentTranslation) },
+                        DialogInterface.OnClickListener { _, _ -> strongNumberListActivity.finish() })
             }
         }
     }

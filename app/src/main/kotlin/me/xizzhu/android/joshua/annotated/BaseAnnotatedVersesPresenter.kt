@@ -72,8 +72,9 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
         } catch (e: Exception) {
             Log.e(tag, "Failed to load annotated verses", e)
             interactor.updateLoadingState(ViewData.error(exception = e))
-            activity.dialog(true, R.string.dialog_load_annotated_verses_error,
-                    DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { load(sortOrder, currentTranslation) } })
+            activity.dialog(false, R.string.dialog_load_annotated_verses_error,
+                    DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { load(sortOrder, currentTranslation) } },
+                    DialogInterface.OnClickListener { _, _ -> activity.finish() })
         }
     }
 
