@@ -4,6 +4,7 @@ CHANGELOG
 #### Next Release
 - Bug fixes:
   - Used SupervisorJob for parent scope
+  - Should close activity when failed to load annotated verses, reading progress, and Strong's numbers
 - Refactoring
   - Used ViewPager2 instead of ViewPager
 - Updated dependencies:

@@ -79,8 +79,9 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load reading progress", e)
                 interactor.updateLoadingState(ViewData.error(exception = e))
-                readingProgressActivity.dialog(true, R.string.dialog_load_reading_progress_error,
-                        DialogInterface.OnClickListener { _, _ -> loadReadingProgress() })
+                readingProgressActivity.dialog(false, R.string.dialog_load_reading_progress_error,
+                        DialogInterface.OnClickListener { _, _ -> loadReadingProgress() },
+                        DialogInterface.OnClickListener { _, _ -> readingProgressActivity.finish() })
             }
         }
     }
