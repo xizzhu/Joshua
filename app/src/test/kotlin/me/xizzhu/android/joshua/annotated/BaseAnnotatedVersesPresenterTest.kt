@@ -29,7 +29,6 @@ import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarkItem
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.toViewData
-import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -106,7 +105,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         `when`(activity.getString(anyInt())).thenReturn(title)
         `when`(interactor.sortOrder()).thenReturn(flowOf(Constants.SORT_BY_DATE).toViewData())
         `when`(interactor.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName).toViewData())
-        `when`(interactor.verseAnnotations(anyInt())).thenReturn(viewData { emptyList<TestVerseAnnotation>() })
+        `when`(interactor.verseAnnotations(anyInt())).thenReturn(emptyList())
 
         baseAnnotatedVersesPresenter.create(annotatedVersesViewHolder)
 

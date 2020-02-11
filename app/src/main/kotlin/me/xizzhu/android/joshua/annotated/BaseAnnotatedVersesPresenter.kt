@@ -82,12 +82,12 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
     }
 
     private suspend fun prepareItems(@Constants.SortOrder sortOrder: Int, currentTranslation: String): List<BaseItem> {
-        val verseAnnotations = interactor.verseAnnotations(sortOrder).dataOnSuccessOrThrow("Failed to load verse annotations")
+        val verseAnnotations = interactor.verseAnnotations(sortOrder)
         if (verseAnnotations.isEmpty()) return listOf(TextItem(activity.getString(noItemText)))
 
-        val bookNames = interactor.bookNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book names")
-        val bookShortNames = interactor.bookShortNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book short names")
-        val verses = interactor.verses(currentTranslation, verseAnnotations.map { it.verseIndex }).dataOnSuccessOrThrow("Failed to load verse")
+        val bookNames = interactor.bookNames(currentTranslation)
+        val bookShortNames = interactor.bookShortNames(currentTranslation)
+        val verses = interactor.verses(currentTranslation, verseAnnotations.map { it.verseIndex })
 
         return when (sortOrder) {
             Constants.SORT_BY_DATE -> verseAnnotations.toBaseItemsByDate(bookNames, bookShortNames, verses)
