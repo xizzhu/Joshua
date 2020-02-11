@@ -26,8 +26,6 @@ import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerViewHolder
 import javax.inject.Inject
 
 abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation> : BaseSettingsAwareActivity() {
@@ -36,8 +34,6 @@ abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation> : BaseSettingsAw
     @Inject
     lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter<V>
     @Inject
-    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
-    @Inject
     lateinit var annotatedVersesPresenter: BaseAnnotatedVersesPresenter<V, AnnotatedVersesInteractor<V>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,11 +41,11 @@ abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation> : BaseSettingsAw
 
         setContentView(R.layout.activity_annotated)
         toolbarPresenter.create(AnnotatedVersesToolbarViewHolder(findViewById(R.id.toolbar)))
-        loadingSpinnerPresenter.create(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
-        annotatedVersesPresenter.create(AnnotatedVersesViewHolder(findViewById(R.id.verse_list)))
+        annotatedVersesPresenter.create(AnnotatedVersesViewHolder(
+                findViewById(R.id.loading_spinner), findViewById(R.id.verse_list)))
     }
 
     override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = annotatedVersesViewModel
 
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(toolbarPresenter, loadingSpinnerPresenter, annotatedVersesPresenter)
+    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(toolbarPresenter, annotatedVersesPresenter)
 }

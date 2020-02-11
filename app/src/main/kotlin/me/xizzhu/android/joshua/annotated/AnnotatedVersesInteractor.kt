@@ -23,13 +23,13 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.toViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 
 class AnnotatedVersesInteractor<V : VerseAnnotation>(private val verseAnnotationManager: VerseAnnotationManager<V>,
                                                      private val bibleReadingManager: BibleReadingManager,
                                                      settingsManager: SettingsManager,
                                                      dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
+    : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
     fun currentTranslation(): Flow<ViewData<String>> =
             bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }.toViewData()
 
