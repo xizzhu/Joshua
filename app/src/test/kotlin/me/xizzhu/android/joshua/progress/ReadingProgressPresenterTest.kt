@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.progress
 
 import android.view.View
+import android.widget.ProgressBar
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -43,6 +44,8 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var readingProgressInteractor: ReadingProgressInteractor
     @Mock
+    private lateinit var loadingSpinner: ProgressBar
+    @Mock
     private lateinit var readingProgressListView: CommonRecyclerView
 
     private lateinit var readingProgressViewHolder: ReadingProgressViewHolder
@@ -57,7 +60,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
             `when`(readingProgressInteractor.bookNames()).thenReturn(ViewData.success(List(Bible.BOOK_COUNT) { i -> i.toString() }))
             `when`(readingProgressInteractor.readingProgress()).thenReturn(ViewData.success(ReadingProgress(0, 0L, emptyList())))
 
-            readingProgressViewHolder = ReadingProgressViewHolder(readingProgressListView)
+            readingProgressViewHolder = ReadingProgressViewHolder(loadingSpinner, readingProgressListView)
             readingProgressPresenter = ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressInteractor, testDispatcher)
         }
     }
@@ -81,12 +84,12 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         readingProgressPresenter.create(readingProgressViewHolder)
         readingProgressPresenter.start()
 
-        with(inOrder(readingProgressInteractor, readingProgressListView)) {
-            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.loading())
+        with(inOrder(loadingSpinner, readingProgressListView)) {
+            verify(loadingSpinner, times(1)).fadeIn()
             verify(readingProgressListView, times(1)).visibility = View.GONE
             verify(readingProgressListView, times(1)).setItems(any())
             verify(readingProgressListView, times(1)).fadeIn()
-            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.success(null))
+            verify(loadingSpinner, times(1)).visibility = View.GONE
         }
 
         readingProgressPresenter.stop()
@@ -101,14 +104,13 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         readingProgressPresenter.create(readingProgressViewHolder)
         readingProgressPresenter.start()
 
-        with(inOrder(readingProgressInteractor, readingProgressListView)) {
-            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.loading())
+        with(inOrder(loadingSpinner, readingProgressListView)) {
+            verify(loadingSpinner, times(1)).fadeIn()
             verify(readingProgressListView, times(1)).visibility = View.GONE
-            verify(readingProgressInteractor, times(1)).updateLoadingState(ViewData.error(exception = exception))
+            verify(loadingSpinner, times(1)).visibility = View.GONE
         }
         verify(readingProgressListView, never()).setItems(any())
         verify(readingProgressListView, never()).fadeIn()
-        verify(readingProgressInteractor, never()).updateLoadingState(ViewData.success(null))
 
         readingProgressPresenter.stop()
         readingProgressPresenter.destroy()

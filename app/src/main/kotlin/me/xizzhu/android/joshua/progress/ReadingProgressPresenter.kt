@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.progress
 
 import android.content.DialogInterface
 import android.view.View
+import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,7 +37,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 
-data class ReadingProgressViewHolder(val readingProgressListView: CommonRecyclerView) : ViewHolder
+data class ReadingProgressViewHolder(val loadingSpinner: ProgressBar,
+                                     val readingProgressListView: CommonRecyclerView) : ViewHolder
 
 class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgressActivity,
                                private val navigator: Navigator,
@@ -60,7 +62,7 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
     private fun loadReadingProgress() {
         coroutineScope.launch {
             try {
-                interactor.updateLoadingState(ViewData.loading())
+                viewHolder?.loadingSpinner?.fadeIn()
 
                 viewHolder?.readingProgressListView?.run {
                     visibility = View.GONE
@@ -74,14 +76,13 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
 
                     fadeIn()
                 }
-
-                interactor.updateLoadingState(ViewData.success(null))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load reading progress", e)
-                interactor.updateLoadingState(ViewData.error(exception = e))
                 readingProgressActivity.dialog(false, R.string.dialog_load_reading_progress_error,
                         DialogInterface.OnClickListener { _, _ -> loadReadingProgress() },
                         DialogInterface.OnClickListener { _, _ -> readingProgressActivity.finish() })
+            } finally {
+                viewHolder?.loadingSpinner?.visibility = View.GONE
             }
         }
     }
