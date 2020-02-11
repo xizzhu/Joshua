@@ -30,11 +30,11 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import kotlin.test.*
 
 class ReadingProgressPresenterTest : BaseUnitTest() {
     @Mock
@@ -127,6 +127,49 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         verify(navigator, times(1)).navigate(readingProgressActivity, Navigator.SCREEN_READING)
 
         readingProgressPresenter.destroy()
+    }
+
+    @Test
+    fun testToItems() {
+        val readingProgress = ReadingProgress(1, 23456L,
+                listOf(ReadingProgress.ChapterReadingStatus(0, 1, 1, 500L, 23456L),
+                        ReadingProgress.ChapterReadingStatus(0, 2, 2, 600L, 23457L),
+                        ReadingProgress.ChapterReadingStatus(2, 0, 3, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 0, 1, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 1, 2, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 2, 3, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 3, 4, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(63, 0, 1, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(64, 0, 1, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(65, 0, 0, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(65, 1, 2, 700L, 23458L)))
+
+        val expected = mutableListOf<BaseItem>(ReadingProgressSummaryItem(1, 10, 3, 1, 2))
+                .apply {
+                    addAll(Array(Bible.BOOK_COUNT) { bookIndex ->
+                        ReadingProgressDetailItem("bookName$bookIndex", bookIndex,
+                                Array(Bible.getChapterCount(bookIndex)) { chapterIndex ->
+                                    when (bookIndex) {
+                                        0 -> chapterIndex == 1 || chapterIndex == 2
+                                        2 -> chapterIndex == 0
+                                        7 -> chapterIndex == 0 || chapterIndex == 1 || chapterIndex == 2 || chapterIndex == 3
+                                        63, 64 -> chapterIndex == 0
+                                        65 -> chapterIndex == 1
+                                        else -> false
+                                    }
+                                }.toList(),
+                                when (bookIndex) {
+                                    0 -> 2
+                                    2, 63, 64, 65 -> 1
+                                    7 -> 4
+                                    else -> 0
+                                },
+                                readingProgressPresenter::onBookClicked, readingProgressPresenter::openChapter,
+                                readingProgressPresenter.expanded[bookIndex])
+                    }.toList())
+                }
+        val actual = with(readingProgressPresenter) { readingProgress.toItems(Array(Bible.BOOK_COUNT) { "bookName$it" }.toList()) }
+        assertEquals(expected, actual)
     }
 
     @Test

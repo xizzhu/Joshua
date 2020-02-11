@@ -28,11 +28,13 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
@@ -45,7 +47,8 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                                readingProgressInteractor: ReadingProgressInteractor,
                                dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : BaseSettingsAwarePresenter<ReadingProgressViewHolder, ReadingProgressInteractor>(readingProgressInteractor, dispatcher) {
-    private val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
+    @VisibleForTesting
+    val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 
     @UiThread
     override fun onCreate(viewHolder: ReadingProgressViewHolder) {
@@ -67,12 +70,7 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                 viewHolder?.readingProgressListView?.run {
                     visibility = View.GONE
 
-                    val bookNames = interactor.bookNames()
-                    val readingProgress = interactor.readingProgress()
-                    val items = readingProgress.toReadingProgressItems(bookNames, expanded,
-                            this@ReadingProgressPresenter::onBookClicked,
-                            this@ReadingProgressPresenter::openChapter)
-                    setItems(items)
+                    setItems(interactor.readingProgress().toItems(interactor.bookNames()))
 
                     fadeIn()
                 }
@@ -88,6 +86,44 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
     }
 
     @VisibleForTesting
+    fun ReadingProgress.toItems(bookNames: List<String>): List<BaseItem> {
+        var totalChaptersRead = 0
+        val chaptersReadPerBook = Array(Bible.BOOK_COUNT) { i ->
+            val chapterCount = Bible.getChapterCount(i)
+            ArrayList<Boolean>(chapterCount).apply { repeat(chapterCount) { add(false) } }
+        }
+        val chaptersReadCountPerBook = Array(Bible.BOOK_COUNT) { 0 }
+        for (chapter in chapterReadingStatus) {
+            if (chapter.readCount > 0) {
+                chaptersReadPerBook[chapter.bookIndex][chapter.chapterIndex] = true
+                chaptersReadCountPerBook[chapter.bookIndex]++
+                ++totalChaptersRead
+            }
+        }
+
+        var finishedBooks = 0
+        var finishedOldTestament = 0
+        var finishedNewTestament = 0
+        val detailItems = ArrayList<ReadingProgressDetailItem>(Bible.BOOK_COUNT)
+        for ((bookIndex, chaptersRead) in chaptersReadPerBook.withIndex()) {
+            val chaptersReadCount = chaptersReadCountPerBook[bookIndex]
+            if (chaptersReadCount == Bible.getChapterCount(bookIndex)) {
+                ++finishedBooks
+                if (bookIndex < Bible.OLD_TESTAMENT_COUNT) {
+                    ++finishedOldTestament
+                } else {
+                    ++finishedNewTestament
+                }
+            }
+            detailItems.add(ReadingProgressDetailItem(bookNames[bookIndex], bookIndex, chaptersRead,
+                    chaptersReadCount, this@ReadingProgressPresenter::onBookClicked,
+                    this@ReadingProgressPresenter::openChapter, expanded[bookIndex]))
+        }
+        return mutableListOf<BaseItem>(ReadingProgressSummaryItem(continuousReadingDays, totalChaptersRead, finishedBooks,
+                finishedOldTestament, finishedNewTestament)).apply { addAll(detailItems) }
+    }
+
+    @VisibleForTesting
     fun openChapter(bookIndex: Int, chapterIndex: Int) {
         coroutineScope.launch {
             try {
@@ -100,7 +136,8 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
         }
     }
 
-    private fun onBookClicked(bookIndex: Int, expanded: Boolean) {
+    @VisibleForTesting
+    fun onBookClicked(bookIndex: Int, expanded: Boolean) {
         this.expanded[bookIndex] = expanded
     }
 }
