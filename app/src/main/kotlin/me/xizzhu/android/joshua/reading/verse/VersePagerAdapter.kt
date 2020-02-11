@@ -149,9 +149,10 @@ private class Page(inflater: LayoutInflater, container: ViewGroup,
     fun bind(payloads: MutableList<Any>) {
         payloads.forEach { payload ->
             when (payload) {
-                is VerseUpdate -> when (payload.operation) {
-                    VerseUpdate.VERSE_SELECTED -> selectVerse(payload)
-                    VerseUpdate.VERSE_DESELECTED -> deselectVerse(payload)
+                is VerseUpdate -> if (payload.operation == VerseUpdate.VERSE_SELECTED) {
+                    selectVerse(payload)
+                } else {
+                    notifyVerseUpdate(payload)
                 }
                 is Verses -> setVerses(payload)
             }
@@ -209,9 +210,5 @@ private class Page(inflater: LayoutInflater, container: ViewGroup,
 
     private fun notifyVerseUpdate(verseUpdate: VerseUpdate) {
         verseList.adapter?.notifyItemChanged(verseUpdate.verseIndex.toItemPosition(), verseUpdate)
-    }
-
-    private fun deselectVerse(verseUpdate: VerseUpdate) {
-        notifyVerseUpdate(verseUpdate)
     }
 }
