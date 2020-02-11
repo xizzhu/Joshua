@@ -57,8 +57,8 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
 
         runBlocking {
             `when`(readingProgressInteractor.settings()).thenReturn(emptyFlow())
-            `when`(readingProgressInteractor.bookNames()).thenReturn(ViewData.success(List(Bible.BOOK_COUNT) { i -> i.toString() }))
-            `when`(readingProgressInteractor.readingProgress()).thenReturn(ViewData.success(ReadingProgress(0, 0L, emptyList())))
+            `when`(readingProgressInteractor.bookNames()).thenReturn(List(Bible.BOOK_COUNT) { i -> i.toString() })
+            `when`(readingProgressInteractor.readingProgress()).thenReturn(ReadingProgress(0, 0L, emptyList()))
 
             readingProgressViewHolder = ReadingProgressViewHolder(loadingSpinner, readingProgressListView)
             readingProgressPresenter = ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressInteractor, testDispatcher)
@@ -79,7 +79,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
 
     @Test
     fun testLoadReadingProgress() = testDispatcher.runBlockingTest {
-        `when`(readingProgressInteractor.readingProgress()).thenReturn(ViewData.success(ReadingProgress(5, 4321L, emptyList())))
+        `when`(readingProgressInteractor.readingProgress()).thenReturn(ReadingProgress(5, 4321L, emptyList()))
 
         readingProgressPresenter.create(readingProgressViewHolder)
         readingProgressPresenter.start()

@@ -20,8 +20,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 
 class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager,
@@ -29,11 +27,11 @@ class ReadingProgressInteractor(private val readingProgressManager: ReadingProgr
                                 settingsManager: SettingsManager,
                                 dispatcher: CoroutineDispatcher = Dispatchers.Default)
     : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
-    suspend fun bookNames(): ViewData<List<String>> = bibleReadingManager
-            .currentTranslation().filter { it.isNotEmpty() }.first()
-            .let { currentTranslation -> viewData { bibleReadingManager.readBookNames(currentTranslation) } }
+    suspend fun bookNames(): List<String> = bibleReadingManager.currentTranslation()
+            .filter { it.isNotEmpty() }.first()
+            .let { bibleReadingManager.readBookNames(it) }
 
-    suspend fun readingProgress(): ViewData<ReadingProgress> = viewData { readingProgressManager.read() }
+    suspend fun readingProgress(): ReadingProgress = readingProgressManager.read()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) = bibleReadingManager.saveCurrentVerseIndex(verseIndex)
 }

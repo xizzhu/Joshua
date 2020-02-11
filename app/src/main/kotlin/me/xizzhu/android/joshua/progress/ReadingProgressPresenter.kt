@@ -67,8 +67,8 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                 viewHolder?.readingProgressListView?.run {
                     visibility = View.GONE
 
-                    val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
-                    val readingProgress = interactor.readingProgress().dataOnSuccessOrThrow("Failed to load reading progress")
+                    val bookNames = interactor.bookNames()
+                    val readingProgress = interactor.readingProgress()
                     val items = readingProgress.toReadingProgressItems(bookNames, expanded,
                             this@ReadingProgressPresenter::onBookClicked,
                             this@ReadingProgressPresenter::openChapter)
