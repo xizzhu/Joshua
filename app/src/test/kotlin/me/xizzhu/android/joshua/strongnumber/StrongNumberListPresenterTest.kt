@@ -25,7 +25,6 @@ import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -87,7 +86,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     fun testLoadStrongNumber() = testDispatcher.runBlockingTest {
         `when`(strongNumberListActivity.strongNumber()).thenReturn("H7225")
         `when`(strongNumberListInteractor.strongNumber("H7225")).thenReturn(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225")))
-        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(viewData { MockContents.kjvShortName }))
+        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(ViewData.success(MockContents.kjvShortName)))
         `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
         `when`(strongNumberListInteractor.bookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
         `when`(strongNumberListInteractor.verseIndexes("H7225")).thenReturn(MockContents.strongNumberReverseIndex.getValue("H7225"))
@@ -118,7 +117,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     fun testLoadStrongNumberWithException() = testDispatcher.runBlockingTest {
         val exception = RuntimeException("random exception")
         `when`(strongNumberListInteractor.strongNumber(anyString())).thenThrow(exception)
-        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(viewData { MockContents.kjvShortName }))
+        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(ViewData.success(MockContents.kjvShortName)))
         `when`(strongNumberListActivity.strongNumber()).thenReturn("sn")
 
         strongNumberListPresenter.create(strongNumberListViewHolder)
