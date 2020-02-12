@@ -81,15 +81,14 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
     private suspend fun prepareItems(sn: String, currentTranslation: String): List<BaseItem> {
         val items: ArrayList<BaseItem> = ArrayList()
 
-        val strongNumber = interactor.strongNumber(sn).dataOnSuccessOrThrow("Failed to load Strong number")
+        val strongNumber = interactor.strongNumber(sn)
         items.add(TextItem(formatStrongNumber(strongNumber)))
 
-        val bookNames = interactor.bookNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book names")
-        val bookShortNames = interactor.bookShortNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book short names")
+        val bookNames = interactor.bookNames(currentTranslation)
+        val bookShortNames = interactor.bookShortNames(currentTranslation)
         val verseIndexes = interactor.verseIndexes(sn)
-                .dataOnSuccessOrThrow("Failed to load verse indexes")
                 .sortedBy { it.bookIndex * 100000 + it.chapterIndex * 1000 + it.verseIndex }
-        val verses = interactor.verses(currentTranslation, verseIndexes).dataOnSuccessOrThrow("Failed to load verses")
+        val verses = interactor.verses(currentTranslation, verseIndexes)
         var currentBookIndex = -1
         verseIndexes.forEach { verseIndex ->
             val bookName = bookNames[verseIndex.bookIndex]

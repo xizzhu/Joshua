@@ -86,13 +86,13 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadStrongNumber() = testDispatcher.runBlockingTest {
         `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf(viewData { "H7225" }))
-        `when`(strongNumberListInteractor.strongNumber("H7225")).thenReturn(ViewData.success(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225"))))
+        `when`(strongNumberListInteractor.strongNumber("H7225")).thenReturn(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225")))
         `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(viewData { MockContents.kjvShortName }))
-        `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookNames))
-        `when`(strongNumberListInteractor.bookShortNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
-        `when`(strongNumberListInteractor.verseIndexes("H7225")).thenReturn(ViewData.success(MockContents.strongNumberReverseIndex.getValue("H7225")))
+        `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+        `when`(strongNumberListInteractor.bookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(strongNumberListInteractor.verseIndexes("H7225")).thenReturn(MockContents.strongNumberReverseIndex.getValue("H7225"))
         `when`(strongNumberListInteractor.verses(MockContents.kjvShortName, MockContents.strongNumberReverseIndex.getValue("H7225")))
-                .thenReturn(ViewData.success(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0])))
+                .thenReturn(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0]))
 
         strongNumberListPresenter = spy(strongNumberListPresenter)
         doReturn("formatted strong number").`when`(strongNumberListPresenter).formatStrongNumber(any())
