@@ -23,20 +23,9 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.StrongNumberManager
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
 @Module
 object StrongNumberListModule {
-    @ActivityScope
-    @Provides
-    fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
-
-    @ActivityScope
-    @Provides
-    fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(loadingSpinnerInteractor)
-
     @ActivityScope
     @Provides
     fun provideStrongNumberListInteractor(strongNumberManager: StrongNumberManager,
@@ -54,7 +43,6 @@ object StrongNumberListModule {
     @ActivityScope
     @Provides
     fun provideStrongNumberViewModel(settingsManager: SettingsManager,
-                                     loadingSpinnerInteractor: LoadingSpinnerInteractor,
                                      strongNumberListInteractor: StrongNumberListInteractor): StrongNumberListViewModel =
-            StrongNumberListViewModel(settingsManager, loadingSpinnerInteractor, strongNumberListInteractor)
+            StrongNumberListViewModel(settingsManager, strongNumberListInteractor)
 }

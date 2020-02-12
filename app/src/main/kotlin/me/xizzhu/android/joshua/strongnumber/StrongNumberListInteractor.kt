@@ -27,13 +27,13 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.toViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 
 class StrongNumberListInteractor(private val strongNumberManager: StrongNumberManager,
                                  private val bibleReadingManager: BibleReadingManager,
                                  settingsManager: SettingsManager,
                                  dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
+    : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val strongNumberRequest: BroadcastChannel<String> = ConflatedBroadcastChannel()
 

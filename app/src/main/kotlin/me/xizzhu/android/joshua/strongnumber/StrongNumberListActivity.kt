@@ -23,8 +23,6 @@ import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerViewHolder
 import javax.inject.Inject
 
 class StrongNumberListActivity : BaseSettingsAwareActivity() {
@@ -38,22 +36,19 @@ class StrongNumberListActivity : BaseSettingsAwareActivity() {
     lateinit var strongNumberListViewModel: StrongNumberListViewModel
 
     @Inject
-    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
-
-    @Inject
     lateinit var strongNumberListPresenter: StrongNumberListPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_strong_number)
-        loadingSpinnerPresenter.create(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
-        strongNumberListPresenter.create(StrongNumberListViewHolder(findViewById(R.id.strong_number_list)))
+        strongNumberListPresenter.create(StrongNumberListViewHolder(
+                findViewById(R.id.loading_spinner), findViewById(R.id.strong_number_list)))
 
         intent.getStringExtra(KEY_STRONG_NUMBER)?.let { strongNumberListViewModel.loadStrongNumber(it) }
     }
 
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(loadingSpinnerPresenter, strongNumberListPresenter)
+    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(strongNumberListPresenter)
 
     override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = strongNumberListViewModel
 }
