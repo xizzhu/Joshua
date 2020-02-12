@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 import me.xizzhu.android.joshua.search.result.SearchResultInteractor
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -36,8 +35,6 @@ class SearchViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var searchToolbarInteractor: SearchToolbarInteractor
     @Mock
-    private lateinit var loadingSpinnerInteractor: LoadingSpinnerInteractor
-    @Mock
     private lateinit var searchResultInteractor: SearchResultInteractor
 
     private lateinit var searchViewModel: SearchViewModel
@@ -47,9 +44,8 @@ class SearchViewModelTest : BaseUnitTest() {
         super.setup()
 
         `when`(searchToolbarInteractor.query()).thenReturn(emptyFlow())
-        `when`(searchResultInteractor.loadingState()).thenReturn(emptyFlow())
 
-        searchViewModel = SearchViewModel(settingsManager, searchToolbarInteractor, loadingSpinnerInteractor, searchResultInteractor, testDispatcher)
+        searchViewModel = SearchViewModel(settingsManager, searchToolbarInteractor, searchResultInteractor, testDispatcher)
     }
 
     @Test
@@ -60,18 +56,6 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.create()
         with(inOrder(searchResultInteractor)) {
             queries.forEach { query -> verify(searchResultInteractor, times(1)).updateQuery(ViewData.success(query)) }
-        }
-        searchViewModel.destroy()
-    }
-
-    @Test
-    fun testLoadingState() = testDispatcher.runBlockingTest {
-        val loadingState = listOf(ViewData.error(), ViewData.loading(), ViewData.success(null))
-        `when`(searchResultInteractor.loadingState()).thenReturn(flow { loadingState.forEach { emit(it) } })
-
-        searchViewModel.create()
-        with(inOrder(loadingSpinnerInteractor)) {
-            loadingState.forEach { verify(loadingSpinnerInteractor, times(1)).updateLoadingState(it) }
         }
         searchViewModel.destroy()
     }

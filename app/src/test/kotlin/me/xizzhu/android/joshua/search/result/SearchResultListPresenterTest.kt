@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.search.result
 
 import android.view.View
+import android.widget.ProgressBar
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -28,11 +29,11 @@ import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,6 +45,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     private lateinit var navigator: Navigator
     @Mock
     private lateinit var searchResultInteractor: SearchResultInteractor
+    @Mock
+    private lateinit var loadingSpinner: ProgressBar
     @Mock
     private lateinit var searchResultListView: CommonRecyclerView
 
@@ -57,7 +60,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         `when`(searchResultInteractor.settings()).thenReturn(emptyFlow())
         `when`(searchResultInteractor.query()).thenReturn(emptyFlow())
 
-        searchResultViewHolder = SearchResultViewHolder(searchResultListView)
+        searchResultViewHolder = SearchResultViewHolder(loadingSpinner, searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchResultInteractor, testDispatcher)
     }
 
@@ -141,12 +144,11 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
         searchResultListPresenter.create(searchResultViewHolder)
 
-        with(inOrder(searchResultInteractor, searchResultListView)) {
-            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.loading())
+        with(inOrder(loadingSpinner, searchResultListView)) {
+            verify(loadingSpinner, times(1)).fadeIn()
             verify(searchResultListView, times(1)).setItems(any())
-            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.success(null))
+            verify(loadingSpinner, times(1)).visibility = View.GONE
         }
-        verify(searchResultInteractor, never()).updateLoadingState(ViewData.error())
 
         searchResultListPresenter.destroy()
     }
@@ -160,12 +162,11 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
         searchResultListPresenter.create(searchResultViewHolder)
 
-        with(inOrder(searchResultInteractor, searchResultListView)) {
-            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.loading())
-            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.error(exception = exception))
+        with(inOrder(loadingSpinner, searchResultListView)) {
+            verify(loadingSpinner, times(1)).fadeIn()
+            verify(loadingSpinner, times(1)).visibility = View.GONE
         }
         verify(searchResultListView, never()).setItems(any())
-        verify(searchResultInteractor, never()).updateLoadingState(ViewData.success(null))
 
         searchResultListPresenter.destroy()
     }

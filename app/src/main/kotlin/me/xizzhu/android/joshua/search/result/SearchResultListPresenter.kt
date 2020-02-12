@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.search.result
 
 import android.content.DialogInterface
 import android.view.View
+import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
@@ -40,7 +41,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 
-data class SearchResultViewHolder(val searchResultListView: CommonRecyclerView) : ViewHolder
+data class SearchResultViewHolder(val loadingSpinner: ProgressBar,
+                                  val searchResultListView: CommonRecyclerView) : ViewHolder
 
 class SearchResultListPresenter(private val searchActivity: SearchActivity,
                                 private val navigator: Navigator,
@@ -90,7 +92,7 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
 
     private suspend fun search(query: String) {
         try {
-            interactor.updateLoadingState(ViewData.loading())
+            viewHolder?.loadingSpinner?.fadeIn()
 
             viewHolder?.searchResultListView?.run {
                 visibility = View.GONE
@@ -103,13 +105,12 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
 
                 searchActivity.toast(searchActivity.getString(R.string.toast_verses_searched, verses.size))
             }
-
-            interactor.updateLoadingState(ViewData.success(null))
         } catch (e: Exception) {
             Log.e(tag, "Failed to search verses", e)
-            interactor.updateLoadingState(ViewData.error(exception = e))
             searchActivity.dialog(true, R.string.dialog_search_error,
                     DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { search(query) } })
+        } finally {
+            viewHolder?.loadingSpinner?.visibility = View.GONE
         }
     }
 

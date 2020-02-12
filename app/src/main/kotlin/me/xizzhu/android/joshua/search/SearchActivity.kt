@@ -23,8 +23,6 @@ import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerViewHolder
 import me.xizzhu.android.joshua.search.result.SearchResultListPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultViewHolder
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
@@ -39,9 +37,6 @@ class SearchActivity : BaseSettingsAwareActivity() {
     lateinit var searchToolbarPresenter: SearchToolbarPresenter
 
     @Inject
-    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
-
-    @Inject
     lateinit var searchResultListPresenter: SearchResultListPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,11 +44,11 @@ class SearchActivity : BaseSettingsAwareActivity() {
 
         setContentView(R.layout.activity_search)
         searchToolbarPresenter.create(SearchToolbarViewHolder(findViewById(R.id.toolbar)))
-        loadingSpinnerPresenter.create(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
-        searchResultListPresenter.create(SearchResultViewHolder(findViewById(R.id.search_result)))
+        searchResultListPresenter.create(SearchResultViewHolder(
+                findViewById(R.id.loading_spinner), findViewById(R.id.search_result)))
     }
 
     override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = searchViewModel
 
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(searchToolbarPresenter, loadingSpinnerPresenter, searchResultListPresenter)
+    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(searchToolbarPresenter, searchResultListPresenter)
 }

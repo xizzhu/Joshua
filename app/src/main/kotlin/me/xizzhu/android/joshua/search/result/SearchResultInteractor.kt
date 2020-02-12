@@ -30,12 +30,12 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.viewData
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 
 class SearchResultInteractor(private val bibleReadingManager: BibleReadingManager,
                              settingsManager: SettingsManager,
                              dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
+    : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val query: BroadcastChannel<ViewData<String>> = ConflatedBroadcastChannel()
 
