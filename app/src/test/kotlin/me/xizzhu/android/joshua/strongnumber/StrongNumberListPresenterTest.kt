@@ -62,9 +62,9 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
         `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
         `when`(resources.getStringArray(anyInt())).thenReturn(Array(12) { "" })
         `when`(strongNumberListActivity.resources).thenReturn(resources)
+        `when`(strongNumberListActivity.strongNumber()).thenReturn("")
 
         `when`(strongNumberListInteractor.settings()).thenReturn(emptyFlow())
-        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(emptyFlow())
         `when`(strongNumberListInteractor.currentTranslation()).thenReturn(emptyFlow())
 
         strongNumberListViewHolder = StrongNumberListViewHolder(loadingSpinner, strongNumberListView)
@@ -85,7 +85,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testLoadStrongNumber() = testDispatcher.runBlockingTest {
-        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf(viewData { "H7225" }))
+        `when`(strongNumberListActivity.strongNumber()).thenReturn("H7225")
         `when`(strongNumberListInteractor.strongNumber("H7225")).thenReturn(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225")))
         `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(viewData { MockContents.kjvShortName }))
         `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
@@ -118,8 +118,8 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     fun testLoadStrongNumberWithException() = testDispatcher.runBlockingTest {
         val exception = RuntimeException("random exception")
         `when`(strongNumberListInteractor.strongNumber(anyString())).thenThrow(exception)
-        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf(viewData { "sn" }))
         `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(viewData { MockContents.kjvShortName }))
+        `when`(strongNumberListActivity.strongNumber()).thenReturn("sn")
 
         strongNumberListPresenter.create(strongNumberListViewHolder)
 

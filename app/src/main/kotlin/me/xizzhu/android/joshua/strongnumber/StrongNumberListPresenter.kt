@@ -52,8 +52,8 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
         super.onCreate(viewHolder)
 
         interactor.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(coroutineScope)
-        interactor.strongNumberRequest().combineOnSuccess(interactor.currentTranslation()) { sn, currentTranslation ->
-            loadStrongNumber(sn, currentTranslation)
+        interactor.currentTranslation().onEachSuccess {
+            loadStrongNumber(strongNumberListActivity.strongNumber(), it)
         }.launchIn(coroutineScope)
     }
 

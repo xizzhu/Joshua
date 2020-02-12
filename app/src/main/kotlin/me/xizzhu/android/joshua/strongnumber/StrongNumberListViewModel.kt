@@ -18,15 +18,10 @@ package me.xizzhu.android.joshua.strongnumber
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 
 class StrongNumberListViewModel(settingsManager: SettingsManager,
-                                private val strongNumberListInteractor: StrongNumberListInteractor,
+                                strongNumberListInteractor: StrongNumberListInteractor,
                                 dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(strongNumberListInteractor), dispatcher) {
-    fun loadStrongNumber(sn: String) {
-        coroutineScope.launch { strongNumberListInteractor.requestStrongNumber(sn) }
-    }
-}
+    : BaseSettingsAwareViewModel(settingsManager, listOf(strongNumberListInteractor), dispatcher)

@@ -44,11 +44,11 @@ class StrongNumberListActivity : BaseSettingsAwareActivity() {
         setContentView(R.layout.activity_strong_number)
         strongNumberListPresenter.create(StrongNumberListViewHolder(
                 findViewById(R.id.loading_spinner), findViewById(R.id.strong_number_list)))
-
-        intent.getStringExtra(KEY_STRONG_NUMBER)?.let { strongNumberListViewModel.loadStrongNumber(it) }
     }
 
     override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(strongNumberListPresenter)
 
     override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = strongNumberListViewModel
+
+    fun strongNumber(): String = intent.getStringExtra(KEY_STRONG_NUMBER) ?: ""
 }
