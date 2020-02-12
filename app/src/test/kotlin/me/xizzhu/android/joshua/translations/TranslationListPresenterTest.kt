@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.translations
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -33,6 +34,8 @@ class TranslationListPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var translationListInteractor: TranslationListInteractor
     @Mock
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    @Mock
     private lateinit var translationListView: CommonRecyclerView
 
     private lateinit var translationListViewHolder: TranslationListViewHolder
@@ -45,7 +48,7 @@ class TranslationListPresenterTest : BaseUnitTest() {
         `when`(translationListInteractor.settings()).thenReturn(emptyFlow())
         `when`(translationListInteractor.translationList()).thenReturn(emptyFlow())
 
-        translationListViewHolder = TranslationListViewHolder(translationListView)
+        translationListViewHolder = TranslationListViewHolder(swipeRefreshLayout, translationListView)
         translationListPresenter = TranslationListPresenter(translationManagementActivity, translationListInteractor, testDispatcher)
         translationListPresenter.create(translationListViewHolder)
     }
@@ -57,12 +60,9 @@ class TranslationListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadTranslationRequestedOnBind() {
-        translationListPresenter.start()
+    fun testLoadTranslationRequestedOnCreate() {
         verify(translationListInteractor, times(1)).loadTranslationList(false)
         verify(translationListInteractor, never()).loadTranslationList(true)
-
-        translationListPresenter.stop()
     }
 
     @Test
@@ -70,25 +70,17 @@ class TranslationListPresenterTest : BaseUnitTest() {
         val translation = MockContents.kjvTranslationInfo
         `when`(translationListInteractor.downloadTranslation(translation)).thenReturn(emptyFlow())
 
-        translationListPresenter.start()
-
         translationListPresenter.onTranslationClicked(translation)
         verify(translationListInteractor, times(1)).downloadTranslation(translation)
-
-        translationListPresenter.stop()
     }
 
     @Test
     fun testOnDownloadedTranslationClicked() = testDispatcher.runBlockingTest {
-        translationListPresenter.start()
-
         val translation = MockContents.kjvDownloadedTranslationInfo
         translationListPresenter.onTranslationClicked(translation)
         verify(translationListInteractor, times(1)).saveCurrentTranslation(translation.shortName)
         verify(translationManagementActivity, times(1)).finish()
         verify(translationListInteractor, never()).downloadTranslation(translation)
-
-        translationListPresenter.stop()
     }
 
     @Test
@@ -96,12 +88,8 @@ class TranslationListPresenterTest : BaseUnitTest() {
         val translation = MockContents.kjvDownloadedTranslationInfo
         `when`(translationListInteractor.saveCurrentTranslation(translation.shortName)).thenThrow(RuntimeException("random exception"))
 
-        translationListPresenter.start()
-
         translationListPresenter.onTranslationClicked(translation)
         verify(translationListInteractor, never()).downloadTranslation(translation)
-
-        translationListPresenter.stop()
     }
 
     @Test
@@ -109,11 +97,7 @@ class TranslationListPresenterTest : BaseUnitTest() {
         val translation = MockContents.kjvTranslationInfo
         `when`(translationListInteractor.downloadTranslation(translation)).thenReturn(emptyFlow())
 
-        translationListPresenter.start()
-
         translationListPresenter.onTranslationLongClicked(translation, false)
         verify(translationListInteractor, times(1)).downloadTranslation(translation)
-
-        translationListPresenter.stop()
     }
 }
