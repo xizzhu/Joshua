@@ -98,12 +98,14 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testInstantSearch() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
         val query = "query"
         val verses = MockContents.kjvVerses
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.loading(query)))
-        `when`(searchResultInteractor.search(query)).thenReturn(ViewData.success(verses))
-        `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
-        `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
+        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
+        `when`(searchResultInteractor.search(currentTranslation, query)).thenReturn(verses)
+        `when`(searchResultInteractor.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(searchResultInteractor.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
         `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
 
         searchResultListPresenter.create(searchResultViewHolder)
@@ -119,10 +121,12 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testInstantSearchWithException() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
         val query = "query"
         val exception = RuntimeException("Random exception")
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.loading(query)))
-        `when`(searchResultInteractor.search(query)).thenThrow(exception)
+        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
+        `when`(searchResultInteractor.search(currentTranslation, query)).thenThrow(exception)
 
         searchResultListPresenter.create(searchResultViewHolder)
 
@@ -134,12 +138,14 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testSearch() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
         val query = "query"
         val verses = MockContents.kjvVerses
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.success(query)))
-        `when`(searchResultInteractor.search(query)).thenReturn(ViewData.success(verses))
-        `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
-        `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
+        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
+        `when`(searchResultInteractor.search(currentTranslation, query)).thenReturn(verses)
+        `when`(searchResultInteractor.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(searchResultInteractor.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
         `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
 
         searchResultListPresenter.create(searchResultViewHolder)
@@ -155,10 +161,12 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testSearchWithException() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
         val query = "query"
         val exception = RuntimeException("Random exception")
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.success(query)))
-        `when`(searchResultInteractor.search(query)).thenThrow(exception)
+        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
+        `when`(searchResultInteractor.search(currentTranslation, query)).thenThrow(exception)
 
         searchResultListPresenter.create(searchResultViewHolder)
 
@@ -173,8 +181,9 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testToSearchItems() = testDispatcher.runBlockingTest {
-        `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
-        `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
+        val currentTranslation = MockContents.kjvShortName
+        `when`(searchResultInteractor.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(searchResultInteractor.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
 
         with(searchResultListPresenter) {
             val query = "query"
@@ -186,7 +195,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
                             SearchItem(MockContents.kjvVerses[1].verseIndex,
                                     MockContents.kjvBookShortNames[0], MockContents.kjvVerses[1].text.text, query, this::selectVerse)
                     ),
-                    listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toSearchItems(query)
+                    listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toSearchItems(currentTranslation, query)
             )
         }
     }

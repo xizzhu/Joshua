@@ -80,7 +80,8 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
     private suspend fun instantSearch(query: String) {
         try {
             viewHolder?.searchResultListView?.run {
-                setItems(interactor.search(query).dataOnSuccessOrThrow("Failed to search verses").toSearchItems(query))
+                val currentTranslation = interactor.currentTranslation()
+                setItems(interactor.search(currentTranslation, query).toSearchItems(currentTranslation, query))
                 scrollToPosition(0)
                 visibility = View.VISIBLE
             }
@@ -97,8 +98,9 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
             viewHolder?.searchResultListView?.run {
                 visibility = View.GONE
 
-                val verses = interactor.search(query).dataOnSuccessOrThrow("Failed to search verses")
-                setItems(verses.toSearchItems(query))
+                val currentTranslation = interactor.currentTranslation()
+                val verses = interactor.search(currentTranslation, query)
+                setItems(verses.toSearchItems(currentTranslation, query))
 
                 scrollToPosition(0)
                 fadeIn()
@@ -115,9 +117,9 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
     }
 
     @VisibleForTesting
-    suspend fun List<Verse>.toSearchItems(query: String): List<BaseItem> {
-        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
-        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
+    suspend fun List<Verse>.toSearchItems(currentTranslation: String, query: String): List<BaseItem> {
+        val bookNames = interactor.bookNames(currentTranslation)
+        val bookShortNames = interactor.bookShortNames(currentTranslation)
         val items = ArrayList<BaseItem>(size + Bible.BOOK_COUNT)
         var lastVerseBookIndex = -1
         forEach { verse ->

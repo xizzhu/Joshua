@@ -29,7 +29,6 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 
 class SearchResultInteractor(private val bibleReadingManager: BibleReadingManager,
@@ -45,17 +44,17 @@ class SearchResultInteractor(private val bibleReadingManager: BibleReadingManage
         this.query.offer(query)
     }
 
-    suspend fun search(query: String): ViewData<List<Verse>> =
-            viewData { bibleReadingManager.search(readCurrentTranslation(), query) }
-
-    private suspend fun readCurrentTranslation(): String =
+    suspend fun currentTranslation(): String =
             bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }.first()
 
-    suspend fun bookNames(): ViewData<List<String>> =
-            viewData { bibleReadingManager.readBookNames(readCurrentTranslation()) }
+    suspend fun search(currentTranslation: String, query: String): List<Verse> =
+            bibleReadingManager.search(currentTranslation, query)
 
-    suspend fun bookShortNames(): ViewData<List<String>> =
-            viewData { bibleReadingManager.readBookShortNames(readCurrentTranslation()) }
+    suspend fun bookNames(currentTranslation: String): List<String> =
+            bibleReadingManager.readBookNames(currentTranslation)
+
+    suspend fun bookShortNames(currentTranslation: String): List<String> =
+            bibleReadingManager.readBookShortNames(currentTranslation)
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
