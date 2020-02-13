@@ -109,14 +109,15 @@ dependencies {
 
     implementation(Dependencies.AndroidX.annotation)
     implementation(Dependencies.AndroidX.appCompat)
-    implementation(Dependencies.AndroidX.constraintLayout)
-    implementation(Dependencies.AndroidX.coordinatorLayout)
     implementation(Dependencies.AndroidX.core)
-    implementation(Dependencies.AndroidX.drawerLayout)
-    implementation(Dependencies.AndroidX.material)
-    implementation(Dependencies.AndroidX.recyclerView)
-    implementation(Dependencies.AndroidX.swipeRefreshLayout)
-    implementation(Dependencies.AndroidX.viewPager2)
+
+    implementation(Dependencies.AndroidX.View.constraintLayout)
+    implementation(Dependencies.AndroidX.View.coordinatorLayout)
+    implementation(Dependencies.AndroidX.View.drawerLayout)
+    implementation(Dependencies.AndroidX.View.material)
+    implementation(Dependencies.AndroidX.View.recyclerView)
+    implementation(Dependencies.AndroidX.View.swipeRefreshLayout)
+    implementation(Dependencies.AndroidX.View.viewPager2)
 
     implementation(Dependencies.Firebase.core)
     implementation(Dependencies.Firebase.analytics)

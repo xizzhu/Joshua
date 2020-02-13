@@ -54,14 +54,17 @@ object Versions {
     object AndroidX {
         const val annotation = "1.1.0"
         const val appCompat = "1.1.0"
-        const val constraintLayout = "1.1.3"
-        const val coordinatorLayout = "1.1.0"
         const val core = "1.2.0"
-        const val drawerLayout = "1.0.0"
-        const val material = "1.1.0"
-        const val recyclerView = "1.1.0"
-        const val swipeRefreshLayout = "1.0.0"
-        const val viewPager2 = "1.0.0"
+
+        object View {
+            const val constraintLayout = "1.1.3"
+            const val coordinatorLayout = "1.1.0"
+            const val drawerLayout = "1.0.0"
+            const val material = "1.1.0"
+            const val recyclerView = "1.1.0"
+            const val swipeRefreshLayout = "1.0.0"
+            const val viewPager2 = "1.0.0"
+        }
 
         object Test {
             const val junit = "1.1.1"
@@ -111,14 +114,17 @@ object Dependencies {
     object AndroidX {
         const val annotation = "androidx.annotation:annotation:${Versions.AndroidX.annotation}"
         const val appCompat = "androidx.appcompat:appcompat:${Versions.AndroidX.appCompat}"
-        const val constraintLayout = "androidx.constraintlayout:constraintlayout:${Versions.AndroidX.constraintLayout}"
-        const val coordinatorLayout = "androidx.coordinatorlayout:coordinatorlayout:${Versions.AndroidX.coordinatorLayout}"
         const val core = "androidx.core:core:${Versions.AndroidX.core}"
-        const val drawerLayout = "androidx.drawerlayout:drawerlayout:${Versions.AndroidX.drawerLayout}"
-        const val material = "com.google.android.material:material:${Versions.AndroidX.material}"
-        const val recyclerView = "androidx.recyclerview:recyclerview:${Versions.AndroidX.recyclerView}"
-        const val swipeRefreshLayout = "androidx.swiperefreshlayout:swiperefreshlayout:${Versions.AndroidX.swipeRefreshLayout}"
-        const val viewPager2 = "androidx.viewpager2:viewpager2:${Versions.AndroidX.viewPager2}"
+
+        object View {
+            const val constraintLayout = "androidx.constraintlayout:constraintlayout:${Versions.AndroidX.View.constraintLayout}"
+            const val coordinatorLayout = "androidx.coordinatorlayout:coordinatorlayout:${Versions.AndroidX.View.coordinatorLayout}"
+            const val drawerLayout = "androidx.drawerlayout:drawerlayout:${Versions.AndroidX.View.drawerLayout}"
+            const val material = "com.google.android.material:material:${Versions.AndroidX.View.material}"
+            const val recyclerView = "androidx.recyclerview:recyclerview:${Versions.AndroidX.View.recyclerView}"
+            const val swipeRefreshLayout = "androidx.swiperefreshlayout:swiperefreshlayout:${Versions.AndroidX.View.swipeRefreshLayout}"
+            const val viewPager2 = "androidx.viewpager2:viewpager2:${Versions.AndroidX.View.viewPager2}"
+        }
 
         object Test {
             const val junit = "androidx.test.ext:junit:${Versions.AndroidX.Test.junit}"
