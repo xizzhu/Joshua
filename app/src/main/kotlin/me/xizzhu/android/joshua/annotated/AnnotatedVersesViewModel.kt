@@ -16,26 +16,15 @@
 
 package me.xizzhu.android.joshua.annotated
 
-import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 
 class AnnotatedVersesViewModel<V : VerseAnnotation>(settingsManager: SettingsManager,
                                                     annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<V>,
-                                                    private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
-                                                    private val annotatedVersesInteractor: AnnotatedVersesInteractor<V>,
+                                                    annotatedVersesInteractor: AnnotatedVersesInteractor<V>,
                                                     dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(annotatedVersesToolbarInteractor, loadingSpinnerInteractor, annotatedVersesInteractor), dispatcher) {
-    @UiThread
-    override fun onCreate() {
-        super.onCreate()
-        annotatedVersesInteractor.loadingState().onEach { loadingSpinnerInteractor.updateLoadingState(it) }.launchIn(coroutineScope)
-    }
-}
+    : BaseSettingsAwareViewModel(settingsManager, listOf(annotatedVersesToolbarInteractor, annotatedVersesInteractor), dispatcher)

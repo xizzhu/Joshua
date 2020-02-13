@@ -21,6 +21,7 @@ import android.view.View
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -37,7 +38,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.logger.Log
 import java.util.ArrayList
 
-data class TranslationListViewHolder(val translationListView: CommonRecyclerView) : ViewHolder
+data class TranslationListViewHolder(val swipeRefreshLayout: SwipeRefreshLayout,
+                                     val translationListView: CommonRecyclerView) : ViewHolder
 
 class TranslationListPresenter(private val translationManagementActivity: TranslationManagementActivity,
                                translationListInteractor: TranslationListInteractor,
@@ -52,6 +54,11 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     @UiThread
     override fun onCreate(viewHolder: TranslationListViewHolder) {
         super.onCreate(viewHolder)
+
+        with(viewHolder.swipeRefreshLayout) {
+            setColorSchemeResources(R.color.primary_dark, R.color.primary, R.color.dark_cyan, R.color.dark_lime)
+            setOnRefreshListener { interactor.loadTranslationList(true) }
+        }
 
         observeSettings()
         observeTranslationList()
@@ -90,14 +97,21 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                         else -> throw IllegalStateException("Unsupported view data status: ${viewData.status}")
                     }
                 }.onEach(
-                        onLoading = { viewHolder?.translationListView?.visibility = View.GONE },
+                        onLoading = {
+                            viewHolder?.run {
+                                swipeRefreshLayout.isRefreshing = true
+                                translationListView.visibility = View.GONE
+                            }
+                        },
                         onSuccess = { items ->
-                            viewHolder?.translationListView?.run {
-                                setItems(items)
-                                fadeIn()
+                            viewHolder?.run {
+                                swipeRefreshLayout.isRefreshing = false
+                                translationListView.setItems(items)
+                                translationListView.fadeIn()
                             }
                         },
                         onError = { _, _ ->
+                            viewHolder?.swipeRefreshLayout?.isRefreshing = false
                             translationManagementActivity.dialog(false, R.string.dialog_load_translation_list_error,
                                     DialogInterface.OnClickListener { _, _ -> interactor.loadTranslationList(false) },
                                     DialogInterface.OnClickListener { _, _ -> translationManagementActivity.finish() })

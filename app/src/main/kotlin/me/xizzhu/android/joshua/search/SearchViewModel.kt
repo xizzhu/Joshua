@@ -23,21 +23,18 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
 import me.xizzhu.android.joshua.search.result.SearchResultInteractor
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
 
 class SearchViewModel(settingsManager: SettingsManager,
                       private val searchToolbarInteractor: SearchToolbarInteractor,
-                      private val loadingSpinnerInteractor: LoadingSpinnerInteractor,
                       private val searchResultInteractor: SearchResultInteractor,
                       dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(searchToolbarInteractor, loadingSpinnerInteractor), dispatcher) {
+    : BaseSettingsAwareViewModel(settingsManager, listOf(searchToolbarInteractor), dispatcher) {
     @UiThread
     override fun onCreate() {
         super.onCreate()
 
         searchToolbarInteractor.query().onEach { searchResultInteractor.updateQuery(it) }.launchIn(coroutineScope)
-        searchResultInteractor.loadingState().onEach { loadingSpinnerInteractor.updateLoadingState(it) }.launchIn(coroutineScope)
     }
 }

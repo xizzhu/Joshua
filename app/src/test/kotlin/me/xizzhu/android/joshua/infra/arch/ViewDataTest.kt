@@ -56,17 +56,6 @@ class ViewDataTest : BaseUnitTest() {
     }
 
     @Test
-    fun testViewDataWrapper() {
-        assertEquals(ViewData.success(Unit), viewData { Unit })
-    }
-
-    @Test
-    fun testViewDataWrapperWithException() {
-        val exception = RuntimeException("random exception")
-        assertEquals(ViewData.error(exception = exception), viewData { throw exception })
-    }
-
-    @Test
     fun testDataOnSuccess() {
         assertEquals(Unit, ViewData.success(Unit).dataOnSuccessOrThrow(""))
     }

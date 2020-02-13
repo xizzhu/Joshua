@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.annotated
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
+import android.widget.ProgressBar
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -43,7 +44,8 @@ import me.xizzhu.android.logger.Log
 import java.util.*
 import kotlin.collections.ArrayList
 
-data class AnnotatedVersesViewHolder(val annotatedVerseListView: CommonRecyclerView) : ViewHolder
+data class AnnotatedVersesViewHolder(val loadingSpinner: ProgressBar,
+                                     val annotatedVerseListView: CommonRecyclerView) : ViewHolder
 
 abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : AnnotatedVersesInteractor<V>>
 (private val activity: BaseAnnotatedVersesActivity<V>, private val navigator: Navigator,
@@ -62,29 +64,30 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
 
     private suspend fun load(@Constants.SortOrder sortOrder: Int, currentTranslation: String) {
         try {
-            interactor.updateLoadingState(ViewData.loading())
+            viewHolder?.loadingSpinner?.fadeIn()
+
             viewHolder?.annotatedVerseListView?.run {
                 visibility = View.GONE
                 setItems(prepareItems(sortOrder, currentTranslation))
                 fadeIn()
             }
-            interactor.updateLoadingState(ViewData.success(null))
         } catch (e: Exception) {
             Log.e(tag, "Failed to load annotated verses", e)
-            interactor.updateLoadingState(ViewData.error(exception = e))
             activity.dialog(false, R.string.dialog_load_annotated_verses_error,
                     DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { load(sortOrder, currentTranslation) } },
                     DialogInterface.OnClickListener { _, _ -> activity.finish() })
+        } finally {
+            viewHolder?.loadingSpinner?.visibility = View.GONE
         }
     }
 
     private suspend fun prepareItems(@Constants.SortOrder sortOrder: Int, currentTranslation: String): List<BaseItem> {
-        val verseAnnotations = interactor.verseAnnotations(sortOrder).dataOnSuccessOrThrow("Failed to load verse annotations")
+        val verseAnnotations = interactor.verseAnnotations(sortOrder)
         if (verseAnnotations.isEmpty()) return listOf(TextItem(activity.getString(noItemText)))
 
-        val bookNames = interactor.bookNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book names")
-        val bookShortNames = interactor.bookShortNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book short names")
-        val verses = interactor.verses(currentTranslation, verseAnnotations.map { it.verseIndex }).dataOnSuccessOrThrow("Failed to load verse")
+        val bookNames = interactor.bookNames(currentTranslation)
+        val bookShortNames = interactor.bookShortNames(currentTranslation)
+        val verses = interactor.verses(currentTranslation, verseAnnotations.map { it.verseIndex })
 
         return when (sortOrder) {
             Constants.SORT_BY_DATE -> verseAnnotations.toBaseItemsByDate(bookNames, bookShortNames, verses)

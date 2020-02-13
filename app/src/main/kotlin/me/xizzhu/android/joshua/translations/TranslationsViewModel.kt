@@ -18,21 +18,10 @@ package me.xizzhu.android.joshua.translations
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.arch.toNothing
 
 class TranslationsViewModel(settingsManager: SettingsManager,
-                            private val swipeRefreshInteractor: SwipeRefreshInteractor,
-                            private val translationListInteractor: TranslationListInteractor,
+                            translationListInteractor: TranslationListInteractor,
                             dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(swipeRefreshInteractor, translationListInteractor), dispatcher) {
-    override fun onCreate() {
-        super.onCreate()
-
-        swipeRefreshInteractor.refreshRequested().onEach { translationListInteractor.loadTranslationList(true) }.launchIn(coroutineScope)
-        translationListInteractor.translationList().onEach { swipeRefreshInteractor.updateLoadingState(it.toNothing()) }.launchIn(coroutineScope)
-    }
-}
+    : BaseSettingsAwareViewModel(settingsManager, listOf(translationListInteractor), dispatcher)

@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.strongnumber
 import android.content.DialogInterface
 import android.text.SpannableStringBuilder
 import android.view.View
+import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
@@ -38,7 +39,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.logger.Log
 
-data class StrongNumberListViewHolder(val strongNumberListView: CommonRecyclerView) : ViewHolder
+data class StrongNumberListViewHolder(val loadingSpinner: ProgressBar,
+                                      val strongNumberListView: CommonRecyclerView) : ViewHolder
 
 class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumberListActivity,
                                 private val navigator: Navigator,
@@ -50,29 +52,28 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
         super.onCreate(viewHolder)
 
         interactor.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(coroutineScope)
-        interactor.strongNumberRequest().combineOnSuccess(interactor.currentTranslation()) { sn, currentTranslation ->
-            loadStrongNumber(sn, currentTranslation)
+        interactor.currentTranslation().onEachSuccess {
+            loadStrongNumber(strongNumberListActivity.strongNumber(), it)
         }.launchIn(coroutineScope)
     }
 
     private fun loadStrongNumber(sn: String, currentTranslation: String) {
         coroutineScope.launch {
             try {
-                interactor.updateLoadingState(ViewData.loading())
+                viewHolder?.loadingSpinner?.fadeIn()
 
                 viewHolder?.strongNumberListView?.run {
                     visibility = View.GONE
                     setItems(prepareItems(sn, currentTranslation))
                     fadeIn()
                 }
-
-                interactor.updateLoadingState(ViewData.success(null))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load Strong's number list", e)
-                interactor.updateLoadingState(ViewData.error(exception = e))
                 strongNumberListActivity.dialog(false, R.string.dialog_load_strong_number_list_error,
                         DialogInterface.OnClickListener { _, _ -> loadStrongNumber(sn, currentTranslation) },
                         DialogInterface.OnClickListener { _, _ -> strongNumberListActivity.finish() })
+            } finally {
+                viewHolder?.loadingSpinner?.visibility = View.GONE
             }
         }
     }
@@ -80,15 +81,14 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
     private suspend fun prepareItems(sn: String, currentTranslation: String): List<BaseItem> {
         val items: ArrayList<BaseItem> = ArrayList()
 
-        val strongNumber = interactor.strongNumber(sn).dataOnSuccessOrThrow("Failed to load Strong number")
+        val strongNumber = interactor.strongNumber(sn)
         items.add(TextItem(formatStrongNumber(strongNumber)))
 
-        val bookNames = interactor.bookNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book names")
-        val bookShortNames = interactor.bookShortNames(currentTranslation).dataOnSuccessOrThrow("Failed to load book short names")
+        val bookNames = interactor.bookNames(currentTranslation)
+        val bookShortNames = interactor.bookShortNames(currentTranslation)
         val verseIndexes = interactor.verseIndexes(sn)
-                .dataOnSuccessOrThrow("Failed to load verse indexes")
                 .sortedBy { it.bookIndex * 100000 + it.chapterIndex * 1000 + it.verseIndex }
-        val verses = interactor.verses(currentTranslation, verseIndexes).dataOnSuccessOrThrow("Failed to load verses")
+        val verses = interactor.verses(currentTranslation, verseIndexes)
         var currentBookIndex = -1
         verseIndexes.forEach { verseIndex ->
             val bookName = bookNames[verseIndex.bookIndex]

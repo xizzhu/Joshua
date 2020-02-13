@@ -30,20 +30,17 @@ class TranslationManagementActivity : BaseSettingsAwareActivity() {
     lateinit var translationViewModel: TranslationsViewModel
 
     @Inject
-    lateinit var swipeRefreshPresenter: SwipeRefreshPresenter
-
-    @Inject
     lateinit var translationListPresenter: TranslationListPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_translation_management)
-        swipeRefreshPresenter.create(SwipeRefreshViewHolder(findViewById(R.id.swipe_refresher)))
-        translationListPresenter.create(TranslationListViewHolder(findViewById(R.id.translation_list)))
+        translationListPresenter.create(TranslationListViewHolder(
+                findViewById(R.id.swipe_refresher), findViewById(R.id.translation_list)))
     }
 
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(swipeRefreshPresenter, translationListPresenter)
+    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(translationListPresenter)
 
     override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = translationViewModel
 }

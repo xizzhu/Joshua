@@ -23,7 +23,7 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
-import me.xizzhu.android.joshua.infra.arch.viewData
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
@@ -56,7 +56,7 @@ class AnnotatedVersesInteractorTest : BaseUnitTest() {
                 .thenReturn(flowOf("", MockContents.kjvShortName, "", "", MockContents.cuvShortName, "", MockContents.bbeShortName))
 
         assertEquals(
-                listOf(viewData { MockContents.kjvShortName }, viewData { MockContents.cuvShortName }, viewData { MockContents.bbeShortName }),
+                listOf(ViewData.success(MockContents.kjvShortName), ViewData.success(MockContents.cuvShortName), ViewData.success(MockContents.bbeShortName)),
                 annotatedVersesInteractor.currentTranslation().toList()
         )
     }

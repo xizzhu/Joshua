@@ -18,13 +18,13 @@ package me.xizzhu.android.joshua.strongnumber
 
 import android.content.res.Resources
 import android.view.View
+import android.widget.ProgressBar
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -46,6 +46,8 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var strongNumberListInteractor: StrongNumberListInteractor
     @Mock
+    private lateinit var loadingSpinner: ProgressBar
+    @Mock
     private lateinit var strongNumberListView: CommonRecyclerView
 
     private lateinit var strongNumberListViewHolder: StrongNumberListViewHolder
@@ -59,12 +61,12 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
         `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
         `when`(resources.getStringArray(anyInt())).thenReturn(Array(12) { "" })
         `when`(strongNumberListActivity.resources).thenReturn(resources)
+        `when`(strongNumberListActivity.strongNumber()).thenReturn("")
 
         `when`(strongNumberListInteractor.settings()).thenReturn(emptyFlow())
-        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(emptyFlow())
         `when`(strongNumberListInteractor.currentTranslation()).thenReturn(emptyFlow())
 
-        strongNumberListViewHolder = StrongNumberListViewHolder(strongNumberListView)
+        strongNumberListViewHolder = StrongNumberListViewHolder(loadingSpinner, strongNumberListView)
         strongNumberListPresenter = StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListInteractor, testDispatcher)
     }
 
@@ -82,22 +84,22 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testLoadStrongNumber() = testDispatcher.runBlockingTest {
-        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf(viewData { "H7225" }))
-        `when`(strongNumberListInteractor.strongNumber("H7225")).thenReturn(ViewData.success(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225"))))
-        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(viewData { MockContents.kjvShortName }))
-        `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookNames))
-        `when`(strongNumberListInteractor.bookShortNames(MockContents.kjvShortName)).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
-        `when`(strongNumberListInteractor.verseIndexes("H7225")).thenReturn(ViewData.success(MockContents.strongNumberReverseIndex.getValue("H7225")))
+        `when`(strongNumberListActivity.strongNumber()).thenReturn("H7225")
+        `when`(strongNumberListInteractor.strongNumber("H7225")).thenReturn(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225")))
+        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(ViewData.success(MockContents.kjvShortName)))
+        `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+        `when`(strongNumberListInteractor.bookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(strongNumberListInteractor.verseIndexes("H7225")).thenReturn(MockContents.strongNumberReverseIndex.getValue("H7225"))
         `when`(strongNumberListInteractor.verses(MockContents.kjvShortName, MockContents.strongNumberReverseIndex.getValue("H7225")))
-                .thenReturn(ViewData.success(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0])))
+                .thenReturn(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0]))
 
         strongNumberListPresenter = spy(strongNumberListPresenter)
         doReturn("formatted strong number").`when`(strongNumberListPresenter).formatStrongNumber(any())
 
         strongNumberListPresenter.create(strongNumberListViewHolder)
 
-        with(inOrder(strongNumberListInteractor, strongNumberListView)) {
-            verify(strongNumberListInteractor, times(1)).updateLoadingState(ViewData.loading())
+        with(inOrder(loadingSpinner, strongNumberListView)) {
+            verify(loadingSpinner, times(1)).fadeIn()
             verify(strongNumberListView, times(1)).visibility = View.GONE
             verify(strongNumberListView, times(1)).setItems(listOf(
                     TextItem("formatted strong number"),
@@ -105,7 +107,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
                     VerseStrongNumberItem(VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, strongNumberListPresenter::openVerse)
             ))
             verify(strongNumberListView, times(1)).fadeIn()
-            verify(strongNumberListInteractor, times(1)).updateLoadingState(ViewData.success(null))
+            verify(loadingSpinner, times(1)).visibility = View.GONE
         }
 
         strongNumberListPresenter.destroy()
@@ -115,19 +117,18 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     fun testLoadStrongNumberWithException() = testDispatcher.runBlockingTest {
         val exception = RuntimeException("random exception")
         `when`(strongNumberListInteractor.strongNumber(anyString())).thenThrow(exception)
-        `when`(strongNumberListInteractor.strongNumberRequest()).thenReturn(flowOf(viewData { "sn" }))
-        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(viewData { MockContents.kjvShortName }))
+        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(ViewData.success(MockContents.kjvShortName)))
+        `when`(strongNumberListActivity.strongNumber()).thenReturn("sn")
 
         strongNumberListPresenter.create(strongNumberListViewHolder)
 
-        with(inOrder(strongNumberListInteractor, strongNumberListView)) {
-            verify(strongNumberListInteractor, times(1)).updateLoadingState(ViewData.loading())
+        with(inOrder(loadingSpinner, strongNumberListView)) {
+            verify(loadingSpinner, times(1)).fadeIn()
             verify(strongNumberListView, times(1)).visibility = View.GONE
-            verify(strongNumberListInteractor, times(1)).updateLoadingState(ViewData.error(exception = exception))
+            verify(loadingSpinner, times(1)).visibility = View.GONE
         }
         verify(strongNumberListView, never()).setItems(any())
         verify(strongNumberListView, never()).fadeIn()
-        verify(strongNumberListInteractor, never()).updateLoadingState(ViewData.success(null))
 
         strongNumberListPresenter.destroy()
     }

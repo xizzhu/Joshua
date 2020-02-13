@@ -20,20 +20,18 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.viewData
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 
 class ReadingProgressInteractor(private val readingProgressManager: ReadingProgressManager,
                                 private val bibleReadingManager: BibleReadingManager,
                                 settingsManager: SettingsManager,
                                 dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
-    suspend fun bookNames(): ViewData<List<String>> = bibleReadingManager
-            .currentTranslation().filter { it.isNotEmpty() }.first()
-            .let { currentTranslation -> viewData { bibleReadingManager.readBookNames(currentTranslation) } }
+    : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
+    suspend fun bookNames(): List<String> = bibleReadingManager.currentTranslation()
+            .filter { it.isNotEmpty() }.first()
+            .let { bibleReadingManager.readBookNames(it) }
 
-    suspend fun readingProgress(): ViewData<ReadingProgress> = viewData { readingProgressManager.read() }
+    suspend fun readingProgress(): ReadingProgress = readingProgressManager.read()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) = bibleReadingManager.saveCurrentVerseIndex(verseIndex)
 }

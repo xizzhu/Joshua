@@ -31,8 +31,6 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 
 @Module
 object BookmarksModule {
@@ -45,15 +43,6 @@ object BookmarksModule {
     @Provides
     fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Bookmark>): AnnotatedVersesToolbarPresenter<Bookmark> =
             AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, annotatedVersesToolbarInteractor)
-
-    @ActivityScope
-    @Provides
-    fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
-
-    @ActivityScope
-    @Provides
-    fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(loadingSpinnerInteractor)
 
     @ActivityScope
     @Provides
@@ -73,7 +62,6 @@ object BookmarksModule {
     @Provides
     fun provideBookmarksViewModel(settingsManager: SettingsManager,
                                   annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Bookmark>,
-                                  loadingSpinnerInteractor: LoadingSpinnerInteractor,
                                   bookmarksListInteractor: AnnotatedVersesInteractor<Bookmark>): AnnotatedVersesViewModel<Bookmark> =
-            AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, loadingSpinnerInteractor, bookmarksListInteractor)
+            AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, bookmarksListInteractor)
 }

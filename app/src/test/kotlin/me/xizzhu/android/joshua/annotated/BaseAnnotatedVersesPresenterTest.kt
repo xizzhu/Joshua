@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.annotated
 
 import android.content.res.Resources
 import android.view.View
+import android.widget.ProgressBar
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
@@ -28,7 +29,6 @@ import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarkItem
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.toViewData
-import me.xizzhu.android.joshua.infra.arch.viewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -63,6 +63,8 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var interactor: AnnotatedVersesInteractor<TestVerseAnnotation>
     @Mock
+    private lateinit var loadingSpinner: ProgressBar
+    @Mock
     private lateinit var annotatedVerseListView: CommonRecyclerView
 
     private lateinit var annotatedVersesViewHolder: AnnotatedVersesViewHolder
@@ -81,7 +83,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         `when`(interactor.sortOrder()).thenReturn(emptyFlow())
         `when`(interactor.currentTranslation()).thenReturn(emptyFlow())
 
-        annotatedVersesViewHolder = AnnotatedVersesViewHolder(annotatedVerseListView)
+        annotatedVersesViewHolder = AnnotatedVersesViewHolder(loadingSpinner, annotatedVerseListView)
         baseAnnotatedVersesPresenter = TestAnnotatedVersePresenter(activity, navigator, interactor, testDispatcher)
     }
 
@@ -103,16 +105,16 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         `when`(activity.getString(anyInt())).thenReturn(title)
         `when`(interactor.sortOrder()).thenReturn(flowOf(Constants.SORT_BY_DATE).toViewData())
         `when`(interactor.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName).toViewData())
-        `when`(interactor.verseAnnotations(anyInt())).thenReturn(viewData { emptyList<TestVerseAnnotation>() })
+        `when`(interactor.verseAnnotations(anyInt())).thenReturn(emptyList())
 
         baseAnnotatedVersesPresenter.create(annotatedVersesViewHolder)
 
-        with(inOrder(interactor, annotatedVerseListView)) {
-            verify(interactor, times(1)).updateLoadingState(ViewData.loading())
+        with(inOrder(loadingSpinner, annotatedVerseListView)) {
+            verify(loadingSpinner, times(1)).fadeIn()
             verify(annotatedVerseListView, times(1)).visibility = View.GONE
             verify(annotatedVerseListView, times(1)).setItems(listOf(TextItem(title)))
             verify(annotatedVerseListView, times(1)).fadeIn()
-            verify(interactor, times(1)).updateLoadingState(ViewData.success(null))
+            verify(loadingSpinner, times(1)).visibility = View.GONE
         }
 
         baseAnnotatedVersesPresenter.destroy()
@@ -127,14 +129,13 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
 
         baseAnnotatedVersesPresenter.create(annotatedVersesViewHolder)
 
-        with(inOrder(interactor, annotatedVerseListView)) {
-            verify(interactor, times(1)).updateLoadingState(ViewData.loading())
+        with(inOrder(loadingSpinner, annotatedVerseListView)) {
+            verify(loadingSpinner, times(1)).fadeIn()
             verify(annotatedVerseListView, times(1)).visibility = View.GONE
-            verify(interactor, times(1)).updateLoadingState(ViewData.error(exception = exception))
+            verify(loadingSpinner, times(1)).visibility = View.GONE
         }
         verify(annotatedVerseListView, never()).setItems(any())
         verify(annotatedVerseListView, never()).fadeIn()
-        verify(interactor, never()).updateLoadingState(ViewData.success(null))
 
         baseAnnotatedVersesPresenter.destroy()
     }

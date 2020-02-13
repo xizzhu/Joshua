@@ -24,8 +24,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Bible
-import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -71,7 +69,7 @@ private class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, par
 }
 
 data class ReadingProgressDetailItem(val bookName: String, val bookIndex: Int,
-                                     val chaptersRead: Array<Boolean>, val chaptersReadCount: Int,
+                                     val chaptersRead: List<Boolean>, val chaptersReadCount: Int,
                                      val onBookClicked: (Int, Boolean) -> Unit,
                                      val onChapterClicked: (Int, Int) -> Unit,
                                      var expanded: Boolean)
@@ -171,40 +169,4 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
             visibility = View.VISIBLE
         }
     }
-}
-
-fun ReadingProgress.toReadingProgressItems(bookNames: List<String>,
-                                           expanded: Array<Boolean>,
-                                           onBookClicked: (Int, Boolean) -> Unit,
-                                           onChapterClicked: (Int, Int) -> Unit): List<BaseItem> {
-    var totalChaptersRead = 0
-    val chaptersReadPerBook = Array(Bible.BOOK_COUNT) { i -> Array(Bible.getChapterCount(i)) { false } }
-    val chaptersReadCountPerBook = Array(Bible.BOOK_COUNT) { 0 }
-    for (chapter in chapterReadingStatus) {
-        if (chapter.readCount > 0) {
-            chaptersReadPerBook[chapter.bookIndex][chapter.chapterIndex] = true
-            chaptersReadCountPerBook[chapter.bookIndex]++
-            ++totalChaptersRead
-        }
-    }
-
-    var finishedBooks = 0
-    var finishedOldTestament = 0
-    var finishedNewTestament = 0
-    val detailItems = ArrayList<ReadingProgressDetailItem>(Bible.BOOK_COUNT)
-    for ((bookIndex, chaptersRead) in chaptersReadPerBook.withIndex()) {
-        val chaptersReadCount = chaptersReadCountPerBook[bookIndex]
-        if (chaptersReadCount == Bible.getChapterCount(bookIndex)) {
-            ++finishedBooks
-            if (bookIndex < Bible.OLD_TESTAMENT_COUNT) {
-                ++finishedOldTestament
-            } else {
-                ++finishedNewTestament
-            }
-        }
-        detailItems.add(ReadingProgressDetailItem(bookNames[bookIndex], bookIndex, chaptersRead,
-                chaptersReadCount, onBookClicked, onChapterClicked, expanded[bookIndex]))
-    }
-    return mutableListOf<BaseItem>(ReadingProgressSummaryItem(continuousReadingDays, totalChaptersRead, finishedBooks,
-            finishedOldTestament, finishedNewTestament)).apply { addAll(detailItems) }
 }

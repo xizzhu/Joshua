@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.search.result
 
 import android.view.View
+import android.widget.ProgressBar
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -28,11 +29,11 @@ import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,6 +45,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     private lateinit var navigator: Navigator
     @Mock
     private lateinit var searchResultInteractor: SearchResultInteractor
+    @Mock
+    private lateinit var loadingSpinner: ProgressBar
     @Mock
     private lateinit var searchResultListView: CommonRecyclerView
 
@@ -57,7 +60,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         `when`(searchResultInteractor.settings()).thenReturn(emptyFlow())
         `when`(searchResultInteractor.query()).thenReturn(emptyFlow())
 
-        searchResultViewHolder = SearchResultViewHolder(searchResultListView)
+        searchResultViewHolder = SearchResultViewHolder(loadingSpinner, searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchResultInteractor, testDispatcher)
     }
 
@@ -95,12 +98,14 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testInstantSearch() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
         val query = "query"
         val verses = MockContents.kjvVerses
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.loading(query)))
-        `when`(searchResultInteractor.search(query)).thenReturn(ViewData.success(verses))
-        `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
-        `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
+        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
+        `when`(searchResultInteractor.search(currentTranslation, query)).thenReturn(verses)
+        `when`(searchResultInteractor.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(searchResultInteractor.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
         `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
 
         searchResultListPresenter.create(searchResultViewHolder)
@@ -116,10 +121,12 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testInstantSearchWithException() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
         val query = "query"
         val exception = RuntimeException("Random exception")
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.loading(query)))
-        `when`(searchResultInteractor.search(query)).thenThrow(exception)
+        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
+        `when`(searchResultInteractor.search(currentTranslation, query)).thenThrow(exception)
 
         searchResultListPresenter.create(searchResultViewHolder)
 
@@ -131,49 +138,52 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testSearch() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
         val query = "query"
         val verses = MockContents.kjvVerses
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.success(query)))
-        `when`(searchResultInteractor.search(query)).thenReturn(ViewData.success(verses))
-        `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
-        `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
+        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
+        `when`(searchResultInteractor.search(currentTranslation, query)).thenReturn(verses)
+        `when`(searchResultInteractor.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(searchResultInteractor.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
         `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
 
         searchResultListPresenter.create(searchResultViewHolder)
 
-        with(inOrder(searchResultInteractor, searchResultListView)) {
-            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.loading())
+        with(inOrder(loadingSpinner, searchResultListView)) {
+            verify(loadingSpinner, times(1)).fadeIn()
             verify(searchResultListView, times(1)).setItems(any())
-            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.success(null))
+            verify(loadingSpinner, times(1)).visibility = View.GONE
         }
-        verify(searchResultInteractor, never()).updateLoadingState(ViewData.error())
 
         searchResultListPresenter.destroy()
     }
 
     @Test
     fun testSearchWithException() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
         val query = "query"
         val exception = RuntimeException("Random exception")
         `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.success(query)))
-        `when`(searchResultInteractor.search(query)).thenThrow(exception)
+        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
+        `when`(searchResultInteractor.search(currentTranslation, query)).thenThrow(exception)
 
         searchResultListPresenter.create(searchResultViewHolder)
 
-        with(inOrder(searchResultInteractor, searchResultListView)) {
-            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.loading())
-            verify(searchResultInteractor, times(1)).updateLoadingState(ViewData.error(exception = exception))
+        with(inOrder(loadingSpinner, searchResultListView)) {
+            verify(loadingSpinner, times(1)).fadeIn()
+            verify(loadingSpinner, times(1)).visibility = View.GONE
         }
         verify(searchResultListView, never()).setItems(any())
-        verify(searchResultInteractor, never()).updateLoadingState(ViewData.success(null))
 
         searchResultListPresenter.destroy()
     }
 
     @Test
     fun testToSearchItems() = testDispatcher.runBlockingTest {
-        `when`(searchResultInteractor.bookNames()).thenReturn(ViewData.success(MockContents.kjvBookNames))
-        `when`(searchResultInteractor.bookShortNames()).thenReturn(ViewData.success(MockContents.kjvBookShortNames))
+        val currentTranslation = MockContents.kjvShortName
+        `when`(searchResultInteractor.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(searchResultInteractor.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
 
         with(searchResultListPresenter) {
             val query = "query"
@@ -185,7 +195,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
                             SearchItem(MockContents.kjvVerses[1].verseIndex,
                                     MockContents.kjvBookShortNames[0], MockContents.kjvVerses[1].text.text, query, this::selectVerse)
                     ),
-                    listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toSearchItems(query)
+                    listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toSearchItems(currentTranslation, query)
             )
         }
     }

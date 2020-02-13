@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.search.result
 
 import android.content.DialogInterface
 import android.view.View
+import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
@@ -40,7 +41,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 
-data class SearchResultViewHolder(val searchResultListView: CommonRecyclerView) : ViewHolder
+data class SearchResultViewHolder(val loadingSpinner: ProgressBar,
+                                  val searchResultListView: CommonRecyclerView) : ViewHolder
 
 class SearchResultListPresenter(private val searchActivity: SearchActivity,
                                 private val navigator: Navigator,
@@ -78,7 +80,8 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
     private suspend fun instantSearch(query: String) {
         try {
             viewHolder?.searchResultListView?.run {
-                setItems(interactor.search(query).dataOnSuccessOrThrow("Failed to search verses").toSearchItems(query))
+                val currentTranslation = interactor.currentTranslation()
+                setItems(interactor.search(currentTranslation, query).toSearchItems(currentTranslation, query))
                 scrollToPosition(0)
                 visibility = View.VISIBLE
             }
@@ -90,33 +93,33 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
 
     private suspend fun search(query: String) {
         try {
-            interactor.updateLoadingState(ViewData.loading())
+            viewHolder?.loadingSpinner?.fadeIn()
 
             viewHolder?.searchResultListView?.run {
                 visibility = View.GONE
 
-                val verses = interactor.search(query).dataOnSuccessOrThrow("Failed to search verses")
-                setItems(verses.toSearchItems(query))
+                val currentTranslation = interactor.currentTranslation()
+                val verses = interactor.search(currentTranslation, query)
+                setItems(verses.toSearchItems(currentTranslation, query))
 
                 scrollToPosition(0)
                 fadeIn()
 
                 searchActivity.toast(searchActivity.getString(R.string.toast_verses_searched, verses.size))
             }
-
-            interactor.updateLoadingState(ViewData.success(null))
         } catch (e: Exception) {
             Log.e(tag, "Failed to search verses", e)
-            interactor.updateLoadingState(ViewData.error(exception = e))
             searchActivity.dialog(true, R.string.dialog_search_error,
                     DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { search(query) } })
+        } finally {
+            viewHolder?.loadingSpinner?.visibility = View.GONE
         }
     }
 
     @VisibleForTesting
-    suspend fun List<Verse>.toSearchItems(query: String): List<BaseItem> {
-        val bookNames = interactor.bookNames().dataOnSuccessOrThrow("Failed to load book names")
-        val bookShortNames = interactor.bookShortNames().dataOnSuccessOrThrow("Failed to load book short names")
+    suspend fun List<Verse>.toSearchItems(currentTranslation: String, query: String): List<BaseItem> {
+        val bookNames = interactor.bookNames(currentTranslation)
+        val bookShortNames = interactor.bookShortNames(currentTranslation)
         val items = ArrayList<BaseItem>(size + Bible.BOOK_COUNT)
         var lastVerseBookIndex = -1
         forEach { verse ->

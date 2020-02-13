@@ -23,16 +23,11 @@ import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.arch.Interactor
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerViewHolder
 import javax.inject.Inject
 
 class ReadingProgressActivity : BaseSettingsAwareActivity() {
     @Inject
     lateinit var readingProgressViewModel: ReadingProgressViewModel
-
-    @Inject
-    lateinit var loadingSpinnerPresenter: LoadingSpinnerPresenter
 
     @Inject
     lateinit var readingProgressPresenter: ReadingProgressPresenter
@@ -41,11 +36,11 @@ class ReadingProgressActivity : BaseSettingsAwareActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_reading_progress)
-        loadingSpinnerPresenter.create(LoadingSpinnerViewHolder(findViewById(R.id.loading_spinner)))
-        readingProgressPresenter.create(ReadingProgressViewHolder(findViewById(R.id.reading_progress_list)))
+        readingProgressPresenter.create(ReadingProgressViewHolder(
+                findViewById(R.id.loading_spinner), findViewById(R.id.reading_progress_list)))
     }
 
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(loadingSpinnerPresenter, readingProgressPresenter)
+    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(readingProgressPresenter)
 
     override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = readingProgressViewModel
 }

@@ -22,8 +22,6 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerInteractor
-import me.xizzhu.android.joshua.infra.ui.LoadingSpinnerPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultInteractor
 import me.xizzhu.android.joshua.search.result.SearchResultListPresenter
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
@@ -43,15 +41,6 @@ object SearchModule {
 
     @ActivityScope
     @Provides
-    fun provideLoadingSpinnerInteractor(): LoadingSpinnerInteractor = LoadingSpinnerInteractor()
-
-    @ActivityScope
-    @Provides
-    fun provideLoadingSpinnerPresenter(loadingSpinnerInteractor: LoadingSpinnerInteractor): LoadingSpinnerPresenter =
-            LoadingSpinnerPresenter(loadingSpinnerInteractor)
-
-    @ActivityScope
-    @Provides
     fun provideSearchResultInteractor(bibleReadingManager: BibleReadingManager,
                                       settingsManager: SettingsManager): SearchResultInteractor =
             SearchResultInteractor(bibleReadingManager, settingsManager)
@@ -67,7 +56,6 @@ object SearchModule {
     @Provides
     fun provideSearchViewModel(settingsManager: SettingsManager,
                                searchToolbarInteractor: SearchToolbarInteractor,
-                               loadingSpinnerInteractor: LoadingSpinnerInteractor,
                                searchResultInteractor: SearchResultInteractor): SearchViewModel =
-            SearchViewModel(settingsManager, searchToolbarInteractor, loadingSpinnerInteractor, searchResultInteractor)
+            SearchViewModel(settingsManager, searchToolbarInteractor, searchResultInteractor)
 }

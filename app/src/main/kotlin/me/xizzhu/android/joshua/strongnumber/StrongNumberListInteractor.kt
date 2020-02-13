@@ -18,48 +18,33 @@ package me.xizzhu.android.joshua.strongnumber
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.toViewData
-import me.xizzhu.android.joshua.infra.arch.viewData
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAndLoadingAwareInteractor
+import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwareInteractor
 
 class StrongNumberListInteractor(private val strongNumberManager: StrongNumberManager,
                                  private val bibleReadingManager: BibleReadingManager,
                                  settingsManager: SettingsManager,
                                  dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAndLoadingAwareInteractor(settingsManager, dispatcher) {
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val strongNumberRequest: BroadcastChannel<String> = ConflatedBroadcastChannel()
+    : BaseSettingsAwareInteractor(settingsManager, dispatcher) {
+    suspend fun strongNumber(sn: String): StrongNumber = strongNumberManager.readStrongNumber(sn)
 
-    fun strongNumberRequest(): Flow<ViewData<String>> = strongNumberRequest.asFlow().toViewData()
-
-    fun requestStrongNumber(sn: String) {
-        strongNumberRequest.offer(sn)
-    }
-
-    suspend fun strongNumber(sn: String): ViewData<StrongNumber> =
-            viewData { strongNumberManager.readStrongNumber(sn) }
-
-    suspend fun verseIndexes(sn: String): ViewData<List<VerseIndex>> =
-            viewData { strongNumberManager.readVerseIndexes(sn) }
+    suspend fun verseIndexes(sn: String): List<VerseIndex> = strongNumberManager.readVerseIndexes(sn)
 
     fun currentTranslation(): Flow<ViewData<String>> =
             bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }.toViewData()
 
-    suspend fun bookNames(currentTranslation: String): ViewData<List<String>> =
-            viewData { bibleReadingManager.readBookNames(currentTranslation) }
+    suspend fun bookNames(currentTranslation: String): List<String> =
+            bibleReadingManager.readBookNames(currentTranslation)
 
-    suspend fun bookShortNames(currentTranslation: String): ViewData<List<String>> =
-            viewData { bibleReadingManager.readBookShortNames(currentTranslation) }
+    suspend fun bookShortNames(currentTranslation: String): List<String> =
+            bibleReadingManager.readBookShortNames(currentTranslation)
 
-    suspend fun verses(currentTranslation: String, verseIndexes: List<VerseIndex>): ViewData<Map<VerseIndex, Verse>> =
-            viewData { bibleReadingManager.readVerses(currentTranslation, verseIndexes) }
+    suspend fun verses(currentTranslation: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse> =
+            bibleReadingManager.readVerses(currentTranslation, verseIndexes)
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
