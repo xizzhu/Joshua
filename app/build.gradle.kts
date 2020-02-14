@@ -31,6 +31,9 @@ android {
         sourceCompatibility = Versions.java
         targetCompatibility = Versions.java
     }
+    kotlinOptions {
+        jvmTarget = Versions.Kotlin.jvmTarget
+    }
 
     buildToolsVersion(Versions.Sdk.buildTools)
     compileSdkVersion(Versions.Sdk.compile)
@@ -107,10 +110,13 @@ dependencies {
     implementation(Dependencies.Kotlin.stdlib)
     implementation(Dependencies.Kotlin.coroutinesAndroid)
 
+    implementation(Dependencies.AndroidX.activity)
     implementation(Dependencies.AndroidX.annotation)
     implementation(Dependencies.AndroidX.appCompat)
     implementation(Dependencies.AndroidX.core)
-
+    implementation(Dependencies.AndroidX.Lifecycle.common)
+    implementation(Dependencies.AndroidX.Lifecycle.runtime)
+    implementation(Dependencies.AndroidX.Lifecycle.viewModel)
     implementation(Dependencies.AndroidX.View.constraintLayout)
     implementation(Dependencies.AndroidX.View.coordinatorLayout)
     implementation(Dependencies.AndroidX.View.drawerLayout)

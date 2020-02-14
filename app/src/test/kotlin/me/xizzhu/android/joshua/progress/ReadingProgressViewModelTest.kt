@@ -29,7 +29,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ReadingProgressInteractorTest : BaseUnitTest() {
+class ReadingProgressViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var readingProgressManager: ReadingProgressManager
     @Mock
@@ -37,13 +37,13 @@ class ReadingProgressInteractorTest : BaseUnitTest() {
     @Mock
     private lateinit var settingsManager: SettingsManager
 
-    private lateinit var readingProgressInteractor: ReadingProgressInteractor
+    private lateinit var readingProgressViewModel: ReadingProgressViewModel
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        readingProgressInteractor = ReadingProgressInteractor(readingProgressManager, bibleReadingManager, settingsManager, testDispatcher)
+        readingProgressViewModel = ReadingProgressViewModel(bibleReadingManager, readingProgressManager, settingsManager)
     }
 
     @Test
@@ -53,7 +53,7 @@ class ReadingProgressInteractorTest : BaseUnitTest() {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(bookNames)
 
-        assertEquals(bookNames, readingProgressInteractor.bookNames())
+        assertEquals(bookNames, readingProgressViewModel.bookNames())
     }
 
     @Test
@@ -64,7 +64,7 @@ class ReadingProgressInteractorTest : BaseUnitTest() {
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenThrow(exception)
 
         try {
-            readingProgressInteractor.bookNames()
+            readingProgressViewModel.bookNames()
         } catch (e: Exception) {
             assertEquals(exception, e)
         }

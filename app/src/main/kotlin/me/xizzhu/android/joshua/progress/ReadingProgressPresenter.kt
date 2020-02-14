@@ -19,10 +19,8 @@ package me.xizzhu.android.joshua.progress
 import android.content.DialogInterface
 import android.view.View
 import android.widget.ProgressBar
-import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
@@ -30,8 +28,8 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.*
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -44,35 +42,28 @@ data class ReadingProgressViewHolder(val loadingSpinner: ProgressBar,
 
 class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgressActivity,
                                private val navigator: Navigator,
-                               readingProgressInteractor: ReadingProgressInteractor,
-                               dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseSettingsAwarePresenter<ReadingProgressViewHolder, ReadingProgressInteractor>(readingProgressInteractor, dispatcher) {
-    @VisibleForTesting
+                               readingProgressViewModel: ReadingProgressViewModel,
+                               lifecycleCoroutineScope: LifecycleCoroutineScope)
+    : BaseSettingsPresenter<ReadingProgressViewHolder, ReadingProgressViewModel>(readingProgressViewModel, lifecycleCoroutineScope) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 
-    @UiThread
-    override fun onCreate(viewHolder: ReadingProgressViewHolder) {
-        super.onCreate(viewHolder)
-        interactor.settings().onEachSuccess { viewHolder.readingProgressListView.setSettings(it) }.launchIn(coroutineScope)
-    }
+    override fun onBind(viewHolder: ReadingProgressViewHolder) {
+        super.onBind(viewHolder)
 
-    @UiThread
-    override fun onStart() {
-        super.onStart()
+        viewModel.settings().onEachSuccess { viewHolder.readingProgressListView.setSettings(it) }.launchIn(lifecycleScope)
         loadReadingProgress()
     }
 
     private fun loadReadingProgress() {
-        coroutineScope.launch {
+        lifecycleScope.launchWhenStarted {
             try {
-                viewHolder?.loadingSpinner?.fadeIn()
+                with(viewHolder) {
+                    loadingSpinner.fadeIn()
 
-                viewHolder?.readingProgressListView?.run {
-                    visibility = View.GONE
-
-                    setItems(interactor.readingProgress().toItems(interactor.bookNames()))
-
-                    fadeIn()
+                    readingProgressListView.visibility = View.GONE
+                    readingProgressListView.setItems(viewModel.readingProgress().toItems(viewModel.bookNames()))
+                    readingProgressListView.fadeIn()
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load reading progress", e)
@@ -80,12 +71,12 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                         DialogInterface.OnClickListener { _, _ -> loadReadingProgress() },
                         DialogInterface.OnClickListener { _, _ -> readingProgressActivity.finish() })
             } finally {
-                viewHolder?.loadingSpinner?.visibility = View.GONE
+                viewHolder.loadingSpinner.visibility = View.GONE
             }
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun ReadingProgress.toItems(bookNames: List<String>): List<BaseItem> {
         var totalChaptersRead = 0
         val chaptersReadPerBook = Array(Bible.BOOK_COUNT) { i ->
@@ -123,11 +114,11 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
                 finishedOldTestament, finishedNewTestament)).apply { addAll(detailItems) }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun openChapter(bookIndex: Int, chapterIndex: Int) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
-                interactor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+                viewModel.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
                 navigator.navigate(readingProgressActivity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to open chapter for reading", e)
@@ -136,7 +127,7 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun onBookClicked(bookIndex: Int, expanded: Boolean) {
         this.expanded[bookIndex] = expanded
     }

@@ -47,14 +47,17 @@ object Versions {
     val java = JavaVersion.VERSION_1_8
 
     object Kotlin {
+        const val jvmTarget = "1.8"
         const val core = "1.3.61"
         const val coroutines = "1.3.3"
     }
 
     object AndroidX {
+        const val activity = "1.1.0"
         const val annotation = "1.1.0"
         const val appCompat = "1.1.0"
         const val core = "1.2.0"
+        const val lifecycle = "2.2.0"
 
         object View {
             const val constraintLayout = "1.1.3"
@@ -112,9 +115,16 @@ object Dependencies {
     }
 
     object AndroidX {
+        const val activity = "androidx.activity:activity-ktx:${Versions.AndroidX.activity}"
         const val annotation = "androidx.annotation:annotation:${Versions.AndroidX.annotation}"
         const val appCompat = "androidx.appcompat:appcompat:${Versions.AndroidX.appCompat}"
         const val core = "androidx.core:core:${Versions.AndroidX.core}"
+
+        object Lifecycle {
+            const val common = "androidx.lifecycle:lifecycle-common-java8:${Versions.AndroidX.lifecycle}"
+            const val runtime = "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.AndroidX.lifecycle}"
+            const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.AndroidX.lifecycle}"
+        }
 
         object View {
             const val constraintLayout = "androidx.constraintlayout:constraintlayout:${Versions.AndroidX.View.constraintLayout}"
