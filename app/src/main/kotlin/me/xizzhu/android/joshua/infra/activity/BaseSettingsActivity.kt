@@ -32,7 +32,7 @@ import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.ui.getBackgroundColor
 
-abstract class BaseSettingsViewModel(private val settingsManager: SettingsManager) : ViewModel() {
+abstract class BaseSettingsViewModel(protected val settingsManager: SettingsManager) : ViewModel() {
     fun settings(): Flow<ViewData<Settings>> = settingsManager.settings().map { ViewData.success(it) }
 }
 

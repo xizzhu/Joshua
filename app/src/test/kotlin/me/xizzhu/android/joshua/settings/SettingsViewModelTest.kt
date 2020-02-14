@@ -27,69 +27,69 @@ import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-class SettingsInteractorTest : BaseUnitTest() {
+class SettingsViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var settingsManager: SettingsManager
     @Mock
     private lateinit var backupManager: BackupManager
 
-    private lateinit var settingsInteractor: SettingsInteractor
+    private lateinit var settingsViewModel: SettingsViewModel
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
         `when`(settingsManager.settings()).thenReturn(flowOf(Settings.DEFAULT))
-        settingsInteractor = SettingsInteractor(settingsManager, backupManager, testDispatcher)
+        settingsViewModel = SettingsViewModel(settingsManager, backupManager)
     }
 
     @Test
     fun testSaveFontSizeScale() = testDispatcher.runBlockingTest {
-        settingsInteractor.saveFontSizeScale(Settings.DEFAULT.fontSizeScale)
+        settingsViewModel.saveFontSizeScale(Settings.DEFAULT.fontSizeScale)
         verify(settingsManager, never()).saveSettings(any())
 
         val updatedSettings = Settings.DEFAULT.copy(fontSizeScale = 1)
-        settingsInteractor.saveFontSizeScale(updatedSettings.fontSizeScale)
+        settingsViewModel.saveFontSizeScale(updatedSettings.fontSizeScale)
         verify(settingsManager, times(1)).saveSettings(updatedSettings)
     }
 
     @Test
     fun testSaveKeepScreenOn() = testDispatcher.runBlockingTest {
-        settingsInteractor.saveKeepScreenOn(Settings.DEFAULT.keepScreenOn)
+        settingsViewModel.saveKeepScreenOn(Settings.DEFAULT.keepScreenOn)
         verify(settingsManager, never()).saveSettings(any())
 
         val updatedSettings = Settings.DEFAULT.copy(keepScreenOn = false)
-        settingsInteractor.saveKeepScreenOn(updatedSettings.keepScreenOn)
+        settingsViewModel.saveKeepScreenOn(updatedSettings.keepScreenOn)
         verify(settingsManager, times(1)).saveSettings(updatedSettings)
     }
 
     @Test
     fun testSaveNightModeOn() = testDispatcher.runBlockingTest {
-        settingsInteractor.saveNightModeOn(Settings.DEFAULT.nightModeOn)
+        settingsViewModel.saveNightModeOn(Settings.DEFAULT.nightModeOn)
         verify(settingsManager, never()).saveSettings(any())
 
         val updatedSettings = Settings.DEFAULT.copy(nightModeOn = true)
-        settingsInteractor.saveNightModeOn(updatedSettings.nightModeOn)
+        settingsViewModel.saveNightModeOn(updatedSettings.nightModeOn)
         verify(settingsManager, times(1)).saveSettings(updatedSettings)
     }
 
     @Test
     fun testSaveSimpleReadingModeOn() = testDispatcher.runBlockingTest {
-        settingsInteractor.saveSimpleReadingModeOn(Settings.DEFAULT.simpleReadingModeOn)
+        settingsViewModel.saveSimpleReadingModeOn(Settings.DEFAULT.simpleReadingModeOn)
         verify(settingsManager, never()).saveSettings(any())
 
         val updatedSettings = Settings.DEFAULT.copy(simpleReadingModeOn = true)
-        settingsInteractor.saveSimpleReadingModeOn(updatedSettings.simpleReadingModeOn)
+        settingsViewModel.saveSimpleReadingModeOn(updatedSettings.simpleReadingModeOn)
         verify(settingsManager, times(1)).saveSettings(updatedSettings)
     }
 
     @Test
     fun testSaveHideSearchButton() = testDispatcher.runBlockingTest {
-        settingsInteractor.saveHideSearchButton(Settings.DEFAULT.hideSearchButton)
+        settingsViewModel.saveHideSearchButton(Settings.DEFAULT.hideSearchButton)
         verify(settingsManager, never()).saveSettings(any())
 
         val updatedSettings = Settings.DEFAULT.copy(hideSearchButton = true)
-        settingsInteractor.saveHideSearchButton(updatedSettings.hideSearchButton)
+        settingsViewModel.saveHideSearchButton(updatedSettings.hideSearchButton)
         verify(settingsManager, times(1)).saveSettings(updatedSettings)
     }
 }

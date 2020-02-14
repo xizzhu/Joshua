@@ -18,42 +18,39 @@ package me.xizzhu.android.joshua.settings
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import dagger.android.AndroidInjection
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.infra.activity.BaseActivity
-import me.xizzhu.android.joshua.infra.arch.Interactor
-import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewModel
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import javax.inject.Inject
 
-class SettingsActivity : BaseActivity() {
+// TODO switch to inherit from BaseActivity
+class SettingsActivity : AppCompatActivity() {
     @Inject
     lateinit var settingsViewModel: SettingsViewModel
 
     @Inject
-    lateinit var settingsViewPresenter: SettingsViewPresenter
+    lateinit var settingsPresenter: SettingsPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_settings)
-        settingsViewPresenter.create(SettingsViewHolder(
-                findViewById(R.id.display), findViewById(R.id.font_size), findViewById(R.id.keep_screen_on),
-                findViewById(R.id.night_mode_on), findViewById(R.id.reading), findViewById(R.id.simple_reading_mode),
-                findViewById(R.id.hide_search_button), findViewById(R.id.backup_restore), findViewById(R.id.backup),
-                findViewById(R.id.restore), findViewById(R.id.about), findViewById(R.id.rate), findViewById(R.id.version)
-        ))
+        settingsPresenter.bind(
+                SettingsViewHolder(
+                        findViewById(R.id.display), findViewById(R.id.font_size), findViewById(R.id.keep_screen_on),
+                        findViewById(R.id.night_mode_on), findViewById(R.id.reading), findViewById(R.id.simple_reading_mode),
+                        findViewById(R.id.hide_search_button), findViewById(R.id.backup_restore), findViewById(R.id.backup),
+                        findViewById(R.id.restore), findViewById(R.id.about), findViewById(R.id.rate), findViewById(R.id.version)
+                )
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            SettingsViewPresenter.CODE_CREATE_DOCUMENT_FOR_BACKUP -> settingsViewPresenter.onCreateDocumentForBackup(resultCode, data)
-            SettingsViewPresenter.CODE_GET_CONTENT_FOR_RESTORE -> settingsViewPresenter.onGetContentForRestore(resultCode, data)
+            SettingsPresenter.CODE_CREATE_DOCUMENT_FOR_BACKUP -> settingsPresenter.onCreateDocumentForBackup(resultCode, data)
+            SettingsPresenter.CODE_GET_CONTENT_FOR_RESTORE -> settingsPresenter.onGetContentForRestore(resultCode, data)
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
-
-    override fun getViewModel(): ViewModel = settingsViewModel
-
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(settingsViewPresenter)
 }

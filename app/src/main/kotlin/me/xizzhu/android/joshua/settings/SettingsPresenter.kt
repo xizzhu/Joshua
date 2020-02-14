@@ -27,15 +27,14 @@ import androidx.annotation.ColorInt
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.onEachSuccess
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
 import me.xizzhu.android.joshua.ui.*
@@ -50,9 +49,10 @@ data class SettingsViewHolder(val display: SettingSectionHeader, val fontSize: S
                               val backup: SettingButton, val restore: SettingButton, val about: SettingSectionHeader,
                               val rate: SettingButton, val version: SettingButton) : ViewHolder
 
-class SettingsViewPresenter(private val settingsActivity: SettingsActivity, interactor: SettingsInteractor,
-                            dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseSettingsAwarePresenter<SettingsViewHolder, SettingsInteractor>(interactor, dispatcher) {
+class SettingsPresenter(private val settingsActivity: SettingsActivity,
+                        settingsViewModel: SettingsViewModel,
+                        lifecycleCoroutineScope: LifecycleCoroutineScope)
+    : BaseSettingsPresenter<SettingsViewHolder, SettingsViewModel>(settingsViewModel, lifecycleCoroutineScope) {
     companion object {
         const val CODE_CREATE_DOCUMENT_FOR_BACKUP = 9999
         const val CODE_GET_CONTENT_FOR_RESTORE = 9998
@@ -68,8 +68,8 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     private var backupRestoreDialog: AlertDialog? = null
 
     @UiThread
-    override fun onCreate(viewHolder: SettingsViewHolder) {
-        super.onCreate(viewHolder)
+    override fun onBind(viewHolder: SettingsViewHolder) {
+        super.onBind(viewHolder)
 
         try {
             viewHolder.version.setDescription(settingsActivity.packageManager.getPackageInfo(settingsActivity.packageName, 0).versionName)
@@ -131,14 +131,14 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
             }
         }
 
-        interactor.settings().onEachSuccess { updateSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEachSuccess { updateSettings(it) }.launchIn(lifecycleScope)
     }
 
     private fun saveFontSizeScale(fontSizeScale: Int) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
                 shouldAnimateFontSize = true
-                interactor.saveFontSizeScale(fontSizeScale)
+                viewModel.saveFontSizeScale(fontSizeScale)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save font size scale", e)
                 settingsActivity.dialog(true, R.string.dialog_update_settings_error,
@@ -148,9 +148,9 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     }
 
     private fun saveKeepScreenOn(keepScreenOn: Boolean) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
-                interactor.saveKeepScreenOn(keepScreenOn)
+                viewModel.saveKeepScreenOn(keepScreenOn)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save keep screen on", e)
                 settingsActivity.dialog(true, R.string.dialog_update_settings_error,
@@ -160,10 +160,10 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     }
 
     private fun saveNightModeOn(nightModeOn: Boolean) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
                 shouldAnimateColor = true
-                interactor.saveNightModeOn(nightModeOn)
+                viewModel.saveNightModeOn(nightModeOn)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save night mode on", e)
                 settingsActivity.dialog(true, R.string.dialog_update_settings_error,
@@ -173,9 +173,9 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     }
 
     private fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
-                interactor.saveSimpleReadingModeOn(simpleReadingModeOn)
+                viewModel.saveSimpleReadingModeOn(simpleReadingModeOn)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save simple reading mode on", e)
                 settingsActivity.dialog(true, R.string.dialog_update_settings_error,
@@ -185,9 +185,9 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     }
 
     private fun saveHideSearchButton(hideSearchButton: Boolean) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
-                interactor.saveHideSearchButton(hideSearchButton)
+                viewModel.saveHideSearchButton(hideSearchButton)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save hiding search button", e)
                 settingsActivity.dialog(true, R.string.dialog_update_settings_error,
@@ -202,10 +202,10 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     }
 
     private fun backup(uri: Uri) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
                 showBackupRestoreDialog()
-                settingsActivity.contentResolver.openOutputStream(uri)?.use { interactor.backup(it) }
+                settingsActivity.contentResolver.openOutputStream(uri)?.use { viewModel.backup(it) }
                         ?: throw IOException("Failed to open Uri for backup - $uri")
                 dismissBackupRestoreDialog()
                 settingsActivity.toast(R.string.toast_backed_up)
@@ -234,10 +234,10 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     }
 
     private fun restore(uri: Uri) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
                 showBackupRestoreDialog()
-                settingsActivity.contentResolver.openInputStream(uri)?.use { interactor.restore(it) }
+                settingsActivity.contentResolver.openInputStream(uri)?.use { viewModel.restore(it) }
                         ?: throw IOException("Failed to open Uri for restore - $uri")
                 dismissBackupRestoreDialog()
                 settingsActivity.toast(R.string.toast_restored)
@@ -280,7 +280,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                     settings.getSecondaryTextColor(resources))
         }
 
-        viewHolder?.let {
+        viewHolder.let {
             it.fontSize.setDescription(fontSizeTexts[settings.fontSizeScale - 1])
             it.keepScreenOn.isChecked = settings.keepScreenOn
             it.nightModeOn.isChecked = settings.nightModeOn
@@ -311,7 +311,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
                             @ColorInt secondaryTextColor: Int) {
         settingsActivity.window.decorView.setBackgroundColor(backgroundColor)
 
-        viewHolder?.run {
+        viewHolder.run {
             fontSize.setTextColor(primaryTextColor, secondaryTextColor)
             keepScreenOn.setTextColor(primaryTextColor)
             nightModeOn.setTextColor(primaryTextColor)
@@ -338,7 +338,7 @@ class SettingsViewPresenter(private val settingsActivity: SettingsActivity, inte
     }
 
     private fun updateTextSize(bodyTextSize: Float, captionTextSize: Float) {
-        viewHolder?.run {
+        viewHolder.run {
             display.setTextSize(bodyTextSize.roundToInt())
             fontSize.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
             keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
