@@ -16,120 +16,60 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
-import android.content.res.Resources
-import android.view.View
-import android.widget.ProgressBar
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flowOf
+import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.fadeIn
-import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class StrongNumberListPresenterTest : BaseUnitTest() {
-    @Mock
-    private lateinit var resources: Resources
     @Mock
     private lateinit var strongNumberListActivity: StrongNumberListActivity
     @Mock
     private lateinit var navigator: Navigator
     @Mock
-    private lateinit var strongNumberListInteractor: StrongNumberListInteractor
+    private lateinit var strongNumberListViewModel: StrongNumberListViewModel
     @Mock
-    private lateinit var loadingSpinner: ProgressBar
-    @Mock
-    private lateinit var strongNumberListView: CommonRecyclerView
+    private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
 
-    private lateinit var strongNumberListViewHolder: StrongNumberListViewHolder
     private lateinit var strongNumberListPresenter: StrongNumberListPresenter
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        `when`(resources.getString(anyInt(), anyString(), anyInt())).thenReturn("")
-        `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
-        `when`(resources.getStringArray(anyInt())).thenReturn(Array(12) { "" })
-        `when`(strongNumberListActivity.resources).thenReturn(resources)
-        `when`(strongNumberListActivity.strongNumber()).thenReturn("")
-
-        `when`(strongNumberListInteractor.settings()).thenReturn(emptyFlow())
-        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(emptyFlow())
-
-        strongNumberListViewHolder = StrongNumberListViewHolder(loadingSpinner, strongNumberListView)
-        strongNumberListPresenter = StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListInteractor, testDispatcher)
+        strongNumberListPresenter = StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListViewModel, lifecycleCoroutineScope)
     }
 
     @Test
-    fun testObserveSettings() = testDispatcher.runBlockingTest {
-        val settings = Settings(false, true, 1, true, true)
-        `when`(strongNumberListInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
-
-        strongNumberListPresenter.create(strongNumberListViewHolder)
-        verify(strongNumberListView, times(1)).setSettings(settings)
-        verify(strongNumberListView, never()).setSettings(Settings.DEFAULT)
-
-        strongNumberListPresenter.destroy()
-    }
-
-    @Test
-    fun testLoadStrongNumber() = testDispatcher.runBlockingTest {
-        `when`(strongNumberListActivity.strongNumber()).thenReturn("H7225")
-        `when`(strongNumberListInteractor.strongNumber("H7225")).thenReturn(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225")))
-        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(ViewData.success(MockContents.kjvShortName)))
-        `when`(strongNumberListInteractor.bookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
-        `when`(strongNumberListInteractor.bookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
-        `when`(strongNumberListInteractor.verseIndexes("H7225")).thenReturn(MockContents.strongNumberReverseIndex.getValue("H7225"))
-        `when`(strongNumberListInteractor.verses(MockContents.kjvShortName, MockContents.strongNumberReverseIndex.getValue("H7225")))
+    fun testPrepareItems() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        val sn = "H7225"
+        val strongNumber = StrongNumber(sn, MockContents.strongNumberWords.getValue(sn))
+        `when`(strongNumberListViewModel.strongNumber(sn)).thenReturn(strongNumber)
+        `when`(strongNumberListViewModel.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(strongNumberListViewModel.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(strongNumberListViewModel.verseIndexes(sn)).thenReturn(MockContents.strongNumberReverseIndex.getValue(sn))
+        `when`(strongNumberListViewModel.verses(currentTranslation, MockContents.strongNumberReverseIndex.getValue(sn)))
                 .thenReturn(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0]))
 
         strongNumberListPresenter = spy(strongNumberListPresenter)
         doReturn("formatted strong number").`when`(strongNumberListPresenter).formatStrongNumber(any())
-
-        strongNumberListPresenter.create(strongNumberListViewHolder)
-
-        with(inOrder(loadingSpinner, strongNumberListView)) {
-            verify(loadingSpinner, times(1)).fadeIn()
-            verify(strongNumberListView, times(1)).visibility = View.GONE
-            verify(strongNumberListView, times(1)).setItems(listOf(
-                    TextItem("formatted strong number"),
-                    TitleItem(MockContents.kjvBookNames[0], false),
-                    VerseStrongNumberItem(VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, strongNumberListPresenter::openVerse)
-            ))
-            verify(strongNumberListView, times(1)).fadeIn()
-            verify(loadingSpinner, times(1)).visibility = View.GONE
-        }
-
-        strongNumberListPresenter.destroy()
-    }
-
-    @Test
-    fun testLoadStrongNumberWithException() = testDispatcher.runBlockingTest {
-        val exception = RuntimeException("random exception")
-        `when`(strongNumberListInteractor.strongNumber(anyString())).thenThrow(exception)
-        `when`(strongNumberListInteractor.currentTranslation()).thenReturn(flowOf(ViewData.success(MockContents.kjvShortName)))
-        `when`(strongNumberListActivity.strongNumber()).thenReturn("sn")
-
-        strongNumberListPresenter.create(strongNumberListViewHolder)
-
-        with(inOrder(loadingSpinner, strongNumberListView)) {
-            verify(loadingSpinner, times(1)).fadeIn()
-            verify(strongNumberListView, times(1)).visibility = View.GONE
-            verify(loadingSpinner, times(1)).visibility = View.GONE
-        }
-        verify(strongNumberListView, never()).setItems(any())
-        verify(strongNumberListView, never()).fadeIn()
-
-        strongNumberListPresenter.destroy()
+        assertEquals(
+                listOf(
+                        TextItem("formatted strong number"),
+                        TitleItem(MockContents.kjvBookNames[0], false),
+                        VerseStrongNumberItem(VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, strongNumberListPresenter::openVerse)
+                ),
+                strongNumberListPresenter.prepareItems(sn, currentTranslation)
+        )
     }
 }

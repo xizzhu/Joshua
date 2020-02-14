@@ -16,6 +16,9 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
@@ -28,21 +31,26 @@ import me.xizzhu.android.joshua.core.StrongNumberManager
 object StrongNumberListModule {
     @ActivityScope
     @Provides
-    fun provideStrongNumberListInteractor(strongNumberManager: StrongNumberManager,
-                                          bibleReadingManager: BibleReadingManager,
-                                          settingsManager: SettingsManager): StrongNumberListInteractor =
-            StrongNumberListInteractor(strongNumberManager, bibleReadingManager, settingsManager)
-
-    @ActivityScope
-    @Provides
     fun provideStrongNumberListPresenter(strongNumberListActivity: StrongNumberListActivity,
                                          navigator: Navigator,
-                                         strongNumberListInteractor: StrongNumberListInteractor): StrongNumberListPresenter =
-            StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListInteractor)
+                                         strongNumberListViewModel: StrongNumberListViewModel): StrongNumberListPresenter =
+            StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListViewModel, strongNumberListActivity.lifecycleScope)
 
     @ActivityScope
     @Provides
-    fun provideStrongNumberViewModel(settingsManager: SettingsManager,
-                                     strongNumberListInteractor: StrongNumberListInteractor): StrongNumberListViewModel =
-            StrongNumberListViewModel(settingsManager, strongNumberListInteractor)
+    fun provideStrongNumberViewModel(strongNumberListActivity: StrongNumberListActivity,
+                                     bibleReadingManager: BibleReadingManager,
+                                     strongNumberManager: StrongNumberManager,
+                                     settingsManager: SettingsManager): StrongNumberListViewModel {
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(StrongNumberListViewModel::class.java)) {
+                    return StrongNumberListViewModel(bibleReadingManager, strongNumberManager, settingsManager) as T
+                }
+
+                throw IllegalArgumentException("Unsupported model class - $modelClass")
+            }
+        }
+        return ViewModelProvider(strongNumberListActivity, factory).get(StrongNumberListViewModel::class.java)
+    }
 }

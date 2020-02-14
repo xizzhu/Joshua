@@ -18,14 +18,11 @@ package me.xizzhu.android.joshua.strongnumber
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.arch.Interactor
-import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import javax.inject.Inject
 
-class StrongNumberListActivity : BaseSettingsAwareActivity() {
+class StrongNumberListActivity : BaseSettingsActivity() {
     companion object {
         private const val KEY_STRONG_NUMBER = "me.xizzhu.android.joshua.KEY_STRONG_NUMBER"
 
@@ -42,13 +39,12 @@ class StrongNumberListActivity : BaseSettingsAwareActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_strong_number)
-        strongNumberListPresenter.create(StrongNumberListViewHolder(
-                findViewById(R.id.loading_spinner), findViewById(R.id.strong_number_list)))
+        strongNumberListPresenter.bind(
+                StrongNumberListViewHolder(findViewById(R.id.loading_spinner), findViewById(R.id.strong_number_list))
+        )
     }
 
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(strongNumberListPresenter)
-
-    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = strongNumberListViewModel
+    override fun getBaseSettingsViewModel(): BaseSettingsViewModel = strongNumberListViewModel
 
     fun strongNumber(): String = intent.getStringExtra(KEY_STRONG_NUMBER) ?: ""
 }

@@ -22,16 +22,15 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.*
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
@@ -44,28 +43,26 @@ data class StrongNumberListViewHolder(val loadingSpinner: ProgressBar,
 
 class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumberListActivity,
                                 private val navigator: Navigator,
-                                strongNumberListInteractor: StrongNumberListInteractor,
-                                dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseSettingsAwarePresenter<StrongNumberListViewHolder, StrongNumberListInteractor>(strongNumberListInteractor, dispatcher) {
+                                strongNumberListViewModel: StrongNumberListViewModel,
+                                lifecycleCoroutineScope: LifecycleCoroutineScope)
+    : BaseSettingsPresenter<StrongNumberListViewHolder, StrongNumberListViewModel>(strongNumberListViewModel, lifecycleCoroutineScope) {
     @UiThread
-    override fun onCreate(viewHolder: StrongNumberListViewHolder) {
-        super.onCreate(viewHolder)
+    override fun onBind(viewHolder: StrongNumberListViewHolder) {
+        super.onBind(viewHolder)
 
-        interactor.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(coroutineScope)
-        interactor.currentTranslation().onEachSuccess {
-            loadStrongNumber(strongNumberListActivity.strongNumber(), it)
-        }.launchIn(coroutineScope)
+        viewModel.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(lifecycleScope)
+        viewModel.currentTranslation().onEachSuccess { loadStrongNumber(strongNumberListActivity.strongNumber(), it) }.launchIn(lifecycleScope)
     }
 
     private fun loadStrongNumber(sn: String, currentTranslation: String) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
-                viewHolder?.loadingSpinner?.fadeIn()
+                with(viewHolder) {
+                    loadingSpinner.fadeIn()
 
-                viewHolder?.strongNumberListView?.run {
-                    visibility = View.GONE
-                    setItems(prepareItems(sn, currentTranslation))
-                    fadeIn()
+                    strongNumberListView.visibility = View.GONE
+                    strongNumberListView.setItems(prepareItems(sn, currentTranslation))
+                    strongNumberListView.fadeIn()
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load Strong's number list", e)
@@ -73,22 +70,23 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
                         DialogInterface.OnClickListener { _, _ -> loadStrongNumber(sn, currentTranslation) },
                         DialogInterface.OnClickListener { _, _ -> strongNumberListActivity.finish() })
             } finally {
-                viewHolder?.loadingSpinner?.visibility = View.GONE
+                viewHolder.loadingSpinner.visibility = View.GONE
             }
         }
     }
 
-    private suspend fun prepareItems(sn: String, currentTranslation: String): List<BaseItem> {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    suspend fun prepareItems(sn: String, currentTranslation: String): List<BaseItem> {
         val items: ArrayList<BaseItem> = ArrayList()
 
-        val strongNumber = interactor.strongNumber(sn)
+        val strongNumber = viewModel.strongNumber(sn)
         items.add(TextItem(formatStrongNumber(strongNumber)))
 
-        val bookNames = interactor.bookNames(currentTranslation)
-        val bookShortNames = interactor.bookShortNames(currentTranslation)
-        val verseIndexes = interactor.verseIndexes(sn)
+        val bookNames = viewModel.bookNames(currentTranslation)
+        val bookShortNames = viewModel.bookShortNames(currentTranslation)
+        val verseIndexes = viewModel.verseIndexes(sn)
                 .sortedBy { it.bookIndex * 100000 + it.chapterIndex * 1000 + it.verseIndex }
-        val verses = interactor.verses(currentTranslation, verseIndexes)
+        val verses = viewModel.verses(currentTranslation, verseIndexes)
         var currentBookIndex = -1
         verseIndexes.forEach { verseIndex ->
             val bookName = bookNames[verseIndex.bookIndex]
@@ -104,18 +102,18 @@ class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumb
         return items
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun formatStrongNumber(strongNumber: StrongNumber): CharSequence =
             SpannableStringBuilder().append(strongNumber.sn)
                     .setSpan(createTitleStyleSpan(), createTitleSizeSpan())
                     .append(' ').append(strongNumber.meaning)
                     .toCharSequence()
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun openVerse(verseToOpen: VerseIndex) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
-                interactor.saveCurrentVerseIndex(verseToOpen)
+                viewModel.saveCurrentVerseIndex(verseToOpen)
                 navigator.navigate(strongNumberListActivity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
