@@ -16,25 +16,46 @@
 
 package me.xizzhu.android.joshua.search
 
-import androidx.annotation.UiThread
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.first
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.search.result.SearchResultInteractor
-import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
+import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import me.xizzhu.android.joshua.infra.arch.ViewData
 
-class SearchViewModel(settingsManager: SettingsManager,
-                      private val searchToolbarInteractor: SearchToolbarInteractor,
-                      private val searchResultInteractor: SearchResultInteractor,
-                      dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(searchToolbarInteractor), dispatcher) {
-    @UiThread
-    override fun onCreate() {
-        super.onCreate()
+class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
+                      settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    private val query: BroadcastChannel<ViewData<String>> = ConflatedBroadcastChannel()
 
-        searchToolbarInteractor.query().onEach { searchResultInteractor.updateQuery(it) }.launchIn(coroutineScope)
+    fun query(): Flow<ViewData<String>> = query.asFlow()
+
+    fun updateQuery(query: String) {
+        this.query.offer(ViewData.loading(query))
+    }
+
+    fun submitQuery(query: String) {
+        this.query.offer(ViewData.success(query))
+    }
+
+    suspend fun currentTranslation(): String =
+            bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+
+    suspend fun search(currentTranslation: String, query: String): List<Verse> =
+            bibleReadingManager.search(currentTranslation, query)
+
+    suspend fun bookNames(currentTranslation: String): List<String> =
+            bibleReadingManager.readBookNames(currentTranslation)
+
+    suspend fun bookShortNames(currentTranslation: String): List<String> =
+            bibleReadingManager.readBookShortNames(currentTranslation)
+
+    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
+        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 }

@@ -21,8 +21,7 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
@@ -30,9 +29,10 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.*
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.search.SearchActivity
+import me.xizzhu.android.joshua.search.SearchViewModel
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -46,22 +46,22 @@ data class SearchResultViewHolder(val loadingSpinner: ProgressBar,
 
 class SearchResultListPresenter(private val searchActivity: SearchActivity,
                                 private val navigator: Navigator,
-                                searchResultInteractor: SearchResultInteractor,
-                                dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseSettingsAwarePresenter<SearchResultViewHolder, SearchResultInteractor>(searchResultInteractor, dispatcher) {
+                                searchViewModel: SearchViewModel,
+                                lifecycleCoroutineScope: LifecycleCoroutineScope)
+    : BaseSettingsPresenter<SearchResultViewHolder, SearchViewModel>(searchViewModel, lifecycleCoroutineScope) {
     @UiThread
-    override fun onCreate(viewHolder: SearchResultViewHolder) {
-        super.onCreate(viewHolder)
+    override fun onBind(viewHolder: SearchResultViewHolder) {
+        super.onBind(viewHolder)
         observeSettings()
         observeQuery()
     }
 
     private fun observeSettings() {
-        interactor.settings().onEachSuccess { viewHolder?.searchResultListView?.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEachSuccess { viewHolder.searchResultListView.setSettings(it) }.launchIn(lifecycleScope)
     }
 
     private fun observeQuery() {
-        interactor.query()
+        viewModel.query()
                 .debounce(250L)
                 .distinctUntilChangedBy { if (it.status == ViewData.STATUS_ERROR) "" else it.data!! }
                 .mapLatest { viewData ->
@@ -74,52 +74,51 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
                                             ?: RuntimeException("Error occurred while observing query"))
                         }
                     }
-                }.launchIn(coroutineScope)
+                }.launchIn(lifecycleScope)
     }
 
     private suspend fun instantSearch(query: String) {
         try {
-            viewHolder?.searchResultListView?.run {
-                val currentTranslation = interactor.currentTranslation()
-                setItems(interactor.search(currentTranslation, query).toSearchItems(currentTranslation, query))
+            with(viewHolder.searchResultListView) {
+                val currentTranslation = viewModel.currentTranslation()
+                setItems(viewModel.search(currentTranslation, query).toSearchItems(currentTranslation, query))
                 scrollToPosition(0)
                 visibility = View.VISIBLE
             }
         } catch (e: Exception) {
-            viewHolder?.searchResultListView?.visibility = View.GONE
+            viewHolder.searchResultListView.visibility = View.GONE
             Log.e(tag, "Failed to search verses", e)
         }
     }
 
     private suspend fun search(query: String) {
         try {
-            viewHolder?.loadingSpinner?.fadeIn()
+            with(viewHolder) {
+                loadingSpinner.fadeIn()
 
-            viewHolder?.searchResultListView?.run {
-                visibility = View.GONE
+                searchResultListView.visibility = View.GONE
 
-                val currentTranslation = interactor.currentTranslation()
-                val verses = interactor.search(currentTranslation, query)
-                setItems(verses.toSearchItems(currentTranslation, query))
-
-                scrollToPosition(0)
-                fadeIn()
+                val currentTranslation = viewModel.currentTranslation()
+                val verses = viewModel.search(currentTranslation, query)
+                searchResultListView.setItems(verses.toSearchItems(currentTranslation, query))
+                searchResultListView.scrollToPosition(0)
+                searchResultListView.fadeIn()
 
                 searchActivity.toast(searchActivity.getString(R.string.toast_verses_searched, verses.size))
             }
         } catch (e: Exception) {
             Log.e(tag, "Failed to search verses", e)
             searchActivity.dialog(true, R.string.dialog_search_error,
-                    DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { search(query) } })
+                    DialogInterface.OnClickListener { _, _ -> lifecycleScope.launch { search(query) } })
         } finally {
-            viewHolder?.loadingSpinner?.visibility = View.GONE
+            viewHolder.loadingSpinner.visibility = View.GONE
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     suspend fun List<Verse>.toSearchItems(currentTranslation: String, query: String): List<BaseItem> {
-        val bookNames = interactor.bookNames(currentTranslation)
-        val bookShortNames = interactor.bookShortNames(currentTranslation)
+        val bookNames = viewModel.bookNames(currentTranslation)
+        val bookShortNames = viewModel.bookShortNames(currentTranslation)
         val items = ArrayList<BaseItem>(size + Bible.BOOK_COUNT)
         var lastVerseBookIndex = -1
         forEach { verse ->
@@ -134,11 +133,11 @@ class SearchResultListPresenter(private val searchActivity: SearchActivity,
         return items
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun selectVerse(verseToSelect: VerseIndex) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
-                interactor.saveCurrentVerseIndex(verseToSelect)
+                viewModel.saveCurrentVerseIndex(verseToSelect)
                 navigator.navigate(searchActivity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)

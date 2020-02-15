@@ -16,26 +16,27 @@
 
 package me.xizzhu.android.joshua.search
 
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.search.result.SearchResultInteractor
-import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
 import me.xizzhu.android.joshua.tests.BaseUnitTest
+import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.`when`
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class SearchViewModelTest : BaseUnitTest() {
     @Mock
+    private lateinit var bibleReadingManager: BibleReadingManager
+    @Mock
     private lateinit var settingsManager: SettingsManager
-    @Mock
-    private lateinit var searchToolbarInteractor: SearchToolbarInteractor
-    @Mock
-    private lateinit var searchResultInteractor: SearchResultInteractor
 
     private lateinit var searchViewModel: SearchViewModel
 
@@ -43,20 +44,32 @@ class SearchViewModelTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        `when`(searchToolbarInteractor.query()).thenReturn(emptyFlow())
-
-        searchViewModel = SearchViewModel(settingsManager, searchToolbarInteractor, searchResultInteractor, testDispatcher)
+        searchViewModel = SearchViewModel(bibleReadingManager, settingsManager)
     }
 
     @Test
     fun testUpdateQuery() = testDispatcher.runBlockingTest {
-        val queries = listOf("query1", "query2", "query3")
-        `when`(searchToolbarInteractor.query()).thenReturn(flow { queries.forEach { emit(ViewData.success(it)) } })
+        val queryAsync = async { searchViewModel.query().take(3).toList() }
 
-        searchViewModel.create()
-        with(inOrder(searchResultInteractor)) {
-            queries.forEach { query -> verify(searchResultInteractor, times(1)).updateQuery(ViewData.success(query)) }
-        }
-        searchViewModel.destroy()
+        val queries = listOf("query 1", "", "another one")
+        queries.forEach { searchViewModel.updateQuery(it) }
+        assertEquals(queries.map { ViewData.loading(it) }, queryAsync.await())
+    }
+
+    @Test
+    fun testSubmitQuery() = testDispatcher.runBlockingTest {
+        val queryAsync = async { searchViewModel.query().take(3).toList() }
+
+        val queries = listOf("query 1", "", "another one")
+        queries.forEach { searchViewModel.submitQuery(it) }
+        assertEquals(queries.map { ViewData.success(it) }, queryAsync.await())
+    }
+
+    @Test
+    fun testCurrentTranslation() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
+
+        assertEquals(currentTranslation, searchViewModel.currentTranslation())
     }
 }

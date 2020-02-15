@@ -18,18 +18,15 @@ package me.xizzhu.android.joshua.search
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.arch.Interactor
-import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.search.result.SearchResultListPresenter
 import me.xizzhu.android.joshua.search.result.SearchResultViewHolder
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarViewHolder
 import javax.inject.Inject
 
-class SearchActivity : BaseSettingsAwareActivity() {
+class SearchActivity : BaseSettingsActivity() {
     @Inject
     lateinit var searchViewModel: SearchViewModel
 
@@ -43,12 +40,11 @@ class SearchActivity : BaseSettingsAwareActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_search)
-        searchToolbarPresenter.create(SearchToolbarViewHolder(findViewById(R.id.toolbar)))
-        searchResultListPresenter.create(SearchResultViewHolder(
-                findViewById(R.id.loading_spinner), findViewById(R.id.search_result)))
+        searchToolbarPresenter.bind(SearchToolbarViewHolder(findViewById(R.id.toolbar)))
+        searchResultListPresenter.bind(
+                SearchResultViewHolder(findViewById(R.id.loading_spinner), findViewById(R.id.search_result))
+        )
     }
 
-    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = searchViewModel
-
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(searchToolbarPresenter, searchResultListPresenter)
+    override fun getBaseSettingsViewModel(): BaseSettingsViewModel = searchViewModel
 }

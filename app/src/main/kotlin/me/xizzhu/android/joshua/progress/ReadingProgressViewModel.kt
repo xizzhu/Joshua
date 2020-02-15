@@ -22,8 +22,7 @@ import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 
 class ReadingProgressViewModel(private val bibleReadingManager: BibleReadingManager,
                                private val readingProgressManager: ReadingProgressManager,
-                               settingsManager: SettingsManager)
-    : BaseSettingsViewModel(settingsManager) {
+                               settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
     suspend fun bookNames(): List<String> = bibleReadingManager.currentTranslation()
             .first { it.isNotEmpty() }
             .let { bibleReadingManager.readBookNames(it) }

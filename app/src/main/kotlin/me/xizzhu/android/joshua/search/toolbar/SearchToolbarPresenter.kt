@@ -20,45 +20,44 @@ import android.app.SearchManager
 import android.content.Context
 import android.provider.SearchRecentSuggestions
 import androidx.annotation.UiThread
-import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.SearchView
-import kotlinx.coroutines.CoroutineDispatcher
+import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.search.SearchActivity
+import me.xizzhu.android.joshua.search.SearchViewModel
 import me.xizzhu.android.joshua.ui.hideKeyboard
 
 data class SearchToolbarViewHolder(val searchToolbar: SearchToolbar) : ViewHolder
 
 class SearchToolbarPresenter(private val searchActivity: SearchActivity,
-                             searchToolbarInteractor: SearchToolbarInteractor,
-                             dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : ViewPresenter<SearchToolbarViewHolder, SearchToolbarInteractor>(searchToolbarInteractor, dispatcher) {
+                             searchViewModel: SearchViewModel,
+                             lifecycleCoroutineScope: LifecycleCoroutineScope)
+    : BaseSettingsPresenter<SearchToolbarViewHolder, SearchViewModel>(searchViewModel, lifecycleCoroutineScope) {
     private val searchRecentSuggestions: SearchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(searchActivity)
 
-    @VisibleForTesting
-    val onQueryTextListener = object : SearchView.OnQueryTextListener {
+    private val onQueryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String): Boolean {
             searchRecentSuggestions.saveRecentQuery(query, null)
-            interactor.submitQuery(query)
-            viewHolder?.searchToolbar?.hideKeyboard()
+            viewModel.submitQuery(query)
+            viewHolder.searchToolbar.hideKeyboard()
 
             // so that the system can close the search suggestion
             return false
         }
 
         override fun onQueryTextChange(newText: String): Boolean {
-            interactor.updateQuery(newText)
+            viewModel.updateQuery(newText)
             return true
         }
     }
 
     @UiThread
-    override fun onCreate(viewHolder: SearchToolbarViewHolder) {
-        super.onCreate(viewHolder)
+    override fun onBind(viewHolder: SearchToolbarViewHolder) {
+        super.onBind(viewHolder)
 
         with(viewHolder.searchToolbar) {
             setOnQueryTextListener(onQueryTextListener)
@@ -67,18 +66,12 @@ class SearchToolbarPresenter(private val searchActivity: SearchActivity,
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.action_clear_search_history -> {
-                        coroutineScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() }
+                        lifecycleScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() }
                         true
                     }
                     else -> false
                 }
             }
         }
-    }
-
-    @UiThread
-    override fun onDestroy() {
-        viewHolder?.searchToolbar?.setOnQueryTextListener(null)
-        super.onDestroy()
     }
 }

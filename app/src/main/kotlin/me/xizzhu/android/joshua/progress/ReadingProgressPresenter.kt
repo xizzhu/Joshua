@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.progress
 import android.content.DialogInterface
 import android.view.View
 import android.widget.ProgressBar
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -48,6 +49,7 @@ class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgr
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 
+    @UiThread
     override fun onBind(viewHolder: ReadingProgressViewHolder) {
         super.onBind(viewHolder)
 

@@ -16,46 +16,47 @@
 
 package me.xizzhu.android.joshua.search
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.search.result.SearchResultInteractor
 import me.xizzhu.android.joshua.search.result.SearchResultListPresenter
-import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
 
 @Module
 object SearchModule {
     @ActivityScope
     @Provides
-    fun provideSearchToolbarInteractor(): SearchToolbarInteractor = SearchToolbarInteractor()
-
-    @ActivityScope
-    @Provides
     fun provideSearchToolbarPresenter(searchActivity: SearchActivity,
-                                      searchToolbarInteractor: SearchToolbarInteractor): SearchToolbarPresenter =
-            SearchToolbarPresenter(searchActivity, searchToolbarInteractor)
-
-    @ActivityScope
-    @Provides
-    fun provideSearchResultInteractor(bibleReadingManager: BibleReadingManager,
-                                      settingsManager: SettingsManager): SearchResultInteractor =
-            SearchResultInteractor(bibleReadingManager, settingsManager)
+                                      searchViewModel: SearchViewModel): SearchToolbarPresenter =
+            SearchToolbarPresenter(searchActivity, searchViewModel, searchActivity.lifecycleScope)
 
     @ActivityScope
     @Provides
     fun provideSearchResultListPresenter(searchActivity: SearchActivity,
                                          navigator: Navigator,
-                                         searchResultInteractor: SearchResultInteractor): SearchResultListPresenter =
-            SearchResultListPresenter(searchActivity, navigator, searchResultInteractor)
+                                         searchViewModel: SearchViewModel): SearchResultListPresenter =
+            SearchResultListPresenter(searchActivity, navigator, searchViewModel, searchActivity.lifecycleScope)
 
     @ActivityScope
     @Provides
-    fun provideSearchViewModel(settingsManager: SettingsManager,
-                               searchToolbarInteractor: SearchToolbarInteractor,
-                               searchResultInteractor: SearchResultInteractor): SearchViewModel =
-            SearchViewModel(settingsManager, searchToolbarInteractor, searchResultInteractor)
+    fun provideSearchViewModel(searchActivity: SearchActivity,
+                               bibleReadingManager: BibleReadingManager,
+                               settingsManager: SettingsManager): SearchViewModel {
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(SearchViewModel::class.java)) {
+                    return SearchViewModel(bibleReadingManager, settingsManager) as T
+                }
+
+                throw IllegalArgumentException("Unsupported model class - $modelClass")
+            }
+        }
+        return ViewModelProvider(searchActivity, factory).get(SearchViewModel::class.java)
+    }
 }
