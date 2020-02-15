@@ -16,16 +16,17 @@
 
 package me.xizzhu.android.joshua.annotated.notes
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.notes.list.NotesListPresenter
-import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Note
@@ -36,32 +37,31 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 object NotesModule {
     @ActivityScope
     @Provides
-    fun provideAnnotatedVersesToolbarInteractor(noteManager: VerseAnnotationManager<Note>): AnnotatedVersesToolbarInteractor<Note> =
-            AnnotatedVersesToolbarInteractor(noteManager)
+    fun provideToolbarPresenter(notesActivity: NotesActivity,
+                                notesViewModel: BaseAnnotatedVersesViewModel<Note>): AnnotatedVersesToolbarPresenter<Note> =
+            AnnotatedVersesToolbarPresenter(R.string.title_notes, notesViewModel, notesActivity.lifecycleScope)
 
     @ActivityScope
     @Provides
-    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Note>): AnnotatedVersesToolbarPresenter<Note> =
-            AnnotatedVersesToolbarPresenter(R.string.title_notes, annotatedVersesToolbarInteractor)
+    fun provideNotesListPresenter(notesActivity: NotesActivity, navigator: Navigator,
+                                  notesViewModel: BaseAnnotatedVersesViewModel<Note>): BaseAnnotatedVersesPresenter<Note> =
+            NotesListPresenter(notesActivity, navigator, notesViewModel, notesActivity.lifecycleScope)
 
     @ActivityScope
     @Provides
-    fun provideNotesListInteractor(noteManager: VerseAnnotationManager<Note>,
-                                   bibleReadingManager: BibleReadingManager,
-                                   settingsManager: SettingsManager): AnnotatedVersesInteractor<Note> =
-            AnnotatedVersesInteractor(noteManager, bibleReadingManager, settingsManager)
+    fun provideNotesViewModel(notesActivity: NotesActivity,
+                              bibleReadingManager: BibleReadingManager,
+                              notesManager: VerseAnnotationManager<Note>,
+                              settingsManager: SettingsManager): BaseAnnotatedVersesViewModel<Note> {
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(NotesViewModel::class.java)) {
+                    return NotesViewModel(bibleReadingManager, notesManager, settingsManager) as T
+                }
 
-    @ActivityScope
-    @Provides
-    fun provideNotesListPresenter(notesActivity: NotesActivity,
-                                  navigator: Navigator,
-                                  notesListInteractor: AnnotatedVersesInteractor<Note>): BaseAnnotatedVersesPresenter<Note, AnnotatedVersesInteractor<Note>> =
-            NotesListPresenter(notesActivity, navigator, notesListInteractor)
-
-    @ActivityScope
-    @Provides
-    fun provideNotesViewModel(settingsManager: SettingsManager,
-                              annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Note>,
-                              notesListInteractor: AnnotatedVersesInteractor<Note>): AnnotatedVersesViewModel<Note> =
-            AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, notesListInteractor)
+                throw IllegalArgumentException("Unsupported model class - $modelClass")
+            }
+        }
+        return ViewModelProvider(notesActivity, factory).get(NotesViewModel::class.java)
+    }
 }

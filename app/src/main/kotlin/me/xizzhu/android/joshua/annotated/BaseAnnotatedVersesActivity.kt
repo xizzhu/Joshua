@@ -21,31 +21,27 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarViewHolder
 import me.xizzhu.android.joshua.core.VerseAnnotation
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.arch.Interactor
-import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import javax.inject.Inject
 
-abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation> : BaseSettingsAwareActivity() {
+abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation> : BaseSettingsActivity() {
     @Inject
-    lateinit var annotatedVersesViewModel: AnnotatedVersesViewModel<V>
+    lateinit var annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>
     @Inject
     lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter<V>
     @Inject
-    lateinit var annotatedVersesPresenter: BaseAnnotatedVersesPresenter<V, AnnotatedVersesInteractor<V>>
+    lateinit var annotatedVersesPresenter: BaseAnnotatedVersesPresenter<V>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_annotated)
-        toolbarPresenter.create(AnnotatedVersesToolbarViewHolder(findViewById(R.id.toolbar)))
-        annotatedVersesPresenter.create(AnnotatedVersesViewHolder(
-                findViewById(R.id.loading_spinner), findViewById(R.id.verse_list)))
+        toolbarPresenter.bind(AnnotatedVersesToolbarViewHolder(findViewById(R.id.toolbar)))
+        annotatedVersesPresenter.bind(
+                AnnotatedVersesViewHolder(findViewById(R.id.loading_spinner), findViewById(R.id.verse_list))
+        )
     }
 
-    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = annotatedVersesViewModel
-
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(toolbarPresenter, annotatedVersesPresenter)
+    override fun getBaseSettingsViewModel(): BaseSettingsViewModel = annotatedVersesViewModel
 }

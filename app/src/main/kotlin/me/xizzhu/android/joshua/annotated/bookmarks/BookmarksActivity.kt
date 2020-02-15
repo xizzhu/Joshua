@@ -17,6 +17,14 @@
 package me.xizzhu.android.joshua.annotated.bookmarks
 
 import me.xizzhu.android.joshua.annotated.*
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
+
+class BookmarksViewModel(bibleReadingManager: BibleReadingManager,
+                         bookmarksManager: VerseAnnotationManager<Bookmark>,
+                         settingsManager: SettingsManager)
+    : BaseAnnotatedVersesViewModel<Bookmark>(bibleReadingManager, bookmarksManager, settingsManager)
 
 class BookmarksActivity : BaseAnnotatedVersesActivity<Bookmark>()

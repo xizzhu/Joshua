@@ -16,16 +16,17 @@
 
 package me.xizzhu.android.joshua.annotated.bookmarks
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListPresenter
-import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
@@ -36,32 +37,31 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 object BookmarksModule {
     @ActivityScope
     @Provides
-    fun provideAnnotatedVersesToolbarInteractor(bookmarkManager: VerseAnnotationManager<Bookmark>): AnnotatedVersesToolbarInteractor<Bookmark> =
-            AnnotatedVersesToolbarInteractor(bookmarkManager)
+    fun provideToolbarPresenter(bookmarksActivity: BookmarksActivity,
+                                bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>): AnnotatedVersesToolbarPresenter<Bookmark> =
+            AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, bookmarksViewModel, bookmarksActivity.lifecycleScope)
 
     @ActivityScope
     @Provides
-    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Bookmark>): AnnotatedVersesToolbarPresenter<Bookmark> =
-            AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, annotatedVersesToolbarInteractor)
+    fun provideBookmarksListPresenter(bookmarksActivity: BookmarksActivity, navigator: Navigator,
+                                      bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>): BaseAnnotatedVersesPresenter<Bookmark> =
+            BookmarksListPresenter(bookmarksActivity, navigator, bookmarksViewModel, bookmarksActivity.lifecycleScope)
 
     @ActivityScope
     @Provides
-    fun provideBookmarksListInteractor(bookmarkManager: VerseAnnotationManager<Bookmark>,
-                                       bibleReadingManager: BibleReadingManager,
-                                       settingsManager: SettingsManager): AnnotatedVersesInteractor<Bookmark> =
-            AnnotatedVersesInteractor(bookmarkManager, bibleReadingManager, settingsManager)
+    fun provideBookmarksViewModel(bookmarksActivity: BookmarksActivity,
+                                  bibleReadingManager: BibleReadingManager,
+                                  bookmarksManager: VerseAnnotationManager<Bookmark>,
+                                  settingsManager: SettingsManager): BaseAnnotatedVersesViewModel<Bookmark> {
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(BookmarksViewModel::class.java)) {
+                    return BookmarksViewModel(bibleReadingManager, bookmarksManager, settingsManager) as T
+                }
 
-    @ActivityScope
-    @Provides
-    fun provideBookmarksListPresenter(bookmarksActivity: BookmarksActivity,
-                                      navigator: Navigator,
-                                      bookmarksListInteractor: AnnotatedVersesInteractor<Bookmark>): BaseAnnotatedVersesPresenter<Bookmark, AnnotatedVersesInteractor<Bookmark>> =
-            BookmarksListPresenter(bookmarksActivity, navigator, bookmarksListInteractor)
-
-    @ActivityScope
-    @Provides
-    fun provideBookmarksViewModel(settingsManager: SettingsManager,
-                                  annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Bookmark>,
-                                  bookmarksListInteractor: AnnotatedVersesInteractor<Bookmark>): AnnotatedVersesViewModel<Bookmark> =
-            AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, bookmarksListInteractor)
+                throw IllegalArgumentException("Unsupported model class - $modelClass")
+            }
+        }
+        return ViewModelProvider(bookmarksActivity, factory).get(BookmarksViewModel::class.java)
+    }
 }

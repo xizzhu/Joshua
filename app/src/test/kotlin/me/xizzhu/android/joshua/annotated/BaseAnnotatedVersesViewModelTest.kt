@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.infra.arch.ViewData
@@ -32,22 +31,21 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class AnnotatedVersesInteractorTest : BaseUnitTest() {
-    @Mock
-    private lateinit var bookmarkManager: VerseAnnotationManager<Bookmark>
+class BaseAnnotatedVersesViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
     @Mock
+    private lateinit var verseAnnotationManager: VerseAnnotationManager<TestVerseAnnotation>
+    @Mock
     private lateinit var settingsManager: SettingsManager
 
-    private lateinit var annotatedVersesInteractor: AnnotatedVersesInteractor<Bookmark>
+    private lateinit var verseAnnotationViewModel: TestVerseAnnotationViewModel
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        annotatedVersesInteractor = AnnotatedVersesInteractor(
-                bookmarkManager, bibleReadingManager, settingsManager, testDispatcher)
+        verseAnnotationViewModel = TestVerseAnnotationViewModel(bibleReadingManager, verseAnnotationManager, settingsManager)
     }
 
     @Test
@@ -57,7 +55,7 @@ class AnnotatedVersesInteractorTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(ViewData.success(MockContents.kjvShortName), ViewData.success(MockContents.cuvShortName), ViewData.success(MockContents.bbeShortName)),
-                annotatedVersesInteractor.currentTranslation().toList()
+                verseAnnotationViewModel.currentTranslation().toList()
         )
     }
 }

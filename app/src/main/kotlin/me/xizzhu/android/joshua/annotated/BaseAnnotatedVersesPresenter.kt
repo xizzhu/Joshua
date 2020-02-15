@@ -23,7 +23,7 @@ import android.widget.ProgressBar
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
-import kotlinx.coroutines.CoroutineDispatcher
+import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
@@ -32,8 +32,8 @@ import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.*
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -47,47 +47,50 @@ import kotlin.collections.ArrayList
 data class AnnotatedVersesViewHolder(val loadingSpinner: ProgressBar,
                                      val annotatedVerseListView: CommonRecyclerView) : ViewHolder
 
-abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : AnnotatedVersesInteractor<V>>
-(private val activity: BaseAnnotatedVersesActivity<V>, private val navigator: Navigator,
- @StringRes private val noItemText: Int, interactor: Interactor, dispatcher: CoroutineDispatcher)
-    : BaseSettingsAwarePresenter<AnnotatedVersesViewHolder, Interactor>(interactor, dispatcher) {
+abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation>(
+        private val activity: BaseAnnotatedVersesActivity<V>,
+        private val navigator: Navigator,
+        @StringRes private val noItemText: Int,
+        annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>,
+        lifecycleCoroutineScope: LifecycleCoroutineScope
+) : BaseSettingsPresenter<AnnotatedVersesViewHolder, BaseAnnotatedVersesViewModel<V>>(annotatedVersesViewModel, lifecycleCoroutineScope) {
     @UiThread
-    override fun onCreate(viewHolder: AnnotatedVersesViewHolder) {
-        super.onCreate(viewHolder)
+    override fun onBind(viewHolder: AnnotatedVersesViewHolder) {
+        super.onBind(viewHolder)
 
-        interactor.settings().onEachSuccess { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEachSuccess { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(lifecycleScope)
 
-        interactor.sortOrder().combineOnSuccess(interactor.currentTranslation()) { sortOrder, currentTranslation ->
+        viewModel.sortOrder().combineOnSuccess(viewModel.currentTranslation()) { sortOrder, currentTranslation ->
             load(sortOrder, currentTranslation)
-        }.launchIn(coroutineScope)
+        }.launchIn(lifecycleScope)
     }
 
     private suspend fun load(@Constants.SortOrder sortOrder: Int, currentTranslation: String) {
         try {
-            viewHolder?.loadingSpinner?.fadeIn()
+            with(viewHolder) {
+                loadingSpinner.fadeIn()
 
-            viewHolder?.annotatedVerseListView?.run {
-                visibility = View.GONE
-                setItems(prepareItems(sortOrder, currentTranslation))
-                fadeIn()
+                annotatedVerseListView.visibility = View.GONE
+                annotatedVerseListView.setItems(prepareItems(sortOrder, currentTranslation))
+                annotatedVerseListView.fadeIn()
             }
         } catch (e: Exception) {
             Log.e(tag, "Failed to load annotated verses", e)
             activity.dialog(false, R.string.dialog_load_annotated_verses_error,
-                    DialogInterface.OnClickListener { _, _ -> coroutineScope.launch { load(sortOrder, currentTranslation) } },
+                    DialogInterface.OnClickListener { _, _ -> lifecycleScope.launch { load(sortOrder, currentTranslation) } },
                     DialogInterface.OnClickListener { _, _ -> activity.finish() })
         } finally {
-            viewHolder?.loadingSpinner?.visibility = View.GONE
+            viewHolder.loadingSpinner.visibility = View.GONE
         }
     }
 
     private suspend fun prepareItems(@Constants.SortOrder sortOrder: Int, currentTranslation: String): List<BaseItem> {
-        val verseAnnotations = interactor.verseAnnotations(sortOrder)
+        val verseAnnotations = viewModel.verseAnnotations(sortOrder)
         if (verseAnnotations.isEmpty()) return listOf(TextItem(activity.getString(noItemText)))
 
-        val bookNames = interactor.bookNames(currentTranslation)
-        val bookShortNames = interactor.bookShortNames(currentTranslation)
-        val verses = interactor.verses(currentTranslation, verseAnnotations.map { it.verseIndex })
+        val bookNames = viewModel.bookNames(currentTranslation)
+        val bookShortNames = viewModel.bookShortNames(currentTranslation)
+        val verses = viewModel.verses(currentTranslation, verseAnnotations.map { it.verseIndex })
 
         return when (sortOrder) {
             Constants.SORT_BY_DATE -> verseAnnotations.toBaseItemsByDate(bookNames, bookShortNames, verses)
@@ -96,7 +99,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun List<V>.toBaseItemsByDate(bookNames: List<String>, bookShortNames: List<String>, verses: Map<VerseIndex, Verse>): List<BaseItem> {
         val calendar = Calendar.getInstance()
         var previousYear = -1
@@ -124,7 +127,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
 
     protected abstract fun V.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun List<V>.toBaseItemsByBook(bookNames: List<String>, bookShortNames: List<String>, verses: Map<VerseIndex, Verse>): List<BaseItem> {
         val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
@@ -143,11 +146,11 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, Interactor : An
         return items
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun openVerse(verseToOpen: VerseIndex) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
-                interactor.saveCurrentVerseIndex(verseToOpen)
+                viewModel.saveCurrentVerseIndex(verseToOpen)
                 navigator.navigate(activity, Navigator.SCREEN_READING, extrasForOpeningVerse())
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)

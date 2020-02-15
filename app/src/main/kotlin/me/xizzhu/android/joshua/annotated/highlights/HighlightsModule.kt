@@ -16,16 +16,17 @@
 
 package me.xizzhu.android.joshua.annotated.highlights
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.highlights.list.HighlightsListPresenter
-import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarInteractor
 import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Highlight
@@ -36,32 +37,31 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 object HighlightsModule {
     @ActivityScope
     @Provides
-    fun provideAnnotatedVersesToolbarInteractor(highlightManager: VerseAnnotationManager<Highlight>): AnnotatedVersesToolbarInteractor<Highlight> =
-            AnnotatedVersesToolbarInteractor(highlightManager)
+    fun provideToolbarPresenter(highlightsActivity: HighlightsActivity,
+                                highlightsViewModel: BaseAnnotatedVersesViewModel<Highlight>): AnnotatedVersesToolbarPresenter<Highlight> =
+            AnnotatedVersesToolbarPresenter(R.string.title_highlights, highlightsViewModel, highlightsActivity.lifecycleScope)
 
     @ActivityScope
     @Provides
-    fun provideSortOrderToolbarPresenter(annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Highlight>): AnnotatedVersesToolbarPresenter<Highlight> =
-            AnnotatedVersesToolbarPresenter(R.string.title_highlights, annotatedVersesToolbarInteractor)
+    fun provideHighlightsListPresenter(highlightsActivity: HighlightsActivity, navigator: Navigator,
+                                       highlightsViewModel: BaseAnnotatedVersesViewModel<Highlight>): BaseAnnotatedVersesPresenter<Highlight> =
+            HighlightsListPresenter(highlightsActivity, navigator, highlightsViewModel, highlightsActivity.lifecycleScope)
 
     @ActivityScope
     @Provides
-    fun provideHighlightsListInteractor(highlightManager: VerseAnnotationManager<Highlight>,
-                                        bibleReadingManager: BibleReadingManager,
-                                        settingsManager: SettingsManager): AnnotatedVersesInteractor<Highlight> =
-            AnnotatedVersesInteractor(highlightManager, bibleReadingManager, settingsManager)
+    fun provideHighlightsViewModel(highlightsActivity: HighlightsActivity,
+                                   bibleReadingManager: BibleReadingManager,
+                                   highlightsManager: VerseAnnotationManager<Highlight>,
+                                   settingsManager: SettingsManager): BaseAnnotatedVersesViewModel<Highlight> {
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(HighlightsViewModel::class.java)) {
+                    return HighlightsViewModel(bibleReadingManager, highlightsManager, settingsManager) as T
+                }
 
-    @ActivityScope
-    @Provides
-    fun provideHighlightsListPresenter(highlightsActivity: HighlightsActivity,
-                                       navigator: Navigator,
-                                       highlightsListInteractor: AnnotatedVersesInteractor<Highlight>): BaseAnnotatedVersesPresenter<Highlight, AnnotatedVersesInteractor<Highlight>> =
-            HighlightsListPresenter(highlightsActivity, navigator, highlightsListInteractor)
-
-    @ActivityScope
-    @Provides
-    fun provideHighlightsViewModel(settingsManager: SettingsManager,
-                                   annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<Highlight>,
-                                   highlightsListInteractor: AnnotatedVersesInteractor<Highlight>): AnnotatedVersesViewModel<Highlight> =
-            AnnotatedVersesViewModel(settingsManager, annotatedVersesToolbarInteractor, highlightsListInteractor)
+                throw IllegalArgumentException("Unsupported model class - $modelClass")
+            }
+        }
+        return ViewModelProvider(highlightsActivity, factory).get(HighlightsViewModel::class.java)
+    }
 }

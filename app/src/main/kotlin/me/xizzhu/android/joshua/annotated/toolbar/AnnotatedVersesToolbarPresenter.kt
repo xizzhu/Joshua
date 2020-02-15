@@ -18,31 +18,27 @@ package me.xizzhu.android.joshua.annotated.toolbar
 
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.LifecycleCoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.VerseAnnotation
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
 
 data class AnnotatedVersesToolbarViewHolder(val toolbar: AnnotatedVersesToolbar) : ViewHolder
 
 class AnnotatedVersesToolbarPresenter<V : VerseAnnotation>(@StringRes private val title: Int,
-                                                           annotatedVersesToolbarInteractor: AnnotatedVersesToolbarInteractor<V>,
-                                                           dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : ViewPresenter<AnnotatedVersesToolbarViewHolder, AnnotatedVersesToolbarInteractor<V>>(annotatedVersesToolbarInteractor, dispatcher) {
+                                                           annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>,
+                                                           lifecycleCoroutineScope: LifecycleCoroutineScope)
+    : BaseSettingsPresenter<AnnotatedVersesToolbarViewHolder, BaseAnnotatedVersesViewModel<V>>(annotatedVersesViewModel, lifecycleCoroutineScope) {
     @UiThread
-    override fun onCreate(viewHolder: AnnotatedVersesToolbarViewHolder) {
-        super.onCreate(viewHolder)
+    override fun onBind(viewHolder: AnnotatedVersesToolbarViewHolder) {
+        super.onBind(viewHolder)
 
         viewHolder.toolbar.setTitle(title)
-        viewHolder.toolbar.sortOrderUpdated = { sortOrder -> coroutineScope.launch { interactor.saveSortOrder(sortOrder) } }
-    }
-
-    @UiThread
-    override fun onStart() {
-        super.onStart()
-
-        coroutineScope.launch { viewHolder?.toolbar?.setSortOrder(interactor.readSortOrder()) }
+        viewHolder.toolbar.sortOrderUpdated = { sortOrder -> lifecycleScope.launch { viewModel.saveSortOrder(sortOrder) } }
+        lifecycleScope.launchWhenStarted { viewHolder.toolbar.setSortOrder(viewModel.sortOrder().filterOnSuccess().first()) }
     }
 }
