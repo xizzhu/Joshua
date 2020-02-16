@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
@@ -38,6 +39,8 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var strongNumberListViewModel: StrongNumberListViewModel
     @Mock
+    private lateinit var lifecycle: Lifecycle
+    @Mock
     private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
 
     private lateinit var strongNumberListPresenter: StrongNumberListPresenter
@@ -46,7 +49,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        strongNumberListPresenter = StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListViewModel, lifecycleCoroutineScope)
+        strongNumberListPresenter = StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListViewModel, lifecycle, lifecycleCoroutineScope)
     }
 
     @Test

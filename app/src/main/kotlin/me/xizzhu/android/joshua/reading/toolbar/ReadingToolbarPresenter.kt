@@ -135,7 +135,7 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     }
 
     private fun startTranslationManagementActivity() {
-        startActivity(Navigator.SCREEN_TRANSLATION_MANAGEMENT, R.string.dialog_navigate_to_translation_error)
+        startActivity(Navigator.SCREEN_TRANSLATIONS, R.string.dialog_navigate_to_translation_error)
     }
 
     private fun startActivity(@Navigator.Companion.Screen screen: Int, @StringRes errorMessage: Int) {

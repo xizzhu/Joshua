@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -34,14 +33,14 @@ object SearchModule {
     @Provides
     fun provideSearchToolbarPresenter(searchActivity: SearchActivity,
                                       searchViewModel: SearchViewModel): SearchToolbarPresenter =
-            SearchToolbarPresenter(searchActivity, searchViewModel, searchActivity.lifecycleScope)
+            SearchToolbarPresenter(searchActivity, searchViewModel, searchActivity.lifecycle)
 
     @ActivityScope
     @Provides
     fun provideSearchResultListPresenter(searchActivity: SearchActivity,
                                          navigator: Navigator,
                                          searchViewModel: SearchViewModel): SearchResultListPresenter =
-            SearchResultListPresenter(searchActivity, navigator, searchViewModel, searchActivity.lifecycleScope)
+            SearchResultListPresenter(searchActivity, navigator, searchViewModel, searchActivity.lifecycle)
 
     @ActivityScope
     @Provides

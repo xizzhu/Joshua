@@ -21,7 +21,9 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
@@ -41,11 +43,11 @@ import me.xizzhu.android.logger.Log
 data class ReadingProgressViewHolder(val loadingSpinner: ProgressBar,
                                      val readingProgressListView: CommonRecyclerView) : ViewHolder
 
-class ReadingProgressPresenter(private val readingProgressActivity: ReadingProgressActivity,
-                               private val navigator: Navigator,
-                               readingProgressViewModel: ReadingProgressViewModel,
-                               lifecycleCoroutineScope: LifecycleCoroutineScope)
-    : BaseSettingsPresenter<ReadingProgressViewHolder, ReadingProgressViewModel>(readingProgressViewModel, lifecycleCoroutineScope) {
+class ReadingProgressPresenter(
+        private val readingProgressActivity: ReadingProgressActivity, private val navigator: Navigator,
+        readingProgressViewModel: ReadingProgressViewModel, lifecycle: Lifecycle,
+        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
+) : BaseSettingsPresenter<ReadingProgressViewHolder, ReadingProgressViewModel>(readingProgressViewModel, lifecycle, lifecycleCoroutineScope) {
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 

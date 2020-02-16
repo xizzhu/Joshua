@@ -22,7 +22,9 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
@@ -41,11 +43,11 @@ import me.xizzhu.android.logger.Log
 data class StrongNumberListViewHolder(val loadingSpinner: ProgressBar,
                                       val strongNumberListView: CommonRecyclerView) : ViewHolder
 
-class StrongNumberListPresenter(private val strongNumberListActivity: StrongNumberListActivity,
-                                private val navigator: Navigator,
-                                strongNumberListViewModel: StrongNumberListViewModel,
-                                lifecycleCoroutineScope: LifecycleCoroutineScope)
-    : BaseSettingsPresenter<StrongNumberListViewHolder, StrongNumberListViewModel>(strongNumberListViewModel, lifecycleCoroutineScope) {
+class StrongNumberListPresenter(
+        private val strongNumberListActivity: StrongNumberListActivity, private val navigator: Navigator,
+        strongNumberListViewModel: StrongNumberListViewModel, lifecycle: Lifecycle,
+        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
+) : BaseSettingsPresenter<StrongNumberListViewHolder, StrongNumberListViewModel>(strongNumberListViewModel, lifecycle, lifecycleCoroutineScope) {
     @UiThread
     override fun onBind(viewHolder: StrongNumberListViewHolder) {
         super.onBind(viewHolder)

@@ -27,7 +27,9 @@ import androidx.annotation.ColorInt
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
@@ -49,10 +51,10 @@ data class SettingsViewHolder(val display: SettingSectionHeader, val fontSize: S
                               val backup: SettingButton, val restore: SettingButton, val about: SettingSectionHeader,
                               val rate: SettingButton, val version: SettingButton) : ViewHolder
 
-class SettingsPresenter(private val settingsActivity: SettingsActivity,
-                        settingsViewModel: SettingsViewModel,
-                        lifecycleCoroutineScope: LifecycleCoroutineScope)
-    : BaseSettingsPresenter<SettingsViewHolder, SettingsViewModel>(settingsViewModel, lifecycleCoroutineScope) {
+class SettingsPresenter(
+        private val settingsActivity: SettingsActivity, settingsViewModel: SettingsViewModel,
+        lifecycle: Lifecycle, lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
+) : BaseSettingsPresenter<SettingsViewHolder, SettingsViewModel>(settingsViewModel, lifecycle, lifecycleCoroutineScope) {
     companion object {
         const val CODE_CREATE_DOCUMENT_FOR_BACKUP = 9999
         const val CODE_GET_CONTENT_FOR_RESTORE = 9998

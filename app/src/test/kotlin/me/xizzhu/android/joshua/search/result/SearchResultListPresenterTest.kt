@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.search.result
 
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
@@ -38,6 +39,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var searchViewModel: SearchViewModel
     @Mock
+    private lateinit var lifecycle: Lifecycle
+    @Mock
     private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
 
     private lateinit var searchResultListPresenter: SearchResultListPresenter
@@ -46,7 +49,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchViewModel, lifecycleCoroutineScope)
+        searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchViewModel, lifecycle, lifecycleCoroutineScope)
     }
 
     @Test

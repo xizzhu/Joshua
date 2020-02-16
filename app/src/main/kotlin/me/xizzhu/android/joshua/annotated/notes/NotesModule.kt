@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.annotated.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
@@ -39,13 +38,13 @@ object NotesModule {
     @Provides
     fun provideToolbarPresenter(notesActivity: NotesActivity,
                                 notesViewModel: BaseAnnotatedVersesViewModel<Note>): AnnotatedVersesToolbarPresenter<Note> =
-            AnnotatedVersesToolbarPresenter(R.string.title_notes, notesViewModel, notesActivity.lifecycleScope)
+            AnnotatedVersesToolbarPresenter(R.string.title_notes, notesViewModel, notesActivity.lifecycle)
 
     @ActivityScope
     @Provides
     fun provideNotesListPresenter(notesActivity: NotesActivity, navigator: Navigator,
                                   notesViewModel: BaseAnnotatedVersesViewModel<Note>): BaseAnnotatedVersesPresenter<Note> =
-            NotesListPresenter(notesActivity, navigator, notesViewModel, notesActivity.lifecycleScope)
+            NotesListPresenter(notesActivity, navigator, notesViewModel, notesActivity.lifecycle)
 
     @ActivityScope
     @Provides

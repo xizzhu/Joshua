@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
@@ -31,7 +30,7 @@ object SettingsModule {
     @Provides
     fun provideSettingsViewPresenter(settingsActivity: SettingsActivity,
                                      settingsViewModel: SettingsViewModel): SettingsPresenter =
-            SettingsPresenter(settingsActivity, settingsViewModel, settingsActivity.lifecycleScope)
+            SettingsPresenter(settingsActivity, settingsViewModel, settingsActivity.lifecycle)
 
     @ActivityScope
     @Provides

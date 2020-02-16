@@ -18,16 +18,13 @@ package me.xizzhu.android.joshua.translations
 
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.arch.Interactor
-import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import javax.inject.Inject
 
-class TranslationManagementActivity : BaseSettingsAwareActivity() {
+class TranslationsActivity : BaseSettingsActivity() {
     @Inject
-    lateinit var translationViewModel: TranslationsViewModel
+    lateinit var translationsViewModel: TranslationsViewModel
 
     @Inject
     lateinit var translationListPresenter: TranslationListPresenter
@@ -36,11 +33,10 @@ class TranslationManagementActivity : BaseSettingsAwareActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_translation_management)
-        translationListPresenter.create(TranslationListViewHolder(
-                findViewById(R.id.swipe_refresher), findViewById(R.id.translation_list)))
+        translationListPresenter.bind(
+                TranslationListViewHolder(findViewById(R.id.swipe_refresher), findViewById(R.id.translation_list))
+        )
     }
 
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(translationListPresenter)
-
-    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = translationViewModel
+    override fun getBaseSettingsViewModel(): BaseSettingsViewModel = translationsViewModel
 }

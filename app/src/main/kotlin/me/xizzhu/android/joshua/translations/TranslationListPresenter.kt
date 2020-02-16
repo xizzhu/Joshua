@@ -21,16 +21,18 @@ import android.view.View
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.coroutineScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.*
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
@@ -41,10 +43,10 @@ import java.util.ArrayList
 data class TranslationListViewHolder(val swipeRefreshLayout: SwipeRefreshLayout,
                                      val translationListView: CommonRecyclerView) : ViewHolder
 
-class TranslationListPresenter(private val translationManagementActivity: TranslationManagementActivity,
-                               translationListInteractor: TranslationListInteractor,
-                               dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseSettingsAwarePresenter<TranslationListViewHolder, TranslationListInteractor>(translationListInteractor, dispatcher) {
+class TranslationListPresenter(
+        private val translationsActivity: TranslationsActivity, translationsViewModel: TranslationsViewModel,
+        lifecycle: Lifecycle, lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
+) : BaseSettingsPresenter<TranslationListViewHolder, TranslationsViewModel>(translationsViewModel, lifecycle, lifecycleCoroutineScope) {
     private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_NAME)
 
     private var downloadingJob: Job? = null
@@ -52,25 +54,25 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     private var removeTranslationDialog: AlertDialog? = null
 
     @UiThread
-    override fun onCreate(viewHolder: TranslationListViewHolder) {
-        super.onCreate(viewHolder)
+    override fun onBind(viewHolder: TranslationListViewHolder) {
+        super.onBind(viewHolder)
 
         with(viewHolder.swipeRefreshLayout) {
             setColorSchemeResources(R.color.primary_dark, R.color.primary, R.color.dark_cyan, R.color.dark_lime)
-            setOnRefreshListener { interactor.loadTranslationList(true) }
+            setOnRefreshListener { viewModel.loadTranslationList(true) }
         }
 
         observeSettings()
         observeTranslationList()
-        interactor.loadTranslationList(false)
+        viewModel.loadTranslationList(false)
     }
 
     private fun observeSettings() {
-        interactor.settings().onEachSuccess { viewHolder?.translationListView?.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEachSuccess { viewHolder?.translationListView?.setSettings(it) }.launchIn(lifecycleScope)
     }
 
     private fun observeTranslationList() {
-        interactor.translationList()
+        viewModel.translationList()
                 .map { viewData ->
                     when (viewData.status) {
                         ViewData.STATUS_SUCCESS -> viewData.data
@@ -83,7 +85,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                                             this@TranslationListPresenter::onTranslationClicked,
                                             this@TranslationListPresenter::onTranslationLongClicked))
                                     if (availableTranslations.isNotEmpty()) {
-                                        items.add(TitleItem(translationManagementActivity.getString(R.string.header_available_translations), false))
+                                        items.add(TitleItem(translationsActivity.getString(R.string.header_available_translations), false))
                                         items.addAll(availableTranslations.toTranslationItems(
                                                 translationList.currentTranslation,
                                                 this@TranslationListPresenter::onTranslationClicked,
@@ -112,11 +114,11 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                         },
                         onError = { _, _ ->
                             viewHolder?.swipeRefreshLayout?.isRefreshing = false
-                            translationManagementActivity.dialog(false, R.string.dialog_load_translation_list_error,
-                                    DialogInterface.OnClickListener { _, _ -> interactor.loadTranslationList(false) },
-                                    DialogInterface.OnClickListener { _, _ -> translationManagementActivity.finish() })
+                            translationsActivity.dialog(false, R.string.dialog_load_translation_list_error,
+                                    DialogInterface.OnClickListener { _, _ -> viewModel.loadTranslationList(false) },
+                                    DialogInterface.OnClickListener { _, _ -> translationsActivity.finish() })
                         }
-                ).launchIn(coroutineScope)
+                ).launchIn(lifecycleScope)
     }
 
     @VisibleForTesting
@@ -129,13 +131,13 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     }
 
     private fun updateCurrentTranslationAndFinishActivity(translationShortName: String) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             try {
-                interactor.saveCurrentTranslation(translationShortName)
-                translationManagementActivity.finish()
+                viewModel.saveCurrentTranslation(translationShortName)
+                translationsActivity.finish()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select translation and close translation management activity", e)
-                translationManagementActivity.dialog(true, R.string.dialog_update_translation_error,
+                translationsActivity.dialog(true, R.string.dialog_update_translation_error,
                         DialogInterface.OnClickListener { _, _ -> updateCurrentTranslationAndFinishActivity(translationShortName) })
             }
         }
@@ -147,10 +149,10 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
             return
         }
 
-        downloadTranslationDialog = translationManagementActivity.progressDialog(
+        downloadTranslationDialog = translationsActivity.progressDialog(
                 R.string.dialog_downloading, 100) { downloadingJob?.cancel() }
 
-        downloadingJob = interactor.downloadTranslation(translationToDownload)
+        downloadingJob = viewModel.downloadTranslation(translationToDownload)
                 .onEach(
                         onLoading = {
                             it?.let { progress ->
@@ -166,16 +168,16 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
                                     ?: throw IllegalStateException("Missing progress data when downloading")
                         },
                         onSuccess = {
-                            translationManagementActivity.toast(R.string.toast_downloaded)
+                            translationsActivity.toast(R.string.toast_downloaded)
                         },
                         onError = { _, _ ->
-                            translationManagementActivity.dialog(true, R.string.dialog_download_error,
+                            translationsActivity.dialog(true, R.string.dialog_download_error,
                                     DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
                         }
                 ).onCompletion {
                     dismissDownloadTranslationDialog()
                     downloadingJob = null
-                }.launchIn(coroutineScope)
+                }.launchIn(lifecycleScope)
     }
 
     private fun dismissDownloadTranslationDialog() {
@@ -187,7 +189,7 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     fun onTranslationLongClicked(translationInfo: TranslationInfo, isCurrentTranslation: Boolean) {
         if (translationInfo.downloaded) {
             if (!isCurrentTranslation) {
-                translationManagementActivity.dialog(true, R.string.dialog_delete_translation_confirmation,
+                translationsActivity.dialog(true, R.string.dialog_delete_translation_confirmation,
                         DialogInterface.OnClickListener { _, _ -> removeTranslation(translationInfo) })
             }
         } else {
@@ -196,23 +198,23 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
     }
 
     private fun removeTranslation(translationToRemove: TranslationInfo) {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             if (removeTranslationDialog != null) {
                 // just in case the user clicks too fast
                 return@launch
             }
 
             try {
-                removeTranslationDialog = translationManagementActivity.indeterminateProgressDialog(R.string.dialog_deleting)
+                removeTranslationDialog = translationsActivity.indeterminateProgressDialog(R.string.dialog_deleting)
 
-                interactor.removeTranslation(translationToRemove)
+                viewModel.removeTranslation(translationToRemove)
 
                 dismissRemoveTranslationDialog()
-                translationManagementActivity.toast(R.string.toast_deleted)
+                translationsActivity.toast(R.string.toast_deleted)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to remove translation", e)
                 dismissRemoveTranslationDialog()
-                translationManagementActivity.dialog(true, R.string.dialog_delete_error,
+                translationsActivity.dialog(true, R.string.dialog_delete_error,
                         DialogInterface.OnClickListener { _, _ -> removeTranslation(translationToRemove) })
             }
         }
@@ -223,14 +225,12 @@ class TranslationListPresenter(private val translationManagementActivity: Transl
         removeTranslationDialog = null
     }
 
-    @UiThread
-    override fun onStop() {
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onStop() {
         dismissDownloadTranslationDialog()
         downloadingJob?.cancel()
         downloadingJob = null
 
         dismissRemoveTranslationDialog()
-
-        super.onStop()
     }
 }

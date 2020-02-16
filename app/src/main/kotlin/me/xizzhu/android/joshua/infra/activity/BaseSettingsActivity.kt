@@ -33,12 +33,16 @@ import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.ui.getBackgroundColor
 
 abstract class BaseSettingsViewModel(protected val settingsManager: SettingsManager) : ViewModel() {
+    protected val tag: String = javaClass.simpleName
+
     fun settings(): Flow<ViewData<Settings>> = settingsManager.settings().map { ViewData.success(it) }
 }
 
 // TODO switch to inherit from ViewPresenter
 abstract class BaseSettingsPresenter<VH : ViewHolder, VM : BaseSettingsViewModel>(
-        protected val viewModel: VM, protected val lifecycleScope: LifecycleCoroutineScope) {
+        protected val viewModel: VM, private val lifecycle: Lifecycle,
+        protected val lifecycleScope: LifecycleCoroutineScope
+) : LifecycleObserver {
     protected val tag: String = javaClass.simpleName
 
     protected lateinit var viewHolder: VH
@@ -47,6 +51,7 @@ abstract class BaseSettingsPresenter<VH : ViewHolder, VM : BaseSettingsViewModel
     fun bind(viewHolder: VH) {
         this.viewHolder = viewHolder
         onBind(viewHolder)
+        lifecycle.addObserver(this)
     }
 
     @UiThread

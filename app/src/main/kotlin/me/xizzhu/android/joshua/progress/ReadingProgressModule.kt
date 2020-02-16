@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.progress
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
@@ -31,10 +30,9 @@ import me.xizzhu.android.joshua.core.SettingsManager
 object ReadingProgressModule {
     @ActivityScope
     @Provides
-    fun provideReadingProgressPresenter(readingProgressActivity: ReadingProgressActivity,
-                                        navigator: Navigator,
+    fun provideReadingProgressPresenter(readingProgressActivity: ReadingProgressActivity, navigator: Navigator,
                                         readingProgressViewModel: ReadingProgressViewModel): ReadingProgressPresenter =
-            ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressViewModel, readingProgressActivity.lifecycleScope)
+            ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressViewModel, readingProgressActivity.lifecycle)
 
     @ActivityScope
     @Provides

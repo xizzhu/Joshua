@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.annotated.bookmarks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
@@ -39,13 +38,13 @@ object BookmarksModule {
     @Provides
     fun provideToolbarPresenter(bookmarksActivity: BookmarksActivity,
                                 bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>): AnnotatedVersesToolbarPresenter<Bookmark> =
-            AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, bookmarksViewModel, bookmarksActivity.lifecycleScope)
+            AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, bookmarksViewModel, bookmarksActivity.lifecycle)
 
     @ActivityScope
     @Provides
     fun provideBookmarksListPresenter(bookmarksActivity: BookmarksActivity, navigator: Navigator,
                                       bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>): BaseAnnotatedVersesPresenter<Bookmark> =
-            BookmarksListPresenter(bookmarksActivity, navigator, bookmarksViewModel, bookmarksActivity.lifecycleScope)
+            BookmarksListPresenter(bookmarksActivity, navigator, bookmarksViewModel, bookmarksActivity.lifecycle)
 
     @ActivityScope
     @Provides

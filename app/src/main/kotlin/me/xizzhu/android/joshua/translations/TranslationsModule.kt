@@ -14,42 +14,40 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.strongnumber
+package me.xizzhu.android.joshua.translations
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.ActivityScope
-import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.core.StrongNumberManager
 
 @Module
-object StrongNumberListModule {
+object TranslationsModule {
     @ActivityScope
     @Provides
-    fun provideStrongNumberListPresenter(strongNumberListActivity: StrongNumberListActivity,
-                                         navigator: Navigator,
-                                         strongNumberListViewModel: StrongNumberListViewModel): StrongNumberListPresenter =
-            StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListViewModel, strongNumberListActivity.lifecycle)
+    fun provideTranslationListPresenter(translationsActivity: TranslationsActivity,
+                                        translationsViewModel: TranslationsViewModel): TranslationListPresenter =
+            TranslationListPresenter(translationsActivity, translationsViewModel, translationsActivity.lifecycle)
 
     @ActivityScope
     @Provides
-    fun provideStrongNumberViewModel(strongNumberListActivity: StrongNumberListActivity,
+    fun provideTranslationsViewModel(translationsActivity: TranslationsActivity,
                                      bibleReadingManager: BibleReadingManager,
-                                     strongNumberManager: StrongNumberManager,
-                                     settingsManager: SettingsManager): StrongNumberListViewModel {
+                                     translationManager: TranslationManager,
+                                     settingsManager: SettingsManager): TranslationsViewModel {
         val factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                if (modelClass.isAssignableFrom(StrongNumberListViewModel::class.java)) {
-                    return StrongNumberListViewModel(bibleReadingManager, strongNumberManager, settingsManager) as T
+                if (modelClass.isAssignableFrom(TranslationsViewModel::class.java)) {
+                    return TranslationsViewModel(bibleReadingManager, translationManager, settingsManager) as T
                 }
 
                 throw IllegalArgumentException("Unsupported model class - $modelClass")
             }
         }
-        return ViewModelProvider(strongNumberListActivity, factory).get(StrongNumberListViewModel::class.java)
+        return ViewModelProvider(translationsActivity, factory).get(TranslationsViewModel::class.java)
     }
 }

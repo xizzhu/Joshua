@@ -21,7 +21,9 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
@@ -44,11 +46,11 @@ import me.xizzhu.android.logger.Log
 data class SearchResultViewHolder(val loadingSpinner: ProgressBar,
                                   val searchResultListView: CommonRecyclerView) : ViewHolder
 
-class SearchResultListPresenter(private val searchActivity: SearchActivity,
-                                private val navigator: Navigator,
-                                searchViewModel: SearchViewModel,
-                                lifecycleCoroutineScope: LifecycleCoroutineScope)
-    : BaseSettingsPresenter<SearchResultViewHolder, SearchViewModel>(searchViewModel, lifecycleCoroutineScope) {
+class SearchResultListPresenter(
+        private val searchActivity: SearchActivity, private val navigator: Navigator,
+        searchViewModel: SearchViewModel, lifecycle: Lifecycle,
+        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
+) : BaseSettingsPresenter<SearchResultViewHolder, SearchViewModel>(searchViewModel, lifecycle, lifecycleCoroutineScope) {
     @UiThread
     override fun onBind(viewHolder: SearchResultViewHolder) {
         super.onBind(viewHolder)

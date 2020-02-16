@@ -21,7 +21,9 @@ import android.content.Context
 import android.provider.SearchRecentSuggestions
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
@@ -33,10 +35,10 @@ import me.xizzhu.android.joshua.ui.hideKeyboard
 
 data class SearchToolbarViewHolder(val searchToolbar: SearchToolbar) : ViewHolder
 
-class SearchToolbarPresenter(private val searchActivity: SearchActivity,
-                             searchViewModel: SearchViewModel,
-                             lifecycleCoroutineScope: LifecycleCoroutineScope)
-    : BaseSettingsPresenter<SearchToolbarViewHolder, SearchViewModel>(searchViewModel, lifecycleCoroutineScope) {
+class SearchToolbarPresenter(
+        private val searchActivity: SearchActivity, searchViewModel: SearchViewModel, lifecycle: Lifecycle,
+        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
+) : BaseSettingsPresenter<SearchToolbarViewHolder, SearchViewModel>(searchViewModel, lifecycle, lifecycleCoroutineScope) {
     private val searchRecentSuggestions: SearchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(searchActivity)
 
     private val onQueryTextListener = object : SearchView.OnQueryTextListener {

@@ -23,6 +23,7 @@ import android.widget.ProgressBar
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
@@ -48,12 +49,10 @@ data class AnnotatedVersesViewHolder(val loadingSpinner: ProgressBar,
                                      val annotatedVerseListView: CommonRecyclerView) : ViewHolder
 
 abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation>(
-        private val activity: BaseAnnotatedVersesActivity<V>,
-        private val navigator: Navigator,
-        @StringRes private val noItemText: Int,
-        annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>,
-        lifecycleCoroutineScope: LifecycleCoroutineScope
-) : BaseSettingsPresenter<AnnotatedVersesViewHolder, BaseAnnotatedVersesViewModel<V>>(annotatedVersesViewModel, lifecycleCoroutineScope) {
+        private val activity: BaseAnnotatedVersesActivity<V>, private val navigator: Navigator,
+        @StringRes private val noItemText: Int, annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>,
+        lifecycle: Lifecycle, lifecycleCoroutineScope: LifecycleCoroutineScope
+) : BaseSettingsPresenter<AnnotatedVersesViewHolder, BaseAnnotatedVersesViewModel<V>>(annotatedVersesViewModel, lifecycle, lifecycleCoroutineScope) {
     @UiThread
     override fun onBind(viewHolder: AnnotatedVersesViewHolder) {
         super.onBind(viewHolder)

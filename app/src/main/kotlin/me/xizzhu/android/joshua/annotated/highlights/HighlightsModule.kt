@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.annotated.highlights
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
@@ -39,13 +38,13 @@ object HighlightsModule {
     @Provides
     fun provideToolbarPresenter(highlightsActivity: HighlightsActivity,
                                 highlightsViewModel: BaseAnnotatedVersesViewModel<Highlight>): AnnotatedVersesToolbarPresenter<Highlight> =
-            AnnotatedVersesToolbarPresenter(R.string.title_highlights, highlightsViewModel, highlightsActivity.lifecycleScope)
+            AnnotatedVersesToolbarPresenter(R.string.title_highlights, highlightsViewModel, highlightsActivity.lifecycle)
 
     @ActivityScope
     @Provides
     fun provideHighlightsListPresenter(highlightsActivity: HighlightsActivity, navigator: Navigator,
                                        highlightsViewModel: BaseAnnotatedVersesViewModel<Highlight>): BaseAnnotatedVersesPresenter<Highlight> =
-            HighlightsListPresenter(highlightsActivity, navigator, highlightsViewModel, highlightsActivity.lifecycleScope)
+            HighlightsListPresenter(highlightsActivity, navigator, highlightsViewModel, highlightsActivity.lifecycle)
 
     @ActivityScope
     @Provides

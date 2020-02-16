@@ -18,7 +18,9 @@ package me.xizzhu.android.joshua.annotated.toolbar
 
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
@@ -29,10 +31,10 @@ import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
 
 data class AnnotatedVersesToolbarViewHolder(val toolbar: AnnotatedVersesToolbar) : ViewHolder
 
-class AnnotatedVersesToolbarPresenter<V : VerseAnnotation>(@StringRes private val title: Int,
-                                                           annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>,
-                                                           lifecycleCoroutineScope: LifecycleCoroutineScope)
-    : BaseSettingsPresenter<AnnotatedVersesToolbarViewHolder, BaseAnnotatedVersesViewModel<V>>(annotatedVersesViewModel, lifecycleCoroutineScope) {
+class AnnotatedVersesToolbarPresenter<V : VerseAnnotation>(
+        @StringRes private val title: Int, annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>,
+        lifecycle: Lifecycle, lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
+) : BaseSettingsPresenter<AnnotatedVersesToolbarViewHolder, BaseAnnotatedVersesViewModel<V>>(annotatedVersesViewModel, lifecycle, lifecycleCoroutineScope) {
     @UiThread
     override fun onBind(viewHolder: AnnotatedVersesToolbarViewHolder) {
         super.onBind(viewHolder)
