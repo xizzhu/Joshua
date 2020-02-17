@@ -42,6 +42,15 @@ fun <T> ViewData<T>.dataOnSuccessOrThrow(errorMessage: String): T =
             throw IllegalStateException(errorMessage, exception)
         }
 
+inline fun <T> flowOf(crossinline block: suspend () -> T): Flow<ViewData<T>> = flow {
+    emit(ViewData.loading())
+    try {
+        emit(ViewData.success(block()))
+    } catch (e: Exception) {
+        emit(ViewData.error(exception = e))
+    }
+}
+
 fun <T> Flow<T>.toViewData(): Flow<ViewData<T>> = map { ViewData.success(it) }
 
 inline fun <T> Flow<ViewData<T>>.onEach(

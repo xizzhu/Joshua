@@ -49,19 +49,6 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
 
     @Test
     fun testToItems() {
-        val readingProgress = ReadingProgress(1, 23456L,
-                listOf(ReadingProgress.ChapterReadingStatus(0, 1, 1, 500L, 23456L),
-                        ReadingProgress.ChapterReadingStatus(0, 2, 2, 600L, 23457L),
-                        ReadingProgress.ChapterReadingStatus(2, 0, 3, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(7, 0, 1, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(7, 1, 2, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(7, 2, 3, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(7, 3, 4, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(63, 0, 1, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(64, 0, 1, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(65, 0, 0, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(65, 1, 2, 700L, 23458L)))
-
         val expected = mutableListOf<BaseItem>(ReadingProgressSummaryItem(1, 10, 3, 1, 2))
                 .apply {
                     addAll(Array(Bible.BOOK_COUNT) { bookIndex ->
@@ -86,7 +73,22 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
                                 readingProgressPresenter.expanded[bookIndex])
                     }.toList())
                 }
-        val actual = with(readingProgressPresenter) { readingProgress.toItems(Array(Bible.BOOK_COUNT) { "bookName$it" }.toList()) }
+
+        val readingProgress = ReadingProgress(1, 23456L,
+                listOf(ReadingProgress.ChapterReadingStatus(0, 1, 1, 500L, 23456L),
+                        ReadingProgress.ChapterReadingStatus(0, 2, 2, 600L, 23457L),
+                        ReadingProgress.ChapterReadingStatus(2, 0, 3, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 0, 1, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 1, 2, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 2, 3, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 3, 4, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(63, 0, 1, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(64, 0, 1, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(65, 0, 0, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(65, 1, 2, 700L, 23458L)))
+        val bookNames = Array(Bible.BOOK_COUNT) { "bookName$it" }.toList()
+        val actual = with(readingProgressPresenter) { ReadingProgressViewData(readingProgress, bookNames).toItems() }
+
         assertEquals(expected, actual)
     }
 }

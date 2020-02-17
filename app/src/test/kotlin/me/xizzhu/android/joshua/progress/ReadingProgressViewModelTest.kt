@@ -17,10 +17,13 @@
 package me.xizzhu.android.joshua.progress
 
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
@@ -47,26 +50,32 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testBookNames() = testDispatcher.runBlockingTest {
+    fun testViewData() = testDispatcher.runBlockingTest {
+        val readingProgress = ReadingProgress(0, 0L, emptyList())
         val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
+        `when`(readingProgressManager.read()).thenReturn(readingProgress)
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(bookNames)
 
-        assertEquals(bookNames, readingProgressViewModel.bookNames())
+        assertEquals(
+                listOf(ViewData.loading(), ViewData.success(ReadingProgressViewData(readingProgress, bookNames))),
+                readingProgressViewModel.viewData().toList()
+        )
     }
 
     @Test
-    fun testBookNamesWithException() = testDispatcher.runBlockingTest {
+    fun testViewDataWithException() = testDispatcher.runBlockingTest {
+        val readingProgress = ReadingProgress(0, 0L, emptyList())
         val currentTranslation = MockContents.kjvShortName
         val exception = RuntimeException("Random exception")
+        `when`(readingProgressManager.read()).thenReturn(readingProgress)
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenThrow(exception)
 
-        try {
-            readingProgressViewModel.bookNames()
-        } catch (e: Exception) {
-            assertEquals(exception, e)
-        }
+        assertEquals(
+                listOf(ViewData.loading(), ViewData.error(exception = exception)),
+                readingProgressViewModel.viewData().toList()
+        )
     }
 }

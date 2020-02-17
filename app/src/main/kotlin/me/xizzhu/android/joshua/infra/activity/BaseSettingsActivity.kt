@@ -32,6 +32,7 @@ import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.ui.getBackgroundColor
 
+// TODO switch to inherit from BaseViewModel
 abstract class BaseSettingsViewModel(protected val settingsManager: SettingsManager) : ViewModel() {
     protected val tag: String = javaClass.simpleName
 
