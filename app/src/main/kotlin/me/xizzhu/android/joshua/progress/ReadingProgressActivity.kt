@@ -19,12 +19,7 @@ package me.xizzhu.android.joshua.progress
 import android.os.Bundle
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
-import me.xizzhu.android.joshua.infra.arch.Interactor
-import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import javax.inject.Inject
 
 class ReadingProgressActivity : BaseSettingsActivity() {
