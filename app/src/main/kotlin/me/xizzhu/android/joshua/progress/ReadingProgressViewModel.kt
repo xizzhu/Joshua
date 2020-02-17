@@ -28,7 +28,7 @@ data class ReadingProgressViewData(val readingProgress: ReadingProgress, val boo
 class ReadingProgressViewModel(private val bibleReadingManager: BibleReadingManager,
                                private val readingProgressManager: ReadingProgressManager,
                                settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    fun viewData(): Flow<ViewData<ReadingProgressViewData>> = flowOf {
+    fun readingProgress(): Flow<ViewData<ReadingProgressViewData>> = flowOf {
         ReadingProgressViewData(
                 readingProgressManager.read(),
                 bibleReadingManager.readBookNames(

@@ -50,7 +50,7 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testViewData() = testDispatcher.runBlockingTest {
+    fun testReadingProgress() = testDispatcher.runBlockingTest {
         val readingProgress = ReadingProgress(0, 0L, emptyList())
         val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
@@ -60,12 +60,12 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(ViewData.loading(), ViewData.success(ReadingProgressViewData(readingProgress, bookNames))),
-                readingProgressViewModel.viewData().toList()
+                readingProgressViewModel.readingProgress().toList()
         )
     }
 
     @Test
-    fun testViewDataWithException() = testDispatcher.runBlockingTest {
+    fun testReadingProgressWithException() = testDispatcher.runBlockingTest {
         val readingProgress = ReadingProgress(0, 0L, emptyList())
         val currentTranslation = MockContents.kjvShortName
         val exception = RuntimeException("Random exception")
@@ -75,7 +75,7 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(ViewData.loading(), ViewData.error(exception = exception)),
-                readingProgressViewModel.viewData().toList()
+                readingProgressViewModel.readingProgress().toList()
         )
     }
 }

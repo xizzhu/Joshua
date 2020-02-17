@@ -58,7 +58,7 @@ class ReadingProgressPresenter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     private fun loadReadingProgress() {
-        viewModel.viewData().onEach(
+        viewModel.readingProgress().onEach(
                 onLoading = {
                     viewHolder.loadingSpinner.fadeIn()
                     viewHolder.readingProgressListView.visibility = View.GONE
