@@ -36,8 +36,8 @@ class AnnotatedVersesToolbarPresenter<V : VerseAnnotation>(
         lifecycle: Lifecycle, lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
 ) : BaseSettingsPresenter<AnnotatedVersesToolbarViewHolder, BaseAnnotatedVersesViewModel<V>>(annotatedVersesViewModel, lifecycle, lifecycleCoroutineScope) {
     @UiThread
-    override fun onBind(viewHolder: AnnotatedVersesToolbarViewHolder) {
-        super.onBind(viewHolder)
+    override fun onBind() {
+        super.onBind()
 
         viewHolder.toolbar.setTitle(title)
         viewHolder.toolbar.sortOrderUpdated = { sortOrder -> lifecycleScope.launch { viewModel.saveSortOrder(sortOrder) } }

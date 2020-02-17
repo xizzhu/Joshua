@@ -54,8 +54,8 @@ class TranslationListPresenter(
     private var removeTranslationDialog: AlertDialog? = null
 
     @UiThread
-    override fun onBind(viewHolder: TranslationListViewHolder) {
-        super.onBind(viewHolder)
+    override fun onBind() {
+        super.onBind()
 
         with(viewHolder.swipeRefreshLayout) {
             setColorSchemeResources(R.color.primary_dark, R.color.primary, R.color.dark_cyan, R.color.dark_lime)

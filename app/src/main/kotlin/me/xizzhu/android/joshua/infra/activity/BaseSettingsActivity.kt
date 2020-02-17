@@ -50,13 +50,13 @@ abstract class BaseSettingsPresenter<VH : ViewHolder, VM : BaseSettingsViewModel
     @UiThread
     fun bind(viewHolder: VH) {
         this.viewHolder = viewHolder
-        onBind(viewHolder)
+        onBind()
         lifecycle.addObserver(this)
     }
 
     @UiThread
     @CallSuper
-    open fun onBind(viewHolder: VH) {
+    open fun onBind() {
     }
 }
 

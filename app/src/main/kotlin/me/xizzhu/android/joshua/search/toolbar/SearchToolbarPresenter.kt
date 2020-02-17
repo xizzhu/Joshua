@@ -58,8 +58,8 @@ class SearchToolbarPresenter(
     }
 
     @UiThread
-    override fun onBind(viewHolder: SearchToolbarViewHolder) {
-        super.onBind(viewHolder)
+    override fun onBind() {
+        super.onBind()
 
         with(viewHolder.searchToolbar) {
             setOnQueryTextListener(onQueryTextListener)

@@ -70,8 +70,8 @@ class SettingsPresenter(
     private var backupRestoreDialog: AlertDialog? = null
 
     @UiThread
-    override fun onBind(viewHolder: SettingsViewHolder) {
-        super.onBind(viewHolder)
+    override fun onBind() {
+        super.onBind()
 
         try {
             viewHolder.version.setDescription(settingsActivity.packageManager.getPackageInfo(settingsActivity.packageName, 0).versionName)

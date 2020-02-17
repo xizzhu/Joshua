@@ -49,8 +49,8 @@ class StrongNumberListPresenter(
         lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
 ) : BaseSettingsPresenter<StrongNumberListViewHolder, StrongNumberListViewModel>(strongNumberListViewModel, lifecycle, lifecycleCoroutineScope) {
     @UiThread
-    override fun onBind(viewHolder: StrongNumberListViewHolder) {
-        super.onBind(viewHolder)
+    override fun onBind() {
+        super.onBind()
 
         viewModel.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(lifecycleScope)
         viewModel.currentTranslation().onEachSuccess { loadStrongNumber(strongNumberListActivity.strongNumber(), it) }.launchIn(lifecycleScope)

@@ -52,8 +52,8 @@ class SearchResultListPresenter(
         lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
 ) : BaseSettingsPresenter<SearchResultViewHolder, SearchViewModel>(searchViewModel, lifecycle, lifecycleCoroutineScope) {
     @UiThread
-    override fun onBind(viewHolder: SearchResultViewHolder) {
-        super.onBind(viewHolder)
+    override fun onBind() {
+        super.onBind()
         observeSettings()
         observeQuery()
     }

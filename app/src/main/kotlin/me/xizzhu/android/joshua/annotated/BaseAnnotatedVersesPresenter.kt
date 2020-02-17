@@ -54,8 +54,8 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation>(
         lifecycle: Lifecycle, lifecycleCoroutineScope: LifecycleCoroutineScope
 ) : BaseSettingsPresenter<AnnotatedVersesViewHolder, BaseAnnotatedVersesViewModel<V>>(annotatedVersesViewModel, lifecycle, lifecycleCoroutineScope) {
     @UiThread
-    override fun onBind(viewHolder: AnnotatedVersesViewHolder) {
-        super.onBind(viewHolder)
+    override fun onBind() {
+        super.onBind()
 
         viewModel.settings().onEachSuccess { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(lifecycleScope)
 
