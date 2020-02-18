@@ -20,10 +20,10 @@ import android.content.DialogInterface
 import android.text.SpannableStringBuilder
 import android.view.View
 import android.widget.ProgressBar
-import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
@@ -40,57 +40,51 @@ import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.logger.Log
 
-data class StrongNumberListViewHolder(val loadingSpinner: ProgressBar,
-                                      val strongNumberListView: CommonRecyclerView) : ViewHolder
+data class StrongNumberListViewHolder(
+        val loadingSpinner: ProgressBar, val strongNumberListView: CommonRecyclerView
+) : ViewHolder
 
 class StrongNumberListPresenter(
         private val strongNumberListActivity: StrongNumberListActivity, private val navigator: Navigator,
         strongNumberListViewModel: StrongNumberListViewModel, lifecycle: Lifecycle,
         lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
 ) : BaseSettingsPresenter<StrongNumberListViewHolder, StrongNumberListViewModel>(strongNumberListViewModel, lifecycle, lifecycleCoroutineScope) {
-    @UiThread
-    override fun onBind() {
-        super.onBind()
-
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    private fun observeSettings() {
         viewModel.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(lifecycleScope)
-        viewModel.currentTranslation().onEachSuccess { loadStrongNumber(strongNumberListActivity.strongNumber(), it) }.launchIn(lifecycleScope)
     }
 
-    private fun loadStrongNumber(sn: String, currentTranslation: String) {
-        lifecycleScope.launch {
-            try {
-                with(viewHolder) {
-                    loadingSpinner.fadeIn()
-
-                    strongNumberListView.visibility = View.GONE
-                    strongNumberListView.setItems(prepareItems(sn, currentTranslation))
-                    strongNumberListView.fadeIn()
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    private fun loadStrongNumber() {
+        viewModel.strongNumber(strongNumberListActivity.strongNumber()).onEach(
+                onLoading = {
+                    viewHolder.loadingSpinner.fadeIn()
+                    viewHolder.strongNumberListView.visibility = View.GONE
+                },
+                onSuccess = { viewData ->
+                    viewHolder.strongNumberListView.setItems(viewData.toItems())
+                    viewHolder.strongNumberListView.fadeIn()
+                    viewHolder.loadingSpinner.visibility = View.GONE
+                },
+                onError = { _, e ->
+                    Log.e(tag, "Failed to load Strong's number list", e!!)
+                    viewHolder.loadingSpinner.visibility = View.GONE
+                    strongNumberListActivity.dialog(false, R.string.dialog_load_strong_number_list_error,
+                            DialogInterface.OnClickListener { _, _ -> loadStrongNumber() },
+                            DialogInterface.OnClickListener { _, _ -> strongNumberListActivity.finish() })
                 }
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to load Strong's number list", e)
-                strongNumberListActivity.dialog(false, R.string.dialog_load_strong_number_list_error,
-                        DialogInterface.OnClickListener { _, _ -> loadStrongNumber(sn, currentTranslation) },
-                        DialogInterface.OnClickListener { _, _ -> strongNumberListActivity.finish() })
-            } finally {
-                viewHolder.loadingSpinner.visibility = View.GONE
-            }
-        }
+        ).launchIn(lifecycleScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    suspend fun prepareItems(sn: String, currentTranslation: String): List<BaseItem> {
+    fun StrongNumberViewData.toItems(): List<BaseItem> {
         val items: ArrayList<BaseItem> = ArrayList()
 
-        val strongNumber = viewModel.strongNumber(sn)
         items.add(TextItem(formatStrongNumber(strongNumber)))
 
-        val bookNames = viewModel.bookNames(currentTranslation)
-        val bookShortNames = viewModel.bookShortNames(currentTranslation)
-        val verseIndexes = viewModel.verseIndexes(sn)
-                .sortedBy { it.bookIndex * 100000 + it.chapterIndex * 1000 + it.verseIndex }
-        val verses = viewModel.verses(currentTranslation, verseIndexes)
         var currentBookIndex = -1
-        verseIndexes.forEach { verseIndex ->
+        verses.forEach { verse ->
+            val verseIndex = verse.verseIndex
             val bookName = bookNames[verseIndex.bookIndex]
             if (verseIndex.bookIndex != currentBookIndex) {
                 items.add(TitleItem(bookName, false))
@@ -98,7 +92,7 @@ class StrongNumberListPresenter(
             }
 
             items.add(VerseStrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex],
-                    verses[verseIndex]?.text?.text ?: "", this::openVerse))
+                    verse.text.text, this@StrongNumberListPresenter::openVerse))
         }
 
         return items

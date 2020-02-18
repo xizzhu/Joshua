@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.strongnumber
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
-import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -53,26 +52,22 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testPrepareItems() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
-        val sn = "H7225"
-        val strongNumber = StrongNumber(sn, MockContents.strongNumberWords.getValue(sn))
-        `when`(strongNumberListViewModel.strongNumber(sn)).thenReturn(strongNumber)
-        `when`(strongNumberListViewModel.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(strongNumberListViewModel.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
-        `when`(strongNumberListViewModel.verseIndexes(sn)).thenReturn(MockContents.strongNumberReverseIndex.getValue(sn))
-        `when`(strongNumberListViewModel.verses(currentTranslation, MockContents.strongNumberReverseIndex.getValue(sn)))
-                .thenReturn(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0]))
-
+    fun testToItems() {
         strongNumberListPresenter = spy(strongNumberListPresenter)
         doReturn("formatted strong number").`when`(strongNumberListPresenter).formatStrongNumber(any())
-        assertEquals(
-                listOf(
-                        TextItem("formatted strong number"),
-                        TitleItem(MockContents.kjvBookNames[0], false),
-                        VerseStrongNumberItem(VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, strongNumberListPresenter::openVerse)
-                ),
-                strongNumberListPresenter.prepareItems(sn, currentTranslation)
+
+        val expected = listOf(
+                TextItem("formatted strong number"),
+                TitleItem(MockContents.kjvBookNames[0], false),
+                VerseStrongNumberItem(VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, strongNumberListPresenter::openVerse)
         )
+
+        val strongNumber = StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225"))
+        val verses = listOf(MockContents.kjvVerses[0])
+        val bookNames = MockContents.kjvBookNames
+        val bookShortNames = MockContents.kjvBookShortNames
+        val actual = with(strongNumberListPresenter) { StrongNumberViewData(strongNumber, verses, bookNames, bookShortNames).toItems() }
+
+        assertEquals(expected, actual)
     }
 }
