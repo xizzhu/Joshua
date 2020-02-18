@@ -20,14 +20,15 @@ import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.coroutineScope
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
+import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 
 data class AnnotatedVersesToolbarViewHolder(val toolbar: AnnotatedVersesToolbar) : ViewHolder
 
@@ -41,6 +42,10 @@ class AnnotatedVersesToolbarPresenter<V : VerseAnnotation>(
 
         viewHolder.toolbar.setTitle(title)
         viewHolder.toolbar.sortOrderUpdated = { sortOrder -> lifecycleScope.launch { viewModel.saveSortOrder(sortOrder) } }
-        lifecycleScope.launchWhenStarted { viewHolder.toolbar.setSortOrder(viewModel.sortOrder().filterOnSuccess().first()) }
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    private fun observeSortOrder() {
+        viewModel.sortOrder().onEachSuccess { viewHolder.toolbar.setSortOrder(it) }.launchIn(lifecycleScope)
     }
 }

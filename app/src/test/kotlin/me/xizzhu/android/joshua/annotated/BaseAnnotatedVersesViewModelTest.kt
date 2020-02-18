@@ -19,9 +19,7 @@ package me.xizzhu.android.joshua.annotated
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.core.VerseAnnotationManager
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -56,6 +54,54 @@ class BaseAnnotatedVersesViewModelTest : BaseUnitTest() {
         assertEquals(
                 listOf(ViewData.success(MockContents.kjvShortName), ViewData.success(MockContents.cuvShortName), ViewData.success(MockContents.bbeShortName)),
                 verseAnnotationViewModel.currentTranslation().toList()
+        )
+    }
+
+    @Test
+    fun testAnnotationVerses() = testDispatcher.runBlockingTest {
+        val sortOrder = Constants.SORT_BY_BOOK
+        val currentTranslation = MockContents.kjvShortName
+        `when`(verseAnnotationManager.read(sortOrder)).thenReturn(listOf(
+                TestVerseAnnotation(VerseIndex(0, 0, 0), 0L),
+                TestVerseAnnotation(VerseIndex(0, 0, 1), 1L)
+        ))
+        `when`(bibleReadingManager.readVerses(
+                currentTranslation,
+                listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
+        ).thenReturn(mapOf(
+                VerseIndex(0, 0, 0) to MockContents.kjvVerses[0],
+                VerseIndex(0, 0, 1) to MockContents.kjvVerses[1]
+        ))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+
+        assertEquals(
+                listOf(
+                        ViewData.loading(),
+                        ViewData.success(
+                                AnnotatedVersesViewData(
+                                        listOf(
+                                                TestVerseAnnotation(VerseIndex(0, 0, 0), 0L) to MockContents.kjvVerses[0],
+                                                TestVerseAnnotation(VerseIndex(0, 0, 1), 1L) to MockContents.kjvVerses[1]
+                                        ),
+                                        MockContents.kjvBookNames,
+                                        MockContents.kjvBookShortNames
+                                )
+                        )
+                ),
+                verseAnnotationViewModel.annotatedVerses(sortOrder, currentTranslation).toList()
+        )
+    }
+
+    @Test
+    fun testAnnotationVersesWithException() = testDispatcher.runBlockingTest {
+        val sortOrder = Constants.SORT_BY_BOOK
+        val e = RuntimeException("random exception")
+        `when`(verseAnnotationManager.read(sortOrder)).thenThrow(e)
+
+        assertEquals(
+                listOf(ViewData.loading(), ViewData.error(exception = e)),
+                verseAnnotationViewModel.annotatedVerses(sortOrder, "").toList()
         )
     }
 }
