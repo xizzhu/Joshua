@@ -72,4 +72,15 @@ class StrongNumberViewModelTest : BaseUnitTest() {
                 strongNumberListViewModel.strongNumber(sn).toList()
         )
     }
+
+    @Test
+    fun testStrongNumberWithException() = testDispatcher.runBlockingTest {
+        val e = RuntimeException("random exception")
+        `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
+
+        assertEquals(
+                listOf(ViewData.loading(), ViewData.error(exception = e)),
+                strongNumberListViewModel.strongNumber("").toList()
+        )
+    }
 }
