@@ -18,15 +18,15 @@ package me.xizzhu.android.joshua.search.result
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
-import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchActivity
+import me.xizzhu.android.joshua.search.SearchResult
 import me.xizzhu.android.joshua.search.SearchViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.mockito.Mock
-import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -53,23 +53,22 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testToSearchItems() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
-        `when`(searchViewModel.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(searchViewModel.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+    fun testToItems() {
+        val query = "query"
+        val expected = listOf(
+                TitleItem(MockContents.kjvBookNames[0], false),
+                SearchItem(
+                        VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0],
+                        MockContents.kjvVerses[0].text.text, query, searchResultListPresenter::selectVerse
+                )
+        )
 
-        with(searchResultListPresenter) {
-            val query = "query"
-            assertEquals(
-                    listOf(
-                            TitleItem(MockContents.kjvBookNames[0], false),
-                            SearchItem(MockContents.kjvVerses[0].verseIndex,
-                                    MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, query, this::selectVerse),
-                            SearchItem(MockContents.kjvVerses[1].verseIndex,
-                                    MockContents.kjvBookShortNames[0], MockContents.kjvVerses[1].text.text, query, this::selectVerse)
-                    ),
-                    listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toSearchItems(currentTranslation, query)
-            )
-        }
+        val searchResult = SearchResult(
+                query, true, listOf(MockContents.kjvVerses[0]),
+                MockContents.kjvBookNames, MockContents.kjvBookShortNames
+        )
+        val actual = with(searchResultListPresenter) { searchResult.toItems() }
+
+        assertEquals(expected, actual)
     }
 }

@@ -21,14 +21,14 @@ import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.flowOf
+import me.xizzhu.android.joshua.infra.arch.flowFrom
 
 data class ReadingProgressViewData(val readingProgress: ReadingProgress, val bookNames: List<String>)
 
 class ReadingProgressViewModel(private val bibleReadingManager: BibleReadingManager,
                                private val readingProgressManager: ReadingProgressManager,
                                settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    fun readingProgress(): Flow<ViewData<ReadingProgressViewData>> = flowOf {
+    fun readingProgress(): Flow<ViewData<ReadingProgressViewData>> = flowFrom {
         ReadingProgressViewData(
                 readingProgressManager.read(),
                 bibleReadingManager.readBookNames(

@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.filter
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.flowOf
+import me.xizzhu.android.joshua.infra.arch.flowFrom
 import me.xizzhu.android.joshua.infra.arch.toViewData
 
 data class AnnotatedVersesViewData<V : VerseAnnotation>(
@@ -37,7 +37,7 @@ abstract class BaseAnnotatedVersesViewModel<V : VerseAnnotation>(private val bib
             bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }.toViewData()
 
     fun annotatedVerses(@Constants.SortOrder sortOrder: Int, currentTranslation: String)
-            : Flow<ViewData<AnnotatedVersesViewData<V>>> = flowOf {
+            : Flow<ViewData<AnnotatedVersesViewData<V>>> = flowFrom {
         val annotations = verseAnnotationManager.read(sortOrder)
         val verses = bibleReadingManager.readVerses(currentTranslation, annotations.map { it.verseIndex })
         AnnotatedVersesViewData(

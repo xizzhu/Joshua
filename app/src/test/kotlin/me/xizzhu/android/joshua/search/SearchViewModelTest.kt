@@ -16,9 +16,8 @@
 
 package me.xizzhu.android.joshua.search
 
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -48,28 +47,62 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testUpdateQuery() = testDispatcher.runBlockingTest {
-        val queryAsync = async { searchViewModel.query().take(3).toList() }
-
-        val queries = listOf("query 1", "", "another one")
-        queries.forEach { searchViewModel.updateQuery(it) }
-        assertEquals(queries.map { ViewData.loading(it) }, queryAsync.await())
-    }
-
-    @Test
-    fun testSubmitQuery() = testDispatcher.runBlockingTest {
-        val queryAsync = async { searchViewModel.query().take(3).toList() }
-
-        val queries = listOf("query 1", "", "another one")
-        queries.forEach { searchViewModel.submitQuery(it) }
-        assertEquals(queries.map { ViewData.success(it) }, queryAsync.await())
-    }
-
-    @Test
-    fun testCurrentTranslation() = testDispatcher.runBlockingTest {
+    fun testSearchResultWithInstantSearch() = testDispatcher.runBlockingTest {
         val currentTranslation = MockContents.kjvShortName
+        val query = "query"
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
+        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0]))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
 
-        assertEquals(currentTranslation, searchViewModel.currentTranslation())
+        searchViewModel.updateQuery(SearchQuery(query, true))
+
+        assertEquals(
+                ViewData.success(
+                        SearchResult(
+                                query, true, listOf(MockContents.kjvVerses[0]),
+                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
+                        )
+                ),
+                searchViewModel.searchResult().first()
+        )
+    }
+
+    @Test
+    fun testSearchResult() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        val query = "query"
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
+        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0]))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+
+        searchViewModel.updateQuery(SearchQuery(query, false))
+
+        assertEquals(
+                listOf(
+                        ViewData.loading(),
+                        ViewData.success(
+                                SearchResult(
+                                        query, true, listOf(MockContents.kjvVerses[0]),
+                                        MockContents.kjvBookNames, MockContents.kjvBookShortNames
+                                )
+                        )
+                ),
+                searchViewModel.searchResult().toList()
+        )
+    }
+
+    @Test
+    fun testSearchResultWithException() = testDispatcher.runBlockingTest {
+        val e = RuntimeException("random exception")
+        `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
+
+        searchViewModel.updateQuery(SearchQuery("", false))
+
+        assertEquals(
+                listOf(ViewData.loading(), ViewData.error(exception = e)),
+                searchViewModel.searchResult().toList()
+        )
     }
 }

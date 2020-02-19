@@ -30,6 +30,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.search.SearchActivity
+import me.xizzhu.android.joshua.search.SearchQuery
 import me.xizzhu.android.joshua.search.SearchViewModel
 import me.xizzhu.android.joshua.ui.hideKeyboard
 
@@ -44,7 +45,7 @@ class SearchToolbarPresenter(
     private val onQueryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String): Boolean {
             searchRecentSuggestions.saveRecentQuery(query, null)
-            viewModel.submitQuery(query)
+            viewModel.updateQuery(SearchQuery(query, false))
             viewHolder.searchToolbar.hideKeyboard()
 
             // so that the system can close the search suggestion
@@ -52,7 +53,7 @@ class SearchToolbarPresenter(
         }
 
         override fun onQueryTextChange(newText: String): Boolean {
-            viewModel.updateQuery(newText)
+            viewModel.updateQuery(SearchQuery(newText, true))
             return true
         }
     }

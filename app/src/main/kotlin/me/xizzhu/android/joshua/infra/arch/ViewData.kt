@@ -42,7 +42,7 @@ fun <T> ViewData<T>.dataOnSuccessOrThrow(errorMessage: String): T =
             throw IllegalStateException(errorMessage, exception)
         }
 
-inline fun <T> flowOf(crossinline block: suspend () -> T): Flow<ViewData<T>> = flow {
+inline fun <T> flowFrom(crossinline block: suspend () -> T): Flow<ViewData<T>> = flow {
     emit(ViewData.loading())
     try {
         emit(ViewData.success(block()))

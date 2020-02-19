@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.flowOf
+import me.xizzhu.android.joshua.infra.arch.flowFrom
 
 data class StrongNumberViewData(val strongNumber: StrongNumber, val verses: List<Verse>,
                                 val bookNames: List<String>, val bookShortNames: List<String>)
@@ -29,7 +29,7 @@ data class StrongNumberViewData(val strongNumber: StrongNumber, val verses: List
 class StrongNumberListViewModel(private val bibleReadingManager: BibleReadingManager,
                                 private val strongNumberManager: StrongNumberManager,
                                 settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    fun strongNumber(sn: String): Flow<ViewData<StrongNumberViewData>> = flowOf {
+    fun strongNumber(sn: String): Flow<ViewData<StrongNumberViewData>> = flowFrom {
         val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
         val verses = bibleReadingManager.readVerses(currentTranslation, strongNumberManager.readVerseIndexes(sn))
                 .map { (_, v) -> v }.sortedBy { verse ->

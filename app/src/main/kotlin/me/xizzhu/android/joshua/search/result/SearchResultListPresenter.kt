@@ -19,10 +19,10 @@ package me.xizzhu.android.joshua.search.result
 import android.content.DialogInterface
 import android.view.View
 import android.widget.ProgressBar
-import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -34,6 +34,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.search.SearchActivity
+import me.xizzhu.android.joshua.search.SearchResult
 import me.xizzhu.android.joshua.search.SearchViewModel
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -51,79 +52,44 @@ class SearchResultListPresenter(
         searchViewModel: SearchViewModel, lifecycle: Lifecycle,
         lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
 ) : BaseSettingsPresenter<SearchResultViewHolder, SearchViewModel>(searchViewModel, lifecycle, lifecycleCoroutineScope) {
-    @UiThread
-    override fun onBind() {
-        super.onBind()
-        observeSettings()
-        observeQuery()
-    }
-
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun observeSettings() {
         viewModel.settings().onEachSuccess { viewHolder.searchResultListView.setSettings(it) }.launchIn(lifecycleScope)
     }
 
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun observeQuery() {
-        viewModel.query()
-                .debounce(250L)
-                .distinctUntilChangedBy { if (it.status == ViewData.STATUS_ERROR) "" else it.data!! }
-                .mapLatest { viewData ->
-                    when (viewData.status) {
-                        ViewData.STATUS_LOADING -> instantSearch(viewData.data!!)
-                        ViewData.STATUS_SUCCESS -> search(viewData.dataOnSuccessOrThrow("Missing query when observing"))
-                        ViewData.STATUS_ERROR -> {
-                            Log.e(tag, "Error occurred while observing query",
-                                    viewData.exception
-                                            ?: RuntimeException("Error occurred while observing query"))
-                        }
+        viewModel.searchResult().onEach(
+                onLoading = {
+                    viewHolder.loadingSpinner.fadeIn()
+                    viewHolder.searchResultListView.visibility = View.GONE
+                },
+                onSuccess = { viewData ->
+                    viewHolder.searchResultListView.setItems(viewData.toItems())
+
+                    viewHolder.searchResultListView.scrollToPosition(0)
+                    viewHolder.loadingSpinner.visibility = View.GONE
+
+                    if (viewData.instantSearch) {
+                        viewHolder.searchResultListView.visibility = View.VISIBLE
+                    } else {
+                        viewHolder.searchResultListView.fadeIn()
+                        searchActivity.toast(searchActivity.getString(R.string.toast_verses_searched, viewData.verses.size))
                     }
-                }.launchIn(lifecycleScope)
-    }
-
-    private suspend fun instantSearch(query: String) {
-        try {
-            with(viewHolder.searchResultListView) {
-                val currentTranslation = viewModel.currentTranslation()
-                setItems(viewModel.search(currentTranslation, query).toSearchItems(currentTranslation, query))
-                scrollToPosition(0)
-                visibility = View.VISIBLE
-            }
-        } catch (e: Exception) {
-            viewHolder.searchResultListView.visibility = View.GONE
-            Log.e(tag, "Failed to search verses", e)
-        }
-    }
-
-    private suspend fun search(query: String) {
-        try {
-            with(viewHolder) {
-                loadingSpinner.fadeIn()
-
-                searchResultListView.visibility = View.GONE
-
-                val currentTranslation = viewModel.currentTranslation()
-                val verses = viewModel.search(currentTranslation, query)
-                searchResultListView.setItems(verses.toSearchItems(currentTranslation, query))
-                searchResultListView.scrollToPosition(0)
-                searchResultListView.fadeIn()
-
-                searchActivity.toast(searchActivity.getString(R.string.toast_verses_searched, verses.size))
-            }
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to search verses", e)
-            searchActivity.dialog(true, R.string.dialog_search_error,
-                    DialogInterface.OnClickListener { _, _ -> lifecycleScope.launch { search(query) } })
-        } finally {
-            viewHolder.loadingSpinner.visibility = View.GONE
-        }
+                },
+                onError = { _, e ->
+                    Log.e(tag, "Failed to load search verses", e!!)
+                    viewHolder.loadingSpinner.visibility = View.GONE
+                    // TODO
+                }
+        ).launchIn(lifecycleScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    suspend fun List<Verse>.toSearchItems(currentTranslation: String, query: String): List<BaseItem> {
-        val bookNames = viewModel.bookNames(currentTranslation)
-        val bookShortNames = viewModel.bookShortNames(currentTranslation)
-        val items = ArrayList<BaseItem>(size + Bible.BOOK_COUNT)
+    fun SearchResult.toItems(): List<BaseItem> {
+        val items = ArrayList<BaseItem>(verses.size + Bible.BOOK_COUNT)
         var lastVerseBookIndex = -1
-        forEach { verse ->
+        verses.forEach { verse ->
             val currentVerseBookIndex = verse.verseIndex.bookIndex
             if (lastVerseBookIndex != currentVerseBookIndex) {
                 items.add(TitleItem(bookNames[currentVerseBookIndex], false))
