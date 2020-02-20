@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.search
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -84,12 +85,12 @@ class SearchViewModelTest : BaseUnitTest() {
                         ViewData.loading(),
                         ViewData.success(
                                 SearchResult(
-                                        query, true, listOf(MockContents.kjvVerses[0]),
+                                        query, false, listOf(MockContents.kjvVerses[0]),
                                         MockContents.kjvBookNames, MockContents.kjvBookShortNames
                                 )
                         )
                 ),
-                searchViewModel.searchResult().toList()
+                searchViewModel.searchResult().take(2).toList()
         )
     }
 
@@ -102,7 +103,7 @@ class SearchViewModelTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(ViewData.loading(), ViewData.error(exception = e)),
-                searchViewModel.searchResult().toList()
+                searchViewModel.searchResult().take(2).toList()
         )
     }
 }
