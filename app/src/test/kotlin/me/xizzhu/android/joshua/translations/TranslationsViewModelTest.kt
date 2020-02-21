@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.translations
 
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -59,36 +58,29 @@ class TranslationsViewModelTest : BaseUnitTest() {
         translationsViewModel = TranslationsViewModel(bibleReadingManager, translationManager, settingsManager)
 
         assertEquals(
-                ViewData.success(
-                        TranslationList(
-                                MockContents.kjvShortName,
-                                listOf(MockContents.cuvTranslationInfo),
-                                listOf(MockContents.kjvDownloadedTranslationInfo)
+                listOf(
+                        ViewData.loading(),
+                        ViewData.success(
+                                TranslationList(
+                                        MockContents.kjvShortName,
+                                        listOf(MockContents.cuvTranslationInfo),
+                                        listOf(MockContents.kjvDownloadedTranslationInfo)
+                                )
                         )
                 ),
-                translationsViewModel.translationList().first()
+                translationsViewModel.translationList(false).toList()
         )
-    }
-
-    @Test
-    fun testLoadTranslationList() = testDispatcher.runBlockingTest {
-        translationsViewModel.loadTranslationList(true)
-
-        assertEquals(ViewData.loading(), translationsViewModel.translationList().first())
-        verify(translationManager, times(1)).reload(true)
+        verify(translationManager, times(1)).reload(false)
     }
 
     @Test
     fun testLoadTranslationListWithException() = testDispatcher.runBlockingTest {
-        val translationListAsync = async { translationsViewModel.translationList().take(2).toList() }
-
         val exception = RuntimeException("random exception")
         `when`(translationManager.reload(true)).thenThrow(exception)
-        translationsViewModel.loadTranslationList(true)
 
         assertEquals(
                 listOf(ViewData.loading(), ViewData.error(exception = exception)),
-                translationListAsync.await()
+                translationsViewModel.translationList(true).toList()
         )
     }
 

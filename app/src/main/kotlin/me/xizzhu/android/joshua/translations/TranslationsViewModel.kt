@@ -16,17 +16,14 @@
 
 package me.xizzhu.android.joshua.translations
 
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.flowFrom
 import me.xizzhu.android.logger.Log
 
 data class TranslationList(val currentTranslation: String,
@@ -36,32 +33,13 @@ data class TranslationList(val currentTranslation: String,
 class TranslationsViewModel(private val bibleReadingManager: BibleReadingManager,
                             private val translationManager: TranslationManager,
                             settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val translationList: BroadcastChannel<ViewData<TranslationList>> = ConflatedBroadcastChannel()
-
-    init {
-        combine(bibleReadingManager.currentTranslation(),
-                translationManager.availableTranslations(),
-                translationManager.downloadedTranslations()
-        ) { currentTranslation, availableTranslations, downloadedTranslations ->
-            TranslationList(currentTranslation, availableTranslations, downloadedTranslations)
-        }.onEach { translationList ->
-            this@TranslationsViewModel.translationList.offer(ViewData.success(translationList))
-        }.launchIn(viewModelScope)
-    }
-
-    fun translationList(): Flow<ViewData<TranslationList>> = translationList.asFlow()
-
-    fun loadTranslationList(forceRefresh: Boolean) {
-        viewModelScope.launch {
-            try {
-                translationList.offer(ViewData.loading())
-                translationManager.reload(forceRefresh)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to load translation list", e)
-                translationList.offer(ViewData.error(exception = e))
-            }
-        }
+    fun translationList(forceRefresh: Boolean): Flow<ViewData<TranslationList>> = flowFrom {
+        translationManager.reload(forceRefresh)
+        TranslationList(
+                bibleReadingManager.currentTranslation().first { it.isNotEmpty() },
+                translationManager.availableTranslations().first(),
+                translationManager.downloadedTranslations().first()
+        )
     }
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
@@ -79,13 +57,9 @@ class TranslationsViewModel(private val bibleReadingManager: BibleReadingManager
                             // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
                             ViewData.success(-1)
                         }
-                    }
-                    .catch { cause ->
-                        Log.e(tag, "Failed to download translation", cause)
-                        emit(ViewData.error(exception = cause))
-                    }
+                    }.catch { cause -> emit(ViewData.error(exception = cause)) }
 
-    suspend fun removeTranslation(translationToRemove: TranslationInfo) {
+    fun removeTranslation(translationToRemove: TranslationInfo): Flow<ViewData<Unit>> = flowFrom {
         translationManager.removeTranslation(translationToRemove)
     }
 }

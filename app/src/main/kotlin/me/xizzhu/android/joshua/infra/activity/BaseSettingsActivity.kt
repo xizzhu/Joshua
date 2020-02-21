@@ -34,8 +34,6 @@ import me.xizzhu.android.joshua.ui.getBackgroundColor
 
 // TODO switch to inherit from BaseViewModel
 abstract class BaseSettingsViewModel(protected val settingsManager: SettingsManager) : ViewModel() {
-    protected val tag: String = javaClass.simpleName
-
     fun settings(): Flow<ViewData<Settings>> = settingsManager.settings().map { ViewData.success(it) }
 }
 
