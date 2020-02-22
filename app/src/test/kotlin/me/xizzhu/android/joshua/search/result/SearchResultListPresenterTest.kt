@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.search.result
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchActivity
@@ -33,15 +31,11 @@ import kotlin.test.assertEquals
 
 class SearchResultListPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var searchActivity: SearchActivity
-    @Mock
     private lateinit var navigator: Navigator
     @Mock
     private lateinit var searchViewModel: SearchViewModel
     @Mock
-    private lateinit var lifecycle: Lifecycle
-    @Mock
-    private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
+    private lateinit var searchActivity: SearchActivity
 
     private lateinit var searchResultListPresenter: SearchResultListPresenter
 
@@ -49,7 +43,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchViewModel, lifecycle, lifecycleCoroutineScope)
+        searchResultListPresenter = SearchResultListPresenter(navigator, searchViewModel, searchActivity, testCoroutineScope)
     }
 
     @Test

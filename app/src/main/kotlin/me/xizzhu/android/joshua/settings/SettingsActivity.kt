@@ -18,13 +18,12 @@ package me.xizzhu.android.joshua.settings
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import dagger.android.AndroidInjection
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.infra.activity.BaseActivity
 import javax.inject.Inject
 
-// TODO switch to inherit from BaseActivity
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : BaseActivity() {
     @Inject
     lateinit var settingsViewModel: SettingsViewModel
 

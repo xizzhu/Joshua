@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -32,15 +30,11 @@ import kotlin.test.assertEquals
 
 class StrongNumberListPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var strongNumberListActivity: StrongNumberListActivity
-    @Mock
     private lateinit var navigator: Navigator
     @Mock
     private lateinit var strongNumberListViewModel: StrongNumberListViewModel
     @Mock
-    private lateinit var lifecycle: Lifecycle
-    @Mock
-    private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
+    private lateinit var strongNumberListActivity: StrongNumberListActivity
 
     private lateinit var strongNumberListPresenter: StrongNumberListPresenter
 
@@ -48,7 +42,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        strongNumberListPresenter = StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListViewModel, lifecycle, lifecycleCoroutineScope)
+        strongNumberListPresenter = StrongNumberListPresenter(navigator, strongNumberListViewModel, strongNumberListActivity, testCoroutineScope)
     }
 
     @Test

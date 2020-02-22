@@ -36,15 +36,15 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 object HighlightsModule {
     @ActivityScope
     @Provides
-    fun provideToolbarPresenter(highlightsActivity: HighlightsActivity,
-                                highlightsViewModel: BaseAnnotatedVersesViewModel<Highlight>): AnnotatedVersesToolbarPresenter<Highlight> =
-            AnnotatedVersesToolbarPresenter(R.string.title_highlights, highlightsViewModel, highlightsActivity.lifecycle)
+    fun provideToolbarPresenter(highlightsViewModel: BaseAnnotatedVersesViewModel<Highlight>,
+                                highlightsActivity: HighlightsActivity): AnnotatedVersesToolbarPresenter<Highlight, HighlightsActivity> =
+            AnnotatedVersesToolbarPresenter(R.string.title_highlights, highlightsViewModel, highlightsActivity)
 
     @ActivityScope
     @Provides
-    fun provideHighlightsListPresenter(highlightsActivity: HighlightsActivity, navigator: Navigator,
-                                       highlightsViewModel: BaseAnnotatedVersesViewModel<Highlight>): BaseAnnotatedVersesPresenter<Highlight> =
-            HighlightsListPresenter(highlightsActivity, navigator, highlightsViewModel, highlightsActivity.lifecycle)
+    fun provideHighlightsListPresenter(navigator: Navigator, highlightsViewModel: BaseAnnotatedVersesViewModel<Highlight>,
+                                       highlightsActivity: HighlightsActivity): BaseAnnotatedVersesPresenter<Highlight, HighlightsActivity> =
+            HighlightsListPresenter(navigator, highlightsViewModel, highlightsActivity)
 
     @ActivityScope
     @Provides

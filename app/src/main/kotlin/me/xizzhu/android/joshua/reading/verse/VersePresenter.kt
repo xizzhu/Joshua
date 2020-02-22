@@ -25,10 +25,7 @@ import android.view.MenuItem
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -50,9 +47,9 @@ import kotlin.math.max
 data class VerseViewHolder(val versePager: ViewPager2) : ViewHolder
 
 class VersePresenter(
-        private val readingActivity: ReadingActivity, readingViewModel: ReadingViewModel,
-        lifecycle: Lifecycle, lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<VerseViewHolder, ReadingViewModel>(readingViewModel, lifecycle, lifecycleCoroutineScope) {
+        readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,
+        coroutineScope: CoroutineScope = readingActivity.lifecycleScope
+) : BaseSettingsPresenter<VerseViewHolder, ReadingViewModel, ReadingActivity>(readingViewModel, readingActivity, coroutineScope) {
     private val selectedVerses: MutableSet<Verse> = mutableSetOf()
     private var actionMode: ActionMode? = null
     private val actionModeCallback = object : ActionMode.Callback {
@@ -83,39 +80,39 @@ class VersePresenter(
     }
 
     private fun copyToClipBoard() {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 if (selectedVerses.isNotEmpty()) {
                     val verse = selectedVerses.first()
                     val bookName = viewModel.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
                     // On older devices, this only works on the threads with loopers.
-                    (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                    (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                             .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
                                     selectedVerses.toStringForSharing(bookName)))
-                    readingActivity.toast(R.string.toast_verses_copied)
+                    activity.toast(R.string.toast_verses_copied)
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to copy", e)
-                readingActivity.toast(R.string.toast_unknown_error)
+                activity.toast(R.string.toast_unknown_error)
             }
             actionMode?.finish()
         }
     }
 
     private fun share() {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 if (selectedVerses.isNotEmpty()) {
                     val verse = selectedVerses.first()
                     val bookName = viewModel.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
 
-                    readingActivity.chooserForSharing(readingActivity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
-                            ?.let { readingActivity.startActivity(it) }
+                    activity.chooserForSharing(activity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
+                            ?.let { activity.startActivity(it) }
                             ?: throw RuntimeException("Failed to create chooser for sharing")
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to share", e)
-                readingActivity.toast(R.string.toast_unknown_error)
+                activity.toast(R.string.toast_unknown_error)
             }
             actionMode?.finish()
         }
@@ -146,7 +143,7 @@ class VersePresenter(
     private fun updateCurrentChapter(bookIndex: Int, chapterIndex: Int) {
         if (currentVerseIndex.bookIndex == bookIndex && currentVerseIndex.chapterIndex == chapterIndex) return
 
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
@@ -157,7 +154,7 @@ class VersePresenter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreate() {
-        viewModel.settings().onEachSuccess { adapter.settings = it }.launchIn(lifecycleScope)
+        viewModel.settings().onEachSuccess { adapter.settings = it }.launchIn(coroutineScope)
 
         combine(
                 viewModel.currentVerseIndex().filterOnSuccess(),
@@ -177,15 +174,15 @@ class VersePresenter(
 
             adapter.setCurrent(newVerseIndex, newTranslation, newParallelTranslations)
             viewHolder.versePager.setCurrentItem(newVerseIndex.toPagePosition(), false)
-        }.launchIn(lifecycleScope)
+        }.launchIn(coroutineScope)
 
-        viewModel.verseUpdates().onEach { adapter.notifyVerseUpdate(it) }.launchIn(lifecycleScope)
+        viewModel.verseUpdates().onEach { adapter.notifyVerseUpdate(it) }.launchIn(coroutineScope)
     }
 
     private fun updateCurrentVerse(verseIndex: VerseIndex) {
         if (currentVerseIndex == verseIndex) return
 
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.saveCurrentVerseIndex(verseIndex)
             } catch (e: Exception) {
@@ -196,7 +193,7 @@ class VersePresenter(
 
     @VisibleForTesting
     fun loadVerses(bookIndex: Int, chapterIndex: Int) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 val items = coroutineScope {
                     val bookNameAsync = async { viewModel.readBookNames(currentTranslation)[bookIndex] }
@@ -223,7 +220,7 @@ class VersePresenter(
                 adapter.setVerses(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verses", e)
-                readingActivity.dialog(true, R.string.dialog_verse_load_error,
+                activity.dialog(true, R.string.dialog_verse_load_error,
                         DialogInterface.OnClickListener { _, _ -> loadVerses(bookIndex, chapterIndex) })
             }
         }
@@ -259,14 +256,14 @@ class VersePresenter(
     @VisibleForTesting
     fun onVerseLongClicked(verse: Verse) {
         if (actionMode == null) {
-            actionMode = readingActivity.startSupportActionMode(actionModeCallback)
+            actionMode = activity.startSupportActionMode(actionModeCallback)
         }
         onVerseClicked(verse)
     }
 
     @VisibleForTesting
     fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 if (hasBookmark) {
                     viewModel.removeBookmark(verseIndex)
@@ -282,8 +279,8 @@ class VersePresenter(
 
     @VisibleForTesting
     fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int) {
-        readingActivity.dialog(R.string.text_pick_highlight_color,
-                readingActivity.resources.getStringArray(R.array.text_colors),
+        activity.dialog(R.string.text_pick_highlight_color,
+                activity.resources.getStringArray(R.array.text_colors),
                 max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
                 DialogInterface.OnClickListener { dialog, which ->
                     updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
@@ -294,7 +291,7 @@ class VersePresenter(
 
     @VisibleForTesting
     fun updateHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 if (highlightColor == Highlight.COLOR_NONE) {
                     viewModel.removeHighlight(verseIndex)

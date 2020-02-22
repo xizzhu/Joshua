@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.infra.activity
 import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -34,9 +35,9 @@ abstract class BaseSettingsViewModel(protected val settingsManager: SettingsMana
     fun settings(): Flow<ViewData<Settings>> = settingsManager.settings().map { ViewData.success(it) }
 }
 
-abstract class BaseSettingsPresenter<VH : ViewHolder, VM : BaseSettingsViewModel>(
-        viewModel: VM, lifecycle: Lifecycle, lifecycleScope: LifecycleCoroutineScope
-) : ViewPresenter<VH, VM>(viewModel, lifecycle, lifecycleScope)
+abstract class BaseSettingsPresenter<VH : ViewHolder, VM : BaseSettingsViewModel, A : BaseSettingsActivity>(
+        viewModel: VM, activity: A, coroutineScope: CoroutineScope
+) : ViewPresenter<VH, VM, A>(viewModel, activity, coroutineScope)
 
 abstract class BaseSettingsActivity : BaseActivity() {
     @CallSuper

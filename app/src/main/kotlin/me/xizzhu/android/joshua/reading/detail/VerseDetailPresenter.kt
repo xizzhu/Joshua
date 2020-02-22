@@ -22,10 +22,7 @@ import android.content.Context
 import android.content.DialogInterface
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -54,10 +51,9 @@ import kotlin.math.max
 data class VerseDetailViewHolder(val verseDetailViewLayout: VerseDetailViewLayout) : ViewHolder
 
 class VerseDetailPresenter(
-        private val readingActivity: ReadingActivity, private val navigator: Navigator,
-        readingViewModel: ReadingViewModel, lifecycle: Lifecycle,
-        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<VerseDetailViewHolder, ReadingViewModel>(readingViewModel, lifecycle, lifecycleCoroutineScope) {
+        private val navigator: Navigator, readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,
+        coroutineScope: CoroutineScope = readingActivity.lifecycleScope
+) : BaseSettingsPresenter<VerseDetailViewHolder, ReadingViewModel, ReadingActivity>(readingViewModel, readingActivity, coroutineScope) {
     private val translationComparator = TranslationInfoComparator(
             TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
 
@@ -86,17 +82,17 @@ class VerseDetailPresenter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreate() {
-        viewModel.settings().onEachSuccess { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(lifecycleScope)
+        viewModel.settings().onEachSuccess { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
         viewModel.verseDetailRequest().onEach {
             loadVerseDetail(it.verseIndex)
             viewHolder.verseDetailViewLayout.show(it.content)
-        }.launchIn(lifecycleScope)
-        viewModel.currentVerseIndex().onEachSuccess { close() }.launchIn(lifecycleScope)
+        }.launchIn(coroutineScope)
+        viewModel.currentVerseIndex().onEachSuccess { close() }.launchIn(coroutineScope)
     }
 
     private fun updateBookmark() {
         updateBookmarkJob?.cancel()
-        updateBookmarkJob = lifecycleScope.launch {
+        updateBookmarkJob = coroutineScope.launch {
             verseDetail?.let { detail ->
                 if (detail.bookmarked) {
                     viewModel.removeBookmark(detail.verseIndex)
@@ -113,8 +109,8 @@ class VerseDetailPresenter(
     }
 
     private fun updateHighlight() {
-        readingActivity.dialog(R.string.text_pick_highlight_color,
-                readingActivity.resources.getStringArray(R.array.text_colors),
+        activity.dialog(R.string.text_pick_highlight_color,
+                activity.resources.getStringArray(R.array.text_colors),
                 max(0, Highlight.AVAILABLE_COLORS.indexOf(verseDetail?.highlightColor
                         ?: Highlight.COLOR_NONE)),
                 DialogInterface.OnClickListener { dialog, which ->
@@ -126,7 +122,7 @@ class VerseDetailPresenter(
 
     private fun updateHighlight(@Highlight.Companion.AvailableColor highlightColor: Int) {
         updateHighlightJob?.cancel()
-        updateHighlightJob = lifecycleScope.launch {
+        updateHighlightJob = coroutineScope.launch {
             verseDetail?.let { detail ->
                 if (highlightColor == Highlight.COLOR_NONE) {
                     viewModel.removeHighlight(detail.verseIndex)
@@ -143,7 +139,7 @@ class VerseDetailPresenter(
 
     private fun updateNote(note: String) {
         updateNoteJob?.cancel()
-        updateNoteJob = lifecycleScope.launch {
+        updateNoteJob = coroutineScope.launch {
             verseDetail?.let { detail ->
                 if (note.isEmpty()) {
                     viewModel.removeNote(detail.verseIndex)
@@ -163,7 +159,7 @@ class VerseDetailPresenter(
             return
         }
 
-        downloadStrongNumberDialog = readingActivity.progressDialog(
+        downloadStrongNumberDialog = activity.progressDialog(
                 R.string.dialog_downloading, 100) { downloadStrongNumberJob?.cancel() }
         downloadStrongNumberJob = viewModel.downloadStrongNumber()
                 .onEach(
@@ -181,7 +177,7 @@ class VerseDetailPresenter(
                                     ?: throw IllegalStateException("Missing progress data when downloading")
                         },
                         onSuccess = {
-                            readingActivity.toast(R.string.toast_downloaded)
+                            activity.toast(R.string.toast_downloaded)
 
                             verseDetail?.let {
                                 verseDetail = it.copy(strongNumberItems = viewModel.readStrongNumber(it.verseIndex).toStrongNumberItems())
@@ -189,13 +185,13 @@ class VerseDetailPresenter(
                             }
                         },
                         onError = { _, _ ->
-                            readingActivity.dialog(true, R.string.dialog_download_error,
+                            activity.dialog(true, R.string.dialog_download_error,
                                     DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
                         }
                 ).onCompletion {
                     dismissDownloadStrongNumberDialog()
                     downloadStrongNumberJob = null
-                }.launchIn(lifecycleScope)
+                }.launchIn(coroutineScope)
     }
 
     private fun dismissDownloadStrongNumberDialog() {
@@ -204,7 +200,7 @@ class VerseDetailPresenter(
     }
 
     private fun loadVerseDetail(verseIndex: VerseIndex) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewHolder.verseDetailViewLayout.setVerseDetail(VerseDetail.INVALID)
                 verseDetail = coroutineScope {
@@ -219,7 +215,7 @@ class VerseDetailPresenter(
                 viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verse detail", e)
-                readingActivity.dialog(true, R.string.dialog_load_verse_detail_error,
+                activity.dialog(true, R.string.dialog_load_verse_detail_error,
                         DialogInterface.OnClickListener { _, _ -> loadVerseDetail(verseIndex) })
             }
         }
@@ -289,7 +285,7 @@ class VerseDetailPresenter(
 
     @VisibleForTesting
     fun onVerseClicked(translation: String) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 if (translation != viewModel.currentTranslation().first { ViewData.STATUS_SUCCESS == it.status }.data) {
                     viewModel.saveCurrentTranslation(translation)
@@ -297,24 +293,24 @@ class VerseDetailPresenter(
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select translation", e)
-                readingActivity.toast(R.string.toast_unknown_error)
+                activity.toast(R.string.toast_unknown_error)
             }
         }
     }
 
     @VisibleForTesting
     fun onVerseLongClicked(verse: Verse) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 val bookName = viewModel.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
                 // On older devices, this only works on the threads with loopers.
-                (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                         .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
                                 verse.toStringForSharing(bookName)))
-                readingActivity.toast(R.string.toast_verses_copied)
+                activity.toast(R.string.toast_verses_copied)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to copy", e)
-                readingActivity.toast(R.string.toast_unknown_error)
+                activity.toast(R.string.toast_unknown_error)
             }
         }
     }
@@ -325,11 +321,11 @@ class VerseDetailPresenter(
 
     private fun onStrongNumberClicked(strongNumber: String) {
         try {
-            navigator.navigate(readingActivity, Navigator.SCREEN_STRONG_NUMBER,
+            navigator.navigate(activity, Navigator.SCREEN_STRONG_NUMBER,
                     StrongNumberListActivity.bundle(strongNumber))
         } catch (e: Exception) {
             Log.e(tag, "Failed to open Strong's number list activity", e)
-            readingActivity.dialog(true, R.string.dialog_navigate_to_strong_number_error,
+            activity.dialog(true, R.string.dialog_navigate_to_strong_number_error,
                     DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
         }
     }

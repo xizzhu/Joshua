@@ -23,8 +23,8 @@ import android.widget.ProgressBar
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.OnLifecycleEvent
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
@@ -48,18 +48,17 @@ data class AnnotatedVersesViewHolder(
         val loadingSpinner: ProgressBar, val annotatedVerseListView: CommonRecyclerView
 ) : ViewHolder
 
-abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation>(
-        private val activity: BaseAnnotatedVersesActivity<V>, private val navigator: Navigator,
-        @StringRes private val noItemText: Int, annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>,
-        lifecycle: Lifecycle, lifecycleCoroutineScope: LifecycleCoroutineScope
-) : BaseSettingsPresenter<AnnotatedVersesViewHolder, BaseAnnotatedVersesViewModel<V>>(annotatedVersesViewModel, lifecycle, lifecycleCoroutineScope) {
+abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotatedVersesActivity<V, A>>(
+        private val navigator: Navigator, @StringRes private val noItemText: Int,
+        annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>, activity: A, coroutineScope: CoroutineScope
+) : BaseSettingsPresenter<AnnotatedVersesViewHolder, BaseAnnotatedVersesViewModel<V>, A>(annotatedVersesViewModel, activity, coroutineScope) {
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun observeSettings() {
-        viewModel.settings().onEachSuccess { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(lifecycleScope)
+        viewModel.settings().onEachSuccess { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(coroutineScope)
 
         viewModel.sortOrder().combineOnSuccess(viewModel.currentTranslation()) { sortOrder, currentTranslation ->
             loadAnnotatedVerses(sortOrder, currentTranslation)
-        }.launchIn(lifecycleScope)
+        }.launchIn(coroutineScope)
     }
 
     private fun loadAnnotatedVerses(@Constants.SortOrder sortOrder: Int, currentTranslation: String) {
@@ -80,7 +79,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation>(
                             DialogInterface.OnClickListener { _, _ -> loadAnnotatedVerses(sortOrder, currentTranslation) },
                             DialogInterface.OnClickListener { _, _ -> activity.finish() })
                 }
-        ).launchIn(lifecycleScope)
+        ).launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -137,7 +136,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation>(
     }
 
     protected fun openVerse(verseToOpen: VerseIndex) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.saveCurrentVerseIndex(verseToOpen)
                 navigator.navigate(activity, Navigator.SCREEN_READING, extrasForOpeningVerse())

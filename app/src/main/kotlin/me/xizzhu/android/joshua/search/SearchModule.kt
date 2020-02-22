@@ -31,16 +31,15 @@ import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
 object SearchModule {
     @ActivityScope
     @Provides
-    fun provideSearchToolbarPresenter(searchActivity: SearchActivity,
-                                      searchViewModel: SearchViewModel): SearchToolbarPresenter =
-            SearchToolbarPresenter(searchActivity, searchViewModel, searchActivity.lifecycle)
+    fun provideSearchToolbarPresenter(searchViewModel: SearchViewModel,
+                                      searchActivity: SearchActivity): SearchToolbarPresenter =
+            SearchToolbarPresenter(searchViewModel, searchActivity)
 
     @ActivityScope
     @Provides
-    fun provideSearchResultListPresenter(searchActivity: SearchActivity,
-                                         navigator: Navigator,
-                                         searchViewModel: SearchViewModel): SearchResultListPresenter =
-            SearchResultListPresenter(searchActivity, navigator, searchViewModel, searchActivity.lifecycle)
+    fun provideSearchResultListPresenter(navigator: Navigator, searchViewModel: SearchViewModel,
+                                         searchActivity: SearchActivity): SearchResultListPresenter =
+            SearchResultListPresenter(navigator, searchViewModel, searchActivity)
 
     @ActivityScope
     @Provides

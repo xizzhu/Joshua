@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.progress
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
@@ -28,15 +26,11 @@ import kotlin.test.*
 
 class ReadingProgressPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var readingProgressActivity: ReadingProgressActivity
-    @Mock
     private lateinit var navigator: Navigator
     @Mock
     private lateinit var readingProgressViewModel: ReadingProgressViewModel
     @Mock
-    private lateinit var lifecycle: Lifecycle
-    @Mock
-    private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
+    private lateinit var readingProgressActivity: ReadingProgressActivity
 
     private lateinit var readingProgressPresenter: ReadingProgressPresenter
 
@@ -44,7 +38,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        readingProgressPresenter = ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressViewModel, lifecycle, lifecycleCoroutineScope)
+        readingProgressPresenter = ReadingProgressPresenter(navigator, readingProgressViewModel, readingProgressActivity, testCoroutineScope)
     }
 
     @Test

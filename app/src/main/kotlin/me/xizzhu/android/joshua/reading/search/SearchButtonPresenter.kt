@@ -18,10 +18,8 @@ package me.xizzhu.android.joshua.reading.search
 
 import android.content.DialogInterface
 import androidx.annotation.UiThread
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -36,10 +34,9 @@ import me.xizzhu.android.logger.Log
 data class SearchButtonViewHolder(val searchButton: SearchFloatingActionButton) : ViewHolder
 
 class SearchButtonPresenter(
-        private val readingActivity: ReadingActivity, private val navigator: Navigator,
-        readingViewModel: ReadingViewModel, lifecycle: Lifecycle,
-        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<SearchButtonViewHolder, ReadingViewModel>(readingViewModel, lifecycle, lifecycleCoroutineScope) {
+        private val navigator: Navigator, readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,
+        coroutineScope: CoroutineScope = readingActivity.lifecycleScope
+) : BaseSettingsPresenter<SearchButtonViewHolder, ReadingViewModel, ReadingActivity>(readingViewModel, readingActivity, coroutineScope) {
     @UiThread
     override fun onBind() {
         super.onBind()
@@ -49,10 +46,10 @@ class SearchButtonPresenter(
 
     private fun openSearch() {
         try {
-            navigator.navigate(readingActivity, Navigator.SCREEN_SEARCH)
+            navigator.navigate(activity, Navigator.SCREEN_SEARCH)
         } catch (e: Exception) {
             Log.e(tag, "Failed to open search activity", e)
-            readingActivity.dialog(true, R.string.dialog_navigate_to_search_error,
+            activity.dialog(true, R.string.dialog_navigate_to_search_error,
                     DialogInterface.OnClickListener { _, _ -> openSearch() })
         }
     }
@@ -65,6 +62,6 @@ class SearchButtonPresenter(
             } else {
                 viewHolder.searchButton.show()
             }
-        }.launchIn(lifecycleScope)
+        }.launchIn(coroutineScope)
     }
 }

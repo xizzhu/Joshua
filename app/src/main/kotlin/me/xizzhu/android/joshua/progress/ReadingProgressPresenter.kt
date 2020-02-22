@@ -20,10 +20,8 @@ import android.content.DialogInterface
 import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
@@ -44,16 +42,18 @@ data class ReadingProgressViewHolder(
 ) : ViewHolder
 
 class ReadingProgressPresenter(
-        private val readingProgressActivity: ReadingProgressActivity, private val navigator: Navigator,
-        readingProgressViewModel: ReadingProgressViewModel, lifecycle: Lifecycle,
-        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<ReadingProgressViewHolder, ReadingProgressViewModel>(readingProgressViewModel, lifecycle, lifecycleCoroutineScope) {
+        private val navigator: Navigator, readingProgressViewModel: ReadingProgressViewModel,
+        readingProgressActivity: ReadingProgressActivity,
+        coroutineScope: CoroutineScope = readingProgressActivity.lifecycleScope
+) : BaseSettingsPresenter<ReadingProgressViewHolder, ReadingProgressViewModel, ReadingProgressActivity>(
+        readingProgressViewModel, readingProgressActivity, coroutineScope
+) {
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun observeSettings() {
-        viewModel.settings().onEachSuccess { viewHolder.readingProgressListView.setSettings(it) }.launchIn(lifecycleScope)
+        viewModel.settings().onEachSuccess { viewHolder.readingProgressListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -71,11 +71,11 @@ class ReadingProgressPresenter(
                 onError = { _, e ->
                     Log.e(tag, "Failed to load reading progress", e!!)
                     viewHolder.loadingSpinner.visibility = View.GONE
-                    readingProgressActivity.dialog(false, R.string.dialog_load_reading_progress_error,
+                    activity.dialog(false, R.string.dialog_load_reading_progress_error,
                             DialogInterface.OnClickListener { _, _ -> loadReadingProgress() },
-                            DialogInterface.OnClickListener { _, _ -> readingProgressActivity.finish() })
+                            DialogInterface.OnClickListener { _, _ -> activity.finish() })
                 }
-        ).launchIn(lifecycleScope)
+        ).launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -119,13 +119,13 @@ class ReadingProgressPresenter(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun openChapter(bookIndex: Int, chapterIndex: Int) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
-                navigator.navigate(readingProgressActivity, Navigator.SCREEN_READING)
+                navigator.navigate(activity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to open chapter for reading", e)
-                readingProgressActivity.toast(R.string.toast_unknown_error)
+                activity.toast(R.string.toast_unknown_error)
             }
         }
     }

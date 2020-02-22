@@ -18,16 +18,15 @@ package me.xizzhu.android.joshua.infra.arch
 
 import androidx.annotation.CallSuper
 import androidx.annotation.UiThread
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineScope
 
 interface ViewHolder
 
-abstract class ViewPresenter<VH : ViewHolder, VM : ViewModel>(
-        protected val viewModel: VM, private val lifecycle: Lifecycle,
-        protected val lifecycleScope: LifecycleCoroutineScope
+abstract class ViewPresenter<VH : ViewHolder, VM : ViewModel, A : AppCompatActivity>(
+        protected val viewModel: VM, protected val activity: A, protected val coroutineScope: CoroutineScope
 ) : LifecycleObserver {
     protected val tag: String = javaClass.simpleName
 
@@ -37,7 +36,7 @@ abstract class ViewPresenter<VH : ViewHolder, VM : ViewModel>(
     fun bind(viewHolder: VH) {
         this.viewHolder = viewHolder
         onBind()
-        lifecycle.addObserver(this)
+        activity.lifecycle.addObserver(this)
     }
 
     @UiThread
@@ -45,4 +44,3 @@ abstract class ViewPresenter<VH : ViewHolder, VM : ViewModel>(
     open fun onBind() {
     }
 }
-

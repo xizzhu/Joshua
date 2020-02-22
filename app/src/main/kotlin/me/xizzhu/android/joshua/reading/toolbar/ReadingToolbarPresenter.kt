@@ -19,10 +19,8 @@ package me.xizzhu.android.joshua.reading.toolbar
 import android.content.DialogInterface
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
@@ -39,10 +37,9 @@ import me.xizzhu.android.logger.Log
 data class ReadingToolbarViewHolder(val readingToolbar: ReadingToolbar) : ViewHolder
 
 class ReadingToolbarPresenter(
-        private val readingActivity: ReadingActivity, private val navigator: Navigator,
-        readingViewModel: ReadingViewModel, lifecycle: Lifecycle,
-        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<ReadingToolbarViewHolder, ReadingViewModel>(readingViewModel, lifecycle, lifecycleCoroutineScope) {
+        private val navigator: Navigator, readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,
+        coroutineScope: CoroutineScope = readingActivity.lifecycleScope
+) : BaseSettingsPresenter<ReadingToolbarViewHolder, ReadingViewModel, ReadingActivity>(readingViewModel, readingActivity, coroutineScope) {
     private val translationComparator = TranslationInfoComparator(
             TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
 
@@ -112,7 +109,7 @@ class ReadingToolbarPresenter(
     }
 
     private fun requestParallelTranslation(translationShortName: String) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.requestParallelTranslation(translationShortName)
             } catch (e: Exception) {
@@ -123,7 +120,7 @@ class ReadingToolbarPresenter(
     }
 
     private fun removeParallelTranslation(translationShortName: String) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.removeParallelTranslation(translationShortName)
             } catch (e: Exception) {
@@ -139,16 +136,16 @@ class ReadingToolbarPresenter(
 
     private fun startActivity(@Navigator.Companion.Screen screen: Int, @StringRes errorMessage: Int) {
         try {
-            navigator.navigate(readingActivity, screen)
+            navigator.navigate(activity, screen)
         } catch (e: Exception) {
             Log.e(tag, "Failed to open activity", e)
-            readingActivity.dialog(true, errorMessage,
+            activity.dialog(true, errorMessage,
                     DialogInterface.OnClickListener { _, _ -> startActivity(screen, errorMessage) })
         }
     }
 
     private fun updateCurrentTranslation(translationShortName: String) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.saveCurrentTranslation(translationShortName)
                 try {
@@ -158,7 +155,7 @@ class ReadingToolbarPresenter(
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update current translation", e)
-                readingActivity.dialog(true, R.string.dialog_update_translation_error,
+                activity.dialog(true, R.string.dialog_update_translation_error,
                         DialogInterface.OnClickListener { _, _ -> updateCurrentTranslation(translationShortName) })
             }
         }
@@ -175,9 +172,9 @@ class ReadingToolbarPresenter(
     private fun observeDownloadedTranslations() {
         viewModel.downloadedTranslations().onEachSuccess { translations ->
             if (translations.isEmpty()) {
-                readingActivity.dialog(false, R.string.dialog_no_translation_downloaded,
+                activity.dialog(false, R.string.dialog_no_translation_downloaded,
                         DialogInterface.OnClickListener { _, _ -> startTranslationManagementActivity() },
-                        DialogInterface.OnClickListener { _, _ -> readingActivity.finish() })
+                        DialogInterface.OnClickListener { _, _ -> activity.finish() })
             } else {
                 downloadedTranslations.clear()
                 downloadedTranslations.addAll(translations.sortedWith(translationComparator))
@@ -191,14 +188,14 @@ class ReadingToolbarPresenter(
                     }
                     names.add(translation.shortName)
                 }
-                names.add(readingActivity.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
+                names.add(activity.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
 
                 with(viewHolder.readingToolbar) {
                     setTranslationShortNames(names)
                     setSpinnerSelection(selected)
                 }
             }
-        }.launchIn(lifecycleScope)
+        }.launchIn(coroutineScope)
     }
 
     private fun observeCurrentTranslation() {
@@ -217,13 +214,13 @@ class ReadingToolbarPresenter(
                 setCurrentTranslation(currentTranslation)
                 setSpinnerSelection(selected)
             }
-        }.launchIn(lifecycleScope)
+        }.launchIn(coroutineScope)
     }
 
     private fun observeParallelTranslations() {
         viewModel.parallelTranslations()
                 .onEachSuccess { viewHolder.readingToolbar.setParallelTranslations(it) }
-                .launchIn(lifecycleScope)
+                .launchIn(coroutineScope)
     }
 
     private fun observeBookNames() {
@@ -231,6 +228,6 @@ class ReadingToolbarPresenter(
                 .combineOnSuccess(viewModel.bookShortNames()) { currentVerseIndex, bookShortNames ->
                     viewHolder.readingToolbar.title =
                             "${bookShortNames[currentVerseIndex.bookIndex]}, ${currentVerseIndex.chapterIndex + 1}"
-                }.launchIn(lifecycleScope)
+                }.launchIn(coroutineScope)
     }
 }

@@ -25,13 +25,13 @@ import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import javax.inject.Inject
 
-abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation> : BaseSettingsActivity() {
+abstract class BaseAnnotatedVersesActivity<V : VerseAnnotation, A : BaseAnnotatedVersesActivity<V, A>> : BaseSettingsActivity() {
     @Inject
     lateinit var annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>
     @Inject
-    lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter<V>
+    lateinit var toolbarPresenter: AnnotatedVersesToolbarPresenter<V, A>
     @Inject
-    lateinit var annotatedVersesPresenter: BaseAnnotatedVersesPresenter<V>
+    lateinit var annotatedVersesPresenter: BaseAnnotatedVersesPresenter<V, A>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

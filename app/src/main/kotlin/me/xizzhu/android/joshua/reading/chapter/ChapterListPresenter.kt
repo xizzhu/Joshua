@@ -18,10 +18,8 @@ package me.xizzhu.android.joshua.reading.chapter
 
 import android.content.DialogInterface
 import androidx.annotation.UiThread
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
@@ -39,9 +37,9 @@ data class ChapterListViewHolder(
 ) : ViewHolder
 
 class ChapterListPresenter(
-        private val readingActivity: ReadingActivity, readingViewModel: ReadingViewModel,
-        lifecycle: Lifecycle, lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<ChapterListViewHolder, ReadingViewModel>(readingViewModel, lifecycle, lifecycleCoroutineScope) {
+        readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,
+        coroutineScope: CoroutineScope = readingActivity.lifecycleScope
+) : BaseSettingsPresenter<ChapterListViewHolder, ReadingViewModel, ReadingActivity>(readingViewModel, readingActivity, coroutineScope) {
     @UiThread
     override fun onBind() {
         super.onBind()
@@ -50,12 +48,12 @@ class ChapterListPresenter(
     }
 
     private fun selectChapter(bookIndex: Int, chapterIndex: Int) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select chapter", e)
-                readingActivity.dialog(true, R.string.dialog_chapter_selection_error,
+                activity.dialog(true, R.string.dialog_chapter_selection_error,
                         DialogInterface.OnClickListener { _, _ -> selectChapter(bookIndex, chapterIndex) })
             }
         }
@@ -69,6 +67,6 @@ class ChapterListPresenter(
                         chapterListView.setData(currentVerseIndex, bookNames)
                         readingDrawerLayout.hide()
                     }
-                }.launchIn(lifecycleScope)
+                }.launchIn(coroutineScope)
     }
 }

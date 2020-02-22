@@ -29,9 +29,9 @@ import me.xizzhu.android.joshua.core.SettingsManager
 object TranslationsModule {
     @ActivityScope
     @Provides
-    fun provideTranslationListPresenter(translationsActivity: TranslationsActivity,
-                                        translationsViewModel: TranslationsViewModel): TranslationListPresenter =
-            TranslationListPresenter(translationsActivity, translationsViewModel, translationsActivity.lifecycle)
+    fun provideTranslationListPresenter(translationsViewModel: TranslationsViewModel,
+                                        translationsActivity: TranslationsActivity): TranslationListPresenter =
+            TranslationListPresenter(translationsViewModel, translationsActivity)
 
     @ActivityScope
     @Provides

@@ -28,9 +28,9 @@ import me.xizzhu.android.joshua.core.SettingsManager
 object SettingsModule {
     @ActivityScope
     @Provides
-    fun provideSettingsViewPresenter(settingsActivity: SettingsActivity,
-                                     settingsViewModel: SettingsViewModel): SettingsPresenter =
-            SettingsPresenter(settingsActivity, settingsViewModel, settingsActivity.lifecycle)
+    fun provideSettingsViewPresenter(settingsViewModel: SettingsViewModel,
+                                     settingsActivity: SettingsActivity): SettingsPresenter =
+            SettingsPresenter(settingsViewModel, settingsActivity)
 
     @ActivityScope
     @Provides

@@ -21,9 +21,8 @@ import android.content.Context
 import android.provider.SearchRecentSuggestions
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
@@ -37,9 +36,9 @@ import me.xizzhu.android.joshua.ui.hideKeyboard
 data class SearchToolbarViewHolder(val searchToolbar: SearchToolbar) : ViewHolder
 
 class SearchToolbarPresenter(
-        private val searchActivity: SearchActivity, searchViewModel: SearchViewModel, lifecycle: Lifecycle,
-        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<SearchToolbarViewHolder, SearchViewModel>(searchViewModel, lifecycle, lifecycleCoroutineScope) {
+        searchViewModel: SearchViewModel, searchActivity: SearchActivity,
+        coroutineScope: CoroutineScope = searchActivity.lifecycleScope
+) : BaseSettingsPresenter<SearchToolbarViewHolder, SearchViewModel, SearchActivity>(searchViewModel, searchActivity, coroutineScope) {
     private val searchRecentSuggestions: SearchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(searchActivity)
 
     private val onQueryTextListener = object : SearchView.OnQueryTextListener {
@@ -64,12 +63,12 @@ class SearchToolbarPresenter(
 
         with(viewHolder.searchToolbar) {
             setOnQueryTextListener(onQueryTextListener)
-            setSearchableInfo((searchActivity.getSystemService(Context.SEARCH_SERVICE) as SearchManager)
-                    .getSearchableInfo(searchActivity.componentName))
+            setSearchableInfo((activity.getSystemService(Context.SEARCH_SERVICE) as SearchManager)
+                    .getSearchableInfo(activity.componentName))
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.action_clear_search_history -> {
-                        lifecycleScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() }
+                        coroutineScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() }
                         true
                     }
                     else -> false

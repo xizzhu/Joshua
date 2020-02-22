@@ -28,4 +28,4 @@ class HighlightsViewModel(bibleReadingManager: BibleReadingManager,
                           settingsManager: SettingsManager)
     : BaseAnnotatedVersesViewModel<Highlight>(bibleReadingManager, highlightsManager, settingsManager)
 
-class HighlightsActivity : BaseAnnotatedVersesActivity<Highlight>()
+class HighlightsActivity : BaseAnnotatedVersesActivity<Highlight, HighlightsActivity>()

@@ -30,9 +30,10 @@ import me.xizzhu.android.joshua.core.SettingsManager
 object ReadingProgressModule {
     @ActivityScope
     @Provides
-    fun provideReadingProgressPresenter(readingProgressActivity: ReadingProgressActivity, navigator: Navigator,
-                                        readingProgressViewModel: ReadingProgressViewModel): ReadingProgressPresenter =
-            ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressViewModel, readingProgressActivity.lifecycle)
+    fun provideReadingProgressPresenter(navigator: Navigator,
+                                        readingProgressViewModel: ReadingProgressViewModel,
+                                        readingProgressActivity: ReadingProgressActivity): ReadingProgressPresenter =
+            ReadingProgressPresenter(navigator, readingProgressViewModel, readingProgressActivity)
 
     @ActivityScope
     @Provides

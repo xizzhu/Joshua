@@ -21,11 +21,9 @@ import android.view.View
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -45,9 +43,11 @@ data class TranslationListViewHolder(
 ) : ViewHolder
 
 class TranslationListPresenter(
-        private val translationsActivity: TranslationsActivity, translationsViewModel: TranslationsViewModel,
-        lifecycle: Lifecycle, lifecycleScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<TranslationListViewHolder, TranslationsViewModel>(translationsViewModel, lifecycle, lifecycleScope) {
+        translationsViewModel: TranslationsViewModel, translationsActivity: TranslationsActivity,
+        coroutineScope: CoroutineScope = translationsActivity.lifecycleScope
+) : BaseSettingsPresenter<TranslationListViewHolder, TranslationsViewModel, TranslationsActivity>(
+        translationsViewModel, translationsActivity, coroutineScope
+) {
     private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_NAME)
 
     private var downloadingJob: Job? = null
@@ -72,7 +72,7 @@ class TranslationListPresenter(
     }
 
     private fun observeSettings() {
-        viewModel.settings().onEachSuccess { viewHolder.translationListView.setSettings(it) }.launchIn(lifecycleScope)
+        viewModel.settings().onEachSuccess { viewHolder.translationListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
     private fun loadTranslationList(forceRefresh: Boolean) {
@@ -92,11 +92,11 @@ class TranslationListPresenter(
                 },
                 onError = { _, _ ->
                     viewHolder.swipeRefreshLayout.isRefreshing = false
-                    translationsActivity.dialog(false, R.string.dialog_load_translation_list_error,
+                    activity.dialog(false, R.string.dialog_load_translation_list_error,
                             DialogInterface.OnClickListener { _, _ -> loadTranslationList(forceRefresh) },
-                            DialogInterface.OnClickListener { _, _ -> translationsActivity.finish() })
+                            DialogInterface.OnClickListener { _, _ -> activity.finish() })
                 }
-        ).launchIn(lifecycleScope)
+        ).launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -106,7 +106,7 @@ class TranslationListPresenter(
         val downloadedTranslations = downloadedTranslations.sortedWith(translationComparator)
         items.addAll(downloadedTranslations.toItems(currentTranslation))
         if (availableTranslations.isNotEmpty()) {
-            items.add(TitleItem(translationsActivity.getString(R.string.header_available_translations), false))
+            items.add(TitleItem(activity.getString(R.string.header_available_translations), false))
             items.addAll(availableTranslations.toItems(currentTranslation))
         }
         return items
@@ -141,13 +141,13 @@ class TranslationListPresenter(
     }
 
     private fun updateCurrentTranslationAndFinishActivity(translationShortName: String) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.saveCurrentTranslation(translationShortName)
-                translationsActivity.finish()
+                activity.finish()
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select translation and close translation management activity", e)
-                translationsActivity.dialog(true, R.string.dialog_update_translation_error,
+                activity.dialog(true, R.string.dialog_update_translation_error,
                         DialogInterface.OnClickListener { _, _ -> updateCurrentTranslationAndFinishActivity(translationShortName) })
             }
         }
@@ -158,7 +158,7 @@ class TranslationListPresenter(
             // just in case the user clicks too fast
             return
         }
-        downloadTranslationDialog = translationsActivity.progressDialog(
+        downloadTranslationDialog = activity.progressDialog(
                 R.string.dialog_downloading, 100) { downloadingJob?.cancel() }
 
         downloadingJob = viewModel.downloadTranslation(translationToDownload).onEach(
@@ -176,26 +176,26 @@ class TranslationListPresenter(
                             ?: throw IllegalStateException("Missing progress data when downloading")
                 },
                 onSuccess = {
-                    translationsActivity.toast(R.string.toast_downloaded)
+                    activity.toast(R.string.toast_downloaded)
                     loadTranslationList(false)
                 },
                 onError = { _, e ->
                     Log.e(tag, "Failed to download translation", e!!)
-                    translationsActivity.dialog(true, R.string.dialog_download_error,
+                    activity.dialog(true, R.string.dialog_download_error,
                             DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
                 }
         ).onCompletion {
             downloadTranslationDialog?.dismiss()
             downloadTranslationDialog = null
             downloadingJob = null
-        }.launchIn(lifecycleScope)
+        }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun onTranslationLongClicked(translationInfo: TranslationInfo, isCurrentTranslation: Boolean) {
         if (translationInfo.downloaded) {
             if (!isCurrentTranslation) {
-                translationsActivity.dialog(true, R.string.dialog_delete_translation_confirmation,
+                activity.dialog(true, R.string.dialog_delete_translation_confirmation,
                         DialogInterface.OnClickListener { _, _ -> removeTranslation(translationInfo) })
             }
         } else {
@@ -208,24 +208,24 @@ class TranslationListPresenter(
             // just in case the user clicks too fast
             return
         }
-        removeTranslationDialog = translationsActivity.indeterminateProgressDialog(R.string.dialog_deleting)
+        removeTranslationDialog = activity.indeterminateProgressDialog(R.string.dialog_deleting)
 
         removingJob = viewModel.removeTranslation(translationToRemove).onEach(
                 onLoading = { /* do nothing */ },
                 onSuccess = {
-                    translationsActivity.toast(R.string.toast_deleted)
+                    activity.toast(R.string.toast_deleted)
                     loadTranslationList(false)
                 },
                 onError = { _, e ->
                     Log.e(tag, "Failed to remove translation", e!!)
-                    translationsActivity.dialog(true, R.string.dialog_delete_error,
+                    activity.dialog(true, R.string.dialog_delete_error,
                             DialogInterface.OnClickListener { _, _ -> removeTranslation(translationToRemove) })
                 }
         ).onCompletion {
             removeTranslationDialog?.dismiss()
             removeTranslationDialog = null
             removingJob = null
-        }.launchIn(lifecycleScope)
+        }.launchIn(coroutineScope)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)

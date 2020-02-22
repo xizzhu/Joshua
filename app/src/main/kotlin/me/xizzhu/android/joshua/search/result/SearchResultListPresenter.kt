@@ -20,16 +20,13 @@ import android.content.DialogInterface
 import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
-import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.*
@@ -48,13 +45,12 @@ data class SearchResultViewHolder(val loadingSpinner: ProgressBar,
                                   val searchResultListView: CommonRecyclerView) : ViewHolder
 
 class SearchResultListPresenter(
-        private val searchActivity: SearchActivity, private val navigator: Navigator,
-        searchViewModel: SearchViewModel, lifecycle: Lifecycle,
-        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<SearchResultViewHolder, SearchViewModel>(searchViewModel, lifecycle, lifecycleCoroutineScope) {
+        private val navigator: Navigator, searchViewModel: SearchViewModel,
+        searchActivity: SearchActivity, coroutineScope: CoroutineScope = searchActivity.lifecycleScope
+) : BaseSettingsPresenter<SearchResultViewHolder, SearchViewModel, SearchActivity>(searchViewModel, searchActivity, coroutineScope) {
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun observeSettings() {
-        viewModel.settings().onEachSuccess { viewHolder.searchResultListView.setSettings(it) }.launchIn(lifecycleScope)
+        viewModel.settings().onEachSuccess { viewHolder.searchResultListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
@@ -74,7 +70,7 @@ class SearchResultListPresenter(
                         viewHolder.searchResultListView.visibility = View.VISIBLE
                     } else {
                         viewHolder.searchResultListView.fadeIn()
-                        searchActivity.toast(searchActivity.getString(R.string.toast_verses_searched, viewData.verses.size))
+                        activity.toast(activity.getString(R.string.toast_verses_searched, viewData.verses.size))
                     }
                 },
                 onError = { _, e ->
@@ -82,7 +78,7 @@ class SearchResultListPresenter(
                     viewHolder.loadingSpinner.visibility = View.GONE
                     // TODO
                 }
-        ).launchIn(lifecycleScope)
+        ).launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -103,13 +99,13 @@ class SearchResultListPresenter(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun selectVerse(verseToSelect: VerseIndex) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.saveCurrentVerseIndex(verseToSelect)
-                navigator.navigate(searchActivity, Navigator.SCREEN_READING)
+                navigator.navigate(activity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
-                searchActivity.dialog(true, R.string.dialog_verse_selection_error,
+                activity.dialog(true, R.string.dialog_verse_selection_error,
                         DialogInterface.OnClickListener { _, _ -> selectVerse(verseToSelect) })
             }
         }

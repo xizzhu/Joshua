@@ -21,10 +21,8 @@ import android.text.SpannableStringBuilder
 import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
@@ -45,18 +43,19 @@ data class StrongNumberListViewHolder(
 ) : ViewHolder
 
 class StrongNumberListPresenter(
-        private val strongNumberListActivity: StrongNumberListActivity, private val navigator: Navigator,
-        strongNumberListViewModel: StrongNumberListViewModel, lifecycle: Lifecycle,
-        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<StrongNumberListViewHolder, StrongNumberListViewModel>(strongNumberListViewModel, lifecycle, lifecycleCoroutineScope) {
+        private val navigator: Navigator, strongNumberListViewModel: StrongNumberListViewModel,
+        strongNumberListActivity: StrongNumberListActivity, coroutineScope: CoroutineScope = strongNumberListActivity.lifecycleScope
+) : BaseSettingsPresenter<StrongNumberListViewHolder, StrongNumberListViewModel, StrongNumberListActivity>(
+        strongNumberListViewModel, strongNumberListActivity, coroutineScope
+) {
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun observeSettings() {
-        viewModel.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(lifecycleScope)
+        viewModel.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     private fun loadStrongNumber() {
-        viewModel.strongNumber(strongNumberListActivity.strongNumber()).onEach(
+        viewModel.strongNumber(activity.strongNumber()).onEach(
                 onLoading = {
                     viewHolder.loadingSpinner.fadeIn()
                     viewHolder.strongNumberListView.visibility = View.GONE
@@ -69,11 +68,11 @@ class StrongNumberListPresenter(
                 onError = { _, e ->
                     Log.e(tag, "Failed to load Strong's number list", e!!)
                     viewHolder.loadingSpinner.visibility = View.GONE
-                    strongNumberListActivity.dialog(false, R.string.dialog_load_strong_number_list_error,
+                    activity.dialog(false, R.string.dialog_load_strong_number_list_error,
                             DialogInterface.OnClickListener { _, _ -> loadStrongNumber() },
-                            DialogInterface.OnClickListener { _, _ -> strongNumberListActivity.finish() })
+                            DialogInterface.OnClickListener { _, _ -> activity.finish() })
                 }
-        ).launchIn(lifecycleScope)
+        ).launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -107,13 +106,13 @@ class StrongNumberListPresenter(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun openVerse(verseToOpen: VerseIndex) {
-        lifecycleScope.launch {
+        coroutineScope.launch {
             try {
                 viewModel.saveCurrentVerseIndex(verseToOpen)
-                navigator.navigate(strongNumberListActivity, Navigator.SCREEN_READING)
+                navigator.navigate(activity, Navigator.SCREEN_READING)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
-                strongNumberListActivity.dialog(true, R.string.dialog_verse_selection_error,
+                activity.dialog(true, R.string.dialog_verse_selection_error,
                         DialogInterface.OnClickListener { _, _ -> openVerse(verseToOpen) })
             }
         }

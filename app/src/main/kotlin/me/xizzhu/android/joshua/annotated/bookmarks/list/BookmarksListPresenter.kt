@@ -16,9 +16,8 @@
 
 package me.xizzhu.android.joshua.annotated.bookmarks.list
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
@@ -29,10 +28,11 @@ import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
 class BookmarksListPresenter(
-        bookmarksActivity: BookmarksActivity, navigator: Navigator,
-        annotatedVersesViewModel: BaseAnnotatedVersesViewModel<Bookmark>, lifecycle: Lifecycle,
-        lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseAnnotatedVersesPresenter<Bookmark>(bookmarksActivity, navigator, R.string.text_no_bookmark, annotatedVersesViewModel, lifecycle, lifecycleCoroutineScope) {
+        navigator: Navigator, annotatedVersesViewModel: BaseAnnotatedVersesViewModel<Bookmark>,
+        bookmarksActivity: BookmarksActivity, coroutineScope: CoroutineScope = bookmarksActivity.lifecycleScope
+) : BaseAnnotatedVersesPresenter<Bookmark, BookmarksActivity>(
+        navigator, R.string.text_no_bookmark, annotatedVersesViewModel, bookmarksActivity, coroutineScope
+) {
     override fun Bookmark.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem =
             BookmarkItem(verseIndex, bookName, bookShortName, verseText, sortOrder, ::openVerse)
 }

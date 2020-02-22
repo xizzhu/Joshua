@@ -28,4 +28,4 @@ class NotesViewModel(bibleReadingManager: BibleReadingManager,
                      settingsManager: SettingsManager)
     : BaseAnnotatedVersesViewModel<Note>(bibleReadingManager, notesManager, settingsManager)
 
-class NotesActivity : BaseAnnotatedVersesActivity<Note>()
+class NotesActivity : BaseAnnotatedVersesActivity<Note, NotesActivity>()

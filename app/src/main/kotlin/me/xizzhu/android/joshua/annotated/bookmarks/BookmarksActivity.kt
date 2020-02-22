@@ -27,4 +27,4 @@ class BookmarksViewModel(bibleReadingManager: BibleReadingManager,
                          settingsManager: SettingsManager)
     : BaseAnnotatedVersesViewModel<Bookmark>(bibleReadingManager, bookmarksManager, settingsManager)
 
-class BookmarksActivity : BaseAnnotatedVersesActivity<Bookmark>()
+class BookmarksActivity : BaseAnnotatedVersesActivity<Bookmark, BookmarksActivity>()

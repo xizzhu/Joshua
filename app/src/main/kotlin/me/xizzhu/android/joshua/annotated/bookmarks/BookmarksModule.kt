@@ -36,15 +36,15 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 object BookmarksModule {
     @ActivityScope
     @Provides
-    fun provideToolbarPresenter(bookmarksActivity: BookmarksActivity,
-                                bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>): AnnotatedVersesToolbarPresenter<Bookmark> =
-            AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, bookmarksViewModel, bookmarksActivity.lifecycle)
+    fun provideToolbarPresenter(bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>,
+                                bookmarksActivity: BookmarksActivity): AnnotatedVersesToolbarPresenter<Bookmark, BookmarksActivity> =
+            AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, bookmarksViewModel, bookmarksActivity)
 
     @ActivityScope
     @Provides
-    fun provideBookmarksListPresenter(bookmarksActivity: BookmarksActivity, navigator: Navigator,
-                                      bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>): BaseAnnotatedVersesPresenter<Bookmark> =
-            BookmarksListPresenter(bookmarksActivity, navigator, bookmarksViewModel, bookmarksActivity.lifecycle)
+    fun provideBookmarksListPresenter(navigator: Navigator, bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>,
+                                      bookmarksActivity: BookmarksActivity): BaseAnnotatedVersesPresenter<Bookmark, BookmarksActivity> =
+            BookmarksListPresenter(navigator, bookmarksViewModel, bookmarksActivity)
 
     @ActivityScope
     @Provides

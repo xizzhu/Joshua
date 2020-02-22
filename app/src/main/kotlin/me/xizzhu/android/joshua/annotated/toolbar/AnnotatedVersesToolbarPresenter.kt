@@ -18,12 +18,11 @@ package me.xizzhu.android.joshua.annotated.toolbar
 
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesActivity
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
@@ -32,20 +31,20 @@ import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 
 data class AnnotatedVersesToolbarViewHolder(val toolbar: AnnotatedVersesToolbar) : ViewHolder
 
-class AnnotatedVersesToolbarPresenter<V : VerseAnnotation>(
+class AnnotatedVersesToolbarPresenter<V : VerseAnnotation, A : BaseAnnotatedVersesActivity<V, A>>(
         @StringRes private val title: Int, annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>,
-        lifecycle: Lifecycle, lifecycleCoroutineScope: LifecycleCoroutineScope = lifecycle.coroutineScope
-) : BaseSettingsPresenter<AnnotatedVersesToolbarViewHolder, BaseAnnotatedVersesViewModel<V>>(annotatedVersesViewModel, lifecycle, lifecycleCoroutineScope) {
+        annotatedVersesActivity: A, coroutineScope: CoroutineScope = annotatedVersesActivity.lifecycleScope
+) : BaseSettingsPresenter<AnnotatedVersesToolbarViewHolder, BaseAnnotatedVersesViewModel<V>, A>(annotatedVersesViewModel, annotatedVersesActivity, coroutineScope) {
     @UiThread
     override fun onBind() {
         super.onBind()
 
         viewHolder.toolbar.setTitle(title)
-        viewHolder.toolbar.sortOrderUpdated = { sortOrder -> lifecycleScope.launch { viewModel.saveSortOrder(sortOrder) } }
+        viewHolder.toolbar.sortOrderUpdated = { sortOrder -> coroutineScope.launch { viewModel.saveSortOrder(sortOrder) } }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun observeSortOrder() {
-        viewModel.sortOrder().onEachSuccess { viewHolder.toolbar.setSortOrder(it) }.launchIn(lifecycleScope)
+        viewModel.sortOrder().onEachSuccess { viewHolder.toolbar.setSortOrder(it) }.launchIn(coroutineScope)
     }
 }

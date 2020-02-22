@@ -36,15 +36,15 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 object NotesModule {
     @ActivityScope
     @Provides
-    fun provideToolbarPresenter(notesActivity: NotesActivity,
-                                notesViewModel: BaseAnnotatedVersesViewModel<Note>): AnnotatedVersesToolbarPresenter<Note> =
-            AnnotatedVersesToolbarPresenter(R.string.title_notes, notesViewModel, notesActivity.lifecycle)
+    fun provideToolbarPresenter(notesViewModel: BaseAnnotatedVersesViewModel<Note>,
+                                notesActivity: NotesActivity): AnnotatedVersesToolbarPresenter<Note, NotesActivity> =
+            AnnotatedVersesToolbarPresenter(R.string.title_notes, notesViewModel, notesActivity)
 
     @ActivityScope
     @Provides
-    fun provideNotesListPresenter(notesActivity: NotesActivity, navigator: Navigator,
-                                  notesViewModel: BaseAnnotatedVersesViewModel<Note>): BaseAnnotatedVersesPresenter<Note> =
-            NotesListPresenter(notesActivity, navigator, notesViewModel, notesActivity.lifecycle)
+    fun provideNotesListPresenter(navigator: Navigator, notesViewModel: BaseAnnotatedVersesViewModel<Note>,
+                                  notesActivity: NotesActivity): BaseAnnotatedVersesPresenter<Note, NotesActivity> =
+            NotesListPresenter(navigator, notesViewModel, notesActivity)
 
     @ActivityScope
     @Provides

@@ -33,35 +33,31 @@ import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarPresenter
 object ReadingModule {
     @ActivityScope
     @Provides
-    fun provideReadingToolbarPresenter(readingActivity: ReadingActivity,
-                                       navigator: Navigator,
-                                       readingViewModel: ReadingViewModel): ReadingToolbarPresenter =
-            ReadingToolbarPresenter(readingActivity, navigator, readingViewModel, readingActivity.lifecycle)
+    fun provideReadingToolbarPresenter(navigator: Navigator, readingViewModel: ReadingViewModel,
+                                       readingActivity: ReadingActivity): ReadingToolbarPresenter =
+            ReadingToolbarPresenter(navigator, readingViewModel, readingActivity)
 
     @ActivityScope
     @Provides
-    fun provideChapterListPresenter(readingActivity: ReadingActivity,
-                                    readingViewModel: ReadingViewModel): ChapterListPresenter =
-            ChapterListPresenter(readingActivity, readingViewModel, readingActivity.lifecycle)
+    fun provideChapterListPresenter(readingViewModel: ReadingViewModel, readingActivity: ReadingActivity): ChapterListPresenter =
+            ChapterListPresenter(readingViewModel, readingActivity)
 
     @ActivityScope
     @Provides
-    fun provideSearchButtonPresenter(readingActivity: ReadingActivity, navigator: Navigator,
-                                     readingViewModel: ReadingViewModel): SearchButtonPresenter =
-            SearchButtonPresenter(readingActivity, navigator, readingViewModel, readingActivity.lifecycle)
+    fun provideSearchButtonPresenter(navigator: Navigator, readingViewModel: ReadingViewModel,
+                                     readingActivity: ReadingActivity): SearchButtonPresenter =
+            SearchButtonPresenter(navigator, readingViewModel, readingActivity)
 
     @ActivityScope
     @Provides
-    fun provideVersePresenter(readingActivity: ReadingActivity,
-                              readingViewModel: ReadingViewModel): VersePresenter =
-            VersePresenter(readingActivity, readingViewModel, readingActivity.lifecycle)
+    fun provideVersePresenter(readingViewModel: ReadingViewModel, readingActivity: ReadingActivity): VersePresenter =
+            VersePresenter(readingViewModel, readingActivity)
 
     @ActivityScope
     @Provides
-    fun provideVerseDetailPresenter(readingActivity: ReadingActivity,
-                                    navigator: Navigator,
-                                    readingViewModel: ReadingViewModel): VerseDetailPresenter =
-            VerseDetailPresenter(readingActivity, navigator, readingViewModel, readingActivity.lifecycle)
+    fun provideVerseDetailPresenter(navigator: Navigator, readingViewModel: ReadingViewModel,
+                                    readingActivity: ReadingActivity): VerseDetailPresenter =
+            VerseDetailPresenter(navigator, readingViewModel, readingActivity)
 
     @ActivityScope
     @Provides

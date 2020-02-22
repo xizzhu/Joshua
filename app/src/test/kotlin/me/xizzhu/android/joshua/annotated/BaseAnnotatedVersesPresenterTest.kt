@@ -17,8 +17,6 @@
 package me.xizzhu.android.joshua.annotated
 
 import android.content.res.Resources
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
@@ -36,18 +34,14 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var resources: Resources
     @Mock
-    private lateinit var activity: BaseAnnotatedVersesActivity<TestVerseAnnotation>
+    private lateinit var activity: TestVerseAnnotationsActivity
     @Mock
     private lateinit var navigator: Navigator
     private val noItemText = R.string.text_no_bookmark
     @Mock
     private lateinit var verseAnnotationViewModel: TestVerseAnnotationViewModel
-    @Mock
-    private lateinit var lifecycle: Lifecycle
-    @Mock
-    private lateinit var lifecycleCoroutineScope: LifecycleCoroutineScope
 
-    private lateinit var baseAnnotatedVersesPresenter: BaseAnnotatedVersesPresenter<TestVerseAnnotation>
+    private lateinit var baseAnnotatedVersesPresenter: BaseAnnotatedVersesPresenter<TestVerseAnnotation, TestVerseAnnotationsActivity>
 
     @BeforeTest
     override fun setup() {
@@ -55,7 +49,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
 
         `when`(activity.resources).thenReturn(resources)
 
-        baseAnnotatedVersesPresenter = TestVerseAnnotationPresenter(activity, navigator, noItemText, verseAnnotationViewModel, lifecycle, lifecycleCoroutineScope)
+        baseAnnotatedVersesPresenter = TestVerseAnnotationPresenter(navigator, noItemText, verseAnnotationViewModel, activity, testCoroutineScope)
     }
 
     @Test

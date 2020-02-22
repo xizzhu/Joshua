@@ -30,10 +30,9 @@ import me.xizzhu.android.joshua.core.StrongNumberManager
 object StrongNumberListModule {
     @ActivityScope
     @Provides
-    fun provideStrongNumberListPresenter(strongNumberListActivity: StrongNumberListActivity,
-                                         navigator: Navigator,
-                                         strongNumberListViewModel: StrongNumberListViewModel): StrongNumberListPresenter =
-            StrongNumberListPresenter(strongNumberListActivity, navigator, strongNumberListViewModel, strongNumberListActivity.lifecycle)
+    fun provideStrongNumberListPresenter(navigator: Navigator, strongNumberListViewModel: StrongNumberListViewModel,
+                                         strongNumberListActivity: StrongNumberListActivity): StrongNumberListPresenter =
+            StrongNumberListPresenter(navigator, strongNumberListViewModel, strongNumberListActivity)
 
     @ActivityScope
     @Provides

@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.translations
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -31,13 +29,9 @@ import kotlin.test.assertEquals
 
 class TranslationListPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var translationsActivity: TranslationsActivity
-    @Mock
     private lateinit var translationsViewModel: TranslationsViewModel
     @Mock
-    private lateinit var lifecycle: Lifecycle
-    @Mock
-    private lateinit var lifecycleScope: LifecycleCoroutineScope
+    private lateinit var translationsActivity: TranslationsActivity
 
     private lateinit var translationListPresenter: TranslationListPresenter
 
@@ -45,7 +39,7 @@ class TranslationListPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        translationListPresenter = TranslationListPresenter(translationsActivity, translationsViewModel, lifecycle, lifecycleScope)
+        translationListPresenter = TranslationListPresenter(translationsViewModel, translationsActivity, testCoroutineScope)
     }
 
     @Test
