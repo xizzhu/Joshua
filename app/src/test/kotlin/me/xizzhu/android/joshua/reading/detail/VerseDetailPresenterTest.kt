@@ -23,6 +23,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -38,6 +39,8 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var navigator: Navigator
     @Mock
+    private lateinit var readingViewModel: ReadingViewModel
+    @Mock
     private lateinit var verseDetailInteractor: VerseDetailInteractor
 
     private lateinit var verseDetailViewHolder: VerseDetailViewHolder
@@ -47,18 +50,18 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        `when`(verseDetailInteractor.settings()).thenReturn(emptyFlow())
-        `when`(verseDetailInteractor.verseDetailRequest()).thenReturn(emptyFlow())
-        `when`(verseDetailInteractor.currentVerseIndex()).thenReturn(emptyFlow())
+        `when`(readingViewModel.settings()).thenReturn(emptyFlow())
+        `when`(readingViewModel.verseDetailRequest()).thenReturn(emptyFlow())
+        `when`(readingViewModel.currentVerseIndex()).thenReturn(emptyFlow())
 
         verseDetailViewHolder = VerseDetailViewHolder(verseDetailViewLayout)
-        verseDetailPresenter = VerseDetailPresenter(readingActivity, navigator, verseDetailInteractor, testDispatcher)
+        verseDetailPresenter = VerseDetailPresenter(readingActivity, navigator, readingViewModel, verseDetailInteractor, testDispatcher)
     }
 
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings(false, true, 1, true, true)
-        `when`(verseDetailInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
+        `when`(readingViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
         verseDetailPresenter.create(verseDetailViewHolder)
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).setSettings(settings)
@@ -81,11 +84,11 @@ class VerseDetailPresenterTest : BaseUnitTest() {
                         verseDetailPresenter::onVerseClicked, verseDetailPresenter::onVerseLongClicked
                 )
         )
-        `when`(verseDetailInteractor.verseDetailRequest()).thenReturn(flowOf(VerseDetailRequest(verseIndex, VerseDetailRequest.VERSES)))
-        `when`(verseDetailInteractor.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, 0L))
-        `when`(verseDetailInteractor.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, 0L))
-        `when`(verseDetailInteractor.readNote(verseIndex)).thenReturn(Note(verseIndex, "", 0L))
-        `when`(verseDetailInteractor.readStrongNumber(verseIndex)).thenReturn(emptyList())
+        `when`(readingViewModel.verseDetailRequest()).thenReturn(flowOf(VerseDetailRequest(verseIndex, VerseDetailRequest.VERSES)))
+        `when`(readingViewModel.readBookmark(verseIndex)).thenReturn(Bookmark(verseIndex, 0L))
+        `when`(readingViewModel.readHighlight(verseIndex)).thenReturn(Highlight(verseIndex, Highlight.COLOR_NONE, 0L))
+        `when`(readingViewModel.readNote(verseIndex)).thenReturn(Note(verseIndex, "", 0L))
+        `when`(readingViewModel.readStrongNumber(verseIndex)).thenReturn(emptyList())
         doReturn(verseTextItems).`when`(verseDetailPresenter).buildVerseTextItems(verseIndex)
 
         verseDetailPresenter.create(verseDetailViewHolder)
@@ -104,10 +107,10 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
         val verses = MockContents.kjvVerses
-        `when`(verseDetailInteractor.currentTranslation()).thenReturn(currentTranslation)
-        `when`(verseDetailInteractor.downloadedTranslations()).thenReturn(emptyList())
-        `when`(verseDetailInteractor.readBookNames(currentTranslation)).thenReturn(bookNames)
-        `when`(verseDetailInteractor.readVerses(currentTranslation, emptyList(), verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(verses)
+        `when`(readingViewModel.currentTranslation()).thenReturn(flowOf(ViewData.success(currentTranslation)))
+        `when`(readingViewModel.downloadedTranslations()).thenReturn(flowOf(ViewData.success(emptyList())))
+        `when`(readingViewModel.readBookNames(currentTranslation)).thenReturn(bookNames)
+        `when`(readingViewModel.readVerses(currentTranslation, emptyList(), verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(verses)
 
         assertEquals(
                 listOf(
@@ -125,11 +128,11 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     fun testBuildVerseTextItemsWithFollowingEmptyVerses() = testDispatcher.runBlockingTest {
         val verseIndex = VerseIndex(0, 0, 0)
         val currentTranslation = MockContents.msgShortName
-        `when`(verseDetailInteractor.currentTranslation()).thenReturn(currentTranslation)
-        `when`(verseDetailInteractor.downloadedTranslations()).thenReturn(listOf(MockContents.msgTranslationInfo, MockContents.kjvTranslationInfo))
-        `when`(verseDetailInteractor.readBookNames(MockContents.msgShortName)).thenReturn(MockContents.msgBookNames)
-        `when`(verseDetailInteractor.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
-        `when`(verseDetailInteractor.readVerses(currentTranslation, listOf(MockContents.kjvShortName), verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(MockContents.msgVersesWithKjvParallel)
+        `when`(readingViewModel.currentTranslation()).thenReturn(flowOf(ViewData.success(currentTranslation)))
+        `when`(readingViewModel.downloadedTranslations()).thenReturn(flowOf(ViewData.success(listOf(MockContents.msgTranslationInfo, MockContents.kjvTranslationInfo))))
+        `when`(readingViewModel.readBookNames(MockContents.msgShortName)).thenReturn(MockContents.msgBookNames)
+        `when`(readingViewModel.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+        `when`(readingViewModel.readVerses(currentTranslation, listOf(MockContents.kjvShortName), verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(MockContents.msgVersesWithKjvParallel)
 
         assertEquals(
                 listOf(
@@ -155,7 +158,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
         verseDetailPresenter.create(verseDetailViewHolder)
         assertFalse(verseDetailPresenter.close())
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).hide()
-        verify(verseDetailInteractor, never()).closeVerseDetail(any())
+        verify(readingViewModel, never()).closeVerseDetail(any())
 
         verseDetailPresenter.destroy()
     }
@@ -167,7 +170,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
         assertTrue(verseDetailPresenter.close())
         verify(verseDetailViewHolder.verseDetailViewLayout, times(1)).hide()
-        verify(verseDetailInteractor, times(1)).closeVerseDetail(VerseIndex(1, 2, 3))
+        verify(readingViewModel, times(1)).closeVerseDetail(VerseIndex(1, 2, 3))
         assertNull(verseDetailPresenter.verseDetail)
 
         verseDetailPresenter.destroy()

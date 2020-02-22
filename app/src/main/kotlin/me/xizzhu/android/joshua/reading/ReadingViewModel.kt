@@ -21,19 +21,16 @@ import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.ReadingProgressManager
-import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.reading.chapter.ChapterListInteractor
-import me.xizzhu.android.joshua.reading.detail.VerseDetailInteractor
-import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarInteractor
-import me.xizzhu.android.joshua.reading.verse.VerseInteractor
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
+import me.xizzhu.android.joshua.infra.arch.toViewData
+import me.xizzhu.android.joshua.utils.currentTimeMillis
 
 data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: Int) {
     companion object {
@@ -66,20 +63,17 @@ data class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int
 
 class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
                        private val readingProgressManager: ReadingProgressManager,
+                       private val translationManager: TranslationManager,
+                       private val bookmarkManager: VerseAnnotationManager<Bookmark>,
+                       private val highlightManager: VerseAnnotationManager<Highlight>,
+                       private val noteManager: VerseAnnotationManager<Note>,
+                       private val strongNumberManager: StrongNumberManager,
                        settingsManager: SettingsManager,
-                       readingToolbarInteractor: ReadingToolbarInteractor,
-                       chapterListInteractor: ChapterListInteractor,
-                       private val verseInteractor: VerseInteractor,
-                       private val verseDetailInteractor: VerseDetailInteractor,
                        dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(readingToolbarInteractor, chapterListInteractor, verseInteractor, verseDetailInteractor), dispatcher) {
-    @UiThread
-    override fun onCreate() {
-        super.onCreate()
-
-        verseInteractor.verseDetailRequest().onEach { verseDetailInteractor.requestVerseDetail(it) }.launchIn(coroutineScope)
-        verseDetailInteractor.verseUpdates().onEach { verseInteractor.updateVerse(it) }.launchIn(coroutineScope)
-    }
+    : BaseSettingsAwareViewModel(settingsManager, listOf(), dispatcher) {
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    private val verseDetailRequest: BroadcastChannel<VerseDetailRequest> = ConflatedBroadcastChannel()
+    private val verseUpdates: BroadcastChannel<VerseUpdate> = ConflatedBroadcastChannel()
 
     @UiThread
     override fun onResume() {
@@ -97,16 +91,141 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
         GlobalScope.launch(Dispatchers.Main.immediate) { readingProgressManager.stopTracking() }
     }
 
+    fun downloadedTranslations(): Flow<ViewData<List<TranslationInfo>>> = translationManager.downloadedTranslations()
+            .distinctUntilChanged()
+            .toViewData()
+
+    fun currentTranslation(): Flow<ViewData<String>> = bibleReadingManager.currentTranslation()
+            .filter { it.isNotEmpty() }
+            .toViewData()
+
+    suspend fun saveCurrentTranslation(translationShortName: String) {
+        bibleReadingManager.saveCurrentTranslation(translationShortName)
+    }
+
+    fun parallelTranslations(): Flow<ViewData<List<String>>> = bibleReadingManager.parallelTranslations().toViewData()
+
+    suspend fun requestParallelTranslation(translationShortName: String) {
+        bibleReadingManager.requestParallelTranslation(translationShortName)
+    }
+
+    suspend fun removeParallelTranslation(translationShortName: String) {
+        bibleReadingManager.removeParallelTranslation(translationShortName)
+    }
+
+    suspend fun clearParallelTranslation() {
+        bibleReadingManager.clearParallelTranslation()
+    }
+
+    fun currentVerseIndex(): Flow<ViewData<VerseIndex>> = bibleReadingManager.currentVerseIndex()
+            .filter { it.isValid() }
+            .toViewData()
+
+    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
+        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
+    }
+
+    fun bookNames(): Flow<ViewData<List<String>>> = currentTranslation()
+            .filterOnSuccess()
+            .map { ViewData.success(bibleReadingManager.readBookNames(it)) }
+
+    suspend fun readBookNames(translationShortName: String): List<String> =
+            bibleReadingManager.readBookNames(translationShortName)
+
+    fun bookShortNames(): Flow<ViewData<List<String>>> = currentTranslation()
+            .filterOnSuccess()
+            .map { ViewData.success(bibleReadingManager.readBookShortNames(it)) }
+
+    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
+            bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex)
+
+    suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
+                           bookIndex: Int, chapterIndex: Int): List<Verse> =
+            bibleReadingManager.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
+
+    suspend fun readBookmarks(bookIndex: Int, chapterIndex: Int): List<Bookmark> = bookmarkManager.read(bookIndex, chapterIndex)
+
+    suspend fun readBookmark(verseIndex: VerseIndex): Bookmark = bookmarkManager.read(verseIndex)
+
+    suspend fun addBookmark(verseIndex: VerseIndex) {
+        bookmarkManager.save(Bookmark(verseIndex, currentTimeMillis()))
+        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED))
+    }
+
+    suspend fun removeBookmark(verseIndex: VerseIndex) {
+        bookmarkManager.remove(verseIndex)
+        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_REMOVED))
+    }
+
+    suspend fun readHighlights(bookIndex: Int, chapterIndex: Int): List<Highlight> = highlightManager.read(bookIndex, chapterIndex)
+
+    suspend fun readHighlight(verseIndex: VerseIndex): Highlight = highlightManager.read(verseIndex)
+
+    suspend fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor color: Int) {
+        highlightManager.save(Highlight(verseIndex, color, currentTimeMillis()))
+        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
+    }
+
+    suspend fun removeHighlight(verseIndex: VerseIndex) {
+        highlightManager.remove(verseIndex)
+        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE))
+    }
+
+    suspend fun readNotes(bookIndex: Int, chapterIndex: Int): List<Note> = noteManager.read(bookIndex, chapterIndex)
+
+    suspend fun readNote(verseIndex: VerseIndex): Note = noteManager.read(verseIndex)
+
+    suspend fun saveNote(verseIndex: VerseIndex, note: String) {
+        noteManager.save(Note(verseIndex, note, currentTimeMillis()))
+        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED))
+    }
+
+    suspend fun removeNote(verseIndex: VerseIndex) {
+        noteManager.remove(verseIndex)
+        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED))
+    }
+
+    suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.readStrongNumber(verseIndex)
+
+    fun downloadStrongNumber(): Flow<ViewData<Int>> =
+            strongNumberManager.download()
+                    .map { progress ->
+                        if (progress <= 100) {
+                            ViewData.loading(progress)
+                        } else {
+                            // Ideally, we should use onCompletion() to handle this. However, it doesn't
+                            // distinguish between a successful completion and a cancellation.
+                            // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
+                            ViewData.success(-1)
+                        }
+                    }
+                    .catch { cause ->
+                        // TODO Log.e(tag, "Failed to download Strong number", cause)
+                        emit(ViewData.error(exception = cause))
+                    }
+
+    fun verseUpdates(): Flow<VerseUpdate> = verseUpdates.asFlow()
+
+    fun verseDetailRequest(): Flow<VerseDetailRequest> = verseDetailRequest.asFlow()
+
+    fun requestVerseDetail(request: VerseDetailRequest) {
+        verseDetailRequest.offer(request)
+    }
+
     fun showNoteInVerseDetail() {
         coroutineScope.launch {
             bibleReadingManager.currentVerseIndex().first().let { verseIndex ->
                 if (verseIndex.isValid()) {
                     // NOTE It's a hack here, because the only thing needed by verse interactor is to select the verse
-                    verseInteractor.updateVerse(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
-
-                    verseDetailInteractor.requestVerseDetail(VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE))
+                    verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
+                    verseDetailRequest.offer(VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE))
                 }
             }
         }
+    }
+
+    fun closeVerseDetail(verseIndex: VerseIndex) {
+        // NOTE It's a hack here, because the only thing needed by the other end (verse interactor) is to deselect the verse
+        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED))
     }
 }

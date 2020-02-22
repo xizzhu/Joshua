@@ -28,12 +28,14 @@ import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.infra.arch.combineOnSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.logger.Log
 
 data class ChapterListViewHolder(val readingDrawerLayout: ReadingDrawerLayout, val chapterListView: ChapterListView) : ViewHolder
 
 class ChapterListPresenter(private val readingActivity: ReadingActivity,
+                           private val readingViewModel: ReadingViewModel,
                            chapterListInteractor: ChapterListInteractor,
                            dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<ChapterListViewHolder, ChapterListInteractor>(chapterListInteractor, dispatcher) {
@@ -43,8 +45,8 @@ class ChapterListPresenter(private val readingActivity: ReadingActivity,
 
         viewHolder.chapterListView.setOnChapterSelectedListener { bookIndex, chapterIndex -> selectChapter(bookIndex, chapterIndex) }
 
-        interactor.currentVerseIndex()
-                .combineOnSuccess(interactor.bookNames()) { currentVerseIndex, bookNames ->
+        readingViewModel.currentVerseIndex()
+                .combineOnSuccess(readingViewModel.bookNames()) { currentVerseIndex, bookNames ->
                     viewHolder.run {
                         chapterListView.setData(currentVerseIndex, bookNames)
                         readingDrawerLayout.hide()
@@ -55,7 +57,7 @@ class ChapterListPresenter(private val readingActivity: ReadingActivity,
     private fun selectChapter(bookIndex: Int, chapterIndex: Int) {
         coroutineScope.launch {
             try {
-                interactor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+                readingViewModel.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select chapter", e)
                 readingActivity.dialog(true, R.string.dialog_chapter_selection_error,

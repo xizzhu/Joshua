@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.logger.Log
@@ -36,6 +37,7 @@ data class ReadingToolbarViewHolder(val readingToolbar: ReadingToolbar) : ViewHo
 
 class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
                               private val navigator: Navigator,
+                              private val readingViewModel: ReadingViewModel,
                               readingToolbarInteractor: ReadingToolbarInteractor,
                               dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<ReadingToolbarViewHolder, ReadingToolbarInteractor>(readingToolbarInteractor, dispatcher) {
@@ -115,7 +117,7 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     private fun requestParallelTranslation(translationShortName: String) {
         coroutineScope.launch {
             try {
-                interactor.requestParallelTranslation(translationShortName)
+                readingViewModel.requestParallelTranslation(translationShortName)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to request parallel translation", e)
                 // TODO
@@ -126,7 +128,7 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     private fun removeParallelTranslation(translationShortName: String) {
         coroutineScope.launch {
             try {
-                interactor.removeParallelTranslation(translationShortName)
+                readingViewModel.removeParallelTranslation(translationShortName)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to remove parallel translation", e)
                 // TODO
@@ -151,9 +153,9 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     private fun updateCurrentTranslation(translationShortName: String) {
         coroutineScope.launch {
             try {
-                interactor.saveCurrentTranslation(translationShortName)
+                readingViewModel.saveCurrentTranslation(translationShortName)
                 try {
-                    interactor.clearParallelTranslation()
+                    readingViewModel.clearParallelTranslation()
                 } catch (e: Exception) {
                     Log.w(tag, "Failed to clear parallel translation", e)
                 }
@@ -166,7 +168,7 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     }
 
     private fun observeDownloadedTranslations() {
-        interactor.downloadedTranslations().onEachSuccess { translations ->
+        readingViewModel.downloadedTranslations().onEachSuccess { translations ->
             if (translations.isEmpty()) {
                 readingActivity.dialog(false, R.string.dialog_no_translation_downloaded,
                         DialogInterface.OnClickListener { _, _ -> startTranslationManagementActivity() },
@@ -195,7 +197,7 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     }
 
     private fun observeCurrentTranslation() {
-        interactor.currentTranslation().onEachSuccess { translationShortName ->
+        readingViewModel.currentTranslation().onEachSuccess { translationShortName ->
             currentTranslation = translationShortName
 
             var selected = 0
@@ -214,14 +216,14 @@ class ReadingToolbarPresenter(private val readingActivity: ReadingActivity,
     }
 
     private fun observeParallelTranslations() {
-        interactor.parallelTranslations()
+        readingViewModel.parallelTranslations()
                 .onEachSuccess { viewHolder?.readingToolbar?.setParallelTranslations(it) }
                 .launchIn(coroutineScope)
     }
 
     private fun observeBookNames() {
-        interactor.currentVerseIndex()
-                .combineOnSuccess(interactor.bookShortNames()) { currentVerseIndex, bookShortNames ->
+        readingViewModel.currentVerseIndex()
+                .combineOnSuccess(readingViewModel.bookShortNames()) { currentVerseIndex, bookShortNames ->
                     viewHolder?.readingToolbar?.title =
                             "${bookShortNames[currentVerseIndex.bookIndex]}, ${currentVerseIndex.chapterIndex + 1}"
                 }.launchIn(coroutineScope)

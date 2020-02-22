@@ -44,8 +44,9 @@ object ReadingModule {
     @Provides
     fun provideReadingToolbarPresenter(readingActivity: ReadingActivity,
                                        navigator: Navigator,
+                                       readingViewModel: ReadingViewModel,
                                        readingToolbarInteractor: ReadingToolbarInteractor): ReadingToolbarPresenter =
-            ReadingToolbarPresenter(readingActivity, navigator, readingToolbarInteractor)
+            ReadingToolbarPresenter(readingActivity, navigator, readingViewModel, readingToolbarInteractor)
 
     @ActivityScope
     @Provides
@@ -55,8 +56,9 @@ object ReadingModule {
     @ActivityScope
     @Provides
     fun provideChapterListPresenter(readingActivity: ReadingActivity,
+                                    readingViewModel: ReadingViewModel,
                                     chapterListInteractor: ChapterListInteractor): ChapterListPresenter =
-            ChapterListPresenter(readingActivity, chapterListInteractor)
+            ChapterListPresenter(readingActivity, readingViewModel, chapterListInteractor)
 
     @ActivityScope
     @Provides
@@ -66,8 +68,9 @@ object ReadingModule {
     @ActivityScope
     @Provides
     fun provideSearchButtonPresenter(readingActivity: ReadingActivity, navigator: Navigator,
+                                     readingViewModel: ReadingViewModel,
                                      searchButtonInteractor: SearchButtonInteractor): SearchButtonPresenter =
-            SearchButtonPresenter(readingActivity, navigator, searchButtonInteractor)
+            SearchButtonPresenter(readingActivity, navigator, readingViewModel, searchButtonInteractor)
 
     @ActivityScope
     @Provides
@@ -81,8 +84,9 @@ object ReadingModule {
     @ActivityScope
     @Provides
     fun provideVersePresenter(readingActivity: ReadingActivity,
+                              readingViewModel: ReadingViewModel,
                               verseInteractor: VerseInteractor): VersePresenter =
-            VersePresenter(readingActivity, verseInteractor)
+            VersePresenter(readingActivity, readingViewModel, verseInteractor)
 
     @ActivityScope
     @Provides
@@ -100,18 +104,20 @@ object ReadingModule {
     @Provides
     fun provideVerseDetailPresenter(readingActivity: ReadingActivity,
                                     navigator: Navigator,
+                                    readingViewModel: ReadingViewModel,
                                     verseDetailInteractor: VerseDetailInteractor): VerseDetailPresenter =
-            VerseDetailPresenter(readingActivity, navigator, verseDetailInteractor)
+            VerseDetailPresenter(readingActivity, navigator, readingViewModel, verseDetailInteractor)
 
     @ActivityScope
     @Provides
     fun provideReadingViewModel(bibleReadingManager: BibleReadingManager,
                                 readingProgressManager: ReadingProgressManager,
-                                settingsManager: SettingsManager,
-                                readingToolbarInteractor: ReadingToolbarInteractor,
-                                chapterListInteractor: ChapterListInteractor,
-                                verseInteractor: VerseInteractor,
-                                verseDetailInteractor: VerseDetailInteractor): ReadingViewModel =
-            ReadingViewModel(bibleReadingManager, readingProgressManager, settingsManager,
-                    readingToolbarInteractor, chapterListInteractor, verseInteractor, verseDetailInteractor)
+                                translationManager: TranslationManager,
+                                bookmarkManager: VerseAnnotationManager<Bookmark>,
+                                highlightManager: VerseAnnotationManager<Highlight>,
+                                noteManager: VerseAnnotationManager<Note>,
+                                strongNumberManager: StrongNumberManager,
+                                settingsManager: SettingsManager): ReadingViewModel =
+            ReadingViewModel(bibleReadingManager, readingProgressManager, translationManager,
+                    bookmarkManager, highlightManager, noteManager, strongNumberManager, settingsManager)
 }

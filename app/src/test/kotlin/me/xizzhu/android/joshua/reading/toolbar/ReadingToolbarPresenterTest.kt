@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
@@ -37,6 +38,8 @@ class ReadingToolbarPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var navigator: Navigator
     @Mock
+    private lateinit var readingViewModel: ReadingViewModel
+    @Mock
     private lateinit var readingToolbarInteractor: ReadingToolbarInteractor
     @Mock
     private lateinit var readingToolbar: ReadingToolbar
@@ -48,19 +51,19 @@ class ReadingToolbarPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        `when`(readingToolbarInteractor.downloadedTranslations()).thenReturn(emptyFlow())
-        `when`(readingToolbarInteractor.currentTranslation()).thenReturn(emptyFlow())
-        `when`(readingToolbarInteractor.parallelTranslations()).thenReturn(emptyFlow())
-        `when`(readingToolbarInteractor.currentVerseIndex()).thenReturn(emptyFlow())
-        `when`(readingToolbarInteractor.bookShortNames()).thenReturn(emptyFlow())
+        `when`(readingViewModel.downloadedTranslations()).thenReturn(emptyFlow())
+        `when`(readingViewModel.currentTranslation()).thenReturn(emptyFlow())
+        `when`(readingViewModel.parallelTranslations()).thenReturn(emptyFlow())
+        `when`(readingViewModel.currentVerseIndex()).thenReturn(emptyFlow())
+        `when`(readingViewModel.bookShortNames()).thenReturn(emptyFlow())
 
         readingToolbarViewHolder = ReadingToolbarViewHolder(readingToolbar)
-        readingToolbarPresenter = ReadingToolbarPresenter(readingActivity, navigator, readingToolbarInteractor, testDispatcher)
+        readingToolbarPresenter = ReadingToolbarPresenter(readingActivity, navigator, readingViewModel, readingToolbarInteractor, testDispatcher)
     }
 
     @Test
     fun testObserveDownloadedTranslations() = testDispatcher.runBlockingTest {
-        `when`(readingToolbarInteractor.downloadedTranslations()).thenReturn(flowOf(ViewData.success(listOf(MockContents.kjvTranslationInfo))))
+        `when`(readingViewModel.downloadedTranslations()).thenReturn(flowOf(ViewData.success(listOf(MockContents.kjvTranslationInfo))))
         `when`(readingActivity.getString(R.string.menu_more_translation)).thenReturn("More")
 
         readingToolbarPresenter.create(readingToolbarViewHolder)
@@ -72,7 +75,7 @@ class ReadingToolbarPresenterTest : BaseUnitTest() {
 
     @Test
     fun testObserveCurrentTranslation() = testDispatcher.runBlockingTest {
-        `when`(readingToolbarInteractor.currentTranslation()).thenReturn(flowOf(ViewData.success(MockContents.kjvShortName)))
+        `when`(readingViewModel.currentTranslation()).thenReturn(flowOf(ViewData.success(MockContents.kjvShortName)))
 
         readingToolbarPresenter.create(readingToolbarViewHolder)
         verify(readingToolbar, times(1)).setCurrentTranslation(MockContents.kjvShortName)
@@ -83,8 +86,8 @@ class ReadingToolbarPresenterTest : BaseUnitTest() {
 
     @Test
     fun testObserveBookNames() = testDispatcher.runBlockingTest {
-        `when`(readingToolbarInteractor.currentVerseIndex()).thenReturn(flowOf(ViewData.success(VerseIndex(1, 2, 3))))
-        `when`(readingToolbarInteractor.bookShortNames()).thenReturn(flowOf(ViewData.success(MockContents.kjvBookShortNames)))
+        `when`(readingViewModel.currentVerseIndex()).thenReturn(flowOf(ViewData.success(VerseIndex(1, 2, 3))))
+        `when`(readingViewModel.bookShortNames()).thenReturn(flowOf(ViewData.success(MockContents.kjvBookShortNames)))
 
         readingToolbarPresenter.create(readingToolbarViewHolder)
         verify(readingToolbar, times(1)).title = "${MockContents.kjvBookShortNames[1]}, 3"

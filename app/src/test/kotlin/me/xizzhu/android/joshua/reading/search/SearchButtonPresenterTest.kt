@@ -22,6 +22,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.mockito.Mock
 import org.mockito.Mockito.*
@@ -33,6 +34,8 @@ class SearchButtonPresenterTest : BaseUnitTest() {
     private lateinit var readingActivity: ReadingActivity
     @Mock
     private lateinit var navigator: Navigator
+    @Mock
+    private lateinit var readingViewModel: ReadingViewModel
     @Mock
     private lateinit var searchButtonInteractor: SearchButtonInteractor
     @Mock
@@ -46,12 +49,12 @@ class SearchButtonPresenterTest : BaseUnitTest() {
         super.setup()
 
         searchButtonViewHolder = SearchButtonViewHolder(searchButton)
-        searchButtonPresenter = SearchButtonPresenter(readingActivity, navigator, searchButtonInteractor, testDispatcher)
+        searchButtonPresenter = SearchButtonPresenter(readingActivity, navigator, readingViewModel, searchButtonInteractor, testDispatcher)
     }
 
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
-        `when`(searchButtonInteractor.settings()).thenReturn(flowOf(
+        `when`(readingViewModel.settings()).thenReturn(flowOf(
                 ViewData.loading(),
                 ViewData.success(Settings.DEFAULT),
                 ViewData.error(),

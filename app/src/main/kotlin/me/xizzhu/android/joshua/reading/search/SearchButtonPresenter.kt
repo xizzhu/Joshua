@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.logger.Log
 
@@ -34,6 +35,7 @@ data class SearchButtonViewHolder(val searchButton: SearchFloatingActionButton) 
 
 class SearchButtonPresenter(private val readingActivity: ReadingActivity,
                             private val navigator: Navigator,
+                            private val readingViewModel: ReadingViewModel,
                             searchButtonInteractor: SearchButtonInteractor,
                             dispatcher: CoroutineDispatcher = Dispatchers.Main)
     : ViewPresenter<SearchButtonViewHolder, SearchButtonInteractor>(searchButtonInteractor, dispatcher) {
@@ -43,7 +45,7 @@ class SearchButtonPresenter(private val readingActivity: ReadingActivity,
 
         viewHolder.searchButton.setOnClickListener { openSearch() }
 
-        interactor.settings().onEachSuccess { settings ->
+        readingViewModel.settings().onEachSuccess { settings ->
             if (settings.hideSearchButton) {
                 viewHolder.searchButton.hide()
             } else {

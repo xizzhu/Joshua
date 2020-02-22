@@ -27,6 +27,7 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -42,6 +43,8 @@ class VersePresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var readingActivity: ReadingActivity
     @Mock
+    private lateinit var readingViewModel: ReadingViewModel
+    @Mock
     private lateinit var verseInteractor: VerseInteractor
     @Mock
     private lateinit var versePagerAdapter: VersePagerAdapter
@@ -54,14 +57,14 @@ class VersePresenterTest : BaseUnitTest() {
         super.setup()
 
         `when`(readingActivity.startSupportActionMode(any())).thenReturn(actionMode)
-        `when`(verseInteractor.settings()).thenReturn(emptyFlow())
-        `when`(verseInteractor.currentTranslation()).thenReturn(emptyFlow())
-        `when`(verseInteractor.currentVerseIndex()).thenReturn(emptyFlow())
-        `when`(verseInteractor.parallelTranslations()).thenReturn(emptyFlow())
-        `when`(verseInteractor.verseUpdates()).thenReturn(emptyFlow())
+        `when`(readingViewModel.settings()).thenReturn(emptyFlow())
+        `when`(readingViewModel.currentTranslation()).thenReturn(emptyFlow())
+        `when`(readingViewModel.currentVerseIndex()).thenReturn(emptyFlow())
+        `when`(readingViewModel.parallelTranslations()).thenReturn(emptyFlow())
+        `when`(readingViewModel.verseUpdates()).thenReturn(emptyFlow())
 
         verseViewHolder = VerseViewHolder(versePager)
-        versePresenter = VersePresenter(readingActivity, verseInteractor, testDispatcher)
+        versePresenter = VersePresenter(readingActivity, readingViewModel, verseInteractor, testDispatcher)
         versePresenter.adapter = versePagerAdapter
     }
 
@@ -70,10 +73,10 @@ class VersePresenterTest : BaseUnitTest() {
         val currentTranslation = ""
         val bookIndex = 0
         val chapterIndex = 0
-        `when`(verseInteractor.readVerses(currentTranslation, bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
-        `when`(verseInteractor.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(verseInteractor.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
-        `when`(verseInteractor.settings()).thenReturn(flowOf(ViewData.success(Settings.DEFAULT.copy(simpleReadingModeOn = true))))
+        `when`(readingViewModel.readVerses(currentTranslation, bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
+        `when`(readingViewModel.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(readingViewModel.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
+        `when`(readingViewModel.settings()).thenReturn(flowOf(ViewData.success(Settings.DEFAULT.copy(simpleReadingModeOn = true))))
 
         versePresenter.create(verseViewHolder)
         versePresenter.loadVerses(bookIndex, chapterIndex)
@@ -92,12 +95,12 @@ class VersePresenterTest : BaseUnitTest() {
         val currentTranslation = ""
         val bookIndex = 0
         val chapterIndex = 0
-        `when`(verseInteractor.readVerses(currentTranslation, bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
-        `when`(verseInteractor.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(verseInteractor.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
-        `when`(verseInteractor.settings()).thenReturn(flowOf(ViewData.success(Settings.DEFAULT.copy(simpleReadingModeOn = false))))
-        `when`(verseInteractor.readBookmarks(bookIndex, chapterIndex)).thenReturn(emptyList())
-        `when`(verseInteractor.readNotes(bookIndex, chapterIndex)).thenReturn(emptyList())
+        `when`(readingViewModel.readVerses(currentTranslation, bookIndex, chapterIndex)).thenReturn(MockContents.kjvVerses)
+        `when`(readingViewModel.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(readingViewModel.readHighlights(bookIndex, chapterIndex)).thenReturn(emptyList())
+        `when`(readingViewModel.settings()).thenReturn(flowOf(ViewData.success(Settings.DEFAULT.copy(simpleReadingModeOn = false))))
+        `when`(readingViewModel.readBookmarks(bookIndex, chapterIndex)).thenReturn(emptyList())
+        `when`(readingViewModel.readNotes(bookIndex, chapterIndex)).thenReturn(emptyList())
 
         versePresenter.create(verseViewHolder)
         versePresenter.loadVerses(bookIndex, chapterIndex)
@@ -116,7 +119,7 @@ class VersePresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings(false, true, 1, true, true)
-        `when`(verseInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
+        `when`(readingViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
 
         versePresenter.create(verseViewHolder)
         verify(versePresenter.adapter, times(1)).settings = settings
@@ -130,9 +133,9 @@ class VersePresenterTest : BaseUnitTest() {
         val verseIndex = VerseIndex(1, 2, 3)
         val translation = MockContents.kjvShortName
         val parallelTranslations = listOf(emptyList(), listOf(MockContents.kjvShortName), emptyList(), listOf(MockContents.bbeShortName, MockContents.cuvShortName))
-        `when`(verseInteractor.currentVerseIndex()).thenReturn(flowOf(verseIndex))
-        `when`(verseInteractor.currentTranslation()).thenReturn(flowOf(translation))
-        `when`(verseInteractor.parallelTranslations()).thenReturn(flow { parallelTranslations.forEach { emit(it) } })
+        `when`(readingViewModel.currentVerseIndex()).thenReturn(flowOf(ViewData.success(verseIndex)))
+        `when`(readingViewModel.currentTranslation()).thenReturn(flowOf(ViewData.success(translation)))
+        `when`(readingViewModel.parallelTranslations()).thenReturn(flow { parallelTranslations.forEach { emit(ViewData.success(it)) } })
 
         versePresenter.create(verseViewHolder)
         with(inOrder(versePresenter.adapter)) {
@@ -149,8 +152,8 @@ class VersePresenterTest : BaseUnitTest() {
 
         val verse = MockContents.kjvVerses[0]
         versePresenter.onVerseClicked(verse)
-        with(inOrder(verseInteractor, versePresenter.adapter)) {
-            verify(verseInteractor, times(1)).requestVerseDetail(VerseDetailRequest(verse.verseIndex, VerseDetailRequest.VERSES))
+        with(inOrder(readingViewModel, versePresenter.adapter)) {
+            verify(readingViewModel, times(1)).requestVerseDetail(VerseDetailRequest(verse.verseIndex, VerseDetailRequest.VERSES))
             verify(versePresenter.adapter, times(1)).selectVerse(verse.verseIndex)
         }
         verify(versePresenter.adapter, never()).deselectVerse(any())
@@ -186,7 +189,7 @@ class VersePresenterTest : BaseUnitTest() {
             verify(actionMode, times(1)).finish()
             verify(versePresenter.adapter, times(1)).deselectVerse(verse1.verseIndex)
         }
-        verify(verseInteractor, never()).requestVerseDetail(any())
+        verify(readingViewModel, never()).requestVerseDetail(any())
 
         versePresenter.destroy()
     }
@@ -197,8 +200,8 @@ class VersePresenterTest : BaseUnitTest() {
 
         val verseIndex = VerseIndex(1, 2, 3)
         versePresenter.onBookmarkClicked(verseIndex, true)
-        verify(verseInteractor, times(1)).removeBookmark(verseIndex)
-        verify(verseInteractor, never()).addBookmark(any())
+        verify(readingViewModel, times(1)).removeBookmark(verseIndex)
+        verify(readingViewModel, never()).addBookmark(any())
 
         versePresenter.destroy()
     }
@@ -209,8 +212,8 @@ class VersePresenterTest : BaseUnitTest() {
 
         val verseIndex = VerseIndex(1, 2, 3)
         versePresenter.onBookmarkClicked(verseIndex, false)
-        verify(verseInteractor, times(1)).addBookmark(verseIndex)
-        verify(verseInteractor, never()).removeBookmark(any())
+        verify(readingViewModel, times(1)).addBookmark(verseIndex)
+        verify(readingViewModel, never()).removeBookmark(any())
 
         versePresenter.destroy()
     }
@@ -222,8 +225,8 @@ class VersePresenterTest : BaseUnitTest() {
         val verseIndex = VerseIndex(1, 2, 3)
         val highlightColor = Highlight.COLOR_BLUE
         versePresenter.updateHighlight(verseIndex, highlightColor)
-        verify(verseInteractor, times(1)).saveHighlight(verseIndex, highlightColor)
-        verify(verseInteractor, never()).removeHighlight(any())
+        verify(readingViewModel, times(1)).saveHighlight(verseIndex, highlightColor)
+        verify(readingViewModel, never()).removeHighlight(any())
 
         versePresenter.destroy()
     }
@@ -235,8 +238,8 @@ class VersePresenterTest : BaseUnitTest() {
         val verseIndex = VerseIndex(1, 2, 3)
         val highlightColor = Highlight.COLOR_NONE
         versePresenter.updateHighlight(verseIndex, highlightColor)
-        verify(verseInteractor, times(1)).removeHighlight(verseIndex)
-        verify(verseInteractor, never()).saveHighlight(any(), anyInt())
+        verify(readingViewModel, times(1)).removeHighlight(verseIndex)
+        verify(readingViewModel, never()).saveHighlight(any(), anyInt())
 
         versePresenter.destroy()
     }
@@ -247,8 +250,8 @@ class VersePresenterTest : BaseUnitTest() {
 
         versePresenter.onNoteClicked(VerseIndex(1, 2, 3))
 
-        with(inOrder(verseInteractor, versePresenter.adapter)) {
-            verify(verseInteractor, times(1)).requestVerseDetail(VerseDetailRequest(VerseIndex(1, 2, 3), VerseDetailRequest.NOTE))
+        with(inOrder(readingViewModel, versePresenter.adapter)) {
+            verify(readingViewModel, times(1)).requestVerseDetail(VerseDetailRequest(VerseIndex(1, 2, 3), VerseDetailRequest.NOTE))
             verify(versePresenter.adapter, times(1)).selectVerse(VerseIndex(1, 2, 3))
         }
 
