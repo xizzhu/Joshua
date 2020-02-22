@@ -17,8 +17,7 @@
 package me.xizzhu.android.joshua.reading
 
 import androidx.annotation.IntDef
-import androidx.annotation.UiThread
-import kotlinx.coroutines.CoroutineDispatcher
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.BroadcastChannel
@@ -26,7 +25,7 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
 import me.xizzhu.android.joshua.infra.arch.toViewData
@@ -61,35 +60,15 @@ data class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int
     }
 }
 
-class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
-                       private val readingProgressManager: ReadingProgressManager,
-                       private val translationManager: TranslationManager,
-                       private val bookmarkManager: VerseAnnotationManager<Bookmark>,
-                       private val highlightManager: VerseAnnotationManager<Highlight>,
-                       private val noteManager: VerseAnnotationManager<Note>,
-                       private val strongNumberManager: StrongNumberManager,
-                       settingsManager: SettingsManager,
-                       dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(), dispatcher) {
+class ReadingViewModel(
+        private val bibleReadingManager: BibleReadingManager, private val readingProgressManager: ReadingProgressManager,
+        private val translationManager: TranslationManager, private val bookmarkManager: VerseAnnotationManager<Bookmark>,
+        private val highlightManager: VerseAnnotationManager<Highlight>, private val noteManager: VerseAnnotationManager<Note>,
+        private val strongNumberManager: StrongNumberManager, settingsManager: SettingsManager
+) : BaseSettingsViewModel(settingsManager) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
     private val verseDetailRequest: BroadcastChannel<VerseDetailRequest> = ConflatedBroadcastChannel()
     private val verseUpdates: BroadcastChannel<VerseUpdate> = ConflatedBroadcastChannel()
-
-    @UiThread
-    override fun onResume() {
-        super.onResume()
-
-        readingProgressManager.startTracking()
-    }
-
-    @UiThread
-    override fun onPause() {
-        super.onPause()
-
-        // uses GlobalScope to make sure this will be executed without being canceled
-        // uses Dispatchers.Main.immediate to make sure this will be executed immediately
-        GlobalScope.launch(Dispatchers.Main.immediate) { readingProgressManager.stopTracking() }
-    }
 
     fun downloadedTranslations(): Flow<ViewData<List<TranslationInfo>>> = translationManager.downloadedTranslations()
             .distinctUntilChanged()
@@ -204,6 +183,16 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
                         emit(ViewData.error(exception = cause))
                     }
 
+    fun startTracking() {
+        readingProgressManager.startTracking()
+    }
+
+    fun stopTracking() {
+        // uses GlobalScope to make sure this will be executed without being canceled
+        // uses Dispatchers.Main.immediate to make sure this will be executed immediately
+        GlobalScope.launch(Dispatchers.Main.immediate) { readingProgressManager.stopTracking() }
+    }
+
     fun verseUpdates(): Flow<VerseUpdate> = verseUpdates.asFlow()
 
     fun verseDetailRequest(): Flow<VerseDetailRequest> = verseDetailRequest.asFlow()
@@ -213,7 +202,7 @@ class ReadingViewModel(private val bibleReadingManager: BibleReadingManager,
     }
 
     fun showNoteInVerseDetail() {
-        coroutineScope.launch {
+        viewModelScope.launch {
             bibleReadingManager.currentVerseIndex().first().let { verseIndex ->
                 if (verseIndex.isValid()) {
                     // NOTE It's a hack here, because the only thing needed by verse interactor is to select the verse

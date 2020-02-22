@@ -54,7 +54,7 @@ class ReadingViewModelTest : BaseUnitTest() {
         super.setup()
 
         readingViewModel = ReadingViewModel(bibleReadingManager, readingProgressManager, translationManager,
-                bookmarkManager, highlightManager, noteManager, strongNumberManager, settingsManager, testDispatcher)
+                bookmarkManager, highlightManager, noteManager, strongNumberManager, settingsManager)
     }
 
     @Test

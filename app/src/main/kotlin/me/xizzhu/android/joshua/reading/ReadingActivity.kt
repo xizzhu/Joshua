@@ -20,11 +20,8 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.ActionBarDrawerToggle
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareActivity
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.infra.arch.Interactor
-import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.chapter.ChapterListViewHolder
 import me.xizzhu.android.joshua.reading.chapter.ReadingDrawerLayout
@@ -39,7 +36,7 @@ import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewHolder
 import javax.inject.Inject
 
-class ReadingActivity : BaseSettingsAwareActivity() {
+class ReadingActivity : BaseSettingsActivity() {
     companion object {
         private const val KEY_OPEN_NOTE = "me.xizzhu.android.joshua.KEY_OPEN_NOTE"
 
@@ -77,11 +74,11 @@ class ReadingActivity : BaseSettingsAwareActivity() {
         drawerToggle = ActionBarDrawerToggle(this, readingDrawerLayout, toolbar, 0, 0)
         readingDrawerLayout.addDrawerListener(drawerToggle)
 
-        readingToolbarPresenter.create(ReadingToolbarViewHolder(toolbar))
-        chapterListPresenter.create(ChapterListViewHolder(readingDrawerLayout, findViewById(R.id.chapter_list_view)))
-        searchButtonPresenter.create(SearchButtonViewHolder(findViewById(R.id.search)))
-        versePresenter.create(VerseViewHolder(findViewById(R.id.verse_view_pager)))
-        verseDetailPresenter.create(VerseDetailViewHolder(findViewById(R.id.verse_detail_view)))
+        readingToolbarPresenter.bind(ReadingToolbarViewHolder(toolbar))
+        chapterListPresenter.bind(ChapterListViewHolder(readingDrawerLayout, findViewById(R.id.chapter_list_view)))
+        searchButtonPresenter.bind(SearchButtonViewHolder(findViewById(R.id.search)))
+        versePresenter.bind(VerseViewHolder(findViewById(R.id.verse_view_pager)))
+        verseDetailPresenter.bind(VerseDetailViewHolder(findViewById(R.id.verse_detail_view)))
 
         if (intent.getBooleanExtra(KEY_OPEN_NOTE, false)) readingViewModel.showNoteInVerseDetail()
     }
@@ -89,6 +86,16 @@ class ReadingActivity : BaseSettingsAwareActivity() {
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
         drawerToggle.syncState()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        readingViewModel.startTracking()
+    }
+
+    override fun onPause() {
+        readingViewModel.stopTracking()
+        super.onPause()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -102,7 +109,5 @@ class ReadingActivity : BaseSettingsAwareActivity() {
         }
     }
 
-    override fun getBaseSettingsAwareViewModel(): BaseSettingsAwareViewModel = readingViewModel
-
-    override fun getViewPresenters(): List<ViewPresenter<out ViewHolder, out Interactor>> = listOf(readingToolbarPresenter, chapterListPresenter, searchButtonPresenter, versePresenter, verseDetailPresenter)
+    override fun getBaseSettingsViewModel(): BaseSettingsViewModel = readingViewModel
 }
