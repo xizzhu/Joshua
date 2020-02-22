@@ -18,10 +18,7 @@ package me.xizzhu.android.joshua.infra.activity
 
 import android.os.Bundle
 import androidx.annotation.CallSuper
-import androidx.annotation.UiThread
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
-import dagger.android.AndroidInjection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -29,41 +26,21 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.ui.getBackgroundColor
 
-// TODO switch to inherit from BaseViewModel
 abstract class BaseSettingsViewModel(protected val settingsManager: SettingsManager) : ViewModel() {
     fun settings(): Flow<ViewData<Settings>> = settingsManager.settings().map { ViewData.success(it) }
 }
 
-// TODO switch to inherit from ViewPresenter
 abstract class BaseSettingsPresenter<VH : ViewHolder, VM : BaseSettingsViewModel>(
-        protected val viewModel: VM, private val lifecycle: Lifecycle,
-        protected val lifecycleScope: LifecycleCoroutineScope
-) : LifecycleObserver {
-    protected val tag: String = javaClass.simpleName
+        viewModel: VM, lifecycle: Lifecycle, lifecycleScope: LifecycleCoroutineScope
+) : ViewPresenter<VH, VM>(viewModel, lifecycle, lifecycleScope)
 
-    protected lateinit var viewHolder: VH
-
-    @UiThread
-    fun bind(viewHolder: VH) {
-        this.viewHolder = viewHolder
-        onBind()
-        lifecycle.addObserver(this)
-    }
-
-    @UiThread
-    @CallSuper
-    open fun onBind() {
-    }
-}
-
-// TODO switch to inherit from BaseActivity
-abstract class BaseSettingsActivity : AppCompatActivity() {
+abstract class BaseSettingsActivity : BaseActivity() {
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
 
         getBaseSettingsViewModel().settings().onEachSuccess { settings ->
