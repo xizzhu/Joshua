@@ -40,6 +40,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import me.xizzhu.android.joshua.utils.currentTimeMillis
 import me.xizzhu.android.logger.Log
 import java.util.*
 import kotlin.collections.ArrayList
@@ -105,7 +106,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
             val currentYear = calendar.get(Calendar.YEAR)
             val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
             if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
-                items.add(TitleItem(verseAnnotation.timestamp.formatDate(activity.resources, calendar), false))
+                items.add(TitleItem(verseAnnotation.timestamp.formatDate(calendar), false))
 
                 previousYear = currentYear
                 previousDayOfYear = currentDayOfYear
@@ -115,6 +116,24 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
                     bookShortNames[verseAnnotation.verseIndex.bookIndex], verse.text.text, Constants.SORT_BY_DATE))
         }
         return items
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun Long.formatDate(calendar: Calendar): String {
+        calendar.timeInMillis = currentTimeMillis()
+        val currentYear = calendar.get(Calendar.YEAR)
+
+        calendar.timeInMillis = this
+        val year = calendar.get(Calendar.YEAR)
+        return if (year == currentYear) {
+            activity.resources.getString(R.string.text_date_without_year,
+                    activity.resources.getStringArray(R.array.text_months)[calendar.get(Calendar.MONTH)],
+                    calendar.get(Calendar.DATE))
+        } else {
+            activity.resources.getString(R.string.text_date,
+                    activity.resources.getStringArray(R.array.text_months)[calendar.get(Calendar.MONTH)],
+                    calendar.get(Calendar.DATE), year)
+        }
     }
 
     protected abstract fun V.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem

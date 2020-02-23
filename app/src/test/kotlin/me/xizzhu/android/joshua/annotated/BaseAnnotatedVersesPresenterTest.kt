@@ -24,8 +24,10 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import me.xizzhu.android.joshua.utils.currentTimeMillis
 import org.mockito.Mock
 import org.mockito.Mockito.*
+import java.util.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -92,6 +94,40 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         val actual = with(baseAnnotatedVersesPresenter) { annotatedVerses.toItems(sortOrder) }
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testFormatDateSameYear() {
+        val expected = "January 1"
+        `when`(resources.getString(R.string.text_date_without_year, "0", 1)).thenReturn(expected)
+        `when`(resources.getStringArray(R.array.text_months)).thenReturn(Array(12) { it.toString() })
+
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_YEAR, 1)
+        currentTimeMillis = System.currentTimeMillis()
+
+        val actual = with(baseAnnotatedVersesPresenter) { calendar.timeInMillis.formatDate(calendar) }
+        assertEquals(expected, actual)
+        verify(resources, times(1)).getString(R.string.text_date_without_year, "0", 1)
+        verify(resources, times(1)).getStringArray(R.array.text_months)
+    }
+
+    @Test
+    fun testFormatDateDifferentYear() {
+        val expected = "January 1, 2019"
+        `when`(resources.getString(R.string.text_date, "0", 1, 2019)).thenReturn(expected)
+        `when`(resources.getStringArray(R.array.text_months)).thenReturn(Array(12) { it.toString() })
+
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.YEAR, 2020)
+        currentTimeMillis = System.currentTimeMillis()
+        calendar.set(Calendar.DAY_OF_YEAR, 1)
+        calendar.set(Calendar.YEAR, 2019)
+
+        val actual = with(baseAnnotatedVersesPresenter) { calendar.timeInMillis.formatDate(calendar) }
+        assertEquals(expected, actual)
+        verify(resources, times(1)).getString(R.string.text_date, "0", 1, 2019)
+        verify(resources, times(1)).getStringArray(R.array.text_months)
     }
 
     @Test
