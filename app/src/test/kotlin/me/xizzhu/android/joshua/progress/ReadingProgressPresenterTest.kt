@@ -16,29 +16,87 @@
 
 package me.xizzhu.android.joshua.progress
 
+import android.view.View
+import android.widget.ProgressBar
+import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
+import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import org.mockito.Mock
+import org.mockito.Mockito.*
 import kotlin.test.*
 
 class ReadingProgressPresenterTest : BaseUnitTest() {
+    @Mock
+    private lateinit var lifecycle: Lifecycle
     @Mock
     private lateinit var navigator: Navigator
     @Mock
     private lateinit var readingProgressViewModel: ReadingProgressViewModel
     @Mock
     private lateinit var readingProgressActivity: ReadingProgressActivity
+    @Mock
+    private lateinit var loadingSpinner: ProgressBar
+    @Mock
+    private lateinit var readingProgressListView: CommonRecyclerView
 
+    private lateinit var readingProgressViewHolder: ReadingProgressViewHolder
     private lateinit var readingProgressPresenter: ReadingProgressPresenter
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
+        `when`(readingProgressActivity.lifecycle).thenReturn(lifecycle)
+
+        readingProgressViewHolder = ReadingProgressViewHolder(loadingSpinner, readingProgressListView)
         readingProgressPresenter = ReadingProgressPresenter(navigator, readingProgressViewModel, readingProgressActivity, testCoroutineScope)
+        readingProgressPresenter.bind(readingProgressViewHolder)
+    }
+
+    @Test
+    fun testObserveSettings() = testDispatcher.runBlockingTest {
+        val settings = Settings.DEFAULT.copy(keepScreenOn = false)
+        `when`(readingProgressViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
+
+        readingProgressPresenter.observeSettings()
+        verify(readingProgressListView, times(1)).setSettings(settings)
+    }
+
+    @Test
+    fun testLoadReadingProgress() = testDispatcher.runBlockingTest {
+        `when`(readingProgressViewModel.readingProgress()).thenReturn(flowOf(
+                ViewData.loading(),
+                ViewData.error(exception = RuntimeException()),
+                ViewData.success(ReadingProgressViewData(
+                        ReadingProgress(0, 0L, emptyList()),
+                        Array(Bible.BOOK_COUNT) { "" }.toList()
+                ))
+        ))
+
+        readingProgressPresenter.loadReadingProgress()
+
+        with(inOrder(loadingSpinner, readingProgressListView)) {
+            // loading
+            verify(loadingSpinner, times(1)).fadeIn()
+            verify(readingProgressListView, times(1)).visibility = View.GONE
+
+            // error
+            verify(loadingSpinner, times(1)).visibility = View.GONE
+
+            // success
+            verify(readingProgressListView, times(1)).setItems(any())
+            verify(readingProgressListView, times(1)).fadeIn()
+            verify(loadingSpinner, times(1)).visibility = View.GONE
+        }
     }
 
     @Test

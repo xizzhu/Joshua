@@ -51,13 +51,15 @@ class ReadingProgressPresenter(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun observeSettings() {
+    fun observeSettings() {
         viewModel.settings().onEachSuccess { viewHolder.readingProgressListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    private fun loadReadingProgress() {
+    fun loadReadingProgress() {
         viewModel.readingProgress().onEach(
                 onLoading = {
                     viewHolder.loadingSpinner.fadeIn()
