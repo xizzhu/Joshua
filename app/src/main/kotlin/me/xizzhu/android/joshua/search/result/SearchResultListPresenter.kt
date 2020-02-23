@@ -48,13 +48,15 @@ class SearchResultListPresenter(
         private val navigator: Navigator, searchViewModel: SearchViewModel,
         searchActivity: SearchActivity, coroutineScope: CoroutineScope = searchActivity.lifecycleScope
 ) : BaseSettingsPresenter<SearchResultViewHolder, SearchViewModel, SearchActivity>(searchViewModel, searchActivity, coroutineScope) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun observeSettings() {
+    fun observeSettings() {
         viewModel.settings().onEachSuccess { viewHolder.searchResultListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun observeQuery() {
+    fun observeQuery() {
         viewModel.searchResult().onEach(
                 onLoading = {
                     viewHolder.loadingSpinner.fadeIn()

@@ -16,34 +16,90 @@
 
 package me.xizzhu.android.joshua.search.result
 
+import android.view.View
+import android.widget.ProgressBar
+import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.search.SearchResult
 import me.xizzhu.android.joshua.search.SearchViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.mockito.Mock
+import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SearchResultListPresenterTest : BaseUnitTest() {
     @Mock
+    private lateinit var lifecycle: Lifecycle
+    @Mock
     private lateinit var navigator: Navigator
     @Mock
     private lateinit var searchViewModel: SearchViewModel
     @Mock
     private lateinit var searchActivity: SearchActivity
+    @Mock
+    private lateinit var loadingSpinner: ProgressBar
+    @Mock
+    private lateinit var searchResultListView: CommonRecyclerView
 
+    private lateinit var searchResultViewHolder: SearchResultViewHolder
     private lateinit var searchResultListPresenter: SearchResultListPresenter
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
+        `when`(searchActivity.lifecycle).thenReturn(lifecycle)
+
+        searchResultViewHolder = SearchResultViewHolder(loadingSpinner, searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(navigator, searchViewModel, searchActivity, testCoroutineScope)
+        searchResultListPresenter.bind(searchResultViewHolder)
+    }
+
+    @Test
+    fun testObserveSettings() = testDispatcher.runBlockingTest {
+        val settings = Settings.DEFAULT.copy(keepScreenOn = false)
+        `when`(searchViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
+
+        searchResultListPresenter.observeSettings()
+        verify(searchResultListView, times(1)).setSettings(settings)
+    }
+
+    @Test
+    fun testObserveQuery() = testDispatcher.runBlockingTest {
+        `when`(searchViewModel.searchResult()).thenReturn(flowOf(
+                ViewData.loading(),
+                ViewData.error(exception = RuntimeException()),
+                ViewData.success(SearchResult("query", true, emptyList(), emptyList(), emptyList()))
+        ))
+
+        searchResultListPresenter.observeQuery()
+
+        with(inOrder(loadingSpinner, searchResultListView)) {
+            // loading
+            verify(loadingSpinner, times(1)).fadeIn()
+            verify(searchResultListView, times(1)).visibility = View.GONE
+
+            // error
+            verify(loadingSpinner, times(1)).visibility = View.GONE
+
+            // success
+            verify(searchResultListView, times(1)).setItems(any())
+            verify(searchResultListView, times(1)).scrollToPosition(0)
+            verify(loadingSpinner, times(1)).visibility = View.GONE
+            verify(searchResultListView, times(1)).visibility = View.VISIBLE
+        }
     }
 
     @Test
