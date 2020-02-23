@@ -16,6 +16,8 @@
 
 package me.xizzhu.android.joshua.infra.arch
 
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -53,5 +55,22 @@ class ViewDataTest : BaseUnitTest() {
         assertEquals(ViewData.STATUS_LOADING, actual.status)
         assertEquals("random data", actual.data)
         assertNull(actual.exception)
+    }
+
+    @Test
+    fun testFlowFrom() = testDispatcher.runBlockingTest {
+        assertEquals(
+                listOf(ViewData.loading(), ViewData.success(Unit)),
+                flowFrom { Unit }.toList()
+        )
+    }
+
+    @Test
+    fun testFlowFromWithException() = testDispatcher.runBlockingTest {
+        val exception = RuntimeException("random exception")
+        assertEquals(
+                listOf(ViewData.loading(), ViewData.error(exception = exception)),
+                flowFrom<Unit> { throw exception }.toList()
+        )
     }
 }
