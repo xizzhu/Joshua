@@ -53,8 +53,9 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
         private val navigator: Navigator, @StringRes private val noItemText: Int,
         annotatedVersesViewModel: BaseAnnotatedVersesViewModel<V>, activity: A, coroutineScope: CoroutineScope
 ) : BaseSettingsPresenter<AnnotatedVersesViewHolder, BaseAnnotatedVersesViewModel<V>, A>(annotatedVersesViewModel, activity, coroutineScope) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun observeSettings() {
+    fun onCreate() {
         viewModel.settings().onEachSuccess { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(coroutineScope)
 
         viewModel.sortOrder().combineOnSuccess(viewModel.currentTranslation()) { sortOrder, currentTranslation ->
@@ -167,5 +168,5 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
         }
     }
 
-    open fun extrasForOpeningVerse(): Bundle? = null
+    open protected fun extrasForOpeningVerse(): Bundle? = null
 }
