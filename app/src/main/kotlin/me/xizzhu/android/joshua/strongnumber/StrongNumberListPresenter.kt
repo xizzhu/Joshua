@@ -48,13 +48,15 @@ class StrongNumberListPresenter(
 ) : BaseSettingsPresenter<StrongNumberListViewHolder, StrongNumberListViewModel, StrongNumberListActivity>(
         strongNumberListViewModel, strongNumberListActivity, coroutineScope
 ) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun observeSettings() {
+    fun observeSettings() {
         viewModel.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    private fun loadStrongNumber() {
+    fun loadStrongNumber() {
         viewModel.strongNumber(activity.strongNumber()).onEach(
                 onLoading = {
                     viewHolder.loadingSpinner.fadeIn()
