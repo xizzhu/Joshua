@@ -94,7 +94,7 @@ object Versions {
 
     const val stetho = "1.5.1"
 
-    const val mockito = "3.2.4"
+    const val mockito = "3.3.0"
 }
 
 object Dependencies {

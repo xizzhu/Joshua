@@ -14,6 +14,7 @@ CHANGELOG
   - Android build tools to 29.0.3
   - AndroidX Core to 1.2.0, Lifecycle to 2.2.0, Material to 1.1.0, ViewPager2 to 1.0.0
   - Dagger to 2.26
+  - Mockito to 3.3.0
 
 #### v0.14.0 (2020-01-19)
 - New features:
