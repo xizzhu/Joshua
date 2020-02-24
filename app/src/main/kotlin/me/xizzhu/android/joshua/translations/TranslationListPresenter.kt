@@ -65,8 +65,9 @@ class TranslationListPresenter(
         }
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun onCreate() {
+    fun onCreate() {
         observeSettings()
         loadTranslationList(false)
     }
