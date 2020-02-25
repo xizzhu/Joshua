@@ -18,49 +18,55 @@ package me.xizzhu.android.joshua.reading.chapter
 
 import android.content.DialogInterface
 import androidx.annotation.UiThread
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.ViewPresenter
 import me.xizzhu.android.joshua.infra.arch.combineOnSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.logger.Log
 
-data class ChapterListViewHolder(val readingDrawerLayout: ReadingDrawerLayout, val chapterListView: ChapterListView) : ViewHolder
+data class ChapterListViewHolder(
+        val readingDrawerLayout: ReadingDrawerLayout, val chapterListView: ChapterListView
+) : ViewHolder
 
-class ChapterListPresenter(private val readingActivity: ReadingActivity,
-                           chapterListInteractor: ChapterListInteractor,
-                           dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : ViewPresenter<ChapterListViewHolder, ChapterListInteractor>(chapterListInteractor, dispatcher) {
+class ChapterListPresenter(
+        readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,
+        coroutineScope: CoroutineScope = readingActivity.lifecycleScope
+) : BaseSettingsPresenter<ChapterListViewHolder, ReadingViewModel, ReadingActivity>(readingViewModel, readingActivity, coroutineScope) {
     @UiThread
-    override fun onCreate(viewHolder: ChapterListViewHolder) {
-        super.onCreate(viewHolder)
+    override fun onBind() {
+        super.onBind()
 
         viewHolder.chapterListView.setOnChapterSelectedListener { bookIndex, chapterIndex -> selectChapter(bookIndex, chapterIndex) }
-
-        interactor.currentVerseIndex()
-                .combineOnSuccess(interactor.bookNames()) { currentVerseIndex, bookNames ->
-                    viewHolder.run {
-                        chapterListView.setData(currentVerseIndex, bookNames)
-                        readingDrawerLayout.hide()
-                    }
-                }.launchIn(coroutineScope)
     }
 
     private fun selectChapter(bookIndex: Int, chapterIndex: Int) {
         coroutineScope.launch {
             try {
-                interactor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+                viewModel.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select chapter", e)
-                readingActivity.dialog(true, R.string.dialog_chapter_selection_error,
+                activity.dialog(true, R.string.dialog_chapter_selection_error,
                         DialogInterface.OnClickListener { _, _ -> selectChapter(bookIndex, chapterIndex) })
             }
         }
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    private fun observeBookNames() {
+        viewModel.currentVerseIndex()
+                .combineOnSuccess(viewModel.bookNames()) { currentVerseIndex, bookNames ->
+                    viewHolder.run {
+                        chapterListView.setData(currentVerseIndex, bookNames)
+                        readingDrawerLayout.hide()
+                    }
+                }.launchIn(coroutineScope)
     }
 }

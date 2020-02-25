@@ -14,96 +14,73 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search
+package me.xizzhu.android.joshua.strongnumber
 
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SearchViewModelTest : BaseUnitTest() {
+class StrongNumberViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
     @Mock
+    private lateinit var strongNumberManager: StrongNumberManager
+    @Mock
     private lateinit var settingsManager: SettingsManager
 
-    private lateinit var searchViewModel: SearchViewModel
+    private lateinit var strongNumberListViewModel: StrongNumberListViewModel
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        searchViewModel = SearchViewModel(bibleReadingManager, settingsManager)
+        strongNumberListViewModel = StrongNumberListViewModel(bibleReadingManager, strongNumberManager, settingsManager)
     }
 
     @Test
-    fun testSearchResultWithInstantSearch() = testDispatcher.runBlockingTest {
+    fun testStrongNumber() = testDispatcher.runBlockingTest {
         val currentTranslation = MockContents.kjvShortName
-        val query = "query"
+        val sn = "H7225"
+        val strongNumber = StrongNumber(sn, MockContents.strongNumberWords.getValue(sn))
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
-        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0]))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
         `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
-
-        searchViewModel.updateQuery(SearchQuery(query, true))
-
-        assertEquals(
-                ViewData.success(
-                        SearchResult(
-                                query, true, listOf(MockContents.kjvVerses[0]),
-                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
-                        )
-                ),
-                searchViewModel.searchResult().first()
-        )
-    }
-
-    @Test
-    fun testSearchResult() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
-        val query = "query"
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
-        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0]))
-        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
-
-        searchViewModel.updateQuery(SearchQuery(query, false))
+        `when`(bibleReadingManager.readVerses(currentTranslation, MockContents.strongNumberReverseIndex.getValue(sn)))
+                .thenReturn(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0]))
+        `when`(strongNumberManager.readStrongNumber(sn)).thenReturn(strongNumber)
+        `when`(strongNumberManager.readVerseIndexes(sn)).thenReturn(MockContents.strongNumberReverseIndex.getValue(sn))
 
         assertEquals(
                 listOf(
                         ViewData.loading(),
                         ViewData.success(
-                                SearchResult(
-                                        query, false, listOf(MockContents.kjvVerses[0]),
+                                StrongNumberViewData(
+                                        strongNumber, listOf(MockContents.kjvVerses[0]),
                                         MockContents.kjvBookNames, MockContents.kjvBookShortNames
                                 )
                         )
                 ),
-                searchViewModel.searchResult().take(2).toList()
+                strongNumberListViewModel.strongNumber(sn).toList()
         )
     }
 
     @Test
-    fun testSearchResultWithException() = testDispatcher.runBlockingTest {
+    fun testStrongNumberWithException() = testDispatcher.runBlockingTest {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
 
-        searchViewModel.updateQuery(SearchQuery("", false))
-
         assertEquals(
                 listOf(ViewData.loading(), ViewData.error(exception = e)),
-                searchViewModel.searchResult().take(2).toList()
+                strongNumberListViewModel.strongNumber("").toList()
         )
     }
 }

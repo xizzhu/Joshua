@@ -17,6 +17,15 @@
 package me.xizzhu.android.joshua.annotated.highlights
 
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesActivity
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
 
-class HighlightsActivity : BaseAnnotatedVersesActivity<Highlight>()
+class HighlightsViewModel(bibleReadingManager: BibleReadingManager,
+                          highlightsManager: VerseAnnotationManager<Highlight>,
+                          settingsManager: SettingsManager)
+    : BaseAnnotatedVersesViewModel<Highlight>(bibleReadingManager, highlightsManager, settingsManager)
+
+class HighlightsActivity : BaseAnnotatedVersesActivity<Highlight, HighlightsActivity>()

@@ -25,15 +25,18 @@ import android.view.MenuItem
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
+import androidx.lifecycle.*
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
+import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
 import me.xizzhu.android.joshua.infra.arch.onEachSuccess
-import me.xizzhu.android.joshua.infra.interactors.BaseSettingsAwarePresenter
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.toast
@@ -43,10 +46,10 @@ import kotlin.math.max
 
 data class VerseViewHolder(val versePager: ViewPager2) : ViewHolder
 
-class VersePresenter(private val readingActivity: ReadingActivity,
-                     verseInteractor: VerseInteractor,
-                     dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseSettingsAwarePresenter<VerseViewHolder, VerseInteractor>(verseInteractor, dispatcher) {
+class VersePresenter(
+        readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,
+        coroutineScope: CoroutineScope = readingActivity.lifecycleScope
+) : BaseSettingsPresenter<VerseViewHolder, ReadingViewModel, ReadingActivity>(readingViewModel, readingActivity, coroutineScope) {
     private val selectedVerses: MutableSet<Verse> = mutableSetOf()
     private var actionMode: ActionMode? = null
     private val actionModeCallback = object : ActionMode.Callback {
@@ -81,16 +84,16 @@ class VersePresenter(private val readingActivity: ReadingActivity,
             try {
                 if (selectedVerses.isNotEmpty()) {
                     val verse = selectedVerses.first()
-                    val bookName = interactor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
+                    val bookName = viewModel.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
                     // On older devices, this only works on the threads with loopers.
-                    (readingActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                    (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                             .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
                                     selectedVerses.toStringForSharing(bookName)))
-                    readingActivity.toast(R.string.toast_verses_copied)
+                    activity.toast(R.string.toast_verses_copied)
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to copy", e)
-                readingActivity.toast(R.string.toast_unknown_error)
+                activity.toast(R.string.toast_unknown_error)
             }
             actionMode?.finish()
         }
@@ -101,15 +104,15 @@ class VersePresenter(private val readingActivity: ReadingActivity,
             try {
                 if (selectedVerses.isNotEmpty()) {
                     val verse = selectedVerses.first()
-                    val bookName = interactor.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
+                    val bookName = viewModel.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
 
-                    readingActivity.chooserForSharing(readingActivity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
-                            ?.let { readingActivity.startActivity(it) }
+                    activity.chooserForSharing(activity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
+                            ?.let { activity.startActivity(it) }
                             ?: throw RuntimeException("Failed to create chooser for sharing")
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to share", e)
-                readingActivity.toast(R.string.toast_unknown_error)
+                activity.toast(R.string.toast_unknown_error)
             }
             actionMode?.finish()
         }
@@ -125,8 +128,8 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     private var parallelTranslations: List<String> = emptyList()
 
     @UiThread
-    override fun onCreate(viewHolder: VerseViewHolder) {
-        super.onCreate(viewHolder)
+    override fun onBind() {
+        super.onBind()
 
         viewHolder.versePager.offscreenPageLimit = 1
         viewHolder.versePager.adapter = adapter
@@ -135,11 +138,29 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                 updateCurrentChapter(position.toBookIndex(), position.toChapterIndex())
             }
         })
+    }
 
-        interactor.settings().onEachSuccess { adapter.settings = it }.launchIn(coroutineScope)
+    private fun updateCurrentChapter(bookIndex: Int, chapterIndex: Int) {
+        if (currentVerseIndex.bookIndex == bookIndex && currentVerseIndex.chapterIndex == chapterIndex) return
 
-        combine(interactor.currentVerseIndex(), interactor.currentTranslation(),
-                interactor.parallelTranslations()) { newVerseIndex, newTranslation, newParallelTranslations ->
+        coroutineScope.launch {
+            try {
+                viewModel.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to current chapter", e)
+            }
+        }
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    private fun onCreate() {
+        viewModel.settings().onEachSuccess { adapter.settings = it }.launchIn(coroutineScope)
+
+        combine(
+                viewModel.currentVerseIndex().filterOnSuccess(),
+                viewModel.currentTranslation().filterOnSuccess(),
+                viewModel.parallelTranslations().filterOnSuccess()
+        ) { newVerseIndex, newTranslation, newParallelTranslations ->
             if (actionMode != null) {
                 if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex
                         || currentVerseIndex.chapterIndex != newVerseIndex.chapterIndex) {
@@ -155,19 +176,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
             viewHolder.versePager.setCurrentItem(newVerseIndex.toPagePosition(), false)
         }.launchIn(coroutineScope)
 
-        interactor.verseUpdates().onEach { adapter.notifyVerseUpdate(it) }.launchIn(coroutineScope)
-    }
-
-    private fun updateCurrentChapter(bookIndex: Int, chapterIndex: Int) {
-        if (currentVerseIndex.bookIndex == bookIndex && currentVerseIndex.chapterIndex == chapterIndex) return
-
-        coroutineScope.launch {
-            try {
-                interactor.saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to current chapter", e)
-            }
-        }
+        viewModel.verseUpdates().onEach { adapter.notifyVerseUpdate(it) }.launchIn(coroutineScope)
     }
 
     private fun updateCurrentVerse(verseIndex: VerseIndex) {
@@ -175,7 +184,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
 
         coroutineScope.launch {
             try {
-                interactor.saveCurrentVerseIndex(verseIndex)
+                viewModel.saveCurrentVerseIndex(verseIndex)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update current verse", e)
             }
@@ -187,21 +196,21 @@ class VersePresenter(private val readingActivity: ReadingActivity,
         coroutineScope.launch {
             try {
                 val items = coroutineScope {
-                    val bookNameAsync = async { interactor.readBookNames(currentTranslation)[bookIndex] }
-                    val highlightsAsync = async { interactor.readHighlights(bookIndex, chapterIndex) }
+                    val bookNameAsync = async { viewModel.readBookNames(currentTranslation)[bookIndex] }
+                    val highlightsAsync = async { viewModel.readHighlights(bookIndex, chapterIndex) }
                     val versesAsync = async {
                         if (parallelTranslations.isEmpty()) {
-                            interactor.readVerses(currentTranslation, bookIndex, chapterIndex)
+                            viewModel.readVerses(currentTranslation, bookIndex, chapterIndex)
                         } else {
-                            interactor.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+                            viewModel.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
                         }
                     }
-                    return@coroutineScope if (interactor.settings().first().data!!.simpleReadingModeOn) {
+                    return@coroutineScope if (viewModel.settings().first().data!!.simpleReadingModeOn) {
                         versesAsync.await().toSimpleVerseItems(bookNameAsync.await(), highlightsAsync.await(),
                                 this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
                     } else {
-                        val bookmarksAsync = async { interactor.readBookmarks(bookIndex, chapterIndex) }
-                        val notesAsync = async { interactor.readNotes(bookIndex, chapterIndex) }
+                        val bookmarksAsync = async { viewModel.readBookmarks(bookIndex, chapterIndex) }
+                        val notesAsync = async { viewModel.readNotes(bookIndex, chapterIndex) }
                         versesAsync.await().toVerseItems(bookNameAsync.await(), bookmarksAsync.await(),
                                 highlightsAsync.await(), notesAsync.await(), this@VersePresenter::onVerseClicked,
                                 this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
@@ -211,7 +220,7 @@ class VersePresenter(private val readingActivity: ReadingActivity,
                 adapter.setVerses(bookIndex, chapterIndex, items)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load verses", e)
-                readingActivity.dialog(true, R.string.dialog_verse_load_error,
+                activity.dialog(true, R.string.dialog_verse_load_error,
                         DialogInterface.OnClickListener { _, _ -> loadVerses(bookIndex, chapterIndex) })
             }
         }
@@ -240,14 +249,14 @@ class VersePresenter(private val readingActivity: ReadingActivity,
     }
 
     private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
-        interactor.requestVerseDetail(VerseDetailRequest(verseIndex, content))
+        viewModel.requestVerseDetail(VerseDetailRequest(verseIndex, content))
         adapter.selectVerse(verseIndex)
     }
 
     @VisibleForTesting
     fun onVerseLongClicked(verse: Verse) {
         if (actionMode == null) {
-            actionMode = readingActivity.startSupportActionMode(actionModeCallback)
+            actionMode = activity.startSupportActionMode(actionModeCallback)
         }
         onVerseClicked(verse)
     }
@@ -257,9 +266,9 @@ class VersePresenter(private val readingActivity: ReadingActivity,
         coroutineScope.launch {
             try {
                 if (hasBookmark) {
-                    interactor.removeBookmark(verseIndex)
+                    viewModel.removeBookmark(verseIndex)
                 } else {
-                    interactor.addBookmark(verseIndex)
+                    viewModel.addBookmark(verseIndex)
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update bookmark", e)
@@ -270,8 +279,8 @@ class VersePresenter(private val readingActivity: ReadingActivity,
 
     @VisibleForTesting
     fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int) {
-        readingActivity.dialog(R.string.text_pick_highlight_color,
-                readingActivity.resources.getStringArray(R.array.text_colors),
+        activity.dialog(R.string.text_pick_highlight_color,
+                activity.resources.getStringArray(R.array.text_colors),
                 max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
                 DialogInterface.OnClickListener { dialog, which ->
                     updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
@@ -285,9 +294,9 @@ class VersePresenter(private val readingActivity: ReadingActivity,
         coroutineScope.launch {
             try {
                 if (highlightColor == Highlight.COLOR_NONE) {
-                    interactor.removeHighlight(verseIndex)
+                    viewModel.removeHighlight(verseIndex)
                 } else {
-                    interactor.saveHighlight(verseIndex, highlightColor)
+                    viewModel.saveHighlight(verseIndex, highlightColor)
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update highlight", e)

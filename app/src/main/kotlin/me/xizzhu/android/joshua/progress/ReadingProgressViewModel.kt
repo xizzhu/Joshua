@@ -16,12 +16,26 @@
 
 package me.xizzhu.android.joshua.progress
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.flowFrom
 
-class ReadingProgressViewModel(settingsManager: SettingsManager,
-                               readingProgressInteractor: ReadingProgressInteractor,
-                               dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(readingProgressInteractor), dispatcher)
+data class ReadingProgressViewData(val readingProgress: ReadingProgress, val bookNames: List<String>)
+
+class ReadingProgressViewModel(private val bibleReadingManager: BibleReadingManager,
+                               private val readingProgressManager: ReadingProgressManager,
+                               settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
+    fun readingProgress(): Flow<ViewData<ReadingProgressViewData>> = flowFrom {
+        ReadingProgressViewData(
+                readingProgressManager.read(),
+                bibleReadingManager.readBookNames(
+                        bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+                )
+        )
+    }
+
+    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) = bibleReadingManager.saveCurrentVerseIndex(verseIndex)
+}

@@ -16,12 +16,33 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.flowFrom
 
-class StrongNumberListViewModel(settingsManager: SettingsManager,
-                                strongNumberListInteractor: StrongNumberListInteractor,
-                                dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(strongNumberListInteractor), dispatcher)
+data class StrongNumberViewData(val strongNumber: StrongNumber, val verses: List<Verse>,
+                                val bookNames: List<String>, val bookShortNames: List<String>)
+
+class StrongNumberListViewModel(private val bibleReadingManager: BibleReadingManager,
+                                private val strongNumberManager: StrongNumberManager,
+                                settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
+    fun strongNumber(sn: String): Flow<ViewData<StrongNumberViewData>> = flowFrom {
+        val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+        val verses = bibleReadingManager.readVerses(currentTranslation, strongNumberManager.readVerseIndexes(sn))
+                .map { (_, v) -> v }.sortedBy { verse ->
+                    with(verse.verseIndex) { bookIndex * 100000 + chapterIndex * 1000 + verseIndex }
+                }
+        StrongNumberViewData(
+                strongNumberManager.readStrongNumber(sn), verses,
+                bibleReadingManager.readBookNames(currentTranslation),
+                bibleReadingManager.readBookShortNames(currentTranslation)
+        )
+    }
+
+    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
+        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
+    }
+}

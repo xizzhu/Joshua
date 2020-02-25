@@ -16,6 +16,8 @@
 
 package me.xizzhu.android.joshua.progress
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
@@ -28,21 +30,26 @@ import me.xizzhu.android.joshua.core.SettingsManager
 object ReadingProgressModule {
     @ActivityScope
     @Provides
-    fun provideReadingProgressInteractor(readingProgressManager: ReadingProgressManager,
-                                         bibleReadingManager: BibleReadingManager,
-                                         settingsManager: SettingsManager): ReadingProgressInteractor =
-            ReadingProgressInteractor(readingProgressManager, bibleReadingManager, settingsManager)
+    fun provideReadingProgressPresenter(navigator: Navigator,
+                                        readingProgressViewModel: ReadingProgressViewModel,
+                                        readingProgressActivity: ReadingProgressActivity): ReadingProgressPresenter =
+            ReadingProgressPresenter(navigator, readingProgressViewModel, readingProgressActivity)
 
     @ActivityScope
     @Provides
-    fun provideReadingProgressPresenter(readingProgressActivity: ReadingProgressActivity,
-                                        navigator: Navigator,
-                                        readingProgressInteractor: ReadingProgressInteractor): ReadingProgressPresenter =
-            ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressInteractor)
+    fun provideReadingProgressViewModel(readingProgressActivity: ReadingProgressActivity,
+                                        bibleReadingManager: BibleReadingManager,
+                                        readingProgressManager: ReadingProgressManager,
+                                        settingsManager: SettingsManager): ReadingProgressViewModel {
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(ReadingProgressViewModel::class.java)) {
+                    return ReadingProgressViewModel(bibleReadingManager, readingProgressManager, settingsManager) as T
+                }
 
-    @ActivityScope
-    @Provides
-    fun provideReadingProgressViewModel(settingsManager: SettingsManager,
-                                        readingProgressInteractor: ReadingProgressInteractor): ReadingProgressViewModel =
-            ReadingProgressViewModel(settingsManager, readingProgressInteractor)
+                throw IllegalArgumentException("Unsupported model class - $modelClass")
+            }
+        }
+        return ViewModelProvider(readingProgressActivity, factory).get(ReadingProgressViewModel::class.java)
+    }
 }

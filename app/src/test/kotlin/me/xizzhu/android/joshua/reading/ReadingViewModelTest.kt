@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading.toolbar
+package me.xizzhu.android.joshua.reading
 
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -31,19 +29,32 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ReadingToolbarInteractorTest : BaseUnitTest() {
+class ReadingViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
     @Mock
+    private lateinit var readingProgressManager: ReadingProgressManager
+    @Mock
     private lateinit var translationManager: TranslationManager
+    @Mock
+    private lateinit var bookmarkManager: VerseAnnotationManager<Bookmark>
+    @Mock
+    private lateinit var highlightManager: VerseAnnotationManager<Highlight>
+    @Mock
+    private lateinit var noteManager: VerseAnnotationManager<Note>
+    @Mock
+    private lateinit var strongNumberManager: StrongNumberManager
+    @Mock
+    private lateinit var settingsManager: SettingsManager
 
-    private lateinit var readingToolbarInteractor: ReadingToolbarInteractor
+    private lateinit var readingViewModel: ReadingViewModel
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        readingToolbarInteractor = ReadingToolbarInteractor(bibleReadingManager, translationManager, testDispatcher)
+        readingViewModel = ReadingViewModel(bibleReadingManager, readingProgressManager, translationManager,
+                bookmarkManager, highlightManager, noteManager, strongNumberManager, settingsManager)
     }
 
     @Test
@@ -64,7 +75,7 @@ class ReadingToolbarInteractorTest : BaseUnitTest() {
                         ViewData.success(listOf(MockContents.kjvTranslationInfo, MockContents.bbeTranslationInfo)),
                         ViewData.success(listOf(MockContents.bbeTranslationInfo))
                 ),
-                readingToolbarInteractor.downloadedTranslations().toList()
+                readingViewModel.downloadedTranslations().toList()
         )
     }
 
@@ -74,7 +85,7 @@ class ReadingToolbarInteractorTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(ViewData.success(MockContents.kjvShortName)),
-                readingToolbarInteractor.currentTranslation().toList()
+                readingViewModel.currentTranslation().toList()
         )
     }
 
@@ -86,7 +97,18 @@ class ReadingToolbarInteractorTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(ViewData.success(VerseIndex(1, 2, 3))),
-                readingToolbarInteractor.currentVerseIndex().toList()
+                readingViewModel.currentVerseIndex().toList()
+        )
+    }
+
+    @Test
+    fun testBookNames() = testDispatcher.runBlockingTest {
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
+        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+
+        assertEquals(
+                listOf(ViewData.success(MockContents.kjvBookNames)),
+                readingViewModel.bookNames().toList()
         )
     }
 
@@ -97,7 +119,7 @@ class ReadingToolbarInteractorTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(ViewData.success(MockContents.kjvBookShortNames)),
-                readingToolbarInteractor.bookShortNames().toList()
+                readingViewModel.bookShortNames().toList()
         )
     }
 }

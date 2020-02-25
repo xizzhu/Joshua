@@ -18,15 +18,16 @@ package me.xizzhu.android.joshua.search.result
 
 import android.view.View
 import android.widget.ProgressBar
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
+import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
-import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.search.SearchActivity
+import me.xizzhu.android.joshua.search.SearchResult
+import me.xizzhu.android.joshua.search.SearchViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -40,11 +41,13 @@ import kotlin.test.assertEquals
 
 class SearchResultListPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var searchActivity: SearchActivity
+    private lateinit var lifecycle: Lifecycle
     @Mock
     private lateinit var navigator: Navigator
     @Mock
-    private lateinit var searchResultInteractor: SearchResultInteractor
+    private lateinit var searchViewModel: SearchViewModel
+    @Mock
+    private lateinit var searchActivity: SearchActivity
     @Mock
     private lateinit var loadingSpinner: ProgressBar
     @Mock
@@ -57,146 +60,65 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        `when`(searchResultInteractor.settings()).thenReturn(emptyFlow())
-        `when`(searchResultInteractor.query()).thenReturn(emptyFlow())
+        `when`(searchActivity.lifecycle).thenReturn(lifecycle)
 
         searchResultViewHolder = SearchResultViewHolder(loadingSpinner, searchResultListView)
-        searchResultListPresenter = SearchResultListPresenter(searchActivity, navigator, searchResultInteractor, testDispatcher)
+        searchResultListPresenter = SearchResultListPresenter(navigator, searchViewModel, searchActivity, testCoroutineScope)
+        searchResultListPresenter.bind(searchResultViewHolder)
     }
 
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
-        val settings = listOf(
-                ViewData.error(),
+        val settings = Settings.DEFAULT.copy(keepScreenOn = false)
+        `when`(searchViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
+
+        searchResultListPresenter.observeSettings()
+        verify(searchResultListView, times(1)).setSettings(settings)
+    }
+
+    @Test
+    fun testObserveQuery() = testDispatcher.runBlockingTest {
+        `when`(searchViewModel.searchResult()).thenReturn(flowOf(
                 ViewData.loading(),
-                ViewData.success(Settings(false, true, 1, true, true))
-        )
-        `when`(searchResultInteractor.settings()).thenReturn(flow { settings.forEach { emit(it) } })
+                ViewData.error(exception = RuntimeException()),
+                ViewData.success(SearchResult("query", true, emptyList(), emptyList(), emptyList()))
+        ))
 
-        searchResultListPresenter.create(searchResultViewHolder)
-        with(inOrder(searchResultViewHolder.searchResultListView)) {
-            settings.forEach {
-                if (ViewData.STATUS_SUCCESS == it.status) {
-                    verify(searchResultViewHolder.searchResultListView, times(1)).setSettings(it.data!!)
-                }
-            }
-        }
+        searchResultListPresenter.observeQuery()
 
-        searchResultListPresenter.destroy()
-    }
+        with(inOrder(loadingSpinner, searchResultListView)) {
+            // loading
+            verify(loadingSpinner, times(1)).fadeIn()
+            verify(searchResultListView, times(1)).visibility = View.GONE
 
-    @Test
-    fun testObserveQueryWithError() = testDispatcher.runBlockingTest {
-        `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.error()))
+            // error
+            verify(loadingSpinner, times(1)).visibility = View.GONE
 
-        searchResultListPresenter.create(searchResultViewHolder)
-
-        verify(searchResultListView, never()).setItems(any())
-
-        searchResultListPresenter.destroy()
-    }
-
-    @Test
-    fun testInstantSearch() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
-        val query = "query"
-        val verses = MockContents.kjvVerses
-        `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.loading(query)))
-        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
-        `when`(searchResultInteractor.search(currentTranslation, query)).thenReturn(verses)
-        `when`(searchResultInteractor.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(searchResultInteractor.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
-        `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
-
-        searchResultListPresenter.create(searchResultViewHolder)
-
-        with(inOrder(searchResultListView)) {
+            // success
             verify(searchResultListView, times(1)).setItems(any())
             verify(searchResultListView, times(1)).scrollToPosition(0)
+            verify(loadingSpinner, times(1)).visibility = View.GONE
             verify(searchResultListView, times(1)).visibility = View.VISIBLE
         }
-
-        searchResultListPresenter.destroy()
     }
 
     @Test
-    fun testInstantSearchWithException() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
+    fun testToItems() {
         val query = "query"
-        val exception = RuntimeException("Random exception")
-        `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.loading(query)))
-        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
-        `when`(searchResultInteractor.search(currentTranslation, query)).thenThrow(exception)
+        val expected = listOf(
+                TitleItem(MockContents.kjvBookNames[0], false),
+                SearchItem(
+                        VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0],
+                        MockContents.kjvVerses[0].text.text, query, searchResultListPresenter::selectVerse
+                )
+        )
 
-        searchResultListPresenter.create(searchResultViewHolder)
+        val searchResult = SearchResult(
+                query, true, listOf(MockContents.kjvVerses[0]),
+                MockContents.kjvBookNames, MockContents.kjvBookShortNames
+        )
+        val actual = with(searchResultListPresenter) { searchResult.toItems() }
 
-        verify(searchResultListView, times(1)).visibility = View.GONE
-        verify(searchResultListView, never()).setItems(any())
-
-        searchResultListPresenter.destroy()
-    }
-
-    @Test
-    fun testSearch() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
-        val query = "query"
-        val verses = MockContents.kjvVerses
-        `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.success(query)))
-        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
-        `when`(searchResultInteractor.search(currentTranslation, query)).thenReturn(verses)
-        `when`(searchResultInteractor.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(searchResultInteractor.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
-        `when`(searchActivity.getString(R.string.toast_verses_searched, verses.size)).thenReturn("")
-
-        searchResultListPresenter.create(searchResultViewHolder)
-
-        with(inOrder(loadingSpinner, searchResultListView)) {
-            verify(loadingSpinner, times(1)).fadeIn()
-            verify(searchResultListView, times(1)).setItems(any())
-            verify(loadingSpinner, times(1)).visibility = View.GONE
-        }
-
-        searchResultListPresenter.destroy()
-    }
-
-    @Test
-    fun testSearchWithException() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
-        val query = "query"
-        val exception = RuntimeException("Random exception")
-        `when`(searchResultInteractor.query()).thenReturn(flowOf(ViewData.success(query)))
-        `when`(searchResultInteractor.currentTranslation()).thenReturn(currentTranslation)
-        `when`(searchResultInteractor.search(currentTranslation, query)).thenThrow(exception)
-
-        searchResultListPresenter.create(searchResultViewHolder)
-
-        with(inOrder(loadingSpinner, searchResultListView)) {
-            verify(loadingSpinner, times(1)).fadeIn()
-            verify(loadingSpinner, times(1)).visibility = View.GONE
-        }
-        verify(searchResultListView, never()).setItems(any())
-
-        searchResultListPresenter.destroy()
-    }
-
-    @Test
-    fun testToSearchItems() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
-        `when`(searchResultInteractor.bookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(searchResultInteractor.bookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
-
-        with(searchResultListPresenter) {
-            val query = "query"
-            assertEquals(
-                    listOf(
-                            TitleItem(MockContents.kjvBookNames[0], false),
-                            SearchItem(MockContents.kjvVerses[0].verseIndex,
-                                    MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, query, this::selectVerse),
-                            SearchItem(MockContents.kjvVerses[1].verseIndex,
-                                    MockContents.kjvBookShortNames[0], MockContents.kjvVerses[1].text.text, query, this::selectVerse)
-                    ),
-                    listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toSearchItems(currentTranslation, query)
-            )
-        }
+        assertEquals(expected, actual)
     }
 }

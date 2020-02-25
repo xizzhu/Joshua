@@ -62,6 +62,7 @@ object MockContents {
 
     const val cuvShortName = "中文和合本"
     val cuvTranslationInfo = TranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L, false)
+    val cuvDownloadedTranslationInfo = TranslationInfo(cuvShortName, "中文和合本（简体）", "zh_cn", 1781521L, true)
     val cuvBookNames: List<String> = listOf("创世记", "出埃及记", "利未记", "民数记", "申命记")
     val cuvBookShortNames: List<String> = listOf("创", "出", "利", "民", "申")
     val cuvVerses: List<Verse> = listOf(

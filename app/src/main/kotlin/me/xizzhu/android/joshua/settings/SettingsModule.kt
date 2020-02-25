@@ -16,6 +16,8 @@
 
 package me.xizzhu.android.joshua.settings
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.ActivityScope
@@ -26,18 +28,24 @@ import me.xizzhu.android.joshua.core.SettingsManager
 object SettingsModule {
     @ActivityScope
     @Provides
-    fun provideSettingsInteractor(settingsManager: SettingsManager,
-                                  backupManager: BackupManager): SettingsInteractor =
-            SettingsInteractor(settingsManager, backupManager)
+    fun provideSettingsViewPresenter(settingsViewModel: SettingsViewModel,
+                                     settingsActivity: SettingsActivity): SettingsPresenter =
+            SettingsPresenter(settingsViewModel, settingsActivity)
 
     @ActivityScope
     @Provides
-    fun provideSettingsViewPresenter(settingsActivity: SettingsActivity,
-                                     settingsInteractor: SettingsInteractor): SettingsViewPresenter =
-            SettingsViewPresenter(settingsActivity, settingsInteractor)
+    fun provideSettingsViewModel(settingsActivity: SettingsActivity,
+                                 settingsManager: SettingsManager,
+                                 backupManager: BackupManager): SettingsViewModel {
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
+                    return SettingsViewModel(settingsManager, backupManager) as T
+                }
 
-    @ActivityScope
-    @Provides
-    fun provideSettingsViewModel(settingsInteractor: SettingsInteractor): SettingsViewModel =
-            SettingsViewModel(settingsInteractor)
+                throw IllegalArgumentException("Unsupported model class - $modelClass")
+            }
+        }
+        return ViewModelProvider(settingsActivity, factory).get(SettingsViewModel::class.java)
+    }
 }

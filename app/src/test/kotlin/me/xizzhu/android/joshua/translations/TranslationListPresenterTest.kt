@@ -16,23 +16,34 @@
 
 package me.xizzhu.android.joshua.translations
 
+import android.view.View
+import androidx.lifecycle.Lifecycle
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.AfterTest
+import java.util.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class TranslationListPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var translationManagementActivity: TranslationManagementActivity
+    private lateinit var lifecycle: Lifecycle
     @Mock
-    private lateinit var translationListInteractor: TranslationListInteractor
+    private lateinit var translationsViewModel: TranslationsViewModel
+    @Mock
+    private lateinit var translationsActivity: TranslationsActivity
     @Mock
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     @Mock
@@ -45,59 +56,70 @@ class TranslationListPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        `when`(translationListInteractor.settings()).thenReturn(emptyFlow())
-        `when`(translationListInteractor.translationList()).thenReturn(emptyFlow())
+        `when`(translationsActivity.lifecycle).thenReturn(lifecycle)
 
         translationListViewHolder = TranslationListViewHolder(swipeRefreshLayout, translationListView)
-        translationListPresenter = TranslationListPresenter(translationManagementActivity, translationListInteractor, testDispatcher)
-        translationListPresenter.create(translationListViewHolder)
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        translationListPresenter.destroy()
-        super.tearDown()
+        translationListPresenter = TranslationListPresenter(translationsViewModel, translationsActivity, testCoroutineScope)
+        translationListPresenter.bind(translationListViewHolder)
     }
 
     @Test
-    fun testLoadTranslationRequestedOnCreate() {
-        verify(translationListInteractor, times(1)).loadTranslationList(false)
-        verify(translationListInteractor, never()).loadTranslationList(true)
+    fun testObserveSettings() = testDispatcher.runBlockingTest {
+        val settings = Settings.DEFAULT.copy(keepScreenOn = false)
+        `when`(translationsViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
+        `when`(translationsViewModel.translationList(anyBoolean())).thenReturn(emptyFlow())
+
+        translationListPresenter.onCreate()
+        verify(translationListView, times(1)).setSettings(settings)
     }
 
     @Test
-    fun testOnAvailableTranslationClicked() {
-        val translation = MockContents.kjvTranslationInfo
-        `when`(translationListInteractor.downloadTranslation(translation)).thenReturn(emptyFlow())
+    fun testLoadTranslationList() = testDispatcher.runBlockingTest {
+        `when`(translationsViewModel.settings()).thenReturn(emptyFlow())
+        `when`(translationsViewModel.translationList(false)).thenReturn(flowOf(
+                ViewData.error(exception = RuntimeException()),
+                ViewData.loading(),
+                ViewData.success(TranslationList("", emptyList(), emptyList()))
+        ))
 
-        translationListPresenter.onTranslationClicked(translation)
-        verify(translationListInteractor, times(1)).downloadTranslation(translation)
+        translationListPresenter.onCreate()
+
+        with(inOrder(swipeRefreshLayout, translationListView)) {
+            // error
+            verify(swipeRefreshLayout, times(1)).isRefreshing = false
+
+            // loading
+            verify(swipeRefreshLayout, times(1)).isRefreshing = true
+            verify(translationListView, times(1)).visibility = View.GONE
+
+            // success
+            verify(swipeRefreshLayout, times(1)).isRefreshing = false
+            verify(translationListView, times(1)).setItems(any())
+            verify(translationListView, times(1)).fadeIn()
+        }
     }
 
     @Test
-    fun testOnDownloadedTranslationClicked() = testDispatcher.runBlockingTest {
-        val translation = MockContents.kjvDownloadedTranslationInfo
-        translationListPresenter.onTranslationClicked(translation)
-        verify(translationListInteractor, times(1)).saveCurrentTranslation(translation.shortName)
-        verify(translationManagementActivity, times(1)).finish()
-        verify(translationListInteractor, never()).downloadTranslation(translation)
-    }
+    fun testToItems() {
+        val expected = listOf(
+                TitleItem(Locale("en").displayName, true),
+                TranslationItem(MockContents.kjvDownloadedTranslationInfo, true, translationListPresenter::onTranslationClicked, translationListPresenter::onTranslationLongClicked),
+                TitleItem(Locale("zh").displayName, true),
+                TranslationItem(MockContents.cuvDownloadedTranslationInfo, false, translationListPresenter::onTranslationClicked, translationListPresenter::onTranslationLongClicked),
+                TitleItem("AVAILABLE", false),
+                TitleItem(Locale("en").displayName, true),
+                TranslationItem(MockContents.bbeTranslationInfo, false, translationListPresenter::onTranslationClicked, translationListPresenter::onTranslationLongClicked),
+                TranslationItem(MockContents.msgTranslationInfo, false, translationListPresenter::onTranslationClicked, translationListPresenter::onTranslationLongClicked)
+        )
 
-    @Test
-    fun testOnDownloadedTranslationClickedWithException() = testDispatcher.runBlockingTest {
-        val translation = MockContents.kjvDownloadedTranslationInfo
-        `when`(translationListInteractor.saveCurrentTranslation(translation.shortName)).thenThrow(RuntimeException("random exception"))
+        `when`(translationsActivity.getString(R.string.header_available_translations)).thenReturn("AVAILABLE")
+        val translationList = TranslationList(
+                MockContents.kjvShortName,
+                listOf(MockContents.bbeTranslationInfo, MockContents.msgTranslationInfo),
+                listOf(MockContents.kjvDownloadedTranslationInfo, MockContents.cuvDownloadedTranslationInfo)
+        )
+        val actual = with(translationListPresenter) { translationList.toItems() }
 
-        translationListPresenter.onTranslationClicked(translation)
-        verify(translationListInteractor, never()).downloadTranslation(translation)
-    }
-
-    @Test
-    fun testOnAvailableTranslationLongClicked() {
-        val translation = MockContents.kjvTranslationInfo
-        `when`(translationListInteractor.downloadTranslation(translation)).thenReturn(emptyFlow())
-
-        translationListPresenter.onTranslationLongClicked(translation, false)
-        verify(translationListInteractor, times(1)).downloadTranslation(translation)
+        assertEquals(expected, actual)
     }
 }

@@ -16,25 +16,58 @@
 
 package me.xizzhu.android.joshua.search
 
-import androidx.annotation.UiThread
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.*
+import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsAwareViewModel
-import me.xizzhu.android.joshua.search.result.SearchResultInteractor
-import me.xizzhu.android.joshua.search.toolbar.SearchToolbarInteractor
+import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import me.xizzhu.android.joshua.infra.arch.ViewData
+import me.xizzhu.android.joshua.infra.arch.flowFrom
 
-class SearchViewModel(settingsManager: SettingsManager,
-                      private val searchToolbarInteractor: SearchToolbarInteractor,
-                      private val searchResultInteractor: SearchResultInteractor,
-                      dispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : BaseSettingsAwareViewModel(settingsManager, listOf(searchToolbarInteractor), dispatcher) {
-    @UiThread
-    override fun onCreate() {
-        super.onCreate()
+data class SearchQuery(val query: String, val instantSearch: Boolean)
 
-        searchToolbarInteractor.query().onEach { searchResultInteractor.updateQuery(it) }.launchIn(coroutineScope)
+data class SearchResult(
+        val query: String, val instantSearch: Boolean, val verses: List<Verse>,
+        val bookNames: List<String>, val bookShortNames: List<String>
+)
+
+class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
+                      settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    private val query: BroadcastChannel<ViewData<SearchQuery>> = ConflatedBroadcastChannel()
+
+    fun updateQuery(query: SearchQuery) {
+        this.query.offer(ViewData.success(query))
+    }
+
+    fun searchResult(): Flow<ViewData<SearchResult>> = query.asFlow()
+            .debounce(250L)
+            .distinctUntilChangedBy { if (it.status == ViewData.STATUS_SUCCESS) it.data?.query else "" }
+            .flatMapLatest { queryViewData ->
+                if (ViewData.STATUS_SUCCESS == queryViewData.status) {
+                    val query = queryViewData.data!!
+                    if (query.instantSearch) {
+                        flowOf(ViewData.success(search(query)))
+                    } else {
+                        flowFrom { search(query) }
+                    }
+                } else {
+                    flowOf(ViewData.error(exception = IllegalStateException("Illegal query state: $queryViewData")))
+                }
+            }
+
+    private suspend fun search(query: SearchQuery): SearchResult {
+        val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+        return SearchResult(query.query, query.instantSearch,
+                bibleReadingManager.search(currentTranslation, query.query),
+                bibleReadingManager.readBookNames(currentTranslation),
+                bibleReadingManager.readBookShortNames(currentTranslation))
+    }
+
+    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
+        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 }

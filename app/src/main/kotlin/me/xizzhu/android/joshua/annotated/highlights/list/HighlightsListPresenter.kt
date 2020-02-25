@@ -16,23 +16,23 @@
 
 package me.xizzhu.android.joshua.annotated.highlights.list
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
-class HighlightsListPresenter(highlightsActivity: HighlightsActivity,
-                              navigator: Navigator,
-                              highlightsListInteractor: AnnotatedVersesInteractor<Highlight>,
-                              dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseAnnotatedVersesPresenter<Highlight, AnnotatedVersesInteractor<Highlight>>(
-        highlightsActivity, navigator, R.string.text_no_highlights, highlightsListInteractor, dispatcher) {
+class HighlightsListPresenter(
+        navigator: Navigator, annotatedVersesViewModel: BaseAnnotatedVersesViewModel<Highlight>,
+        highlightsActivity: HighlightsActivity, coroutineScope: CoroutineScope = highlightsActivity.lifecycleScope
+) : BaseAnnotatedVersesPresenter<Highlight, HighlightsActivity>(
+        navigator, R.string.text_no_highlights, annotatedVersesViewModel, highlightsActivity, coroutineScope
+) {
     override fun Highlight.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem =
             HighlightItem(verseIndex, bookName, bookShortName, verseText, color, sortOrder, ::openVerse)
 }

@@ -17,11 +17,11 @@
 package me.xizzhu.android.joshua.annotated.notes.list
 
 import android.os.Bundle
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesInteractor
+import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.core.Constants
@@ -29,12 +29,12 @@ import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
-class NotesListPresenter(notesActivity: NotesActivity,
-                         navigator: Navigator,
-                         notesListInteractor: AnnotatedVersesInteractor<Note>,
-                         dispatcher: CoroutineDispatcher = Dispatchers.Main)
-    : BaseAnnotatedVersesPresenter<Note, AnnotatedVersesInteractor<Note>>(
-        notesActivity, navigator, R.string.text_no_note, notesListInteractor, dispatcher) {
+class NotesListPresenter(
+        navigator: Navigator, annotatedVersesViewModel: BaseAnnotatedVersesViewModel<Note>,
+        notesActivity: NotesActivity, coroutineScope: CoroutineScope = notesActivity.lifecycleScope
+) : BaseAnnotatedVersesPresenter<Note, NotesActivity>(
+        navigator, R.string.text_no_note, annotatedVersesViewModel, notesActivity, coroutineScope
+) {
     override fun Note.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem =
             NoteItem(verseIndex, bookShortName, verseText, note, ::openVerse)
 

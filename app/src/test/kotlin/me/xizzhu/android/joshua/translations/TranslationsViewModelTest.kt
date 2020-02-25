@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.translations
 
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -31,7 +30,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TranslationListInteractorTest : BaseUnitTest() {
+class TranslationsViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
     @Mock
@@ -39,12 +38,16 @@ class TranslationListInteractorTest : BaseUnitTest() {
     @Mock
     private lateinit var settingsManager: SettingsManager
 
-    private lateinit var translationListInteractor: TranslationListInteractor
+    private lateinit var translationsViewModel: TranslationsViewModel
 
     @BeforeTest
     override fun setup() {
         super.setup()
-        translationListInteractor = TranslationListInteractor(bibleReadingManager, translationManager, settingsManager, testDispatcher)
+
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(emptyFlow())
+        `when`(translationManager.availableTranslations()).thenReturn(emptyFlow())
+        `when`(translationManager.downloadedTranslations()).thenReturn(emptyFlow())
+        translationsViewModel = TranslationsViewModel(bibleReadingManager, translationManager, settingsManager)
     }
 
     @Test
@@ -52,42 +55,32 @@ class TranslationListInteractorTest : BaseUnitTest() {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
         `when`(translationManager.availableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
         `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(listOf(MockContents.kjvDownloadedTranslationInfo)))
-
-        translationListInteractor.create()
+        translationsViewModel = TranslationsViewModel(bibleReadingManager, translationManager, settingsManager)
 
         assertEquals(
-                ViewData.success(
-                        TranslationList(
-                                MockContents.kjvShortName,
-                                listOf(MockContents.cuvTranslationInfo),
-                                listOf(MockContents.kjvDownloadedTranslationInfo)
+                listOf(
+                        ViewData.loading(),
+                        ViewData.success(
+                                TranslationList(
+                                        MockContents.kjvShortName,
+                                        listOf(MockContents.cuvTranslationInfo),
+                                        listOf(MockContents.kjvDownloadedTranslationInfo)
+                                )
                         )
                 ),
-                translationListInteractor.translationList().first()
+                translationsViewModel.translationList(false).toList()
         )
-
-        translationListInteractor.destroy()
-    }
-
-    @Test
-    fun testLoadTranslationList() = testDispatcher.runBlockingTest {
-        translationListInteractor.loadTranslationList(true)
-
-        assertEquals(ViewData.loading(), translationListInteractor.translationList().first())
-        verify(translationManager, times(1)).reload(true)
+        verify(translationManager, times(1)).reload(false)
     }
 
     @Test
     fun testLoadTranslationListWithException() = testDispatcher.runBlockingTest {
-        val translationListAsync = async { translationListInteractor.translationList().take(2).toList() }
-
         val exception = RuntimeException("random exception")
         `when`(translationManager.reload(true)).thenThrow(exception)
-        translationListInteractor.loadTranslationList(true)
 
         assertEquals(
                 listOf(ViewData.loading(), ViewData.error(exception = exception)),
-                translationListAsync.await()
+                translationsViewModel.translationList(true).toList()
         )
     }
 
@@ -99,7 +92,7 @@ class TranslationListInteractorTest : BaseUnitTest() {
         `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flowOf(progress, 101))
 
         assertEquals(listOf(ViewData.loading(progress), ViewData.success(-1)),
-                translationListInteractor.downloadTranslation(translationToDownload).toList())
+                translationsViewModel.downloadTranslation(translationToDownload).toList())
         verify(translationManager, times(1)).downloadTranslation(translationToDownload)
     }
 
@@ -110,7 +103,7 @@ class TranslationListInteractorTest : BaseUnitTest() {
         `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flow { throw exception })
 
         assertEquals(listOf(ViewData.error(exception = exception)),
-                translationListInteractor.downloadTranslation(translationToDownload).toList())
+                translationsViewModel.downloadTranslation(translationToDownload).toList())
         verify(translationManager, times(1)).downloadTranslation(translationToDownload)
     }
 }

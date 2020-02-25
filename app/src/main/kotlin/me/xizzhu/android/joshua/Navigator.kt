@@ -28,13 +28,13 @@ import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.settings.SettingsActivity
 import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
-import me.xizzhu.android.joshua.translations.TranslationManagementActivity
+import me.xizzhu.android.joshua.translations.TranslationsActivity
 
 class Navigator {
     companion object {
         const val SCREEN_READING = 0
         const val SCREEN_SEARCH = 1
-        const val SCREEN_TRANSLATION_MANAGEMENT = 2
+        const val SCREEN_TRANSLATIONS = 2
         const val SCREEN_READING_PROGRESS = 3
         const val SCREEN_BOOKMARKS = 4
         const val SCREEN_HIGHLIGHTS = 5
@@ -42,7 +42,7 @@ class Navigator {
         const val SCREEN_SETTINGS = 7
         const val SCREEN_STRONG_NUMBER = 8
 
-        @IntDef(SCREEN_READING, SCREEN_SEARCH, SCREEN_TRANSLATION_MANAGEMENT, SCREEN_READING_PROGRESS,
+        @IntDef(SCREEN_READING, SCREEN_SEARCH, SCREEN_TRANSLATIONS, SCREEN_READING_PROGRESS,
                 SCREEN_BOOKMARKS, SCREEN_HIGHLIGHTS, SCREEN_NOTES, SCREEN_SETTINGS, SCREEN_STRONG_NUMBER)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Screen
@@ -52,7 +52,7 @@ class Navigator {
         val intent = when (screen) {
             SCREEN_READING -> Intent(activity, ReadingActivity::class.java)
             SCREEN_SEARCH -> Intent(activity, SearchActivity::class.java)
-            SCREEN_TRANSLATION_MANAGEMENT -> Intent(activity, TranslationManagementActivity::class.java)
+            SCREEN_TRANSLATIONS -> Intent(activity, TranslationsActivity::class.java)
             SCREEN_READING_PROGRESS -> Intent(activity, ReadingProgressActivity::class.java)
             SCREEN_BOOKMARKS -> Intent(activity, BookmarksActivity::class.java)
             SCREEN_HIGHLIGHTS -> Intent(activity, HighlightsActivity::class.java)

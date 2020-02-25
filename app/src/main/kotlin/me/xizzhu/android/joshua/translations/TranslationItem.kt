@@ -24,34 +24,13 @@ import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
-import java.util.*
-import kotlin.collections.ArrayList
 
 data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean,
                            val onClicked: (TranslationInfo) -> Unit,
                            val onLongClicked: (TranslationInfo, Boolean) -> Unit,
                            val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0)
     : BaseItem(R.layout.item_translation, { inflater, parent -> TranslationItemViewHolder(inflater, parent) })
-
-fun List<TranslationInfo>.toTranslationItems(currentTranslation: String,
-                                             onClicked: (TranslationInfo) -> Unit,
-                                             onLongClicked: (TranslationInfo, Boolean) -> Unit): List<BaseItem> {
-    return ArrayList<BaseItem>(size).apply {
-        var currentLanguage = ""
-        for (translationInfo in this@toTranslationItems) {
-            val language = translationInfo.language.split("_")[0]
-            if (currentLanguage != language) {
-                add(TitleItem(Locale(language).displayLanguage, true))
-                currentLanguage = language
-            }
-            add(TranslationItem(translationInfo,
-                    translationInfo.downloaded && translationInfo.shortName == currentTranslation,
-                    onClicked, onLongClicked))
-        }
-    }
-}
 
 private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<TranslationItem>(inflater.inflate(R.layout.item_translation, parent, false)) {

@@ -45,8 +45,8 @@ import me.xizzhu.android.joshua.settings.SettingsActivity
 import me.xizzhu.android.joshua.settings.SettingsModule
 import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
 import me.xizzhu.android.joshua.strongnumber.StrongNumberListModule
-import me.xizzhu.android.joshua.translations.TranslationManagementActivity
-import me.xizzhu.android.joshua.translations.TranslationManagementModule
+import me.xizzhu.android.joshua.translations.TranslationsActivity
+import me.xizzhu.android.joshua.translations.TranslationsModule
 import javax.inject.Scope
 import javax.inject.Singleton
 
@@ -199,8 +199,8 @@ abstract class ActivityModule {
     abstract fun contributeStrongNumberListActivity(): StrongNumberListActivity
 
     @ActivityScope
-    @ContributesAndroidInjector(modules = [(TranslationManagementModule::class)])
-    abstract fun contributeTranslationManagementActivity(): TranslationManagementActivity
+    @ContributesAndroidInjector(modules = [(TranslationsModule::class)])
+    abstract fun contributeTranslationManagementActivity(): TranslationsActivity
 }
 
 @Singleton

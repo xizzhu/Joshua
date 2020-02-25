@@ -16,6 +16,8 @@
 
 package me.xizzhu.android.joshua.reading
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
@@ -23,95 +25,61 @@ import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.reading.chapter.ChapterListInteractor
-import me.xizzhu.android.joshua.reading.detail.VerseDetailInteractor
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPresenter
-import me.xizzhu.android.joshua.reading.search.SearchButtonInteractor
 import me.xizzhu.android.joshua.reading.search.SearchButtonPresenter
-import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarInteractor
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarPresenter
-import me.xizzhu.android.joshua.reading.verse.VerseInteractor
 
 @Module
 object ReadingModule {
     @ActivityScope
     @Provides
-    fun provideReadingToolbarInteractor(bibleReadingManager: BibleReadingManager,
-                                        translationManager: TranslationManager): ReadingToolbarInteractor =
-            ReadingToolbarInteractor(bibleReadingManager, translationManager)
+    fun provideReadingToolbarPresenter(navigator: Navigator, readingViewModel: ReadingViewModel,
+                                       readingActivity: ReadingActivity): ReadingToolbarPresenter =
+            ReadingToolbarPresenter(navigator, readingViewModel, readingActivity)
 
     @ActivityScope
     @Provides
-    fun provideReadingToolbarPresenter(readingActivity: ReadingActivity,
-                                       navigator: Navigator,
-                                       readingToolbarInteractor: ReadingToolbarInteractor): ReadingToolbarPresenter =
-            ReadingToolbarPresenter(readingActivity, navigator, readingToolbarInteractor)
+    fun provideChapterListPresenter(readingViewModel: ReadingViewModel, readingActivity: ReadingActivity): ChapterListPresenter =
+            ChapterListPresenter(readingViewModel, readingActivity)
 
     @ActivityScope
     @Provides
-    fun provideChapterListInteractor(bibleReadingManager: BibleReadingManager): ChapterListInteractor =
-            ChapterListInteractor(bibleReadingManager)
+    fun provideSearchButtonPresenter(navigator: Navigator, readingViewModel: ReadingViewModel,
+                                     readingActivity: ReadingActivity): SearchButtonPresenter =
+            SearchButtonPresenter(navigator, readingViewModel, readingActivity)
 
     @ActivityScope
     @Provides
-    fun provideChapterListPresenter(readingActivity: ReadingActivity,
-                                    chapterListInteractor: ChapterListInteractor): ChapterListPresenter =
-            ChapterListPresenter(readingActivity, chapterListInteractor)
+    fun provideVersePresenter(readingViewModel: ReadingViewModel, readingActivity: ReadingActivity): VersePresenter =
+            VersePresenter(readingViewModel, readingActivity)
 
     @ActivityScope
     @Provides
-    fun provideSearchButtonInteractor(settingsManager: SettingsManager): SearchButtonInteractor =
-            SearchButtonInteractor(settingsManager)
+    fun provideVerseDetailPresenter(navigator: Navigator, readingViewModel: ReadingViewModel,
+                                    readingActivity: ReadingActivity): VerseDetailPresenter =
+            VerseDetailPresenter(navigator, readingViewModel, readingActivity)
 
     @ActivityScope
     @Provides
-    fun provideSearchButtonPresenter(readingActivity: ReadingActivity, navigator: Navigator,
-                                     searchButtonInteractor: SearchButtonInteractor): SearchButtonPresenter =
-            SearchButtonPresenter(readingActivity, navigator, searchButtonInteractor)
-
-    @ActivityScope
-    @Provides
-    fun provideVerseInteractor(bibleReadingManager: BibleReadingManager,
-                               bookmarkManager: VerseAnnotationManager<Bookmark>,
-                               highlightManager: VerseAnnotationManager<Highlight>,
-                               noteManager: VerseAnnotationManager<Note>,
-                               settingsManager: SettingsManager): VerseInteractor =
-            VerseInteractor(bibleReadingManager, bookmarkManager, highlightManager, noteManager, settingsManager)
-
-    @ActivityScope
-    @Provides
-    fun provideVersePresenter(readingActivity: ReadingActivity,
-                              verseInteractor: VerseInteractor): VersePresenter =
-            VersePresenter(readingActivity, verseInteractor)
-
-    @ActivityScope
-    @Provides
-    fun provideVerseDetailInteractor(translationManager: TranslationManager,
-                                     bibleReadingManager: BibleReadingManager,
-                                     bookmarkManager: VerseAnnotationManager<Bookmark>,
-                                     highlightManager: VerseAnnotationManager<Highlight>,
-                                     noteManager: VerseAnnotationManager<Note>,
-                                     strongNumberManager: StrongNumberManager,
-                                     settingsManager: SettingsManager): VerseDetailInteractor =
-            VerseDetailInteractor(translationManager, bibleReadingManager, bookmarkManager,
-                    highlightManager, noteManager, strongNumberManager, settingsManager)
-
-    @ActivityScope
-    @Provides
-    fun provideVerseDetailPresenter(readingActivity: ReadingActivity,
-                                    navigator: Navigator,
-                                    verseDetailInteractor: VerseDetailInteractor): VerseDetailPresenter =
-            VerseDetailPresenter(readingActivity, navigator, verseDetailInteractor)
-
-    @ActivityScope
-    @Provides
-    fun provideReadingViewModel(bibleReadingManager: BibleReadingManager,
+    fun provideReadingViewModel(readingActivity: ReadingActivity,
+                                bibleReadingManager: BibleReadingManager,
                                 readingProgressManager: ReadingProgressManager,
-                                settingsManager: SettingsManager,
-                                readingToolbarInteractor: ReadingToolbarInteractor,
-                                chapterListInteractor: ChapterListInteractor,
-                                verseInteractor: VerseInteractor,
-                                verseDetailInteractor: VerseDetailInteractor): ReadingViewModel =
-            ReadingViewModel(bibleReadingManager, readingProgressManager, settingsManager,
-                    readingToolbarInteractor, chapterListInteractor, verseInteractor, verseDetailInteractor)
+                                translationManager: TranslationManager,
+                                bookmarkManager: VerseAnnotationManager<Bookmark>,
+                                highlightManager: VerseAnnotationManager<Highlight>,
+                                noteManager: VerseAnnotationManager<Note>,
+                                strongNumberManager: StrongNumberManager,
+                                settingsManager: SettingsManager): ReadingViewModel {
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(ReadingViewModel::class.java)) {
+                    return ReadingViewModel(bibleReadingManager, readingProgressManager, translationManager,
+                            bookmarkManager, highlightManager, noteManager, strongNumberManager, settingsManager) as T
+                }
+
+                throw IllegalArgumentException("Unsupported model class - $modelClass")
+            }
+        }
+        return ViewModelProvider(readingActivity, factory).get(ReadingViewModel::class.java)
+    }
 }

@@ -35,12 +35,14 @@ data class ViewData<T> private constructor(@Status val status: Int, val data: T?
     }
 }
 
-fun <T> ViewData<T>.dataOnSuccessOrThrow(errorMessage: String): T =
-        if (ViewData.STATUS_SUCCESS == status) {
-            data!!
-        } else {
-            throw IllegalStateException(errorMessage, exception)
-        }
+inline fun <T> flowFrom(crossinline block: suspend () -> T): Flow<ViewData<T>> = flow {
+    emit(ViewData.loading())
+    try {
+        emit(ViewData.success(block()))
+    } catch (e: Exception) {
+        emit(ViewData.error(exception = e))
+    }
+}
 
 fun <T> Flow<T>.toViewData(): Flow<ViewData<T>> = map { ViewData.success(it) }
 

@@ -18,15 +18,13 @@ package me.xizzhu.android.joshua.progress
 
 import android.view.View
 import android.widget.ProgressBar
-import kotlinx.coroutines.flow.emptyFlow
+import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -38,11 +36,13 @@ import kotlin.test.*
 
 class ReadingProgressPresenterTest : BaseUnitTest() {
     @Mock
-    private lateinit var readingProgressActivity: ReadingProgressActivity
+    private lateinit var lifecycle: Lifecycle
     @Mock
     private lateinit var navigator: Navigator
     @Mock
-    private lateinit var readingProgressInteractor: ReadingProgressInteractor
+    private lateinit var readingProgressViewModel: ReadingProgressViewModel
+    @Mock
+    private lateinit var readingProgressActivity: ReadingProgressActivity
     @Mock
     private lateinit var loadingSpinner: ProgressBar
     @Mock
@@ -55,95 +55,52 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        runBlocking {
-            `when`(readingProgressInteractor.settings()).thenReturn(emptyFlow())
-            `when`(readingProgressInteractor.bookNames()).thenReturn(List(Bible.BOOK_COUNT) { i -> i.toString() })
-            `when`(readingProgressInteractor.readingProgress()).thenReturn(ReadingProgress(0, 0L, emptyList()))
+        `when`(readingProgressActivity.lifecycle).thenReturn(lifecycle)
 
-            readingProgressViewHolder = ReadingProgressViewHolder(loadingSpinner, readingProgressListView)
-            readingProgressPresenter = ReadingProgressPresenter(readingProgressActivity, navigator, readingProgressInteractor, testDispatcher)
-        }
+        readingProgressViewHolder = ReadingProgressViewHolder(loadingSpinner, readingProgressListView)
+        readingProgressPresenter = ReadingProgressPresenter(navigator, readingProgressViewModel, readingProgressActivity, testCoroutineScope)
+        readingProgressPresenter.bind(readingProgressViewHolder)
     }
 
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
-        val settings = Settings(false, true, 1, true, true)
-        `when`(readingProgressInteractor.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.success(settings), ViewData.error()))
+        val settings = Settings.DEFAULT.copy(keepScreenOn = false)
+        `when`(readingProgressViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
 
-        readingProgressPresenter.create(readingProgressViewHolder)
+        readingProgressPresenter.observeSettings()
         verify(readingProgressListView, times(1)).setSettings(settings)
-        verify(readingProgressListView, never()).setSettings(Settings.DEFAULT)
-
-        readingProgressPresenter.destroy()
     }
 
     @Test
     fun testLoadReadingProgress() = testDispatcher.runBlockingTest {
-        `when`(readingProgressInteractor.readingProgress()).thenReturn(ReadingProgress(5, 4321L, emptyList()))
+        `when`(readingProgressViewModel.readingProgress()).thenReturn(flowOf(
+                ViewData.loading(),
+                ViewData.error(exception = RuntimeException()),
+                ViewData.success(ReadingProgressViewData(
+                        ReadingProgress(0, 0L, emptyList()),
+                        Array(Bible.BOOK_COUNT) { "" }.toList()
+                ))
+        ))
 
-        readingProgressPresenter.create(readingProgressViewHolder)
-        readingProgressPresenter.start()
+        readingProgressPresenter.loadReadingProgress()
 
         with(inOrder(loadingSpinner, readingProgressListView)) {
+            // loading
             verify(loadingSpinner, times(1)).fadeIn()
             verify(readingProgressListView, times(1)).visibility = View.GONE
+
+            // error
+            verify(loadingSpinner, times(1)).visibility = View.GONE
+
+            // success
             verify(readingProgressListView, times(1)).setItems(any())
             verify(readingProgressListView, times(1)).fadeIn()
             verify(loadingSpinner, times(1)).visibility = View.GONE
         }
-
-        readingProgressPresenter.stop()
-        readingProgressPresenter.destroy()
-    }
-
-    @Test
-    fun testLoadReadingProgressWithBookNamesException() = testDispatcher.runBlockingTest {
-        val exception = RuntimeException("Random exception")
-        `when`(readingProgressInteractor.bookNames()).thenThrow(exception)
-
-        readingProgressPresenter.create(readingProgressViewHolder)
-        readingProgressPresenter.start()
-
-        with(inOrder(loadingSpinner, readingProgressListView)) {
-            verify(loadingSpinner, times(1)).fadeIn()
-            verify(readingProgressListView, times(1)).visibility = View.GONE
-            verify(loadingSpinner, times(1)).visibility = View.GONE
-        }
-        verify(readingProgressListView, never()).setItems(any())
-        verify(readingProgressListView, never()).fadeIn()
-
-        readingProgressPresenter.stop()
-        readingProgressPresenter.destroy()
-    }
-
-    @Test
-    fun testOpenChapter() = testDispatcher.runBlockingTest {
-        readingProgressPresenter.create(readingProgressViewHolder)
-
-        val bookIndex = 1
-        val chapterIndex = 2
-        readingProgressPresenter.openChapter(bookIndex, chapterIndex)
-        verify(readingProgressInteractor, times(1)).saveCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
-        verify(navigator, times(1)).navigate(readingProgressActivity, Navigator.SCREEN_READING)
-
-        readingProgressPresenter.destroy()
     }
 
     @Test
     fun testToItems() {
-        val readingProgress = ReadingProgress(1, 23456L,
-                listOf(ReadingProgress.ChapterReadingStatus(0, 1, 1, 500L, 23456L),
-                        ReadingProgress.ChapterReadingStatus(0, 2, 2, 600L, 23457L),
-                        ReadingProgress.ChapterReadingStatus(2, 0, 3, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(7, 0, 1, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(7, 1, 2, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(7, 2, 3, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(7, 3, 4, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(63, 0, 1, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(64, 0, 1, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(65, 0, 0, 700L, 23458L),
-                        ReadingProgress.ChapterReadingStatus(65, 1, 2, 700L, 23458L)))
-
         val expected = mutableListOf<BaseItem>(ReadingProgressSummaryItem(1, 10, 3, 1, 2))
                 .apply {
                     addAll(Array(Bible.BOOK_COUNT) { bookIndex ->
@@ -168,16 +125,22 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
                                 readingProgressPresenter.expanded[bookIndex])
                     }.toList())
                 }
-        val actual = with(readingProgressPresenter) { readingProgress.toItems(Array(Bible.BOOK_COUNT) { "bookName$it" }.toList()) }
+
+        val readingProgress = ReadingProgress(1, 23456L,
+                listOf(ReadingProgress.ChapterReadingStatus(0, 1, 1, 500L, 23456L),
+                        ReadingProgress.ChapterReadingStatus(0, 2, 2, 600L, 23457L),
+                        ReadingProgress.ChapterReadingStatus(2, 0, 3, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 0, 1, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 1, 2, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 2, 3, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(7, 3, 4, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(63, 0, 1, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(64, 0, 1, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(65, 0, 0, 700L, 23458L),
+                        ReadingProgress.ChapterReadingStatus(65, 1, 2, 700L, 23458L)))
+        val bookNames = Array(Bible.BOOK_COUNT) { "bookName$it" }.toList()
+        val actual = with(readingProgressPresenter) { ReadingProgressViewData(readingProgress, bookNames).toItems() }
+
         assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testOpenChapterWithException() = testDispatcher.runBlockingTest {
-        `when`(readingProgressInteractor.saveCurrentVerseIndex(any())).thenThrow(RuntimeException("Random exception"))
-
-        readingProgressPresenter.create(readingProgressViewHolder)
-        readingProgressPresenter.openChapter(0, 0)
-        readingProgressPresenter.destroy()
     }
 }
