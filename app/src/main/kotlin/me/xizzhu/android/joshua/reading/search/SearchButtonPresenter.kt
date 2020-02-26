@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.reading.search
 
 import android.content.DialogInterface
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -54,8 +55,9 @@ class SearchButtonPresenter(
         }
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun observeSettings() {
+    fun observeSettings() {
         viewModel.settings().onEachSuccess { settings ->
             if (settings.hideSearchButton) {
                 viewHolder.searchButton.hide()
