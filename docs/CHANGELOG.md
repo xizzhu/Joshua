@@ -10,10 +10,12 @@ CHANGELOG
   - Used Lifecycle and ViewModel from AndroidX
 - Updated dependencies:
   - Kotlin JVM target to 1.8
-  - Gradle to 6.1.1
+  - Gradle to 6.2.1
+  - Android Gradle plugin to 3.6.0
   - Android build tools to 29.0.3
   - AndroidX Core to 1.2.0, Lifecycle to 2.2.0, Material to 1.1.0, ViewPager2 to 1.0.0
   - Dagger to 2.26
+  - Mockito to 3.3.0
 
 #### v0.14.0 (2020-01-19)
 - New features:

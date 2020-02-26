@@ -37,7 +37,7 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "3.5.3"
+        const val classpath = "3.6.0"
         const val buildTools = "29.0.3"
         const val compile = 29
         const val min = 21
@@ -94,7 +94,7 @@ object Versions {
 
     const val stetho = "1.5.1"
 
-    const val mockito = "3.2.4"
+    const val mockito = "3.3.0"
 }
 
 object Dependencies {
