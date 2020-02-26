@@ -49,8 +49,6 @@ android {
 
         resConfigs(Configurations.supportedLocales)
 
-        buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString() + "L")
-
         testInstrumentationRunner = Dependencies.AndroidX.Test.runner
     }
 
