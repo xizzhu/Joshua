@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.reading.chapter
 
 import android.content.DialogInterface
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -26,7 +27,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.combineOnSuccess
+import me.xizzhu.android.joshua.infra.arch.onEach
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.ui.dialog
@@ -59,14 +60,18 @@ class ChapterListPresenter(
         }
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun observeBookNames() {
-        viewModel.currentVerseIndex()
-                .combineOnSuccess(viewModel.bookNames()) { currentVerseIndex, bookNames ->
-                    viewHolder.run {
-                        chapterListView.setData(currentVerseIndex, bookNames)
-                        readingDrawerLayout.hide()
-                    }
-                }.launchIn(coroutineScope)
+    fun observeChapterListViewData() {
+        viewModel.chapterListViewData().onEach(
+                onLoading = {},
+                onSuccess = { viewData ->
+                    viewHolder.chapterListView.setData(viewData.currentVerseIndex, viewData.bookNames)
+                    viewHolder.readingDrawerLayout.hide()
+                },
+                onError = { _, e ->
+                    Log.e(tag, "Error when observing chapter list view data", e!!)
+                }
+        ).launchIn(coroutineScope)
     }
 }

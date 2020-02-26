@@ -44,7 +44,7 @@ inline fun <T> flowFrom(crossinline block: suspend () -> T): Flow<ViewData<T>> =
     }
 }
 
-fun <T> Flow<T>.toViewData(): Flow<ViewData<T>> = map { ViewData.success(it) }
+fun <T> Flow<T>.toViewData(): Flow<ViewData<T>> = map { ViewData.success(it) }.catch { ViewData.error<T>(exception = it) }
 
 inline fun <T> Flow<ViewData<T>>.onEach(
         crossinline onLoading: suspend (value: T?) -> Unit,

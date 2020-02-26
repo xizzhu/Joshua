@@ -102,13 +102,14 @@ class ReadingViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testBookNames() = testDispatcher.runBlockingTest {
+    fun testChapterListViewData() = testDispatcher.runBlockingTest {
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex(0, 0, 0)))
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
         `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
 
         assertEquals(
-                listOf(ViewData.success(MockContents.kjvBookNames)),
-                readingViewModel.bookNames().toList()
+                listOf(ViewData.success(ChapterListViewData(VerseIndex(0, 0, 0), MockContents.kjvBookNames))),
+                readingViewModel.chapterListViewData().toList()
         )
     }
 
