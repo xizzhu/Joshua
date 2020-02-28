@@ -31,18 +31,18 @@ import org.junit.runner.RunWith
 class VerseItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_verse, VerseItem(Verse.INVALID, "", 0, false, 0, false, {}, {}, {}, { _, _ -> }, { _, _ -> }).viewType)
+        assertEquals(R.layout.item_verse, VerseItem(Verse.INVALID, 0, false, 0, false, {}, {}, {}, { _, _ -> }, { _, _ -> }).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
-        assertEquals("${MockContents.kjvBookNames[0]} 1:1\n${MockContents.kjvVerses[0].text.text}",
-                VerseItem(MockContents.kjvVerses[0], MockContents.kjvBookNames[0], 0, false, 0, false, {}, {}, {}, { _, _ -> }, { _, _ -> }).textForDisplay.toString())
+        assertEquals("1:1 ${MockContents.kjvVerses[0].text.text}",
+                VerseItem(MockContents.kjvVerses[0], 0, false, 0, false, {}, {}, {}, { _, _ -> }, { _, _ -> }).textForDisplay.toString())
     }
 
     @Test
     fun testTextForDisplayWithParallelTranslations() {
         assertEquals("${MockContents.kjvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].text.text}\n\n${MockContents.cuvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].parallel[0].text}",
-                VerseItem(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvBookNames[0], 0, false, 0, false, {}, {}, {}, { _, _ -> }, { _, _ -> }).textForDisplay.toString())
+                VerseItem(MockContents.kjvVersesWithCuvParallel[0], 0, false, 0, false, {}, {}, {}, { _, _ -> }, { _, _ -> }).textForDisplay.toString())
     }
 }
