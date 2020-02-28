@@ -134,14 +134,14 @@ class ReadingViewModel(
 
     suspend fun readBookmark(verseIndex: VerseIndex): Bookmark = bookmarkManager.read(verseIndex)
 
-    suspend fun addBookmark(verseIndex: VerseIndex) {
-        bookmarkManager.save(Bookmark(verseIndex, currentTimeMillis()))
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED))
-    }
-
-    suspend fun removeBookmark(verseIndex: VerseIndex) {
-        bookmarkManager.remove(verseIndex)
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_REMOVED))
+    suspend fun saveBookmark(verseIndex: VerseIndex, hasBookmark: Boolean) {
+        if (hasBookmark) {
+            bookmarkManager.remove(verseIndex)
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_REMOVED))
+        } else {
+            bookmarkManager.save(Bookmark(verseIndex, currentTimeMillis()))
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED))
+        }
     }
 
     suspend fun readHighlights(bookIndex: Int, chapterIndex: Int): List<Highlight> = highlightManager.read(bookIndex, chapterIndex)
@@ -149,13 +149,13 @@ class ReadingViewModel(
     suspend fun readHighlight(verseIndex: VerseIndex): Highlight = highlightManager.read(verseIndex)
 
     suspend fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor color: Int) {
-        highlightManager.save(Highlight(verseIndex, color, currentTimeMillis()))
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
-    }
-
-    suspend fun removeHighlight(verseIndex: VerseIndex) {
-        highlightManager.remove(verseIndex)
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE))
+        if (color == Highlight.COLOR_NONE) {
+            highlightManager.remove(verseIndex)
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE))
+        } else {
+            highlightManager.save(Highlight(verseIndex, color, currentTimeMillis()))
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
+        }
     }
 
     suspend fun readNotes(bookIndex: Int, chapterIndex: Int): List<Note> = noteManager.read(bookIndex, chapterIndex)
@@ -163,13 +163,13 @@ class ReadingViewModel(
     suspend fun readNote(verseIndex: VerseIndex): Note = noteManager.read(verseIndex)
 
     suspend fun saveNote(verseIndex: VerseIndex, note: String) {
-        noteManager.save(Note(verseIndex, note, currentTimeMillis()))
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED))
-    }
-
-    suspend fun removeNote(verseIndex: VerseIndex) {
-        noteManager.remove(verseIndex)
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED))
+        if (note.isEmpty()) {
+            noteManager.remove(verseIndex)
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED))
+        } else {
+            noteManager.save(Note(verseIndex, note, currentTimeMillis()))
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED))
+        }
     }
 
     suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.readStrongNumber(verseIndex)

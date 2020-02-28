@@ -118,8 +118,7 @@ class VersePresenter(
         }
     }
 
-    @VisibleForTesting
-    var adapter: VersePagerAdapter = VersePagerAdapter(readingActivity,
+    private val adapter: VersePagerAdapter = VersePagerAdapter(readingActivity,
             { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) },
             { verseIndex -> updateCurrentVerse(verseIndex) })
 
@@ -265,11 +264,7 @@ class VersePresenter(
     fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
         coroutineScope.launch {
             try {
-                if (hasBookmark) {
-                    viewModel.removeBookmark(verseIndex)
-                } else {
-                    viewModel.addBookmark(verseIndex)
-                }
+                viewModel.saveBookmark(verseIndex, hasBookmark)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update bookmark", e)
                 // TODO
@@ -293,11 +288,7 @@ class VersePresenter(
     fun updateHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
         coroutineScope.launch {
             try {
-                if (highlightColor == Highlight.COLOR_NONE) {
-                    viewModel.removeHighlight(verseIndex)
-                } else {
-                    viewModel.saveHighlight(verseIndex, highlightColor)
-                }
+                viewModel.saveHighlight(verseIndex, highlightColor)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update highlight", e)
                 // TODO

@@ -94,13 +94,8 @@ class VerseDetailPresenter(
         updateBookmarkJob?.cancel()
         updateBookmarkJob = coroutineScope.launch {
             verseDetail?.let { detail ->
-                if (detail.bookmarked) {
-                    viewModel.removeBookmark(detail.verseIndex)
-                    verseDetail = detail.copy(bookmarked = false)
-                } else {
-                    viewModel.addBookmark(detail.verseIndex)
-                    verseDetail = detail.copy(bookmarked = true)
-                }
+                viewModel.saveBookmark(detail.verseIndex, detail.bookmarked)
+                verseDetail = detail.copy(bookmarked = !detail.bookmarked)
                 viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
             }
 
@@ -124,11 +119,7 @@ class VerseDetailPresenter(
         updateHighlightJob?.cancel()
         updateHighlightJob = coroutineScope.launch {
             verseDetail?.let { detail ->
-                if (highlightColor == Highlight.COLOR_NONE) {
-                    viewModel.removeHighlight(detail.verseIndex)
-                } else {
-                    viewModel.saveHighlight(detail.verseIndex, highlightColor)
-                }
+                viewModel.saveHighlight(detail.verseIndex, highlightColor)
                 verseDetail = detail.copy(highlightColor = highlightColor)
                 viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
             }
@@ -141,11 +132,7 @@ class VerseDetailPresenter(
         updateNoteJob?.cancel()
         updateNoteJob = coroutineScope.launch {
             verseDetail?.let { detail ->
-                if (note.isEmpty()) {
-                    viewModel.removeNote(detail.verseIndex)
-                } else {
-                    viewModel.saveNote(detail.verseIndex, note)
-                }
+                viewModel.saveNote(detail.verseIndex, note)
                 verseDetail = detail.copy(note = note)
             }
 
