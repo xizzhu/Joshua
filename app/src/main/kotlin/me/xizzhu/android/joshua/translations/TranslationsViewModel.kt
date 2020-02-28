@@ -24,7 +24,6 @@ import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.flowFrom
-import me.xizzhu.android.logger.Log
 
 data class TranslationList(val currentTranslation: String,
                            val availableTranslations: List<TranslationInfo>,
@@ -36,7 +35,7 @@ class TranslationsViewModel(private val bibleReadingManager: BibleReadingManager
     fun translationList(forceRefresh: Boolean): Flow<ViewData<TranslationList>> = flowFrom {
         translationManager.reload(forceRefresh)
         TranslationList(
-                bibleReadingManager.currentTranslation().first { it.isNotEmpty() },
+                bibleReadingManager.currentTranslation().first(),
                 translationManager.availableTranslations().first(),
                 translationManager.downloadedTranslations().first()
         )

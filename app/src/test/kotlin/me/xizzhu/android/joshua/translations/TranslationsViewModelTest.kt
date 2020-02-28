@@ -51,6 +51,29 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
+    fun testTranslationListWithNoCurrentTranslation() = testDispatcher.runBlockingTest {
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(""))
+        `when`(translationManager.availableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
+        `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(emptyList()))
+        translationsViewModel = TranslationsViewModel(bibleReadingManager, translationManager, settingsManager)
+
+        assertEquals(
+                listOf(
+                        ViewData.loading(),
+                        ViewData.success(
+                                TranslationList(
+                                        "",
+                                        listOf(MockContents.cuvTranslationInfo),
+                                        emptyList()
+                                )
+                        )
+                ),
+                translationsViewModel.translationList(false).toList()
+        )
+        verify(translationManager, times(1)).reload(false)
+    }
+
+    @Test
     fun testTranslationList() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
         `when`(translationManager.availableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
