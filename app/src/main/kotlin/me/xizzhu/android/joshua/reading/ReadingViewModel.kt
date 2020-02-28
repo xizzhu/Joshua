@@ -18,20 +18,21 @@ package me.xizzhu.android.joshua.reading
 
 import androidx.annotation.IntDef
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
-import me.xizzhu.android.joshua.infra.arch.toViewData
+import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.utils.currentTimeMillis
 
 data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames: List<String>)
+
+data class VersesViewData(
+        val simpleReadingModeOn: Boolean, val verses: List<Verse>,
+        val bookmarks: List<Bookmark>, val highlights: List<Highlight>, val notes: List<Note>
+)
 
 data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: Int) {
     companion object {
@@ -108,7 +109,7 @@ class ReadingViewModel(
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 
-    fun chapterListViewData(): Flow<ViewData<ChapterListViewData>> =
+    fun chapterList(): Flow<ViewData<ChapterListViewData>> =
             _currentVerseIndex().combine(bookNames()) { currentVerseIndex, bookNames ->
                 ChapterListViewData(currentVerseIndex, bookNames)
             }.toViewData()
@@ -123,14 +124,30 @@ class ReadingViewModel(
             .filterOnSuccess()
             .map { ViewData.success(bibleReadingManager.readBookShortNames(it)) }
 
-    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
-            bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex)
+    fun verses(bookIndex: Int, chapterIndex: Int): Flow<ViewData<VersesViewData>> = flowFrom {
+        coroutineScope {
+            val bookmarks = async { bookmarkManager.read(bookIndex, chapterIndex) }
+            val highlights = async { highlightManager.read(bookIndex, chapterIndex) }
+            val notes = async { noteManager.read(bookIndex, chapterIndex) }
+            val verses = async {
+                val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+                val parallelTranslations = bibleReadingManager.parallelTranslations().first()
+                if (parallelTranslations.isEmpty()) {
+                    bibleReadingManager.readVerses(currentTranslation, bookIndex, chapterIndex)
+                } else {
+                    bibleReadingManager.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+                }
+            }
+            VersesViewData(
+                    settings().firstSuccess().simpleReadingModeOn, verses.await(),
+                    bookmarks.await(), highlights.await(), notes.await()
+            )
+        }
+    }
 
     suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
                            bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingManager.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
-
-    suspend fun readBookmarks(bookIndex: Int, chapterIndex: Int): List<Bookmark> = bookmarkManager.read(bookIndex, chapterIndex)
 
     suspend fun readBookmark(verseIndex: VerseIndex): Bookmark = bookmarkManager.read(verseIndex)
 
@@ -144,8 +161,6 @@ class ReadingViewModel(
         }
     }
 
-    suspend fun readHighlights(bookIndex: Int, chapterIndex: Int): List<Highlight> = highlightManager.read(bookIndex, chapterIndex)
-
     suspend fun readHighlight(verseIndex: VerseIndex): Highlight = highlightManager.read(verseIndex)
 
     suspend fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor color: Int) {
@@ -157,8 +172,6 @@ class ReadingViewModel(
             verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
         }
     }
-
-    suspend fun readNotes(bookIndex: Int, chapterIndex: Int): List<Note> = noteManager.read(bookIndex, chapterIndex)
 
     suspend fun readNote(verseIndex: VerseIndex): Note = noteManager.read(verseIndex)
 

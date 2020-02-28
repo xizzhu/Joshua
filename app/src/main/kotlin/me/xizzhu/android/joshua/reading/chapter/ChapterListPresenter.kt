@@ -63,7 +63,7 @@ class ChapterListPresenter(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun observeChapterListViewData() {
-        viewModel.chapterListViewData().onEach(
+        viewModel.chapterList().onEach(
                 onLoading = {},
                 onSuccess = { viewData ->
                     viewHolder.chapterListView.setData(viewData.currentVerseIndex, viewData.bookNames)

@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading
 
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -105,14 +106,40 @@ class ReadingViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testChapterListViewData() = testDispatcher.runBlockingTest {
+    fun testChapterList() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex(0, 0, 0)))
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
         `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
 
         assertEquals(
                 listOf(ViewData.success(ChapterListViewData(VerseIndex(0, 0, 0), MockContents.kjvBookNames))),
-                readingViewModel.chapterListViewData().toList()
+                readingViewModel.chapterList().toList()
+        )
+    }
+
+    @Test
+    fun testVerses() = testDispatcher.runBlockingTest {
+        val verseIndex = VerseIndex(0, 0, 0)
+        val verses = MockContents.kjvVerses
+        val bookmarks = listOf(Bookmark(verseIndex, 123L))
+        val highlights = listOf(Highlight(verseIndex, Highlight.COLOR_BLUE, 456L))
+        val notes = listOf(Note(verseIndex, "random note", 789L))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
+        `when`(bibleReadingManager.parallelTranslations()).thenReturn(flowOf(emptyList()))
+        `when`(bibleReadingManager.readVerses(MockContents.kjvShortName, verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(verses)
+        `when`(bookmarkManager.read(verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(bookmarks)
+        `when`(highlightManager.read(verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(highlights)
+        `when`(noteManager.read(verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(notes)
+        `when`(settingsManager.settings()).thenReturn(flowOf(Settings.DEFAULT))
+
+        assertEquals(
+                listOf(
+                        ViewData.loading(),
+                        ViewData.success(
+                                VersesViewData(Settings.DEFAULT.simpleReadingModeOn, verses, bookmarks, highlights, notes)
+                        )
+                ),
+                readingViewModel.verses(verseIndex.bookIndex, verseIndex.chapterIndex).toList()
         )
     }
 

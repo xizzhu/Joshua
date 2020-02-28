@@ -58,7 +58,7 @@ class ChapterListPresenterTest : BaseUnitTest() {
 
     @Test
     fun testLoadReadingProgress() = testDispatcher.runBlockingTest {
-        `when`(readingViewModel.chapterListViewData()).thenReturn(flowOf(
+        `when`(readingViewModel.chapterList()).thenReturn(flowOf(
                 ViewData.loading(),
                 ViewData.error(exception = RuntimeException()),
                 ViewData.success(ChapterListViewData(

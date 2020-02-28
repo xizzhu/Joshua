@@ -34,11 +34,14 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
+import me.xizzhu.android.joshua.infra.arch.onEach
 import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
+import me.xizzhu.android.joshua.reading.VersesViewData
 import me.xizzhu.android.joshua.ui.dialog
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.joshua.utils.chooserForSharing
 import me.xizzhu.android.logger.Log
@@ -122,9 +125,7 @@ class VersePresenter(
             { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) },
             { verseIndex -> updateCurrentVerse(verseIndex) })
 
-    private var currentTranslation: String = ""
     private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
-    private var parallelTranslations: List<String> = emptyList()
 
     @UiThread
     override fun onBind() {
@@ -168,8 +169,6 @@ class VersePresenter(
             }
 
             currentVerseIndex = newVerseIndex
-            currentTranslation = newTranslation
-            parallelTranslations = newParallelTranslations
 
             adapter.setCurrent(newVerseIndex, newTranslation, newParallelTranslations)
             viewHolder.versePager.setCurrentItem(newVerseIndex.toPagePosition(), false)
@@ -190,38 +189,24 @@ class VersePresenter(
         }
     }
 
-    @VisibleForTesting
-    fun loadVerses(bookIndex: Int, chapterIndex: Int) {
-        coroutineScope.launch {
-            try {
-                val items = coroutineScope {
-                    val highlightsAsync = async { viewModel.readHighlights(bookIndex, chapterIndex) }
-                    val versesAsync = async {
-                        if (parallelTranslations.isEmpty()) {
-                            viewModel.readVerses(currentTranslation, bookIndex, chapterIndex)
-                        } else {
-                            viewModel.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
-                        }
-                    }
-                    return@coroutineScope if (viewModel.settings().first().data!!.simpleReadingModeOn) {
-                        versesAsync.await().toSimpleVerseItems(highlightsAsync.await(),
-                                this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
-                    } else {
-                        val bookmarksAsync = async { viewModel.readBookmarks(bookIndex, chapterIndex) }
-                        val notesAsync = async { viewModel.readNotes(bookIndex, chapterIndex) }
-                        versesAsync.await().toVerseItems(bookmarksAsync.await(),
-                                highlightsAsync.await(), notesAsync.await(), this@VersePresenter::onVerseClicked,
-                                this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
-                                this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
-                    }
+    private fun loadVerses(bookIndex: Int, chapterIndex: Int) {
+        viewModel.verses(bookIndex, chapterIndex).onEach(
+                onLoading = {},
+                onSuccess = { adapter.setVerses(bookIndex, chapterIndex, it.toItems()) },
+                onError = { _, e ->
+                    Log.e(tag, "Failed to load verses", e!!)
+                    activity.dialog(true, R.string.dialog_verse_load_error,
+                            DialogInterface.OnClickListener { _, _ -> loadVerses(bookIndex, chapterIndex) })
                 }
-                adapter.setVerses(bookIndex, chapterIndex, items)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to load verses", e)
-                activity.dialog(true, R.string.dialog_verse_load_error,
-                        DialogInterface.OnClickListener { _, _ -> loadVerses(bookIndex, chapterIndex) })
-            }
-        }
+        ).launchIn(coroutineScope)
+    }
+
+    private fun VersesViewData.toItems(): List<BaseItem> = if (simpleReadingModeOn) {
+        verses.toSimpleVerseItems(highlights, this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
+    } else {
+        verses.toVerseItems(bookmarks, highlights, notes, this@VersePresenter::onVerseClicked,
+                this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
+                this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
     }
 
     @VisibleForTesting

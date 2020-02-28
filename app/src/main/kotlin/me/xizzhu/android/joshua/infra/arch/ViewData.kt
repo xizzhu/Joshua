@@ -66,5 +66,7 @@ fun <T> Flow<ViewData<T>>.filterOnSuccess(): Flow<T> = transform { viewData ->
     if (viewData.status == ViewData.STATUS_SUCCESS) emit(viewData.data!!)
 }
 
+suspend inline fun <T> Flow<ViewData<T>>.firstSuccess(): T = first { it.status == ViewData.STATUS_SUCCESS }.data!!
+
 fun <T1, T2, R> Flow<ViewData<T1>>.combineOnSuccess(flow: Flow<ViewData<T2>>, transform: suspend (a: T1, b: T2) -> R): Flow<R> =
         filterOnSuccess().combine(flow.filterOnSuccess()) { a, b -> transform(a, b) }
