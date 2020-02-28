@@ -195,7 +195,6 @@ class VersePresenter(
         coroutineScope.launch {
             try {
                 val items = coroutineScope {
-                    val bookNameAsync = async { viewModel.readBookNames(currentTranslation)[bookIndex] }
                     val highlightsAsync = async { viewModel.readHighlights(bookIndex, chapterIndex) }
                     val versesAsync = async {
                         if (parallelTranslations.isEmpty()) {
@@ -205,12 +204,12 @@ class VersePresenter(
                         }
                     }
                     return@coroutineScope if (viewModel.settings().first().data!!.simpleReadingModeOn) {
-                        versesAsync.await().toSimpleVerseItems(bookNameAsync.await(), highlightsAsync.await(),
+                        versesAsync.await().toSimpleVerseItems(highlightsAsync.await(),
                                 this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
                     } else {
                         val bookmarksAsync = async { viewModel.readBookmarks(bookIndex, chapterIndex) }
                         val notesAsync = async { viewModel.readNotes(bookIndex, chapterIndex) }
-                        versesAsync.await().toVerseItems(bookNameAsync.await(), bookmarksAsync.await(),
+                        versesAsync.await().toVerseItems(bookmarksAsync.await(),
                                 highlightsAsync.await(), notesAsync.await(), this@VersePresenter::onVerseClicked,
                                 this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
                                 this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)

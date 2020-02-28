@@ -31,21 +31,19 @@ private val bookNameSizeSpan = createTitleSizeSpan()
 private val bookNameStyleSpan = createTitleStyleSpan()
 private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
 
-fun SpannableStringBuilder.format(verse: Verse, bookName: String, followingEmptyVerseCount: Int,
+fun SpannableStringBuilder.format(verse: Verse, followingEmptyVerseCount: Int,
                                   simpleReadingModeOn: Boolean, @ColorInt highlightColor: Int): CharSequence {
     clearAll()
 
     if (verse.parallel.isEmpty()) {
         if (!simpleReadingModeOn) {
             // format:
-            // <book name> <chapter verseIndex>:<verse verseIndex>
-            // <verse text>
-            append(bookName).append(' ')
-                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
+            // <chapter verseIndex>:<verse verseIndex> <verse text>
+            append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
             if (followingEmptyVerseCount > 0) {
                 append('-').append(verse.verseIndex.verseIndex + followingEmptyVerseCount + 1)
             }
-            append('\n')
+            append(' ')
 
             setSpan(bookNameStyleSpan, bookNameSizeSpan, 0, length)
         }
