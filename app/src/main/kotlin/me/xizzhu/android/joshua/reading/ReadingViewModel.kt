@@ -77,10 +77,8 @@ class ReadingViewModel(
             .distinctUntilChanged()
             .toViewData()
 
-    fun currentTranslation(): Flow<ViewData<String>> = _currentTranslation().toViewData()
-
-    // TODO
-    private fun _currentTranslation(): Flow<String> = bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }
+    fun currentTranslation(): Flow<ViewData<String>> =
+            bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }.toViewData()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
@@ -100,22 +98,22 @@ class ReadingViewModel(
         bibleReadingManager.clearParallelTranslation()
     }
 
-    fun currentVerseIndex(): Flow<ViewData<VerseIndex>> = _currentVerseIndex().toViewData()
-
-    // TODO
-    private fun _currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
+    fun currentVerseIndex(): Flow<ViewData<VerseIndex>> =
+            bibleReadingManager.currentVerseIndex().filter { it.isValid() }.toViewData()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 
-    fun chapterList(): Flow<ViewData<ChapterListViewData>> =
-            _currentVerseIndex().combine(bookNames()) { currentVerseIndex, bookNames ->
-                ChapterListViewData(currentVerseIndex, bookNames)
-            }.toViewData()
-
-    private fun bookNames(): Flow<List<String>> = _currentTranslation()
-            .map { bibleReadingManager.readBookNames(it) }
+    fun chapterList(): Flow<ViewData<ChapterListViewData>> {
+        val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
+        val bookNamesFlow = bibleReadingManager.currentTranslation()
+                .filter { it.isNotEmpty() }
+                .map { bibleReadingManager.readBookNames(it) }
+        return combine(currentVerseIndexFlow, bookNamesFlow) { currentVerseIndex, bookNames ->
+            ChapterListViewData(currentVerseIndex, bookNames)
+        }.toViewData()
+    }
 
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)

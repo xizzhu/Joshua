@@ -23,7 +23,6 @@ import android.content.DialogInterface
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.UiThread
-import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
 import androidx.lifecycle.*
 import androidx.viewpager2.widget.ViewPager2
@@ -127,6 +126,108 @@ class VersePresenter(
 
     private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
 
+    private fun updateCurrentVerse(verseIndex: VerseIndex) {
+        if (currentVerseIndex == verseIndex) return
+
+        coroutineScope.launch {
+            try {
+                viewModel.saveCurrentVerseIndex(verseIndex)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to update current verse", e)
+            }
+        }
+    }
+
+    private fun loadVerses(bookIndex: Int, chapterIndex: Int) {
+        viewModel.verses(bookIndex, chapterIndex).onEach(
+                onLoading = {},
+                onSuccess = { adapter.setVerses(bookIndex, chapterIndex, it.toItems()) },
+                onError = { _, e ->
+                    Log.e(tag, "Failed to load verses", e!!)
+                    activity.dialog(true, R.string.dialog_verse_load_error,
+                            DialogInterface.OnClickListener { _, _ -> loadVerses(bookIndex, chapterIndex) })
+                }
+        ).launchIn(coroutineScope)
+    }
+
+    private fun VersesViewData.toItems(): List<BaseItem> = if (simpleReadingModeOn) {
+        verses.toSimpleVerseItems(highlights, this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
+    } else {
+        verses.toVerseItems(bookmarks, highlights, notes, this@VersePresenter::onVerseClicked,
+                this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
+                this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
+    }
+
+    private fun onVerseClicked(verse: Verse) {
+        if (actionMode == null) {
+            showVerseDetail(verse.verseIndex, VerseDetailRequest.VERSES)
+            return
+        }
+
+        if (selectedVerses.contains(verse)) {
+            // de-select the verse
+            selectedVerses.remove(verse)
+            if (selectedVerses.isEmpty()) {
+                actionMode?.finish()
+            }
+
+            adapter.deselectVerse(verse.verseIndex)
+        } else {
+            // select the verse
+            selectedVerses.add(verse)
+            adapter.selectVerse(verse.verseIndex)
+        }
+    }
+
+    private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
+        viewModel.requestVerseDetail(VerseDetailRequest(verseIndex, content))
+        adapter.selectVerse(verseIndex)
+    }
+
+    private fun onVerseLongClicked(verse: Verse) {
+        if (actionMode == null) {
+            actionMode = activity.startSupportActionMode(actionModeCallback)
+        }
+        onVerseClicked(verse)
+    }
+
+    private fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
+        coroutineScope.launch {
+            try {
+                viewModel.saveBookmark(verseIndex, hasBookmark)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to update bookmark", e)
+                // TODO
+            }
+        }
+    }
+
+    private fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int) {
+        activity.dialog(R.string.text_pick_highlight_color,
+                activity.resources.getStringArray(R.array.text_colors),
+                max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
+                DialogInterface.OnClickListener { dialog, which ->
+                    updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
+
+                    dialog.dismiss()
+                })
+    }
+
+    private fun updateHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
+        coroutineScope.launch {
+            try {
+                viewModel.saveHighlight(verseIndex, highlightColor)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to update highlight", e)
+                // TODO
+            }
+        }
+    }
+
+    private fun onNoteClicked(verseIndex: VerseIndex) {
+        showVerseDetail(verseIndex, VerseDetailRequest.NOTE)
+    }
+
     @UiThread
     override fun onBind() {
         super.onBind()
@@ -175,113 +276,5 @@ class VersePresenter(
         }.launchIn(coroutineScope)
 
         viewModel.verseUpdates().onEach { adapter.notifyVerseUpdate(it) }.launchIn(coroutineScope)
-    }
-
-    private fun updateCurrentVerse(verseIndex: VerseIndex) {
-        if (currentVerseIndex == verseIndex) return
-
-        coroutineScope.launch {
-            try {
-                viewModel.saveCurrentVerseIndex(verseIndex)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to update current verse", e)
-            }
-        }
-    }
-
-    private fun loadVerses(bookIndex: Int, chapterIndex: Int) {
-        viewModel.verses(bookIndex, chapterIndex).onEach(
-                onLoading = {},
-                onSuccess = { adapter.setVerses(bookIndex, chapterIndex, it.toItems()) },
-                onError = { _, e ->
-                    Log.e(tag, "Failed to load verses", e!!)
-                    activity.dialog(true, R.string.dialog_verse_load_error,
-                            DialogInterface.OnClickListener { _, _ -> loadVerses(bookIndex, chapterIndex) })
-                }
-        ).launchIn(coroutineScope)
-    }
-
-    private fun VersesViewData.toItems(): List<BaseItem> = if (simpleReadingModeOn) {
-        verses.toSimpleVerseItems(highlights, this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
-    } else {
-        verses.toVerseItems(bookmarks, highlights, notes, this@VersePresenter::onVerseClicked,
-                this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
-                this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
-    }
-
-    @VisibleForTesting
-    fun onVerseClicked(verse: Verse) {
-        if (actionMode == null) {
-            showVerseDetail(verse.verseIndex, VerseDetailRequest.VERSES)
-            return
-        }
-
-        if (selectedVerses.contains(verse)) {
-            // de-select the verse
-            selectedVerses.remove(verse)
-            if (selectedVerses.isEmpty()) {
-                actionMode?.finish()
-            }
-
-            adapter.deselectVerse(verse.verseIndex)
-        } else {
-            // select the verse
-            selectedVerses.add(verse)
-            adapter.selectVerse(verse.verseIndex)
-        }
-    }
-
-    private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
-        viewModel.requestVerseDetail(VerseDetailRequest(verseIndex, content))
-        adapter.selectVerse(verseIndex)
-    }
-
-    @VisibleForTesting
-    fun onVerseLongClicked(verse: Verse) {
-        if (actionMode == null) {
-            actionMode = activity.startSupportActionMode(actionModeCallback)
-        }
-        onVerseClicked(verse)
-    }
-
-    @VisibleForTesting
-    fun onBookmarkClicked(verseIndex: VerseIndex, hasBookmark: Boolean) {
-        coroutineScope.launch {
-            try {
-                viewModel.saveBookmark(verseIndex, hasBookmark)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to update bookmark", e)
-                // TODO
-            }
-        }
-    }
-
-    @VisibleForTesting
-    fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int) {
-        activity.dialog(R.string.text_pick_highlight_color,
-                activity.resources.getStringArray(R.array.text_colors),
-                max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
-                DialogInterface.OnClickListener { dialog, which ->
-                    updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
-
-                    dialog.dismiss()
-                })
-    }
-
-    @VisibleForTesting
-    fun updateHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
-        coroutineScope.launch {
-            try {
-                viewModel.saveHighlight(verseIndex, highlightColor)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to update highlight", e)
-                // TODO
-            }
-        }
-    }
-
-    @VisibleForTesting
-    fun onNoteClicked(verseIndex: VerseIndex) {
-        showVerseDetail(verseIndex, VerseDetailRequest.NOTE)
     }
 }
