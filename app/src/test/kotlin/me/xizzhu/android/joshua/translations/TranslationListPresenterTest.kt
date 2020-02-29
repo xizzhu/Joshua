@@ -20,11 +20,11 @@ import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -76,18 +76,12 @@ class TranslationListPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadTranslationList() = testDispatcher.runBlockingTest {
         `when`(translationsViewModel.settings()).thenReturn(emptyFlow())
-        `when`(translationsViewModel.translationList(false)).thenReturn(flowOf(
-                ViewData.error(exception = RuntimeException()),
-                ViewData.loading(),
-                ViewData.success(TranslationList("", emptyList(), emptyList()))
-        ))
+        `when`(translationsViewModel.translationList(false))
+                .thenReturn(flowOf(TranslationList("", emptyList(), emptyList())))
 
         translationListPresenter.onCreate()
 
         with(inOrder(swipeRefreshLayout, translationListView)) {
-            // error
-            verify(swipeRefreshLayout, times(1)).isRefreshing = false
-
             // loading
             verify(swipeRefreshLayout, times(1)).isRefreshing = true
             verify(translationListView, times(1)).visibility = View.GONE
@@ -97,6 +91,15 @@ class TranslationListPresenterTest : BaseUnitTest() {
             verify(translationListView, times(1)).setItems(any())
             verify(translationListView, times(1)).fadeIn()
         }
+    }
+
+    @Test
+    fun testLoadTranslationListWithException() = testDispatcher.runBlockingTest {
+        `when`(translationsViewModel.settings()).thenReturn(emptyFlow())
+        `when`(translationsViewModel.translationList(false)).thenReturn(flow { throw RuntimeException() })
+
+        translationListPresenter.onCreate()
+        verify(swipeRefreshLayout, times(1)).isRefreshing = false
     }
 
     @Test

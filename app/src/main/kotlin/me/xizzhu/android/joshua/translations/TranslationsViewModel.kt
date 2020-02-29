@@ -22,8 +22,6 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.flowFrom
 
 data class TranslationList(val currentTranslation: String,
                            val availableTranslations: List<TranslationInfo>,
@@ -32,33 +30,29 @@ data class TranslationList(val currentTranslation: String,
 class TranslationsViewModel(private val bibleReadingManager: BibleReadingManager,
                             private val translationManager: TranslationManager,
                             settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    fun translationList(forceRefresh: Boolean): Flow<ViewData<TranslationList>> = flowFrom {
+    fun translationList(forceRefresh: Boolean): Flow<TranslationList> = flow {
         translationManager.reload(forceRefresh)
-        TranslationList(
+        emit(TranslationList(
                 bibleReadingManager.currentTranslation().first(),
                 translationManager.availableTranslations().first(),
                 translationManager.downloadedTranslations().first()
-        )
+        ))
     }
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
-    fun downloadTranslation(translationToDownload: TranslationInfo): Flow<ViewData<Int>> =
+    fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> =
             translationManager.downloadTranslation(translationToDownload)
                     .map { progress ->
-                        if (progress <= 100) {
-                            ViewData.loading(progress)
-                        } else {
-                            // Ideally, we should use onCompletion() to handle this. However, it doesn't
-                            // distinguish between a successful completion and a cancellation.
-                            // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
-                            ViewData.success(-1)
-                        }
-                    }.catch { cause -> emit(ViewData.error(exception = cause)) }
+                        // Ideally, we should use onCompletion() to handle this. However, it doesn't
+                        // distinguish between a successful completion and a cancellation.
+                        // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
+                        if (progress <= 100) progress else -1
+                    }
 
-    fun removeTranslation(translationToRemove: TranslationInfo): Flow<ViewData<Unit>> = flowFrom {
-        translationManager.removeTranslation(translationToRemove)
+    fun removeTranslation(translationToRemove: TranslationInfo): Flow<Unit> = flow {
+        emit(translationManager.removeTranslation(translationToRemove))
     }
 }
