@@ -19,11 +19,11 @@ package me.xizzhu.android.joshua.strongnumber
 import android.view.View
 import android.widget.ProgressBar
 import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -78,11 +78,8 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
         strongNumberListPresenter = spy(strongNumberListPresenter)
         doReturn("").`when`(strongNumberListPresenter).formatStrongNumber(any())
         `when`(strongNumberListActivity.strongNumber()).thenReturn("")
-        `when`(strongNumberListViewModel.strongNumber("")).thenReturn(flowOf(
-                ViewData.loading(),
-                ViewData.error(exception = RuntimeException()),
-                ViewData.success(StrongNumberViewData(StrongNumber("", ""), emptyList(), emptyList(), emptyList()))
-        ))
+        `when`(strongNumberListViewModel.strongNumber(""))
+                .thenReturn(flowOf(StrongNumberViewData(StrongNumber("", ""), emptyList(), emptyList(), emptyList())))
 
         strongNumberListPresenter.loadStrongNumber()
 
@@ -91,14 +88,20 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
             verify(loadingSpinner, times(1)).fadeIn()
             verify(strongNumberListView, times(1)).visibility = View.GONE
 
-            // error
-            verify(loadingSpinner, times(1)).visibility = View.GONE
-
             // success
             verify(strongNumberListView, times(1)).setItems(any())
             verify(strongNumberListView, times(1)).fadeIn()
             verify(loadingSpinner, times(1)).visibility = View.GONE
         }
+    }
+
+    @Test
+    fun testLoadStrongNumberWithException() = testDispatcher.runBlockingTest {
+        `when`(strongNumberListActivity.strongNumber()).thenReturn("")
+        `when`(strongNumberListViewModel.strongNumber("")).thenReturn(flow { throw RuntimeException() })
+
+        strongNumberListPresenter.loadStrongNumber()
+        verify(loadingSpinner, times(1)).visibility = View.GONE
     }
 
     @Test

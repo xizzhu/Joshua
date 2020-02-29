@@ -16,11 +16,9 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
@@ -61,12 +59,9 @@ class StrongNumberViewModelTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(
-                        ViewData.loading(),
-                        ViewData.success(
-                                StrongNumberViewData(
-                                        strongNumber, listOf(MockContents.kjvVerses[0]),
-                                        MockContents.kjvBookNames, MockContents.kjvBookShortNames
-                                )
+                        StrongNumberViewData(
+                                strongNumber, listOf(MockContents.kjvVerses[0]),
+                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
                         )
                 ),
                 strongNumberListViewModel.strongNumber(sn).toList()
@@ -78,9 +73,9 @@ class StrongNumberViewModelTest : BaseUnitTest() {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
 
-        assertEquals(
-                listOf(ViewData.loading(), ViewData.error(exception = e)),
-                strongNumberListViewModel.strongNumber("").toList()
-        )
+        strongNumberListViewModel.strongNumber("")
+                .onCompletion { assertEquals(e, it) }
+                .catch { }
+                .collect()
     }
 }
