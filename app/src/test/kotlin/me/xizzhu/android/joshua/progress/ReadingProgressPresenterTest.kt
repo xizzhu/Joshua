@@ -65,7 +65,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
-        `when`(readingProgressViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
+        `when`(readingProgressViewModel.settings()).thenReturn(flowOf(settings))
 
         readingProgressPresenter.observeSettings()
         verify(readingProgressListView, times(1)).setSettings(settings)

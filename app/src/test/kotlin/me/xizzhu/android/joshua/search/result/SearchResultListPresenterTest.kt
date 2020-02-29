@@ -70,7 +70,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
-        `when`(searchViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
+        `when`(searchViewModel.settings()).thenReturn(flowOf(settings))
 
         searchResultListPresenter.observeSettings()
         verify(searchResultListView, times(1)).setSettings(settings)

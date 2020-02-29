@@ -59,7 +59,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
-        viewModel.settings().onEachSuccess { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEach { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(coroutineScope)
         viewModel.loadingRequest().onEach { loadAnnotatedVerses(it) }.launchIn(coroutineScope)
     }
 

@@ -23,6 +23,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -54,7 +55,7 @@ class ReadingProgressPresenter(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun observeSettings() {
-        viewModel.settings().onEachSuccess { viewHolder.readingProgressListView.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEach { viewHolder.readingProgressListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

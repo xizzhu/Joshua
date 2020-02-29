@@ -30,12 +30,12 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
-import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
 import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
 import me.xizzhu.android.joshua.ui.*
@@ -132,7 +132,7 @@ class SettingsPresenter(
             }
         }
 
-        viewModel.settings().onEachSuccess { updateSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEach { updateSettings(it) }.launchIn(coroutineScope)
     }
 
     private fun saveFontSizeScale(fontSizeScale: Int) {

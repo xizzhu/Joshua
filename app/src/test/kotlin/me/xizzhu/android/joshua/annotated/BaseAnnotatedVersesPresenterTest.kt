@@ -27,7 +27,6 @@ import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -81,7 +80,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
-        `when`(verseAnnotationViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
+        `when`(verseAnnotationViewModel.settings()).thenReturn(flowOf(settings))
 
         baseAnnotatedVersesPresenter.onCreate()
         verify(annotatedVerseListView, times(1)).setSettings(settings)

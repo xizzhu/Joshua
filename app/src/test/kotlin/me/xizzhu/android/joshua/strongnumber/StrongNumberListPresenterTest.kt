@@ -67,7 +67,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
-        `when`(strongNumberListViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
+        `when`(strongNumberListViewModel.settings()).thenReturn(flowOf(settings))
 
         strongNumberListPresenter.observeSettings()
         verify(strongNumberListView, times(1)).setSettings(settings)

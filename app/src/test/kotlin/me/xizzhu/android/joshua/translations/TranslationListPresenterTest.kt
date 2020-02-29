@@ -66,7 +66,7 @@ class TranslationListPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
-        `when`(translationsViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
+        `when`(translationsViewModel.settings()).thenReturn(flowOf(settings))
         `when`(translationsViewModel.translationList(anyBoolean())).thenReturn(emptyFlow())
 
         translationListPresenter.onCreate()

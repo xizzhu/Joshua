@@ -73,7 +73,7 @@ class TranslationListPresenter(
     }
 
     private fun observeSettings() {
-        viewModel.settings().onEachSuccess { viewHolder.translationListView.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEach { viewHolder.translationListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
     private fun loadTranslationList(forceRefresh: Boolean) {

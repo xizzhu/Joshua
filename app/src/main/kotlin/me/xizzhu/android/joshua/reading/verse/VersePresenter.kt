@@ -34,7 +34,6 @@ import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
 import me.xizzhu.android.joshua.infra.arch.onEach
-import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
@@ -258,7 +257,7 @@ class VersePresenter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreate() {
-        viewModel.settings().onEachSuccess { adapter.settings = it }.launchIn(coroutineScope)
+        viewModel.settings().onEach { adapter.settings = it }.launchIn(coroutineScope)
 
         combine(
                 viewModel.currentVerseIndex().filterOnSuccess(),

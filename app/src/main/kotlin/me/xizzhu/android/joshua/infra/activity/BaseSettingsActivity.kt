@@ -22,17 +22,15 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
-import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.ui.getBackgroundColor
 
 abstract class BaseSettingsViewModel(protected val settingsManager: SettingsManager) : ViewModel() {
-    fun settings(): Flow<ViewData<Settings>> = settingsManager.settings().map { ViewData.success(it) }
+    fun settings(): Flow<Settings> = settingsManager.settings()
 }
 
 abstract class BaseSettingsPresenter<VH : ViewHolder, VM : BaseSettingsViewModel, A : BaseSettingsActivity>(
@@ -44,7 +42,7 @@ abstract class BaseSettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        getBaseSettingsViewModel().settings().onEachSuccess { settings ->
+        getBaseSettingsViewModel().settings().onEach { settings ->
             with(window.decorView) {
                 keepScreenOn = settings.keepScreenOn
                 setBackgroundColor(settings.getBackgroundColor())

@@ -141,7 +141,7 @@ class ReadingViewModel(
                 }
             }
             VersesViewData(
-                    settings().firstSuccess().simpleReadingModeOn, verses.await(),
+                    settings().first().simpleReadingModeOn, verses.await(),
                     bookmarks.await(), highlights.await(), notes.await()
             )
         }
