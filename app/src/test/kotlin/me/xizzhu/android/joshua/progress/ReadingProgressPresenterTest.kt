@@ -19,13 +19,13 @@ package me.xizzhu.android.joshua.progress
 import android.view.View
 import android.widget.ProgressBar
 import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -74,12 +74,10 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadReadingProgress() = testDispatcher.runBlockingTest {
         `when`(readingProgressViewModel.readingProgress()).thenReturn(flowOf(
-                ViewData.loading(),
-                ViewData.error(exception = RuntimeException()),
-                ViewData.success(ReadingProgressViewData(
+                ReadingProgressViewData(
                         ReadingProgress(0, 0L, emptyList()),
                         Array(Bible.BOOK_COUNT) { "" }.toList()
-                ))
+                )
         ))
 
         readingProgressPresenter.loadReadingProgress()
@@ -89,14 +87,19 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
             verify(loadingSpinner, times(1)).fadeIn()
             verify(readingProgressListView, times(1)).visibility = View.GONE
 
-            // error
-            verify(loadingSpinner, times(1)).visibility = View.GONE
-
             // success
             verify(readingProgressListView, times(1)).setItems(any())
             verify(readingProgressListView, times(1)).fadeIn()
             verify(loadingSpinner, times(1)).visibility = View.GONE
         }
+    }
+
+    @Test
+    fun testLoadReadingProgressWithException() = testDispatcher.runBlockingTest {
+        `when`(readingProgressViewModel.readingProgress()).thenReturn(flow { throw RuntimeException() })
+
+        readingProgressPresenter.loadReadingProgress()
+        verify(loadingSpinner, times(1)).visibility = View.GONE
     }
 
     @Test
