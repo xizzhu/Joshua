@@ -5,7 +5,9 @@ CHANGELOG
 - Bug fixes:
   - Used SupervisorJob for parent scope
   - Should close activity when failed to load annotated verses, reading progress, and Strong's numbers
-- Refactoring
+- Changes:
+  - No longer show book name when simple reading mode is off
+- Refactoring:
   - Used ViewPager2 instead of ViewPager
   - Used Lifecycle and ViewModel from AndroidX
 - Updated dependencies:

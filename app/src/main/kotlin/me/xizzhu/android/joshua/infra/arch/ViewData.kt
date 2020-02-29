@@ -44,7 +44,7 @@ inline fun <T> flowFrom(crossinline block: suspend () -> T): Flow<ViewData<T>> =
     }
 }
 
-fun <T> Flow<T>.toViewData(): Flow<ViewData<T>> = map { ViewData.success(it) }
+fun <T> Flow<T>.toViewData(): Flow<ViewData<T>> = map { ViewData.success(it) }.catch { ViewData.error<T>(exception = it) }
 
 inline fun <T> Flow<ViewData<T>>.onEach(
         crossinline onLoading: suspend (value: T?) -> Unit,
@@ -65,6 +65,8 @@ inline fun <T> Flow<ViewData<T>>.onEachSuccess(crossinline action: suspend (valu
 fun <T> Flow<ViewData<T>>.filterOnSuccess(): Flow<T> = transform { viewData ->
     if (viewData.status == ViewData.STATUS_SUCCESS) emit(viewData.data!!)
 }
+
+suspend inline fun <T> Flow<ViewData<T>>.firstSuccess(): T = first { it.status == ViewData.STATUS_SUCCESS }.data!!
 
 fun <T1, T2, R> Flow<ViewData<T1>>.combineOnSuccess(flow: Flow<ViewData<T2>>, transform: suspend (a: T1, b: T2) -> R): Flow<R> =
         filterOnSuccess().combine(flow.filterOnSuccess()) { a, b -> transform(a, b) }

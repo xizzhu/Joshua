@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.reading.verse
 
 import me.xizzhu.android.joshua.core.*
 
-fun List<Verse>.toSimpleVerseItems(bookName: String, highlights: List<Highlight>,
-                                   onVerseClicked: (Verse) -> Unit, onVerseLongClicked: (Verse) -> Unit): List<SimpleVerseItem> {
+fun List<Verse>.toSimpleVerseItems(highlights: List<Highlight>, onVerseClicked: (Verse) -> Unit,
+                                   onVerseLongClicked: (Verse) -> Unit): List<SimpleVerseItem> {
     val items = ArrayList<SimpleVerseItem>(size)
 
     val verseIterator = iterator()
@@ -44,8 +44,8 @@ fun List<Verse>.toSimpleVerseItems(bookName: String, highlights: List<Highlight>
                 ?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
                 ?: Highlight.COLOR_NONE
 
-        items.add(SimpleVerseItem(verse.transform(parallel), bookName, size,
-                followingEmptyVerseCount, highlightColor, onVerseClicked, onVerseLongClicked))
+        items.add(SimpleVerseItem(verse.transform(parallel), size, followingEmptyVerseCount,
+                highlightColor, onVerseClicked, onVerseLongClicked))
 
         verse = nextVerse
     }
@@ -95,8 +95,7 @@ private fun Verse.transform(concatenatedParallel: Array<StringBuilder>): Verse {
     return copy(parallel = parallelTexts)
 }
 
-fun List<Verse>.toVerseItems(bookName: String, bookmarks: List<Bookmark>,
-                             highlights: List<Highlight>, notes: List<Note>,
+fun List<Verse>.toVerseItems(bookmarks: List<Bookmark>, highlights: List<Highlight>, notes: List<Note>,
                              onVerseClicked: (Verse) -> Unit, onVerseLongClicked: (Verse) -> Unit,
                              onBookmarkClicked: (VerseIndex, Boolean) -> Unit,
                              onHighlightClicked: (VerseIndex, Int) -> Unit,
@@ -150,7 +149,7 @@ fun List<Verse>.toVerseItems(bookName: String, bookmarks: List<Bookmark>,
         val hasBookmark = bookmark?.let { it.verseIndex.verseIndex == verseIndex }
                 ?: false
 
-        items.add(VerseItem(verse.transform(parallel), bookName, followingEmptyVerseCount,
+        items.add(VerseItem(verse.transform(parallel), followingEmptyVerseCount,
                 hasNote, highlightColor, hasBookmark, onVerseClicked, onVerseLongClicked,
                 onNoteClicked, onHighlightClicked, onBookmarkClicked))
 

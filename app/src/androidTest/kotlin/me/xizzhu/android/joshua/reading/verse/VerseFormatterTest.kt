@@ -29,27 +29,27 @@ import kotlin.test.assertEquals
 class VerseFormatterTest : BaseUnitTest() {
     @Test
     fun testFormat() {
-        assertEquals("${MockContents.kjvBookNames[0]} 1:1\n${MockContents.kjvVerses[0].text.text}",
-                SpannableStringBuilder().format(MockContents.kjvVerses[0], MockContents.kjvBookNames[0], 0, false, Highlight.COLOR_NONE).toString())
+        assertEquals("1:1 ${MockContents.kjvVerses[0].text.text}",
+                SpannableStringBuilder().format(MockContents.kjvVerses[0], 0, false, Highlight.COLOR_NONE).toString())
     }
 
     @Test
     fun testFormatWithSimpleReadingMode() {
         assertEquals(MockContents.kjvVerses[0].text.text,
-                SpannableStringBuilder().format(MockContents.kjvVerses[0], MockContents.kjvBookNames[0], 0, true, Highlight.COLOR_NONE).toString())
+                SpannableStringBuilder().format(MockContents.kjvVerses[0], 0, true, Highlight.COLOR_NONE).toString())
     }
 
     @Test
     fun testFormatWithFollowingEmptyVerse() {
-        assertEquals("${MockContents.msgBookNames[0]} 1:1-2\n${MockContents.msgVerses[0].text.text}",
-                SpannableStringBuilder().format(MockContents.msgVerses[0], MockContents.msgBookNames[0], 1, false, Highlight.COLOR_NONE).toString())
+        assertEquals("1:1-2 ${MockContents.msgVerses[0].text.text}",
+                SpannableStringBuilder().format(MockContents.msgVerses[0], 1, false, Highlight.COLOR_NONE).toString())
     }
 
     @Test
     fun testFormatWithHighlight() {
         val ssb = SpannableStringBuilder()
-        assertEquals("${MockContents.kjvBookNames[0]} 1:1\n${MockContents.kjvVerses[0].text.text}",
-                ssb.format(MockContents.kjvVerses[0], MockContents.kjvBookNames[0], 0, false, Highlight.COLOR_PINK).toString())
+        assertEquals("1:1 ${MockContents.kjvVerses[0].text.text}",
+                ssb.format(MockContents.kjvVerses[0], 0, false, Highlight.COLOR_PINK).toString())
 
         val actualBackgroundColorSpans = ssb.getSpans(0, ssb.length, BackgroundColorSpan::class.java)
         assertEquals(1, actualBackgroundColorSpans.size)
@@ -63,8 +63,8 @@ class VerseFormatterTest : BaseUnitTest() {
     @Test
     fun testFormatWithBlueHighlight() {
         val ssb = SpannableStringBuilder()
-        assertEquals("${MockContents.kjvBookNames[0]} 1:1\n${MockContents.kjvVerses[0].text.text}",
-                ssb.format(MockContents.kjvVerses[0], MockContents.kjvBookNames[0], 0, false, Highlight.COLOR_BLUE).toString())
+        assertEquals("1:1 ${MockContents.kjvVerses[0].text.text}",
+                ssb.format(MockContents.kjvVerses[0], 0, false, Highlight.COLOR_BLUE).toString())
 
         val actualBackgroundColorSpans = ssb.getSpans(0, ssb.length, BackgroundColorSpan::class.java)
         assertEquals(1, actualBackgroundColorSpans.size)
@@ -78,8 +78,8 @@ class VerseFormatterTest : BaseUnitTest() {
     @Test
     fun testFormatWithHighlightAndFollowingEmptyVerse() {
         val ssb = SpannableStringBuilder()
-        assertEquals("${MockContents.msgBookNames[0]} 1:1-2\n${MockContents.msgVerses[0].text.text}",
-                ssb.format(MockContents.msgVerses[0], MockContents.msgBookNames[0], 1, false, Highlight.COLOR_PINK).toString())
+        assertEquals("1:1-2 ${MockContents.msgVerses[0].text.text}",
+                ssb.format(MockContents.msgVerses[0], 1, false, Highlight.COLOR_PINK).toString())
 
         val actualBackgroundColorSpans = ssb.getSpans(0, ssb.length, BackgroundColorSpan::class.java)
         assertEquals(1, actualBackgroundColorSpans.size)
@@ -93,20 +93,20 @@ class VerseFormatterTest : BaseUnitTest() {
     @Test
     fun testFormatWithParallel() {
         assertEquals("${MockContents.kjvShortName} 1:1\n${MockContents.kjvVersesWithBbeCuvParallel[0].text.text}\n\n${MockContents.bbeShortName} 1:1\n${MockContents.kjvVersesWithBbeCuvParallel[0].parallel[0].text}\n\n${MockContents.cuvShortName} 1:1\n${MockContents.kjvVersesWithBbeCuvParallel[0].parallel[1].text}",
-                SpannableStringBuilder().format(MockContents.kjvVersesWithBbeCuvParallel[0], MockContents.kjvBookNames[0], 0, false, Highlight.COLOR_NONE).toString())
+                SpannableStringBuilder().format(MockContents.kjvVersesWithBbeCuvParallel[0], 0, false, Highlight.COLOR_NONE).toString())
     }
 
     @Test
     fun testFormatWithParallelAndFollowingEmptyVerse() {
         assertEquals("${MockContents.msgShortName} 1:1-2\n${MockContents.msgVersesWithKjvParallel[0].text.text}\n\n${MockContents.kjvShortName} 1:1-2\n${MockContents.msgVersesWithKjvParallel[0].parallel[0].text}",
-                SpannableStringBuilder().format(MockContents.msgVersesWithKjvParallel[0], MockContents.msgBookNames[0], 1, false, Highlight.COLOR_NONE).toString())
+                SpannableStringBuilder().format(MockContents.msgVersesWithKjvParallel[0], 1, false, Highlight.COLOR_NONE).toString())
     }
 
     @Test
     fun testFormatWithParallelAndHighlight() {
         val ssb = SpannableStringBuilder()
         assertEquals("${MockContents.kjvShortName} 1:1\n${MockContents.kjvVersesWithBbeCuvParallel[0].text.text}\n\n${MockContents.bbeShortName} 1:1\n${MockContents.kjvVersesWithBbeCuvParallel[0].parallel[0].text}\n\n${MockContents.cuvShortName} 1:1\n${MockContents.kjvVersesWithBbeCuvParallel[0].parallel[1].text}",
-                ssb.format(MockContents.kjvVersesWithBbeCuvParallel[0], MockContents.kjvBookNames[0], 0, false, Highlight.COLOR_PINK).toString())
+                ssb.format(MockContents.kjvVersesWithBbeCuvParallel[0], 0, false, Highlight.COLOR_PINK).toString())
 
         val actualBackgroundColorSpans = ssb.getSpans(0, ssb.length, BackgroundColorSpan::class.java)
         assertEquals(1, actualBackgroundColorSpans.size)
@@ -121,7 +121,7 @@ class VerseFormatterTest : BaseUnitTest() {
     fun testFormatWithParallelAndBlueHighlight() {
         val ssb = SpannableStringBuilder()
         assertEquals("${MockContents.kjvShortName} 1:1\n${MockContents.kjvVersesWithBbeCuvParallel[0].text.text}\n\n${MockContents.bbeShortName} 1:1\n${MockContents.kjvVersesWithBbeCuvParallel[0].parallel[0].text}\n\n${MockContents.cuvShortName} 1:1\n${MockContents.kjvVersesWithBbeCuvParallel[0].parallel[1].text}",
-                ssb.format(MockContents.kjvVersesWithBbeCuvParallel[0], MockContents.kjvBookNames[0], 0, false, Highlight.COLOR_BLUE).toString())
+                ssb.format(MockContents.kjvVersesWithBbeCuvParallel[0], 0, false, Highlight.COLOR_BLUE).toString())
 
         val actualBackgroundColorSpans = ssb.getSpans(0, ssb.length, BackgroundColorSpan::class.java)
         assertEquals(1, actualBackgroundColorSpans.size)
@@ -136,7 +136,7 @@ class VerseFormatterTest : BaseUnitTest() {
     fun testFormatWithParallelAndHighlightAndFollowingEmptyVerse() {
         val ssb = SpannableStringBuilder()
         assertEquals("${MockContents.msgShortName} 1:1-2\n${MockContents.msgVersesWithKjvParallel[0].text.text}\n\n${MockContents.kjvShortName} 1:1-2\n${MockContents.msgVersesWithKjvParallel[0].parallel[0].text}",
-                ssb.format(MockContents.msgVersesWithKjvParallel[0], MockContents.msgBookNames[0], 1, false, Highlight.COLOR_PINK).toString())
+                ssb.format(MockContents.msgVersesWithKjvParallel[0], 1, false, Highlight.COLOR_PINK).toString())
 
         val actualBackgroundColorSpans = ssb.getSpans(0, ssb.length, BackgroundColorSpan::class.java)
         assertEquals(1, actualBackgroundColorSpans.size)

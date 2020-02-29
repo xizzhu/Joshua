@@ -28,7 +28,7 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun testToSimpleVerseItems() {
         val verses = MockContents.kjvVerses
-        val actual = verses.toSimpleVerseItems(MockContents.kjvBookNames[0], emptyList(), {}, {})
+        val actual = verses.toSimpleVerseItems(emptyList(), {}, {})
         assertEquals(verses.size, actual.size)
         actual.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
@@ -39,7 +39,7 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun testToSimpleVerseItemsWithFollowingEmptyVerse() {
         val verses = MockContents.msgVerses
-        val actual = verses.toSimpleVerseItems(MockContents.msgBookNames[0], emptyList(), {}, {})
+        val actual = verses.toSimpleVerseItems(emptyList(), {}, {})
         assertTrue(verses.size > actual.size)
 
         var index = 0
@@ -59,7 +59,7 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun testToSimpleVerseItemsWithFollowingEmptyVerseAndParallel() {
         val verses = MockContents.msgVersesWithKjvParallel
-        val actual = verses.toSimpleVerseItems(MockContents.msgBookNames[0], emptyList(), {}, {})
+        val actual = verses.toSimpleVerseItems(emptyList(), {}, {})
         assertEquals(1, actual.size)
         assertEquals(
                 Verse(
@@ -72,12 +72,13 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun testToSimpleVerseItemsWithHighlights() {
         val verses = MockContents.kjvVerses
-        val simpleVerseItems = verses.toSimpleVerseItems(MockContents.kjvBookNames[0],
+        val simpleVerseItems = verses.toSimpleVerseItems(
                 listOf(
                         Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 1L),
                         Highlight(VerseIndex(0, 0, 6), Highlight.COLOR_BLUE, 2L),
                         Highlight(VerseIndex(0, 0, 10), Highlight.COLOR_PURPLE, 3L)
-                ), {}, {})
+                ), {}, {}
+        )
         assertEquals(verses.size, simpleVerseItems.size)
         simpleVerseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
@@ -92,7 +93,7 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun testToVerseItems() {
         val verses = MockContents.kjvVerses
-        val verseItems = verses.toVerseItems(MockContents.kjvBookNames[0], emptyList(), emptyList(), emptyList(), {}, {}, { _, _ -> }, { _, _ -> }, {})
+        val verseItems = verses.toVerseItems(emptyList(), emptyList(), emptyList(), {}, {}, { _, _ -> }, { _, _ -> }, {})
         assertEquals(verses.size, verseItems.size)
         verseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)
@@ -105,7 +106,7 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun testToVerseItemsWithBookmarksHighlightsNotes() {
         val verses = MockContents.kjvVerses
-        val verseItems = verses.toVerseItems(MockContents.kjvBookNames[0],
+        val verseItems = verses.toVerseItems(
                 listOf(
                         Bookmark(VerseIndex(0, 0, 0), 0L),
                         Bookmark(VerseIndex(0, 0, 5), 0L),
@@ -120,7 +121,8 @@ class VerseTransformerTest : BaseUnitTest() {
                         Note(VerseIndex(0, 0, 0), "", 0L),
                         Note(VerseIndex(0, 0, 7), "", 0L),
                         Note(VerseIndex(0, 0, 10), "", 0L)
-                ), {}, {}, { _, _ -> }, { _, _ -> }, {})
+                ), {}, {}, { _, _ -> }, { _, _ -> }, {}
+        )
         assertEquals(verses.size, verseItems.size)
         verseItems.forEachIndexed { index, verseItem ->
             assertEquals(verses[index], verseItem.verse)

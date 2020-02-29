@@ -18,18 +18,21 @@ package me.xizzhu.android.joshua.reading
 
 import androidx.annotation.IntDef
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
-import me.xizzhu.android.joshua.infra.arch.toViewData
+import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.utils.currentTimeMillis
+
+data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames: List<String>)
+
+data class VersesViewData(
+        val simpleReadingModeOn: Boolean, val verses: List<Verse>,
+        val bookmarks: List<Bookmark>, val highlights: List<Highlight>, val notes: List<Note>
+)
 
 data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: Int) {
     companion object {
@@ -74,9 +77,8 @@ class ReadingViewModel(
             .distinctUntilChanged()
             .toViewData()
 
-    fun currentTranslation(): Flow<ViewData<String>> = bibleReadingManager.currentTranslation()
-            .filter { it.isNotEmpty() }
-            .toViewData()
+    fun currentTranslation(): Flow<ViewData<String>> =
+            bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }.toViewData()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
@@ -96,17 +98,26 @@ class ReadingViewModel(
         bibleReadingManager.clearParallelTranslation()
     }
 
-    fun currentVerseIndex(): Flow<ViewData<VerseIndex>> = bibleReadingManager.currentVerseIndex()
-            .filter { it.isValid() }
-            .toViewData()
+    fun currentVerseIndex(): Flow<ViewData<VerseIndex>> =
+            bibleReadingManager.currentVerseIndex().filter { it.isValid() }.toViewData()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 
-    fun bookNames(): Flow<ViewData<List<String>>> = currentTranslation()
-            .filterOnSuccess()
-            .map { ViewData.success(bibleReadingManager.readBookNames(it)) }
+    fun chapterList(): Flow<ViewData<ChapterListViewData>> {
+        val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
+        val bookNamesFlow = bibleReadingManager.currentTranslation()
+                .filter { it.isNotEmpty() }
+                .map { bibleReadingManager.readBookNames(it) }
+        return combine(currentVerseIndexFlow, bookNamesFlow) { currentVerseIndex, bookNames ->
+            ChapterListViewData(currentVerseIndex, bookNames)
+        }.toViewData()
+    }
+
+    fun bookName(translationShortName: String, bookIndex: Int): Flow<ViewData<String>> = flowFrom {
+        bibleReadingManager.readBookNames(translationShortName)[bookIndex]
+    }
 
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)
@@ -115,53 +126,65 @@ class ReadingViewModel(
             .filterOnSuccess()
             .map { ViewData.success(bibleReadingManager.readBookShortNames(it)) }
 
-    suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> =
-            bibleReadingManager.readVerses(translationShortName, bookIndex, chapterIndex)
+    fun verses(bookIndex: Int, chapterIndex: Int): Flow<ViewData<VersesViewData>> = flowFrom {
+        coroutineScope {
+            val bookmarks = async { bookmarkManager.read(bookIndex, chapterIndex) }
+            val highlights = async { highlightManager.read(bookIndex, chapterIndex) }
+            val notes = async { noteManager.read(bookIndex, chapterIndex) }
+            val verses = async {
+                val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+                val parallelTranslations = bibleReadingManager.parallelTranslations().first()
+                if (parallelTranslations.isEmpty()) {
+                    bibleReadingManager.readVerses(currentTranslation, bookIndex, chapterIndex)
+                } else {
+                    bibleReadingManager.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+                }
+            }
+            VersesViewData(
+                    settings().firstSuccess().simpleReadingModeOn, verses.await(),
+                    bookmarks.await(), highlights.await(), notes.await()
+            )
+        }
+    }
 
     suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
                            bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingManager.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
 
-    suspend fun readBookmarks(bookIndex: Int, chapterIndex: Int): List<Bookmark> = bookmarkManager.read(bookIndex, chapterIndex)
-
     suspend fun readBookmark(verseIndex: VerseIndex): Bookmark = bookmarkManager.read(verseIndex)
 
-    suspend fun addBookmark(verseIndex: VerseIndex) {
-        bookmarkManager.save(Bookmark(verseIndex, currentTimeMillis()))
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED))
+    suspend fun saveBookmark(verseIndex: VerseIndex, hasBookmark: Boolean) {
+        if (hasBookmark) {
+            bookmarkManager.remove(verseIndex)
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_REMOVED))
+        } else {
+            bookmarkManager.save(Bookmark(verseIndex, currentTimeMillis()))
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED))
+        }
     }
-
-    suspend fun removeBookmark(verseIndex: VerseIndex) {
-        bookmarkManager.remove(verseIndex)
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_REMOVED))
-    }
-
-    suspend fun readHighlights(bookIndex: Int, chapterIndex: Int): List<Highlight> = highlightManager.read(bookIndex, chapterIndex)
 
     suspend fun readHighlight(verseIndex: VerseIndex): Highlight = highlightManager.read(verseIndex)
 
     suspend fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor color: Int) {
-        highlightManager.save(Highlight(verseIndex, color, currentTimeMillis()))
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
+        if (color == Highlight.COLOR_NONE) {
+            highlightManager.remove(verseIndex)
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE))
+        } else {
+            highlightManager.save(Highlight(verseIndex, color, currentTimeMillis()))
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
+        }
     }
-
-    suspend fun removeHighlight(verseIndex: VerseIndex) {
-        highlightManager.remove(verseIndex)
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE))
-    }
-
-    suspend fun readNotes(bookIndex: Int, chapterIndex: Int): List<Note> = noteManager.read(bookIndex, chapterIndex)
 
     suspend fun readNote(verseIndex: VerseIndex): Note = noteManager.read(verseIndex)
 
     suspend fun saveNote(verseIndex: VerseIndex, note: String) {
-        noteManager.save(Note(verseIndex, note, currentTimeMillis()))
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED))
-    }
-
-    suspend fun removeNote(verseIndex: VerseIndex) {
-        noteManager.remove(verseIndex)
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED))
+        if (note.isEmpty()) {
+            noteManager.remove(verseIndex)
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED))
+        } else {
+            noteManager.save(Note(verseIndex, note, currentTimeMillis()))
+            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED))
+        }
     }
 
     suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.readStrongNumber(verseIndex)
