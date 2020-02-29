@@ -115,6 +115,10 @@ class ReadingViewModel(
         }.toViewData()
     }
 
+    fun bookName(translationShortName: String, bookIndex: Int): Flow<ViewData<String>> = flowFrom {
+        bibleReadingManager.readBookNames(translationShortName)[bookIndex]
+    }
+
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)
 

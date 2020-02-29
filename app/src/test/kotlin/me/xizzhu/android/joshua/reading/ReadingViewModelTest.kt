@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.reading
 
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -114,6 +113,23 @@ class ReadingViewModelTest : BaseUnitTest() {
         assertEquals(
                 listOf(ViewData.success(ChapterListViewData(VerseIndex(0, 0, 0), MockContents.kjvBookNames))),
                 readingViewModel.chapterList().toList()
+        )
+    }
+
+    @Test
+
+    fun testBookName() = testDispatcher.runBlockingTest {
+        val e = RuntimeException("random exception")
+        `when`(bibleReadingManager.readBookNames(MockContents.cuvShortName)).thenThrow(e)
+        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+
+        assertEquals(
+                listOf(ViewData.loading(), ViewData.success(MockContents.kjvBookNames[0])),
+                readingViewModel.bookName(MockContents.kjvShortName, 0).toList()
+        )
+        assertEquals(
+                listOf(ViewData.loading(), ViewData.error(exception = e)),
+                readingViewModel.bookName(MockContents.cuvShortName, 0).toList()
         )
     }
 

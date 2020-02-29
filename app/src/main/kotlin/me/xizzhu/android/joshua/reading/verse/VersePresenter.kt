@@ -82,42 +82,45 @@ class VersePresenter(
     }
 
     private fun copyToClipBoard() {
-        coroutineScope.launch {
-            try {
-                if (selectedVerses.isNotEmpty()) {
-                    val verse = selectedVerses.first()
-                    val bookName = viewModel.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
+        if (selectedVerses.isEmpty()) return
+
+        val verse = selectedVerses.first()
+        viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex).onEach(
+                onLoading = {},
+                onSuccess = { bookName ->
                     // On older devices, this only works on the threads with loopers.
                     (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                             .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
                                     selectedVerses.toStringForSharing(bookName)))
                     activity.toast(R.string.toast_verses_copied)
+                },
+                onError = { _, e ->
+                    Log.e(tag, "Failed to copy", e!!)
+                    activity.toast(R.string.toast_unknown_error)
                 }
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to copy", e)
-                activity.toast(R.string.toast_unknown_error)
-            }
+        ).onCompletion {
             actionMode?.finish()
-        }
+        }.launchIn(coroutineScope)
     }
 
     private fun share() {
-        coroutineScope.launch {
-            try {
-                if (selectedVerses.isNotEmpty()) {
-                    val verse = selectedVerses.first()
-                    val bookName = viewModel.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
+        if (selectedVerses.isEmpty()) return
 
+        val verse = selectedVerses.first()
+        viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex).onEach(
+                onLoading = {},
+                onSuccess = { bookName ->
                     activity.chooserForSharing(activity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
                             ?.let { activity.startActivity(it) }
                             ?: throw RuntimeException("Failed to create chooser for sharing")
+                },
+                onError = { _, e ->
+                    Log.e(tag, "Failed to share", e!!)
+                    activity.toast(R.string.toast_unknown_error)
                 }
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to share", e)
-                activity.toast(R.string.toast_unknown_error)
-            }
+        ).onCompletion {
             actionMode?.finish()
-        }
+        }.launchIn(coroutineScope)
     }
 
     private val adapter: VersePagerAdapter = VersePagerAdapter(readingActivity,
