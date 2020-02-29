@@ -170,7 +170,7 @@ class ReadingToolbarPresenter(
     }
 
     private fun observeDownloadedTranslations() {
-        viewModel.downloadedTranslations().onEachSuccess { translations ->
+        viewModel.downloadedTranslations().onEach { translations ->
             if (translations.isEmpty()) {
                 activity.dialog(false, R.string.dialog_no_translation_downloaded,
                         DialogInterface.OnClickListener { _, _ -> startTranslationManagementActivity() },
@@ -199,7 +199,7 @@ class ReadingToolbarPresenter(
     }
 
     private fun observeCurrentTranslation() {
-        viewModel.currentTranslation().onEachSuccess { translationShortName ->
+        viewModel.currentTranslation().onEach { translationShortName ->
             currentTranslation = translationShortName
 
             var selected = 0
@@ -219,13 +219,13 @@ class ReadingToolbarPresenter(
 
     private fun observeParallelTranslations() {
         viewModel.parallelTranslations()
-                .onEachSuccess { viewHolder.readingToolbar.setParallelTranslations(it) }
+                .onEach { viewHolder.readingToolbar.setParallelTranslations(it) }
                 .launchIn(coroutineScope)
     }
 
     private fun observeBookNames() {
         viewModel.currentVerseIndex()
-                .combineOnSuccess(viewModel.bookShortNames()) { currentVerseIndex, bookShortNames ->
+                .combine(viewModel.bookShortNames()) { currentVerseIndex, bookShortNames ->
                     viewHolder.readingToolbar.title =
                             "${bookShortNames[currentVerseIndex.bookIndex]}, ${currentVerseIndex.chapterIndex + 1}"
                 }.launchIn(coroutineScope)

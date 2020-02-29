@@ -17,12 +17,9 @@
 package me.xizzhu.android.joshua.reading
 
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.utils.currentTimeMillis
@@ -74,9 +71,9 @@ class ReadingViewModelTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(
-                        ViewData.success(emptyList()),
-                        ViewData.success(listOf(MockContents.kjvTranslationInfo, MockContents.bbeTranslationInfo)),
-                        ViewData.success(listOf(MockContents.bbeTranslationInfo))
+                        emptyList(),
+                        listOf(MockContents.kjvTranslationInfo, MockContents.bbeTranslationInfo),
+                        listOf(MockContents.bbeTranslationInfo)
                 ),
                 readingViewModel.downloadedTranslations().toList()
         )
@@ -86,10 +83,7 @@ class ReadingViewModelTest : BaseUnitTest() {
     fun testCurrentTranslation() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
 
-        assertEquals(
-                listOf(ViewData.success(MockContents.kjvShortName)),
-                readingViewModel.currentTranslation().toList()
-        )
+        assertEquals(listOf(MockContents.kjvShortName), readingViewModel.currentTranslation().toList())
     }
 
     @Test
@@ -99,7 +93,7 @@ class ReadingViewModelTest : BaseUnitTest() {
         )
 
         assertEquals(
-                listOf(ViewData.success(VerseIndex(1, 2, 3))),
+                listOf(VerseIndex(1, 2, 3)),
                 readingViewModel.currentVerseIndex().toList()
         )
     }
@@ -111,7 +105,7 @@ class ReadingViewModelTest : BaseUnitTest() {
         `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
 
         assertEquals(
-                listOf(ViewData.success(ChapterListViewData(VerseIndex(0, 0, 0), MockContents.kjvBookNames))),
+                listOf(ChapterListViewData(VerseIndex(0, 0, 0), MockContents.kjvBookNames)),
                 readingViewModel.chapterList().toList()
         )
     }
@@ -124,13 +118,20 @@ class ReadingViewModelTest : BaseUnitTest() {
         `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
 
         assertEquals(
-                listOf(ViewData.loading(), ViewData.success(MockContents.kjvBookNames[0])),
+                listOf(MockContents.kjvBookNames[0]),
                 readingViewModel.bookName(MockContents.kjvShortName, 0).toList()
         )
-        assertEquals(
-                listOf(ViewData.loading(), ViewData.error(exception = e)),
-                readingViewModel.bookName(MockContents.cuvShortName, 0).toList()
-        )
+    }
+
+    fun testBookNameWithException() = testDispatcher.runBlockingTest {
+        val e = RuntimeException("random exception")
+        `when`(bibleReadingManager.readBookNames(MockContents.cuvShortName)).thenThrow(e)
+        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+
+        readingViewModel.bookName(MockContents.cuvShortName, 0)
+                .onCompletion { assertEquals(e, it) }
+                .catch {}
+                .collect()
     }
 
     @Test
@@ -149,12 +150,7 @@ class ReadingViewModelTest : BaseUnitTest() {
         `when`(settingsManager.settings()).thenReturn(flowOf(Settings.DEFAULT))
 
         assertEquals(
-                listOf(
-                        ViewData.loading(),
-                        ViewData.success(
-                                VersesViewData(Settings.DEFAULT.simpleReadingModeOn, verses, bookmarks, highlights, notes)
-                        )
-                ),
+                listOf(VersesViewData(Settings.DEFAULT.simpleReadingModeOn, verses, bookmarks, highlights, notes)),
                 readingViewModel.verses(verseIndex.bookIndex, verseIndex.chapterIndex).toList()
         )
     }
@@ -164,10 +160,7 @@ class ReadingViewModelTest : BaseUnitTest() {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
         `when`(bibleReadingManager.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
 
-        assertEquals(
-                listOf(ViewData.success(MockContents.kjvBookShortNames)),
-                readingViewModel.bookShortNames().toList()
-        )
+        assertEquals(listOf(MockContents.kjvBookShortNames), readingViewModel.bookShortNames().toList())
     }
 
     @Test

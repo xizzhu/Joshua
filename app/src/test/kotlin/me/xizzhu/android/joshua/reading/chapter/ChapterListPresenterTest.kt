@@ -17,10 +17,10 @@
 package me.xizzhu.android.joshua.reading.chapter
 
 import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.reading.ChapterListViewData
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
@@ -59,22 +59,25 @@ class ChapterListPresenterTest : BaseUnitTest() {
     @Test
     fun testLoadReadingProgress() = testDispatcher.runBlockingTest {
         `when`(readingViewModel.chapterList()).thenReturn(flowOf(
-                ViewData.loading(),
-                ViewData.error(exception = RuntimeException()),
-                ViewData.success(ChapterListViewData(
-                        VerseIndex(0, 0, 0), MockContents.kjvBookNames
-                ))
+                ChapterListViewData(VerseIndex(0, 0, 0), MockContents.kjvBookNames)
         ))
 
         chapterListPresenter.observeChapterListViewData()
 
         with(inOrder(readingDrawerLayout, chapterListView)) {
-            // nothing for loading & error
-
             // success
             verify(chapterListView, times(1))
                     .setData(VerseIndex(0, 0, 0), MockContents.kjvBookNames)
             verify(readingDrawerLayout, times(1)).hide()
         }
+    }
+
+    @Test
+    fun testLoadReadingProgressWithException() = testDispatcher.runBlockingTest {
+        `when`(readingViewModel.chapterList()).thenReturn(flow { throw RuntimeException() })
+
+        chapterListPresenter.observeChapterListViewData()
+        verify(chapterListView, never()).setData(any(), any())
+        verify(readingDrawerLayout, never()).hide()
     }
 }

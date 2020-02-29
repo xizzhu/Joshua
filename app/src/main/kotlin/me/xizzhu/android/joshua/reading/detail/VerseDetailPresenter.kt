@@ -24,10 +24,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
@@ -35,10 +32,7 @@ import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.onEach
-import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
@@ -87,7 +81,7 @@ class VerseDetailPresenter(
             loadVerseDetail(it.verseIndex)
             viewHolder.verseDetailViewLayout.show(it.content)
         }.launchIn(coroutineScope)
-        viewModel.currentVerseIndex().onEachSuccess { close() }.launchIn(coroutineScope)
+        viewModel.currentVerseIndex().onEach { close() }.launchIn(coroutineScope)
     }
 
     private fun updateBookmark() {
@@ -149,33 +143,30 @@ class VerseDetailPresenter(
         downloadStrongNumberDialog = activity.progressDialog(
                 R.string.dialog_downloading, 100) { downloadStrongNumberJob?.cancel() }
         downloadStrongNumberJob = viewModel.downloadStrongNumber()
-                .onEach(
-                        onLoading = {
-                            it?.let { progress ->
-                                downloadStrongNumberDialog?.run {
-                                    if (progress < 100) {
-                                        setProgress(progress)
-                                    } else {
-                                        setTitle(R.string.dialog_installing)
-                                        setIsIndeterminate(true)
-                                    }
-                                }
-                            }
-                                    ?: throw IllegalStateException("Missing progress data when downloading")
-                        },
-                        onSuccess = {
+                .onEach { progress ->
+                    when (progress) {
+                        -1 -> {
                             activity.toast(R.string.toast_downloaded)
-
                             verseDetail?.let {
                                 verseDetail = it.copy(strongNumberItems = viewModel.readStrongNumber(it.verseIndex).toStrongNumberItems())
                                 viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
                             }
-                        },
-                        onError = { _, _ ->
-                            activity.dialog(true, R.string.dialog_download_error,
-                                    DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
                         }
-                ).onCompletion {
+                        in 0 until 100 -> {
+                            downloadStrongNumberDialog?.setProgress(progress)
+                        }
+                        else -> {
+                            downloadStrongNumberDialog?.run {
+                                setTitle(R.string.dialog_installing)
+                                setIsIndeterminate(true)
+                            }
+                        }
+                    }
+                }.catch { e ->
+                    Log.e(tag, "Failed to download Strong's numberrs", e)
+                    activity.dialog(true, R.string.dialog_download_error,
+                            DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
+                }.onCompletion {
                     dismissDownloadStrongNumberDialog()
                     downloadStrongNumberJob = null
                 }.launchIn(coroutineScope)
@@ -210,8 +201,8 @@ class VerseDetailPresenter(
 
     @VisibleForTesting
     suspend fun buildVerseTextItems(verseIndex: VerseIndex): List<VerseTextItem> {
-        val currentTranslation = viewModel.currentTranslation().first { ViewData.STATUS_SUCCESS == it.status }.data!!
-        val parallelTranslations = viewModel.downloadedTranslations().first { ViewData.STATUS_SUCCESS == it.status }.data!!
+        val currentTranslation = viewModel.currentTranslation().first()
+        val parallelTranslations = viewModel.downloadedTranslations().first()
                 .sortedWith(translationComparator)
                 .filter { it.shortName != currentTranslation }
                 .map { it.shortName }
@@ -274,7 +265,7 @@ class VerseDetailPresenter(
     fun onVerseClicked(translation: String) {
         coroutineScope.launch {
             try {
-                if (translation != viewModel.currentTranslation().first { ViewData.STATUS_SUCCESS == it.status }.data) {
+                if (translation != viewModel.currentTranslation().first()) {
                     viewModel.saveCurrentTranslation(translation)
                     close()
                 }
