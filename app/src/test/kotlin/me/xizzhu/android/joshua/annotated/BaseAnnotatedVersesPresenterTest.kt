@@ -21,6 +21,7 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
@@ -68,6 +69,10 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         `when`(activity.resources).thenReturn(resources)
         `when`(activity.lifecycle).thenReturn(lifecycle)
 
+        `when`(verseAnnotationViewModel.settings()).thenReturn(emptyFlow())
+        `when`(verseAnnotationViewModel.sortOrder()).thenReturn(emptyFlow())
+        `when`(verseAnnotationViewModel.loadingRequest()).thenReturn(emptyFlow())
+
         annotatedVersesViewHolder = AnnotatedVersesViewHolder(loadingSpinner, annotatedVerseListView)
         baseAnnotatedVersesPresenter = TestVerseAnnotationPresenter(navigator, noItemText, verseAnnotationViewModel, activity, testCoroutineScope)
         baseAnnotatedVersesPresenter.bind(annotatedVersesViewHolder)
@@ -77,8 +82,6 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
         `when`(verseAnnotationViewModel.settings()).thenReturn(flowOf(ViewData.loading(), ViewData.error(), ViewData.success(settings)))
-        `when`(verseAnnotationViewModel.sortOrder()).thenReturn(emptyFlow())
-        `when`(verseAnnotationViewModel.currentTranslation()).thenReturn(emptyFlow())
 
         baseAnnotatedVersesPresenter.onCreate()
         verify(annotatedVerseListView, times(1)).setSettings(settings)
@@ -90,13 +93,9 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         val currentTranslation = MockContents.kjvShortName
         val title = "random title"
         `when`(activity.getString(noItemText)).thenReturn(title)
-        `when`(verseAnnotationViewModel.settings()).thenReturn(emptyFlow())
-        `when`(verseAnnotationViewModel.sortOrder()).thenReturn(flowOf(ViewData.loading(), ViewData.success(sortOrder)))
-        `when`(verseAnnotationViewModel.currentTranslation()).thenReturn(flowOf(ViewData.loading(), ViewData.success(currentTranslation)))
-        `when`(verseAnnotationViewModel.annotatedVerses(sortOrder, currentTranslation)).thenReturn(flowOf(
-                ViewData.loading(),
-                ViewData.error(exception = RuntimeException()),
-                ViewData.success(AnnotatedVersesViewData(emptyList(), MockContents.kjvBookNames, MockContents.kjvBookShortNames))
+        `when`(verseAnnotationViewModel.loadingRequest()).thenReturn(flowOf(LoadingRequest(currentTranslation, sortOrder)))
+        `when`(verseAnnotationViewModel.annotatedVerses(LoadingRequest(currentTranslation, sortOrder))).thenReturn(flowOf(
+                AnnotatedVerses(sortOrder, emptyList(), MockContents.kjvBookNames, MockContents.kjvBookShortNames)
         ))
 
         baseAnnotatedVersesPresenter.onCreate()
@@ -106,9 +105,6 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
             verify(loadingSpinner, times(1)).fadeIn()
             verify(annotatedVerseListView, times(1)).visibility = View.GONE
 
-            // error
-            verify(loadingSpinner, times(1)).visibility = View.GONE
-
             // success
             verify(annotatedVerseListView, times(1)).setItems(listOf(TextItem(title)))
             verify(annotatedVerseListView, times(1)).fadeIn()
@@ -117,24 +113,38 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testLoadAnnotatedVersesWithException() = testDispatcher.runBlockingTest {
+        val currentTranslation = MockContents.kjvShortName
+        val sortOrder = Constants.SORT_BY_DATE
+        `when`(verseAnnotationViewModel.loadingRequest()).thenReturn(flowOf(LoadingRequest(currentTranslation, sortOrder)))
+        `when`(verseAnnotationViewModel.annotatedVerses(LoadingRequest(currentTranslation, sortOrder))).thenReturn(flow { throw RuntimeException() })
+
+        baseAnnotatedVersesPresenter.onCreate()
+        verify(loadingSpinner, times(1)).visibility = View.GONE
+    }
+
+    @Test
     fun testToEmptyItems() {
         val title = "random title"
         `when`(activity.getString(noItemText)).thenReturn(title)
-        val annotatedVerses = AnnotatedVersesViewData<TestVerseAnnotation>(emptyList(), MockContents.kjvBookNames, MockContents.kjvBookShortNames)
+        val annotatedVerses = AnnotatedVerses<TestVerseAnnotation>(
+                Constants.DEFAULT_SORT_ORDER, emptyList(), MockContents.kjvBookNames, MockContents.kjvBookShortNames
+        )
         assertEquals(
                 listOf(TextItem(title)),
-                with(baseAnnotatedVersesPresenter) { annotatedVerses.toItems(Constants.DEFAULT_SORT_ORDER) }
+                with(baseAnnotatedVersesPresenter) { annotatedVerses.toItems() }
         )
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun testToItemsWithIllegalSortOrder() {
-        val annotatedVerses = AnnotatedVersesViewData(
+        val annotatedVerses = AnnotatedVerses(
+                -1,
                 listOf(TestVerseAnnotation(VerseIndex(0, 0, 0), 0L) to MockContents.kjvVerses[0]),
                 MockContents.kjvBookNames,
                 MockContents.kjvBookShortNames
         )
-        with(baseAnnotatedVersesPresenter) { annotatedVerses.toItems(Constants.SORT_ORDER_COUNT) }
+        with(baseAnnotatedVersesPresenter) { annotatedVerses.toItems() }
     }
 
     @Test
@@ -149,8 +159,8 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
                 TestVerseItem(VerseIndex(0, 0, 2), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], Constants.SORT_BY_DATE)
         )
 
-        val sortOrder = Constants.SORT_BY_DATE
-        val annotatedVerses = AnnotatedVersesViewData(
+        val annotatedVerses = AnnotatedVerses(
+                Constants.SORT_BY_DATE,
                 listOf(
                         TestVerseAnnotation(VerseIndex(0, 0, 4), 2L * 365L * 24L * 3600L * 1000L) to MockContents.kjvVerses[4],
                         TestVerseAnnotation(VerseIndex(0, 0, 1), 36L * 3600L * 1000L) to MockContents.kjvVerses[1],
@@ -163,7 +173,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         `when`(resources.getString(anyInt(), anyString(), anyInt())).thenReturn("")
         `when`(resources.getString(anyInt(), anyString(), anyInt(), anyInt())).thenReturn("")
         `when`(resources.getStringArray(anyInt())).thenReturn(Array(12) { "" })
-        val actual = with(baseAnnotatedVersesPresenter) { annotatedVerses.toItems(sortOrder) }
+        val actual = with(baseAnnotatedVersesPresenter) { annotatedVerses.toItems() }
 
         assertEquals(expected, actual)
     }
@@ -210,8 +220,8 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
                 TestVerseItem(VerseIndex(0, 0, 4), MockContents.kjvBookNames[0], MockContents.kjvBookShortNames[0], Constants.SORT_BY_BOOK)
         )
 
-        val sortOrder = Constants.SORT_BY_BOOK
-        val annotatedVerses = AnnotatedVersesViewData(
+        val annotatedVerses = AnnotatedVerses(
+                Constants.SORT_BY_BOOK,
                 listOf(
                         TestVerseAnnotation(VerseIndex(0, 0, 2), 3L) to MockContents.kjvVerses[2],
                         TestVerseAnnotation(VerseIndex(0, 0, 4), 5L) to MockContents.kjvVerses[4]
@@ -219,7 +229,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
                 MockContents.kjvBookNames,
                 MockContents.kjvBookShortNames
         )
-        val actual = with(baseAnnotatedVersesPresenter) { annotatedVerses.toItems(sortOrder) }
+        val actual = with(baseAnnotatedVersesPresenter) { annotatedVerses.toItems() }
 
         assertEquals(expected, actual)
     }
