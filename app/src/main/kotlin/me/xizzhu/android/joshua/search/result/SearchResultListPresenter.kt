@@ -31,6 +31,7 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.search.SearchActivity
+import me.xizzhu.android.joshua.search.SearchRequest
 import me.xizzhu.android.joshua.search.SearchResult
 import me.xizzhu.android.joshua.search.SearchViewModel
 import me.xizzhu.android.joshua.ui.dialog
@@ -50,37 +51,52 @@ class SearchResultListPresenter(
 ) : BaseSettingsPresenter<SearchResultViewHolder, SearchViewModel, SearchActivity>(searchViewModel, searchActivity, coroutineScope) {
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    fun observeSettings() {
+    fun onCreate() {
+        observeSettings()
+        observeSearchRequest()
+    }
+
+    private fun observeSettings() {
         viewModel.settings().onEach { viewHolder.searchResultListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    fun observeQuery() {
-        viewModel.searchResult().onEach(
-                onLoading = {
-                    viewHolder.loadingSpinner.fadeIn()
-                    viewHolder.searchResultListView.visibility = View.GONE
-                },
-                onSuccess = { viewData ->
-                    viewHolder.searchResultListView.setItems(viewData.toItems())
+    private fun observeSearchRequest() {
+        viewModel.searchRequest()
+                .debounce(250L)
+                .distinctUntilChangedBy { it.query }
+                .mapLatest { it }
+                .onEach { search(it) }
+                .launchIn(coroutineScope)
+    }
+
+    private fun search(searchRequest: SearchRequest) {
+        viewModel.search(searchRequest.query)
+                .onStart {
+                    if (!searchRequest.instantSearch) {
+                        viewHolder.loadingSpinner.fadeIn()
+                        viewHolder.searchResultListView.visibility = View.GONE
+                    }
+                }.onEach { searchResult ->
+                    viewHolder.searchResultListView.setItems(searchResult.toItems())
 
                     viewHolder.searchResultListView.scrollToPosition(0)
                     viewHolder.loadingSpinner.visibility = View.GONE
 
-                    if (viewData.instantSearch) {
+                    if (searchRequest.instantSearch) {
                         viewHolder.searchResultListView.visibility = View.VISIBLE
                     } else {
                         viewHolder.searchResultListView.fadeIn()
-                        activity.toast(activity.getString(R.string.toast_verses_searched, viewData.verses.size))
+                        activity.toast(activity.getString(R.string.toast_verses_searched, searchResult.verses.size))
                     }
-                },
-                onError = { _, e ->
-                    Log.e(tag, "Failed to load search verses", e!!)
-                    viewHolder.loadingSpinner.visibility = View.GONE
-                    // TODO
-                }
-        ).launchIn(coroutineScope)
+                }.catch { e ->
+                    Log.e(tag, "Failed to load search verses", e)
+                    if (!searchRequest.instantSearch) {
+                        viewHolder.loadingSpinner.visibility = View.GONE
+                        viewHolder.searchResultListView.visibility = View.GONE
+                        activity.dialog(false, R.string.dialog_search_error,
+                                DialogInterface.OnClickListener { _, _ -> search(searchRequest) })
+                    }
+                }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

@@ -19,13 +19,15 @@ package me.xizzhu.android.joshua.search.result
 import android.view.View
 import android.widget.ProgressBar
 import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.search.SearchActivity
+import me.xizzhu.android.joshua.search.SearchRequest
 import me.xizzhu.android.joshua.search.SearchResult
 import me.xizzhu.android.joshua.search.SearchViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -61,6 +63,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         super.setup()
 
         `when`(searchActivity.lifecycle).thenReturn(lifecycle)
+        `when`(searchViewModel.settings()).thenReturn(emptyFlow())
+        `when`(searchViewModel.searchRequest()).thenReturn(emptyFlow())
 
         searchResultViewHolder = SearchResultViewHolder(loadingSpinner, searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(navigator, searchViewModel, searchActivity, testCoroutineScope)
@@ -72,19 +76,57 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
         `when`(searchViewModel.settings()).thenReturn(flowOf(settings))
 
-        searchResultListPresenter.observeSettings()
+        searchResultListPresenter.onCreate()
         verify(searchResultListView, times(1)).setSettings(settings)
     }
 
     @Test
-    fun testObserveQuery() = testDispatcher.runBlockingTest {
-        `when`(searchViewModel.searchResult()).thenReturn(flowOf(
-                ViewData.loading(),
-                ViewData.error(exception = RuntimeException()),
-                ViewData.success(SearchResult("query", true, emptyList(), emptyList(), emptyList()))
-        ))
+    fun testObserveSearchRequest() = testDispatcher.runBlockingTest {
+        val query = "query"
+        `when`(searchViewModel.searchRequest()).thenReturn(flowOf(SearchRequest(query, false)))
+        `when`(searchViewModel.search(query))
+                .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList())))
 
-        searchResultListPresenter.observeQuery()
+        searchResultListPresenter.onCreate()
+
+        with(inOrder(loadingSpinner, searchResultListView)) {
+            // loading
+            verify(loadingSpinner, times(1)).fadeIn()
+            verify(searchResultListView, times(1)).visibility = View.GONE
+
+            // success
+            verify(searchResultListView, times(1)).setItems(any())
+            verify(searchResultListView, times(1)).scrollToPosition(0)
+            verify(loadingSpinner, times(1)).visibility = View.GONE
+            verify(searchResultListView, times(1)).fadeIn()
+        }
+    }
+
+    @Test
+    fun testObserveSearchRequestWithInstantSearch() = testDispatcher.runBlockingTest {
+        val query = "query"
+        `when`(searchViewModel.searchRequest()).thenReturn(flowOf(SearchRequest(query, true)))
+        `when`(searchViewModel.search(query))
+                .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList())))
+
+        searchResultListPresenter.onCreate()
+
+        with(inOrder(loadingSpinner, searchResultListView)) {
+            // success
+            verify(searchResultListView, times(1)).setItems(any())
+            verify(searchResultListView, times(1)).scrollToPosition(0)
+            verify(loadingSpinner, times(1)).visibility = View.GONE
+            verify(searchResultListView, times(1)).visibility = View.VISIBLE
+        }
+    }
+
+    @Test
+    fun testObserveSearchRequestWithException() = testDispatcher.runBlockingTest {
+        val query = "query"
+        `when`(searchViewModel.searchRequest()).thenReturn(flowOf(SearchRequest(query, false)))
+        `when`(searchViewModel.search(query)).thenReturn(flow { throw RuntimeException() })
+
+        searchResultListPresenter.onCreate()
 
         with(inOrder(loadingSpinner, searchResultListView)) {
             // loading
@@ -93,12 +135,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
             // error
             verify(loadingSpinner, times(1)).visibility = View.GONE
-
-            // success
-            verify(searchResultListView, times(1)).setItems(any())
-            verify(searchResultListView, times(1)).scrollToPosition(0)
-            verify(loadingSpinner, times(1)).visibility = View.GONE
-            verify(searchResultListView, times(1)).visibility = View.VISIBLE
+            verify(searchResultListView, times(1)).visibility = View.GONE
         }
     }
 
@@ -114,7 +151,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         )
 
         val searchResult = SearchResult(
-                query, true, listOf(MockContents.kjvVerses[0]),
+                query, listOf(MockContents.kjvVerses[0]),
                 MockContents.kjvBookNames, MockContents.kjvBookShortNames
         )
         val actual = with(searchResultListPresenter) { searchResult.toItems() }
