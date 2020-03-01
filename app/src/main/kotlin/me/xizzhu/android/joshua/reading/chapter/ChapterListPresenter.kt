@@ -21,13 +21,14 @@ import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.onEach
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.ui.dialog
@@ -63,15 +64,12 @@ class ChapterListPresenter(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun observeChapterListViewData() {
-        viewModel.chapterList().onEach(
-                onLoading = {},
-                onSuccess = { viewData ->
-                    viewHolder.chapterListView.setData(viewData.currentVerseIndex, viewData.bookNames)
+        viewModel.chapterList()
+                .onEach { chapterList ->
+                    viewHolder.chapterListView.setData(chapterList.currentVerseIndex, chapterList.bookNames)
                     viewHolder.readingDrawerLayout.hide()
-                },
-                onError = { _, e ->
-                    Log.e(tag, "Error when observing chapter list view data", e!!)
-                }
-        ).launchIn(coroutineScope)
+                }.catch { e ->
+                    Log.e(tag, "Error when observing chapter list view data", e)
+                }.launchIn(coroutineScope)
     }
 }

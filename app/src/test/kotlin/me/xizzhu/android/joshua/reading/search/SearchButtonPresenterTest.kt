@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -58,11 +57,9 @@ class SearchButtonPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSettings() = testDispatcher.runBlockingTest {
         `when`(readingViewModel.settings()).thenReturn(flowOf(
-                ViewData.loading(),
-                ViewData.success(Settings.DEFAULT),
-                ViewData.error(exception = RuntimeException()),
-                ViewData.success(Settings.DEFAULT.copy(hideSearchButton = true)),
-                ViewData.success(Settings.DEFAULT)
+                Settings.DEFAULT,
+                Settings.DEFAULT.copy(hideSearchButton = true),
+                Settings.DEFAULT
         ))
 
         searchButtonPresenter.observeSettings()

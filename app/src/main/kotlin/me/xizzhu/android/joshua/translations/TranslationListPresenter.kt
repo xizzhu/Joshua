@@ -73,31 +73,28 @@ class TranslationListPresenter(
     }
 
     private fun observeSettings() {
-        viewModel.settings().onEachSuccess { viewHolder.translationListView.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEach { viewHolder.translationListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
     private fun loadTranslationList(forceRefresh: Boolean) {
-        viewModel.translationList(forceRefresh).onEach(
-                onLoading = {
+        viewModel.translationList(forceRefresh)
+                .onStart {
                     with(viewHolder) {
                         swipeRefreshLayout.isRefreshing = true
                         translationListView.visibility = View.GONE
                     }
-                },
-                onSuccess = { viewData ->
+                }.onEach { translationList ->
                     with(viewHolder) {
                         swipeRefreshLayout.isRefreshing = false
-                        translationListView.setItems(viewData.toItems())
+                        translationListView.setItems(translationList.toItems())
                         translationListView.fadeIn()
                     }
-                },
-                onError = { _, _ ->
+                }.catch { e ->
                     viewHolder.swipeRefreshLayout.isRefreshing = false
                     activity.dialog(false, R.string.dialog_load_translation_list_error,
                             DialogInterface.OnClickListener { _, _ -> loadTranslationList(forceRefresh) },
                             DialogInterface.OnClickListener { _, _ -> activity.finish() })
-                }
-        ).launchIn(coroutineScope)
+                }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -162,34 +159,32 @@ class TranslationListPresenter(
         downloadTranslationDialog = activity.progressDialog(
                 R.string.dialog_downloading, 100) { downloadingJob?.cancel() }
 
-        downloadingJob = viewModel.downloadTranslation(translationToDownload).onEach(
-                onLoading = {
-                    it?.let { progress ->
-                        downloadTranslationDialog?.run {
-                            if (progress < 100) {
-                                setProgress(progress)
-                            } else {
+        downloadingJob = viewModel.downloadTranslation(translationToDownload)
+                .onEach { progress ->
+                    when (progress) {
+                        -1 -> {
+                            activity.toast(R.string.toast_downloaded)
+                            loadTranslationList(false)
+                        }
+                        in 0 until 100 -> {
+                            downloadTranslationDialog?.setProgress(progress)
+                        }
+                        else -> {
+                            downloadTranslationDialog?.run {
                                 setTitle(R.string.dialog_installing)
                                 setIsIndeterminate(true)
                             }
                         }
                     }
-                            ?: throw IllegalStateException("Missing progress data when downloading")
-                },
-                onSuccess = {
-                    activity.toast(R.string.toast_downloaded)
-                    loadTranslationList(false)
-                },
-                onError = { _, e ->
-                    Log.e(tag, "Failed to download translation", e!!)
+                }.catch { e ->
+                    Log.e(tag, "Failed to download translation", e)
                     activity.dialog(true, R.string.dialog_download_error,
                             DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
-                }
-        ).onCompletion {
-            downloadTranslationDialog?.dismiss()
-            downloadTranslationDialog = null
-            downloadingJob = null
-        }.launchIn(coroutineScope)
+                }.onCompletion {
+                    downloadTranslationDialog?.dismiss()
+                    downloadTranslationDialog = null
+                    downloadingJob = null
+                }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -211,22 +206,19 @@ class TranslationListPresenter(
         }
         removeTranslationDialog = activity.indeterminateProgressDialog(R.string.dialog_deleting)
 
-        removingJob = viewModel.removeTranslation(translationToRemove).onEach(
-                onLoading = { /* do nothing */ },
-                onSuccess = {
+        removingJob = viewModel.removeTranslation(translationToRemove)
+                .onEach {
                     activity.toast(R.string.toast_deleted)
                     loadTranslationList(false)
-                },
-                onError = { _, e ->
-                    Log.e(tag, "Failed to remove translation", e!!)
+                }.catch { e ->
+                    Log.e(tag, "Failed to remove translation", e)
                     activity.dialog(true, R.string.dialog_delete_error,
                             DialogInterface.OnClickListener { _, _ -> removeTranslation(translationToRemove) })
-                }
-        ).onCompletion {
-            removeTranslationDialog?.dismiss()
-            removeTranslationDialog = null
-            removingJob = null
-        }.launchIn(coroutineScope)
+                }.onCompletion {
+                    removeTranslationDialog?.dismiss()
+                    removeTranslationDialog = null
+                    removingJob = null
+                }.launchIn(coroutineScope)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)

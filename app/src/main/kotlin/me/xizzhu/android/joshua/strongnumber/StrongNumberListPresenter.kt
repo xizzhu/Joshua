@@ -23,7 +23,10 @@ import android.widget.ProgressBar
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -51,30 +54,27 @@ class StrongNumberListPresenter(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun observeSettings() {
-        viewModel.settings().onEachSuccess { viewHolder.strongNumberListView.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEach { viewHolder.strongNumberListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun loadStrongNumber() {
-        viewModel.strongNumber(activity.strongNumber()).onEach(
-                onLoading = {
+        viewModel.strongNumber(activity.strongNumber())
+                .onStart {
                     viewHolder.loadingSpinner.fadeIn()
                     viewHolder.strongNumberListView.visibility = View.GONE
-                },
-                onSuccess = { viewData ->
-                    viewHolder.strongNumberListView.setItems(viewData.toItems())
+                }.onEach { strongNumber ->
+                    viewHolder.strongNumberListView.setItems(strongNumber.toItems())
                     viewHolder.strongNumberListView.fadeIn()
                     viewHolder.loadingSpinner.visibility = View.GONE
-                },
-                onError = { _, e ->
-                    Log.e(tag, "Failed to load Strong's number list", e!!)
+                }.catch { e ->
+                    Log.e(tag, "Failed to load Strong's number list", e)
                     viewHolder.loadingSpinner.visibility = View.GONE
                     activity.dialog(false, R.string.dialog_load_strong_number_list_error,
                             DialogInterface.OnClickListener { _, _ -> loadStrongNumber() },
                             DialogInterface.OnClickListener { _, _ -> activity.finish() })
-                }
-        ).launchIn(coroutineScope)
+                }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

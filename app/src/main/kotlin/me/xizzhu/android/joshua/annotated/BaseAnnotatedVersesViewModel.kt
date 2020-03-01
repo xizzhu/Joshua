@@ -17,34 +17,40 @@
 package me.xizzhu.android.joshua.annotated
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.flowFrom
-import me.xizzhu.android.joshua.infra.arch.toViewData
 
-data class AnnotatedVersesViewData<V : VerseAnnotation>(
-        val verses: List<Pair<V, Verse>>, val bookNames: List<String>, val bookShortNames: List<String>
+data class AnnotatedVerses<V : VerseAnnotation>(
+        @Constants.SortOrder val sortOrder: Int, val verses: List<Pair<V, Verse>>,
+        val bookNames: List<String>, val bookShortNames: List<String>
 )
+
+data class LoadingRequest(val currentTranslation: String, @Constants.SortOrder val sortOrder: Int)
 
 abstract class BaseAnnotatedVersesViewModel<V : VerseAnnotation>(private val bibleReadingManager: BibleReadingManager,
                                                                  private val verseAnnotationManager: VerseAnnotationManager<V>,
                                                                  settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    fun sortOrder(): Flow<ViewData<Int>> = verseAnnotationManager.sortOrder().toViewData()
+    fun sortOrder(): Flow<Int> = verseAnnotationManager.sortOrder()
 
-    fun currentTranslation(): Flow<ViewData<String>> =
-            bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }.toViewData()
+    fun loadingRequest(): Flow<LoadingRequest> =
+            bibleReadingManager.currentTranslation()
+                    .filter { it.isNotEmpty() }
+                    .combine(verseAnnotationManager.sortOrder()) { currentTranslation, sortOrder ->
+                        LoadingRequest(currentTranslation, sortOrder)
+                    }
 
-    fun annotatedVerses(@Constants.SortOrder sortOrder: Int, currentTranslation: String)
-            : Flow<ViewData<AnnotatedVersesViewData<V>>> = flowFrom {
-        val annotations = verseAnnotationManager.read(sortOrder)
-        val verses = bibleReadingManager.readVerses(currentTranslation, annotations.map { it.verseIndex })
-        AnnotatedVersesViewData(
+    fun annotatedVerses(loadingRequest: LoadingRequest): Flow<AnnotatedVerses<V>> = flow {
+        val annotations = verseAnnotationManager.read(loadingRequest.sortOrder)
+        val verses = bibleReadingManager.readVerses(loadingRequest.currentTranslation, annotations.map { it.verseIndex })
+        emit(AnnotatedVerses(
+                loadingRequest.sortOrder,
                 annotations.mapNotNull { annotation -> verses[annotation.verseIndex]?.let { Pair(annotation, it) } },
-                bibleReadingManager.readBookNames(currentTranslation),
-                bibleReadingManager.readBookShortNames(currentTranslation)
-        )
+                bibleReadingManager.readBookNames(loadingRequest.currentTranslation),
+                bibleReadingManager.readBookShortNames(loadingRequest.currentTranslation)
+        ))
     }
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {

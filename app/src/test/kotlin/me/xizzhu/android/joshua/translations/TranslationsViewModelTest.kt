@@ -21,7 +21,6 @@ import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
@@ -59,13 +58,10 @@ class TranslationsViewModelTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(
-                        ViewData.loading(),
-                        ViewData.success(
-                                TranslationList(
-                                        "",
-                                        listOf(MockContents.cuvTranslationInfo),
-                                        emptyList()
-                                )
+                        TranslationList(
+                                "",
+                                listOf(MockContents.cuvTranslationInfo),
+                                emptyList()
                         )
                 ),
                 translationsViewModel.translationList(false).toList()
@@ -82,13 +78,10 @@ class TranslationsViewModelTest : BaseUnitTest() {
 
         assertEquals(
                 listOf(
-                        ViewData.loading(),
-                        ViewData.success(
-                                TranslationList(
-                                        MockContents.kjvShortName,
-                                        listOf(MockContents.cuvTranslationInfo),
-                                        listOf(MockContents.kjvDownloadedTranslationInfo)
-                                )
+                        TranslationList(
+                                MockContents.kjvShortName,
+                                listOf(MockContents.cuvTranslationInfo),
+                                listOf(MockContents.kjvDownloadedTranslationInfo)
                         )
                 ),
                 translationsViewModel.translationList(false).toList()
@@ -101,10 +94,10 @@ class TranslationsViewModelTest : BaseUnitTest() {
         val exception = RuntimeException("random exception")
         `when`(translationManager.reload(true)).thenThrow(exception)
 
-        assertEquals(
-                listOf(ViewData.loading(), ViewData.error(exception = exception)),
-                translationsViewModel.translationList(true).toList()
-        )
+        translationsViewModel.translationList(true)
+                .onCompletion { assertEquals(exception, it) }
+                .catch { }
+                .collect()
     }
 
     @Test
@@ -114,7 +107,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
         val progress = 89
         `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flowOf(progress, 101))
 
-        assertEquals(listOf(ViewData.loading(progress), ViewData.success(-1)),
+        assertEquals(listOf(progress, -1),
                 translationsViewModel.downloadTranslation(translationToDownload).toList())
         verify(translationManager, times(1)).downloadTranslation(translationToDownload)
     }
@@ -125,8 +118,10 @@ class TranslationsViewModelTest : BaseUnitTest() {
         val exception = RuntimeException("random exception")
         `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flow { throw exception })
 
-        assertEquals(listOf(ViewData.error(exception = exception)),
-                translationsViewModel.downloadTranslation(translationToDownload).toList())
+        translationsViewModel.downloadTranslation(translationToDownload)
+                .onCompletion { assertEquals(exception, it) }
+                .catch { }
+                .collect()
         verify(translationManager, times(1)).downloadTranslation(translationToDownload)
     }
 }

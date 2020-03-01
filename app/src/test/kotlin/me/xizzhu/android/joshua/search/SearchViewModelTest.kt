@@ -16,14 +16,11 @@
 
 package me.xizzhu.android.joshua.search
 
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
@@ -48,29 +45,22 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSearchResultWithInstantSearch() = testDispatcher.runBlockingTest {
-        val currentTranslation = MockContents.kjvShortName
-        val query = "query"
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
-        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0]))
-        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
-
-        searchViewModel.updateQuery(SearchQuery(query, true))
-
-        assertEquals(
-                ViewData.success(
-                        SearchResult(
-                                query, true, listOf(MockContents.kjvVerses[0]),
-                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
-                        )
-                ),
-                searchViewModel.searchResult().first()
+    fun testSearchRequest() = testDispatcher.runBlockingTest {
+        val requests = listOf(
+                SearchRequest("1", true),
+                SearchRequest("2", false),
+                SearchRequest("", false),
+                SearchRequest("", true),
+                SearchRequest("3", true)
         )
+        val searchRequest = async { searchViewModel.searchRequest().take(requests.size).toList() }
+        requests.forEach { searchViewModel.requestSearch(it) }
+
+        assertEquals(requests, searchRequest.await())
     }
 
     @Test
-    fun testSearchResult() = testDispatcher.runBlockingTest {
+    fun testSearch() = testDispatcher.runBlockingTest {
         val currentTranslation = MockContents.kjvShortName
         val query = "query"
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
@@ -78,19 +68,14 @@ class SearchViewModelTest : BaseUnitTest() {
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
         `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
 
-        searchViewModel.updateQuery(SearchQuery(query, false))
-
         assertEquals(
                 listOf(
-                        ViewData.loading(),
-                        ViewData.success(
-                                SearchResult(
-                                        query, false, listOf(MockContents.kjvVerses[0]),
-                                        MockContents.kjvBookNames, MockContents.kjvBookShortNames
-                                )
+                        SearchResult(
+                                query, listOf(MockContents.kjvVerses[0]),
+                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
                         )
                 ),
-                searchViewModel.searchResult().take(2).toList()
+                searchViewModel.search(query).toList()
         )
     }
 
@@ -99,11 +84,9 @@ class SearchViewModelTest : BaseUnitTest() {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
 
-        searchViewModel.updateQuery(SearchQuery("", false))
-
-        assertEquals(
-                listOf(ViewData.loading(), ViewData.error(exception = e)),
-                searchViewModel.searchResult().take(2).toList()
-        )
+        searchViewModel.search("")
+                .onCompletion { assertEquals(e, it) }
+                .catch { }
+                .collect()
     }
 }

@@ -25,7 +25,10 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -56,36 +59,30 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
-        viewModel.settings().onEachSuccess { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(coroutineScope)
-
-        viewModel.sortOrder().combineOnSuccess(viewModel.currentTranslation()) { sortOrder, currentTranslation ->
-            loadAnnotatedVerses(sortOrder, currentTranslation)
-        }.launchIn(coroutineScope)
+        viewModel.settings().onEach { viewHolder.annotatedVerseListView.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.loadingRequest().onEach { loadAnnotatedVerses(it) }.launchIn(coroutineScope)
     }
 
-    private fun loadAnnotatedVerses(@Constants.SortOrder sortOrder: Int, currentTranslation: String) {
-        viewModel.annotatedVerses(sortOrder, currentTranslation).onEach(
-                onLoading = {
+    private fun loadAnnotatedVerses(loadingRequest: LoadingRequest) {
+        viewModel.annotatedVerses(loadingRequest)
+                .onStart {
                     viewHolder.loadingSpinner.fadeIn()
                     viewHolder.annotatedVerseListView.visibility = View.GONE
-                },
-                onSuccess = { viewData ->
-                    viewHolder.annotatedVerseListView.setItems(viewData.toItems(sortOrder))
+                }.onEach { annotatedVerses ->
+                    viewHolder.annotatedVerseListView.setItems(annotatedVerses.toItems())
                     viewHolder.annotatedVerseListView.fadeIn()
                     viewHolder.loadingSpinner.visibility = View.GONE
-                },
-                onError = { _, e ->
-                    Log.e(tag, "Failed to load annotated verses", e!!)
+                }.catch { e ->
+                    Log.e(tag, "Failed to load annotated verses", e)
                     viewHolder.loadingSpinner.visibility = View.GONE
                     activity.dialog(false, R.string.dialog_load_annotated_verses_error,
-                            DialogInterface.OnClickListener { _, _ -> loadAnnotatedVerses(sortOrder, currentTranslation) },
+                            DialogInterface.OnClickListener { _, _ -> loadAnnotatedVerses(loadingRequest) },
                             DialogInterface.OnClickListener { _, _ -> activity.finish() })
-                }
-        ).launchIn(coroutineScope)
+                }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun AnnotatedVersesViewData<V>.toItems(@Constants.SortOrder sortOrder: Int): List<BaseItem> =
+    fun AnnotatedVerses<V>.toItems(): List<BaseItem> =
             if (verses.isEmpty()) {
                 listOf(TextItem(activity.getString(noItemText)))
             } else {
@@ -96,7 +93,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
                 }
             }
 
-    private fun AnnotatedVersesViewData<V>.toItemsByDate(): List<BaseItem> {
+    private fun AnnotatedVerses<V>.toItemsByDate(): List<BaseItem> {
         val calendar = Calendar.getInstance()
         var previousYear = -1
         var previousDayOfYear = -1
@@ -139,7 +136,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
 
     protected abstract fun V.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem
 
-    private fun AnnotatedVersesViewData<V>.toItemsByBook(): List<BaseItem> {
+    private fun AnnotatedVerses<V>.toItemsByBook(): List<BaseItem> {
         val items: ArrayList<BaseItem> = ArrayList()
         var currentBookIndex = -1
         verses.forEach { (verseAnnotation, verse) ->

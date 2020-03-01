@@ -22,7 +22,10 @@ import android.widget.ProgressBar
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -54,30 +57,27 @@ class ReadingProgressPresenter(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun observeSettings() {
-        viewModel.settings().onEachSuccess { viewHolder.readingProgressListView.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.settings().onEach { viewHolder.readingProgressListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun loadReadingProgress() {
-        viewModel.readingProgress().onEach(
-                onLoading = {
+        viewModel.readingProgress()
+                .onStart {
                     viewHolder.loadingSpinner.fadeIn()
                     viewHolder.readingProgressListView.visibility = View.GONE
-                },
-                onSuccess = { viewData ->
-                    viewHolder.readingProgressListView.setItems(viewData.toItems())
+                }.onEach { readingProgress ->
+                    viewHolder.readingProgressListView.setItems(readingProgress.toItems())
                     viewHolder.readingProgressListView.fadeIn()
                     viewHolder.loadingSpinner.visibility = View.GONE
-                },
-                onError = { _, e ->
-                    Log.e(tag, "Failed to load reading progress", e!!)
+                }.catch { e ->
+                    Log.e(tag, "Failed to load reading progress", e)
                     viewHolder.loadingSpinner.visibility = View.GONE
                     activity.dialog(false, R.string.dialog_load_reading_progress_error,
                             DialogInterface.OnClickListener { _, _ -> loadReadingProgress() },
                             DialogInterface.OnClickListener { _, _ -> activity.finish() })
-                }
-        ).launchIn(coroutineScope)
+                }.launchIn(coroutineScope)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

@@ -10,6 +10,7 @@ CHANGELOG
 - Refactoring:
   - Used ViewPager2 instead of ViewPager
   - Used Lifecycle and ViewModel from AndroidX
+  - No longer needs ViewData
 - Updated dependencies:
   - Kotlin JVM target to 1.8
   - Gradle to 6.2.1

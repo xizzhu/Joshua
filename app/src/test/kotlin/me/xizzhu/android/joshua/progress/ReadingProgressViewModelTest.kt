@@ -16,14 +16,12 @@
 
 package me.xizzhu.android.joshua.progress
 
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.arch.ViewData
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
@@ -59,7 +57,7 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(bookNames)
 
         assertEquals(
-                listOf(ViewData.loading(), ViewData.success(ReadingProgressViewData(readingProgress, bookNames))),
+                listOf(ReadingProgressViewData(readingProgress, bookNames)),
                 readingProgressViewModel.readingProgress().toList()
         )
     }
@@ -73,9 +71,9 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(currentTranslation))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenThrow(exception)
 
-        assertEquals(
-                listOf(ViewData.loading(), ViewData.error(exception = exception)),
-                readingProgressViewModel.readingProgress().toList()
-        )
+        readingProgressViewModel.readingProgress()
+                .onCompletion { assertEquals(exception, it) }
+                .catch { }
+                .collect()
     }
 }

@@ -18,10 +18,9 @@ package me.xizzhu.android.joshua.strongnumber
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.flowFrom
 
 data class StrongNumberViewData(val strongNumber: StrongNumber, val verses: List<Verse>,
                                 val bookNames: List<String>, val bookShortNames: List<String>)
@@ -29,17 +28,17 @@ data class StrongNumberViewData(val strongNumber: StrongNumber, val verses: List
 class StrongNumberListViewModel(private val bibleReadingManager: BibleReadingManager,
                                 private val strongNumberManager: StrongNumberManager,
                                 settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    fun strongNumber(sn: String): Flow<ViewData<StrongNumberViewData>> = flowFrom {
+    fun strongNumber(sn: String): Flow<StrongNumberViewData> = flow {
         val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
         val verses = bibleReadingManager.readVerses(currentTranslation, strongNumberManager.readVerseIndexes(sn))
                 .map { (_, v) -> v }.sortedBy { verse ->
                     with(verse.verseIndex) { bookIndex * 100000 + chapterIndex * 1000 + verseIndex }
                 }
-        StrongNumberViewData(
+        emit(StrongNumberViewData(
                 strongNumberManager.readStrongNumber(sn), verses,
                 bibleReadingManager.readBookNames(currentTranslation),
                 bibleReadingManager.readBookShortNames(currentTranslation)
-        )
+        ))
     }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {

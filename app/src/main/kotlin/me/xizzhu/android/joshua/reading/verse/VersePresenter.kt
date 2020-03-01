@@ -32,9 +32,6 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.filterOnSuccess
-import me.xizzhu.android.joshua.infra.arch.onEach
-import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.reading.VerseDetailRequest
@@ -85,42 +82,36 @@ class VersePresenter(
         if (selectedVerses.isEmpty()) return
 
         val verse = selectedVerses.first()
-        viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex).onEach(
-                onLoading = {},
-                onSuccess = { bookName ->
+        viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex)
+                .onEach { bookName ->
                     // On older devices, this only works on the threads with loopers.
                     (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
                             .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
                                     selectedVerses.toStringForSharing(bookName)))
                     activity.toast(R.string.toast_verses_copied)
-                },
-                onError = { _, e ->
-                    Log.e(tag, "Failed to copy", e!!)
+                }.catch { e ->
+                    Log.e(tag, "Failed to copy", e)
                     activity.toast(R.string.toast_unknown_error)
-                }
-        ).onCompletion {
-            actionMode?.finish()
-        }.launchIn(coroutineScope)
+                }.onCompletion {
+                    actionMode?.finish()
+                }.launchIn(coroutineScope)
     }
 
     private fun share() {
         if (selectedVerses.isEmpty()) return
 
         val verse = selectedVerses.first()
-        viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex).onEach(
-                onLoading = {},
-                onSuccess = { bookName ->
+        viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex)
+                .onEach { bookName ->
                     activity.chooserForSharing(activity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
                             ?.let { activity.startActivity(it) }
                             ?: throw RuntimeException("Failed to create chooser for sharing")
-                },
-                onError = { _, e ->
-                    Log.e(tag, "Failed to share", e!!)
+                }.catch { e ->
+                    Log.e(tag, "Failed to share", e)
                     activity.toast(R.string.toast_unknown_error)
-                }
-        ).onCompletion {
-            actionMode?.finish()
-        }.launchIn(coroutineScope)
+                }.onCompletion {
+                    actionMode?.finish()
+                }.launchIn(coroutineScope)
     }
 
     private val adapter: VersePagerAdapter = VersePagerAdapter(readingActivity,
@@ -142,15 +133,14 @@ class VersePresenter(
     }
 
     private fun loadVerses(bookIndex: Int, chapterIndex: Int) {
-        viewModel.verses(bookIndex, chapterIndex).onEach(
-                onLoading = {},
-                onSuccess = { adapter.setVerses(bookIndex, chapterIndex, it.toItems()) },
-                onError = { _, e ->
-                    Log.e(tag, "Failed to load verses", e!!)
+        viewModel.verses(bookIndex, chapterIndex)
+                .onEach {
+                    adapter.setVerses(bookIndex, chapterIndex, it.toItems())
+                }.catch { e ->
+                    Log.e(tag, "Failed to load verses", e)
                     activity.dialog(true, R.string.dialog_verse_load_error,
                             DialogInterface.OnClickListener { _, _ -> loadVerses(bookIndex, chapterIndex) })
-                }
-        ).launchIn(coroutineScope)
+                }.launchIn(coroutineScope)
     }
 
     private fun VersesViewData.toItems(): List<BaseItem> = if (simpleReadingModeOn) {
@@ -258,12 +248,12 @@ class VersePresenter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreate() {
-        viewModel.settings().onEachSuccess { adapter.settings = it }.launchIn(coroutineScope)
+        viewModel.settings().onEach { adapter.settings = it }.launchIn(coroutineScope)
 
         combine(
-                viewModel.currentVerseIndex().filterOnSuccess(),
-                viewModel.currentTranslation().filterOnSuccess(),
-                viewModel.parallelTranslations().filterOnSuccess()
+                viewModel.currentVerseIndex(),
+                viewModel.currentTranslation(),
+                viewModel.parallelTranslations()
         ) { newVerseIndex, newTranslation, newParallelTranslations ->
             if (actionMode != null) {
                 if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex

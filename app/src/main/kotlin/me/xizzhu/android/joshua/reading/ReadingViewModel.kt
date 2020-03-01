@@ -73,18 +73,17 @@ class ReadingViewModel(
     private val verseDetailRequest: BroadcastChannel<VerseDetailRequest> = ConflatedBroadcastChannel()
     private val verseUpdates: BroadcastChannel<VerseUpdate> = ConflatedBroadcastChannel()
 
-    fun downloadedTranslations(): Flow<ViewData<List<TranslationInfo>>> = translationManager.downloadedTranslations()
-            .distinctUntilChanged()
-            .toViewData()
+    fun downloadedTranslations(): Flow<List<TranslationInfo>> =
+            translationManager.downloadedTranslations().distinctUntilChanged()
 
-    fun currentTranslation(): Flow<ViewData<String>> =
-            bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }.toViewData()
+    fun currentTranslation(): Flow<String> =
+            bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
-    fun parallelTranslations(): Flow<ViewData<List<String>>> = bibleReadingManager.parallelTranslations().toViewData()
+    fun parallelTranslations(): Flow<List<String>> = bibleReadingManager.parallelTranslations()
 
     suspend fun requestParallelTranslation(translationShortName: String) {
         bibleReadingManager.requestParallelTranslation(translationShortName)
@@ -98,35 +97,34 @@ class ReadingViewModel(
         bibleReadingManager.clearParallelTranslation()
     }
 
-    fun currentVerseIndex(): Flow<ViewData<VerseIndex>> =
-            bibleReadingManager.currentVerseIndex().filter { it.isValid() }.toViewData()
+    fun currentVerseIndex(): Flow<VerseIndex> =
+            bibleReadingManager.currentVerseIndex().filter { it.isValid() }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 
-    fun chapterList(): Flow<ViewData<ChapterListViewData>> {
+    fun chapterList(): Flow<ChapterListViewData> {
         val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
         val bookNamesFlow = bibleReadingManager.currentTranslation()
                 .filter { it.isNotEmpty() }
                 .map { bibleReadingManager.readBookNames(it) }
         return combine(currentVerseIndexFlow, bookNamesFlow) { currentVerseIndex, bookNames ->
             ChapterListViewData(currentVerseIndex, bookNames)
-        }.toViewData()
+        }
     }
 
-    fun bookName(translationShortName: String, bookIndex: Int): Flow<ViewData<String>> = flowFrom {
-        bibleReadingManager.readBookNames(translationShortName)[bookIndex]
+    fun bookName(translationShortName: String, bookIndex: Int): Flow<String> = flow {
+        emit(bibleReadingManager.readBookNames(translationShortName)[bookIndex])
     }
 
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)
 
-    fun bookShortNames(): Flow<ViewData<List<String>>> = currentTranslation()
-            .filterOnSuccess()
-            .map { ViewData.success(bibleReadingManager.readBookShortNames(it)) }
+    fun bookShortNames(): Flow<List<String>> = currentTranslation()
+            .map { bibleReadingManager.readBookShortNames(it) }
 
-    fun verses(bookIndex: Int, chapterIndex: Int): Flow<ViewData<VersesViewData>> = flowFrom {
+    fun verses(bookIndex: Int, chapterIndex: Int): Flow<VersesViewData> = flow {
         coroutineScope {
             val bookmarks = async { bookmarkManager.read(bookIndex, chapterIndex) }
             val highlights = async { highlightManager.read(bookIndex, chapterIndex) }
@@ -140,10 +138,10 @@ class ReadingViewModel(
                     bibleReadingManager.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
                 }
             }
-            VersesViewData(
-                    settings().firstSuccess().simpleReadingModeOn, verses.await(),
+            emit(VersesViewData(
+                    settings().first().simpleReadingModeOn, verses.await(),
                     bookmarks.await(), highlights.await(), notes.await()
-            )
+            ))
         }
     }
 
@@ -189,21 +187,13 @@ class ReadingViewModel(
 
     suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.readStrongNumber(verseIndex)
 
-    fun downloadStrongNumber(): Flow<ViewData<Int>> =
+    fun downloadStrongNumber(): Flow<Int> =
             strongNumberManager.download()
                     .map { progress ->
-                        if (progress <= 100) {
-                            ViewData.loading(progress)
-                        } else {
-                            // Ideally, we should use onCompletion() to handle this. However, it doesn't
-                            // distinguish between a successful completion and a cancellation.
-                            // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
-                            ViewData.success(-1)
-                        }
-                    }
-                    .catch { cause ->
-                        // TODO Log.e(tag, "Failed to download Strong number", cause)
-                        emit(ViewData.error(exception = cause))
+                        // Ideally, we should use onCompletion() to handle this. However, it doesn't
+                        // distinguish between a successful completion and a cancellation.
+                        // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
+                        if (progress <= 100) progress else -1
                     }
 
     fun startTracking() {

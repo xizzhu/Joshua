@@ -21,13 +21,13 @@ import androidx.annotation.UiThread
 import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesActivity
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.infra.arch.onEachSuccess
 
 data class AnnotatedVersesToolbarViewHolder(val toolbar: AnnotatedVersesToolbar) : ViewHolder
 
@@ -45,6 +45,6 @@ class AnnotatedVersesToolbarPresenter<V : VerseAnnotation, A : BaseAnnotatedVers
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun observeSortOrder() {
-        viewModel.sortOrder().onEachSuccess { viewHolder.toolbar.setSortOrder(it) }.launchIn(coroutineScope)
+        viewModel.sortOrder().onEach { viewHolder.toolbar.setSortOrder(it) }.launchIn(coroutineScope)
     }
 }

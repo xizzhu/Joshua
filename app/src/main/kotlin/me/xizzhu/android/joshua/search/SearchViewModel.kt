@@ -24,47 +24,32 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
-import me.xizzhu.android.joshua.infra.arch.ViewData
-import me.xizzhu.android.joshua.infra.arch.flowFrom
 
-data class SearchQuery(val query: String, val instantSearch: Boolean)
+data class SearchRequest(val query: String, val instantSearch: Boolean)
 
 data class SearchResult(
-        val query: String, val instantSearch: Boolean, val verses: List<Verse>,
+        val query: String, val verses: List<Verse>,
         val bookNames: List<String>, val bookShortNames: List<String>
 )
 
 class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
                       settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
-    private val query: BroadcastChannel<ViewData<SearchQuery>> = ConflatedBroadcastChannel()
+    private val searchRequest: BroadcastChannel<SearchRequest> = ConflatedBroadcastChannel()
 
-    fun updateQuery(query: SearchQuery) {
-        this.query.offer(ViewData.success(query))
+    fun requestSearch(request: SearchRequest) {
+        this.searchRequest.offer(request)
     }
 
-    fun searchResult(): Flow<ViewData<SearchResult>> = query.asFlow()
-            .debounce(250L)
-            .distinctUntilChangedBy { if (it.status == ViewData.STATUS_SUCCESS) it.data?.query else "" }
-            .flatMapLatest { queryViewData ->
-                if (ViewData.STATUS_SUCCESS == queryViewData.status) {
-                    val query = queryViewData.data!!
-                    if (query.instantSearch) {
-                        flowOf(ViewData.success(search(query)))
-                    } else {
-                        flowFrom { search(query) }
-                    }
-                } else {
-                    flowOf(ViewData.error(exception = IllegalStateException("Illegal query state: $queryViewData")))
-                }
-            }
+    fun searchRequest(): Flow<SearchRequest> = searchRequest.asFlow()
 
-    private suspend fun search(query: SearchQuery): SearchResult {
+    fun search(query: String): Flow<SearchResult> = flow {
         val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
-        return SearchResult(query.query, query.instantSearch,
-                bibleReadingManager.search(currentTranslation, query.query),
+        emit(SearchResult(
+                query, bibleReadingManager.search(currentTranslation, query),
                 bibleReadingManager.readBookNames(currentTranslation),
-                bibleReadingManager.readBookShortNames(currentTranslation))
+                bibleReadingManager.readBookShortNames(currentTranslation)
+        ))
     }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
