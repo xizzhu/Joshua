@@ -80,24 +80,18 @@ class ReadingToolbarPresenter(
     }
 
     private fun onTranslationSelected(translationShortName: String) {
-        var isDownloadedTranslation = false
-        for (translation in downloadedTranslations) {
-            if (translation.shortName == translationShortName) {
-                if (currentTranslation != translationShortName) {
-                    updateCurrentTranslation(translationShortName)
-                }
-                isDownloadedTranslation = true
-                break
-            }
-        }
+        if (currentTranslation == translationShortName) return
 
-        if (!isDownloadedTranslation) {
-            for (i in 0 until downloadedTranslations.size) {
-                if (currentTranslation == downloadedTranslations[i].shortName) {
-                    viewHolder.readingToolbar.setSpinnerSelection(i)
-                    break
-                }
-            }
+        downloadedTranslations.firstOrNull { it.shortName == translationShortName }?.let {
+            // the selected was one of the downloaded translations, update now
+            // currentTranslation is updated by the listener
+            updateCurrentTranslation(translationShortName)
+        } ?: run {
+            // selected "More", re-select the current translation,
+            // and start translations management activity
+            val index = downloadedTranslations.indexOfFirst { it.shortName == currentTranslation }
+            if (index >= 0) viewHolder.readingToolbar.setSpinnerSelection(index)
+
             startActivity(Navigator.SCREEN_TRANSLATIONS)
         }
     }
