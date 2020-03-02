@@ -52,7 +52,7 @@ class ReadingToolbarPresenter(
         viewHolder.readingToolbar.initialize(
                 onParallelTranslationRequested = ::requestParallelTranslation,
                 onParallelTranslationRemoved = ::removeParallelTranslation,
-                onTranslationSelected = ::selectCurrentTranslation,
+                onTranslationSelected = ::onTranslationSelected,
                 onScreenRequested = ::startActivity
         )
     }
@@ -79,7 +79,7 @@ class ReadingToolbarPresenter(
         }
     }
 
-    private fun selectCurrentTranslation(translationShortName: String) {
+    private fun onTranslationSelected(translationShortName: String) {
         var isDownloadedTranslation = false
         for (translation in downloadedTranslations) {
             if (translation.shortName == translationShortName) {
@@ -102,16 +102,6 @@ class ReadingToolbarPresenter(
         }
     }
 
-    private fun startActivity(@Navigator.Companion.Screen screen: Int) {
-        try {
-            navigator.navigate(activity, screen)
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to open activity", e)
-            activity.dialog(true, R.string.dialog_navigation_error,
-                    DialogInterface.OnClickListener { _, _ -> startActivity(screen) })
-        }
-    }
-
     private fun updateCurrentTranslation(translationShortName: String) {
         coroutineScope.launch {
             try {
@@ -126,6 +116,16 @@ class ReadingToolbarPresenter(
                 activity.dialog(true, R.string.dialog_update_translation_error,
                         DialogInterface.OnClickListener { _, _ -> updateCurrentTranslation(translationShortName) })
             }
+        }
+    }
+
+    private fun startActivity(@Navigator.Companion.Screen screen: Int) {
+        try {
+            navigator.navigate(activity, screen)
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to open activity", e)
+            activity.dialog(true, R.string.dialog_navigation_error,
+                    DialogInterface.OnClickListener { _, _ -> startActivity(screen) })
         }
     }
 
