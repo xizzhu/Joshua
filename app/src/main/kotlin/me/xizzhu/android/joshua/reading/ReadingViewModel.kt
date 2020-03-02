@@ -24,7 +24,6 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
-import me.xizzhu.android.joshua.infra.arch.*
 import me.xizzhu.android.joshua.utils.currentTimeMillis
 
 data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames: List<String>)
