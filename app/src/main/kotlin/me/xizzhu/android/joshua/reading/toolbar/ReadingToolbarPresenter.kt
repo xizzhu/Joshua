@@ -51,61 +51,11 @@ class ReadingToolbarPresenter(
         super.onBind()
 
         viewHolder.readingToolbar.initialize(
-                onParallelTranslationRequested = { requestParallelTranslation(it) },
-                onParallelTranslationRemoved = { removeParallelTranslation(it) },
-                onSpinnerItemSelected = { translationShortName ->
-                    var isDownloadedTranslation = false
-                    for (translation in downloadedTranslations) {
-                        if (translation.shortName == translationShortName) {
-                            if (currentTranslation != translationShortName) {
-                                updateCurrentTranslation(translationShortName)
-                            }
-                            isDownloadedTranslation = true
-                            break
-                        }
-                    }
-
-                    if (!isDownloadedTranslation) {
-                        for (i in 0 until downloadedTranslations.size) {
-                            if (currentTranslation == downloadedTranslations[i].shortName) {
-                                viewHolder.readingToolbar.setSpinnerSelection(i)
-                                break
-                            }
-                        }
-                        startTranslationManagementActivity()
-                    }
-                }
+                onParallelTranslationRequested = ::requestParallelTranslation,
+                onParallelTranslationRemoved = ::removeParallelTranslation,
+                onTranslationSelected = ::selectCurrentTranslation,
+                onScreenRequested = ::startActivity
         )
-
-        viewHolder.readingToolbar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.action_reading_progress -> {
-                    startActivity(Navigator.SCREEN_READING_PROGRESS, R.string.dialog_navigate_to_reading_progress_error)
-                    true
-                }
-                R.id.action_bookmarks -> {
-                    startActivity(Navigator.SCREEN_BOOKMARKS, R.string.dialog_navigate_to_bookmarks_error)
-                    true
-                }
-                R.id.action_highlights -> {
-                    startActivity(Navigator.SCREEN_HIGHLIGHTS, R.string.dialog_navigate_to_highlights_error)
-                    true
-                }
-                R.id.action_notes -> {
-                    startActivity(Navigator.SCREEN_NOTES, R.string.dialog_navigate_to_notes_error)
-                    true
-                }
-                R.id.action_search -> {
-                    startActivity(Navigator.SCREEN_SEARCH, R.string.dialog_navigate_to_search_error)
-                    true
-                }
-                R.id.action_settings -> {
-                    startActivity(Navigator.SCREEN_SETTINGS, R.string.dialog_navigate_to_settings_error)
-                    true
-                }
-                else -> false
-            }
-        }
     }
 
     private fun requestParallelTranslation(translationShortName: String) {
@@ -127,6 +77,30 @@ class ReadingToolbarPresenter(
                 Log.e(tag, "Failed to remove parallel translation", e)
                 // TODO
             }
+        }
+    }
+
+
+    private fun selectCurrentTranslation(translationShortName: String) {
+        var isDownloadedTranslation = false
+        for (translation in downloadedTranslations) {
+            if (translation.shortName == translationShortName) {
+                if (currentTranslation != translationShortName) {
+                    updateCurrentTranslation(translationShortName)
+                }
+                isDownloadedTranslation = true
+                break
+            }
+        }
+
+        if (!isDownloadedTranslation) {
+            for (i in 0 until downloadedTranslations.size) {
+                if (currentTranslation == downloadedTranslations[i].shortName) {
+                    viewHolder.readingToolbar.setSpinnerSelection(i)
+                    break
+                }
+            }
+            startTranslationManagementActivity()
         }
     }
 
