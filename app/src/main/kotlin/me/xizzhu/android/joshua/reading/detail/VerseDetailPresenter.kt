@@ -303,7 +303,7 @@ class VerseDetailPresenter(
                     StrongNumberListActivity.bundle(strongNumber))
         } catch (e: Exception) {
             Log.e(tag, "Failed to open Strong's number list activity", e)
-            activity.dialog(true, R.string.dialog_navigate_to_strong_number_error,
+            activity.dialog(true, R.string.dialog_navigation_error,
                     DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
         }
     }

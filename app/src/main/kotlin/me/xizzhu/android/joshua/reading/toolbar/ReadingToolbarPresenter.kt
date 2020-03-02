@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.reading.toolbar
 
 import android.content.DialogInterface
-import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
@@ -80,7 +79,6 @@ class ReadingToolbarPresenter(
         }
     }
 
-
     private fun selectCurrentTranslation(translationShortName: String) {
         var isDownloadedTranslation = false
         for (translation in downloadedTranslations) {
@@ -100,21 +98,17 @@ class ReadingToolbarPresenter(
                     break
                 }
             }
-            startTranslationManagementActivity()
+            startActivity(Navigator.SCREEN_TRANSLATIONS)
         }
     }
 
-    private fun startTranslationManagementActivity() {
-        startActivity(Navigator.SCREEN_TRANSLATIONS, R.string.dialog_navigate_to_translation_error)
-    }
-
-    private fun startActivity(@Navigator.Companion.Screen screen: Int, @StringRes errorMessage: Int) {
+    private fun startActivity(@Navigator.Companion.Screen screen: Int) {
         try {
             navigator.navigate(activity, screen)
         } catch (e: Exception) {
             Log.e(tag, "Failed to open activity", e)
-            activity.dialog(true, errorMessage,
-                    DialogInterface.OnClickListener { _, _ -> startActivity(screen, errorMessage) })
+            activity.dialog(true, R.string.dialog_navigation_error,
+                    DialogInterface.OnClickListener { _, _ -> startActivity(screen) })
         }
     }
 
@@ -147,7 +141,7 @@ class ReadingToolbarPresenter(
         viewModel.downloadedTranslations().onEach { translations ->
             if (translations.isEmpty()) {
                 activity.dialog(false, R.string.dialog_no_translation_downloaded,
-                        DialogInterface.OnClickListener { _, _ -> startTranslationManagementActivity() },
+                        DialogInterface.OnClickListener { _, _ -> startActivity(Navigator.SCREEN_TRANSLATIONS) },
                         DialogInterface.OnClickListener { _, _ -> activity.finish() })
             } else {
                 downloadedTranslations.clear()

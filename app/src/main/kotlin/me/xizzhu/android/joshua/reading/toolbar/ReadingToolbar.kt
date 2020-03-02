@@ -40,7 +40,7 @@ class ReadingToolbar : Toolbar {
     fun initialize(onParallelTranslationRequested: (String) -> Unit,
                    onParallelTranslationRemoved: (String) -> Unit,
                    onTranslationSelected: (String) -> Unit,
-                   onScreenRequested: (screen: Int, errorMessage: Int) -> Unit) {
+                   onScreenRequested: (Int) -> Unit) {
         with(spinner()) {
             adapter = TranslationSpinnerAdapter(context = context,
                     onParallelTranslationRequested = onParallelTranslationRequested,
@@ -58,27 +58,27 @@ class ReadingToolbar : Toolbar {
         setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_reading_progress -> {
-                    onScreenRequested(Navigator.SCREEN_READING_PROGRESS, R.string.dialog_navigate_to_reading_progress_error)
+                    onScreenRequested(Navigator.SCREEN_READING_PROGRESS)
                     true
                 }
                 R.id.action_bookmarks -> {
-                    onScreenRequested(Navigator.SCREEN_BOOKMARKS, R.string.dialog_navigate_to_bookmarks_error)
+                    onScreenRequested(Navigator.SCREEN_BOOKMARKS)
                     true
                 }
                 R.id.action_highlights -> {
-                    onScreenRequested(Navigator.SCREEN_HIGHLIGHTS, R.string.dialog_navigate_to_highlights_error)
+                    onScreenRequested(Navigator.SCREEN_HIGHLIGHTS)
                     true
                 }
                 R.id.action_notes -> {
-                    onScreenRequested(Navigator.SCREEN_NOTES, R.string.dialog_navigate_to_notes_error)
+                    onScreenRequested(Navigator.SCREEN_NOTES)
                     true
                 }
                 R.id.action_search -> {
-                    onScreenRequested(Navigator.SCREEN_SEARCH, R.string.dialog_navigate_to_search_error)
+                    onScreenRequested(Navigator.SCREEN_SEARCH)
                     true
                 }
                 R.id.action_settings -> {
-                    onScreenRequested(Navigator.SCREEN_SETTINGS, R.string.dialog_navigate_to_settings_error)
+                    onScreenRequested(Navigator.SCREEN_SETTINGS)
                     true
                 }
                 else -> false

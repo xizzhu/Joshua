@@ -48,14 +48,7 @@
     <string name="dialog_verse_load_error">Failed to load the verses, retry?</string>
     <string name="dialog_search_error">Error occurred during search, retry?</string>
     <string name="dialog_verse_selection_error">Failed to select the verse, retry?</string>
-    <string name="dialog_navigate_to_search_error">Failed to open search view, retry?</string>
-    <string name="dialog_navigate_to_translation_error">Failed to open translation management view, retry?</string>
-    <string name="dialog_navigate_to_reading_progress_error">Failed to open reading progress view, retry?</string>
-    <string name="dialog_navigate_to_bookmarks_error">Failed to open bookmarks, retry?</string>
-    <string name="dialog_navigate_to_highlights_error">Failed to open highlights, retry?</string>
-    <string name="dialog_navigate_to_notes_error">Failed to open notes, retry?</string>
-    <string name="dialog_navigate_to_settings_error">Failed to open settings, retry?</string>
-    <string name="dialog_navigate_to_strong_number_error">Failed to open Strong\'s numbers, retry?</string>
+    <string name="dialog_navigation_error">Failed to navigate, retry?</string>
     <string name="dialog_load_reading_progress_error">Failed to load reading progress, retry?</string>
     <string name="dialog_load_strong_number_list_error">Failed to load Strong\'s numbers, retry?</string>
     <string name="dialog_load_annotated_verses_error">Failed to load, retry?</string>
