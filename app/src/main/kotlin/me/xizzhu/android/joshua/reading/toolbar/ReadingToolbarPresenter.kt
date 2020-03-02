@@ -142,20 +142,16 @@ class ReadingToolbarPresenter(
                 downloadedTranslations.addAll(translations.sortedWith(translationComparator))
 
                 val names = ArrayList<String>(downloadedTranslations.size + 1)
-                var selected = 0
-                for (i in 0 until downloadedTranslations.size) {
-                    val translation = downloadedTranslations[i]
-                    if (currentTranslation == translation.shortName) {
-                        selected = i
-                    }
-                    names.add(translation.shortName)
-                }
-                names.add(activity.getString(R.string.menu_more_translation)) // amends "More" to the end of the list
+                        .apply {
+                            addAll(downloadedTranslations.map { it.shortName })
 
-                with(viewHolder.readingToolbar) {
-                    setTranslationShortNames(names)
-                    setSpinnerSelection(selected)
-                }
+                            // amends "More" to the end of the list
+                            add(activity.getString(R.string.menu_more_translation))
+                        }
+                viewHolder.readingToolbar.setTranslationShortNames(names)
+
+                downloadedTranslations.indexOfFirst { it.shortName == currentTranslation }
+                        .let { if (it >= 0) viewHolder.readingToolbar.setSpinnerSelection(it) }
             }
         }.launchIn(coroutineScope)
     }
@@ -163,19 +159,10 @@ class ReadingToolbarPresenter(
     private fun observeCurrentTranslation() {
         viewModel.currentTranslation().onEach { translationShortName ->
             currentTranslation = translationShortName
+            viewHolder.readingToolbar.setCurrentTranslation(currentTranslation)
 
-            var selected = 0
-            for (i in 0 until downloadedTranslations.size) {
-                if (currentTranslation == downloadedTranslations[i].shortName) {
-                    selected = i
-                    break
-                }
-            }
-
-            with(viewHolder.readingToolbar) {
-                setCurrentTranslation(currentTranslation)
-                setSpinnerSelection(selected)
-            }
+            downloadedTranslations.indexOfFirst { it.shortName == currentTranslation }
+                    .let { if (it >= 0) viewHolder.readingToolbar.setSpinnerSelection(it) }
         }.launchIn(coroutineScope)
     }
 
