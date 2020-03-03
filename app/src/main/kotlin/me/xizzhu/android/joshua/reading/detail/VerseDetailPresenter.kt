@@ -167,14 +167,10 @@ class VerseDetailPresenter(
                     activity.dialog(true, R.string.dialog_download_error,
                             DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
                 }.onCompletion {
-                    dismissDownloadStrongNumberDialog()
+                    downloadStrongNumberDialog?.dismiss()
+                    downloadStrongNumberDialog = null
                     downloadStrongNumberJob = null
                 }.launchIn(coroutineScope)
-    }
-
-    private fun dismissDownloadStrongNumberDialog() {
-        downloadStrongNumberDialog?.dismiss()
-        downloadStrongNumberDialog = null
     }
 
     private fun loadVerseDetail(verseIndex: VerseIndex) {
@@ -310,10 +306,7 @@ class VerseDetailPresenter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onStop() {
-        dismissDownloadStrongNumberDialog()
-
         downloadStrongNumberJob?.cancel()
-        downloadStrongNumberJob = null
     }
 
     /**
