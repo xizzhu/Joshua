@@ -123,7 +123,6 @@ dependencies {
     implementation(Dependencies.AndroidX.View.swipeRefreshLayout)
     implementation(Dependencies.AndroidX.View.viewPager2)
 
-    implementation(Dependencies.Firebase.core)
     implementation(Dependencies.Firebase.analytics)
     implementation(Dependencies.Firebase.Crashlytics.crashlytics)
 

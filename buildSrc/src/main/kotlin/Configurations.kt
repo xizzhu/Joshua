@@ -48,7 +48,7 @@ object Versions {
 
     object Kotlin {
         const val jvmTarget = "1.8"
-        const val core = "1.3.61"
+        const val core = "1.3.70"
         const val coroutines = "1.3.3"
     }
 
@@ -77,8 +77,7 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.3"
-        const val core = "17.2.2"
-        const val analytics = "17.2.2"
+        const val analytics = "17.2.3"
 
         object Crashlytics {
             const val classpath = "1.28.1"
@@ -146,7 +145,6 @@ object Dependencies {
 
     object Firebase {
         const val classpath = "com.google.gms:google-services:${Versions.Firebase.classpath}"
-        const val core = "com.google.firebase:firebase-core:${Versions.Firebase.core}"
         const val analytics = "com.google.firebase:firebase-analytics:${Versions.Firebase.analytics}"
 
         object Crashlytics {
