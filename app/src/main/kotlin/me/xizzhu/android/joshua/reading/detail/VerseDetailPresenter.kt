@@ -74,16 +74,6 @@ class VerseDetailPresenter(
         }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun onCreate() {
-        viewModel.settings().onEach { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
-        viewModel.verseDetailRequest().onEach {
-            loadVerseDetail(it.verseIndex)
-            viewHolder.verseDetailViewLayout.show(it.content)
-        }.launchIn(coroutineScope)
-        viewModel.currentVerseIndex().onEach { close() }.launchIn(coroutineScope)
-    }
-
     private fun updateBookmark() {
         updateBookmarkJob?.cancel()
         updateBookmarkJob = coroutineScope.launch {
@@ -92,9 +82,7 @@ class VerseDetailPresenter(
                 verseDetail = detail.copy(bookmarked = !detail.bookmarked)
                 viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
             }
-
-            updateBookmarkJob = null
-        }
+        }.also { it.invokeOnCompletion { updateBookmarkJob = null } }
     }
 
     private fun updateHighlight() {
@@ -117,9 +105,7 @@ class VerseDetailPresenter(
                 verseDetail = detail.copy(highlightColor = highlightColor)
                 viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
             }
-
-            updateHighlightJob = null
-        }
+        }.also { it.invokeOnCompletion { updateHighlightJob = null } }
     }
 
     private fun updateNote(note: String) {
@@ -129,9 +115,7 @@ class VerseDetailPresenter(
                 viewModel.saveNote(detail.verseIndex, note)
                 verseDetail = detail.copy(note = note)
             }
-
-            updateNoteJob = null
-        }
+        }.also { it.invokeOnCompletion { updateNoteJob = null } }
     }
 
     private fun downloadStrongNumber() {
@@ -167,14 +151,20 @@ class VerseDetailPresenter(
                     activity.dialog(true, R.string.dialog_download_error,
                             DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
                 }.onCompletion {
-                    dismissDownloadStrongNumberDialog()
+                    downloadStrongNumberDialog?.dismiss()
+                    downloadStrongNumberDialog = null
                     downloadStrongNumberJob = null
                 }.launchIn(coroutineScope)
     }
 
-    private fun dismissDownloadStrongNumberDialog() {
-        downloadStrongNumberDialog?.dismiss()
-        downloadStrongNumberDialog = null
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    private fun onCreate() {
+        viewModel.settings().onEach { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
+        viewModel.verseDetailRequest().onEach {
+            loadVerseDetail(it.verseIndex)
+            viewHolder.verseDetailViewLayout.show(it.content)
+        }.launchIn(coroutineScope)
+        viewModel.currentVerseIndex().onEach { close() }.launchIn(coroutineScope)
     }
 
     private fun loadVerseDetail(verseIndex: VerseIndex) {
@@ -303,17 +293,14 @@ class VerseDetailPresenter(
                     StrongNumberListActivity.bundle(strongNumber))
         } catch (e: Exception) {
             Log.e(tag, "Failed to open Strong's number list activity", e)
-            activity.dialog(true, R.string.dialog_navigate_to_strong_number_error,
+            activity.dialog(true, R.string.dialog_navigation_error,
                     DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
         }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onStop() {
-        dismissDownloadStrongNumberDialog()
-
         downloadStrongNumberJob?.cancel()
-        downloadStrongNumberJob = null
     }
 
     /**

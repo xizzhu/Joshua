@@ -57,12 +57,12 @@ class ChapterListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadReadingProgress() = testDispatcher.runBlockingTest {
+    fun testObserveChapterList() = testDispatcher.runBlockingTest {
         `when`(readingViewModel.chapterList()).thenReturn(flowOf(
                 ChapterListViewData(VerseIndex(0, 0, 0), MockContents.kjvBookNames)
         ))
 
-        chapterListPresenter.observeChapterListViewData()
+        chapterListPresenter.observeChapterList()
 
         with(inOrder(readingDrawerLayout, chapterListView)) {
             // success
@@ -73,10 +73,10 @@ class ChapterListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadReadingProgressWithException() = testDispatcher.runBlockingTest {
+    fun testObserveChapterListWithException() = testDispatcher.runBlockingTest {
         `when`(readingViewModel.chapterList()).thenReturn(flow { throw RuntimeException() })
 
-        chapterListPresenter.observeChapterListViewData()
+        chapterListPresenter.observeChapterList()
         verify(chapterListView, never()).setData(any(), any())
         verify(readingDrawerLayout, never()).hide()
     }

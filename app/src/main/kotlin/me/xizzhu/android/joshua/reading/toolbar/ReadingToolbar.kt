@@ -22,6 +22,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.Spinner
 import androidx.appcompat.widget.Toolbar
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 
 class ReadingToolbar : Toolbar {
@@ -38,19 +39,49 @@ class ReadingToolbar : Toolbar {
 
     fun initialize(onParallelTranslationRequested: (String) -> Unit,
                    onParallelTranslationRemoved: (String) -> Unit,
-                   onSpinnerItemSelected: (String) -> Unit) {
+                   onTranslationSelected: (String) -> Unit,
+                   onScreenRequested: (Int) -> Unit) {
         with(spinner()) {
-            this.adapter = TranslationSpinnerAdapter(context = context,
+            adapter = TranslationSpinnerAdapter(context = context,
                     onParallelTranslationRequested = onParallelTranslationRequested,
                     onParallelTranslationRemoved = onParallelTranslationRemoved)
-            this.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                    onSpinnerItemSelected(spinnerAdapter().getItem(position))
+                    onTranslationSelected(spinnerAdapter().getItem(position))
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) {
                     // do nothing
                 }
+            }
+        }
+        setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_reading_progress -> {
+                    onScreenRequested(Navigator.SCREEN_READING_PROGRESS)
+                    true
+                }
+                R.id.action_bookmarks -> {
+                    onScreenRequested(Navigator.SCREEN_BOOKMARKS)
+                    true
+                }
+                R.id.action_highlights -> {
+                    onScreenRequested(Navigator.SCREEN_HIGHLIGHTS)
+                    true
+                }
+                R.id.action_notes -> {
+                    onScreenRequested(Navigator.SCREEN_NOTES)
+                    true
+                }
+                R.id.action_search -> {
+                    onScreenRequested(Navigator.SCREEN_SEARCH)
+                    true
+                }
+                R.id.action_settings -> {
+                    onScreenRequested(Navigator.SCREEN_SETTINGS)
+                    true
+                }
+                else -> false
             }
         }
     }
