@@ -30,10 +30,9 @@ class FloatingActionButtonScrollAwareBehavior : FloatingActionButton.Behavior {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     override fun onStartNestedScroll(coordinatorLayout: CoordinatorLayout, child: FloatingActionButton,
-                                     directTargetChild: View, target: View, axes: Int, type: Int): Boolean {
-        return axes == ViewCompat.SCROLL_AXIS_VERTICAL
-                || super.onStartNestedScroll(coordinatorLayout, child, directTargetChild, target, axes, type)
-    }
+                                     directTargetChild: View, target: View, axes: Int, type: Int): Boolean =
+            axes == ViewCompat.SCROLL_AXIS_VERTICAL
+                    || super.onStartNestedScroll(coordinatorLayout, child, directTargetChild, target, axes, type)
 
     override fun onNestedPreScroll(coordinatorLayout: CoordinatorLayout, child: FloatingActionButton,
                                    target: View, dx: Int, dy: Int, consumed: IntArray, type: Int) {
@@ -64,12 +63,4 @@ class FloatingActionButtonScrollAwareBehavior : FloatingActionButton.Behavior {
 
         fab.animate().translationY(0.0F)
     }
-}
-
-class SearchFloatingActionButton : FloatingActionButton {
-    constructor(context: Context) : super(context)
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 }
