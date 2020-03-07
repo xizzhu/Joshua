@@ -14,13 +14,15 @@ CHANGELOG
   - No longer needs ViewData
 - Updated dependencies:
   - Kotlin JVM target to 1.8
-  - Kotlin to 1.3.70
-  - Gradle to 6.2.1
+  - Kotlin to 1.3.70, Coroutine to 1.3.4
+  - Gradle to 6.2.2
   - Android Gradle plugin to 3.6.1
   - Android build tools to 29.0.3
   - AndroidX Core to 1.2.0, Lifecycle to 2.2.0, Material to 1.1.0, ViewPager2 to 1.0.0
   - Firebase Analytics to 17.2.3, removed Firebase Core
   - Dagger to 2.26
+  - ASK to 0.5.2
+  - Logger to 0.2.0
   - Mockito to 3.3.0
 
 #### v0.14.0 (2020-01-19)
