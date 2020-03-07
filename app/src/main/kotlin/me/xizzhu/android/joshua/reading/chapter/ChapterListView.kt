@@ -54,7 +54,6 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
     }
 
     override fun onGroupClick(parent: ExpandableListView, v: View, groupPosition: Int, id: Long): Boolean {
-        smoothScrollToPosition(groupPosition)
         if (isGroupExpanded(groupPosition)) {
             collapseGroup(groupPosition)
         } else {
@@ -64,6 +63,7 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
                 lastExpandedGroup = groupPosition
             }
         }
+        smoothScrollToPosition(groupPosition)
         return true
     }
 
