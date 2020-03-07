@@ -46,7 +46,7 @@ class ChapterListPresenter(
     override fun onBind() {
         super.onBind()
 
-        viewHolder.chapterListView.setOnChapterSelectedListener { bookIndex, chapterIndex -> selectChapter(bookIndex, chapterIndex) }
+        viewHolder.chapterListView.initialize(::selectChapter)
     }
 
     private fun selectChapter(bookIndex: Int, chapterIndex: Int) {
