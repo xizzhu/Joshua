@@ -39,8 +39,7 @@ class ReadingToolbarPresenter(
         private val navigator: Navigator, readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,
         coroutineScope: CoroutineScope = readingActivity.lifecycleScope
 ) : BaseSettingsPresenter<ReadingToolbarViewHolder, ReadingViewModel, ReadingActivity>(readingViewModel, readingActivity, coroutineScope) {
-    private val translationComparator = TranslationInfoComparator(
-            TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
+    private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
 
     private val downloadedTranslations = ArrayList<TranslationInfo>()
     private var currentTranslation = ""
@@ -52,7 +51,7 @@ class ReadingToolbarPresenter(
         viewHolder.readingToolbar.initialize(
                 onParallelTranslationRequested = ::requestParallelTranslation,
                 onParallelTranslationRemoved = ::removeParallelTranslation,
-                onTranslationSelected = ::onTranslationSelected,
+                onTranslationSelected = ::selectTranslation,
                 onScreenRequested = ::startActivity
         )
     }
@@ -79,7 +78,7 @@ class ReadingToolbarPresenter(
         }
     }
 
-    private fun onTranslationSelected(translationShortName: String) {
+    private fun selectTranslation(translationShortName: String) {
         if (currentTranslation == translationShortName) return
 
         downloadedTranslations.firstOrNull { it.shortName == translationShortName }?.let {
@@ -133,26 +132,22 @@ class ReadingToolbarPresenter(
 
     private fun observeDownloadedTranslations() {
         viewModel.downloadedTranslations().onEach { translations ->
-            if (translations.isEmpty()) {
-                activity.dialog(false, R.string.dialog_no_translation_downloaded,
-                        DialogInterface.OnClickListener { _, _ -> startActivity(Navigator.SCREEN_TRANSLATIONS) },
-                        DialogInterface.OnClickListener { _, _ -> activity.finish() })
-            } else {
-                downloadedTranslations.clear()
-                downloadedTranslations.addAll(translations.sortedWith(translationComparator))
+            if (translations.isEmpty()) return@onEach
 
-                val names = ArrayList<String>(downloadedTranslations.size + 1)
-                        .apply {
-                            addAll(downloadedTranslations.map { it.shortName })
+            downloadedTranslations.clear()
+            downloadedTranslations.addAll(translations.sortedWith(translationComparator))
 
-                            // amends "More" to the end of the list
-                            add(activity.getString(R.string.menu_more_translation))
-                        }
-                viewHolder.readingToolbar.setTranslationShortNames(names)
+            val names = ArrayList<String>(downloadedTranslations.size + 1)
+                    .apply {
+                        addAll(downloadedTranslations.map { it.shortName })
 
-                downloadedTranslations.indexOfFirst { it.shortName == currentTranslation }
-                        .let { if (it >= 0) viewHolder.readingToolbar.setSpinnerSelection(it) }
-            }
+                        // amends "More" to the end of the list
+                        add(activity.getString(R.string.menu_more_translation))
+                    }
+            viewHolder.readingToolbar.setTranslationShortNames(names)
+
+            downloadedTranslations.indexOfFirst { it.shortName == currentTranslation }
+                    .let { if (it >= 0) viewHolder.readingToolbar.setSpinnerSelection(it) }
         }.launchIn(coroutineScope)
     }
 
@@ -178,5 +173,16 @@ class ReadingToolbarPresenter(
                     viewHolder.readingToolbar.title =
                             "${bookShortNames[currentVerseIndex.bookIndex]}, ${currentVerseIndex.chapterIndex + 1}"
                 }.launchIn(coroutineScope)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    private fun checkHasDownloadedTranslation() {
+        coroutineScope.launch {
+            if (viewModel.hasDownloadedTranslation()) return@launch
+
+            activity.dialog(false, R.string.dialog_no_translation_downloaded,
+                    DialogInterface.OnClickListener { _, _ -> startActivity(Navigator.SCREEN_TRANSLATIONS) },
+                    DialogInterface.OnClickListener { _, _ -> activity.finish() })
+        }
     }
 }

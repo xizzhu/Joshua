@@ -75,6 +75,9 @@ class ReadingViewModel(
     fun downloadedTranslations(): Flow<List<TranslationInfo>> =
             translationManager.downloadedTranslations().distinctUntilChanged()
 
+    suspend fun hasDownloadedTranslation(): Boolean =
+            translationManager.downloadedTranslations().first().isNotEmpty()
+
     fun currentTranslation(): Flow<String> =
             bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }
 

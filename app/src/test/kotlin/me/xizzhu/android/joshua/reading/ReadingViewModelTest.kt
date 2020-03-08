@@ -25,25 +25,30 @@ import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.utils.currentTimeMillis
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.*
 
 class ReadingViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
+
     @Mock
     private lateinit var readingProgressManager: ReadingProgressManager
+
     @Mock
     private lateinit var translationManager: TranslationManager
+
     @Mock
     private lateinit var bookmarkManager: VerseAnnotationManager<Bookmark>
+
     @Mock
     private lateinit var highlightManager: VerseAnnotationManager<Highlight>
+
     @Mock
     private lateinit var noteManager: VerseAnnotationManager<Note>
+
     @Mock
     private lateinit var strongNumberManager: StrongNumberManager
+
     @Mock
     private lateinit var settingsManager: SettingsManager
 
@@ -77,6 +82,15 @@ class ReadingViewModelTest : BaseUnitTest() {
                 ),
                 readingViewModel.downloadedTranslations().toList()
         )
+    }
+
+    @Test
+    fun testHasDownloadedTranslation() = testDispatcher.runBlockingTest {
+        `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(emptyList()))
+        assertFalse(readingViewModel.hasDownloadedTranslation())
+
+        `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(listOf(MockContents.bbeTranslationInfo)))
+        assertTrue(readingViewModel.hasDownloadedTranslation())
     }
 
     @Test
