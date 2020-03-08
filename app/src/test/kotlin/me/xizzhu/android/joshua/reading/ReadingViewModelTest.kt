@@ -125,7 +125,6 @@ class ReadingViewModelTest : BaseUnitTest() {
     }
 
     @Test
-
     fun testBookName() = testDispatcher.runBlockingTest {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.readBookNames(MockContents.cuvShortName)).thenThrow(e)
@@ -137,6 +136,7 @@ class ReadingViewModelTest : BaseUnitTest() {
         )
     }
 
+    @Test
     fun testBookNameWithException() = testDispatcher.runBlockingTest {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.readBookNames(MockContents.cuvShortName)).thenThrow(e)
@@ -146,6 +146,18 @@ class ReadingViewModelTest : BaseUnitTest() {
                 .onCompletion { assertEquals(e, it) }
                 .catch {}
                 .collect()
+    }
+
+    @Test
+    fun testToolbarData() = testDispatcher.runBlockingTest {
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID, VerseIndex(0, 0, 0)))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
+        `when`(bibleReadingManager.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
+
+        assertEquals(
+                listOf(ToolbarViewData(0, MockContents.kjvBookShortNames[0])),
+                readingViewModel.toolbarData().toList()
+        )
     }
 
     @Test
@@ -167,14 +179,6 @@ class ReadingViewModelTest : BaseUnitTest() {
                 listOf(VersesViewData(Settings.DEFAULT.simpleReadingModeOn, verses, bookmarks, highlights, notes)),
                 readingViewModel.verses(verseIndex.bookIndex, verseIndex.chapterIndex).toList()
         )
-    }
-
-    @Test
-    fun testBookShortNames() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
-        `when`(bibleReadingManager.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
-
-        assertEquals(listOf(MockContents.kjvBookShortNames), readingViewModel.bookShortNames().toList())
     }
 
     @Test

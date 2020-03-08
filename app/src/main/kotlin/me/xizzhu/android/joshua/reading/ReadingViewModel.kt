@@ -28,6 +28,8 @@ import me.xizzhu.android.joshua.utils.currentTimeMillis
 
 data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames: List<String>)
 
+data class ToolbarViewData(val currentChapterIndex: Int, val currentBookShortName: String)
+
 data class VersesViewData(
         val simpleReadingModeOn: Boolean, val verses: List<Verse>,
         val bookmarks: List<Bookmark>, val highlights: List<Highlight>, val notes: List<Note>
@@ -123,8 +125,15 @@ class ReadingViewModel(
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)
 
-    fun bookShortNames(): Flow<List<String>> = currentTranslation()
-            .map { bibleReadingManager.readBookShortNames(it) }
+    fun toolbarData(): Flow<ToolbarViewData> {
+        val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
+        val bookShortNamesFlow = bibleReadingManager.currentTranslation()
+                .filter { it.isNotEmpty() }
+                .map { bibleReadingManager.readBookShortNames(it) }
+        return combine(currentVerseIndexFlow, bookShortNamesFlow) { currentVerseIndex, bookNames ->
+            ToolbarViewData(currentVerseIndex.chapterIndex, bookNames[currentVerseIndex.bookIndex])
+        }
+    }
 
     fun verses(bookIndex: Int, chapterIndex: Int): Flow<VersesViewData> = flow {
         coroutineScope {
