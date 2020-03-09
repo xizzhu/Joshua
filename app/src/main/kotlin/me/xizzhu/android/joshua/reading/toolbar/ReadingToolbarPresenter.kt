@@ -126,7 +126,6 @@ class ReadingToolbarPresenter(
     private fun onCreate() {
         observeDownloadedTranslations()
         observeCurrentTranslation()
-        observeParallelTranslations()
         observeToolbarData()
     }
 
@@ -152,19 +151,14 @@ class ReadingToolbarPresenter(
     }
 
     private fun observeCurrentTranslation() {
-        viewModel.currentTranslation().onEach { translationShortName ->
-            currentTranslation = translationShortName
+        viewModel.currentTranslationViewData().onEach { viewData ->
+            currentTranslation = viewData.currentTranslation
             viewHolder.readingToolbar.setCurrentTranslation(currentTranslation)
+            viewHolder.readingToolbar.setParallelTranslations(viewData.parallelTranslations)
 
             downloadedTranslations.indexOfFirst { it.shortName == currentTranslation }
                     .let { if (it >= 0) viewHolder.readingToolbar.setSpinnerSelection(it) }
         }.launchIn(coroutineScope)
-    }
-
-    private fun observeParallelTranslations() {
-        viewModel.parallelTranslations()
-                .onEach { viewHolder.readingToolbar.setParallelTranslations(it) }
-                .launchIn(coroutineScope)
     }
 
     private fun observeToolbarData() {

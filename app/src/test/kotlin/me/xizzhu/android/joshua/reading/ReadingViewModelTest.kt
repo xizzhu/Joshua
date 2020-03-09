@@ -101,6 +101,20 @@ class ReadingViewModelTest : BaseUnitTest() {
     }
 
     @Test
+    fun testCurrentTranslationViewData() = testDispatcher.runBlockingTest {
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
+        `when`(bibleReadingManager.parallelTranslations()).thenReturn(flowOf(emptyList(), listOf(MockContents.cuvShortName)))
+
+        assertEquals(
+                listOf(
+                        CurrentTranslationViewData(MockContents.kjvShortName, emptyList()),
+                        CurrentTranslationViewData(MockContents.kjvShortName, listOf(MockContents.cuvShortName))
+                ),
+                readingViewModel.currentTranslationViewData().toList()
+        )
+    }
+
+    @Test
     fun testCurrentVerseIndex() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.currentVerseIndex()).thenReturn(
                 flowOf(VerseIndex.INVALID, VerseIndex(1, 2, 3), VerseIndex.INVALID, VerseIndex.INVALID)

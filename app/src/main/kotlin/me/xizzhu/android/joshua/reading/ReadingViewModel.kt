@@ -30,6 +30,8 @@ data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames:
 
 data class ToolbarViewData(val currentChapterIndex: Int, val currentBookShortName: String)
 
+data class CurrentTranslationViewData(val currentTranslation: String, val parallelTranslations: List<String>)
+
 data class VersesViewData(
         val simpleReadingModeOn: Boolean, val verses: List<Verse>,
         val bookmarks: List<Bookmark>, val highlights: List<Highlight>, val notes: List<Note>
@@ -82,6 +84,12 @@ class ReadingViewModel(
 
     fun currentTranslation(): Flow<String> =
             bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }
+
+    fun currentTranslationViewData(): Flow<CurrentTranslationViewData> =
+            combine(bibleReadingManager.currentTranslation().filter { it.isNotEmpty() },
+                    bibleReadingManager.parallelTranslations()) { current, parallel ->
+                CurrentTranslationViewData(current, parallel)
+            }
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingManager.saveCurrentTranslation(translationShortName)
