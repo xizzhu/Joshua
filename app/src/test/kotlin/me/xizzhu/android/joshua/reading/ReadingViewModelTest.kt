@@ -127,6 +127,23 @@ class ReadingViewModelTest : BaseUnitTest() {
     }
 
     @Test
+    fun testCurrentVerseIndexViewData() = testDispatcher.runBlockingTest {
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID, VerseIndex(0, 0, 0)))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
+        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+        `when`(bibleReadingManager.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
+
+        assertEquals(
+                listOf(CurrentVerseIndexViewData(
+                        VerseIndex(0, 0, 0),
+                        MockContents.kjvBookNames[0],
+                        MockContents.kjvBookShortNames[0]
+                )),
+                readingViewModel.currentVerseIndexViewData().toList()
+        )
+    }
+
+    @Test
     fun testChapterList() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex(0, 0, 0)))
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
@@ -160,18 +177,6 @@ class ReadingViewModelTest : BaseUnitTest() {
                 .onCompletion { assertEquals(e, it) }
                 .catch {}
                 .collect()
-    }
-
-    @Test
-    fun testToolbarData() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID, VerseIndex(0, 0, 0)))
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
-        `when`(bibleReadingManager.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
-
-        assertEquals(
-                listOf(ToolbarViewData(0, MockContents.kjvBookShortNames[0])),
-                readingViewModel.toolbarData().toList()
-        )
     }
 
     @Test

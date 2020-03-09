@@ -126,7 +126,7 @@ class ReadingToolbarPresenter(
     private fun onCreate() {
         observeDownloadedTranslations()
         observeCurrentTranslation()
-        observeToolbarData()
+        observeCurrentVerseIndex()
     }
 
     private fun observeDownloadedTranslations() {
@@ -161,11 +161,11 @@ class ReadingToolbarPresenter(
         }.launchIn(coroutineScope)
     }
 
-    private fun observeToolbarData() {
-        viewModel.toolbarData()
+    private fun observeCurrentVerseIndex() {
+        viewModel.currentVerseIndexViewData()
                 .onEach { toolbarViewData ->
                     viewHolder.readingToolbar.title =
-                            "${toolbarViewData.currentBookShortName}, ${toolbarViewData.currentChapterIndex + 1}"
+                            "${toolbarViewData.bookShortName}, ${toolbarViewData.verseIndex.chapterIndex + 1}"
                 }.launchIn(coroutineScope)
     }
 

@@ -32,10 +32,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.reading.ReadingViewModel
-import me.xizzhu.android.joshua.reading.VerseDetailRequest
-import me.xizzhu.android.joshua.reading.VersesViewData
+import me.xizzhu.android.joshua.reading.*
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.toast
@@ -118,10 +115,10 @@ class VersePresenter(
             { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) },
             { verseIndex -> updateCurrentVerse(verseIndex) })
 
-    private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
+    private var currentVerseIndexViewData = CurrentVerseIndexViewData(VerseIndex.INVALID, "", "")
 
     private fun updateCurrentVerse(verseIndex: VerseIndex) {
-        if (currentVerseIndex == verseIndex) return
+        if (currentVerseIndexViewData.verseIndex == verseIndex) return
 
         coroutineScope.launch {
             try {
@@ -235,7 +232,10 @@ class VersePresenter(
     }
 
     private fun updateCurrentChapter(bookIndex: Int, chapterIndex: Int) {
-        if (currentVerseIndex.bookIndex == bookIndex && currentVerseIndex.chapterIndex == chapterIndex) return
+        if (currentVerseIndexViewData.verseIndex.bookIndex == bookIndex
+                && currentVerseIndexViewData.verseIndex.chapterIndex == chapterIndex) {
+            return
+        }
 
         coroutineScope.launch {
             try {
@@ -250,22 +250,23 @@ class VersePresenter(
     private fun onCreate() {
         viewModel.settings().onEach { adapter.settings = it }.launchIn(coroutineScope)
 
-        combine(
-                viewModel.currentVerseIndex(),
-                viewModel.currentTranslation(),
-                viewModel.parallelTranslations()
-        ) { newVerseIndex, newTranslation, newParallelTranslations ->
+        combine(viewModel.currentVerseIndexViewData(),
+                viewModel.currentTranslationViewData()) { newVerseIndexViewData, newTranslationViewData ->
             if (actionMode != null) {
-                if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex
-                        || currentVerseIndex.chapterIndex != newVerseIndex.chapterIndex) {
+                if (currentVerseIndexViewData.verseIndex.bookIndex != newVerseIndexViewData.verseIndex.bookIndex
+                        || currentVerseIndexViewData.verseIndex.chapterIndex != newVerseIndexViewData.verseIndex.chapterIndex) {
                     actionMode?.finish()
                 }
             }
 
-            currentVerseIndex = newVerseIndex
+            currentVerseIndexViewData = newVerseIndexViewData
 
-            adapter.setCurrent(newVerseIndex, newTranslation, newParallelTranslations)
-            viewHolder.versePager.setCurrentItem(newVerseIndex.toPagePosition(), false)
+            adapter.setCurrent(
+                    newVerseIndexViewData.verseIndex,
+                    newTranslationViewData.currentTranslation,
+                    newTranslationViewData.parallelTranslations
+            )
+            viewHolder.versePager.setCurrentItem(newVerseIndexViewData.verseIndex.toPagePosition(), false)
         }.launchIn(coroutineScope)
 
         viewModel.verseUpdates().onEach { adapter.notifyVerseUpdate(it) }.launchIn(coroutineScope)

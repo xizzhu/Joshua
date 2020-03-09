@@ -28,7 +28,7 @@ import me.xizzhu.android.joshua.utils.currentTimeMillis
 
 data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames: List<String>)
 
-data class ToolbarViewData(val currentChapterIndex: Int, val currentBookShortName: String)
+data class CurrentVerseIndexViewData(val verseIndex: VerseIndex, val bookName: String, val bookShortName: String)
 
 data class CurrentTranslationViewData(val currentTranslation: String, val parallelTranslations: List<String>)
 
@@ -95,8 +95,6 @@ class ReadingViewModel(
         bibleReadingManager.saveCurrentTranslation(translationShortName)
     }
 
-    fun parallelTranslations(): Flow<List<String>> = bibleReadingManager.parallelTranslations()
-
     suspend fun requestParallelTranslation(translationShortName: String) {
         bibleReadingManager.requestParallelTranslation(translationShortName)
     }
@@ -116,6 +114,16 @@ class ReadingViewModel(
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 
+    fun currentVerseIndexViewData(): Flow<CurrentVerseIndexViewData> =
+            combine(bibleReadingManager.currentTranslation().filter { it.isNotEmpty() },
+                    bibleReadingManager.currentVerseIndex().filter { it.isValid() }) { curentTranslation, currentVerseIndex ->
+                CurrentVerseIndexViewData(
+                        currentVerseIndex,
+                        bibleReadingManager.readBookNames(curentTranslation)[currentVerseIndex.bookIndex],
+                        bibleReadingManager.readBookShortNames(curentTranslation)[currentVerseIndex.bookIndex]
+                )
+            }
+
     fun chapterList(): Flow<ChapterListViewData> {
         val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
         val bookNamesFlow = bibleReadingManager.currentTranslation()
@@ -132,16 +140,6 @@ class ReadingViewModel(
 
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingManager.readBookNames(translationShortName)
-
-    fun toolbarData(): Flow<ToolbarViewData> {
-        val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
-        val bookShortNamesFlow = bibleReadingManager.currentTranslation()
-                .filter { it.isNotEmpty() }
-                .map { bibleReadingManager.readBookShortNames(it) }
-        return combine(currentVerseIndexFlow, bookShortNamesFlow) { currentVerseIndex, bookNames ->
-            ToolbarViewData(currentVerseIndex.chapterIndex, bookNames[currentVerseIndex.bookIndex])
-        }
-    }
 
     fun verses(bookIndex: Int, chapterIndex: Int): Flow<VersesViewData> = flow {
         coroutineScope {
