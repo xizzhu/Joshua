@@ -21,7 +21,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.DialogInterface
 import androidx.annotation.UiThread
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -51,8 +50,7 @@ class VerseDetailPresenter(
     private val translationComparator = TranslationInfoComparator(
             TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
 
-    @VisibleForTesting
-    var verseDetail: VerseDetail? = null
+    private var verseDetail: VerseDetail? = null
     private var updateBookmarkJob: Job? = null
     private var updateHighlightJob: Job? = null
     private var updateNoteJob: Job? = null
@@ -64,10 +62,10 @@ class VerseDetailPresenter(
     override fun onBind() {
         super.onBind()
 
-        viewHolder.verseDetailViewLayout.setListeners(
-                onClicked = { close() }, onBookmarkClicked = { updateBookmark() },
-                onHighlightClicked = { updateHighlight() }, onNoteUpdated = { updateNote(it) },
-                onNoStrongNumberClicked = { downloadStrongNumber() }
+        viewHolder.verseDetailViewLayout.initialize(
+                onClicked = ::close, onBookmarkClicked = ::updateBookmark,
+                onHighlightClicked = ::updateHighlight, onNoteUpdated = ::updateNote,
+                onNoStrongNumberClicked = ::downloadStrongNumber
         )
         viewHolder.verseDetailViewLayout.post {
             viewHolder.verseDetailViewLayout.hide()
@@ -157,6 +155,20 @@ class VerseDetailPresenter(
                 }.launchIn(coroutineScope)
     }
 
+    private fun List<StrongNumber>.toStrongNumberItems(): List<StrongNumberItem> =
+            map { StrongNumberItem(it, ::onStrongNumberClicked) }
+
+    private fun onStrongNumberClicked(strongNumber: String) {
+        try {
+            navigator.navigate(activity, Navigator.SCREEN_STRONG_NUMBER,
+                    StrongNumberListActivity.bundle(strongNumber))
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to open Strong's number list activity", e)
+            activity.dialog(true, R.string.dialog_navigation_error,
+                    DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
+        }
+    }
+
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreate() {
         viewModel.settings().onEach { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
@@ -189,8 +201,7 @@ class VerseDetailPresenter(
         }
     }
 
-    @VisibleForTesting
-    suspend fun buildVerseTextItems(verseIndex: VerseIndex): List<VerseTextItem> {
+    private suspend fun buildVerseTextItems(verseIndex: VerseIndex): List<VerseTextItem> {
         val currentTranslation = viewModel.currentTranslation().first()
         val parallelTranslations = viewModel.downloadedTranslations().first()
                 .sortedWith(translationComparator)
@@ -251,8 +262,7 @@ class VerseDetailPresenter(
         return verseTextItems
     }
 
-    @VisibleForTesting
-    fun onVerseClicked(translation: String) {
+    private fun onVerseClicked(translation: String) {
         coroutineScope.launch {
             try {
                 if (translation != viewModel.currentTranslation().first()) {
@@ -266,36 +276,18 @@ class VerseDetailPresenter(
         }
     }
 
-    @VisibleForTesting
-    fun onVerseLongClicked(verse: Verse) {
-        coroutineScope.launch {
-            try {
-                val bookName = viewModel.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
-                // On older devices, this only works on the threads with loopers.
-                (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-                        .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
-                                verse.toStringForSharing(bookName)))
-                activity.toast(R.string.toast_verses_copied)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to copy", e)
-                activity.toast(R.string.toast_unknown_error)
-            }
-        }
-    }
-
-    private fun List<StrongNumber>.toStrongNumberItems(): List<StrongNumberItem> = map {
-        StrongNumberItem(it, this@VerseDetailPresenter::onStrongNumberClicked)
-    }
-
-    private fun onStrongNumberClicked(strongNumber: String) {
-        try {
-            navigator.navigate(activity, Navigator.SCREEN_STRONG_NUMBER,
-                    StrongNumberListActivity.bundle(strongNumber))
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to open Strong's number list activity", e)
-            activity.dialog(true, R.string.dialog_navigation_error,
-                    DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
-        }
+    private fun onVerseLongClicked(verse: Verse) {
+        viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex)
+                .onEach { bookName ->
+                    // On older devices, this only works on the threads with loopers.
+                    (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                            .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
+                                    verse.toStringForSharing(bookName)))
+                    activity.toast(R.string.toast_verses_copied)
+                }.catch { e ->
+                    Log.e(tag, "Failed to copy", e)
+                    activity.toast(R.string.toast_unknown_error)
+                }.launchIn(coroutineScope)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)

@@ -113,24 +113,10 @@ class VersePresenter(
         }
     }
 
-    private val adapter: VersePagerAdapter = VersePagerAdapter(readingActivity,
-            { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) },
-            { verseIndex -> updateCurrentVerse(verseIndex) })
+    private val adapter: VersePagerAdapter = VersePagerAdapter(readingActivity, ::loadVerses, ::updateCurrentVerse)
 
     private var currentTranslationViewData = CurrentTranslationViewData("", emptyList())
     private var currentVerseIndexViewData = CurrentVerseIndexViewData(VerseIndex.INVALID, "", "")
-
-    private fun updateCurrentVerse(verseIndex: VerseIndex) {
-        if (currentVerseIndexViewData.verseIndex == verseIndex) return
-
-        coroutineScope.launch {
-            try {
-                viewModel.saveCurrentVerseIndex(verseIndex)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to update current verse", e)
-            }
-        }
-    }
 
     private fun loadVerses(bookIndex: Int, chapterIndex: Int) {
         viewModel.verses(bookIndex, chapterIndex)
@@ -144,11 +130,10 @@ class VersePresenter(
     }
 
     private fun VersesViewData.toItems(): List<BaseItem> = if (simpleReadingModeOn) {
-        verses.toSimpleVerseItems(highlights, this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
+        verses.toSimpleVerseItems(highlights, ::onVerseClicked, ::onVerseLongClicked)
     } else {
-        verses.toVerseItems(bookmarks, highlights, notes, this@VersePresenter::onVerseClicked,
-                this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
-                this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
+        verses.toVerseItems(bookmarks, highlights, notes, ::onVerseClicked, ::onVerseLongClicked,
+                ::onBookmarkClicked, ::onHighlightClicked, ::onNoteClicked)
     }
 
     private fun onVerseClicked(verse: Verse) {
@@ -219,6 +204,18 @@ class VersePresenter(
 
     private fun onNoteClicked(verseIndex: VerseIndex) {
         showVerseDetail(verseIndex, VerseDetailRequest.NOTE)
+    }
+
+    private fun updateCurrentVerse(verseIndex: VerseIndex) {
+        if (currentVerseIndexViewData.verseIndex == verseIndex) return
+
+        coroutineScope.launch {
+            try {
+                viewModel.saveCurrentVerseIndex(verseIndex)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to update current verse", e)
+            }
+        }
     }
 
     @UiThread
