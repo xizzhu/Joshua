@@ -156,30 +156,6 @@ class ReadingViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testBookName() = testDispatcher.runBlockingTest {
-        val e = RuntimeException("random exception")
-        `when`(bibleReadingManager.readBookNames(MockContents.cuvShortName)).thenThrow(e)
-        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
-
-        assertEquals(
-                listOf(MockContents.kjvBookNames[0]),
-                readingViewModel.bookName(MockContents.kjvShortName, 0).toList()
-        )
-    }
-
-    @Test
-    fun testBookNameWithException() = testDispatcher.runBlockingTest {
-        val e = RuntimeException("random exception")
-        `when`(bibleReadingManager.readBookNames(MockContents.cuvShortName)).thenThrow(e)
-        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
-
-        readingViewModel.bookName(MockContents.cuvShortName, 0)
-                .onCompletion { assertEquals(e, it) }
-                .catch {}
-                .collect()
-    }
-
-    @Test
     fun testVerses() = testDispatcher.runBlockingTest {
         val verseIndex = VerseIndex(0, 0, 0)
         val verses = MockContents.kjvVerses
