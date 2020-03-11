@@ -24,6 +24,7 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.utils.currentTimeMillis
 
 data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames: List<String>)
@@ -36,6 +37,14 @@ data class VersesViewData(
         val simpleReadingModeOn: Boolean, val verses: List<Verse>,
         val bookmarks: List<Bookmark>, val highlights: List<Highlight>, val notes: List<Note>
 )
+
+data class VerseDetailViewData(
+        val verseIndex: VerseIndex, val followingEmptyVerseCount: Int, val verseTexts: List<VerseText>,
+        val bookmarked: Boolean, @Highlight.Companion.AvailableColor val highlightColor: Int,
+        val note: String, val strongNumbers: List<StrongNumber>
+) {
+    data class VerseText(val text: Verse.Text, val bookName: String)
+}
 
 data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: Int) {
     companion object {
@@ -138,9 +147,6 @@ class ReadingViewModel(
         emit(bibleReadingManager.readBookNames(translationShortName)[bookIndex])
     }
 
-    suspend fun readBookNames(translationShortName: String): List<String> =
-            bibleReadingManager.readBookNames(translationShortName)
-
     fun verses(bookIndex: Int, chapterIndex: Int): Flow<VersesViewData> = flow {
         coroutineScope {
             val bookmarks = async { bookmarkManager.read(bookIndex, chapterIndex) }
@@ -162,11 +168,81 @@ class ReadingViewModel(
         }
     }
 
+    fun verseDetail(verseIndex: VerseIndex): Flow<VerseDetailViewData> = flow {
+        coroutineScope {
+            val bookmarked = async { bookmarkManager.read(verseIndex).isValid() }
+            val highlightColor = async { highlightManager.read(verseIndex).color }
+            val note = async { noteManager.read(verseIndex).note }
+            val strongNumbers = async { strongNumberManager.readStrongNumber(verseIndex) }
+
+            // build the verse
+            val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+            val parallelTranslations = translationManager.downloadedTranslations().first()
+                    .filter { it.shortName != currentTranslation }
+                    .sortedWith(TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME))
+                    .map { it.shortName }
+            val verses = bibleReadingManager.readVerses(currentTranslation, parallelTranslations,
+                    verseIndex.bookIndex, verseIndex.chapterIndex)
+
+            // step 1: finds the verse
+            var start: VerseIndex? = null
+            for (verse in verses) {
+                if (verse.text.text.isNotEmpty()) start = verse.verseIndex // skip empty verses
+                if (verse.verseIndex.verseIndex >= verseIndex.verseIndex) break
+            }
+
+            val verseIterator = verses.iterator()
+            var verse: Verse? = null
+            while (verseIterator.hasNext()) {
+                val v = verseIterator.next()
+                if (v.verseIndex == start) {
+                    verse = v
+                    break
+                }
+            }
+            if (verse == null) throw IllegalStateException("Failed to find target verse")
+
+            // step 2: builds the parallel
+            val parallel = Array(parallelTranslations.size) { StringBuilder() }
+            val parallelBuilder: (index: Int, Verse.Text) -> Unit = { index, text ->
+                with(parallel[index]) {
+                    if (isNotEmpty()) append(' ')
+                    append(text.text)
+                }
+            }
+            verse.parallel.forEachIndexed(parallelBuilder)
+
+            var followingEmptyVerseCount = 0
+            while (verseIterator.hasNext()) {
+                val v = verseIterator.next()
+                if (v.text.text.isNotEmpty()) break
+                v.parallel.forEachIndexed(parallelBuilder)
+                followingEmptyVerseCount++
+            }
+
+            // step 3: constructs verse texts
+            val verseTexts = ArrayList<VerseDetailViewData.VerseText>(parallelTranslations.size + 1)
+            verseTexts.add(VerseDetailViewData.VerseText(
+                    verse.text,
+                    bibleReadingManager.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
+            ))
+            parallelTranslations.forEachIndexed { index, translation ->
+                verseTexts.add(VerseDetailViewData.VerseText(
+                        Verse.Text(translation, parallel[index].toString()),
+                        bibleReadingManager.readBookNames(translation)[verse.verseIndex.bookIndex]
+                ))
+            }
+
+            emit(VerseDetailViewData(
+                    verseIndex, followingEmptyVerseCount, verseTexts,
+                    bookmarked.await(), highlightColor.await(), note.await(), strongNumbers.await()
+            ))
+        }
+    }
+
     suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
                            bookIndex: Int, chapterIndex: Int): List<Verse> =
             bibleReadingManager.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
-
-    suspend fun readBookmark(verseIndex: VerseIndex): Bookmark = bookmarkManager.read(verseIndex)
 
     suspend fun saveBookmark(verseIndex: VerseIndex, hasBookmark: Boolean) {
         if (hasBookmark) {
@@ -178,8 +254,6 @@ class ReadingViewModel(
         }
     }
 
-    suspend fun readHighlight(verseIndex: VerseIndex): Highlight = highlightManager.read(verseIndex)
-
     suspend fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor color: Int) {
         if (color == Highlight.COLOR_NONE) {
             highlightManager.remove(verseIndex)
@@ -189,8 +263,6 @@ class ReadingViewModel(
             verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
         }
     }
-
-    suspend fun readNote(verseIndex: VerseIndex): Note = noteManager.read(verseIndex)
 
     suspend fun saveNote(verseIndex: VerseIndex, note: String) {
         if (note.isEmpty()) {
