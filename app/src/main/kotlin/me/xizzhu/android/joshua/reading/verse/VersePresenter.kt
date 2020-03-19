@@ -16,9 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.DialogInterface
 import android.view.Menu
 import android.view.MenuItem
@@ -37,6 +34,7 @@ import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.joshua.utils.chooserForSharing
+import me.xizzhu.android.joshua.utils.copyToClipBoard
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
 
@@ -79,12 +77,10 @@ class VersePresenter(
         if (selectedVerses.isEmpty()) return
 
         try {
-            // On older devices, this only works on the threads with loopers.
-            (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-                    .setPrimaryClip(ClipData.newPlainText(
-                            "${currentTranslationViewData.currentTranslation} ${currentVerseIndexViewData.bookName}",
-                            selectedVerses.toStringForSharing(currentVerseIndexViewData.bookName)
-                    ))
+            activity.copyToClipBoard(
+                    "${currentTranslationViewData.currentTranslation} ${currentVerseIndexViewData.bookName}",
+                    selectedVerses.toStringForSharing(currentVerseIndexViewData.bookName)
+            )
             activity.toast(R.string.toast_verses_copied)
         } catch (e: Exception) {
             Log.e(tag, "Failed to copy", e)

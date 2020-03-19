@@ -16,9 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.DialogInterface
 import androidx.annotation.UiThread
 import androidx.lifecycle.*
@@ -38,6 +35,7 @@ import me.xizzhu.android.joshua.reading.VerseDetailViewData
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
 import me.xizzhu.android.joshua.ui.*
+import me.xizzhu.android.joshua.utils.copyToClipBoard
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
 
@@ -218,10 +216,10 @@ class VerseDetailPresenter(
     private fun onVerseLongClicked(verse: Verse) {
         viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex)
                 .onEach { bookName ->
-                    // On older devices, this only works on the threads with loopers.
-                    (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-                            .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
-                                    verse.toStringForSharing(bookName)))
+                    activity.copyToClipBoard(
+                            verse.text.translationShortName + " " + bookName,
+                            verse.toStringForSharing(bookName)
+                    )
                     activity.toast(R.string.toast_verses_copied)
                 }.catch { e ->
                     Log.e(tag, "Failed to copy", e)
