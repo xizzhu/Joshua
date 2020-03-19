@@ -49,7 +49,7 @@ object Versions {
     object Kotlin {
         const val jvmTarget = "1.8"
         const val core = "1.3.70"
-        const val coroutines = "1.3.4"
+        const val coroutines = "1.3.5"
     }
 
     object AndroidX {
@@ -85,7 +85,7 @@ object Versions {
         }
     }
 
-    const val dagger = "2.26"
+    const val dagger = "2.27"
 
     const val ask = "0.5.2"
 
@@ -93,7 +93,7 @@ object Versions {
 
     const val stetho = "1.5.1"
 
-    const val mockito = "3.3.0"
+    const val mockito = "3.3.3"
 }
 
 object Dependencies {
