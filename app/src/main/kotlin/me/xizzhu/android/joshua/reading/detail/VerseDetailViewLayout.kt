@@ -84,6 +84,8 @@ class VerseDetailViewLayout : FrameLayout {
         highlight.setOnClickListener { onHighlightClicked() }
         adapter.onNoteUpdated = onNoteUpdated
         adapter.onNoStrongNumberClicked = onNoStrongNumberClicked
+
+        post { hide() }
     }
 
     fun setSettings(settings: Settings) {

@@ -62,9 +62,6 @@ class VerseDetailPresenter(
                 onHighlightClicked = ::updateHighlight, onNoteUpdated = ::updateNote,
                 onNoStrongNumberClicked = ::downloadStrongNumber
         )
-        viewHolder.verseDetailViewLayout.post {
-            viewHolder.verseDetailViewLayout.hide()
-        }
     }
 
     private fun updateBookmark() {
