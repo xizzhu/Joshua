@@ -16,12 +16,8 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.DialogInterface
 import androidx.annotation.UiThread
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -35,11 +31,12 @@ import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
+import me.xizzhu.android.joshua.reading.VerseDetailViewData
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
 import me.xizzhu.android.joshua.ui.*
+import me.xizzhu.android.joshua.utils.copyToClipBoard
 import me.xizzhu.android.logger.Log
-import java.lang.StringBuilder
 import kotlin.math.max
 
 data class VerseDetailViewHolder(val verseDetailViewLayout: VerseDetailViewLayout) : ViewHolder
@@ -48,11 +45,7 @@ class VerseDetailPresenter(
         private val navigator: Navigator, readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,
         coroutineScope: CoroutineScope = readingActivity.lifecycleScope
 ) : BaseSettingsPresenter<VerseDetailViewHolder, ReadingViewModel, ReadingActivity>(readingViewModel, readingActivity, coroutineScope) {
-    private val translationComparator = TranslationInfoComparator(
-            TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
-
-    @VisibleForTesting
-    var verseDetail: VerseDetail? = null
+    private var verseDetail: VerseDetail? = null
     private var updateBookmarkJob: Job? = null
     private var updateHighlightJob: Job? = null
     private var updateNoteJob: Job? = null
@@ -64,14 +57,11 @@ class VerseDetailPresenter(
     override fun onBind() {
         super.onBind()
 
-        viewHolder.verseDetailViewLayout.setListeners(
-                onClicked = { close() }, onBookmarkClicked = { updateBookmark() },
-                onHighlightClicked = { updateHighlight() }, onNoteUpdated = { updateNote(it) },
-                onNoStrongNumberClicked = { downloadStrongNumber() }
+        viewHolder.verseDetailViewLayout.initialize(
+                onClicked = ::close, onBookmarkClicked = ::updateBookmark,
+                onHighlightClicked = ::updateHighlight, onNoteUpdated = ::updateNote,
+                onNoStrongNumberClicked = ::downloadStrongNumber
         )
-        viewHolder.verseDetailViewLayout.post {
-            viewHolder.verseDetailViewLayout.hide()
-        }
     }
 
     private fun updateBookmark() {
@@ -157,6 +147,20 @@ class VerseDetailPresenter(
                 }.launchIn(coroutineScope)
     }
 
+    private fun List<StrongNumber>.toStrongNumberItems(): List<StrongNumberItem> =
+            map { StrongNumberItem(it, ::onStrongNumberClicked) }
+
+    private fun onStrongNumberClicked(strongNumber: String) {
+        try {
+            navigator.navigate(activity, Navigator.SCREEN_STRONG_NUMBER,
+                    StrongNumberListActivity.bundle(strongNumber))
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to open Strong's number list activity", e)
+            activity.dialog(true, R.string.dialog_navigation_error,
+                    DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
+        }
+    }
+
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreate() {
         viewModel.settings().onEach { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
@@ -168,91 +172,31 @@ class VerseDetailPresenter(
     }
 
     private fun loadVerseDetail(verseIndex: VerseIndex) {
-        coroutineScope.launch {
-            try {
-                viewHolder.verseDetailViewLayout.setVerseDetail(VerseDetail.INVALID)
-                verseDetail = coroutineScope {
-                    val bookmarkAsync = async { viewModel.readBookmark(verseIndex) }
-                    val highlightAsync = async { viewModel.readHighlight(verseIndex) }
-                    val noteAsync = async { viewModel.readNote(verseIndex) }
-                    val strongNumberAsync = async { viewModel.readStrongNumber(verseIndex) }
-                    return@coroutineScope VerseDetail(verseIndex, buildVerseTextItems(verseIndex),
-                            bookmarkAsync.await().isValid(), highlightAsync.await().color,
-                            noteAsync.await().note, strongNumberAsync.await().toStrongNumberItems())
-                }
-                viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to load verse detail", e)
-                activity.dialog(true, R.string.dialog_load_verse_detail_error,
-                        DialogInterface.OnClickListener { _, _ -> loadVerseDetail(verseIndex) })
-            }
-        }
+        viewModel.verseDetail(verseIndex)
+                .onStart {
+                    viewHolder.verseDetailViewLayout.setVerseDetail(VerseDetail.INVALID)
+                }.onEach { viewData ->
+                    verseDetail = viewData.toVerseDetail()
+                    viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
+                }.catch { e ->
+                    Log.e(tag, "Failed to load verse detail", e)
+                    activity.dialog(true, R.string.dialog_load_verse_detail_error,
+                            DialogInterface.OnClickListener { _, _ -> loadVerseDetail(verseIndex) })
+                }.launchIn(coroutineScope)
     }
 
-    @VisibleForTesting
-    suspend fun buildVerseTextItems(verseIndex: VerseIndex): List<VerseTextItem> {
-        val currentTranslation = viewModel.currentTranslation().first()
-        val parallelTranslations = viewModel.downloadedTranslations().first()
-                .sortedWith(translationComparator)
-                .filter { it.shortName != currentTranslation }
-                .map { it.shortName }
-        val verses = viewModel.readVerses(currentTranslation, parallelTranslations,
-                verseIndex.bookIndex, verseIndex.chapterIndex)
+    private fun VerseDetailViewData.toVerseDetail(): VerseDetail = VerseDetail(
+            verseIndex,
+            verseTexts.map {
+                VerseTextItem(verseIndex, followingEmptyVerseCount, it.text, it.bookName, ::onVerseClicked, ::onVerseLongClicked)
+            },
+            bookmarked,
+            highlightColor,
+            note,
+            strongNumbers.toStrongNumberItems()
+    )
 
-        // 1. finds the verse
-        var start: VerseIndex? = null
-        for (verse in verses) {
-            if (verse.text.text.isNotEmpty()) start = verse.verseIndex // we need to consider the empty verses
-            if (verse.verseIndex.verseIndex >= verseIndex.verseIndex) break
-        }
-
-        val verseIterator = verses.iterator()
-        var verse: Verse? = null
-        while (verseIterator.hasNext()) {
-            val v = verseIterator.next()
-            if (v.verseIndex == start) {
-                verse = v
-                break
-            }
-        }
-        if (verse == null) throw IllegalStateException("Failed to find target verse")
-
-        // 2. builds the parallel
-        val parallel = Array(parallelTranslations.size) { StringBuilder() }
-        val parallelBuilder: (index: Int, Verse.Text) -> Unit = { index, text ->
-            with(parallel[index]) {
-                if (isNotEmpty()) append(' ')
-                append(text.text)
-            }
-        }
-        verse.parallel.forEachIndexed(parallelBuilder)
-
-        var followingEmptyVerseCount = 0
-        while (verseIterator.hasNext()) {
-            val v = verseIterator.next()
-            if (v.text.text.isNotEmpty()) break
-            v.parallel.forEachIndexed(parallelBuilder)
-            followingEmptyVerseCount++
-        }
-
-        // 3. constructs VerseTextItems
-        val verseTextItems = ArrayList<VerseTextItem>(parallelTranslations.size + 1)
-        verseTextItems.add(VerseTextItem(verse.verseIndex, followingEmptyVerseCount, verse.text,
-                viewModel.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex],
-                this@VerseDetailPresenter::onVerseClicked, this@VerseDetailPresenter::onVerseLongClicked))
-
-        parallelTranslations.forEachIndexed { index, translation ->
-            verseTextItems.add(VerseTextItem(verse.verseIndex, followingEmptyVerseCount,
-                    Verse.Text(translation, parallel[index].toString()),
-                    viewModel.readBookNames(translation)[verse.verseIndex.bookIndex],
-                    this@VerseDetailPresenter::onVerseClicked, this@VerseDetailPresenter::onVerseLongClicked))
-        }
-
-        return verseTextItems
-    }
-
-    @VisibleForTesting
-    fun onVerseClicked(translation: String) {
+    private fun onVerseClicked(translation: String) {
         coroutineScope.launch {
             try {
                 if (translation != viewModel.currentTranslation().first()) {
@@ -266,36 +210,18 @@ class VerseDetailPresenter(
         }
     }
 
-    @VisibleForTesting
-    fun onVerseLongClicked(verse: Verse) {
-        coroutineScope.launch {
-            try {
-                val bookName = viewModel.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
-                // On older devices, this only works on the threads with loopers.
-                (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-                        .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
-                                verse.toStringForSharing(bookName)))
-                activity.toast(R.string.toast_verses_copied)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to copy", e)
-                activity.toast(R.string.toast_unknown_error)
-            }
-        }
-    }
-
-    private fun List<StrongNumber>.toStrongNumberItems(): List<StrongNumberItem> = map {
-        StrongNumberItem(it, this@VerseDetailPresenter::onStrongNumberClicked)
-    }
-
-    private fun onStrongNumberClicked(strongNumber: String) {
-        try {
-            navigator.navigate(activity, Navigator.SCREEN_STRONG_NUMBER,
-                    StrongNumberListActivity.bundle(strongNumber))
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to open Strong's number list activity", e)
-            activity.dialog(true, R.string.dialog_navigation_error,
-                    DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
-        }
+    private fun onVerseLongClicked(verse: Verse) {
+        viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex)
+                .onEach { bookName ->
+                    activity.copyToClipBoard(
+                            verse.text.translationShortName + " " + bookName,
+                            verse.toStringForSharing(bookName)
+                    )
+                    activity.toast(R.string.toast_verses_copied)
+                }.catch { e ->
+                    Log.e(tag, "Failed to copy", e)
+                    activity.toast(R.string.toast_unknown_error)
+                }.launchIn(coroutineScope)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)

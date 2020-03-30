@@ -25,25 +25,30 @@ import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.utils.currentTimeMillis
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.*
 
 class ReadingViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
+
     @Mock
     private lateinit var readingProgressManager: ReadingProgressManager
+
     @Mock
     private lateinit var translationManager: TranslationManager
+
     @Mock
     private lateinit var bookmarkManager: VerseAnnotationManager<Bookmark>
+
     @Mock
     private lateinit var highlightManager: VerseAnnotationManager<Highlight>
+
     @Mock
     private lateinit var noteManager: VerseAnnotationManager<Note>
+
     @Mock
     private lateinit var strongNumberManager: StrongNumberManager
+
     @Mock
     private lateinit var settingsManager: SettingsManager
 
@@ -80,10 +85,33 @@ class ReadingViewModelTest : BaseUnitTest() {
     }
 
     @Test
+    fun testHasDownloadedTranslation() = testDispatcher.runBlockingTest {
+        `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(emptyList()))
+        assertFalse(readingViewModel.hasDownloadedTranslation())
+
+        `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(listOf(MockContents.bbeTranslationInfo)))
+        assertTrue(readingViewModel.hasDownloadedTranslation())
+    }
+
+    @Test
     fun testCurrentTranslation() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
 
         assertEquals(listOf(MockContents.kjvShortName), readingViewModel.currentTranslation().toList())
+    }
+
+    @Test
+    fun testCurrentTranslationViewData() = testDispatcher.runBlockingTest {
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
+        `when`(bibleReadingManager.parallelTranslations()).thenReturn(flowOf(emptyList(), listOf(MockContents.cuvShortName)))
+
+        assertEquals(
+                listOf(
+                        CurrentTranslationViewData(MockContents.kjvShortName, emptyList()),
+                        CurrentTranslationViewData(MockContents.kjvShortName, listOf(MockContents.cuvShortName))
+                ),
+                readingViewModel.currentTranslationViewData().toList()
+        )
     }
 
     @Test
@@ -95,6 +123,23 @@ class ReadingViewModelTest : BaseUnitTest() {
         assertEquals(
                 listOf(VerseIndex(1, 2, 3)),
                 readingViewModel.currentVerseIndex().toList()
+        )
+    }
+
+    @Test
+    fun testCurrentVerseIndexViewData() = testDispatcher.runBlockingTest {
+        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID, VerseIndex(0, 0, 0)))
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
+        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
+        `when`(bibleReadingManager.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
+
+        assertEquals(
+                listOf(CurrentVerseIndexViewData(
+                        VerseIndex(0, 0, 0),
+                        MockContents.kjvBookNames[0],
+                        MockContents.kjvBookShortNames[0]
+                )),
+                readingViewModel.currentVerseIndexViewData().toList()
         )
     }
 
@@ -111,7 +156,6 @@ class ReadingViewModelTest : BaseUnitTest() {
     }
 
     @Test
-
     fun testBookName() = testDispatcher.runBlockingTest {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.readBookNames(MockContents.cuvShortName)).thenThrow(e)
@@ -123,6 +167,7 @@ class ReadingViewModelTest : BaseUnitTest() {
         )
     }
 
+    @Test
     fun testBookNameWithException() = testDispatcher.runBlockingTest {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.readBookNames(MockContents.cuvShortName)).thenThrow(e)
@@ -153,14 +198,6 @@ class ReadingViewModelTest : BaseUnitTest() {
                 listOf(VersesViewData(Settings.DEFAULT.simpleReadingModeOn, verses, bookmarks, highlights, notes)),
                 readingViewModel.verses(verseIndex.bookIndex, verseIndex.chapterIndex).toList()
         )
-    }
-
-    @Test
-    fun testBookShortNames() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
-        `when`(bibleReadingManager.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
-
-        assertEquals(listOf(MockContents.kjvBookShortNames), readingViewModel.bookShortNames().toList())
     }
 
     @Test

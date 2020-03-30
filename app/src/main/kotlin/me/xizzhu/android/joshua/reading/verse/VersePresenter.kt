@@ -16,9 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.DialogInterface
 import android.view.Menu
 import android.view.MenuItem
@@ -32,14 +29,12 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
-import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.reading.ReadingViewModel
-import me.xizzhu.android.joshua.reading.VerseDetailRequest
-import me.xizzhu.android.joshua.reading.VersesViewData
+import me.xizzhu.android.joshua.reading.*
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.joshua.utils.chooserForSharing
+import me.xizzhu.android.joshua.utils.copyToClipBoard
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
 
@@ -81,56 +76,43 @@ class VersePresenter(
     private fun copyToClipBoard() {
         if (selectedVerses.isEmpty()) return
 
-        val verse = selectedVerses.first()
-        viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex)
-                .onEach { bookName ->
-                    // On older devices, this only works on the threads with loopers.
-                    (activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-                            .setPrimaryClip(ClipData.newPlainText(verse.text.translationShortName + " " + bookName,
-                                    selectedVerses.toStringForSharing(bookName)))
-                    activity.toast(R.string.toast_verses_copied)
-                }.catch { e ->
-                    Log.e(tag, "Failed to copy", e)
-                    activity.toast(R.string.toast_unknown_error)
-                }.onCompletion {
-                    actionMode?.finish()
-                }.launchIn(coroutineScope)
+        try {
+            activity.copyToClipBoard(
+                    "${currentTranslationViewData.currentTranslation} ${currentVerseIndexViewData.bookName}",
+                    selectedVerses.toStringForSharing(currentVerseIndexViewData.bookName)
+            )
+            activity.toast(R.string.toast_verses_copied)
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to copy", e)
+            activity.toast(R.string.toast_unknown_error)
+        } finally {
+            actionMode?.finish()
+        }
     }
 
     private fun share() {
         if (selectedVerses.isEmpty()) return
 
-        val verse = selectedVerses.first()
-        viewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex)
-                .onEach { bookName ->
-                    activity.chooserForSharing(activity.getString(R.string.text_share_with), selectedVerses.toStringForSharing(bookName))
-                            ?.let { activity.startActivity(it) }
-                            ?: throw RuntimeException("Failed to create chooser for sharing")
-                }.catch { e ->
-                    Log.e(tag, "Failed to share", e)
-                    activity.toast(R.string.toast_unknown_error)
-                }.onCompletion {
-                    actionMode?.finish()
-                }.launchIn(coroutineScope)
-    }
-
-    private val adapter: VersePagerAdapter = VersePagerAdapter(readingActivity,
-            { bookIndex, chapterIndex -> loadVerses(bookIndex, chapterIndex) },
-            { verseIndex -> updateCurrentVerse(verseIndex) })
-
-    private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
-
-    private fun updateCurrentVerse(verseIndex: VerseIndex) {
-        if (currentVerseIndex == verseIndex) return
-
-        coroutineScope.launch {
-            try {
-                viewModel.saveCurrentVerseIndex(verseIndex)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to update current verse", e)
-            }
+        try {
+            activity.chooserForSharing(
+                            activity.getString(R.string.text_share_with),
+                            selectedVerses.toStringForSharing(currentVerseIndexViewData.bookName)
+                    )
+                    ?.let { activity.startActivity(it) }
+                    ?: throw RuntimeException("Failed to create chooser for sharing")
+            activity.toast(R.string.toast_verses_copied)
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to share", e)
+            activity.toast(R.string.toast_unknown_error)
+        } finally {
+            actionMode?.finish()
         }
     }
+
+    private val adapter: VersePagerAdapter = VersePagerAdapter(readingActivity, ::loadVerses, ::updateCurrentVerse)
+
+    private var currentTranslationViewData = CurrentTranslationViewData("", emptyList())
+    private var currentVerseIndexViewData = CurrentVerseIndexViewData(VerseIndex.INVALID, "", "")
 
     private fun loadVerses(bookIndex: Int, chapterIndex: Int) {
         viewModel.verses(bookIndex, chapterIndex)
@@ -144,11 +126,10 @@ class VersePresenter(
     }
 
     private fun VersesViewData.toItems(): List<BaseItem> = if (simpleReadingModeOn) {
-        verses.toSimpleVerseItems(highlights, this@VersePresenter::onVerseClicked, this@VersePresenter::onVerseLongClicked)
+        verses.toSimpleVerseItems(highlights, ::onVerseClicked, ::onVerseLongClicked)
     } else {
-        verses.toVerseItems(bookmarks, highlights, notes, this@VersePresenter::onVerseClicked,
-                this@VersePresenter::onVerseLongClicked, this@VersePresenter::onBookmarkClicked,
-                this@VersePresenter::onHighlightClicked, this@VersePresenter::onNoteClicked)
+        verses.toVerseItems(bookmarks, highlights, notes, ::onVerseClicked, ::onVerseLongClicked,
+                ::onBookmarkClicked, ::onHighlightClicked, ::onNoteClicked)
     }
 
     private fun onVerseClicked(verse: Verse) {
@@ -221,6 +202,18 @@ class VersePresenter(
         showVerseDetail(verseIndex, VerseDetailRequest.NOTE)
     }
 
+    private fun updateCurrentVerse(verseIndex: VerseIndex) {
+        if (currentVerseIndexViewData.verseIndex == verseIndex) return
+
+        coroutineScope.launch {
+            try {
+                viewModel.saveCurrentVerseIndex(verseIndex)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to update current verse", e)
+            }
+        }
+    }
+
     @UiThread
     override fun onBind() {
         super.onBind()
@@ -235,7 +228,10 @@ class VersePresenter(
     }
 
     private fun updateCurrentChapter(bookIndex: Int, chapterIndex: Int) {
-        if (currentVerseIndex.bookIndex == bookIndex && currentVerseIndex.chapterIndex == chapterIndex) return
+        if (currentVerseIndexViewData.verseIndex.bookIndex == bookIndex
+                && currentVerseIndexViewData.verseIndex.chapterIndex == chapterIndex) {
+            return
+        }
 
         coroutineScope.launch {
             try {
@@ -250,22 +246,24 @@ class VersePresenter(
     private fun onCreate() {
         viewModel.settings().onEach { adapter.settings = it }.launchIn(coroutineScope)
 
-        combine(
-                viewModel.currentVerseIndex(),
-                viewModel.currentTranslation(),
-                viewModel.parallelTranslations()
-        ) { newVerseIndex, newTranslation, newParallelTranslations ->
+        combine(viewModel.currentVerseIndexViewData(),
+                viewModel.currentTranslationViewData()) { newVerseIndexViewData, newTranslationViewData ->
             if (actionMode != null) {
-                if (currentVerseIndex.bookIndex != newVerseIndex.bookIndex
-                        || currentVerseIndex.chapterIndex != newVerseIndex.chapterIndex) {
+                if (currentVerseIndexViewData.verseIndex.bookIndex != newVerseIndexViewData.verseIndex.bookIndex
+                        || currentVerseIndexViewData.verseIndex.chapterIndex != newVerseIndexViewData.verseIndex.chapterIndex) {
                     actionMode?.finish()
                 }
             }
 
-            currentVerseIndex = newVerseIndex
+            currentVerseIndexViewData = newVerseIndexViewData
+            currentTranslationViewData = newTranslationViewData
 
-            adapter.setCurrent(newVerseIndex, newTranslation, newParallelTranslations)
-            viewHolder.versePager.setCurrentItem(newVerseIndex.toPagePosition(), false)
+            adapter.setCurrent(
+                    newVerseIndexViewData.verseIndex,
+                    newTranslationViewData.currentTranslation,
+                    newTranslationViewData.parallelTranslations
+            )
+            viewHolder.versePager.setCurrentItem(newVerseIndexViewData.verseIndex.toPagePosition(), false)
         }.launchIn(coroutineScope)
 
         viewModel.verseUpdates().onEach { adapter.notifyVerseUpdate(it) }.launchIn(coroutineScope)

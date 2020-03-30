@@ -6,6 +6,7 @@ CHANGELOG
   - Used SupervisorJob for parent scope
   - Should close activity when failed to load annotated verses, reading progress, and Strong's numbers
   - Properly nullify when jobs updating annotated verses complete
+  - Should scroll after chapter group is expanded / collapsed
 - Changes:
   - No longer show book name when simple reading mode is off
 - Refactoring:

@@ -20,6 +20,7 @@ import android.content.DialogInterface
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -32,7 +33,7 @@ import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.logger.Log
 
-data class SearchButtonViewHolder(val searchButton: SearchFloatingActionButton) : ViewHolder
+data class SearchButtonViewHolder(val searchButton: FloatingActionButton) : ViewHolder
 
 class SearchButtonPresenter(
         private val navigator: Navigator, readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,

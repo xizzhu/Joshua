@@ -66,22 +66,20 @@ class TranslationSpinnerAdapter(context: Context, onParallelTranslationRequested
 
     override fun getItemId(position: Int): Long = position.toLong()
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val textView = (convertView
-                ?: inflater.inflate(R.layout.spinner_selected, parent, false)) as TextView
-        textView.text = getItem(position)
-        return textView
-    }
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View =
+            (convertView ?: inflater.inflate(R.layout.spinner_selected, parent, false))
+                    .apply { (this as TextView).text = getItem(position) }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val viewHolder = convertView?.let { it.tag as DropDownViewHolder }
-                ?: DropDownViewHolder(inflater.inflate(R.layout.spinner_drop_down, parent, false))
-                        .apply { rootView.tag = this }
-        return with(viewHolder) {
+        val view = convertView
+                ?: inflater.inflate(R.layout.spinner_drop_down, parent, false).apply { tag = DropDownViewHolder(this) }
+        with(view.tag as DropDownViewHolder) {
             val translationShortName = translationShortNames[position]
             title.text = translationShortName
 
+            // Nullify the listener to avoid unwanted callback when updating isChecked.
             checkBox.setOnCheckedChangeListener(null)
+
             if (position < count - 1) {
                 if (currentTranslation == translationShortName) {
                     checkBox.isEnabled = false
@@ -91,17 +89,17 @@ class TranslationSpinnerAdapter(context: Context, onParallelTranslationRequested
                     checkBox.isChecked = parallelTranslations.contains(translationShortName)
                     checkBox.tag = translationShortName
 
-                    // Sets the listener after isChecked is updated, to avoid unwanted callback.
+                    // Sets the listener after isChecked is updated.
                     checkBox.setOnCheckedChangeListener(checkBoxListener)
                 }
 
                 checkBox.visibility = View.VISIBLE
             } else {
-                // Hides the check box for last item ("More")
+                // It's the last item ("More"), hide the check box.
                 checkBox.visibility = View.INVISIBLE
             }
-            return@with rootView
         }
+        return view
     }
 }
 

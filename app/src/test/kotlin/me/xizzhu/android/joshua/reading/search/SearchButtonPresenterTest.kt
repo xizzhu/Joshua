@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading.search
 
 import androidx.lifecycle.Lifecycle
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.Navigator
@@ -31,14 +32,18 @@ import kotlin.test.*
 class SearchButtonPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var lifecycle: Lifecycle
+
     @Mock
     private lateinit var navigator: Navigator
+
     @Mock
     private lateinit var readingViewModel: ReadingViewModel
+
     @Mock
     private lateinit var readingActivity: ReadingActivity
+
     @Mock
-    private lateinit var searchButton: SearchFloatingActionButton
+    private lateinit var searchButton: FloatingActionButton
 
     private lateinit var searchButtonViewHolder: SearchButtonViewHolder
     private lateinit var searchButtonPresenter: SearchButtonPresenter
