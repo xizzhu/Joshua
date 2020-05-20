@@ -16,7 +16,7 @@ CHANGELOG
 - Updated dependencies:
   - Kotlin JVM target to 1.8
   - Kotlin to 1.3.70, Coroutine to 1.3.5
-  - Gradle to 6.2.2
+  - Gradle to 6.4.1
   - Android Gradle plugin to 3.6.3
   - Android build tools to 29.0.3
   - AndroidX Core to 1.2.0, Lifecycle to 2.2.0, Material to 1.1.0, ViewPager2 to 1.0.0
