@@ -15,7 +15,7 @@ CHANGELOG
   - No longer needs ViewData
 - Updated dependencies:
   - Kotlin JVM target to 1.8
-  - Kotlin to 1.3.70, Coroutine to 1.3.5
+  - Kotlin to 1.3.72, Coroutine to 1.3.5
   - Gradle to 6.4.1
   - Android Gradle plugin to 3.6.3
   - Android build tools to 29.0.3

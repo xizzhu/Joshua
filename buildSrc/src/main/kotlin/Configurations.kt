@@ -48,7 +48,7 @@ object Versions {
 
     object Kotlin {
         const val jvmTarget = "1.8"
-        const val core = "1.3.70"
+        const val core = "1.3.72"
         const val coroutines = "1.3.5"
     }
 
