@@ -168,8 +168,6 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
             return@synchronized Pair(available, downloaded)
         }
         notifyTranslationsUpdated(available, downloaded)
-
-        offer(101)
     }
 
     @VisibleForTesting

@@ -56,8 +56,8 @@ class StrongNumberRepositoryTest : BaseUnitTest() {
         var called = false
         strongNumberRepository.download(versesDownloadProgress, wordsDownloadProgress)
                 .collect {
-                    assertTrue(it in (0..101))
-                    if (it == 101) called = true
+                    assertTrue(it in (0..100))
+                    if (it == 100) called = true
                 }
         assertTrue(called)
         assertTrue(versesDownloadProgress.isClosedForSend && versesDownloadProgress.isClosedForReceive)

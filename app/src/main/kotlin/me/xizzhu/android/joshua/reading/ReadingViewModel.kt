@@ -276,14 +276,7 @@ class ReadingViewModel(
 
     suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.readStrongNumber(verseIndex)
 
-    fun downloadStrongNumber(): Flow<Int> =
-            strongNumberManager.download()
-                    .map { progress ->
-                        // Ideally, we should use onCompletion() to handle this. However, it doesn't
-                        // distinguish between a successful completion and a cancellation.
-                        // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
-                        if (progress <= 100) progress else -1
-                    }
+    fun downloadStrongNumber(): Flow<Int> = strongNumberManager.download()
 
     fun startTracking() {
         readingProgressManager.startTracking()

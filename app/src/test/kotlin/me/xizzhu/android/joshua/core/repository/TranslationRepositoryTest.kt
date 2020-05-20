@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.core.repository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.TranslationInfo
@@ -234,7 +235,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
         assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
         assertEquals(setOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo), translationRepository.availableTranslations().first().toSet())
 
-        assertEquals(101, translationRepository.downloadTranslation(MockContents.kjvTranslationInfo).first { it == 101 })
+        assertTrue(translationRepository.downloadTranslation(MockContents.kjvTranslationInfo).toList().isEmpty())
         assertEquals(listOf(MockContents.cuvTranslationInfo), translationRepository.availableTranslations().first())
         assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations().first())
     }
