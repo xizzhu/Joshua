@@ -38,7 +38,7 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
 
     private val cache: BibleReadingCache = BibleReadingCache()
 
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
     private val currentTranslationShortName: ConflatedBroadcastChannel<String> = ConflatedBroadcastChannel()
     private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())

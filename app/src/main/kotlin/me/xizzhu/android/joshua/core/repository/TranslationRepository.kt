@@ -47,7 +47,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         const val TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS = 7L * 24L * 3600L * 1000L // 7 day
     }
 
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
     private val translationsLock: Any = Any()
     private val availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
     private val downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
