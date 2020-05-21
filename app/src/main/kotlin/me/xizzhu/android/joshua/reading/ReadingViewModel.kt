@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.utils.currentTimeMillis
+import me.xizzhu.android.joshua.utils.firstNotEmpty
 
 data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames: List<String>)
 
@@ -153,7 +154,7 @@ class ReadingViewModel(
             val highlights = async { highlightManager.read(bookIndex, chapterIndex) }
             val notes = async { noteManager.read(bookIndex, chapterIndex) }
             val verses = async {
-                val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+                val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
                 val parallelTranslations = bibleReadingManager.parallelTranslations().first()
                 if (parallelTranslations.isEmpty()) {
                     bibleReadingManager.readVerses(currentTranslation, bookIndex, chapterIndex)
@@ -176,7 +177,7 @@ class ReadingViewModel(
             val strongNumbers = async { strongNumberManager.readStrongNumber(verseIndex) }
 
             // build the verse
-            val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+            val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
             val parallelTranslations = translationManager.downloadedTranslations().first()
                     .filter { it.shortName != currentTranslation }
                     .sortedWith(TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME))

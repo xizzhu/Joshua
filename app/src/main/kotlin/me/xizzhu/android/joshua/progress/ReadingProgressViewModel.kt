@@ -17,10 +17,10 @@
 package me.xizzhu.android.joshua.progress
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import me.xizzhu.android.joshua.utils.firstNotEmpty
 
 data class ReadingProgressViewData(val readingProgress: ReadingProgress, val bookNames: List<String>)
 
@@ -30,7 +30,7 @@ class ReadingProgressViewModel(private val bibleReadingManager: BibleReadingMana
     fun readingProgress(): Flow<ReadingProgressViewData> = flow {
         emit(ReadingProgressViewData(
                 readingProgressManager.read(),
-                bibleReadingManager.readBookNames(bibleReadingManager.currentTranslation().first { it.isNotEmpty() })
+                bibleReadingManager.readBookNames(bibleReadingManager.currentTranslation().firstNotEmpty())
         ))
     }
 

@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import me.xizzhu.android.joshua.utils.firstNotEmpty
 
 data class SearchRequest(val query: String, val instantSearch: Boolean)
 
@@ -44,7 +45,7 @@ class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
     fun searchRequest(): Flow<SearchRequest> = searchRequest.asFlow()
 
     fun search(query: String): Flow<SearchResult> = flow {
-        val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+        val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
         emit(SearchResult(
                 query, bibleReadingManager.search(currentTranslation, query),
                 bibleReadingManager.readBookNames(currentTranslation),
