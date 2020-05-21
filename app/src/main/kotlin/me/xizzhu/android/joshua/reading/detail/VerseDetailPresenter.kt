@@ -119,13 +119,6 @@ class VerseDetailPresenter(
         downloadStrongNumberJob = viewModel.downloadStrongNumber()
                 .onEach { progress ->
                     when (progress) {
-                        -1 -> {
-                            activity.toast(R.string.toast_downloaded)
-                            verseDetail?.let {
-                                verseDetail = it.copy(strongNumberItems = viewModel.readStrongNumber(it.verseIndex).toStrongNumberItems())
-                                viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
-                            }
-                        }
                         in 0 until 100 -> {
                             downloadStrongNumberDialog?.setProgress(progress)
                         }
@@ -140,10 +133,18 @@ class VerseDetailPresenter(
                     Log.e(tag, "Failed to download Strong's numberrs", e)
                     activity.dialog(true, R.string.dialog_download_error,
                             DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
-                }.onCompletion {
+                }.onCompletion { e ->
                     downloadStrongNumberDialog?.dismiss()
                     downloadStrongNumberDialog = null
                     downloadStrongNumberJob = null
+
+                    if (e == null) {
+                        activity.toast(R.string.toast_downloaded)
+                        verseDetail?.let {
+                            verseDetail = it.copy(strongNumberItems = viewModel.readStrongNumber(it.verseIndex).toStrongNumberItems())
+                            viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
+                        }
+                    }
                 }.launchIn(coroutineScope)
     }
 

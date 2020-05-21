@@ -162,10 +162,6 @@ class TranslationListPresenter(
         downloadingJob = viewModel.downloadTranslation(translationToDownload)
                 .onEach { progress ->
                     when (progress) {
-                        -1 -> {
-                            activity.toast(R.string.toast_downloaded)
-                            loadTranslationList(false)
-                        }
                         in 0 until 100 -> {
                             downloadTranslationDialog?.setProgress(progress)
                         }
@@ -180,10 +176,15 @@ class TranslationListPresenter(
                     Log.e(tag, "Failed to download translation", e)
                     activity.dialog(true, R.string.dialog_download_error,
                             DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
-                }.onCompletion {
+                }.onCompletion { e ->
                     downloadTranslationDialog?.dismiss()
                     downloadTranslationDialog = null
                     downloadingJob = null
+
+                    if (e == null) {
+                        activity.toast(R.string.toast_downloaded)
+                        loadTranslationList(false)
+                    }
                 }.launchIn(coroutineScope)
     }
 

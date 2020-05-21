@@ -34,7 +34,7 @@ class SettingsRepository(private val localSettingsStorage: LocalSettingsStorage,
         private val TAG = SettingsRepository::class.java.simpleName
     }
 
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
     private val currentSettings: BroadcastChannel<Settings> = ConflatedBroadcastChannel()
 
     init {

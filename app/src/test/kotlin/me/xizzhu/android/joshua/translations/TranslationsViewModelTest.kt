@@ -32,8 +32,10 @@ import kotlin.test.assertEquals
 class TranslationsViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
+
     @Mock
     private lateinit var translationManager: TranslationManager
+
     @Mock
     private lateinit var settingsManager: SettingsManager
 
@@ -104,11 +106,10 @@ class TranslationsViewModelTest : BaseUnitTest() {
     fun testDownloadTranslation() = testDispatcher.runBlockingTest {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(""))
         val translationToDownload = MockContents.kjvTranslationInfo
-        val progress = 89
-        `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flowOf(progress, 101))
+        val progress = listOf(64, 89, 100)
+        `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(progress.asFlow())
 
-        assertEquals(listOf(progress, -1),
-                translationsViewModel.downloadTranslation(translationToDownload).toList())
+        assertEquals(progress, translationsViewModel.downloadTranslation(translationToDownload).toList())
         verify(translationManager, times(1)).downloadTranslation(translationToDownload)
     }
 

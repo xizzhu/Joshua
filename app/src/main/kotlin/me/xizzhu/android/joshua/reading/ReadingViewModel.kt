@@ -81,7 +81,7 @@ class ReadingViewModel(
         private val highlightManager: VerseAnnotationManager<Highlight>, private val noteManager: VerseAnnotationManager<Note>,
         private val strongNumberManager: StrongNumberManager, settingsManager: SettingsManager
 ) : BaseSettingsViewModel(settingsManager) {
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
     private val verseDetailRequest: BroadcastChannel<VerseDetailRequest> = ConflatedBroadcastChannel()
     private val verseUpdates: BroadcastChannel<VerseUpdate> = ConflatedBroadcastChannel()
 
@@ -276,14 +276,7 @@ class ReadingViewModel(
 
     suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.readStrongNumber(verseIndex)
 
-    fun downloadStrongNumber(): Flow<Int> =
-            strongNumberManager.download()
-                    .map { progress ->
-                        // Ideally, we should use onCompletion() to handle this. However, it doesn't
-                        // distinguish between a successful completion and a cancellation.
-                        // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
-                        if (progress <= 100) progress else -1
-                    }
+    fun downloadStrongNumber(): Flow<Int> = strongNumberManager.download()
 
     fun startTracking() {
         readingProgressManager.startTracking()

@@ -45,12 +45,6 @@ class TranslationsViewModel(private val bibleReadingManager: BibleReadingManager
 
     fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> =
             translationManager.downloadTranslation(translationToDownload)
-                    .map { progress ->
-                        // Ideally, we should use onCompletion() to handle this. However, it doesn't
-                        // distinguish between a successful completion and a cancellation.
-                        // See https://github.com/Kotlin/kotlinx.coroutines/issues/1693
-                        if (progress <= 100) progress else -1
-                    }
 
     fun removeTranslation(translationToRemove: TranslationInfo): Flow<Unit> = flow {
         emit(translationManager.removeTranslation(translationToRemove))

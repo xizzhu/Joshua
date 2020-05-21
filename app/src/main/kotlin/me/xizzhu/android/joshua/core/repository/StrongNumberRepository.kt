@@ -67,8 +67,6 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
         Log.i(TAG, "Strong number saved to database")
         val installFinished = elapsedRealtime()
 
-        offer(101)
-
         Analytics.track(Analytics.EVENT_DOWNLOAD_STRONG_NUMBER, mapOf(
                 Pair(Analytics.PARAM_DOWNLOAD_TIME, downloadFinished - start),
                 Pair(Analytics.PARAM_INSTALL_TIME, installFinished - downloadFinished)

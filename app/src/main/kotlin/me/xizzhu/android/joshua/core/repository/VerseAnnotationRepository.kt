@@ -37,7 +37,7 @@ class VerseAnnotationRepository<T : VerseAnnotation>(
         private val TAG = VerseAnnotationRepository::class.java.simpleName
     }
 
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
     private val sortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
 
     init {

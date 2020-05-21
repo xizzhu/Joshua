@@ -34,7 +34,7 @@ data class SearchResult(
 
 class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
                       settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/1082 is done
+    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
     private val searchRequest: BroadcastChannel<SearchRequest> = ConflatedBroadcastChannel()
 
     fun requestSearch(request: SearchRequest) {
