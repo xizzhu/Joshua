@@ -41,7 +41,7 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
     private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
     private val currentTranslationShortName: ConflatedBroadcastChannel<String> = ConflatedBroadcastChannel()
-    private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel(emptyList())
+    private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel()
 
     init {
         GlobalScope.launch(initDispatcher) {
