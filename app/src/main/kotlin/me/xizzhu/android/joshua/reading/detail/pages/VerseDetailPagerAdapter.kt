@@ -55,14 +55,14 @@ class VerseDetailPagerAdapter(context: Context) : RecyclerView.Adapter<VerseDeta
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerseDetailPage =
             when (viewType) {
-                PAGE_VERSES -> VersesPage(inflater, parent, settings!!)
-                PAGE_NOTE -> NotePage(inflater, parent, settings!!, onNoteUpdated!!)
-                PAGE_STRONG_NUMBER -> StrongNumberPage(inflater, parent, settings!!, onNoStrongNumberClicked!!)
+                PAGE_VERSES -> VersesPage(inflater, parent)
+                PAGE_NOTE -> NotePage(inflater, parent, onNoteUpdated!!)
+                PAGE_STRONG_NUMBER -> StrongNumberPage(inflater, parent, onNoStrongNumberClicked!!)
                 else -> throw IllegalArgumentException("Unsupported view type: $viewType")
             }
 
     override fun onBindViewHolder(holder: VerseDetailPage, position: Int) {
-        holder.bind(verseDetail)
+        holder.bind(verseDetail, settings!!)
     }
 
     fun pageTitle(position: Int): CharSequence = when (position) {

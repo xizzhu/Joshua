@@ -29,36 +29,38 @@ import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 
-class StrongNumberPage(inflater: LayoutInflater, container: ViewGroup, settings: Settings, onNoStrongNumberClicked: () -> Unit)
+class StrongNumberPage(inflater: LayoutInflater, container: ViewGroup, onNoStrongNumberClicked: () -> Unit)
     : VerseDetailPage(inflater.inflate(R.layout.page_verse_detail_strong_number, container, false)) {
     private val emptyStrongNumberList: TextView = itemView.findViewById<TextView>(R.id.empty_strong_number_list)
-            .apply {
-                setOnClickListener { onNoStrongNumberClicked() }
-                setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
-                setTextColor(settings.getPrimaryTextColor(resources))
-            }
+            .apply { setOnClickListener { onNoStrongNumberClicked() } }
     private val strongNumberListView: CommonRecyclerView = itemView.findViewById<CommonRecyclerView>(R.id.strong_number_list)
-            .apply {
-                isNestedScrollingEnabled = false
-                setSettings(settings)
-            }
+            .apply { isNestedScrollingEnabled = false }
 
-    override fun bind(verseDetail: VerseDetail) {
+    override fun bind(verseDetail: VerseDetail, settings: Settings) {
         if (verseDetail.strongNumberItems.isEmpty()) {
-            bindNoStrongNumberView()
+            bindNoStrongNumberView(settings)
         } else {
-            bindStrongNumberItems(verseDetail.strongNumberItems)
+            bindStrongNumberItems(verseDetail.strongNumberItems, settings)
         }
     }
 
-    private fun bindNoStrongNumberView() {
-        emptyStrongNumberList.visibility = View.VISIBLE
+    private fun bindNoStrongNumberView(settings: Settings) {
+        with(emptyStrongNumberList) {
+            visibility = View.VISIBLE
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+            setTextColor(settings.getPrimaryTextColor(resources))
+        }
+
         strongNumberListView.visibility = View.GONE
     }
 
-    private fun bindStrongNumberItems(strongNumberItems: List<StrongNumberItem>) {
+    private fun bindStrongNumberItems(strongNumberItems: List<StrongNumberItem>, settings: Settings) {
         emptyStrongNumberList.visibility = View.GONE
-        strongNumberListView.visibility = View.VISIBLE
-        strongNumberListView.setItems(strongNumberItems)
+
+        with(strongNumberListView) {
+            visibility = View.VISIBLE
+            setItems(strongNumberItems)
+            setSettings(settings)
+        }
     }
 }

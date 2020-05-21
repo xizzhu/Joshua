@@ -18,8 +18,9 @@ package me.xizzhu.android.joshua.reading.detail.pages
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.reading.detail.VerseDetail
 
 abstract class VerseDetailPage(view: View) : RecyclerView.ViewHolder(view) {
-    abstract fun bind(verseDetail: VerseDetail)
+    abstract fun bind(verseDetail: VerseDetail, settings: Settings)
 }

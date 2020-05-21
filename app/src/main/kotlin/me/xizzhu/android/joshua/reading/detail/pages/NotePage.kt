@@ -28,8 +28,7 @@ import me.xizzhu.android.joshua.reading.detail.VerseDetail
 import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 
-class NotePage(inflater: LayoutInflater, container: ViewGroup,
-               settings: Settings, onNoteUpdated: (String) -> Unit)
+class NotePage(inflater: LayoutInflater, container: ViewGroup, onNoteUpdated: (String) -> Unit)
     : VerseDetailPage(inflater.inflate(R.layout.page_verse_detail_note, container, false)) {
     private val textWatcher = object : TextWatcher {
         override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
@@ -41,17 +40,17 @@ class NotePage(inflater: LayoutInflater, container: ViewGroup,
         }
     }
 
-    private val note: TextInputEditText = itemView.findViewById<TextInputEditText>(R.id.note).apply {
-        addTextChangedListener(textWatcher)
-        setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
-        setTextColor(settings.getPrimaryTextColor(resources))
-    }
+    private val note: TextInputEditText = itemView.findViewById<TextInputEditText>(R.id.note)
+            .apply { addTextChangedListener(textWatcher) }
 
-    override fun bind(verseDetail: VerseDetail) {
+    override fun bind(verseDetail: VerseDetail, settings: Settings) {
         with(note) {
             removeTextChangedListener(textWatcher)
             setText(verseDetail.note)
             addTextChangedListener(textWatcher)
+
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+            setTextColor(settings.getPrimaryTextColor(resources))
         }
     }
 }
