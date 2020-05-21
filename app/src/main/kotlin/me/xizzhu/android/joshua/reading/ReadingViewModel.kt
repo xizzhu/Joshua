@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.utils.currentTimeMillis
+import me.xizzhu.android.joshua.utils.filterIsValid
 import me.xizzhu.android.joshua.utils.filterNotEmpty
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 
@@ -119,7 +120,7 @@ class ReadingViewModel(
     }
 
     fun currentVerseIndex(): Flow<VerseIndex> =
-            bibleReadingManager.currentVerseIndex().filter { it.isValid() }
+            bibleReadingManager.currentVerseIndex().filterIsValid()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
@@ -127,7 +128,7 @@ class ReadingViewModel(
 
     fun currentVerseIndexViewData(): Flow<CurrentVerseIndexViewData> =
             combine(bibleReadingManager.currentTranslation().filterNotEmpty(),
-                    bibleReadingManager.currentVerseIndex().filter { it.isValid() }) { currentTranslation, currentVerseIndex ->
+                    bibleReadingManager.currentVerseIndex().filterIsValid()) { currentTranslation, currentVerseIndex ->
                 CurrentVerseIndexViewData(
                         currentVerseIndex,
                         bibleReadingManager.readBookNames(currentTranslation)[currentVerseIndex.bookIndex],
@@ -136,7 +137,7 @@ class ReadingViewModel(
             }
 
     fun chapterList(): Flow<ChapterListViewData> {
-        val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
+        val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filterIsValid()
         val bookNamesFlow = bibleReadingManager.currentTranslation()
                 .filterNotEmpty()
                 .map { bibleReadingManager.readBookNames(it) }
