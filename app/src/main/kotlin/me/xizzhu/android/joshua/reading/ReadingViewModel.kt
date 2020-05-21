@@ -126,11 +126,11 @@ class ReadingViewModel(
 
     fun currentVerseIndexViewData(): Flow<CurrentVerseIndexViewData> =
             combine(bibleReadingManager.currentTranslation().filter { it.isNotEmpty() },
-                    bibleReadingManager.currentVerseIndex().filter { it.isValid() }) { curentTranslation, currentVerseIndex ->
+                    bibleReadingManager.currentVerseIndex().filter { it.isValid() }) { currentTranslation, currentVerseIndex ->
                 CurrentVerseIndexViewData(
                         currentVerseIndex,
-                        bibleReadingManager.readBookNames(curentTranslation)[currentVerseIndex.bookIndex],
-                        bibleReadingManager.readBookShortNames(curentTranslation)[currentVerseIndex.bookIndex]
+                        bibleReadingManager.readBookNames(currentTranslation)[currentVerseIndex.bookIndex],
+                        bibleReadingManager.readBookShortNames(currentTranslation)[currentVerseIndex.bookIndex]
                 )
             }
 
