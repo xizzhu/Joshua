@@ -97,6 +97,13 @@ android {
 
     packagingOptions {
         exclude("META-INF/atomicfu.kotlin_module")
+        exclude("META-INF/AL2.0")
+        exclude("META-INF/LGPL2.1")
+        exclude("META-INF/licenses/*")
+
+        // workaround for https://github.com/Kotlin/kotlinx.coroutines/issues/2023
+        exclude("win32-x86/attach_hotspot_windows.dll")
+        exclude("win32-x86-64/attach_hotspot_windows.dll")
     }
 }
 
