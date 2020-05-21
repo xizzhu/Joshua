@@ -99,11 +99,15 @@ class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRep
         }
     }
 
-    suspend fun stopTracking() {
-        trackReadingProgress()
-        currentVerseIndex = VerseIndex.INVALID
-        lastTimestamp = 0L
-        currentVerseIndexObserver = null
+    fun stopTracking() {
+        // uses GlobalScope to make sure this will be executed without being canceled
+        // uses Dispatchers.Main.immediate to make sure this will be executed immediately
+        GlobalScope.launch(Dispatchers.Main.immediate) {
+            trackReadingProgress()
+            currentVerseIndex = VerseIndex.INVALID
+            lastTimestamp = 0L
+            currentVerseIndexObserver = null
+        }
     }
 
     suspend fun read(): ReadingProgress = readingProgressRepository.read()

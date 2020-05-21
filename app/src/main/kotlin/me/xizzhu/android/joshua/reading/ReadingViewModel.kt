@@ -119,8 +119,7 @@ class ReadingViewModel(
         bibleReadingManager.clearParallelTranslation()
     }
 
-    fun currentVerseIndex(): Flow<VerseIndex> =
-            bibleReadingManager.currentVerseIndex().filterIsValid()
+    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.currentVerseIndex().filterIsValid()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
@@ -136,15 +135,13 @@ class ReadingViewModel(
                 )
             }
 
-    fun chapterList(): Flow<ChapterListViewData> {
-        val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filterIsValid()
-        val bookNamesFlow = bibleReadingManager.currentTranslation()
-                .filterNotEmpty()
-                .map { bibleReadingManager.readBookNames(it) }
-        return combine(currentVerseIndexFlow, bookNamesFlow) { currentVerseIndex, bookNames ->
-            ChapterListViewData(currentVerseIndex, bookNames)
-        }
-    }
+    fun chapterList(): Flow<ChapterListViewData> =
+            combine(bibleReadingManager.currentVerseIndex().filterIsValid(),
+                    bibleReadingManager.currentTranslation()
+                            .filterNotEmpty()
+                            .map { bibleReadingManager.readBookNames(it) }) { currentVerseIndex, bookNames ->
+                ChapterListViewData(currentVerseIndex, bookNames)
+            }
 
     fun bookName(translationShortName: String, bookIndex: Int): Flow<String> = flow {
         emit(bibleReadingManager.readBookNames(translationShortName)[bookIndex])
@@ -286,9 +283,7 @@ class ReadingViewModel(
     }
 
     fun stopTracking() {
-        // uses GlobalScope to make sure this will be executed without being canceled
-        // uses Dispatchers.Main.immediate to make sure this will be executed immediately
-        GlobalScope.launch(Dispatchers.Main.immediate) { readingProgressManager.stopTracking() }
+        readingProgressManager.stopTracking()
     }
 
     fun verseUpdates(): Flow<VerseUpdate> = verseUpdates.asFlow()
