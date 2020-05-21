@@ -80,8 +80,8 @@ object Versions {
         const val analytics = "17.4.1"
 
         object Crashlytics {
-            const val classpath = "1.28.1"
-            const val crashlytics = "2.10.1"
+            const val classpath = "2.1.0"
+            const val crashlytics = "17.0.0"
         }
     }
 
@@ -148,8 +148,8 @@ object Dependencies {
         const val analytics = "com.google.firebase:firebase-analytics:${Versions.Firebase.analytics}"
 
         object Crashlytics {
-            const val classpath = "io.fabric.tools:gradle:${Versions.Firebase.Crashlytics.classpath}"
-            const val crashlytics = "com.crashlytics.sdk.android:crashlytics:${Versions.Firebase.Crashlytics.crashlytics}"
+            const val classpath = "com.google.firebase:firebase-crashlytics-gradle:${Versions.Firebase.Crashlytics.classpath}"
+            const val crashlytics = "com.google.firebase:firebase-crashlytics:${Versions.Firebase.Crashlytics.crashlytics}"
         }
     }
 

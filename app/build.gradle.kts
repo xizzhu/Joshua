@@ -21,9 +21,6 @@ plugins {
     kotlin("android")
     kotlin("kapt")
 }
-apply {
-    plugin("io.fabric")
-}
 apply("$rootDir/scripts/coverage.gradle.kts")
 
 android {
@@ -159,4 +156,5 @@ dependencies {
 
 apply {
     plugin("com.google.gms.google-services")
+    plugin("com.google.firebase.crashlytics")
 }

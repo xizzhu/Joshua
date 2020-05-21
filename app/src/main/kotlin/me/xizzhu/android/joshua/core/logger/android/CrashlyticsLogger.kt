@@ -17,16 +17,16 @@
 package me.xizzhu.android.joshua.core.logger.android
 
 import androidx.annotation.VisibleForTesting
-import com.crashlytics.android.Crashlytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import me.xizzhu.android.logger.Log
 import me.xizzhu.android.logger.Logger
 
 class CrashlyticsLogger : Logger {
-    private val crashlyticsCore by lazy { Crashlytics.getInstance().core }
+    private val crashlytics by lazy { FirebaseCrashlytics.getInstance() }
 
     override fun log(@Log.Level level: Int, tag: String, msg: String) {
         if (level >= Log.INFO && msg.isNotBlank()) {
-            crashlyticsCore.log(level, tag, msg)
+            crashlytics.log("$tag: $msg")
         }
     }
 
@@ -34,9 +34,9 @@ class CrashlyticsLogger : Logger {
         if (e.isCoroutineCancellationException()) return
 
         if (msg.isNotBlank()) {
-            crashlyticsCore.log(level, tag, msg)
+            crashlytics.log("$tag: $msg")
         }
-        crashlyticsCore.logException(e)
+        crashlytics.recordException(e)
     }
 
     @VisibleForTesting
