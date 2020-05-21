@@ -35,12 +35,15 @@ abstract class BaseAnnotatedVersesViewModel<V : VerseAnnotation>(private val bib
                                                                  settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
     fun sortOrder(): Flow<Int> = verseAnnotationManager.sortOrder()
 
+    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
+        verseAnnotationManager.saveSortOrder(sortOrder)
+    }
+
     fun loadingRequest(): Flow<LoadingRequest> =
-            bibleReadingManager.currentTranslation()
-                    .filter { it.isNotEmpty() }
-                    .combine(verseAnnotationManager.sortOrder()) { currentTranslation, sortOrder ->
-                        LoadingRequest(currentTranslation, sortOrder)
-                    }
+            combine(bibleReadingManager.currentTranslation().filter { it.isNotEmpty() },
+                    verseAnnotationManager.sortOrder()) { currentTranslation, sortOrder ->
+                LoadingRequest(currentTranslation, sortOrder)
+            }
 
     fun annotatedVerses(loadingRequest: LoadingRequest): Flow<AnnotatedVerses<V>> = flow {
         val annotations = verseAnnotationManager.read(loadingRequest.sortOrder)
@@ -51,10 +54,6 @@ abstract class BaseAnnotatedVersesViewModel<V : VerseAnnotation>(private val bib
                 bibleReadingManager.readBookNames(loadingRequest.currentTranslation),
                 bibleReadingManager.readBookShortNames(loadingRequest.currentTranslation)
         ))
-    }
-
-    suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
-        verseAnnotationManager.saveSortOrder(sortOrder)
     }
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {

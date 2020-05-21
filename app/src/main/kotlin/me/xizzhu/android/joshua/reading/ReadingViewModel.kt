@@ -26,6 +26,9 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.utils.currentTimeMillis
+import me.xizzhu.android.joshua.utils.filterIsValid
+import me.xizzhu.android.joshua.utils.filterNotEmpty
+import me.xizzhu.android.joshua.utils.firstNotEmpty
 
 data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames: List<String>)
 
@@ -92,10 +95,10 @@ class ReadingViewModel(
             translationManager.downloadedTranslations().first().isNotEmpty()
 
     fun currentTranslation(): Flow<String> =
-            bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }
+            bibleReadingManager.currentTranslation().filterNotEmpty()
 
     fun currentTranslationViewData(): Flow<CurrentTranslationViewData> =
-            combine(bibleReadingManager.currentTranslation().filter { it.isNotEmpty() },
+            combine(bibleReadingManager.currentTranslation().filterNotEmpty(),
                     bibleReadingManager.parallelTranslations()) { current, parallel ->
                 CurrentTranslationViewData(current, parallel)
             }
@@ -116,32 +119,29 @@ class ReadingViewModel(
         bibleReadingManager.clearParallelTranslation()
     }
 
-    fun currentVerseIndex(): Flow<VerseIndex> =
-            bibleReadingManager.currentVerseIndex().filter { it.isValid() }
+    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.currentVerseIndex().filterIsValid()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingManager.saveCurrentVerseIndex(verseIndex)
     }
 
     fun currentVerseIndexViewData(): Flow<CurrentVerseIndexViewData> =
-            combine(bibleReadingManager.currentTranslation().filter { it.isNotEmpty() },
-                    bibleReadingManager.currentVerseIndex().filter { it.isValid() }) { curentTranslation, currentVerseIndex ->
+            combine(bibleReadingManager.currentTranslation().filterNotEmpty(),
+                    bibleReadingManager.currentVerseIndex().filterIsValid()) { currentTranslation, currentVerseIndex ->
                 CurrentVerseIndexViewData(
                         currentVerseIndex,
-                        bibleReadingManager.readBookNames(curentTranslation)[currentVerseIndex.bookIndex],
-                        bibleReadingManager.readBookShortNames(curentTranslation)[currentVerseIndex.bookIndex]
+                        bibleReadingManager.readBookNames(currentTranslation)[currentVerseIndex.bookIndex],
+                        bibleReadingManager.readBookShortNames(currentTranslation)[currentVerseIndex.bookIndex]
                 )
             }
 
-    fun chapterList(): Flow<ChapterListViewData> {
-        val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
-        val bookNamesFlow = bibleReadingManager.currentTranslation()
-                .filter { it.isNotEmpty() }
-                .map { bibleReadingManager.readBookNames(it) }
-        return combine(currentVerseIndexFlow, bookNamesFlow) { currentVerseIndex, bookNames ->
-            ChapterListViewData(currentVerseIndex, bookNames)
-        }
-    }
+    fun chapterList(): Flow<ChapterListViewData> =
+            combine(bibleReadingManager.currentVerseIndex().filterIsValid(),
+                    bibleReadingManager.currentTranslation()
+                            .filterNotEmpty()
+                            .map { bibleReadingManager.readBookNames(it) }) { currentVerseIndex, bookNames ->
+                ChapterListViewData(currentVerseIndex, bookNames)
+            }
 
     fun bookName(translationShortName: String, bookIndex: Int): Flow<String> = flow {
         emit(bibleReadingManager.readBookNames(translationShortName)[bookIndex])
@@ -153,7 +153,7 @@ class ReadingViewModel(
             val highlights = async { highlightManager.read(bookIndex, chapterIndex) }
             val notes = async { noteManager.read(bookIndex, chapterIndex) }
             val verses = async {
-                val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+                val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
                 val parallelTranslations = bibleReadingManager.parallelTranslations().first()
                 if (parallelTranslations.isEmpty()) {
                     bibleReadingManager.readVerses(currentTranslation, bookIndex, chapterIndex)
@@ -176,7 +176,7 @@ class ReadingViewModel(
             val strongNumbers = async { strongNumberManager.readStrongNumber(verseIndex) }
 
             // build the verse
-            val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+            val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
             val parallelTranslations = translationManager.downloadedTranslations().first()
                     .filter { it.shortName != currentTranslation }
                     .sortedWith(TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME))
@@ -283,9 +283,7 @@ class ReadingViewModel(
     }
 
     fun stopTracking() {
-        // uses GlobalScope to make sure this will be executed without being canceled
-        // uses Dispatchers.Main.immediate to make sure this will be executed immediately
-        GlobalScope.launch(Dispatchers.Main.immediate) { readingProgressManager.stopTracking() }
+        readingProgressManager.stopTracking()
     }
 
     fun verseUpdates(): Flow<VerseUpdate> = verseUpdates.asFlow()

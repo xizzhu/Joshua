@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.utils.elapsedRealtime
+import me.xizzhu.android.joshua.utils.filterIsValid
 import me.xizzhu.android.logger.Log
 
 data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimestamp: Long,
@@ -67,7 +68,7 @@ class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRep
         lastTimestamp = elapsedRealtime()
         currentVerseIndexObserver = bibleReadingRepository.currentVerseIndex()
         GlobalScope.launch(Dispatchers.Main) {
-            currentVerseIndexObserver?.filter { it.isValid() }
+            currentVerseIndexObserver?.filterIsValid()
                     ?.collect {
                         trackReadingProgress()
                         currentVerseIndex = it
@@ -98,11 +99,15 @@ class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRep
         }
     }
 
-    suspend fun stopTracking() {
-        trackReadingProgress()
-        currentVerseIndex = VerseIndex.INVALID
-        lastTimestamp = 0L
-        currentVerseIndexObserver = null
+    fun stopTracking() {
+        // uses GlobalScope to make sure this will be executed without being canceled
+        // uses Dispatchers.Main.immediate to make sure this will be executed immediately
+        GlobalScope.launch(Dispatchers.Main.immediate) {
+            trackReadingProgress()
+            currentVerseIndex = VerseIndex.INVALID
+            lastTimestamp = 0L
+            currentVerseIndexObserver = null
+        }
     }
 
     suspend fun read(): ReadingProgress = readingProgressRepository.read()

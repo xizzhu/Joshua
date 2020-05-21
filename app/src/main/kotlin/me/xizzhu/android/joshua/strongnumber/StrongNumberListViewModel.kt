@@ -17,10 +17,10 @@
 package me.xizzhu.android.joshua.strongnumber
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import me.xizzhu.android.joshua.utils.firstNotEmpty
 
 data class StrongNumberViewData(val strongNumber: StrongNumber, val verses: List<Verse>,
                                 val bookNames: List<String>, val bookShortNames: List<String>)
@@ -29,7 +29,7 @@ class StrongNumberListViewModel(private val bibleReadingManager: BibleReadingMan
                                 private val strongNumberManager: StrongNumberManager,
                                 settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
     fun strongNumber(sn: String): Flow<StrongNumberViewData> = flow {
-        val currentTranslation = bibleReadingManager.currentTranslation().first { it.isNotEmpty() }
+        val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
         val verses = bibleReadingManager.readVerses(currentTranslation, strongNumberManager.readVerseIndexes(sn))
                 .map { (_, v) -> v }.sortedBy { verse ->
                     with(verse.verseIndex) { bookIndex * 100000 + chapterIndex * 1000 + verseIndex }
