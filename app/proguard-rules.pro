@@ -7,12 +7,12 @@
 -keep class androidx.appcompat.widget.Toolbar { *; }
 
 # Crashlytics
--keepattributes *Annotation*
+# https://firebase.google.com/docs/crashlytics/get-deobfuscated-reports?platform=android
 -keepattributes SourceFile,LineNumberTable
 -keep public class * extends java.lang.Exception
 
--keep class com.crashlytics.** { *; }
--dontwarn com.crashlytics.**
+-keep class com.google.firebase.crashlytics.** { *; }
+-dontwarn com.google.firebase.crashlytics.**
 
 # Kotlin Intrinsics
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics { *; }

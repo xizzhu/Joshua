@@ -10,6 +10,7 @@ CHANGELOG
 - Changes:
   - No longer show book name when simple reading mode is off
 - Refactoring:
+  - Migrated to Firebase Crashlytics
   - Used ViewPager2 instead of ViewPager
   - Used Lifecycle and ViewModel from AndroidX
   - No longer needs ViewData
@@ -20,7 +21,7 @@ CHANGELOG
   - Android Gradle plugin to 3.6.3
   - Android build tools to 29.0.3
   - AndroidX Core to 1.2.0, Lifecycle to 2.2.0, Material to 1.1.0, ViewPager2 to 1.0.0
-  - Firebase Analytics to 17.4.1, removed Firebase Core
+  - Firebase Analytics to 17.4.1, Crashlytics to 17.0.0, Crashlytics Gradle plugin to 2.1.0, removed Firebase Core
   - Dagger to 2.27
   - ASK to 0.5.2
   - Logger to 0.2.0
