@@ -37,7 +37,7 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "3.6.1"
+        const val classpath = "3.6.3"
         const val buildTools = "29.0.3"
         const val compile = 29
         const val min = 21
@@ -48,7 +48,7 @@ object Versions {
 
     object Kotlin {
         const val jvmTarget = "1.8"
-        const val core = "1.3.70"
+        const val core = "1.3.72"
         const val coroutines = "1.3.5"
     }
 
@@ -77,7 +77,7 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.3"
-        const val analytics = "17.2.3"
+        const val analytics = "17.4.1"
 
         object Crashlytics {
             const val classpath = "1.28.1"
