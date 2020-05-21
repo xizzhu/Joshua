@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.utils.currentTimeMillis
+import me.xizzhu.android.joshua.utils.filterNotEmpty
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 
 data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames: List<String>)
@@ -93,10 +94,10 @@ class ReadingViewModel(
             translationManager.downloadedTranslations().first().isNotEmpty()
 
     fun currentTranslation(): Flow<String> =
-            bibleReadingManager.currentTranslation().filter { it.isNotEmpty() }
+            bibleReadingManager.currentTranslation().filterNotEmpty()
 
     fun currentTranslationViewData(): Flow<CurrentTranslationViewData> =
-            combine(bibleReadingManager.currentTranslation().filter { it.isNotEmpty() },
+            combine(bibleReadingManager.currentTranslation().filterNotEmpty(),
                     bibleReadingManager.parallelTranslations()) { current, parallel ->
                 CurrentTranslationViewData(current, parallel)
             }
@@ -125,7 +126,7 @@ class ReadingViewModel(
     }
 
     fun currentVerseIndexViewData(): Flow<CurrentVerseIndexViewData> =
-            combine(bibleReadingManager.currentTranslation().filter { it.isNotEmpty() },
+            combine(bibleReadingManager.currentTranslation().filterNotEmpty(),
                     bibleReadingManager.currentVerseIndex().filter { it.isValid() }) { currentTranslation, currentVerseIndex ->
                 CurrentVerseIndexViewData(
                         currentVerseIndex,
@@ -137,7 +138,7 @@ class ReadingViewModel(
     fun chapterList(): Flow<ChapterListViewData> {
         val currentVerseIndexFlow = bibleReadingManager.currentVerseIndex().filter { it.isValid() }
         val bookNamesFlow = bibleReadingManager.currentTranslation()
-                .filter { it.isNotEmpty() }
+                .filterNotEmpty()
                 .map { bibleReadingManager.readBookNames(it) }
         return combine(currentVerseIndexFlow, bookNamesFlow) { currentVerseIndex, bookNames ->
             ChapterListViewData(currentVerseIndex, bookNames)

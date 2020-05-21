@@ -17,6 +17,9 @@
 package me.xizzhu.android.joshua.utils
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 
 suspend inline fun Flow<String>.firstNotEmpty(): String = first { it.isNotEmpty() }
+
+fun Flow<String>.filterNotEmpty(): Flow<String> = filter { it.isNotEmpty() }
