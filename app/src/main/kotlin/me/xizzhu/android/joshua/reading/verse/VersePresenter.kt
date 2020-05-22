@@ -100,7 +100,6 @@ class VersePresenter(
                     )
                     ?.let { activity.startActivity(it) }
                     ?: throw RuntimeException("Failed to create chooser for sharing")
-            activity.toast(R.string.toast_verses_copied)
         } catch (e: Exception) {
             Log.e(tag, "Failed to share", e)
             activity.toast(R.string.toast_unknown_error)
