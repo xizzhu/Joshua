@@ -42,7 +42,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
 
     fun download(): Flow<Int> = download(Channel(Channel.CONFLATED), Channel(Channel.CONFLATED))
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun download(versesDownloadProgress: Channel<Int>, wordsDownloadProgress: Channel<Int>) = channelFlow {
         val start = elapsedRealtime()
         Log.i(TAG, "Start downloading Strong number")

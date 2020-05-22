@@ -41,7 +41,7 @@ fun JsonReader.readListJson(): List<RemoteTranslationInfo> {
     throw RuntimeException("Missing 'translations' in list.json")
 }
 
-@VisibleForTesting
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 fun JsonReader.readTranslationsArray(): List<RemoteTranslationInfo> {
     val remoteTranslations = ArrayList<RemoteTranslationInfo>()
     beginArray()
@@ -52,7 +52,7 @@ fun JsonReader.readTranslationsArray(): List<RemoteTranslationInfo> {
     return remoteTranslations
 }
 
-@VisibleForTesting
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 fun JsonReader.readTranslation(): RemoteTranslationInfo? {
     var shortName: String? = null
     var name: String? = null
@@ -103,7 +103,7 @@ fun JsonReader.readBooksJson(): Pair<List<String>, List<String>> {
     throw RuntimeException("Illegal JSON format in books.json")
 }
 
-@VisibleForTesting
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 fun JsonReader.readStringsArray(): List<String> {
     val strings = ArrayList<String>()
     beginArray()
@@ -154,7 +154,7 @@ fun JsonReader.readStrongNumberVerses(): Map<Int, List<Int>> {
     return verses
 }
 
-@VisibleForTesting
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 fun JsonReader.readIntsArray(): List<Int> {
     val ints = ArrayList<Int>()
     beginArray()

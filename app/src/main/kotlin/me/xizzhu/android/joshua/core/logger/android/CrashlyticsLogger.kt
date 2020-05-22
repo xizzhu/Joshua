@@ -39,7 +39,7 @@ class CrashlyticsLogger : Logger {
         crashlytics.recordException(e)
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun Throwable.isCoroutineCancellationException(): Boolean {
         var rootCause = this
         while (rootCause.cause?.let { it != rootCause } == true) rootCause = rootCause.cause!!

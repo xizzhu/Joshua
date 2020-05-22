@@ -43,7 +43,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
     companion object {
         private val TAG: String = TranslationRepository::class.java.simpleName
 
-        @VisibleForTesting
+        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         const val TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS = 7L * 24L * 3600L * 1000L // 7 day
     }
 
@@ -63,7 +63,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun updateTranslations(updatedTranslations: List<TranslationInfo>) {
         val (available, downloaded) = synchronized(translationsLock) {
             val available = mutableMapOf<String, TranslationInfo>()
@@ -109,11 +109,11 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         updateTranslations(translations)
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     suspend fun translationListTooOld(): Boolean =
             currentTimeMillis() - localTranslationStorage.readTranslationListRefreshTimestamp() >= TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
         Log.i(TAG, "Start fetching translation list")
         val fetchedTranslations = remoteTranslationService.fetchTranslations()
@@ -170,7 +170,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         notifyTranslationsUpdated(available, downloaded)
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     suspend fun downloadTranslation(downloadProgressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
         val start = elapsedRealtime()
         Log.i(TAG, "Start downloading translation - ${translationInfo.shortName}")

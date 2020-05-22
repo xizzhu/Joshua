@@ -52,6 +52,6 @@ class TranslationInfoComparator(@SortOrder private val sortOrder: Int) : Compara
         return r
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun userLanguage(): String = Locale.getDefault().displayLanguage
 }

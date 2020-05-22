@@ -29,7 +29,7 @@ class FirebaseAnalyticsProvider(context: Context) : AnalyticsProvider {
         firebaseAnalytics.logEvent(event, params?.toBundle())
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun Map<String, Any>.toBundle(): Bundle = Bundle().also { bundle ->
         forEach { (key, value) ->
             when (value) {

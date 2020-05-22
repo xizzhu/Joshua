@@ -51,7 +51,7 @@ class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRep
     companion object {
         private val TAG: String = ReadingProgressManager::class.java.simpleName
 
-        @VisibleForTesting
+        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         const val TIME_SPENT_THRESHOLD_IN_MILLIS = 2500L
     }
 

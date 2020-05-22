@@ -47,7 +47,7 @@ fun Activity.share(title: String, text: String) {
             ?: throw RuntimeException("Failed to create chooser for sharing")
 }
 
-@VisibleForTesting
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 fun PackageManager.chooserForSharing(packageToExclude: String, title: String, text: String): Intent? {
     val sendIntent = Intent(Intent.ACTION_SEND).setType("text/plain")
     val resolveInfoList = queryIntentActivities(sendIntent, 0)
