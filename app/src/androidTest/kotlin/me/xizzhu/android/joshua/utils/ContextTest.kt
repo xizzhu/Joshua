@@ -35,7 +35,7 @@ import kotlin.test.assertNotNull
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class IntentHelperTest : BaseUnitTest() {
+class ContextTest : BaseUnitTest() {
     @Mock
     private lateinit var packageManager: PackageManager
 

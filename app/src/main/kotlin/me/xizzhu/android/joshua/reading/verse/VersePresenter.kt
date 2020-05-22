@@ -33,8 +33,8 @@ import me.xizzhu.android.joshua.reading.*
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.toast
-import me.xizzhu.android.joshua.utils.chooserForSharing
 import me.xizzhu.android.joshua.utils.copyToClipBoard
+import me.xizzhu.android.joshua.utils.share
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
 
@@ -94,12 +94,10 @@ class VersePresenter(
         if (selectedVerses.isEmpty()) return
 
         try {
-            activity.chooserForSharing(
-                            activity.getString(R.string.text_share_with),
-                            selectedVerses.toStringForSharing(currentVerseIndexViewData.bookName)
-                    )
-                    ?.let { activity.startActivity(it) }
-                    ?: throw RuntimeException("Failed to create chooser for sharing")
+            activity.share(
+                    activity.getString(R.string.text_share_with),
+                    selectedVerses.toStringForSharing(currentVerseIndexViewData.bookName)
+            )
         } catch (e: Exception) {
             Log.e(tag, "Failed to share", e)
             activity.toast(R.string.toast_unknown_error)
