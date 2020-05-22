@@ -65,6 +65,18 @@ fun Activity.dialog(cancelable: Boolean, @StringRes message: Int,
             .show()
 }
 
+fun Activity.dialog(cancelable: Boolean, message: CharSequence,
+                    onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {
+    if (isDestroyed) return
+
+    AlertDialog.Builder(this)
+            .setCancelable(cancelable)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.yes, onPositive)
+            .setNegativeButton(android.R.string.no, onNegative)
+            .show()
+}
+
 fun Activity.progressDialog(@StringRes title: Int, maxProgress: Int, onCancel: () -> Unit): ProgressDialog? {
     val progressBar = (View.inflate(this, R.layout.widget_progress_bar, null) as ProgressBar)
             .apply { max = maxProgress }

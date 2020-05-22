@@ -36,6 +36,8 @@ fun Activity.dialog(@StringRes title: Int, items: Array<String>, selected: Int, 
 
 fun Activity.dialog(cancelable: Boolean, @StringRes message: Int, onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {}
 
+fun Activity.dialog(cancelable: Boolean, message: CharSequence, onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {}
+
 fun Activity.progressDialog(@StringRes title: Int, maxProgress: Int, onCancel: () -> Unit): ProgressDialog? = null
 
 fun Activity.indeterminateProgressDialog(@StringRes title: Int): AlertDialog? = null

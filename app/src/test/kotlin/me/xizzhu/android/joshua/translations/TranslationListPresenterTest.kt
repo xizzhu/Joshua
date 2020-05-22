@@ -40,12 +40,16 @@ import kotlin.test.assertEquals
 class TranslationListPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var lifecycle: Lifecycle
+
     @Mock
     private lateinit var translationsViewModel: TranslationsViewModel
+
     @Mock
     private lateinit var translationsActivity: TranslationsActivity
+
     @Mock
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+
     @Mock
     private lateinit var translationListView: CommonRecyclerView
 
@@ -124,5 +128,50 @@ class TranslationListPresenterTest : BaseUnitTest() {
         val actual = with(translationListPresenter) { translationList.toItems() }
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testOnTranslationClicked() {
+        translationListPresenter = spy(translationListPresenter)
+        doNothing().`when`(translationListPresenter).confirmAndDownloadTranslation(MockContents.kjvTranslationInfo)
+
+        translationListPresenter.onTranslationClicked(MockContents.kjvTranslationInfo)
+        verify(translationListPresenter, times(1)).confirmAndDownloadTranslation(MockContents.kjvTranslationInfo)
+    }
+
+    @Test
+    fun testOnDownloadedTranslationClicked() {
+        translationListPresenter = spy(translationListPresenter)
+        doNothing().`when`(translationListPresenter)
+                .updateCurrentTranslationAndFinishActivity(MockContents.kjvShortName)
+
+        translationListPresenter.onTranslationClicked(MockContents.kjvDownloadedTranslationInfo)
+        verify(translationListPresenter, times(1))
+                .updateCurrentTranslationAndFinishActivity(MockContents.kjvShortName)
+    }
+
+    @Test
+    fun testOnTranslationLongClicked() {
+        translationListPresenter = spy(translationListPresenter)
+        doNothing().`when`(translationListPresenter).confirmAndDownloadTranslation(MockContents.kjvTranslationInfo)
+
+        translationListPresenter.onTranslationLongClicked(MockContents.kjvTranslationInfo, true)
+        verify(translationListPresenter, times(1)).confirmAndDownloadTranslation(MockContents.kjvTranslationInfo)
+
+        translationListPresenter.onTranslationLongClicked(MockContents.kjvTranslationInfo, false)
+        verify(translationListPresenter, times(2)).confirmAndDownloadTranslation(MockContents.kjvTranslationInfo)
+    }
+
+    @Test
+    fun testOnDownloadedTranslationLongClicked() {
+        translationListPresenter = spy(translationListPresenter)
+        doNothing().`when`(translationListPresenter).confirmAndRemoveTranslation(MockContents.kjvDownloadedTranslationInfo)
+
+        translationListPresenter.onTranslationLongClicked(MockContents.kjvDownloadedTranslationInfo, true)
+        verify(translationListPresenter, never()).confirmAndRemoveTranslation(any())
+
+        translationListPresenter.onTranslationLongClicked(MockContents.kjvDownloadedTranslationInfo, false)
+        verify(translationListPresenter, times(1))
+                .confirmAndRemoveTranslation(MockContents.kjvDownloadedTranslationInfo)
     }
 }

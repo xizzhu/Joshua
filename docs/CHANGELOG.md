@@ -10,6 +10,7 @@ CHANGELOG
   - Fixed issue with Direct Share on Android 10 and above
 - Changes:
   - No longer show book name when simple reading mode is off
+  - Added confirmation dialog before downloading
 - Refactoring:
   - Migrated to Firebase Crashlytics
   - Used ViewPager2 instead of ViewPager
