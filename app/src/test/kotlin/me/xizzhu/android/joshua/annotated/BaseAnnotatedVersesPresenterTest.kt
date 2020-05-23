@@ -44,17 +44,23 @@ import kotlin.test.assertEquals
 class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var resources: Resources
+
     @Mock
     private lateinit var lifecycle: Lifecycle
+
     @Mock
     private lateinit var activity: TestVerseAnnotationsActivity
+
     @Mock
     private lateinit var navigator: Navigator
     private val noItemText = R.string.text_no_bookmark
+
     @Mock
     private lateinit var verseAnnotationViewModel: TestVerseAnnotationViewModel
+
     @Mock
     private lateinit var loadingSpinner: ProgressBar
+
     @Mock
     private lateinit var annotatedVerseListView: CommonRecyclerView
 
@@ -231,5 +237,13 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         val actual = with(baseAnnotatedVersesPresenter) { annotatedVerses.toItems() }
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testOpenVerse() = testDispatcher.runBlockingTest {
+        val verseIndex = VerseIndex(1, 2, 3)
+        baseAnnotatedVersesPresenter.openVerse(verseIndex)
+        verify(verseAnnotationViewModel, times(1)).saveCurrentVerseIndex(verseIndex)
+        verify(navigator, times(1)).navigate(activity, Navigator.SCREEN_READING)
     }
 }
