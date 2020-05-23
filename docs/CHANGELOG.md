@@ -11,6 +11,7 @@ CHANGELOG
 - Changes:
   - No longer show book name when simple reading mode is off
   - Added confirmation dialog before downloading
+  - Tweaked text to show translation name when confirming removal
 - Refactoring:
   - Migrated to Firebase Crashlytics
   - Used ViewPager2 instead of ViewPager

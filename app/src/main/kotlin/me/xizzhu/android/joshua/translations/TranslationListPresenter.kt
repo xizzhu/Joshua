@@ -208,7 +208,7 @@ class TranslationListPresenter(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun confirmAndRemoveTranslation(translationToRemove: TranslationInfo) {
-        activity.dialog(true, R.string.dialog_delete_translation_confirmation,
+        activity.dialog(true, activity.getString(R.string.dialog_delete_translation_confirmation, translationToRemove.name),
                 DialogInterface.OnClickListener { _, _ -> removeTranslation(translationToRemove) })
     }
 
