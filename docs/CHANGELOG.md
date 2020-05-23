@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.15.0 (2020-05-22)
 - Bug fixes:
   - Used SupervisorJob for parent scope
   - Should close activity when failed to load annotated verses, reading progress, and Strong's numbers
