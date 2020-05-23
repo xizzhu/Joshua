@@ -134,11 +134,12 @@ class TranslationListPresenter(
         if (translationInfo.downloaded) {
             updateCurrentTranslationAndFinishActivity(translationInfo.shortName)
         } else {
-            downloadTranslation(translationInfo)
+            confirmAndDownloadTranslation(translationInfo)
         }
     }
 
-    private fun updateCurrentTranslationAndFinishActivity(translationShortName: String) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun updateCurrentTranslationAndFinishActivity(translationShortName: String) {
         coroutineScope.launch {
             try {
                 viewModel.saveCurrentTranslation(translationShortName)
@@ -149,6 +150,12 @@ class TranslationListPresenter(
                         DialogInterface.OnClickListener { _, _ -> updateCurrentTranslationAndFinishActivity(translationShortName) })
             }
         }
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun confirmAndDownloadTranslation(translationToDownload: TranslationInfo) {
+        activity.dialog(true, activity.getString(R.string.dialog_download_translation_confirmation, translationToDownload.name),
+                DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
     }
 
     private fun downloadTranslation(translationToDownload: TranslationInfo) {
@@ -192,12 +199,17 @@ class TranslationListPresenter(
     fun onTranslationLongClicked(translationInfo: TranslationInfo, isCurrentTranslation: Boolean) {
         if (translationInfo.downloaded) {
             if (!isCurrentTranslation) {
-                activity.dialog(true, R.string.dialog_delete_translation_confirmation,
-                        DialogInterface.OnClickListener { _, _ -> removeTranslation(translationInfo) })
+                confirmAndRemoveTranslation(translationInfo)
             }
         } else {
-            downloadTranslation(translationInfo)
+            confirmAndDownloadTranslation(translationInfo)
         }
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun confirmAndRemoveTranslation(translationToRemove: TranslationInfo) {
+        activity.dialog(true, R.string.dialog_delete_translation_confirmation,
+                DialogInterface.OnClickListener { _, _ -> removeTranslation(translationToRemove) })
     }
 
     private fun removeTranslation(translationToRemove: TranslationInfo) {
