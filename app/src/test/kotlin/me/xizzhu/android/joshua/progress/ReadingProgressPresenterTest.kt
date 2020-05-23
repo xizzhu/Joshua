@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -37,14 +38,19 @@ import kotlin.test.*
 class ReadingProgressPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var lifecycle: Lifecycle
+
     @Mock
     private lateinit var navigator: Navigator
+
     @Mock
     private lateinit var readingProgressViewModel: ReadingProgressViewModel
+
     @Mock
     private lateinit var readingProgressActivity: ReadingProgressActivity
+
     @Mock
     private lateinit var loadingSpinner: ProgressBar
+
     @Mock
     private lateinit var readingProgressListView: CommonRecyclerView
 
@@ -145,5 +151,33 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
         val actual = with(readingProgressPresenter) { ReadingProgressViewData(readingProgress, bookNames).toItems() }
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testOpenChapter() = testDispatcher.runBlockingTest {
+        readingProgressPresenter.openChapter(8, 9)
+        verify(readingProgressViewModel, times(1)).saveCurrentVerseIndex(VerseIndex(8, 9, 0))
+        verify(navigator, times(1)).navigate(readingProgressActivity, Navigator.SCREEN_READING)
+    }
+
+    @Test
+    fun testOnBookClicked() {
+        readingProgressPresenter.expanded.forEachIndexed { index, expanded -> assertEquals(index == 0, expanded) }
+
+        readingProgressPresenter.onBookClicked(0, true)
+        readingProgressPresenter.expanded.forEachIndexed { index, expanded -> assertEquals(index == 0, expanded) }
+
+        readingProgressPresenter.onBookClicked(0, false)
+        readingProgressPresenter.expanded.forEach { assertFalse(it) }
+
+        readingProgressPresenter.onBookClicked(1, true)
+        readingProgressPresenter.onBookClicked(3, true)
+        readingProgressPresenter.onBookClicked(4, true)
+        readingProgressPresenter.onBookClicked(42, true)
+        readingProgressPresenter.onBookClicked(4, true)
+        readingProgressPresenter.onBookClicked(3, false)
+        readingProgressPresenter.expanded.forEachIndexed { index, expanded ->
+            assertEquals(index in listOf(1, 4, 42), expanded)
+        }
     }
 }
