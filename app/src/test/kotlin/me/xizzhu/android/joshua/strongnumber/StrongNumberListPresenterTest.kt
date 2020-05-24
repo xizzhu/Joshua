@@ -39,14 +39,19 @@ import kotlin.test.assertEquals
 class StrongNumberListPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var lifecycle: Lifecycle
+
     @Mock
     private lateinit var navigator: Navigator
+
     @Mock
     private lateinit var strongNumberListViewModel: StrongNumberListViewModel
+
     @Mock
     private lateinit var strongNumberListActivity: StrongNumberListActivity
+
     @Mock
     private lateinit var loadingSpinner: ProgressBar
+
     @Mock
     private lateinit var strongNumberListView: CommonRecyclerView
 
@@ -122,5 +127,13 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
         val actual = with(strongNumberListPresenter) { StrongNumberViewData(strongNumber, verses, bookNames, bookShortNames).toItems() }
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testOpenChapter() = testDispatcher.runBlockingTest {
+        val verseIndex = VerseIndex(1, 2, 3)
+        strongNumberListPresenter.openVerse(verseIndex)
+        verify(strongNumberListViewModel, times(1)).saveCurrentVerseIndex(verseIndex)
+        verify(navigator, times(1)).navigate(strongNumberListActivity, Navigator.SCREEN_READING)
     }
 }

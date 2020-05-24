@@ -152,7 +152,8 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
         return items
     }
 
-    protected fun openVerse(verseToOpen: VerseIndex) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    fun openVerse(verseToOpen: VerseIndex) {
         coroutineScope.launch {
             try {
                 viewModel.saveCurrentVerseIndex(verseToOpen)
@@ -165,5 +166,5 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
         }
     }
 
-    open protected fun extrasForOpeningVerse(): Bundle? = null
+    protected open fun extrasForOpeningVerse(): Bundle? = null
 }

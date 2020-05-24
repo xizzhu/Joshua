@@ -51,6 +51,7 @@ class ReadingProgressPresenter(
 ) : BaseSettingsPresenter<ReadingProgressViewHolder, ReadingProgressViewModel, ReadingProgressActivity>(
         readingProgressViewModel, readingProgressActivity, coroutineScope
 ) {
+    // we also cache the state here, so that when it's re-started, we can maintain the same expanding state
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 

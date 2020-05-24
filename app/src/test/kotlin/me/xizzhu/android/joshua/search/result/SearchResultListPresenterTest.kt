@@ -158,4 +158,12 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
         assertEquals(expected, actual)
     }
+
+    @Test
+    fun testSelectVerse() = testDispatcher.runBlockingTest {
+        val verseIndex = VerseIndex(1, 2, 3)
+        searchResultListPresenter.selectVerse(verseIndex)
+        verify(searchViewModel, times(1)).saveCurrentVerseIndex(verseIndex)
+        verify(navigator, times(1)).navigate(searchActivity, Navigator.SCREEN_READING)
+    }
 }
