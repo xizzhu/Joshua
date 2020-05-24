@@ -159,7 +159,8 @@ class TranslationListPresenter(
                 DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
     }
 
-    private fun downloadTranslation(translationToDownload: TranslationInfo) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun downloadTranslation(translationToDownload: TranslationInfo) {
         if (downloadingJob != null || downloadTranslationDialog != null) {
             // just in case the user clicks too fast
             return
@@ -180,11 +181,9 @@ class TranslationListPresenter(
                             }
                         }
                     }
-                }.catch { e ->
-                    Log.e(tag, "Failed to download translation", e)
-                    activity.dialog(true, R.string.dialog_download_error,
-                            DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
                 }.onCompletion { e ->
+                    // should onCompletion() fist, otherwise catch() will swallow the exception
+
                     downloadTranslationDialog?.dismiss()
                     downloadTranslationDialog = null
                     downloadingJob = null
@@ -193,6 +192,10 @@ class TranslationListPresenter(
                         activity.toast(R.string.toast_downloaded)
                         loadTranslationList(false)
                     }
+                }.catch { e ->
+                    Log.e(tag, "Failed to download translation", e)
+                    activity.dialog(true, R.string.dialog_download_error,
+                            DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
                 }.launchIn(coroutineScope)
     }
 
