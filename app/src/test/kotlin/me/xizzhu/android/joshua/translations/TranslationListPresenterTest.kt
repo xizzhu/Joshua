@@ -174,4 +174,13 @@ class TranslationListPresenterTest : BaseUnitTest() {
         verify(translationListPresenter, times(1))
                 .confirmAndRemoveTranslation(MockContents.kjvDownloadedTranslationInfo)
     }
+
+    @Test
+    fun testRemoveTranslationWithException() = testDispatcher.runBlockingTest {
+        translationListPresenter = spy(translationListPresenter)
+        `when`(translationsViewModel.removeTranslation(any())).thenReturn(flow { throw RuntimeException("random exception") })
+
+        translationListPresenter.removeTranslation(MockContents.kjvTranslationInfo)
+        verify(translationListPresenter, never()).loadTranslationList(anyBoolean())
+    }
 }

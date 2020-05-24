@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Bug fixes:
+  - Properly handled error case when removing translations
+
 #### v0.15.0 (2020-05-22)
 - Bug fixes:
   - Used SupervisorJob for parent scope
