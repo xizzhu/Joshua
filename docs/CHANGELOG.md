@@ -3,7 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Bug fixes:
-  - Properly handled error case when downloading & removing translations
+  - Properly handled error case when downloading & removing translations, and downloading Strong's numbers
 
 #### v0.15.0 (2020-05-22)
 - Bug fixes:
