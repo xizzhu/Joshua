@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.15.1 (2020-05-24)
 - Bug fixes:
   - Properly handled error case when downloading & removing translations, and downloading Strong's numbers
 
