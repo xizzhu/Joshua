@@ -47,6 +47,6 @@ class TranslationsViewModel(private val bibleReadingManager: BibleReadingManager
             translationManager.downloadTranslation(translationToDownload)
 
     fun removeTranslation(translationToRemove: TranslationInfo): Flow<Unit> = flow {
-        emit(translationManager.removeTranslation(translationToRemove))
+        translationManager.removeTranslation(translationToRemove)
     }
 }

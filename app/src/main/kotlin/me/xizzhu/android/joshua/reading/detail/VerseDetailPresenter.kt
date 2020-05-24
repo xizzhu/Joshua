@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.reading.detail
 
 import android.content.DialogInterface
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -45,7 +46,8 @@ class VerseDetailPresenter(
         private val navigator: Navigator, readingViewModel: ReadingViewModel, readingActivity: ReadingActivity,
         coroutineScope: CoroutineScope = readingActivity.lifecycleScope
 ) : BaseSettingsPresenter<VerseDetailViewHolder, ReadingViewModel, ReadingActivity>(readingViewModel, readingActivity, coroutineScope) {
-    private var verseDetail: VerseDetail? = null
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var verseDetail: VerseDetail? = null
     private var updateBookmarkJob: Job? = null
     private var updateHighlightJob: Job? = null
     private var updateNoteJob: Job? = null
@@ -108,7 +110,8 @@ class VerseDetailPresenter(
         }.also { it.invokeOnCompletion { updateNoteJob = null } }
     }
 
-    private fun downloadStrongNumber() {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun downloadStrongNumber() {
         if (downloadStrongNumberJob != null || downloadStrongNumberDialog != null) {
             // just in case the user clicks too fast
             return
@@ -129,11 +132,9 @@ class VerseDetailPresenter(
                             }
                         }
                     }
-                }.catch { e ->
-                    Log.e(tag, "Failed to download Strong's numberrs", e)
-                    activity.dialog(true, R.string.dialog_download_error,
-                            DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
                 }.onCompletion { e ->
+                    // should onCompletion() fist, otherwise catch() will swallow the exception
+
                     downloadStrongNumberDialog?.dismiss()
                     downloadStrongNumberDialog = null
                     downloadStrongNumberJob = null
@@ -145,6 +146,10 @@ class VerseDetailPresenter(
                             viewHolder.verseDetailViewLayout.setVerseDetail(verseDetail!!)
                         }
                     }
+                }.catch { e ->
+                    Log.e(tag, "Failed to download Strong's numberrs", e)
+                    activity.dialog(true, R.string.dialog_download_error,
+                            DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
                 }.launchIn(coroutineScope)
     }
 

@@ -76,7 +76,8 @@ class TranslationListPresenter(
         viewModel.settings().onEach { viewHolder.translationListView.setSettings(it) }.launchIn(coroutineScope)
     }
 
-    private fun loadTranslationList(forceRefresh: Boolean) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun loadTranslationList(forceRefresh: Boolean) {
         viewModel.translationList(forceRefresh)
                 .onStart {
                     with(viewHolder) {
@@ -158,7 +159,8 @@ class TranslationListPresenter(
                 DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
     }
 
-    private fun downloadTranslation(translationToDownload: TranslationInfo) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun downloadTranslation(translationToDownload: TranslationInfo) {
         if (downloadingJob != null || downloadTranslationDialog != null) {
             // just in case the user clicks too fast
             return
@@ -179,11 +181,9 @@ class TranslationListPresenter(
                             }
                         }
                     }
-                }.catch { e ->
-                    Log.e(tag, "Failed to download translation", e)
-                    activity.dialog(true, R.string.dialog_download_error,
-                            DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
                 }.onCompletion { e ->
+                    // should onCompletion() fist, otherwise catch() will swallow the exception
+
                     downloadTranslationDialog?.dismiss()
                     downloadTranslationDialog = null
                     downloadingJob = null
@@ -192,6 +192,10 @@ class TranslationListPresenter(
                         activity.toast(R.string.toast_downloaded)
                         loadTranslationList(false)
                     }
+                }.catch { e ->
+                    Log.e(tag, "Failed to download translation", e)
+                    activity.dialog(true, R.string.dialog_download_error,
+                            DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
                 }.launchIn(coroutineScope)
     }
 
@@ -212,7 +216,8 @@ class TranslationListPresenter(
                 DialogInterface.OnClickListener { _, _ -> removeTranslation(translationToRemove) })
     }
 
-    private fun removeTranslation(translationToRemove: TranslationInfo) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun removeTranslation(translationToRemove: TranslationInfo) {
         if (removeTranslationDialog != null) {
             // just in case the user clicks too fast
             return
@@ -220,17 +225,20 @@ class TranslationListPresenter(
         removeTranslationDialog = activity.indeterminateProgressDialog(R.string.dialog_deleting)
 
         removingJob = viewModel.removeTranslation(translationToRemove)
-                .onEach {
-                    activity.toast(R.string.toast_deleted)
-                    loadTranslationList(false)
+                // should onCompletion() fist, otherwise catch() will swallow the exception
+                .onCompletion { e ->
+                    removeTranslationDialog?.dismiss()
+                    removeTranslationDialog = null
+                    removingJob = null
+
+                    if (e == null) {
+                        activity.toast(R.string.toast_deleted)
+                        loadTranslationList(false)
+                    }
                 }.catch { e ->
                     Log.e(tag, "Failed to remove translation", e)
                     activity.dialog(true, R.string.dialog_delete_error,
                             DialogInterface.OnClickListener { _, _ -> removeTranslation(translationToRemove) })
-                }.onCompletion {
-                    removeTranslationDialog?.dismiss()
-                    removeTranslationDialog = null
-                    removingJob = null
                 }.launchIn(coroutineScope)
     }
 

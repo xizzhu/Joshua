@@ -151,6 +151,15 @@ class TranslationListPresenterTest : BaseUnitTest() {
     }
 
     @Test
+    fun testDownloadTranslationWithException() = testDispatcher.runBlockingTest {
+        translationListPresenter = spy(translationListPresenter)
+        `when`(translationsViewModel.downloadTranslation(any())).thenReturn(flow { throw RuntimeException("random exception") })
+
+        translationListPresenter.downloadTranslation(MockContents.kjvTranslationInfo)
+        verify(translationListPresenter, never()).loadTranslationList(anyBoolean())
+    }
+
+    @Test
     fun testOnTranslationLongClicked() {
         translationListPresenter = spy(translationListPresenter)
         doNothing().`when`(translationListPresenter).confirmAndDownloadTranslation(MockContents.kjvTranslationInfo)
@@ -173,5 +182,14 @@ class TranslationListPresenterTest : BaseUnitTest() {
         translationListPresenter.onTranslationLongClicked(MockContents.kjvDownloadedTranslationInfo, false)
         verify(translationListPresenter, times(1))
                 .confirmAndRemoveTranslation(MockContents.kjvDownloadedTranslationInfo)
+    }
+
+    @Test
+    fun testRemoveTranslationWithException() = testDispatcher.runBlockingTest {
+        translationListPresenter = spy(translationListPresenter)
+        `when`(translationsViewModel.removeTranslation(any())).thenReturn(flow { throw RuntimeException("random exception") })
+
+        translationListPresenter.removeTranslation(MockContents.kjvTranslationInfo)
+        verify(translationListPresenter, never()).loadTranslationList(anyBoolean())
     }
 }
