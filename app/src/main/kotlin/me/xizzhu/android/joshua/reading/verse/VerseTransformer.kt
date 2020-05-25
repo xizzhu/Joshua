@@ -159,12 +159,59 @@ fun List<Verse>.toVerseItems(bookmarks: List<Bookmark>, highlights: List<Highlig
     return items
 }
 
-fun Collection<Verse>.toStringForSharing(bookName: String): String {
-    val stringBuilder = StringBuilder()
-    sortedBy { verse ->
+fun Collection<Verse>.toStringForSharing(bookName: String, consolidateVerses: Boolean): String {
+    val sortedVerses = sortedBy { verse ->
         val verseIndex = verse.verseIndex
         verseIndex.bookIndex * 100000 + verseIndex.chapterIndex * 1000 + verseIndex.verseIndex
-    }.forEach { verse -> stringBuilder.append(verse, bookName) }
+    }
+
+    if (!consolidateVerses || size == 1) {
+        return StringBuilder().apply {
+            sortedVerses.forEach { verse -> append(verse, bookName) }
+        }.toString()
+    }
+
+    // format:
+    // <book name> <chapter index>:<start verse index>-<end verse index>
+    // texts
+    // <book name> <chapter index>:<verse index>
+    // texts
+
+    // step 1: find all start - end verse index pairs
+    val verseGroups = arrayListOf<Pair<Int, Int>>()
+    sortedVerses.forEach { verse ->
+        val lastVerseIndexPair = verseGroups.lastOrNull()
+        if (lastVerseIndexPair != null && lastVerseIndexPair.second + 1 == verse.verseIndex.verseIndex) {
+            verseGroups[verseGroups.size - 1] = lastVerseIndexPair.copy(second = verse.verseIndex.verseIndex)
+        } else {
+            verseGroups.add(Pair(verse.verseIndex.verseIndex, verse.verseIndex.verseIndex))
+        }
+    }
+
+    // step 2: build the string for sharing
+    val stringBuilder = StringBuilder()
+
+    var currentVerseGroupIndex = 0
+    sortedVerses.forEach { verse ->
+        val currentVerseGroup = verseGroups[currentVerseGroupIndex]
+        if (verse.verseIndex.verseIndex == currentVerseGroup.first) {
+            if (stringBuilder.isNotEmpty()) stringBuilder.append("\n\n")
+            stringBuilder.append(bookName).append(' ')
+                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
+            if (currentVerseGroup.first < currentVerseGroup.second) {
+                stringBuilder.append('-').append(currentVerseGroup.second + 1)
+            }
+            stringBuilder.append('\n')
+        }
+
+        if (verse.verseIndex.verseIndex > currentVerseGroup.first) stringBuilder.append(' ')
+        stringBuilder.append(verse.text.text)
+
+        if (verse.verseIndex.verseIndex == currentVerseGroup.second) {
+            currentVerseGroupIndex++
+        }
+    }
+
     return stringBuilder.toString()
 }
 

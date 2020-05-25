@@ -139,7 +139,7 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun testVerseToStringForSharing() {
         assertEquals(
-                "Genesis 1:1 In the beginning God created the heaven and the earth.",
+                "${MockContents.kjvBookNames[0]} 1:1 ${MockContents.kjvVerses[0].text.text}",
                 MockContents.kjvVerses[0].toStringForSharing(MockContents.kjvBookNames[0])
         )
     }
@@ -147,7 +147,9 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun testVerseWithParallelTranslationsToStringForSharing() {
         assertEquals(
-                "Genesis 1:1\nKJV: In the beginning God created the heaven and the earth.\n中文和合本: 起初神创造天地。",
+                "${MockContents.kjvBookNames[0]} 1:1\n" +
+                        "${MockContents.kjvShortName}: ${MockContents.kjvVerses[0].text.text}\n" +
+                        "${MockContents.cuvShortName}: ${MockContents.cuvVerses[0].text.text}",
                 MockContents.kjvVersesWithCuvParallel[0].toStringForSharing(MockContents.kjvBookNames[0])
         )
     }
@@ -155,24 +157,70 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun testVersesToStringForSharing() {
         assertEquals(
-                "Genesis 1:1 In the beginning God created the heaven and the earth.\nGenesis 1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.",
-                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1]).toStringForSharing(MockContents.kjvBookNames[0])
+                "${MockContents.kjvBookNames[0]} 1:1 ${MockContents.kjvVerses[0].text.text}\n" +
+                        "${MockContents.kjvBookNames[0]} 1:2 ${MockContents.kjvVerses[1].text.text}\n" +
+                        "${MockContents.kjvBookNames[0]} 1:10 ${MockContents.kjvVerses[9].text.text}",
+                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[9])
+                        .toStringForSharing(MockContents.kjvBookNames[0], false)
+        )
+
+        assertEquals(
+                "${MockContents.kjvBookNames[0]} 1:1 ${MockContents.kjvVerses[0].text.text}",
+                listOf(MockContents.kjvVerses[0]).toStringForSharing(MockContents.kjvBookNames[0], false)
+        )
+
+        assertEquals(
+                "${MockContents.kjvBookNames[0]} 1:1-2\n" +
+                        "${MockContents.kjvVerses[0].text.text} ${MockContents.kjvVerses[1].text.text}\n\n" +
+                        "${MockContents.kjvBookNames[0]} 1:10\n" +
+                        MockContents.kjvVerses[9].text.text,
+                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[9])
+                        .toStringForSharing(MockContents.kjvBookNames[0], true)
         )
     }
 
     @Test
     fun testVersesWithParallelTranslationsToStringForSharing() {
         assertEquals(
-                "Genesis 1:1\nKJV: In the beginning God created the heaven and the earth.\n中文和合本: 起初神创造天地。\nGenesis 1:2\nKJV: And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.\n中文和合本: 地是空虚混沌。渊面黑暗。神的灵运行在水面上。",
-                listOf(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvVersesWithCuvParallel[1]).toStringForSharing(MockContents.kjvBookNames[0])
+                "${MockContents.kjvBookNames[0]} 1:1\n" +
+                        "${MockContents.kjvShortName}: ${MockContents.kjvVerses[0].text.text}\n" +
+                        "${MockContents.cuvShortName}: ${MockContents.cuvVerses[0].text.text}\n" +
+                        "${MockContents.kjvBookNames[0]} 1:2\n" +
+                        "${MockContents.kjvShortName}: ${MockContents.kjvVerses[1].text.text}\n" +
+                        "${MockContents.cuvShortName}: ${MockContents.cuvVerses[1].text.text}",
+                listOf(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvVersesWithCuvParallel[1])
+                        .toStringForSharing(MockContents.kjvBookNames[0], false)
         )
     }
 
     @Test
     fun testVersesWithRandomOrderToStringForSharing() {
         assertEquals(
-                "Genesis 1:1 In the beginning God created the heaven and the earth.\nGenesis 1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.\nGenesis 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
-                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[9], MockContents.kjvVerses[1]).toStringForSharing(MockContents.kjvBookNames[0])
+                "${MockContents.kjvBookNames[0]} 1:1 ${MockContents.kjvVerses[0].text.text}\n" +
+                        "${MockContents.kjvBookNames[0]} 1:2 ${MockContents.kjvVerses[1].text.text}\n" +
+                        "${MockContents.kjvBookNames[0]} 1:10 ${MockContents.kjvVerses[9].text.text}",
+                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[9], MockContents.kjvVerses[1])
+                        .toStringForSharing(MockContents.kjvBookNames[0], false)
+        )
+
+        assertEquals(
+                "${MockContents.kjvBookNames[0]} 1:1\n" +
+                        "${MockContents.kjvShortName}: ${MockContents.kjvVerses[0].text.text}\n" +
+                        "${MockContents.cuvShortName}: ${MockContents.cuvVerses[0].text.text}\n" +
+                        "${MockContents.kjvBookNames[0]} 1:2\n" +
+                        "${MockContents.kjvShortName}: ${MockContents.kjvVerses[1].text.text}\n" +
+                        "${MockContents.cuvShortName}: ${MockContents.cuvVerses[1].text.text}",
+                listOf(MockContents.kjvVersesWithCuvParallel[1], MockContents.kjvVersesWithCuvParallel[0])
+                        .toStringForSharing(MockContents.kjvBookNames[0], false)
+        )
+
+        assertEquals(
+                "${MockContents.kjvBookNames[0]} 1:1-2\n" +
+                        "${MockContents.kjvVerses[0].text.text} ${MockContents.kjvVerses[1].text.text}\n\n" +
+                        "${MockContents.kjvBookNames[0]} 1:10\n" +
+                        MockContents.kjvVerses[9].text.text,
+                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[9], MockContents.kjvVerses[1])
+                        .toStringForSharing(MockContents.kjvBookNames[0], true)
         )
     }
 }
