@@ -171,11 +171,21 @@ fun Collection<Verse>.toStringForSharing(bookName: String, consolidateVerses: Bo
         }.toString()
     }
 
-    // format:
+    // format (without parallel):
     // <book name> <chapter index>:<start verse index>-<end verse index>
-    // texts
+    // <verse text>
     // <book name> <chapter index>:<verse index>
-    // texts
+    // <verse text>
+    //
+    // format (with parallel):
+    // <book name> <chapter index>:<start verse index>-<end verse index>
+    // <primary translation>: <verse text>
+    // <parallel translation 1>: <verse text>
+    // <parallel translation 2>: <verse text>
+    // <book name> <chapter index>:<verse index>
+    // <primary translation>: <verse text>
+    // <parallel translation 1>: <verse text>
+    // <parallel translation 2>: <verse text>
 
     // step 1: find all start - end verse index pairs
     val verseGroups = arrayListOf<Pair<Int, Int>>()
@@ -192,22 +202,49 @@ fun Collection<Verse>.toStringForSharing(bookName: String, consolidateVerses: Bo
     val stringBuilder = StringBuilder()
 
     var currentVerseGroupIndex = 0
+    val parallelVersesBuilder = Array(sortedVerses.first().parallel.size) { StringBuilder() }
     sortedVerses.forEach { verse ->
         val currentVerseGroup = verseGroups[currentVerseGroupIndex]
+
+        // start of the verse group
         if (verse.verseIndex.verseIndex == currentVerseGroup.first) {
             if (stringBuilder.isNotEmpty()) stringBuilder.append("\n\n")
+
             stringBuilder.append(bookName).append(' ')
                     .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
             if (currentVerseGroup.first < currentVerseGroup.second) {
                 stringBuilder.append('-').append(currentVerseGroup.second + 1)
             }
             stringBuilder.append('\n')
+
+            if (verse.parallel.isNotEmpty()) {
+                stringBuilder.append(verse.text.translationShortName).append(": ")
+
+                verse.parallel.forEachIndexed { index, parallel ->
+                    with(parallelVersesBuilder[index]) {
+                        clear()
+                        append(parallel.translationShortName).append(": ")
+                    }
+                }
+            }
         }
 
         if (verse.verseIndex.verseIndex > currentVerseGroup.first) stringBuilder.append(' ')
         stringBuilder.append(verse.text.text)
 
+        verse.parallel.forEachIndexed { index, parallel ->
+            with(parallelVersesBuilder[index]) {
+                if (verse.verseIndex.verseIndex > currentVerseGroup.first) append(' ')
+                append(parallel.text)
+            }
+        }
+
+        // end of the verse group
         if (verse.verseIndex.verseIndex == currentVerseGroup.second) {
+            parallelVersesBuilder.forEach { parallelBuilder ->
+                stringBuilder.append('\n').append(parallelBuilder)
+            }
+
             currentVerseGroupIndex++
         }
     }

@@ -191,6 +191,14 @@ class VerseTransformerTest : BaseUnitTest() {
                 listOf(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvVersesWithCuvParallel[1])
                         .toStringForSharing(MockContents.kjvBookNames[0], false)
         )
+
+        assertEquals(
+                "${MockContents.kjvBookNames[0]} 1:1-2\n" +
+                        "${MockContents.kjvShortName}: ${MockContents.kjvVerses[0].text.text} ${MockContents.kjvVerses[1].text.text}\n" +
+                        "${MockContents.cuvShortName}: ${MockContents.cuvVerses[0].text.text} ${MockContents.cuvVerses[1].text.text}",
+                listOf(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvVersesWithCuvParallel[1])
+                        .toStringForSharing(MockContents.kjvBookNames[0], true)
+        )
     }
 
     @Test
@@ -220,6 +228,14 @@ class VerseTransformerTest : BaseUnitTest() {
                         "${MockContents.kjvBookNames[0]} 1:10\n" +
                         MockContents.kjvVerses[9].text.text,
                 listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[9], MockContents.kjvVerses[1])
+                        .toStringForSharing(MockContents.kjvBookNames[0], true)
+        )
+
+        assertEquals(
+                "${MockContents.kjvBookNames[0]} 1:1-2\n" +
+                        "${MockContents.kjvShortName}: ${MockContents.kjvVerses[0].text.text} ${MockContents.kjvVerses[1].text.text}\n" +
+                        "${MockContents.cuvShortName}: ${MockContents.cuvVerses[0].text.text} ${MockContents.cuvVerses[1].text.text}",
+                listOf(MockContents.kjvVersesWithCuvParallel[1], MockContents.kjvVersesWithCuvParallel[0])
                         .toStringForSharing(MockContents.kjvBookNames[0], true)
         )
     }
