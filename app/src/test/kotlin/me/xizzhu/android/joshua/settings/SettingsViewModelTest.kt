@@ -92,4 +92,14 @@ class SettingsViewModelTest : BaseUnitTest() {
         settingsViewModel.saveHideSearchButton(updatedSettings.hideSearchButton)
         verify(settingsManager, times(1)).saveSettings(updatedSettings)
     }
+
+    @Test
+    fun testSaveConsolidateVersesForSharing() = testDispatcher.runBlockingTest {
+        settingsViewModel.saveConsolidateVersesForSharing(Settings.DEFAULT.consolidateVersesForSharing)
+        verify(settingsManager, never()).saveSettings(any())
+
+        val updatedSettings = Settings.DEFAULT.copy(consolidateVersesForSharing = true)
+        settingsViewModel.saveConsolidateVersesForSharing(updatedSettings.consolidateVersesForSharing)
+        verify(settingsManager, times(1)).saveSettings(updatedSettings)
+    }
 }

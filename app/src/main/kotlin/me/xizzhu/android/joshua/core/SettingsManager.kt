@@ -20,9 +20,10 @@ import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
 data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fontSizeScale: Int,
-                    val simpleReadingModeOn: Boolean, val hideSearchButton: Boolean) {
+                    val simpleReadingModeOn: Boolean, val hideSearchButton: Boolean,
+                    val consolidateVersesForSharing: Boolean) {
     companion object {
-        val DEFAULT = Settings(true, false, 2, false, false)
+        val DEFAULT = Settings(true, false, 2, false, false, false)
     }
 }
 

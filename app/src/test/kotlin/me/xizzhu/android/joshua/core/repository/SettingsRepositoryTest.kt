@@ -34,7 +34,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     @Test
     fun testObserveInitialSettings() = testDispatcher.runBlockingTest {
-        val settings = Settings(false, true, 3, false, false)
+        val settings = Settings(false, true, 3, false, false, true)
         `when`(localSettingsStorage.readSettings()).thenReturn(settings)
         settingsRepository = SettingsRepository(localSettingsStorage)
 
@@ -54,7 +54,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
         `when`(localSettingsStorage.readSettings()).thenReturn(Settings.DEFAULT)
         settingsRepository = SettingsRepository(localSettingsStorage)
 
-        val settings = Settings(false, true, 1, true, true)
+        val settings = Settings(false, true, 1, true, true, true)
         settingsRepository.saveSettings(settings)
         assertEquals(settings, settingsRepository.settings().first())
     }

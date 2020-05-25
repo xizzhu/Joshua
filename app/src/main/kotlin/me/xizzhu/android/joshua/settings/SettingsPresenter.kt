@@ -96,7 +96,7 @@ class SettingsPresenter(
 
         viewHolder.hideSearchButton.setOnCheckedChangeListener { _, isChecked -> saveHideSearchButton(isChecked) }
 
-        viewHolder.consolidatedSharing.setOnCheckedChangeListener { _, isChecked ->  }
+        viewHolder.consolidatedSharing.setOnCheckedChangeListener { _, isChecked -> saveConsolidateVersesForSharing(isChecked) }
 
         viewHolder.backup.setOnClickListener {
             try {
@@ -196,6 +196,18 @@ class SettingsPresenter(
                 Log.e(tag, "Failed to save hiding search button", e)
                 activity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveHideSearchButton(hideSearchButton) })
+            }
+        }
+    }
+
+    private fun saveConsolidateVersesForSharing(consolidateVerses: Boolean) {
+        coroutineScope.launch {
+            try {
+                viewModel.saveConsolidateVersesForSharing(consolidateVerses)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save consolidating verses for sharing", e)
+                activity.dialog(true, R.string.dialog_update_settings_error,
+                        DialogInterface.OnClickListener { _, _ -> saveConsolidateVersesForSharing(consolidateVerses) })
             }
         }
     }
