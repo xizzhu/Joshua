@@ -159,12 +159,96 @@ fun List<Verse>.toVerseItems(bookmarks: List<Bookmark>, highlights: List<Highlig
     return items
 }
 
-fun Collection<Verse>.toStringForSharing(bookName: String): String {
-    val stringBuilder = StringBuilder()
-    sortedBy { verse ->
+fun Collection<Verse>.toStringForSharing(bookName: String, consolidateVerses: Boolean): String {
+    val sortedVerses = sortedBy { verse ->
         val verseIndex = verse.verseIndex
         verseIndex.bookIndex * 100000 + verseIndex.chapterIndex * 1000 + verseIndex.verseIndex
-    }.forEach { verse -> stringBuilder.append(verse, bookName) }
+    }
+
+    if (!consolidateVerses || size == 1) {
+        return StringBuilder().apply {
+            sortedVerses.forEach { verse -> append(verse, bookName) }
+        }.toString()
+    }
+
+    // format (without parallel):
+    // <book name> <chapter index>:<start verse index>-<end verse index>
+    // <verse text>
+    // <book name> <chapter index>:<verse index>
+    // <verse text>
+    //
+    // format (with parallel):
+    // <book name> <chapter index>:<start verse index>-<end verse index>
+    // <primary translation>: <verse text>
+    // <parallel translation 1>: <verse text>
+    // <parallel translation 2>: <verse text>
+    // <book name> <chapter index>:<verse index>
+    // <primary translation>: <verse text>
+    // <parallel translation 1>: <verse text>
+    // <parallel translation 2>: <verse text>
+
+    // step 1: find all start - end verse index pairs
+    val verseGroups = arrayListOf<Pair<Int, Int>>()
+    sortedVerses.forEach { verse ->
+        val lastVerseIndexPair = verseGroups.lastOrNull()
+        if (lastVerseIndexPair != null && lastVerseIndexPair.second + 1 == verse.verseIndex.verseIndex) {
+            verseGroups[verseGroups.size - 1] = lastVerseIndexPair.copy(second = verse.verseIndex.verseIndex)
+        } else {
+            verseGroups.add(Pair(verse.verseIndex.verseIndex, verse.verseIndex.verseIndex))
+        }
+    }
+
+    // step 2: build the string for sharing
+    val stringBuilder = StringBuilder()
+
+    var currentVerseGroupIndex = 0
+    val parallelVersesBuilder = Array(sortedVerses.first().parallel.size) { StringBuilder() }
+    sortedVerses.forEach { verse ->
+        val currentVerseGroup = verseGroups[currentVerseGroupIndex]
+
+        // start of the verse group
+        if (verse.verseIndex.verseIndex == currentVerseGroup.first) {
+            if (stringBuilder.isNotEmpty()) stringBuilder.append("\n\n")
+
+            stringBuilder.append(bookName).append(' ')
+                    .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
+            if (currentVerseGroup.first < currentVerseGroup.second) {
+                stringBuilder.append('-').append(currentVerseGroup.second + 1)
+            }
+            stringBuilder.append('\n')
+
+            if (verse.parallel.isNotEmpty()) {
+                stringBuilder.append(verse.text.translationShortName).append(": ")
+
+                verse.parallel.forEachIndexed { index, parallel ->
+                    with(parallelVersesBuilder[index]) {
+                        clear()
+                        append(parallel.translationShortName).append(": ")
+                    }
+                }
+            }
+        }
+
+        if (verse.verseIndex.verseIndex > currentVerseGroup.first) stringBuilder.append(' ')
+        stringBuilder.append(verse.text.text)
+
+        verse.parallel.forEachIndexed { index, parallel ->
+            with(parallelVersesBuilder[index]) {
+                if (verse.verseIndex.verseIndex > currentVerseGroup.first) append(' ')
+                append(parallel.text)
+            }
+        }
+
+        // end of the verse group
+        if (verse.verseIndex.verseIndex == currentVerseGroup.second) {
+            parallelVersesBuilder.forEach { parallelBuilder ->
+                stringBuilder.append('\n').append(parallelBuilder)
+            }
+
+            currentVerseGroupIndex++
+        }
+    }
+
     return stringBuilder.toString()
 }
 

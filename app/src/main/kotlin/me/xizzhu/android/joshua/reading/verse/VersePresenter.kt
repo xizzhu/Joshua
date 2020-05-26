@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.content.DialogInterface
+import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.UiThread
@@ -76,33 +77,43 @@ class VersePresenter(
     private fun copyToClipBoard() {
         if (selectedVerses.isEmpty()) return
 
-        try {
-            activity.copyToClipBoard(
-                    "${currentTranslationViewData.currentTranslation} ${currentVerseIndexViewData.bookName}",
-                    selectedVerses.toStringForSharing(currentVerseIndexViewData.bookName)
-            )
-            activity.toast(R.string.toast_verses_copied)
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to copy", e)
-            activity.toast(R.string.toast_unknown_error)
-        } finally {
-            actionMode?.finish()
+        coroutineScope.launch {
+            try {
+                activity.copyToClipBoard(
+                        "${currentTranslationViewData.currentTranslation} ${currentVerseIndexViewData.bookName}",
+                        selectedVerses.toStringForSharing(
+                                currentVerseIndexViewData.bookName,
+                                viewModel.settings().first().consolidateVersesForSharing
+                        )
+                )
+                activity.toast(R.string.toast_verses_copied)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to copy", e)
+                activity.toast(R.string.toast_unknown_error)
+            } finally {
+                actionMode?.finish()
+            }
         }
     }
 
     private fun share() {
         if (selectedVerses.isEmpty()) return
 
-        try {
-            activity.share(
-                    activity.getString(R.string.text_share_with),
-                    selectedVerses.toStringForSharing(currentVerseIndexViewData.bookName)
-            )
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to share", e)
-            activity.toast(R.string.toast_unknown_error)
-        } finally {
-            actionMode?.finish()
+        coroutineScope.launch {
+            try {
+                activity.share(
+                        activity.getString(R.string.text_share_with),
+                        selectedVerses.toStringForSharing(
+                                currentVerseIndexViewData.bookName,
+                                viewModel.settings().first().consolidateVersesForSharing
+                        )
+                )
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to share", e)
+                activity.toast(R.string.toast_unknown_error)
+            } finally {
+                actionMode?.finish()
+            }
         }
     }
 

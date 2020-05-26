@@ -68,6 +68,14 @@ class SettingsViewModel(settingsManager: SettingsManager,
         }
     }
 
+    suspend fun saveConsolidateVersesForSharing(consolidateVerses: Boolean) {
+        currentSettings().let { current ->
+            if (consolidateVerses != current.consolidateVersesForSharing) {
+                settingsManager.saveSettings(current.copy(consolidateVersesForSharing = consolidateVerses))
+            }
+        }
+    }
+
     suspend fun backup(to: OutputStream) {
         to.write(backupManager.prepareForBackup().toByteArray(Charsets.UTF_8))
     }

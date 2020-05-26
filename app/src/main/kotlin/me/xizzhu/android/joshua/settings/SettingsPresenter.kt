@@ -46,7 +46,8 @@ import kotlin.math.roundToInt
 data class SettingsViewHolder(val display: SettingSectionHeader, val fontSize: SettingButton,
                               val keepScreenOn: SwitchCompat, val nightModeOn: SwitchCompat,
                               val reading: SettingSectionHeader, val simpleReadingMode: SwitchCompat,
-                              val hideSearchButton: SwitchCompat, val backupRestore: SettingSectionHeader,
+                              val hideSearchButton: SwitchCompat, val consolidatedSharing: SwitchCompat,
+                              val backupRestore: SettingSectionHeader,
                               val backup: SettingButton, val restore: SettingButton, val about: SettingSectionHeader,
                               val rate: SettingButton, val version: SettingButton) : ViewHolder
 
@@ -94,6 +95,8 @@ class SettingsPresenter(
         viewHolder.simpleReadingMode.setOnCheckedChangeListener { _, isChecked -> saveSimpleReadingModeOn(isChecked) }
 
         viewHolder.hideSearchButton.setOnCheckedChangeListener { _, isChecked -> saveHideSearchButton(isChecked) }
+
+        viewHolder.consolidatedSharing.setOnCheckedChangeListener { _, isChecked -> saveConsolidateVersesForSharing(isChecked) }
 
         viewHolder.backup.setOnClickListener {
             try {
@@ -193,6 +196,18 @@ class SettingsPresenter(
                 Log.e(tag, "Failed to save hiding search button", e)
                 activity.dialog(true, R.string.dialog_update_settings_error,
                         DialogInterface.OnClickListener { _, _ -> saveHideSearchButton(hideSearchButton) })
+            }
+        }
+    }
+
+    private fun saveConsolidateVersesForSharing(consolidateVerses: Boolean) {
+        coroutineScope.launch {
+            try {
+                viewModel.saveConsolidateVersesForSharing(consolidateVerses)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save consolidating verses for sharing", e)
+                activity.dialog(true, R.string.dialog_update_settings_error,
+                        DialogInterface.OnClickListener { _, _ -> saveConsolidateVersesForSharing(consolidateVerses) })
             }
         }
     }
@@ -318,6 +333,7 @@ class SettingsPresenter(
             nightModeOn.setTextColor(primaryTextColor)
             simpleReadingMode.setTextColor(primaryTextColor)
             hideSearchButton.setTextColor(primaryTextColor)
+            consolidatedSharing.setTextColor(primaryTextColor)
             backup.setTextColor(primaryTextColor, secondaryTextColor)
             restore.setTextColor(primaryTextColor, secondaryTextColor)
             rate.setTextColor(primaryTextColor, secondaryTextColor)
@@ -347,6 +363,7 @@ class SettingsPresenter(
             reading.setTextSize(bodyTextSize.roundToInt())
             simpleReadingMode.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
             hideSearchButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+            consolidatedSharing.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
             backupRestore.setTextSize(bodyTextSize.roundToInt())
             backup.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
             restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
