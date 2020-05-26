@@ -51,7 +51,10 @@ class TranslationListPresenter(
     private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_NAME)
 
     private var downloadingJob: Job? = null
-    private var downloadTranslationDialog: ProgressDialog? = null
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var downloadTranslationDialog: ProgressDialog? = null
+
     private var removingJob: Job? = null
     private var removeTranslationDialog: AlertDialog? = null
 

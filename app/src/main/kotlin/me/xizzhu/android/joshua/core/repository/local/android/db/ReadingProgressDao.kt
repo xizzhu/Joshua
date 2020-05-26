@@ -74,4 +74,9 @@ class ReadingProgressDao(sqliteHelper: SQLiteOpenHelper) {
                 ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, it.getInt(COLUMN_READ_COUNT),
                         it.getLong(COLUMN_TIME_SPENT_IN_MILLS), it.getLong(COLUMN_LAST_READING_TIMESTAMP))
             }
+
+    @WorkerThread
+    fun removeAll() {
+        db.deleteAll(TABLE_READING_PROGRESS)
+    }
 }

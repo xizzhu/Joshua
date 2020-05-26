@@ -88,4 +88,9 @@ class MetadataDao(sqliteHelper: SQLiteOpenHelper) {
     fun save(entries: List<Pair<String, String>>) {
         db.transaction { entries.forEach { save(it.first, it.second) } }
     }
+
+    @WorkerThread
+    fun removeAll() {
+        db.deleteAll(TABLE_METADATA)
+    }
 }

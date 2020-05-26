@@ -16,27 +16,41 @@
 
 package me.xizzhu.android.joshua.end2end
 
-import android.content.Context
 import androidx.annotation.CallSuper
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 abstract class BaseE2ETest {
+    private lateinit var androidDatabase: AndroidDatabase
+
     @BeforeTest
     @CallSuper
     open fun setup() {
-        clearLocalStorage()
+        androidDatabase = AndroidDatabase(ApplicationProvider.getApplicationContext())
+        resetLocalDatabase()
     }
 
-    private fun clearLocalStorage() {
-        ApplicationProvider.getApplicationContext<Context>().deleteDatabase(AndroidDatabase.DATABASE_NAME)
+    private fun resetLocalDatabase() {
+        androidDatabase.removeAll()
     }
 
     @AfterTest
     @CallSuper
     open fun tearDown() {
-        clearLocalStorage()
+        resetLocalDatabase()
+        androidDatabase.close()
+    }
+
+    protected fun assertNoCurrentTranslation() {
+        assertTrue(androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, "").isEmpty())
+    }
+
+    protected fun assertCurrentTranslation(currentTranslation: String) {
+        assertEquals(currentTranslation, androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, ""))
     }
 }

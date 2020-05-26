@@ -30,6 +30,8 @@ class ProgressDialog(private val dialog: AlertDialog, private val progressBar: P
     fun setProgress(progress: Int) {}
 
     fun dismiss() {}
+
+    fun isShowing(): Boolean = false
 }
 
 fun Activity.dialog(@StringRes title: Int, items: Array<String>, selected: Int, onClicked: DialogInterface.OnClickListener) {}

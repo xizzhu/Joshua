@@ -48,6 +48,10 @@ fun prepareKjv() {
     inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("KJV.zip")
 }
 
+fun prepareCuv() {
+    inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("中文和合本.zip")
+}
+
 fun prepareSnIndexes() {
     inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn_indexes.zip")
 }

@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
-import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import androidx.annotation.CallSuper
@@ -33,19 +32,19 @@ abstract class BaseSqliteTest : BaseUnitTest() {
     @CallSuper
     override fun setup() {
         super.setup()
-        clearLocalStorage()
         androidDatabase = AndroidDatabase(ApplicationProvider.getApplicationContext())
+        clearLocalStorage()
     }
 
     private fun clearLocalStorage() {
-        ApplicationProvider.getApplicationContext<Context>().deleteDatabase(AndroidDatabase.DATABASE_NAME)
+        androidDatabase.removeAll()
     }
 
     @After
     @CallSuper
     override fun tearDown() {
-        androidDatabase.close()
         clearLocalStorage()
+        androidDatabase.close()
         super.tearDown()
     }
 

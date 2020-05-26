@@ -20,15 +20,19 @@ import android.app.Activity
 import android.content.Intent
 import android.view.View
 import androidx.annotation.StringRes
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.longClick
 import androidx.test.espresso.assertion.PositionAssertions.isCompletelyBelow
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.rule.ActivityTestRule
 import org.hamcrest.Matcher
 
-open class BaseRobot<T : Activity, SELF : BaseRobot<T, SELF>>(private val activityRule: ActivityTestRule<T>) {
+open class BaseRobot<T : Activity, SELF : BaseRobot<T, SELF>>(protected val activityRule: ActivityTestRule<T>) {
     open fun launch(): SELF {
         activityRule.launchActivity(Intent())
         return self()
@@ -36,6 +40,36 @@ open class BaseRobot<T : Activity, SELF : BaseRobot<T, SELF>>(private val activi
 
     @Suppress("UNCHECKED_CAST")
     protected fun self(): SELF = this as SELF
+
+    fun pressBack(): SELF {
+        Espresso.pressBack()
+        return self()
+    }
+
+    fun clickDialogPositive(): SELF {
+        onView(withText(android.R.string.yes)).inRoot(isDialog()).perform(click())
+        return self()
+    }
+
+    fun clickDialogNegative(): SELF {
+        onView(withText(android.R.string.no)).inRoot(isDialog()).perform(click())
+        return self()
+    }
+
+    fun hasDialogWithText(@StringRes text: Int): SELF {
+        onView(withText(text)).inRoot(isDialog())
+        return self()
+    }
+
+    fun clickText(text: String): SELF {
+        onView(withText(text)).perform(click())
+        return self()
+    }
+
+    fun longClickText(text: String): SELF {
+        onView(withText(text)).perform(longClick())
+        return self()
+    }
 
     fun hasText(@StringRes text: Int): SELF {
         onView(withText(text)).check(matches(isDisplayed()))

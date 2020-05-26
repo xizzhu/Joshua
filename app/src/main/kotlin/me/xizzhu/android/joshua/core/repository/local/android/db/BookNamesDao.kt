@@ -77,4 +77,9 @@ class BookNamesDao(sqliteHelper: SQLiteOpenHelper) {
     fun remove(translationShortName: String) {
         db.delete(TABLE_BOOK_NAMES) { COLUMN_TRANSLATION_SHORT_NAME eq translationShortName }
     }
+
+    @WorkerThread
+    fun removeAll() {
+        db.deleteAll(TABLE_BOOK_NAMES)
+    }
 }
