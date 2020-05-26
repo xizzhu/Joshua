@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.core.repository.remote.android
 
-import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
@@ -43,7 +42,7 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
     @Test
     fun testFetchIndexes() {
         runBlocking {
-            inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn_indexes.zip")
+            prepareSnIndexes()
 
             val channel = Channel<Int>()
             var channelCalled = false
@@ -69,7 +68,7 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
     @Test
     fun testFetchWords() {
         runBlocking {
-            inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn_en.zip")
+            prepareSnEn()
 
             val channel = Channel<Int>()
             var channelCalled = false

@@ -17,12 +17,44 @@
 package me.xizzhu.android.joshua.core.repository.remote.android
 
 import android.util.JsonReader
+import androidx.test.platform.app.InstrumentationRegistry
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.StringReader
 import java.util.zip.ZipInputStream
 
-var inputStream: InputStream? = null
+private var inputStream: InputStream? = null
+
+fun prepareTranslationList() {
+    inputStream = ByteArrayInputStream("""
+        {
+        	"translations": [{
+        		"name": "King James Version",
+        		"shortName": "KJV",
+        		"language": "en_gb",
+        		"size": 1861133
+        	}, {
+        		"name": "中文和合本（简体）",
+        		"shortName": "中文和合本",
+        		"language": "zh_cn",
+        		"size": 1781720
+        	}]
+        }
+    """.trimIndent().toByteArray())
+}
+
+fun prepareKjv() {
+    inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("KJV.zip")
+}
+
+fun prepareSnIndexes() {
+    inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn_indexes.zip")
+}
+
+fun prepareSnEn() {
+    inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn_en.zip")
+}
 
 fun getInputStream(relativeUrl: String): InputStream = inputStream!!
 

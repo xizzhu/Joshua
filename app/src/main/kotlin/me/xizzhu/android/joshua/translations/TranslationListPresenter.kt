@@ -90,7 +90,7 @@ class TranslationListPresenter(
                         translationListView.setItems(translationList.toItems())
                         translationListView.fadeIn()
                     }
-                }.catch { e ->
+                }.catch {
                     viewHolder.swipeRefreshLayout.isRefreshing = false
                     activity.dialog(false, R.string.dialog_load_translation_list_error,
                             DialogInterface.OnClickListener { _, _ -> loadTranslationList(forceRefresh) },
