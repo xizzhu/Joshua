@@ -14,48 +14,48 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.end2end
+package me.xizzhu.android.joshua.end2end.utils
 
-import androidx.annotation.CallSuper
+import android.app.Activity
+import android.view.WindowManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.IdlingPolicies
+import androidx.test.rule.ActivityTestRule
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
-import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
+import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-abstract class BaseE2eTest {
-    private lateinit var androidDatabase: AndroidDatabase
+class E2eActivityTestRule<T : Activity>(activityClass: Class<T>) : ActivityTestRule<T>(activityClass, true, false) {
+    override fun beforeActivityLaunched() {
+        super.beforeActivityLaunched()
 
-    @BeforeTest
-    @CallSuper
-    open fun setup() {
         IdlingPolicies.setMasterPolicyTimeout(5L, TimeUnit.MINUTES)
         IdlingPolicies.setIdlingResourceTimeout(5L, TimeUnit.MINUTES)
 
-        androidDatabase = AndroidDatabase(ApplicationProvider.getApplicationContext())
+        Locale.setDefault(Locale.ENGLISH)
+
         resetLocalDatabase()
     }
 
     private fun resetLocalDatabase() {
-        androidDatabase.removeAll()
+        AndroidDatabase(ApplicationProvider.getApplicationContext()).removeAll()
     }
 
-    @AfterTest
-    @CallSuper
-    open fun tearDown() {
+    override fun afterActivityLaunched() {
+        super.afterActivityLaunched()
+
+        activity.runOnUiThread {
+            activity.window.addFlags(
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            )
+        }
+    }
+
+    override fun afterActivityFinished() {
         resetLocalDatabase()
-        androidDatabase.close()
-    }
 
-    protected fun assertNoCurrentTranslation() {
-        assertTrue(androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, "").isEmpty())
-    }
-
-    protected fun assertCurrentTranslation(currentTranslation: String) {
-        assertEquals(currentTranslation, androidDatabase.metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, ""))
+        super.afterActivityFinished()
     }
 }

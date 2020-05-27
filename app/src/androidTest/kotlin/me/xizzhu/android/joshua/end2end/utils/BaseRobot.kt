@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.end2end
+package me.xizzhu.android.joshua.end2end.utils
 
 import android.app.Activity
 import android.content.Intent
 import android.view.View
-import android.view.WindowManager
 import androidx.annotation.StringRes
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
@@ -36,13 +35,6 @@ import org.hamcrest.Matcher
 open class BaseRobot<T : Activity, SELF : BaseRobot<T, SELF>>(protected val activityRule: ActivityTestRule<T>) {
     open fun launch(): SELF {
         activityRule.launchActivity(Intent())
-        activityRule.activity.runOnUiThread {
-            activityRule.activity.window.addFlags(
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-            )
-        }
         return self()
     }
 

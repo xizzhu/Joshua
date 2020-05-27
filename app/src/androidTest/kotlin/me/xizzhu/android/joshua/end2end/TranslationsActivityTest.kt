@@ -28,6 +28,11 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.repository.remote.android.prepareCuv
 import me.xizzhu.android.joshua.core.repository.remote.android.prepareKjv
 import me.xizzhu.android.joshua.core.repository.remote.android.prepareTranslationList
+import me.xizzhu.android.joshua.end2end.utils.Assertions.assertCurrentTranslation
+import me.xizzhu.android.joshua.end2end.utils.Assertions.assertNoCurrentTranslation
+import me.xizzhu.android.joshua.end2end.utils.BaseRobot
+import me.xizzhu.android.joshua.end2end.utils.E2eActivityTestRule
+import me.xizzhu.android.joshua.end2end.utils.ProgressDialogIdlingResource
 import me.xizzhu.android.joshua.translations.TranslationsActivity
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -36,9 +41,9 @@ import kotlin.test.Test
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class TranslationsActivityTest : BaseE2eTest() {
+class TranslationsActivityTest {
     @get:Rule
-    val activityRule: ActivityTestRule<TranslationsActivity> = ActivityTestRule(TranslationsActivity::class.java, true, false)
+    val activityRule: ActivityTestRule<TranslationsActivity> = E2eActivityTestRule(TranslationsActivity::class.java)
 
     @Test
     fun testLoadTranslationListWithError() {

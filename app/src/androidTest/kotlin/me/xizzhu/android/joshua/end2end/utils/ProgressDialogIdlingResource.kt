@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.end2end
+package me.xizzhu.android.joshua.end2end.utils
 
 import androidx.test.espresso.IdlingResource
 import me.xizzhu.android.joshua.ui.ProgressDialog
