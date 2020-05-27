@@ -18,19 +18,24 @@ package me.xizzhu.android.joshua.end2end
 
 import androidx.annotation.CallSuper
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.IdlingPolicies
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
+import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-abstract class BaseE2ETest {
+abstract class BaseE2eTest {
     private lateinit var androidDatabase: AndroidDatabase
 
     @BeforeTest
     @CallSuper
     open fun setup() {
+        IdlingPolicies.setMasterPolicyTimeout(5L, TimeUnit.MINUTES)
+        IdlingPolicies.setIdlingResourceTimeout(5L, TimeUnit.MINUTES)
+
         androidDatabase = AndroidDatabase(ApplicationProvider.getApplicationContext())
         resetLocalDatabase()
     }

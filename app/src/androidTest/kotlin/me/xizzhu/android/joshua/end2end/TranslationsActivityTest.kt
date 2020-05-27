@@ -36,7 +36,7 @@ import kotlin.test.Test
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class TranslationsActivityTest : BaseE2ETest() {
+class TranslationsActivityTest : BaseE2eTest() {
     @get:Rule
     val activityRule: ActivityTestRule<TranslationsActivity> = ActivityTestRule(TranslationsActivity::class.java, true, false)
 
