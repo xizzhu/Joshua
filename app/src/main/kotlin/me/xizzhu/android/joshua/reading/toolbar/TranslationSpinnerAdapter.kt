@@ -103,7 +103,7 @@ class TranslationSpinnerAdapter(context: Context, onParallelTranslationRequested
     }
 }
 
-private class DropDownViewHolder(val rootView: View) {
+private class DropDownViewHolder(rootView: View) {
     val title: TextView = rootView.findViewById(R.id.title)
     val checkBox: CheckBox = rootView.findViewById(R.id.checkbox)
 }

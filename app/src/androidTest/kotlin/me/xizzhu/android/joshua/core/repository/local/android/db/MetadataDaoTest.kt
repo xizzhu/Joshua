@@ -92,8 +92,8 @@ class MetadataDaoTest : BaseSqliteTest() {
         }
         val actual = androidDatabase.metadataDao.read(keys)
         assertEquals(entries.size, actual.size)
-        for (i in 0 until entries.size) {
-            assertEquals(entries[i].second, actual[keys[i].first])
+        entries.forEachIndexed { index, (_, value) ->
+            assertEquals(value, actual[keys[index].first])
         }
     }
 
@@ -114,8 +114,8 @@ class MetadataDaoTest : BaseSqliteTest() {
         }
         val actual = androidDatabase.metadataDao.read(keys)
         assertEquals(entries.size, actual.size)
-        for (i in 0 until entries.size) {
-            assertEquals(entries[i].second, actual[keys[i].first])
+        entries.forEachIndexed { index, (_, value) ->
+            assertEquals(value, actual[keys[index].first])
         }
     }
 }
