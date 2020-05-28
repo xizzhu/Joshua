@@ -56,7 +56,7 @@ object Versions {
         const val activity = "1.1.0"
         const val annotation = "1.1.0"
         const val appCompat = "1.1.0"
-        const val core = "1.2.0"
+        const val core = "1.3.0"
         const val lifecycle = "2.2.0"
 
         object View {
@@ -77,10 +77,10 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.3"
-        const val analytics = "17.4.1"
+        const val analytics = "17.4.2"
 
         object Crashlytics {
-            const val classpath = "2.1.0"
+            const val classpath = "2.1.1"
             const val crashlytics = "17.0.0"
         }
     }

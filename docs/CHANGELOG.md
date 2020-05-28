@@ -4,6 +4,9 @@ CHANGELOG
 #### Next Release
 - New features:
   - Allowed consolidating verses for sharing (#160)
+- Updated dependencies:
+  - AndroidX Core to 1.3.0
+  - Firebase Analytics to 17.4.2, Crashlytics Gradle plugin to 2.1.1
 
 #### v0.15.1 (2020-05-24)
 - Bug fixes:
