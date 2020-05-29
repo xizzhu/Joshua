@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.end2end.utils
+package me.xizzhu.android.joshua.tests.assertions
 
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 object Assertions {
     fun assertNoCurrentTranslation() {
-        assertTrue(database().metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, "").isEmpty())
+        assertCurrentTranslation("")
     }
-
-    private fun database() = AndroidDatabase(ApplicationProvider.getApplicationContext())
 
     fun assertCurrentTranslation(currentTranslation: String) {
         assertEquals(currentTranslation, database().metadataDao.read(MetadataDao.KEY_CURRENT_TRANSLATION, ""))
     }
+
+    private fun database() = AndroidDatabase(ApplicationProvider.getApplicationContext())
 }

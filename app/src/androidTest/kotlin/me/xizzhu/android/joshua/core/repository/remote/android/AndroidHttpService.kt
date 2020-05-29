@@ -60,6 +60,10 @@ fun prepareSnEn() {
     inputStream = InstrumentationRegistry.getInstrumentation().context.assets.open("sn_en.zip")
 }
 
+fun clearPrepared() {
+    inputStream = null
+}
+
 fun getInputStream(relativeUrl: String): InputStream = inputStream!!
 
 fun ZipInputStream.forEachIndexed(action: (index: Int, entryName: String, contentReader: JsonReader) -> Unit) = use {

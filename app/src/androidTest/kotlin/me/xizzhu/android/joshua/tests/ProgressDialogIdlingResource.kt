@@ -14,19 +14,31 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.end2end.utils
+package me.xizzhu.android.joshua.tests
 
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.IdlingResource
 import me.xizzhu.android.joshua.ui.ProgressDialog
 
+fun ProgressDialog?.waitUntilDismissed() {
+    this?.let { ProgressDialogIdlingResource(it) }
+}
+
 class ProgressDialogIdlingResource(private val dialog: ProgressDialog) : IdlingResource {
+    init {
+        IdlingRegistry.getInstance().register(this)
+    }
+
     private var resourceCallback: IdlingResource.ResourceCallback? = null
 
     override fun getName(): String = ProgressDialogIdlingResource::class.java.name
 
     override fun isIdleNow(): Boolean {
         val idle = !dialog.isShowing()
-        if (idle) resourceCallback?.onTransitionToIdle()
+        if (idle) {
+            resourceCallback?.onTransitionToIdle()
+            IdlingRegistry.getInstance().unregister(this)
+        }
         return idle
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.end2end.utils
+package me.xizzhu.android.joshua.tests
 
 import android.app.Activity
 import android.view.WindowManager
@@ -25,7 +25,9 @@ import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class E2eActivityTestRule<T : Activity>(activityClass: Class<T>) : ActivityTestRule<T>(activityClass, true, false) {
+open class EspressoTestRule<T : Activity>(activityClass: Class<T>,
+                                          launchActivity: Boolean = true)
+    : ActivityTestRule<T>(activityClass, true, launchActivity) {
     override fun beforeActivityLaunched() {
         super.beforeActivityLaunched()
 
@@ -34,10 +36,6 @@ class E2eActivityTestRule<T : Activity>(activityClass: Class<T>) : ActivityTestR
 
         Locale.setDefault(Locale.ENGLISH)
 
-        resetLocalDatabase()
-    }
-
-    private fun resetLocalDatabase() {
         AndroidDatabase(ApplicationProvider.getApplicationContext()).removeAll()
     }
 
@@ -51,11 +49,5 @@ class E2eActivityTestRule<T : Activity>(activityClass: Class<T>) : ActivityTestR
                             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             )
         }
-    }
-
-    override fun afterActivityFinished() {
-        resetLocalDatabase()
-
-        super.afterActivityFinished()
     }
 }
