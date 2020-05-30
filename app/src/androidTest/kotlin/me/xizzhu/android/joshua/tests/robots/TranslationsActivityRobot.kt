@@ -26,8 +26,8 @@ import me.xizzhu.android.joshua.tests.waitUntilDismissed
 import me.xizzhu.android.joshua.translations.TranslationsActivity
 import java.util.*
 
-class TranslationsActivityRobot(activity: TranslationsActivity, prev: ReadingActivityRobot? = null)
-    : BaseRobot<TranslationsActivity, ReadingActivityRobot?, TranslationsActivityRobot>(activity, prev) {
+class TranslationsActivityRobot(activity: TranslationsActivity)
+    : BaseRobot<TranslationsActivity, TranslationsActivityRobot>(activity) {
     fun refresh(): TranslationsActivityRobot {
         onView(withId(R.id.translation_list)).perform(swipeDown())
         return self()

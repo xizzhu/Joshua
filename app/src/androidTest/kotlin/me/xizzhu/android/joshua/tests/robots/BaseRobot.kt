@@ -31,14 +31,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import org.hamcrest.Matcher
 
-open class BaseRobot<ACTIVITY : Activity, PREV, SELF : BaseRobot<ACTIVITY, PREV, SELF>>(
-        protected val activity: ACTIVITY, private val previous: PREV
-) {
-    fun goBack(): PREV {
-        pressBack()
-        return previous
-    }
-
+open class BaseRobot<ACTIVITY : Activity, SELF : BaseRobot<ACTIVITY, SELF>>(protected val activity: ACTIVITY) {
     fun pressBack(): SELF {
         Espresso.pressBack()
         return self()
