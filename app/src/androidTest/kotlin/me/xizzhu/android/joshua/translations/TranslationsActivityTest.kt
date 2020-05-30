@@ -18,37 +18,48 @@ package me.xizzhu.android.joshua.translations
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import me.xizzhu.android.joshua.core.repository.remote.android.prepareTranslationList
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.tests.EspressoTestRule
+import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.assertions.ActivityAssertions.assertActivityDestroyed
-import me.xizzhu.android.joshua.tests.assertions.Assertions.assertCurrentTranslation
-import me.xizzhu.android.joshua.tests.assertions.Assertions.assertNoCurrentTranslation
 import me.xizzhu.android.joshua.tests.robots.TranslationsActivityRobot
 import org.junit.Rule
 import org.junit.runner.RunWith
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class TranslationsActivityTest {
     @get:Rule
-    val activityRule = object : EspressoTestRule<TranslationsActivity>(TranslationsActivity::class.java) {
-        override fun beforeActivityLaunched() {
-            super.beforeActivityLaunched()
+    val activityRule = EspressoTestRule(TranslationsActivity::class.java)
 
-            prepareTranslationList()
-        }
+    @Test
+    fun testLoadTranslationListWithError() {
+        TranslationManager.throwErrorWhenLoadingTranslationList = true
+
+        TranslationsActivityRobot(activityRule.activity)
+                .refresh()
+                .isTranslationListLoadingErrorDialogDisplayed()
+                .confirmLoadTranslationListRetryRequest()
+                .isTranslationListLoadingErrorDialogDisplayed()
+                .cancelLoadTranslationListRetryRequest()
+
+        assertActivityDestroyed(activityRule.activity)
+        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
     }
 
     @Test
     fun testNoDownloadedTranslation() {
         val robot = TranslationsActivityRobot(activityRule.activity)
                 .hasNoTranslationDownloaded()
-        assertNoCurrentTranslation()
+        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
 
         robot.refresh()
                 .hasNoTranslationDownloaded()
-        assertNoCurrentTranslation()
+        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
     }
 
     @Test
@@ -58,7 +69,7 @@ class TranslationsActivityTest {
                 .isDownloadRequestDialogDisplayed()
                 .cancelDownloadRequest()
                 .hasNoTranslationDownloaded()
-        assertNoCurrentTranslation()
+        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
     }
 
     @Test
@@ -69,23 +80,26 @@ class TranslationsActivityTest {
                 .confirmDownloadRequest()
                 .cancelDownload()
                 .hasNoTranslationDownloaded()
-        assertNoCurrentTranslation()
+        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
     }
 
     @Test
     fun testDownloadTranslationWithError() {
+        TranslationManager.throwErrorWhenDownloadingTranslation = true
+
         val robot = TranslationsActivityRobot(activityRule.activity)
-                .tryDownloadKjvWithError()
+                .tryDownloadKjv()
                 .isDownloadRequestDialogDisplayed()
                 .confirmDownloadRequest()
+                .waitUntilDownloadFinish()
                 .isDownloadRetryRequestDialogDisplayed()
                 .confirmDownloadRetryRequest()
-        assertNoCurrentTranslation()
+        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
 
         robot.isDownloadRetryRequestDialogDisplayed()
                 .cancelDownloadRetryRequest()
                 .hasNoTranslationDownloaded()
-        assertNoCurrentTranslation()
+        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
     }
 
     @Test
@@ -97,7 +111,7 @@ class TranslationsActivityTest {
                 .confirmDownloadRequest()
                 .waitUntilDownloadFinish()
                 .hasKjvDownloaded()
-        assertCurrentTranslation("KJV")
+        assertEquals(MockContents.kjvShortName, BibleReadingManager.currentTranslation.value)
 
         // try to remove KJV (current translation), but nothing happens
         robot.tryRemoveKjv()
@@ -138,6 +152,6 @@ class TranslationsActivityTest {
         // select CUV as current translation
         robot.selectCuv()
         assertActivityDestroyed(activityRule.activity)
-        assertCurrentTranslation("中文和合本")
+        assertEquals(MockContents.cuvShortName, BibleReadingManager.currentTranslation.value)
     }
 }

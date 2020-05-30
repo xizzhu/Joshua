@@ -21,9 +21,7 @@ import androidx.test.espresso.action.ViewActions.swipeDown
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.repository.remote.android.clearPrepared
-import me.xizzhu.android.joshua.core.repository.remote.android.prepareCuv
-import me.xizzhu.android.joshua.core.repository.remote.android.prepareKjv
+import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.waitUntilDismissed
 import me.xizzhu.android.joshua.translations.TranslationsActivity
 import java.util.*
@@ -47,18 +45,11 @@ class TranslationsActivityRobot(activity: TranslationsActivity, prev: ReadingAct
             isDialogDisplayed(R.string.dialog_load_translation_list_error)
 
     fun tryDownloadCuv(): TranslationsActivityRobot {
-        prepareCuv()
-        return clickText("中文和合本（简体）")
+        return clickText(MockContents.cuvTranslationInfo.name)
     }
 
     fun tryDownloadKjv(): TranslationsActivityRobot {
-        prepareKjv()
-        return clickText("King James Version")
-    }
-
-    fun tryDownloadKjvWithError(): TranslationsActivityRobot {
-        clearPrepared()
-        return clickText("King James Version")
+        return clickText(MockContents.kjvTranslationInfo.name)
     }
 
     fun confirmDownloadRequest(): TranslationsActivityRobot =
@@ -92,27 +83,27 @@ class TranslationsActivityRobot(activity: TranslationsActivity, prev: ReadingAct
 
     fun hasNoTranslationDownloaded(): TranslationsActivityRobot =
             isTextDisplayed(R.string.header_available_translations)
-                    .isTextDisplayedBelow(Locale("en").displayLanguage, withText(R.string.header_available_translations))
-                    .isTextDisplayedBelow("King James Version", withText(Locale("en").displayLanguage))
-                    .isTextDisplayedBelow(Locale("zh").displayLanguage, withText("King James Version"))
-                    .isTextDisplayedBelow("中文和合本（简体）", withText(Locale("zh").displayLanguage))
+                    .isTextDisplayedBelow(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage, withText(R.string.header_available_translations))
+                    .isTextDisplayedBelow(MockContents.kjvTranslationInfo.name, withText(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage))
+                    .isTextDisplayedBelow(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage, withText(MockContents.kjvTranslationInfo.name))
+                    .isTextDisplayedBelow(MockContents.cuvTranslationInfo.name, withText(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage))
 
     fun hasKjvDownloaded(): TranslationsActivityRobot =
-            isTextDisplayed(Locale("en").displayLanguage)
-                    .isTextDisplayedBelow("King James Version", withText(Locale("en").displayLanguage))
-                    .isTextDisplayedBelow(R.string.header_available_translations, withText("King James Version"))
-                    .isTextDisplayedBelow(Locale("zh").displayLanguage, withText(R.string.header_available_translations))
-                    .isTextDisplayedBelow("中文和合本（简体）", withText(Locale("zh").displayLanguage))
+            isTextDisplayed(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage)
+                    .isTextDisplayedBelow(MockContents.kjvTranslationInfo.name, withText(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage))
+                    .isTextDisplayedBelow(R.string.header_available_translations, withText(MockContents.kjvTranslationInfo.name))
+                    .isTextDisplayedBelow(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage, withText(R.string.header_available_translations))
+                    .isTextDisplayedBelow(MockContents.cuvTranslationInfo.name, withText(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage))
 
     fun hasKjvAndCuvDownloaded(): TranslationsActivityRobot =
-            isTextDisplayed(Locale("en").displayLanguage)
-                    .isTextDisplayedBelow("King James Version", withText(Locale("en").displayLanguage))
-                    .isTextDisplayedBelow(Locale("zh").displayLanguage, withText("King James Version"))
-                    .isTextDisplayedBelow("中文和合本（简体）", withText(Locale("zh").displayLanguage))
+            isTextDisplayed(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage)
+                    .isTextDisplayedBelow(MockContents.kjvTranslationInfo.name, withText(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage))
+                    .isTextDisplayedBelow(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage, withText(MockContents.kjvTranslationInfo.name))
+                    .isTextDisplayedBelow(MockContents.cuvTranslationInfo.name, withText(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage))
 
-    fun tryRemoveKjv(): TranslationsActivityRobot = longClickText("King James Version")
+    fun tryRemoveKjv(): TranslationsActivityRobot = longClickText(MockContents.kjvTranslationInfo.name)
 
-    fun tryRemoveCuv(): TranslationsActivityRobot = longClickText("中文和合本（简体）")
+    fun tryRemoveCuv(): TranslationsActivityRobot = longClickText(MockContents.cuvTranslationInfo.name)
 
     fun confirmRemoveRequest(): TranslationsActivityRobot =
             isRemoveRequestDialogDisplayed()
@@ -129,7 +120,7 @@ class TranslationsActivityRobot(activity: TranslationsActivity, prev: ReadingAct
             dialogNotExist(R.string.dialog_delete_translation_confirmation)
 
     fun selectCuv(): TranslationsActivityRobot {
-        clickText("中文和合本（简体）")
+        clickText(MockContents.cuvTranslationInfo.name)
         return self()
     }
 }

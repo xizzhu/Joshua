@@ -18,16 +18,14 @@ package me.xizzhu.android.joshua.tests
 
 import android.app.Activity
 import android.view.WindowManager
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.rule.ActivityTestRule
-import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.TranslationManager
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-open class EspressoTestRule<T : Activity>(activityClass: Class<T>,
-                                          launchActivity: Boolean = true)
-    : ActivityTestRule<T>(activityClass, true, launchActivity) {
+open class EspressoTestRule<T : Activity>(activityClass: Class<T>) : ActivityTestRule<T>(activityClass) {
     override fun beforeActivityLaunched() {
         super.beforeActivityLaunched()
 
@@ -36,7 +34,8 @@ open class EspressoTestRule<T : Activity>(activityClass: Class<T>,
 
         Locale.setDefault(Locale.ENGLISH)
 
-        AndroidDatabase(ApplicationProvider.getApplicationContext()).removeAll()
+        BibleReadingManager.reset()
+        TranslationManager.reset()
     }
 
     override fun afterActivityLaunched() {
