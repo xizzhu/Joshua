@@ -16,12 +16,19 @@
 
 package me.xizzhu.android.joshua.tests.robots
 
-import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.swipeDown
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.tests.action.clickDialogNegativeButton
+import me.xizzhu.android.joshua.tests.action.clickDialogPositiveButton
+import me.xizzhu.android.joshua.tests.action.clickText
+import me.xizzhu.android.joshua.tests.action.longClickText
+import me.xizzhu.android.joshua.tests.assertions.doesNotExist
+import me.xizzhu.android.joshua.tests.assertions.isDialogDisplayed
+import me.xizzhu.android.joshua.tests.assertions.isDisplayed
+import me.xizzhu.android.joshua.tests.assertions.isTextDisplayedBelow
+import me.xizzhu.android.joshua.tests.matchers.onView
 import me.xizzhu.android.joshua.tests.waitUntilDismissed
 import me.xizzhu.android.joshua.translations.TranslationsActivity
 import java.util.*
@@ -29,50 +36,63 @@ import java.util.*
 class TranslationsActivityRobot(activity: TranslationsActivity)
     : BaseRobot<TranslationsActivity, TranslationsActivityRobot>(activity) {
     fun refresh(): TranslationsActivityRobot {
-        onView(withId(R.id.translation_list)).perform(swipeDown())
+        onView(R.id.translation_list).perform(swipeDown())
         return self()
     }
 
-    fun confirmLoadTranslationListRetryRequest(): TranslationsActivityRobot =
-            isTranslationListLoadingErrorDialogDisplayed()
-                    .clickDialogPositiveButton()
+    fun confirmLoadTranslationListRetryRequest(): TranslationsActivityRobot {
+        isTranslationListLoadingErrorDialogDisplayed()
+        clickDialogPositiveButton()
+        return self()
+    }
 
-    fun cancelLoadTranslationListRetryRequest(): TranslationsActivityRobot =
-            isTranslationListLoadingErrorDialogDisplayed()
-                    .clickDialogNegativeButton()
+    fun cancelLoadTranslationListRetryRequest(): TranslationsActivityRobot {
+        isTranslationListLoadingErrorDialogDisplayed()
+        clickDialogNegativeButton()
+        return self()
+    }
 
-    fun isTranslationListLoadingErrorDialogDisplayed(): TranslationsActivityRobot =
-            isDialogDisplayed(R.string.dialog_load_translation_list_error)
+    fun isTranslationListLoadingErrorDialogDisplayed(): TranslationsActivityRobot {
+        isDialogDisplayed(R.string.dialog_load_translation_list_error)
+        return self()
+    }
 
     fun tryDownloadCuv(): TranslationsActivityRobot {
-        return clickText(MockContents.cuvTranslationInfo.name)
+        clickText(MockContents.cuvTranslationInfo.name)
+        return self()
     }
 
     fun tryDownloadKjv(): TranslationsActivityRobot {
-        return clickText(MockContents.kjvTranslationInfo.name)
+        clickText(MockContents.kjvTranslationInfo.name)
+        return self()
     }
 
-    fun confirmDownloadRequest(): TranslationsActivityRobot =
-            isDownloadRequestDialogDisplayed()
-                    .clickDialogPositiveButton()
+    fun confirmDownloadRequest(): TranslationsActivityRobot {
+        clickDialogPositiveButton()
+        return self()
+    }
 
-    fun cancelDownloadRequest(): TranslationsActivityRobot =
-            isDownloadRequestDialogDisplayed()
-                    .clickDialogNegativeButton()
+    fun cancelDownloadRequest(): TranslationsActivityRobot {
+        clickDialogNegativeButton()
+        return self()
+    }
 
-    fun isDownloadRequestDialogDisplayed(): TranslationsActivityRobot =
-            isDialogDisplayed(R.string.dialog_download_translation_confirmation)
+    fun confirmDownloadRetryRequest(): TranslationsActivityRobot {
+        isDownloadRetryRequestDialogDisplayed()
+        clickDialogPositiveButton()
+        return self()
+    }
 
-    fun confirmDownloadRetryRequest(): TranslationsActivityRobot =
-            isDownloadRetryRequestDialogDisplayed()
-                    .clickDialogPositiveButton()
+    fun cancelDownloadRetryRequest(): TranslationsActivityRobot {
+        isDownloadRetryRequestDialogDisplayed()
+        clickDialogNegativeButton()
+        return self()
+    }
 
-    fun cancelDownloadRetryRequest(): TranslationsActivityRobot =
-            isDownloadRetryRequestDialogDisplayed()
-                    .clickDialogNegativeButton()
-
-    fun isDownloadRetryRequestDialogDisplayed(): TranslationsActivityRobot =
-            isDialogDisplayed(R.string.dialog_download_error)
+    fun isDownloadRetryRequestDialogDisplayed(): TranslationsActivityRobot {
+        isDialogDisplayed(R.string.dialog_download_error)
+        return self()
+    }
 
     fun cancelDownload(): TranslationsActivityRobot = pressBack()
 
@@ -81,43 +101,56 @@ class TranslationsActivityRobot(activity: TranslationsActivity)
         return self()
     }
 
-    fun hasNoTranslationDownloaded(): TranslationsActivityRobot =
-            isTextDisplayed(R.string.header_available_translations)
-                    .isTextDisplayedBelow(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage, withText(R.string.header_available_translations))
-                    .isTextDisplayedBelow(MockContents.kjvTranslationInfo.name, withText(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage))
-                    .isTextDisplayedBelow(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage, withText(MockContents.kjvTranslationInfo.name))
-                    .isTextDisplayedBelow(MockContents.cuvTranslationInfo.name, withText(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage))
+    fun hasNoTranslationDownloaded(): TranslationsActivityRobot {
+        isDisplayed(R.string.header_available_translations)
+        isTextDisplayedBelow(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage, withText(R.string.header_available_translations))
+        isTextDisplayedBelow(MockContents.kjvTranslationInfo.name, withText(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage))
+        isTextDisplayedBelow(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage, withText(MockContents.kjvTranslationInfo.name))
+        isTextDisplayedBelow(MockContents.cuvTranslationInfo.name, withText(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage))
+        return self()
+    }
 
-    fun hasKjvDownloaded(): TranslationsActivityRobot =
-            isTextDisplayed(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage)
-                    .isTextDisplayedBelow(MockContents.kjvTranslationInfo.name, withText(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage))
-                    .isTextDisplayedBelow(R.string.header_available_translations, withText(MockContents.kjvTranslationInfo.name))
-                    .isTextDisplayedBelow(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage, withText(R.string.header_available_translations))
-                    .isTextDisplayedBelow(MockContents.cuvTranslationInfo.name, withText(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage))
+    fun hasKjvDownloaded(): TranslationsActivityRobot {
+        isDisplayed(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage)
+        isTextDisplayedBelow(MockContents.kjvTranslationInfo.name, withText(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage))
+        isTextDisplayedBelow(R.string.header_available_translations, withText(MockContents.kjvTranslationInfo.name))
+        isTextDisplayedBelow(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage, withText(R.string.header_available_translations))
+        isTextDisplayedBelow(MockContents.cuvTranslationInfo.name, withText(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage))
+        return self()
+    }
 
-    fun hasKjvAndCuvDownloaded(): TranslationsActivityRobot =
-            isTextDisplayed(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage)
-                    .isTextDisplayedBelow(MockContents.kjvTranslationInfo.name, withText(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage))
-                    .isTextDisplayedBelow(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage, withText(MockContents.kjvTranslationInfo.name))
-                    .isTextDisplayedBelow(MockContents.cuvTranslationInfo.name, withText(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage))
+    fun hasKjvAndCuvDownloaded(): TranslationsActivityRobot {
+        isDisplayed(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage)
+        isTextDisplayedBelow(MockContents.kjvTranslationInfo.name, withText(Locale(MockContents.kjvTranslationInfo.language.split("_")[0]).displayLanguage))
+        isTextDisplayedBelow(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage, withText(MockContents.kjvTranslationInfo.name))
+        isTextDisplayedBelow(MockContents.cuvTranslationInfo.name, withText(Locale(MockContents.cuvTranslationInfo.language.split("_")[0]).displayLanguage))
+        return self()
+    }
 
-    fun tryRemoveKjv(): TranslationsActivityRobot = longClickText(MockContents.kjvTranslationInfo.name)
+    fun tryRemoveKjv(): TranslationsActivityRobot {
+        longClickText(MockContents.kjvTranslationInfo.name)
+        return self()
+    }
 
-    fun tryRemoveCuv(): TranslationsActivityRobot = longClickText(MockContents.cuvTranslationInfo.name)
+    fun tryRemoveCuv(): TranslationsActivityRobot {
+        longClickText(MockContents.cuvTranslationInfo.name)
+        return self()
+    }
 
-    fun confirmRemoveRequest(): TranslationsActivityRobot =
-            isRemoveRequestDialogDisplayed()
-                    .clickDialogPositiveButton()
+    fun confirmRemoveRequest(): TranslationsActivityRobot {
+        clickDialogPositiveButton()
+        return self()
+    }
 
-    fun cancelRemoveRequest(): TranslationsActivityRobot =
-            isRemoveRequestDialogDisplayed()
-                    .clickDialogNegativeButton()
+    fun cancelRemoveRequest(): TranslationsActivityRobot {
+        clickDialogNegativeButton()
+        return self()
+    }
 
-    fun isRemoveRequestDialogDisplayed(): TranslationsActivityRobot =
-            isDialogDisplayed(R.string.dialog_delete_translation_confirmation)
-
-    fun removeRequestDialogNotDisplayed(): TranslationsActivityRobot =
-            dialogNotExist(R.string.dialog_delete_translation_confirmation)
+    fun removeRequestDialogNotDisplayed(): TranslationsActivityRobot {
+        doesNotExist(R.string.dialog_delete_translation_confirmation)
+        return self()
+    }
 
     fun selectCuv(): TranslationsActivityRobot {
         clickText(MockContents.cuvTranslationInfo.name)

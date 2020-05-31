@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.tests.robots
+package me.xizzhu.android.joshua.tests.matchers
 
-import android.app.Activity
-import androidx.test.espresso.Espresso
+import androidx.annotation.IdRes
+import androidx.annotation.StringRes
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.ViewInteraction
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 
-open class BaseRobot<ACTIVITY : Activity, SELF : BaseRobot<ACTIVITY, SELF>>(protected val activity: ACTIVITY) {
-    fun pressBack(): SELF {
-        Espresso.pressBack()
-        return self()
-    }
+fun onView(@IdRes viewId: Int): ViewInteraction = onView(withId(viewId))
 
-    @Suppress("UNCHECKED_CAST")
-    protected fun self(): SELF = this as SELF
-}
+fun viewWithText(text: String): ViewInteraction = onView(withText(text))
+
+fun viewWithText(@StringRes textId: Int): ViewInteraction = onView(withText(textId))

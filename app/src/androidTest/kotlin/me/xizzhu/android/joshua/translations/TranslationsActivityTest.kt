@@ -66,7 +66,6 @@ class TranslationsActivityTest {
     fun testTryDownloadTranslationButCancelRequest() {
         TranslationsActivityRobot(activityRule.activity)
                 .tryDownloadKjv()
-                .isDownloadRequestDialogDisplayed()
                 .cancelDownloadRequest()
                 .hasNoTranslationDownloaded()
         assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
@@ -76,7 +75,6 @@ class TranslationsActivityTest {
     fun testDownloadTranslationThenCancel() {
         TranslationsActivityRobot(activityRule.activity)
                 .tryDownloadKjv()
-                .isDownloadRequestDialogDisplayed()
                 .confirmDownloadRequest()
                 .cancelDownload()
                 .hasNoTranslationDownloaded()
@@ -89,11 +87,11 @@ class TranslationsActivityTest {
 
         val robot = TranslationsActivityRobot(activityRule.activity)
                 .tryDownloadKjv()
-                .isDownloadRequestDialogDisplayed()
                 .confirmDownloadRequest()
                 .waitUntilDownloadFinish()
                 .isDownloadRetryRequestDialogDisplayed()
                 .confirmDownloadRetryRequest()
+                .waitUntilDownloadFinish()
         assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
 
         robot.isDownloadRetryRequestDialogDisplayed()
@@ -107,7 +105,6 @@ class TranslationsActivityTest {
         // download KJV
         val robot = TranslationsActivityRobot(activityRule.activity)
                 .tryDownloadKjv()
-                .isDownloadRequestDialogDisplayed()
                 .confirmDownloadRequest()
                 .waitUntilDownloadFinish()
                 .hasKjvDownloaded()
@@ -120,7 +117,6 @@ class TranslationsActivityTest {
 
         // download CUV
         robot.tryDownloadCuv()
-                .isDownloadRequestDialogDisplayed()
                 .confirmDownloadRequest()
                 .waitUntilDownloadFinish()
                 .hasKjvAndCuvDownloaded()
@@ -132,19 +128,16 @@ class TranslationsActivityTest {
 
         // try to remove CUV, but cancel
         robot.tryRemoveCuv()
-                .isRemoveRequestDialogDisplayed()
                 .cancelRemoveRequest()
                 .hasKjvAndCuvDownloaded()
 
         // remove CUV
         robot.tryRemoveCuv()
-                .isRemoveRequestDialogDisplayed()
                 .confirmRemoveRequest()
                 .hasKjvDownloaded()
 
         // download CUV again
         robot.tryDownloadCuv()
-                .isDownloadRequestDialogDisplayed()
                 .confirmDownloadRequest()
                 .waitUntilDownloadFinish()
                 .hasKjvAndCuvDownloaded()
