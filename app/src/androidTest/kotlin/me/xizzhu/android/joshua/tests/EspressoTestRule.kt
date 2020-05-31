@@ -21,6 +21,7 @@ import android.view.WindowManager
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.rule.ActivityTestRule
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -35,6 +36,7 @@ open class EspressoTestRule<T : Activity>(activityClass: Class<T>) : ActivityTes
         Locale.setDefault(Locale.ENGLISH)
 
         BibleReadingManager.reset()
+        SettingsManager.reset()
         TranslationManager.reset()
     }
 

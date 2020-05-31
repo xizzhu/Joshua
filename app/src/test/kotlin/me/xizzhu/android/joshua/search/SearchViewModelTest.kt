@@ -25,13 +25,12 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.*
 
 class SearchViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
+
     @Mock
     private lateinit var settingsManager: SettingsManager
 
@@ -80,7 +79,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSearchResultWithException() = testDispatcher.runBlockingTest {
+    fun testSearchWithException() = testDispatcher.runBlockingTest {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
 

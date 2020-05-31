@@ -18,14 +18,18 @@ package me.xizzhu.android.joshua.tests.action
 
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.ViewInteraction
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.longClick
+import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import me.xizzhu.android.joshua.tests.assertions.isDialogDisplayed
 import me.xizzhu.android.joshua.tests.matchers.onView
 import me.xizzhu.android.joshua.tests.matchers.viewWithText
 
 fun click(@IdRes viewId: Int): ViewInteraction = onView(viewId).perform(click())
+
+fun clickOnItem(@IdRes recyclerViewId: Int, position: Int): ViewInteraction =
+        onView(recyclerViewId).perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(position, click()))
 
 fun clickDialogPositiveButton(): ViewInteraction = isDialogDisplayed(android.R.string.yes).perform(click())
 
@@ -36,3 +40,5 @@ fun clickText(text: String): ViewInteraction = viewWithText(text).perform(click(
 fun clickText(@StringRes textId: Int): ViewInteraction = viewWithText(textId).perform(click())
 
 fun longClickText(text: String): ViewInteraction = viewWithText(text).perform(longClick())
+
+fun typeText(@IdRes viewId: Int, text: String): ViewInteraction = onView(viewId).perform(typeText(text))

@@ -20,9 +20,12 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
+import me.xizzhu.android.joshua.tests.MockContents
+import kotlin.math.min
 
 object BibleReadingManager {
     val currentTranslation = ConflatedBroadcastChannel<String>()
+    val currentVerseIndex = ConflatedBroadcastChannel<VerseIndex>()
 
     init {
         reset()
@@ -30,11 +33,13 @@ object BibleReadingManager {
 
     fun reset() {
         currentTranslation.offer("")
+        currentVerseIndex.offer(VerseIndex.INVALID)
     }
 
-    fun currentVerseIndex(): Flow<VerseIndex> = emptyFlow()
+    fun currentVerseIndex(): Flow<VerseIndex> = currentVerseIndex.asFlow()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
+        currentVerseIndex.send(verseIndex)
     }
 
     fun currentTranslation(): Flow<String> = currentTranslation.asFlow()
@@ -54,9 +59,19 @@ object BibleReadingManager {
     suspend fun clearParallelTranslation() {
     }
 
-    suspend fun readBookNames(translationShortName: String): List<String> = emptyList()
+    suspend fun readBookNames(translationShortName: String): List<String> = when (translationShortName) {
+        MockContents.kjvShortName -> MockContents.kjvBookNames
+        MockContents.cuvShortName -> MockContents.cuvBookNames
+        MockContents.msgShortName -> MockContents.msgBookNames
+        else -> emptyList()
+    }
 
-    suspend fun readBookShortNames(translationShortName: String): List<String> = emptyList()
+    suspend fun readBookShortNames(translationShortName: String): List<String> = when (translationShortName) {
+        MockContents.kjvShortName -> MockContents.kjvBookShortNames
+        MockContents.cuvShortName -> MockContents.cuvBookShortNames
+        MockContents.msgShortName -> MockContents.msgBookShortNames
+        else -> emptyList()
+    }
 
     suspend fun readVerses(translationShortName: String, bookIndex: Int, chapterIndex: Int): List<Verse> = emptyList()
 
@@ -65,5 +80,12 @@ object BibleReadingManager {
 
     suspend fun readVerses(translationShortName: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse> = emptyMap()
 
-    suspend fun search(translationShortName: String, query: String): List<Verse> = emptyList()
+    suspend fun search(translationShortName: String, query: String): List<Verse> = when (translationShortName) {
+        MockContents.kjvShortName -> MockContents.kjvVerses
+        MockContents.cuvShortName -> MockContents.cuvVerses
+        MockContents.msgShortName -> MockContents.msgVerses
+        else -> emptyList()
+    }.let {
+        it.subList(0, min(it.size, query.length))
+    }
 }

@@ -75,8 +75,7 @@ class AppModule(private val app: App) {
 
         @Provides
         @Singleton
-        fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager =
-                SettingsManager(settingsRepository)
+        fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager = SettingsManager
 
         @Provides
         @Singleton
