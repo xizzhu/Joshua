@@ -79,8 +79,7 @@ class AppModule(private val app: App) {
 
         @Provides
         @Singleton
-        fun provideStrongNumberManager(strongNumberRepository: StrongNumberRepository): StrongNumberManager =
-                StrongNumberManager(strongNumberRepository)
+        fun provideStrongNumberManager(strongNumberRepository: StrongNumberRepository): StrongNumberManager = StrongNumberManager
 
         @Provides
         @Singleton

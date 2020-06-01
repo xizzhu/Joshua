@@ -26,7 +26,8 @@ import me.xizzhu.android.joshua.core.TranslationManager
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-open class EspressoTestRule<T : Activity>(activityClass: Class<T>) : ActivityTestRule<T>(activityClass) {
+open class EspressoTestRule<T : Activity>(activityClass: Class<T>, launchActivity: Boolean = true)
+    : ActivityTestRule<T>(activityClass, false, launchActivity) {
     override fun beforeActivityLaunched() {
         super.beforeActivityLaunched()
 

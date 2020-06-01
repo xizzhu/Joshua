@@ -78,7 +78,12 @@ object BibleReadingManager {
     suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
                            bookIndex: Int, chapterIndex: Int): List<Verse> = emptyList()
 
-    suspend fun readVerses(translationShortName: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse> = emptyMap()
+    suspend fun readVerses(translationShortName: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse> = when (translationShortName) {
+        MockContents.kjvShortName -> MockContents.kjvVerses.filter { verseIndexes.contains(it.verseIndex) }
+        MockContents.cuvShortName -> MockContents.cuvVerses.filter { verseIndexes.contains(it.verseIndex) }
+        MockContents.msgShortName -> MockContents.msgVerses.filter { verseIndexes.contains(it.verseIndex) }
+        else -> emptyList()
+    }.associateBy { it.verseIndex }
 
     suspend fun search(translationShortName: String, query: String): List<Verse> = when (translationShortName) {
         MockContents.kjvShortName -> MockContents.kjvVerses
