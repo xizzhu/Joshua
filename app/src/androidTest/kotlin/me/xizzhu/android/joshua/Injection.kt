@@ -20,7 +20,6 @@ import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.core.repository.*
-import me.xizzhu.android.joshua.core.serializer.android.BackupJsonSerializer
 import javax.inject.Scope
 import javax.inject.Singleton
 
@@ -44,8 +43,7 @@ class AppModule(private val app: App) {
         fun provideBackupManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>,
                                  highlightRepository: VerseAnnotationRepository<Highlight>,
                                  noteRepository: VerseAnnotationRepository<Note>,
-                                 readingProgressRepository: ReadingProgressRepository): BackupManager =
-                BackupManager(BackupJsonSerializer(), bookmarkRepository, highlightRepository, noteRepository, readingProgressRepository)
+                                 readingProgressRepository: ReadingProgressRepository): BackupManager = BackupManager
 
         @Provides
         @Singleton
