@@ -26,8 +26,32 @@ object MockContents {
     const val kjvShortName = "KJV"
     val kjvTranslationInfo = TranslationInfo(kjvShortName, "Authorized King James", "en_gb", 1860978L, false)
     val kjvDownloadedTranslationInfo = TranslationInfo(kjvShortName, "Authorized King James", "en_gb", 1860978L, true)
-    val kjvBookNames: List<String> = listOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
-    val kjvBookShortNames: List<String> = listOf("Gen.", "Ex.", "Lev.", "Num.", "Deut.")
+    val kjvBookNames: List<String> = listOf(
+            "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua",
+            "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings",
+            "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job",
+            "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah",
+            "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos",
+            "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah",
+            "Haggai", "Zechariah", "Malachi", "St. Matthew", "St. Mark", "St. Luke",
+            "St. John", "The Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians",
+            "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy",
+            "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter",
+            "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"
+    )
+    val kjvBookShortNames: List<String> = listOf(
+            "Gen.", "Ex.", "Lev.", "Num.", "Deut.", "Josh.",
+            "Judg.", "Ruth", "1 Sam.", "2 Sam.", "1 Kings", "2 Kings",
+            "1 Chron.", "2 Chron.", "Ezra", "Neh.", "Est.", "Job",
+            "Ps.", "Prov", "Eccles.", "Song", "Isa.", "Jer.",
+            "Lam.", "Ezek.", "Dan.", "Hos.", "Joel", "Amos",
+            "Obad.", "Jonah", "Mic.", "Nah.", "Hab.", "Zeph.",
+            "Hag.", "Zech.", "Mal.", "Matt.", "Mark", "Luke",
+            "John", "Acts", "Rom.", "1 Cor.", "2 Cor.", "Gal.",
+            "Eph.", "Phil.", "Col.", "1 Thess.", "2 Thess.", "1 Tim.",
+            "2 Tim.", "Titus", "Philem.", "Heb.", "James", "1 Pet.",
+            "2 Pet.", "1 John", "2 John", "3 John", "Jude", "Rev"
+    )
     val kjvVerses: List<Verse> = listOf(
             Verse(VerseIndex(0, 0, 0), Verse.Text(kjvShortName, "In the beginning God created the heaven and the earth."), emptyList()),
             Verse(VerseIndex(0, 0, 1), Verse.Text(kjvShortName, "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters."), emptyList()),

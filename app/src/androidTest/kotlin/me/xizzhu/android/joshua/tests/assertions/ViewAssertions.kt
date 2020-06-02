@@ -18,14 +18,19 @@ package me.xizzhu.android.joshua.tests.assertions
 
 import android.view.View
 import androidx.annotation.StringRes
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.ViewInteraction
 import androidx.test.espresso.assertion.PositionAssertions.isCompletelyBelow
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import me.xizzhu.android.joshua.tests.matchers.viewWithText
 import org.hamcrest.Matcher
+
+fun isDisplayed(matcher: Matcher<View>, text: String): ViewInteraction =
+        onView(matcher).check(matches(withText(text))).check(matches(isDisplayed()))
 
 fun isDisplayed(text: String): ViewInteraction =
         viewWithText(text).check(matches(isDisplayed()))

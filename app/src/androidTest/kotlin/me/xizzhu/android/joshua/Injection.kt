@@ -68,8 +68,7 @@ class AppModule(private val app: App) {
         @Provides
         @Singleton
         fun provideReadingProgressManager(bibleReadingRepository: BibleReadingRepository,
-                                          readingProgressRepository: ReadingProgressRepository): ReadingProgressManager =
-                ReadingProgressManager(bibleReadingRepository, readingProgressRepository)
+                                          readingProgressRepository: ReadingProgressRepository): ReadingProgressManager = ReadingProgressManager
 
         @Provides
         @Singleton

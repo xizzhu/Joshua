@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.tests.robots
 
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.reading.detail.StrongNumberItem
 import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
 import me.xizzhu.android.joshua.strongnumber.StrongNumberViewData
 import me.xizzhu.android.joshua.strongnumber.VerseStrongNumberItem
@@ -34,7 +33,7 @@ class StrongNumberListActivityRobot(activity: StrongNumberListActivity)
         return self()
     }
 
-    fun hasStrongNumberShown(data: StrongNumberViewData): StrongNumberListActivityRobot {
+    fun isStrongNumberDisplayed(data: StrongNumberViewData): StrongNumberListActivityRobot {
         val strongNumberText = "${data.strongNumber.sn} ${data.strongNumber.meaning}"
         isDisplayed(strongNumberText)
 

@@ -43,7 +43,7 @@ class StrongNumberListActivityTest {
         BibleReadingManager.currentTranslation.offer(MockContents.kjvShortName)
 
         StrongNumberListActivityRobot(activityRule.activity)
-                .hasStrongNumberShown(StrongNumberViewData(
+                .isStrongNumberDisplayed(StrongNumberViewData(
                         StrongNumber(sn, MockContents.strongNumberWords.getValue(sn)),
                         listOf(MockContents.kjvVerses[0]),
                         MockContents.kjvBookNames,

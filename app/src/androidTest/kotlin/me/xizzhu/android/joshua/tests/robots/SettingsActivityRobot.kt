@@ -45,9 +45,4 @@ class SettingsActivityRobot(activity: SettingsActivity) : BaseRobot<SettingsActi
         click(R.id.consolidated_sharing)
         return self()
     }
-
-    fun clickBackup(): SettingsActivityRobot {
-        click(R.id.backup)
-        return self()
-    }
 }

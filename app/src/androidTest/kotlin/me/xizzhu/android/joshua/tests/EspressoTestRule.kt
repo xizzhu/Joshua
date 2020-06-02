@@ -21,12 +21,15 @@ import android.view.WindowManager
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.rule.ActivityTestRule
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-open class EspressoTestRule<T : Activity>(activityClass: Class<T>, launchActivity: Boolean = true)
+open class EspressoTestRule<T : Activity>(activityClass: Class<T>,
+                                          launchActivity: Boolean = true,
+                                          private val resetBeforeLaunchingActivity: Boolean = true)
     : ActivityTestRule<T>(activityClass, false, launchActivity) {
     override fun beforeActivityLaunched() {
         super.beforeActivityLaunched()
@@ -36,7 +39,14 @@ open class EspressoTestRule<T : Activity>(activityClass: Class<T>, launchActivit
 
         Locale.setDefault(Locale.ENGLISH)
 
+        if (resetBeforeLaunchingActivity) {
+            reset()
+        }
+    }
+
+    private fun reset() {
         BibleReadingManager.reset()
+        ReadingProgressManager.reset()
         SettingsManager.reset()
         TranslationManager.reset()
     }
@@ -51,5 +61,10 @@ open class EspressoTestRule<T : Activity>(activityClass: Class<T>, launchActivit
                             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             )
         }
+    }
+
+    override fun afterActivityFinished() {
+        reset()
+        super.afterActivityFinished()
     }
 }
