@@ -16,11 +16,21 @@
 
 package me.xizzhu.android.joshua.tests.robots
 
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.RootMatchers.isDialog
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.settings.SettingsActivity
+import me.xizzhu.android.joshua.settings.SettingsPresenter
 import me.xizzhu.android.joshua.tests.action.click
+import me.xizzhu.android.joshua.tests.matchers.viewWithText
 
 class SettingsActivityRobot(activity: SettingsActivity) : BaseRobot<SettingsActivity, SettingsActivityRobot>(activity) {
+    fun selectFontSize(fontSize: Int): SettingsActivityRobot {
+        click(R.id.font_size)
+        viewWithText(SettingsPresenter.fontSizeTexts[fontSize]).inRoot(isDialog()).perform(click())
+        return self()
+    }
+
     fun toggleKeepScreenOn(): SettingsActivityRobot {
         click(R.id.keep_screen_on)
         return self()

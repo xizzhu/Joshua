@@ -36,8 +36,12 @@ class SettingsActivityTest {
     @Test
     fun testSettings() {
         val robot = SettingsActivityRobot(activityRule.activity)
-                .toggleKeepScreenOn()
-        var expectedSettings = Settings.DEFAULT.copy(keepScreenOn = false)
+                .selectFontSize(3)
+        var expectedSettings = Settings.DEFAULT.copy(fontSizeScale = 4)
+        assertEquals(expectedSettings, SettingsManager.settings.value)
+
+        robot.toggleKeepScreenOn()
+        expectedSettings = expectedSettings.copy(keepScreenOn = false)
         assertEquals(expectedSettings, SettingsManager.settings.value)
 
         robot.toggleNightMode()

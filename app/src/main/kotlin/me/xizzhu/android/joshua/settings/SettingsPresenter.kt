@@ -25,6 +25,7 @@ import android.net.Uri
 import android.util.TypedValue
 import androidx.annotation.ColorInt
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
@@ -59,7 +60,8 @@ class SettingsPresenter(
         const val CODE_CREATE_DOCUMENT_FOR_BACKUP = 9999
         const val CODE_GET_CONTENT_FOR_RESTORE = 9998
 
-        private val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
+        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+        val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
     }
 
     private var currentSettings: Settings? = null
