@@ -101,13 +101,11 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideBookmarkRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Bookmark> =
-            BookmarksRepository
+    fun provideBookmarkRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Bookmark> = BookmarksRepository
 
     @Provides
     @Singleton
-    fun provideHighlightRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Highlight> =
-            VerseAnnotationRepository()
+    fun provideHighlightRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Highlight> = HighlightsRepository
 
     @Provides
     @Singleton

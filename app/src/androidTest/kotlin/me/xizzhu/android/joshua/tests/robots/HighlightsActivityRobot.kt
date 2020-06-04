@@ -17,26 +17,26 @@
 package me.xizzhu.android.joshua.tests.robots
 
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity
-import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarkItem
+import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
+import me.xizzhu.android.joshua.annotated.highlights.list.HighlightItem
 import me.xizzhu.android.joshua.tests.action.clickOnItem
 import me.xizzhu.android.joshua.tests.assertions.isDisplayed
 import me.xizzhu.android.joshua.tests.matchers.atPositionOnRecyclerView
 
-class BookmarksActivityRobot(activity: BookmarksActivity) : BaseRobot<BookmarksActivity, BookmarksActivityRobot>(activity) {
-    fun isNoBookmarksDisplayed(): BookmarksActivityRobot {
-        isDisplayed(atPositionOnRecyclerView(R.id.verse_list, 0, 0), R.string.text_no_bookmarks)
+class HighlightsActivityRobot(activity: HighlightsActivity) : BaseRobot<HighlightsActivity, HighlightsActivityRobot>(activity) {
+    fun isNoHighlightsDisplayed(): HighlightsActivityRobot {
+        isDisplayed(atPositionOnRecyclerView(R.id.verse_list, 0, 0), R.string.text_no_highlights)
         return self()
     }
 
-    fun areBookmarksDisplayed(bookmarks: List<BookmarkItem>): BookmarksActivityRobot {
-        bookmarks.forEachIndexed { index, bookmark ->
-            isDisplayed(atPositionOnRecyclerView(R.id.verse_list, index + 1, 0), bookmark.textForDisplay.toString())
+    fun areHighlightsDisplayed(highlights: List<HighlightItem>): HighlightsActivityRobot {
+        highlights.forEachIndexed { index, highlight ->
+            isDisplayed(atPositionOnRecyclerView(R.id.verse_list, index + 1, 0), highlight.textForDisplay.toString())
         }
         return self()
     }
 
-    fun clickBookmark(position: Int): BookmarksActivityRobot {
+    fun clickHighlight(position: Int): HighlightsActivityRobot {
         clickOnItem(R.id.verse_list, position + 1)
         return self()
     }

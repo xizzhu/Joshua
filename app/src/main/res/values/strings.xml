@@ -74,9 +74,9 @@
     <string name="text_note">Note</string>
     <string name="text_strong_number">Strong\'s numbers</string>
 
-    <string name="text_no_bookmark">No bookmarks yet.</string>
+    <string name="text_no_bookmarks">No bookmarks yet.</string>
     <string name="text_no_highlights">No highlights yet.</string>
-    <string name="text_no_note">No notes yet.</string>
+    <string name="text_no_notes">No notes yet.</string>
 
     <string name="text_continuous_reading">Consecutive Reading</string>
     <string name="text_continuous_reading_count">%1$d day(s)</string>

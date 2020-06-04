@@ -20,10 +20,7 @@ import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
-import me.xizzhu.android.joshua.core.Bookmark
-import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.VerseAnnotation
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.*
 import java.lang.UnsupportedOperationException
 
 open class VerseAnnotationRepository<T : VerseAnnotation> {
@@ -36,6 +33,7 @@ open class VerseAnnotationRepository<T : VerseAnnotation> {
 
     open fun reset() {
         sortOrder.offer(Constants.DEFAULT_SORT_ORDER)
+        annotations = emptyList()
     }
 
     fun sortOrder(): Flow<Int> = sortOrder.asFlow()
@@ -60,3 +58,5 @@ open class VerseAnnotationRepository<T : VerseAnnotation> {
 }
 
 val BookmarksRepository: VerseAnnotationRepository<Bookmark> = VerseAnnotationRepository()
+
+val HighlightsRepository: VerseAnnotationRepository<Highlight> = VerseAnnotationRepository()

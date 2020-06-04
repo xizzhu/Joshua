@@ -53,7 +53,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
 
     @Mock
     private lateinit var navigator: Navigator
-    private val noItemText = R.string.text_no_bookmark
+    private val noItemText = R.string.text_no_bookmarks
 
     @Mock
     private lateinit var verseAnnotationViewModel: TestVerseAnnotationViewModel

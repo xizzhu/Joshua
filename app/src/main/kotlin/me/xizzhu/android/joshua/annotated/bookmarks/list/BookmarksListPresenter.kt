@@ -31,7 +31,7 @@ class BookmarksListPresenter(
         navigator: Navigator, annotatedVersesViewModel: BaseAnnotatedVersesViewModel<Bookmark>,
         bookmarksActivity: BookmarksActivity, coroutineScope: CoroutineScope = bookmarksActivity.lifecycleScope
 ) : BaseAnnotatedVersesPresenter<Bookmark, BookmarksActivity>(
-        navigator, R.string.text_no_bookmark, annotatedVersesViewModel, bookmarksActivity, coroutineScope
+        navigator, R.string.text_no_bookmarks, annotatedVersesViewModel, bookmarksActivity, coroutineScope
 ) {
     override fun Bookmark.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem =
             BookmarkItem(verseIndex, bookName, bookShortName, verseText, sortOrder, ::openVerse)
