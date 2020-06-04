@@ -109,8 +109,7 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideNoteRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Note> =
-            VerseAnnotationRepository()
+    fun provideNoteRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Note> = NotesRepository
 
     @Provides
     @Singleton

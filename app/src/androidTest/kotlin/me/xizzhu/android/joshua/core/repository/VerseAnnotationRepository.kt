@@ -60,3 +60,5 @@ open class VerseAnnotationRepository<T : VerseAnnotation> {
 val BookmarksRepository: VerseAnnotationRepository<Bookmark> = VerseAnnotationRepository()
 
 val HighlightsRepository: VerseAnnotationRepository<Highlight> = VerseAnnotationRepository()
+
+val NotesRepository: VerseAnnotationRepository<Note> = VerseAnnotationRepository()
