@@ -24,6 +24,7 @@ import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.core.repository.BookmarksRepository
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -46,6 +47,7 @@ open class EspressoTestRule<T : Activity>(activityClass: Class<T>,
 
     private fun reset() {
         BibleReadingManager.reset()
+        BookmarksRepository.reset()
         ReadingProgressManager.reset()
         SettingsManager.reset()
         TranslationManager.reset()

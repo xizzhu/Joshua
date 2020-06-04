@@ -32,6 +32,9 @@ import org.hamcrest.Matcher
 fun isDisplayed(matcher: Matcher<View>, text: String): ViewInteraction =
         onView(matcher).check(matches(withText(text))).check(matches(isDisplayed()))
 
+fun isDisplayed(matcher: Matcher<View>, @StringRes textId: Int): ViewInteraction =
+        onView(matcher).check(matches(withText(textId))).check(matches(isDisplayed()))
+
 fun isDisplayed(text: String): ViewInteraction =
         viewWithText(text).check(matches(isDisplayed()))
 

@@ -25,7 +25,11 @@ abstract class VerseAnnotation(open val verseIndex: VerseIndex, open val timesta
     open fun isValid(): Boolean = verseIndex.isValid() && timestamp > 0L
 }
 
-data class Bookmark(override val verseIndex: VerseIndex, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp)
+data class Bookmark(override val verseIndex: VerseIndex, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp) {
+    companion object {
+        val INVALID: Bookmark = Bookmark(VerseIndex.INVALID, 0L)
+    }
+}
 
 data class Highlight(override val verseIndex: VerseIndex, @ColorInt val color: Int, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp) {
     companion object {

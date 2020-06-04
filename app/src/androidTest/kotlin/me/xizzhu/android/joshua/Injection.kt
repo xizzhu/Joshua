@@ -20,6 +20,10 @@ import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.core.repository.*
+import me.xizzhu.android.joshua.core.repository.local.android.*
+import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.remote.android.HttpStrongNumberService
+import me.xizzhu.android.joshua.core.repository.remote.android.HttpTranslationService
 import javax.inject.Scope
 import javax.inject.Singleton
 
@@ -82,4 +86,51 @@ class AppModule(private val app: App) {
         @Singleton
         fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager = TranslationManager
     }
+}
+
+@Module
+object RepositoryModule {
+    @Provides
+    @Singleton
+    fun provideAndroidDatabase(app: App): AndroidDatabase = AndroidDatabase(app)
+
+    @Provides
+    @Singleton
+    fun provideBibleReadingRepository(androidDatabase: AndroidDatabase): BibleReadingRepository =
+            BibleReadingRepository(AndroidReadingStorage(androidDatabase))
+
+    @Provides
+    @Singleton
+    fun provideBookmarkRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Bookmark> =
+            BookmarksRepository
+
+    @Provides
+    @Singleton
+    fun provideHighlightRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Highlight> =
+            VerseAnnotationRepository()
+
+    @Provides
+    @Singleton
+    fun provideNoteRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Note> =
+            VerseAnnotationRepository()
+
+    @Provides
+    @Singleton
+    fun provideReadingProgressRepository(androidDatabase: AndroidDatabase): ReadingProgressRepository =
+            ReadingProgressRepository(AndroidReadingProgressStorage(androidDatabase))
+
+    @Provides
+    @Singleton
+    fun provideSettingsRepository(androidDatabase: AndroidDatabase): SettingsRepository =
+            SettingsRepository(AndroidSettingsStorage(androidDatabase))
+
+    @Provides
+    @Singleton
+    fun provideStrongNumberRepository(androidDatabase: AndroidDatabase): StrongNumberRepository =
+            StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase), HttpStrongNumberService())
+
+    @Provides
+    @Singleton
+    fun provideTranslationRepository(androidDatabase: AndroidDatabase): TranslationRepository =
+            TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService())
 }
