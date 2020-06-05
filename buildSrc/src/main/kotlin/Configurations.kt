@@ -86,7 +86,7 @@ object Versions {
         }
     }
 
-    const val dagger = "2.27"
+    const val dagger = "2.28"
 
     const val ask = "0.5.2"
 
