@@ -51,7 +51,10 @@ class TranslationListPresenter(
     private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_NAME)
 
     private var downloadingJob: Job? = null
-    private var downloadTranslationDialog: ProgressDialog? = null
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var downloadTranslationDialog: ProgressDialog? = null
+
     private var removingJob: Job? = null
     private var removeTranslationDialog: AlertDialog? = null
 
@@ -90,7 +93,7 @@ class TranslationListPresenter(
                         translationListView.setItems(translationList.toItems())
                         translationListView.fadeIn()
                     }
-                }.catch { e ->
+                }.catch {
                     viewHolder.swipeRefreshLayout.isRefreshing = false
                     activity.dialog(false, R.string.dialog_load_translation_list_error,
                             DialogInterface.OnClickListener { _, _ -> loadTranslationList(forceRefresh) },

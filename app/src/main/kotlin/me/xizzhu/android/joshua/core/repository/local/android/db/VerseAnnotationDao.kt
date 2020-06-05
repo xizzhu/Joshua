@@ -108,4 +108,9 @@ abstract class VerseAnnotationDao<T : VerseAnnotation>(sqliteHelper: SQLiteOpenH
     fun remove(verseIndex: VerseIndex) {
         db.delete(tableName) { eq(verseIndex) }
     }
+
+    @WorkerThread
+    fun removeAll() {
+        db.deleteAll(tableName)
+    }
 }

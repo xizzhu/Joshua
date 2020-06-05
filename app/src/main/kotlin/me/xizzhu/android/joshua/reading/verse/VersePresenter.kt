@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.content.DialogInterface
-import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.UiThread

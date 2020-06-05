@@ -23,7 +23,8 @@ data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fon
                     val simpleReadingModeOn: Boolean, val hideSearchButton: Boolean,
                     val consolidateVersesForSharing: Boolean) {
     companion object {
-        val DEFAULT = Settings(true, false, 2, false, false, false)
+        val DEFAULT = Settings(keepScreenOn = true, nightModeOn = false, fontSizeScale = 2,
+                simpleReadingModeOn = false, hideSearchButton = false, consolidateVersesForSharing = false)
     }
 }
 

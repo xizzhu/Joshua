@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.reading.detail
 
 import me.xizzhu.android.joshua.core.Highlight
-import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 
 data class VerseDetail(val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,

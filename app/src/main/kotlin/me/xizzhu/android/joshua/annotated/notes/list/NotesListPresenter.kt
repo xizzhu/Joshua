@@ -33,7 +33,7 @@ class NotesListPresenter(
         navigator: Navigator, annotatedVersesViewModel: BaseAnnotatedVersesViewModel<Note>,
         notesActivity: NotesActivity, coroutineScope: CoroutineScope = notesActivity.lifecycleScope
 ) : BaseAnnotatedVersesPresenter<Note, NotesActivity>(
-        navigator, R.string.text_no_note, annotatedVersesViewModel, notesActivity, coroutineScope
+        navigator, R.string.text_no_notes, annotatedVersesViewModel, notesActivity, coroutineScope
 ) {
     override fun Note.toBaseItem(bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int): BaseItem =
             NoteItem(verseIndex, bookShortName, verseText, note, ::openVerse)
