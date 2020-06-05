@@ -8,7 +8,7 @@ CHANGELOG
   - Gradle to 6.5
   - Android Gradle plugin to 4.0.0
   - AndroidX Core to 1.3.0
-  - Firebase Analytics to 17.4.2, Crashlytics Gradle plugin to 2.1.1
+  - Firebase Analytics to 17.4.3, Crashlytics Gradle plugin to 2.1.1, Crashlytics to 17.0.1
 
 #### v0.15.1 (2020-05-24)
 - Bug fixes:
