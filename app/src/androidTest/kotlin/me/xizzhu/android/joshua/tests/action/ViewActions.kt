@@ -42,3 +42,5 @@ fun clickText(@StringRes textId: Int): ViewInteraction = viewWithText(textId).pe
 fun longClickText(text: String): ViewInteraction = viewWithText(text).perform(longClick())
 
 fun typeText(@IdRes viewId: Int, text: String): ViewInteraction = onView(viewId).perform(typeText(text))
+
+fun swipeDown(@IdRes viewId: Int): ViewInteraction = onView(viewId).perform(swipeDown())

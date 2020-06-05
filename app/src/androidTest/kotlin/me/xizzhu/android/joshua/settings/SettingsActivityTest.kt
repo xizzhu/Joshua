@@ -36,8 +36,8 @@ class SettingsActivityTest {
     @Test
     fun testSettings() {
         val robot = SettingsActivityRobot(activityRule.activity)
-                .selectFontSize(3)
-        var expectedSettings = Settings.DEFAULT.copy(fontSizeScale = 4)
+                .selectFontSize(0) // make font small to make tests less likely to fail on small devices
+        var expectedSettings = Settings.DEFAULT.copy(fontSizeScale = 1)
         assertEquals(expectedSettings, SettingsManager.settings.value)
 
         robot.toggleKeepScreenOn()

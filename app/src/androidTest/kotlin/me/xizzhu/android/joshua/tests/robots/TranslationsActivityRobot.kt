@@ -16,19 +16,14 @@
 
 package me.xizzhu.android.joshua.tests.robots
 
-import androidx.test.espresso.action.ViewActions.swipeDown
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.tests.action.clickDialogNegativeButton
-import me.xizzhu.android.joshua.tests.action.clickDialogPositiveButton
-import me.xizzhu.android.joshua.tests.action.clickText
-import me.xizzhu.android.joshua.tests.action.longClickText
+import me.xizzhu.android.joshua.tests.action.*
 import me.xizzhu.android.joshua.tests.assertions.doesNotExist
 import me.xizzhu.android.joshua.tests.assertions.isDialogDisplayed
 import me.xizzhu.android.joshua.tests.assertions.isDisplayed
 import me.xizzhu.android.joshua.tests.assertions.isTextDisplayedBelow
-import me.xizzhu.android.joshua.tests.matchers.onView
 import me.xizzhu.android.joshua.tests.waitUntilDismissed
 import me.xizzhu.android.joshua.translations.TranslationsActivity
 import java.util.*
@@ -36,7 +31,7 @@ import java.util.*
 class TranslationsActivityRobot(activity: TranslationsActivity)
     : BaseRobot<TranslationsActivity, TranslationsActivityRobot>(activity) {
     fun refresh(): TranslationsActivityRobot {
-        onView(R.id.translation_list).perform(swipeDown())
+        swipeDown(R.id.translation_list)
         return self()
     }
 
