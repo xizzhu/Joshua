@@ -4,6 +4,8 @@ CHANGELOG
 #### Next Release
 - New features:
   - Allowed consolidating verses for sharing (#160)
+- Bug fixes:
+  - Fixed crashes when verses are loaded while user is scrolling the pages
 - Updated dependencies:
   - Gradle to 6.5
   - Android Gradle plugin to 4.0.0

@@ -47,6 +47,8 @@ class VersePagerAdapter(context: Context, private val onChapterRequested: (Int, 
         }
     }
 
+    private var attachedRecyclerView: RecyclerView? = null
+
     private var currentVerseIndex = VerseIndex.INVALID
     private var currentTranslation = ""
     private var parallelTranslations = emptyList<String>()
@@ -54,7 +56,7 @@ class VersePagerAdapter(context: Context, private val onChapterRequested: (Int, 
     var settings: Settings? = null
         set(value) {
             field = value
-            notifyDataSetChanged()
+            notifyDataSetChangedSafely()
         }
 
     fun setCurrent(newVerseIndex: VerseIndex, newTranslation: String, newParallelTranslations: List<String>) {
@@ -67,11 +69,33 @@ class VersePagerAdapter(context: Context, private val onChapterRequested: (Int, 
         currentTranslation = newTranslation
         parallelTranslations = newParallelTranslations
 
-        if (shouldNotifyDataSetChanged) notifyDataSetChanged()
+        if (shouldNotifyDataSetChanged) notifyDataSetChangedSafely()
+    }
+
+    private fun notifyDataSetChangedSafely() {
+        // RecyclerView throws IllegalStateException if it is computing layout or scrolling when notifying
+        // item / data changes. This is a work-around for this issue.
+        // See RecyclerView.assertNotInLayoutOrScroll() for details.
+        if (attachedRecyclerView?.isComputingLayout == true) {
+            attachedRecyclerView?.post { notifyDataSetChanged() }
+        } else {
+            notifyDataSetChanged()
+        }
     }
 
     fun setVerses(bookIndex: Int, chapterIndex: Int, verses: List<BaseItem>) {
-        notifyItemChanged(indexToPagePosition(bookIndex, chapterIndex), Verses(verses, currentVerseIndex))
+        notifyItemChangedSafely(indexToPagePosition(bookIndex, chapterIndex), Verses(verses, currentVerseIndex))
+    }
+
+    private fun notifyItemChangedSafely(position: Int, payload: Any) {
+        // RecyclerView throws IllegalStateException if it is computing layout or scrolling when notifying
+        // item / data changes. This is a work-around for this issue.
+        // See RecyclerView.assertNotInLayoutOrScroll() for details.
+        if (attachedRecyclerView?.isComputingLayout == true) {
+            attachedRecyclerView?.post { notifyItemChanged(position, payload) }
+        } else {
+            notifyItemChanged(position, payload)
+        }
     }
 
     fun selectVerse(verseIndex: VerseIndex) {
@@ -83,14 +107,16 @@ class VersePagerAdapter(context: Context, private val onChapterRequested: (Int, 
     }
 
     fun notifyVerseUpdate(verseUpdate: VerseUpdate) {
-        notifyItemChanged(verseUpdate.verseIndex.toPagePosition(), verseUpdate)
+        notifyItemChangedSafely(verseUpdate.verseIndex.toPagePosition(), verseUpdate)
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        attachedRecyclerView = recyclerView
         (recyclerView.parent as ViewPager2).registerOnPageChangeCallback(pageChangeCallback)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        attachedRecyclerView = null
         (recyclerView.parent as ViewPager2).unregisterOnPageChangeCallback(pageChangeCallback)
     }
 
