@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.16.0 (2020-06-10)
 - New features:
   - Allowed consolidating verses for sharing (#160)
 - Bug fixes:
