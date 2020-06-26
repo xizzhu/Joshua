@@ -62,10 +62,10 @@ object Versions {
         object View {
             const val constraintLayout = "1.1.3"
             const val coordinatorLayout = "1.1.0"
-            const val drawerLayout = "1.0.0"
+            const val drawerLayout = "1.1.0"
             const val material = "1.1.0"
             const val recyclerView = "1.1.0"
-            const val swipeRefreshLayout = "1.0.0"
+            const val swipeRefreshLayout = "1.1.0"
             const val viewPager2 = "1.0.0"
         }
 

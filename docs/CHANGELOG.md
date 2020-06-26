@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Updated dependencies:
+  - AndroidX DrawerLayout to 1.1.0, SwipeRefreshLayout to 1.1.0
+
 #### v0.16.0 (2020-06-10)
 - New features:
   - Allowed consolidating verses for sharing (#160)
