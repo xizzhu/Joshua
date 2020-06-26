@@ -62,10 +62,10 @@ object Versions {
         object View {
             const val constraintLayout = "1.1.3"
             const val coordinatorLayout = "1.1.0"
-            const val drawerLayout = "1.0.0"
+            const val drawerLayout = "1.1.0"
             const val material = "1.1.0"
             const val recyclerView = "1.1.0"
-            const val swipeRefreshLayout = "1.0.0"
+            const val swipeRefreshLayout = "1.1.0"
             const val viewPager2 = "1.0.0"
         }
 
@@ -81,12 +81,12 @@ object Versions {
         const val analytics = "17.4.3"
 
         object Crashlytics {
-            const val classpath = "2.1.1"
-            const val crashlytics = "17.0.1"
+            const val classpath = "2.2.0"
+            const val crashlytics = "17.1.0"
         }
     }
 
-    const val dagger = "2.28"
+    const val dagger = "2.28.1"
 
     const val ask = "0.5.2"
 
