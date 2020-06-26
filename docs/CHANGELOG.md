@@ -5,6 +5,7 @@ CHANGELOG
 - Updated dependencies:
   - AndroidX DrawerLayout to 1.1.0, SwipeRefreshLayout to 1.1.0
   - Firebase Crashlytics Gradle plugin to 2.2.0, Crashlytics to 17.1.0
+  - Dagger to 2.28.1
 
 #### v0.16.0 (2020-06-10)
 - New features:
