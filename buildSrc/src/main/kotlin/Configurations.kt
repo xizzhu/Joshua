@@ -81,8 +81,8 @@ object Versions {
         const val analytics = "17.4.3"
 
         object Crashlytics {
-            const val classpath = "2.1.1"
-            const val crashlytics = "17.0.1"
+            const val classpath = "2.2.0"
+            const val crashlytics = "17.1.0"
         }
     }
 
