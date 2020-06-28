@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.reading.detail
 
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
@@ -59,7 +59,7 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testDownloadStrongNumberWithException() = testDispatcher.runBlockingTest {
+    fun testDownloadStrongNumberWithException() = runBlocking {
         verseDetailPresenter.verseDetail = VerseDetail.INVALID
         `when`(readingViewModel.downloadStrongNumber()).thenReturn(flow { throw RuntimeException("random exception") })
 

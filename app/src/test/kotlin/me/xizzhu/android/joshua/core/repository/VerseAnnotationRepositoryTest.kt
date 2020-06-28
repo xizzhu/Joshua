@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.core.repository
 
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.repository.local.LocalVerseAnnotationStorage
@@ -34,21 +34,21 @@ class VerseAnnotationRepositoryTest : BaseUnitTest() {
     private lateinit var verseAnnotationRepository: VerseAnnotationRepository<Bookmark>
 
     @Test
-    fun testObserveInitialSortOrder() = testDispatcher.runBlockingTest {
+    fun testObserveInitialSortOrder() = runBlocking {
         `when`(localVerseAnnotationStorage.readSortOrder()).thenReturn(Constants.SORT_BY_BOOK)
         verseAnnotationRepository = VerseAnnotationRepository(localVerseAnnotationStorage, testDispatcher)
         assertEquals(Constants.SORT_BY_BOOK, verseAnnotationRepository.sortOrder().first())
     }
 
     @Test
-    fun testObserveInitialSortOrderWithException() = testDispatcher.runBlockingTest {
+    fun testObserveInitialSortOrderWithException() = runBlocking {
         `when`(localVerseAnnotationStorage.readSortOrder()).thenThrow(RuntimeException("Random exception"))
         verseAnnotationRepository = VerseAnnotationRepository(localVerseAnnotationStorage, testDispatcher)
         assertEquals(Constants.DEFAULT_SORT_ORDER, verseAnnotationRepository.sortOrder().first())
     }
 
     @Test
-    fun testSaveThenReadSortOrder() = testDispatcher.runBlockingTest {
+    fun testSaveThenReadSortOrder() = runBlocking {
         `when`(localVerseAnnotationStorage.readSortOrder()).thenReturn(Constants.DEFAULT_SORT_ORDER)
         verseAnnotationRepository = VerseAnnotationRepository(localVerseAnnotationStorage, testDispatcher)
         assertEquals(Constants.DEFAULT_SORT_ORDER, verseAnnotationRepository.sortOrder().first())

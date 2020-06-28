@@ -19,7 +19,7 @@ package me.xizzhu.android.joshua.reading.chapter
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.reading.ChapterListViewData
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -33,12 +33,16 @@ import kotlin.test.*
 class ChapterListPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var lifecycle: Lifecycle
+
     @Mock
     private lateinit var readingViewModel: ReadingViewModel
+
     @Mock
     private lateinit var readingActivity: ReadingActivity
+
     @Mock
     private lateinit var readingDrawerLayout: ReadingDrawerLayout
+
     @Mock
     private lateinit var chapterListView: ChapterListView
 
@@ -57,27 +61,31 @@ class ChapterListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveChapterList() = testDispatcher.runBlockingTest {
-        `when`(readingViewModel.chapterList()).thenReturn(flowOf(
-                ChapterListViewData(VerseIndex(0, 0, 0), MockContents.kjvBookNames)
-        ))
+    fun testObserveChapterList() {
+        runBlocking {
+            `when`(readingViewModel.chapterList()).thenReturn(flowOf(
+                    ChapterListViewData(VerseIndex(0, 0, 0), MockContents.kjvBookNames)
+            ))
 
-        chapterListPresenter.observeChapterList()
+            chapterListPresenter.observeChapterList()
 
-        with(inOrder(readingDrawerLayout, chapterListView)) {
-            // success
-            verify(chapterListView, times(1))
-                    .setData(VerseIndex(0, 0, 0), MockContents.kjvBookNames)
-            verify(readingDrawerLayout, times(1)).hide()
+            with(inOrder(readingDrawerLayout, chapterListView)) {
+                // success
+                verify(chapterListView, times(1))
+                        .setData(VerseIndex(0, 0, 0), MockContents.kjvBookNames)
+                verify(readingDrawerLayout, times(1)).hide()
+            }
         }
     }
 
     @Test
-    fun testObserveChapterListWithException() = testDispatcher.runBlockingTest {
-        `when`(readingViewModel.chapterList()).thenReturn(flow { throw RuntimeException() })
+    fun testObserveChapterListWithException() {
+        runBlocking {
+            `when`(readingViewModel.chapterList()).thenReturn(flow { throw RuntimeException() })
 
-        chapterListPresenter.observeChapterList()
-        verify(chapterListView, never()).setData(any(), any())
-        verify(readingDrawerLayout, never()).hide()
+            chapterListPresenter.observeChapterList()
+            verify(chapterListView, never()).setData(any(), any())
+            verify(readingDrawerLayout, never()).hide()
+        }
     }
 }

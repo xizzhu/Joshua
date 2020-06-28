@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.progress
 
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.ReadingProgressManager
@@ -48,7 +48,7 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testReadingProgress() = testDispatcher.runBlockingTest {
+    fun testReadingProgress() = runBlocking {
         val readingProgress = ReadingProgress(0, 0L, emptyList())
         val currentTranslation = MockContents.kjvShortName
         val bookNames = MockContents.kjvBookNames
@@ -63,7 +63,7 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testReadingProgressWithException() = testDispatcher.runBlockingTest {
+    fun testReadingProgressWithException() = runBlocking {
         val readingProgress = ReadingProgress(0, 0L, emptyList())
         val currentTranslation = MockContents.kjvShortName
         val exception = RuntimeException("Random exception")

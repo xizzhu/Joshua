@@ -19,7 +19,7 @@ package me.xizzhu.android.joshua.reading.search
 import androidx.lifecycle.Lifecycle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.reading.ReadingActivity
@@ -60,7 +60,7 @@ class SearchButtonPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveSettings() = testDispatcher.runBlockingTest {
+    fun testObserveSettings() = runBlocking {
         `when`(readingViewModel.settings()).thenReturn(flowOf(
                 Settings.DEFAULT,
                 Settings.DEFAULT.copy(hideSearchButton = true),

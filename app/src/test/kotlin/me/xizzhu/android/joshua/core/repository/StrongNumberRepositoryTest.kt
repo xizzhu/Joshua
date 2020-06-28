@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.core.repository
 
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberIndexes
@@ -47,7 +47,7 @@ class StrongNumberRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testDownload() = testDispatcher.runBlockingTest {
+    fun testDownload() = runBlocking {
         val versesDownloadProgress = Channel<Int>()
         val wordsDownloadProgress = Channel<Int>()
         `when`(remoteStrongNumberStorage.fetchIndexes(versesDownloadProgress)).thenReturn(RemoteStrongNumberIndexes(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex))

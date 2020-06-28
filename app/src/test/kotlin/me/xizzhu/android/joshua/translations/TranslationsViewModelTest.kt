@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.translations
 
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationManager
@@ -52,7 +52,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testTranslationListWithNoCurrentTranslation() = testDispatcher.runBlockingTest {
+    fun testTranslationListWithNoCurrentTranslation() = runBlocking {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(""))
         `when`(translationManager.availableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
         `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(emptyList()))
@@ -72,7 +72,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testTranslationList() = testDispatcher.runBlockingTest {
+    fun testTranslationList() = runBlocking {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(MockContents.kjvShortName))
         `when`(translationManager.availableTranslations()).thenReturn(flowOf(listOf(MockContents.cuvTranslationInfo)))
         `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(listOf(MockContents.kjvDownloadedTranslationInfo)))
@@ -92,7 +92,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadTranslationListWithException() = testDispatcher.runBlockingTest {
+    fun testLoadTranslationListWithException() = runBlocking {
         val exception = RuntimeException("random exception")
         `when`(translationManager.reload(true)).thenThrow(exception)
 
@@ -103,26 +103,30 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testDownloadTranslation() = testDispatcher.runBlockingTest {
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(""))
-        val translationToDownload = MockContents.kjvTranslationInfo
-        val progress = listOf(64, 89, 100)
-        `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(progress.asFlow())
+    fun testDownloadTranslation() {
+        runBlocking {
+            `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf(""))
+            val translationToDownload = MockContents.kjvTranslationInfo
+            val progress = listOf(64, 89, 100)
+            `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(progress.asFlow())
 
-        assertEquals(progress, translationsViewModel.downloadTranslation(translationToDownload).toList())
-        verify(translationManager, times(1)).downloadTranslation(translationToDownload)
+            assertEquals(progress, translationsViewModel.downloadTranslation(translationToDownload).toList())
+            verify(translationManager, times(1)).downloadTranslation(translationToDownload)
+        }
     }
 
     @Test
-    fun testDownloadTranslationWithException() = testDispatcher.runBlockingTest {
-        val translationToDownload = MockContents.kjvTranslationInfo
-        val exception = RuntimeException("random exception")
-        `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flow { throw exception })
+    fun testDownloadTranslationWithException() {
+        runBlocking {
+            val translationToDownload = MockContents.kjvTranslationInfo
+            val exception = RuntimeException("random exception")
+            `when`(translationManager.downloadTranslation(translationToDownload)).thenReturn(flow { throw exception })
 
-        translationsViewModel.downloadTranslation(translationToDownload)
-                .onCompletion { assertEquals(exception, it) }
-                .catch { }
-                .collect()
-        verify(translationManager, times(1)).downloadTranslation(translationToDownload)
+            translationsViewModel.downloadTranslation(translationToDownload)
+                    .onCompletion { assertEquals(exception, it) }
+                    .catch { }
+                    .collect()
+            verify(translationManager, times(1)).downloadTranslation(translationToDownload)
+        }
     }
 }

@@ -21,7 +21,7 @@ import android.widget.ProgressBar
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.ReadingProgress
@@ -69,7 +69,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveSettings() = testDispatcher.runBlockingTest {
+    fun testObserveSettings() = runBlocking {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
         `when`(readingProgressViewModel.settings()).thenReturn(flowOf(settings))
 
@@ -78,7 +78,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadReadingProgress() = testDispatcher.runBlockingTest {
+    fun testLoadReadingProgress() = runBlocking {
         `when`(readingProgressViewModel.readingProgress()).thenReturn(flowOf(
                 ReadingProgressViewData(
                         ReadingProgress(0, 0L, emptyList()),
@@ -101,7 +101,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadReadingProgressWithException() = testDispatcher.runBlockingTest {
+    fun testLoadReadingProgressWithException() = runBlocking {
         `when`(readingProgressViewModel.readingProgress()).thenReturn(flow { throw RuntimeException() })
 
         readingProgressPresenter.loadReadingProgress()
@@ -154,7 +154,7 @@ class ReadingProgressPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testOpenChapter() = testDispatcher.runBlockingTest {
+    fun testOpenChapter() = runBlocking {
         readingProgressPresenter.openChapter(8, 9)
         verify(readingProgressViewModel, times(1)).saveCurrentVerseIndex(VerseIndex(8, 9, 0))
         verify(navigator, times(1)).navigate(readingProgressActivity, Navigator.SCREEN_READING)

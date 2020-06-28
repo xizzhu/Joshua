@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -44,7 +44,7 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveFontSizeScale() = testDispatcher.runBlockingTest {
+    fun testSaveFontSizeScale() = runBlocking {
         settingsViewModel.saveFontSizeScale(Settings.DEFAULT.fontSizeScale)
         verify(settingsManager, never()).saveSettings(any())
 
@@ -54,7 +54,7 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveKeepScreenOn() = testDispatcher.runBlockingTest {
+    fun testSaveKeepScreenOn() = runBlocking {
         settingsViewModel.saveKeepScreenOn(Settings.DEFAULT.keepScreenOn)
         verify(settingsManager, never()).saveSettings(any())
 
@@ -64,7 +64,7 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveNightModeOn() = testDispatcher.runBlockingTest {
+    fun testSaveNightModeOn() = runBlocking {
         settingsViewModel.saveNightModeOn(Settings.DEFAULT.nightModeOn)
         verify(settingsManager, never()).saveSettings(any())
 
@@ -74,7 +74,7 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveSimpleReadingModeOn() = testDispatcher.runBlockingTest {
+    fun testSaveSimpleReadingModeOn() = runBlocking {
         settingsViewModel.saveSimpleReadingModeOn(Settings.DEFAULT.simpleReadingModeOn)
         verify(settingsManager, never()).saveSettings(any())
 
@@ -84,7 +84,7 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveHideSearchButton() = testDispatcher.runBlockingTest {
+    fun testSaveHideSearchButton() = runBlocking {
         settingsViewModel.saveHideSearchButton(Settings.DEFAULT.hideSearchButton)
         verify(settingsManager, never()).saveSettings(any())
 
@@ -94,7 +94,7 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveConsolidateVersesForSharing() = testDispatcher.runBlockingTest {
+    fun testSaveConsolidateVersesForSharing() = runBlocking {
         settingsViewModel.saveConsolidateVersesForSharing(Settings.DEFAULT.consolidateVersesForSharing)
         verify(settingsManager, never()).saveSettings(any())
 

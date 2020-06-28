@@ -21,7 +21,7 @@ import android.widget.ProgressBar
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -70,7 +70,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveSettings() = testDispatcher.runBlockingTest {
+    fun testObserveSettings() = runBlocking {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
         `when`(strongNumberListViewModel.settings()).thenReturn(flowOf(settings))
 
@@ -79,7 +79,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadStrongNumber() = testDispatcher.runBlockingTest {
+    fun testLoadStrongNumber() = runBlocking {
         strongNumberListPresenter = spy(strongNumberListPresenter)
         doReturn("").`when`(strongNumberListPresenter).formatStrongNumber(any())
         `when`(strongNumberListActivity.strongNumber()).thenReturn("")
@@ -101,7 +101,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadStrongNumberWithException() = testDispatcher.runBlockingTest {
+    fun testLoadStrongNumberWithException() = runBlocking {
         `when`(strongNumberListActivity.strongNumber()).thenReturn("")
         `when`(strongNumberListViewModel.strongNumber("")).thenReturn(flow { throw RuntimeException() })
 
@@ -130,7 +130,7 @@ class StrongNumberListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testOpenChapter() = testDispatcher.runBlockingTest {
+    fun testOpenChapter() = runBlocking {
         val verseIndex = VerseIndex(1, 2, 3)
         strongNumberListPresenter.openVerse(verseIndex)
         verify(strongNumberListViewModel, times(1)).saveCurrentVerseIndex(verseIndex)
