@@ -42,6 +42,8 @@ class BibleReadingManagerTest : BaseUnitTest() {
         `when`(bibleReadingRepository.parallelTranslations()).thenReturn(flowOf(emptyList()))
         val downloadedTranslationsChannel: BroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
         `when`(translationRepository.downloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
+
+        // we need to create a BibleReadingManager instance to let TranslationRepository load downloaded translations
         val bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, testDispatcher)
 
         // downloads a translation
