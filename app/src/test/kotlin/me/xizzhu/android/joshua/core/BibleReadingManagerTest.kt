@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.asFlow
 
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -37,11 +37,13 @@ class BibleReadingManagerTest : BaseUnitTest() {
     private lateinit var translationRepository: TranslationRepository
 
     @Test
-    fun testObserveDownloadedTranslations() = testDispatcher.runBlockingTest {
+    fun testObserveDownloadedTranslations() = runBlocking {
         `when`(bibleReadingRepository.currentTranslation()).thenReturn(flowOf(""))
         `when`(bibleReadingRepository.parallelTranslations()).thenReturn(flowOf(emptyList()))
         val downloadedTranslationsChannel: BroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
         `when`(translationRepository.downloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
+
+        // we need to create a BibleReadingManager instance to let TranslationRepository load downloaded translations
         val bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, testDispatcher)
 
         // downloads a translation

@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.annotated
 
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -45,7 +45,7 @@ class BaseAnnotatedVersesViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadingRequest() = testDispatcher.runBlockingTest {
+    fun testLoadingRequest() = runBlocking {
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName))
         `when`(verseAnnotationManager.sortOrder()).thenReturn(flowOf(Constants.SORT_BY_BOOK))
 
@@ -56,7 +56,7 @@ class BaseAnnotatedVersesViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testAnnotationVerses() = testDispatcher.runBlockingTest {
+    fun testAnnotationVerses() = runBlocking {
         val sortOrder = Constants.SORT_BY_BOOK
         val currentTranslation = MockContents.kjvShortName
         `when`(verseAnnotationManager.read(sortOrder)).thenReturn(listOf(
@@ -90,7 +90,7 @@ class BaseAnnotatedVersesViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testAnnotationVersesWithException() = testDispatcher.runBlockingTest {
+    fun testAnnotationVersesWithException() = runBlocking {
         val sortOrder = Constants.SORT_BY_BOOK
         val e = RuntimeException("random exception")
         `when`(verseAnnotationManager.read(sortOrder)).thenThrow(e)

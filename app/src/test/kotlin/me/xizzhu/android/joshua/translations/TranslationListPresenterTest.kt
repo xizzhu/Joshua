@@ -22,7 +22,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -68,7 +68,7 @@ class TranslationListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveSettings() = testDispatcher.runBlockingTest {
+    fun testObserveSettings() = runBlocking {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
         `when`(translationsViewModel.settings()).thenReturn(flowOf(settings))
         `when`(translationsViewModel.translationList(anyBoolean())).thenReturn(emptyFlow())
@@ -78,7 +78,7 @@ class TranslationListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadTranslationList() = testDispatcher.runBlockingTest {
+    fun testLoadTranslationList() = runBlocking {
         `when`(translationsViewModel.settings()).thenReturn(emptyFlow())
         `when`(translationsViewModel.translationList(false))
                 .thenReturn(flowOf(TranslationList("", emptyList(), emptyList())))
@@ -98,7 +98,7 @@ class TranslationListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadTranslationListWithException() = testDispatcher.runBlockingTest {
+    fun testLoadTranslationListWithException() = runBlocking {
         `when`(translationsViewModel.settings()).thenReturn(emptyFlow())
         `when`(translationsViewModel.translationList(false)).thenReturn(flow { throw RuntimeException() })
 
@@ -151,7 +151,7 @@ class TranslationListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testDownloadTranslationWithException() = testDispatcher.runBlockingTest {
+    fun testDownloadTranslationWithException() = runBlocking {
         translationListPresenter = spy(translationListPresenter)
         `when`(translationsViewModel.downloadTranslation(any())).thenReturn(flow { throw RuntimeException("random exception") })
 
@@ -185,7 +185,7 @@ class TranslationListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testRemoveTranslationWithException() = testDispatcher.runBlockingTest {
+    fun testRemoveTranslationWithException() = runBlocking {
         translationListPresenter = spy(translationListPresenter)
         `when`(translationsViewModel.removeTranslation(any())).thenReturn(flow { throw RuntimeException("random exception") })
 

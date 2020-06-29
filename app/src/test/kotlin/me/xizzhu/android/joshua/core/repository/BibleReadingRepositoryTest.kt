@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.core.repository
 
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -35,7 +35,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     private lateinit var localReadingStorage: LocalReadingStorage
 
     @Test
-    fun testObserveInitialCurrentVerseIndex() = testDispatcher.runBlockingTest {
+    fun testObserveInitialCurrentVerseIndex() = runBlocking {
         `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
         `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
@@ -45,7 +45,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveInitialCurrentVerseIndexWithException() = testDispatcher.runBlockingTest {
+    fun testObserveInitialCurrentVerseIndexWithException() = runBlocking {
         `when`(localReadingStorage.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
         `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
@@ -55,7 +55,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveCurrentVerseIndex() = testDispatcher.runBlockingTest {
+    fun testSaveCurrentVerseIndex() = runBlocking {
         `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
         `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
@@ -66,7 +66,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveInitialCurrentTranslation() = testDispatcher.runBlockingTest {
+    fun testObserveInitialCurrentTranslation() = runBlocking {
         `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
         `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
@@ -76,7 +76,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveInitialCurrentTranslationWithException() = testDispatcher.runBlockingTest {
+    fun testObserveInitialCurrentTranslationWithException() = runBlocking {
         `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
         `when`(localReadingStorage.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
@@ -86,7 +86,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveCurrentTranslation() = testDispatcher.runBlockingTest {
+    fun testSaveCurrentTranslation() = runBlocking {
         `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
         `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
@@ -97,7 +97,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveInitialParallelTranslations() = testDispatcher.runBlockingTest {
+    fun testObserveInitialParallelTranslations() = runBlocking {
         `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
         `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(listOf(MockContents.cuvShortName))
@@ -107,7 +107,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveInitialParallelTranslationsWithException() = testDispatcher.runBlockingTest {
+    fun testObserveInitialParallelTranslationsWithException() = runBlocking {
         `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
         `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
         `when`(localReadingStorage.readParallelTranslations()).thenThrow(RuntimeException("Random exception"))
@@ -117,7 +117,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testUpdateParallelTranslations() = testDispatcher.runBlockingTest {
+    fun testUpdateParallelTranslations() = runBlocking {
         `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
         `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
@@ -151,7 +151,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
 
 
     @Test
-    fun testClearParallelTranslations() = testDispatcher.runBlockingTest {
+    fun testClearParallelTranslations() = runBlocking {
         `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
         `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
@@ -166,7 +166,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testReadBookNames() = testDispatcher.runBlockingTest {
+    fun testReadBookNames() = runBlocking {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         // no cache yet, read from LocalReadingStorage
@@ -183,7 +183,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testReadBookShortNames() = testDispatcher.runBlockingTest {
+    fun testReadBookShortNames() = runBlocking {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         // no cache yet, read from LocalReadingStorage
@@ -200,7 +200,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testReadVerses() = testDispatcher.runBlockingTest {
+    fun testReadVerses() = runBlocking {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         // no cache yet, read from LocalReadingStorage

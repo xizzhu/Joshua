@@ -23,7 +23,7 @@ import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
@@ -84,7 +84,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveSettings() = testDispatcher.runBlockingTest {
+    fun testObserveSettings() = runBlocking {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
         `when`(verseAnnotationViewModel.settings()).thenReturn(flowOf(settings))
 
@@ -93,7 +93,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadAnnotatedVerses() = testDispatcher.runBlockingTest {
+    fun testLoadAnnotatedVerses() = runBlocking {
         val sortOrder = Constants.SORT_BY_DATE
         val currentTranslation = MockContents.kjvShortName
         val title = "random title"
@@ -118,7 +118,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testLoadAnnotatedVersesWithException() = testDispatcher.runBlockingTest {
+    fun testLoadAnnotatedVersesWithException() = runBlocking {
         val currentTranslation = MockContents.kjvShortName
         val sortOrder = Constants.SORT_BY_DATE
         `when`(verseAnnotationViewModel.loadingRequest()).thenReturn(flowOf(LoadingRequest(currentTranslation, sortOrder)))
@@ -240,7 +240,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testOpenVerse() = testDispatcher.runBlockingTest {
+    fun testOpenVerse() = runBlocking {
         val verseIndex = VerseIndex(1, 2, 3)
         baseAnnotatedVersesPresenter.openVerse(verseIndex)
         verify(verseAnnotationViewModel, times(1)).saveCurrentVerseIndex(verseIndex)

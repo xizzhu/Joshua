@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.search
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -44,7 +45,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSearchRequest() = testDispatcher.runBlockingTest {
+    fun testSearchRequest() = runBlockingTest {
         val requests = listOf(
                 SearchRequest("1", true),
                 SearchRequest("2", false),
@@ -59,7 +60,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSearch() = testDispatcher.runBlockingTest {
+    fun testSearch() = runBlocking {
         val currentTranslation = MockContents.kjvShortName
         val query = "query"
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
@@ -79,7 +80,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSearchWithException() = testDispatcher.runBlockingTest {
+    fun testSearchWithException() = runBlocking {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
 

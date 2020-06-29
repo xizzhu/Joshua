@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.strongnumber
 
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -45,7 +45,7 @@ class StrongNumberViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testStrongNumber() = testDispatcher.runBlockingTest {
+    fun testStrongNumber() = runBlocking {
         val currentTranslation = MockContents.kjvShortName
         val sn = "H7225"
         val strongNumber = StrongNumber(sn, MockContents.strongNumberWords.getValue(sn))
@@ -69,7 +69,7 @@ class StrongNumberViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun testStrongNumberWithException() = testDispatcher.runBlockingTest {
+    fun testStrongNumberWithException() = runBlocking {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
 

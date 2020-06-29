@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.core.repository
 
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.repository.local.LocalSettingsStorage
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -33,7 +33,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
     private lateinit var settingsRepository: SettingsRepository
 
     @Test
-    fun testObserveInitialSettings() = testDispatcher.runBlockingTest {
+    fun testObserveInitialSettings() = runBlocking {
         val settings = Settings(false, true, 3, false, false, true)
         `when`(localSettingsStorage.readSettings()).thenReturn(settings)
         settingsRepository = SettingsRepository(localSettingsStorage)
@@ -42,7 +42,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveInitialSettingsWithException() = testDispatcher.runBlockingTest {
+    fun testObserveInitialSettingsWithException() = runBlocking {
         `when`(localSettingsStorage.readSettings()).thenThrow(RuntimeException("Random exception"))
         settingsRepository = SettingsRepository(localSettingsStorage)
 
@@ -50,7 +50,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveThenReadSettings() = testDispatcher.runBlockingTest {
+    fun testSaveThenReadSettings() = runBlocking {
         `when`(localSettingsStorage.readSettings()).thenReturn(Settings.DEFAULT)
         settingsRepository = SettingsRepository(localSettingsStorage)
 

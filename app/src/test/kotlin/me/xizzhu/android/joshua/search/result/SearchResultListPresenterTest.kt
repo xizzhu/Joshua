@@ -22,7 +22,7 @@ import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -72,7 +72,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveSettings() = testDispatcher.runBlockingTest {
+    fun testObserveSettings() = runBlocking {
         val settings = Settings.DEFAULT.copy(keepScreenOn = false)
         `when`(searchViewModel.settings()).thenReturn(flowOf(settings))
 
@@ -81,7 +81,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveSearchRequest() = testDispatcher.runBlockingTest {
+    fun testObserveSearchRequest() = runBlocking {
         val query = "query"
         `when`(searchViewModel.searchRequest()).thenReturn(flowOf(SearchRequest(query, false)))
         `when`(searchViewModel.search(query))
@@ -103,7 +103,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveSearchRequestWithInstantSearch() = testDispatcher.runBlockingTest {
+    fun testObserveSearchRequestWithInstantSearch() = runBlocking {
         val query = "query"
         `when`(searchViewModel.searchRequest()).thenReturn(flowOf(SearchRequest(query, true)))
         `when`(searchViewModel.search(query))
@@ -121,7 +121,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveSearchRequestWithException() = testDispatcher.runBlockingTest {
+    fun testObserveSearchRequestWithException() = runBlocking {
         val query = "query"
         `when`(searchViewModel.searchRequest()).thenReturn(flowOf(SearchRequest(query, false)))
         `when`(searchViewModel.search(query)).thenReturn(flow { throw RuntimeException() })
@@ -160,7 +160,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSelectVerse() = testDispatcher.runBlockingTest {
+    fun testSelectVerse() = runBlocking {
         val verseIndex = VerseIndex(1, 2, 3)
         searchResultListPresenter.selectVerse(verseIndex)
         verify(searchViewModel, times(1)).saveCurrentVerseIndex(verseIndex)

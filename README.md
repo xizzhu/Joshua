@@ -1,4 +1,4 @@
-[![Build Status](https://img.shields.io/travis/xizzhu/Joshua.svg)](https://travis-ci.org/xizzhu/Joshua)
+[![Build Status](https://img.shields.io/travis/com/xizzhu/Joshua)](https://travis-ci.com/xizzhu/Joshua)
 [![Coverage Status](https://img.shields.io/coveralls/github/xizzhu/Joshua.svg)](https://coveralls.io/github/xizzhu/Joshua)
 [![API](https://img.shields.io/badge/API-21%2B-green.svg?style=flat)](https://developer.android.com/about/versions/android-5.0.html)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)

@@ -17,10 +17,9 @@
 package me.xizzhu.android.joshua.core.logger.android
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -41,7 +40,7 @@ class CrashlyticsLoggerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testTimeoutIsNotCoroutineCancellationException() = testDispatcher.runBlockingTest {
+    fun testTimeoutIsNotCoroutineCancellationException() = runBlocking {
         CrashlyticsLogger().run {
             try {
                 withTimeout(1L) { delay(1000L) }
@@ -53,7 +52,7 @@ class CrashlyticsLoggerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testIsCoroutineCancellationException() = testDispatcher.runBlockingTest {
+    fun testIsCoroutineCancellationException() = runBlocking {
         CrashlyticsLogger().run {
             CoroutineScope(Job()).run {
                 launch {
@@ -70,7 +69,7 @@ class CrashlyticsLoggerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testRootCauseIsCoroutineCancellationException() = testDispatcher.runBlockingTest {
+    fun testRootCauseIsCoroutineCancellationException() = runBlocking {
         CrashlyticsLogger().run {
             CoroutineScope(Job()).run {
                 launch {
@@ -91,36 +90,32 @@ class CrashlyticsLoggerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testIsChildCancelledException() = testDispatcher.runBlockingTest {
-        CrashlyticsLogger().run {
-            flowOf(1, 2, 3)
-                    .mapLatest {
+    fun testIsChildCancelledException() = runBlocking {
+        flowOf(1, 2, 3)
+                .mapLatest {
+                    try {
+                        delay(1000L)
+                        if (it != 3) fail()
+                    } catch (e: CancellationException) {
+                        with(CrashlyticsLogger()) { assertTrue(e.isCoroutineCancellationException()) }
+                    }
+                }.collect()
+    }
+
+    @Test
+    fun testRootCauseIsChildCancelledException() = runBlocking {
+        flowOf(1, 2, 3)
+                .mapLatest {
+                    try {
                         try {
                             delay(1000L)
                             if (it != 3) fail()
                         } catch (e: CancellationException) {
-                            assertTrue(e.isCoroutineCancellationException())
+                            throw RuntimeException("", e)
                         }
-                    }.launchIn(this@runBlockingTest)
-        }
-    }
-
-    @Test
-    fun testRootCauseIsChildCancelledException() = testDispatcher.runBlockingTest {
-        CrashlyticsLogger().run {
-            flowOf(1, 2, 3)
-                    .mapLatest {
-                        try {
-                            try {
-                                delay(1000L)
-                                if (it != 3) fail()
-                            } catch (e: CancellationException) {
-                                throw RuntimeException("", e)
-                            }
-                        } catch (e: RuntimeException) {
-                            assertTrue(e.isCoroutineCancellationException())
-                        }
-                    }.launchIn(this@runBlockingTest)
-        }
+                    } catch (e: RuntimeException) {
+                        with(CrashlyticsLogger()) { assertTrue(e.isCoroutineCancellationException()) }
+                    }
+                }.collect()
     }
 }
