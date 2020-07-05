@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next Release
 - Updated dependencies:
+  - Gradle to 6.5.1
   - AndroidX DrawerLayout to 1.1.0, SwipeRefreshLayout to 1.1.0
   - Firebase Crashlytics Gradle plugin to 2.2.0, Crashlytics to 17.1.0
   - Dagger to 2.28.1
