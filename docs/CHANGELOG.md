@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+- Bug fixes:
+  - Add workaround for "unable to select texts from notes" (#191)
 - Updated dependencies:
   - Gradle to 6.5.1
   - AndroidX DrawerLayout to 1.1.0, SwipeRefreshLayout to 1.1.0

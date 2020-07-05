@@ -40,7 +40,7 @@ class NotePage(inflater: LayoutInflater, container: ViewGroup, onNoteUpdated: (S
         }
     }
 
-    private val note: TextInputEditText = itemView.findViewById<TextInputEditText>(R.id.note)
+    val note: TextInputEditText = itemView.findViewById<TextInputEditText>(R.id.note)
             .apply { addTextChangedListener(textWatcher) }
 
     override fun bind(verseDetail: VerseDetail, settings: Settings) {

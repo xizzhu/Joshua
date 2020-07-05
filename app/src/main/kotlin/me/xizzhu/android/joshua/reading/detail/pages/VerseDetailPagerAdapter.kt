@@ -65,6 +65,14 @@ class VerseDetailPagerAdapter(context: Context) : RecyclerView.Adapter<VerseDeta
         holder.bind(verseDetail, settings!!)
     }
 
+    override fun onViewAttachedToWindow(holder: VerseDetailPage) {
+        // Workaround for https://issuetracker.google.com/issues/37095917
+        if (holder is NotePage) {
+            holder.note.isEnabled = false
+            holder.note.isEnabled = true
+        }
+    }
+
     fun pageTitle(position: Int): CharSequence = when (position) {
         PAGE_VERSES -> resources.getString(R.string.text_verse_comparison)
         PAGE_NOTE -> resources.getString(R.string.text_note)
