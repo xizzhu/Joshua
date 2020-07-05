@@ -4,6 +4,7 @@ CHANGELOG
 #### Next Release
 - Bug fixes:
   - Add workaround for "unable to select texts from notes" (#191)
+  - Should open note when reading activity is opened from note list
 - Updated dependencies:
   - Gradle to 6.5.1
   - AndroidX DrawerLayout to 1.1.0, SwipeRefreshLayout to 1.1.0

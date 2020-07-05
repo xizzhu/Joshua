@@ -82,11 +82,24 @@ class ReadingViewModel(
         private val bibleReadingManager: BibleReadingManager, private val readingProgressManager: ReadingProgressManager,
         private val translationManager: TranslationManager, private val bookmarkManager: VerseAnnotationManager<Bookmark>,
         private val highlightManager: VerseAnnotationManager<Highlight>, private val noteManager: VerseAnnotationManager<Note>,
-        private val strongNumberManager: StrongNumberManager, settingsManager: SettingsManager
+        private val strongNumberManager: StrongNumberManager, settingsManager: SettingsManager, openNoteWhenCreated: Boolean
 ) : BaseSettingsViewModel(settingsManager) {
     // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
     private val verseDetailRequest: BroadcastChannel<VerseDetailRequest> = ConflatedBroadcastChannel()
     private val verseUpdates: BroadcastChannel<VerseUpdate> = ConflatedBroadcastChannel()
+
+    init {
+        if (openNoteWhenCreated) {
+            viewModelScope.launch {
+                bibleReadingManager.currentVerseIndex().first().let { verseIndex ->
+                    if (verseIndex.isValid()) {
+                        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
+                        verseDetailRequest.offer(VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE))
+                    }
+                }
+            }
+        }
+    }
 
     fun downloadedTranslations(): Flow<List<TranslationInfo>> =
             translationManager.downloadedTranslations().distinctUntilChanged()
@@ -294,20 +307,8 @@ class ReadingViewModel(
         verseDetailRequest.offer(request)
     }
 
-    fun showNoteInVerseDetail() {
-        viewModelScope.launch {
-            bibleReadingManager.currentVerseIndex().first().let { verseIndex ->
-                if (verseIndex.isValid()) {
-                    // NOTE It's a hack here, because the only thing needed by verse interactor is to select the verse
-                    verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
-                    verseDetailRequest.offer(VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE))
-                }
-            }
-        }
-    }
-
     fun closeVerseDetail(verseIndex: VerseIndex) {
-        // NOTE It's a hack here, because the only thing needed by the other end (verse interactor) is to deselect the verse
+        // Note: As of now, this is only called by verse detail presenter, so no need to tell it to hide.
         verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED))
     }
 }

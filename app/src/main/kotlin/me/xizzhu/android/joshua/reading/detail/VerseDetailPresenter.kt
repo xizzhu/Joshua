@@ -62,7 +62,8 @@ class VerseDetailPresenter(
         viewHolder.verseDetailViewLayout.initialize(
                 onClicked = ::close, onBookmarkClicked = ::updateBookmark,
                 onHighlightClicked = ::updateHighlight, onNoteUpdated = ::updateNote,
-                onNoStrongNumberClicked = ::downloadStrongNumber
+                onNoStrongNumberClicked = ::downloadStrongNumber,
+                hide = !activity.openNoteWhenCreated()
         )
     }
 

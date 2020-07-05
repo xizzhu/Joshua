@@ -79,8 +79,6 @@ class ReadingActivity : BaseSettingsActivity() {
         searchButtonPresenter.bind(SearchButtonViewHolder(findViewById(R.id.search)))
         versePresenter.bind(VerseViewHolder(findViewById(R.id.verse_view_pager)))
         verseDetailPresenter.bind(VerseDetailViewHolder(findViewById(R.id.verse_detail_view)))
-
-        if (intent.getBooleanExtra(KEY_OPEN_NOTE, false)) readingViewModel.showNoteInVerseDetail()
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -110,4 +108,6 @@ class ReadingActivity : BaseSettingsActivity() {
     }
 
     override fun getBaseSettingsViewModel(): BaseSettingsViewModel = readingViewModel
+
+    fun openNoteWhenCreated() = intent.getBooleanExtra(KEY_OPEN_NOTE, false)
 }

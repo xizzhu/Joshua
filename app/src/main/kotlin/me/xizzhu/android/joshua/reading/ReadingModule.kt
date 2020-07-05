@@ -74,7 +74,8 @@ object ReadingModule {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(ReadingViewModel::class.java)) {
                     return ReadingViewModel(bibleReadingManager, readingProgressManager, translationManager,
-                            bookmarkManager, highlightManager, noteManager, strongNumberManager, settingsManager) as T
+                            bookmarkManager, highlightManager, noteManager, strongNumberManager,
+                            settingsManager, readingActivity.openNoteWhenCreated()) as T
                 }
 
                 throw IllegalArgumentException("Unsupported model class - $modelClass")
