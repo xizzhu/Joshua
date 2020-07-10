@@ -6,9 +6,11 @@ CHANGELOG
   - Add workaround for "unable to select texts from notes" (#191)
   - Should open note when reading activity is opened from note list
 - Updated dependencies:
+  - Android build tool to 30.0.1
+  - Compile SDK and target SDK to 30
   - Gradle to 6.5.1
   - AndroidX DrawerLayout to 1.1.0, SwipeRefreshLayout to 1.1.0
-  - Firebase Crashlytics Gradle plugin to 2.2.0, Crashlytics to 17.1.0
+  - Firebase Analytics to 17.4.4, Crashlytics Gradle plugin to 2.2.0, Crashlytics to 17.1.1
   - Dagger to 2.28.1
 
 #### v0.16.0 (2020-06-10)
