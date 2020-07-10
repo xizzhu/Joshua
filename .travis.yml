@@ -20,6 +20,10 @@ branches:
   only:
     - master
 
+before_install:
+  - yes | sdkmanager "platforms;android-30"
+  - yes | sdkmanager "build-tools;30.0.1"
+
 before_script:
   - android list targets
   - echo no | android create avd --force -n test -t android-25 --abi google_apis/arm64-v8a
