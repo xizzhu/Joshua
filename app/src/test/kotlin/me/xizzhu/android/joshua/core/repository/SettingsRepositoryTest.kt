@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.core.repository
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.repository.local.LocalSettingsStorage
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -34,7 +35,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     @Test
     fun testObserveInitialSettings() = runBlocking {
-        val settings = Settings(false, true, 3, false, false, true)
+        val settings = Settings(false, true, 3, false, false, true, Highlight.COLOR_PINK)
         `when`(localSettingsStorage.readSettings()).thenReturn(settings)
         settingsRepository = SettingsRepository(localSettingsStorage)
 
@@ -54,7 +55,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
         `when`(localSettingsStorage.readSettings()).thenReturn(Settings.DEFAULT)
         settingsRepository = SettingsRepository(localSettingsStorage)
 
-        val settings = Settings(false, true, 1, true, true, true)
+        val settings = Settings(false, true, 1, true, true, true, Highlight.COLOR_BLUE)
         settingsRepository.saveSettings(settings)
         assertEquals(settings, settingsRepository.settings().first())
     }
