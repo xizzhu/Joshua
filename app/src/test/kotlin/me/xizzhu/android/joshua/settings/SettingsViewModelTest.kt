@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.settings
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.BackupManager
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -30,6 +31,7 @@ import kotlin.test.Test
 class SettingsViewModelTest : BaseUnitTest() {
     @Mock
     private lateinit var settingsManager: SettingsManager
+
     @Mock
     private lateinit var backupManager: BackupManager
 
@@ -100,6 +102,16 @@ class SettingsViewModelTest : BaseUnitTest() {
 
         val updatedSettings = Settings.DEFAULT.copy(consolidateVersesForSharing = true)
         settingsViewModel.saveConsolidateVersesForSharing(updatedSettings.consolidateVersesForSharing)
+        verify(settingsManager, times(1)).saveSettings(updatedSettings)
+    }
+
+    @Test
+    fun testSaveDefaultHighlightColor() = runBlocking {
+        settingsViewModel.saveDefaultHighlightColor(Settings.DEFAULT.defaultHighlightColor)
+        verify(settingsManager, never()).saveSettings(any())
+
+        val updatedSettings = Settings.DEFAULT.copy(defaultHighlightColor = Highlight.COLOR_PURPLE)
+        settingsViewModel.saveDefaultHighlightColor(updatedSettings.defaultHighlightColor)
         verify(settingsManager, times(1)).saveSettings(updatedSettings)
     }
 }

@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.settings
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.tests.EspressoTestRule
@@ -58,6 +59,10 @@ class SettingsActivityTest {
 
         robot.toggleConsolidateVersesForSharing()
         expectedSettings = expectedSettings.copy(consolidateVersesForSharing = true)
+        assertEquals(expectedSettings, SettingsManager.settings.value)
+
+        robot.selectDefaultHighlightColor(Highlight.COLOR_PURPLE)
+        expectedSettings = expectedSettings.copy(defaultHighlightColor = Highlight.COLOR_PURPLE)
         assertEquals(expectedSettings, SettingsManager.settings.value)
     }
 }
