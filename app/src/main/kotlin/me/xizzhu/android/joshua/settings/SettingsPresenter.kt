@@ -48,7 +48,7 @@ data class SettingsViewHolder(val display: SettingSectionHeader, val fontSize: S
                               val keepScreenOn: SwitchCompat, val nightModeOn: SwitchCompat,
                               val reading: SettingSectionHeader, val simpleReadingMode: SwitchCompat,
                               val hideSearchButton: SwitchCompat, val consolidatedSharing: SwitchCompat,
-                              val backupRestore: SettingSectionHeader,
+                              val defaultHighlightColor: SettingButton, val backupRestore: SettingSectionHeader,
                               val backup: SettingButton, val restore: SettingButton, val about: SettingSectionHeader,
                               val rate: SettingButton, val version: SettingButton) : ViewHolder
 
@@ -336,6 +336,7 @@ class SettingsPresenter(
             simpleReadingMode.setTextColor(primaryTextColor)
             hideSearchButton.setTextColor(primaryTextColor)
             consolidatedSharing.setTextColor(primaryTextColor)
+            defaultHighlightColor.setTextColor(primaryTextColor, secondaryTextColor)
             backup.setTextColor(primaryTextColor, secondaryTextColor)
             restore.setTextColor(primaryTextColor, secondaryTextColor)
             rate.setTextColor(primaryTextColor, secondaryTextColor)
@@ -366,6 +367,7 @@ class SettingsPresenter(
             simpleReadingMode.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
             hideSearchButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
             consolidatedSharing.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+            defaultHighlightColor.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
             backupRestore.setTextSize(bodyTextSize.roundToInt())
             backup.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
             restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
