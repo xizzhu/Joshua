@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.reading.detail
+package me.xizzhu.android.joshua.reading.verse
 
 import androidx.lifecycle.Lifecycle
-import kotlinx.coroutines.flow.flow
+import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
-import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -33,12 +31,9 @@ import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-class VerseDetailPresenterTest : BaseUnitTest() {
+class VersePresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var lifecycle: Lifecycle
-
-    @Mock
-    private lateinit var navigator: Navigator
 
     @Mock
     private lateinit var readingViewModel: ReadingViewModel
@@ -47,10 +42,10 @@ class VerseDetailPresenterTest : BaseUnitTest() {
     private lateinit var readingActivity: ReadingActivity
 
     @Mock
-    private lateinit var verseDetailViewLayout: VerseDetailViewLayout
+    private lateinit var versePager: ViewPager2
 
-    private lateinit var verseDetailViewHolder: VerseDetailViewHolder
-    private lateinit var verseDetailPresenter: VerseDetailPresenter
+    private lateinit var verseViewHolder: VerseViewHolder
+    private lateinit var versePresenter: VersePresenter
 
     @BeforeTest
     override fun setup() {
@@ -58,29 +53,19 @@ class VerseDetailPresenterTest : BaseUnitTest() {
 
         `when`(readingActivity.lifecycle).thenReturn(lifecycle)
 
-        verseDetailViewHolder = VerseDetailViewHolder(verseDetailViewLayout)
-        verseDetailPresenter = VerseDetailPresenter(navigator, readingViewModel, readingActivity, testCoroutineScope)
-        verseDetailPresenter.bind(verseDetailViewHolder)
+        verseViewHolder = VerseViewHolder(versePager)
+        versePresenter = VersePresenter(readingViewModel, readingActivity, testCoroutineScope)
+        versePresenter.bind(verseViewHolder)
     }
 
     @Test
-    fun testUpdateHighlight() = testDispatcher.runBlockingTest {
+    fun testOnHighlightClicked() = testDispatcher.runBlockingTest {
         `when`(readingViewModel.settings()).thenReturn(flowOf(Settings.DEFAULT.copy(defaultHighlightColor = Highlight.COLOR_PURPLE)))
-        verseDetailPresenter.verseDetail = VerseDetail.INVALID.copy(verseIndex = VerseIndex(0, 0, 0))
 
-        verseDetailPresenter.updateHighlight()
+        versePresenter.onHighlightClicked(VerseIndex(0, 0, 0), Highlight.COLOR_NONE)
         verify(readingViewModel, times(1)).saveHighlight(VerseIndex(0, 0, 0), Highlight.COLOR_PURPLE)
 
-        verseDetailPresenter.updateHighlight()
+        versePresenter.onHighlightClicked(VerseIndex(0, 0, 0), Highlight.COLOR_PURPLE)
         verify(readingViewModel, times(1)).saveHighlight(VerseIndex(0, 0, 0), Highlight.COLOR_NONE)
-    }
-
-    @Test
-    fun testDownloadStrongNumberWithException() = runBlocking {
-        verseDetailPresenter.verseDetail = VerseDetail.INVALID
-        `when`(readingViewModel.downloadStrongNumber()).thenReturn(flow { throw RuntimeException("random exception") })
-
-        verseDetailPresenter.downloadStrongNumber()
-        verify(verseDetailViewLayout, never()).setVerseDetail(any())
     }
 }

@@ -93,6 +93,7 @@
     <string name="settings_title_simple_reading">Simple reading</string>
     <string name="settings_title_hide_search_button">Hide search button</string>
     <string name="settings_title_consolidated_sharing">Consolidate verses when sharing</string>
+    <string name="settings_title_default_highlight_color">Default highlight color</string>
     <string name="settings_header_backup_restore">Backup &amp; restore</string>
     <string name="settings_title_backup">Backup all my data</string>
     <string name="settings_title_restore">Restore</string>

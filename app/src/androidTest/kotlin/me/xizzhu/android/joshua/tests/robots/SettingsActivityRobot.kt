@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.tests.robots
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.settings.SettingsActivity
 import me.xizzhu.android.joshua.settings.SettingsPresenter
 import me.xizzhu.android.joshua.tests.action.click
@@ -53,6 +54,12 @@ class SettingsActivityRobot(activity: SettingsActivity) : BaseRobot<SettingsActi
 
     fun toggleConsolidateVersesForSharing(): SettingsActivityRobot {
         click(R.id.consolidated_sharing)
+        return self()
+    }
+
+    fun selectDefaultHighlightColor(@Highlight.Companion.AvailableColor color: Int): SettingsActivityRobot {
+        click(R.id.default_highlight_color)
+        viewWithText(activity.resources.getStringArray(R.array.text_colors)[Highlight.AVAILABLE_COLORS.indexOf(color)]).inRoot(isDialog()).perform(click())
         return self()
     }
 }

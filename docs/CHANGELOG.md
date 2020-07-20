@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+- New features:
+  - Add default color for highlight (#193)
 - Bug fixes:
   - Add workaround for "unable to select texts from notes" (#191)
   - Should open note when reading activity is opened from note list

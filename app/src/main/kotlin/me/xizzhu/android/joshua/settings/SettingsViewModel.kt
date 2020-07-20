@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.settings
 
 import kotlinx.coroutines.flow.first
 import me.xizzhu.android.joshua.core.BackupManager
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
@@ -72,6 +73,14 @@ class SettingsViewModel(settingsManager: SettingsManager,
         currentSettings().let { current ->
             if (consolidateVerses != current.consolidateVersesForSharing) {
                 settingsManager.saveSettings(current.copy(consolidateVersesForSharing = consolidateVerses))
+            }
+        }
+    }
+
+    suspend fun saveDefaultHighlightColor(@Highlight.Companion.AvailableColor color: Int) {
+        currentSettings().let { current ->
+            if (color != current.defaultHighlightColor) {
+                settingsManager.saveSettings(current.copy(defaultHighlightColor = color))
             }
         }
     }

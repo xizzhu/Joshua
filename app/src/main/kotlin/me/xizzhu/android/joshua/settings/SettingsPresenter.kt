@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.infra.arch.ViewHolder
 import me.xizzhu.android.joshua.infra.arch.ViewPresenter
@@ -42,13 +43,14 @@ import me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.logger.Log
 import java.io.IOException
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 data class SettingsViewHolder(val display: SettingSectionHeader, val fontSize: SettingButton,
                               val keepScreenOn: SwitchCompat, val nightModeOn: SwitchCompat,
                               val reading: SettingSectionHeader, val simpleReadingMode: SwitchCompat,
                               val hideSearchButton: SwitchCompat, val consolidatedSharing: SwitchCompat,
-                              val backupRestore: SettingSectionHeader,
+                              val defaultHighlightColor: SettingButton, val backupRestore: SettingSectionHeader,
                               val backup: SettingButton, val restore: SettingButton, val about: SettingSectionHeader,
                               val rate: SettingButton, val version: SettingButton) : ViewHolder
 
@@ -63,6 +65,8 @@ class SettingsPresenter(
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
     }
+
+    private val highlightColorTexts = activity.resources.getStringArray(R.array.text_colors)
 
     private var currentSettings: Settings? = null
 
@@ -99,6 +103,15 @@ class SettingsPresenter(
         viewHolder.hideSearchButton.setOnCheckedChangeListener { _, isChecked -> saveHideSearchButton(isChecked) }
 
         viewHolder.consolidatedSharing.setOnCheckedChangeListener { _, isChecked -> saveConsolidateVersesForSharing(isChecked) }
+
+        viewHolder.defaultHighlightColor.setOnClickListener {
+            activity.dialog(R.string.text_pick_highlight_color, highlightColorTexts,
+                    max(0, Highlight.AVAILABLE_COLORS.indexOf(currentSettings?.defaultHighlightColor ?: Highlight.COLOR_NONE)),
+                    DialogInterface.OnClickListener { dialog, which ->
+                        saveDefaultHighlightColor(Highlight.AVAILABLE_COLORS[which])
+                        dialog.dismiss()
+                    })
+        }
 
         viewHolder.backup.setOnClickListener {
             try {
@@ -214,6 +227,18 @@ class SettingsPresenter(
         }
     }
 
+    private fun saveDefaultHighlightColor(@Highlight.Companion.AvailableColor color: Int) {
+        coroutineScope.launch {
+            try {
+                viewModel.saveDefaultHighlightColor(color)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save default highlight color", e)
+                activity.dialog(true, R.string.dialog_update_settings_error,
+                        DialogInterface.OnClickListener { _, _ -> saveDefaultHighlightColor(color) })
+            }
+        }
+    }
+
     fun onCreateDocumentForBackup(resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) return
         data?.data?.let { backup(it) } ?: activity.toast(R.string.toast_unknown_error)
@@ -304,6 +329,7 @@ class SettingsPresenter(
             it.nightModeOn.isChecked = settings.nightModeOn
             it.simpleReadingMode.isChecked = settings.simpleReadingModeOn
             it.hideSearchButton.isChecked = settings.hideSearchButton
+            it.defaultHighlightColor.setDescription(highlightColorTexts[Highlight.AVAILABLE_COLORS.indexOf(settings.defaultHighlightColor)])
         }
 
         currentSettings = settings
@@ -336,6 +362,7 @@ class SettingsPresenter(
             simpleReadingMode.setTextColor(primaryTextColor)
             hideSearchButton.setTextColor(primaryTextColor)
             consolidatedSharing.setTextColor(primaryTextColor)
+            defaultHighlightColor.setTextColor(primaryTextColor, secondaryTextColor)
             backup.setTextColor(primaryTextColor, secondaryTextColor)
             restore.setTextColor(primaryTextColor, secondaryTextColor)
             rate.setTextColor(primaryTextColor, secondaryTextColor)
@@ -366,6 +393,7 @@ class SettingsPresenter(
             simpleReadingMode.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
             hideSearchButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
             consolidatedSharing.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSize)
+            defaultHighlightColor.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
             backupRestore.setTextSize(bodyTextSize.roundToInt())
             backup.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
             restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())

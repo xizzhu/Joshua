@@ -21,10 +21,12 @@ import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
 data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fontSizeScale: Int,
                     val simpleReadingModeOn: Boolean, val hideSearchButton: Boolean,
-                    val consolidateVersesForSharing: Boolean) {
+                    val consolidateVersesForSharing: Boolean,
+                    @Highlight.Companion.AvailableColor val defaultHighlightColor: Int) {
     companion object {
         val DEFAULT = Settings(keepScreenOn = true, nightModeOn = false, fontSizeScale = 2,
-                simpleReadingModeOn = false, hideSearchButton = false, consolidateVersesForSharing = false)
+                simpleReadingModeOn = false, hideSearchButton = false, consolidateVersesForSharing = false,
+                defaultHighlightColor = Highlight.COLOR_NONE)
     }
 }
 

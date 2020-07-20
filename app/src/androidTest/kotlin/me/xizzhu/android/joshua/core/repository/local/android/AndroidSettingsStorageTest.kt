@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.core.repository.local.android
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -48,9 +49,9 @@ class AndroidSettingsStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenRead() {
         runBlocking {
-            androidSettingsStorage.saveSettings(Settings(false, true, 2, false, false, false))
+            androidSettingsStorage.saveSettings(Settings(false, true, 2, false, false, false, Highlight.COLOR_PINK))
 
-            val expected = Settings(false, true, 2, false, false, false)
+            val expected = Settings(false, true, 2, false, false, false, Highlight.COLOR_PINK)
             val actual = androidSettingsStorage.readSettings()
             assertEquals(expected, actual)
         }
@@ -59,10 +60,10 @@ class AndroidSettingsStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveOverrideThenRead() {
         runBlocking {
-            androidSettingsStorage.saveSettings(Settings(true, false, 3, true, true, true))
-            androidSettingsStorage.saveSettings(Settings(false, true, 2, false, false, false))
+            androidSettingsStorage.saveSettings(Settings(true, false, 3, true, true, true, Highlight.COLOR_PINK))
+            androidSettingsStorage.saveSettings(Settings(false, true, 2, false, false, false, Highlight.COLOR_PURPLE))
 
-            val expected = Settings(false, true, 2, false, false, false)
+            val expected = Settings(false, true, 2, false, false, false, Highlight.COLOR_PURPLE)
             val actual = androidSettingsStorage.readSettings()
             assertEquals(expected, actual)
         }

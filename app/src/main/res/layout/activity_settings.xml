@@ -83,6 +83,12 @@
                 android:paddingEnd="@dimen/padding"
                 android:text="@string/settings_title_consolidated_sharing" />
 
+            <me.xizzhu.android.joshua.settings.widgets.SettingButton
+                android:id="@+id/default_highlight_color"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingButtonTitle="@string/settings_title_default_highlight_color" />
+
             <me.xizzhu.android.joshua.settings.widgets.SettingSectionHeader
                 android:id="@+id/backup_restore"
                 android:layout_width="match_parent"
