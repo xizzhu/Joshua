@@ -78,16 +78,28 @@ class VerseDetailPresenter(
         }.also { it.invokeOnCompletion { updateBookmarkJob = null } }
     }
 
-    private fun updateHighlight() {
-        activity.dialog(R.string.text_pick_highlight_color,
-                activity.resources.getStringArray(R.array.text_colors),
-                max(0, Highlight.AVAILABLE_COLORS.indexOf(verseDetail?.highlightColor
-                        ?: Highlight.COLOR_NONE)),
-                DialogInterface.OnClickListener { dialog, which ->
-                    updateHighlight(Highlight.AVAILABLE_COLORS[which])
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun updateHighlight() {
+        coroutineScope.launch {
+            when (val defaultHighlightColor = viewModel.settings().first().defaultHighlightColor) {
+                Highlight.COLOR_NONE -> {
+                    activity.dialog(R.string.text_pick_highlight_color,
+                            activity.resources.getStringArray(R.array.text_colors),
+                            max(0, Highlight.AVAILABLE_COLORS.indexOf(verseDetail?.highlightColor
+                                    ?: Highlight.COLOR_NONE)),
+                            DialogInterface.OnClickListener { dialog, which ->
+                                updateHighlight(Highlight.AVAILABLE_COLORS[which])
 
-                    dialog.dismiss()
+                                dialog.dismiss()
+                            })
+                }
+                else -> updateHighlight(if (verseDetail?.highlightColor == Highlight.COLOR_NONE) {
+                    defaultHighlightColor
+                } else {
+                    Highlight.COLOR_NONE
                 })
+            }
+        }
     }
 
     private fun updateHighlight(@Highlight.Companion.AvailableColor highlightColor: Int) {

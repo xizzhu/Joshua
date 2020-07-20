@@ -20,6 +20,7 @@ import android.content.DialogInterface
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ActionMode
 import androidx.lifecycle.*
 import androidx.viewpager2.widget.ViewPager2
@@ -183,15 +184,32 @@ class VersePresenter(
         }
     }
 
-    private fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int) {
-        activity.dialog(R.string.text_pick_highlight_color,
-                activity.resources.getStringArray(R.array.text_colors),
-                max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
-                DialogInterface.OnClickListener { dialog, which ->
-                    updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int) {
+        coroutineScope.launch {
+            when (val defaultHighlightColor = viewModel.settings().first().defaultHighlightColor) {
+                Highlight.COLOR_NONE -> {
+                    activity.dialog(R.string.text_pick_highlight_color,
+                            activity.resources.getStringArray(R.array.text_colors),
+                            max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
+                            DialogInterface.OnClickListener { dialog, which ->
+                                updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
 
-                    dialog.dismiss()
-                })
+                                dialog.dismiss()
+                            })
+                }
+                else -> {
+                    updateHighlight(
+                            verseIndex,
+                            if (currentHighlightColor == Highlight.COLOR_NONE) {
+                                defaultHighlightColor
+                            } else {
+                                Highlight.COLOR_NONE
+                            }
+                    )
+                }
+            }
+        }
     }
 
     private fun updateHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
