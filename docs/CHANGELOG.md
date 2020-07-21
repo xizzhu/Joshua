@@ -9,11 +9,14 @@ CHANGELOG
   - Should open note when reading activity is opened from note list
 - Updated dependencies:
   - Android build tool to 30.0.1
+  - Android Gradle plugin to 4.0.1
   - Compile SDK and target SDK to 30
   - Gradle to 6.5.1
+  - Kotlin Coroutines to 1.3.8
   - AndroidX DrawerLayout to 1.1.0, SwipeRefreshLayout to 1.1.0
-  - Firebase Analytics to 17.4.4, Crashlytics Gradle plugin to 2.2.0, Crashlytics to 17.1.1
-  - Dagger to 2.28.1
+  - Firebase Analytics to 17.4.4, Core to 1.3.1, Crashlytics Gradle plugin to 2.2.0, Crashlytics to 17.1.1
+  - Dagger to 2.28.3
+  - Mockito to 3.4.4
 
 #### v0.16.0 (2020-06-10)
 - New features:

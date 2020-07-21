@@ -37,7 +37,7 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "4.0.0"
+        const val classpath = "4.0.1"
         const val buildTools = "30.0.1"
         const val compile = 30
         const val min = 21
@@ -49,14 +49,14 @@ object Versions {
     object Kotlin {
         const val jvmTarget = "1.8"
         const val core = "1.3.72"
-        const val coroutines = "1.3.7"
+        const val coroutines = "1.3.8"
     }
 
     object AndroidX {
         const val activity = "1.1.0"
         const val annotation = "1.1.0"
         const val appCompat = "1.1.0"
-        const val core = "1.3.0"
+        const val core = "1.3.1"
         const val lifecycle = "2.2.0"
 
         object View {
@@ -86,7 +86,7 @@ object Versions {
         }
     }
 
-    const val dagger = "2.28.1"
+    const val dagger = "2.28.3"
 
     const val ask = "0.5.2"
 
@@ -94,7 +94,7 @@ object Versions {
 
     const val stetho = "1.5.1"
 
-    const val mockito = "3.3.3"
+    const val mockito = "3.4.4"
 }
 
 object Dependencies {

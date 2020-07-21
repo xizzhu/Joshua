@@ -32,11 +32,13 @@ abstract class BaseUnitTest {
     protected val testDispatcher = TestCoroutineDispatcher()
     protected val testCoroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + testDispatcher)
 
+    private lateinit var mockCloseable: AutoCloseable
+
     @CallSuper
     @BeforeTest
     open fun setup() {
         Dispatchers.setMain(testDispatcher)
-        MockitoAnnotations.initMocks(this)
+        mockCloseable = MockitoAnnotations.openMocks(this)
     }
 
     @CallSuper
@@ -44,6 +46,7 @@ abstract class BaseUnitTest {
     open fun tearDown() {
         Dispatchers.resetMain()
         testDispatcher.cleanupTestCoroutines()
+        mockCloseable.close()
     }
 
     protected fun <T> any(): T {
