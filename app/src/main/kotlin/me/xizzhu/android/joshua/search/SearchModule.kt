@@ -23,6 +23,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.scopes.ActivityScoped
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -35,16 +36,19 @@ object SearchModule {
     @Provides
     fun provideSearchActivity(activity: Activity): SearchActivity = activity as SearchActivity
 
+    @ActivityScoped
     @Provides
     fun provideSearchToolbarPresenter(searchViewModel: SearchViewModel,
                                       searchActivity: SearchActivity): SearchToolbarPresenter =
             SearchToolbarPresenter(searchViewModel, searchActivity)
 
+    @ActivityScoped
     @Provides
     fun provideSearchResultListPresenter(navigator: Navigator, searchViewModel: SearchViewModel,
                                          searchActivity: SearchActivity): SearchResultListPresenter =
             SearchResultListPresenter(navigator, searchViewModel, searchActivity)
 
+    @ActivityScoped
     @Provides
     fun provideSearchViewModel(searchActivity: SearchActivity,
                                bibleReadingManager: BibleReadingManager,

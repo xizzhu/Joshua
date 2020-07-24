@@ -23,6 +23,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.scopes.ActivityScoped
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
@@ -45,11 +46,13 @@ object HighlightsModule {
                                 highlightsActivity: HighlightsActivity): AnnotatedVersesToolbarPresenter<Highlight, HighlightsActivity> =
             AnnotatedVersesToolbarPresenter(R.string.title_highlights, highlightsViewModel, highlightsActivity)
 
+    @ActivityScoped
     @Provides
     fun provideHighlightsListPresenter(navigator: Navigator, highlightsViewModel: BaseAnnotatedVersesViewModel<Highlight>,
                                        highlightsActivity: HighlightsActivity): BaseAnnotatedVersesPresenter<Highlight, HighlightsActivity> =
             HighlightsListPresenter(navigator, highlightsViewModel, highlightsActivity)
 
+    @ActivityScoped
     @Provides
     fun provideHighlightsViewModel(highlightsActivity: HighlightsActivity,
                                    bibleReadingManager: BibleReadingManager,

@@ -23,6 +23,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.scopes.ActivityScoped
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
@@ -40,16 +41,19 @@ object NotesModule {
     @Provides
     fun provideNotesActivity(activity: Activity): NotesActivity = activity as NotesActivity
 
+    @ActivityScoped
     @Provides
     fun provideToolbarPresenter(notesViewModel: BaseAnnotatedVersesViewModel<Note>,
                                 notesActivity: NotesActivity): AnnotatedVersesToolbarPresenter<Note, NotesActivity> =
             AnnotatedVersesToolbarPresenter(R.string.title_notes, notesViewModel, notesActivity)
 
+    @ActivityScoped
     @Provides
     fun provideNotesListPresenter(navigator: Navigator, notesViewModel: BaseAnnotatedVersesViewModel<Note>,
                                   notesActivity: NotesActivity): BaseAnnotatedVersesPresenter<Note, NotesActivity> =
             NotesListPresenter(navigator, notesViewModel, notesActivity)
 
+    @ActivityScoped
     @Provides
     fun provideNotesViewModel(notesActivity: NotesActivity,
                               bibleReadingManager: BibleReadingManager,

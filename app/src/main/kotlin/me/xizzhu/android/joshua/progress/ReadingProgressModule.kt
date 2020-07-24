@@ -23,6 +23,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.scopes.ActivityScoped
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgressManager
@@ -34,12 +35,14 @@ object ReadingProgressModule {
     @Provides
     fun provideReadingProgressActivity(activity: Activity): ReadingProgressActivity = activity as ReadingProgressActivity
 
+    @ActivityScoped
     @Provides
     fun provideReadingProgressPresenter(navigator: Navigator,
                                         readingProgressViewModel: ReadingProgressViewModel,
                                         readingProgressActivity: ReadingProgressActivity): ReadingProgressPresenter =
             ReadingProgressPresenter(navigator, readingProgressViewModel, readingProgressActivity)
 
+    @ActivityScoped
     @Provides
     fun provideReadingProgressViewModel(readingProgressActivity: ReadingProgressActivity,
                                         bibleReadingManager: BibleReadingManager,

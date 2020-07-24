@@ -23,6 +23,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.scopes.ActivityScoped
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.SettingsManager
 
@@ -32,11 +33,13 @@ object SettingsModule {
     @Provides
     fun provideSettingsActivity(activity: Activity): SettingsActivity = activity as SettingsActivity
 
+    @ActivityScoped
     @Provides
     fun provideSettingsViewPresenter(settingsViewModel: SettingsViewModel,
                                      settingsActivity: SettingsActivity): SettingsPresenter =
             SettingsPresenter(settingsViewModel, settingsActivity)
 
+    @ActivityScoped
     @Provides
     fun provideSettingsViewModel(settingsActivity: SettingsActivity,
                                  settingsManager: SettingsManager,
