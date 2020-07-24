@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.16.1 (2020-07-23)
 - New features:
   - Add default color for highlight (#193)
 - Bug fixes:
