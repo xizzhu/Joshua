@@ -16,12 +16,11 @@
 
 package me.xizzhu.android.joshua
 
-import dagger.Component
 import dagger.Module
 import dagger.Provides
-import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
-import dagger.android.support.AndroidSupportInjectionModule
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ApplicationComponent
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksModule
 import me.xizzhu.android.joshua.core.*
@@ -55,6 +54,7 @@ import javax.inject.Singleton
 annotation class ActivityScope
 
 @Module
+@InstallIn(ApplicationComponent::class)
 class AppModule(private val app: App) {
     @Provides
     @Singleton
@@ -118,6 +118,7 @@ class AppModule(private val app: App) {
 }
 
 @Module
+@InstallIn(ApplicationComponent::class)
 object RepositoryModule {
     @Provides
     @Singleton
@@ -201,11 +202,4 @@ abstract class ActivityModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = [(TranslationsModule::class)])
     abstract fun contributeTranslationManagementActivity(): TranslationsActivity
-}
-
-@Singleton
-@Component(modules = [(AppModule::class), (RepositoryModule::class), (ActivityModule::class),
-    (AndroidInjectionModule::class), (AndroidSupportInjectionModule::class)])
-interface AppComponent {
-    fun inject(app: App)
 }
