@@ -18,6 +18,7 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
+    id("dagger.hilt.android.plugin")
     kotlin("android")
     kotlin("kapt")
 }
@@ -130,11 +131,8 @@ dependencies {
     implementation(Dependencies.Firebase.analytics)
     implementation(Dependencies.Firebase.Crashlytics.crashlytics)
 
-    implementation(Dependencies.Dagger.dagger)
-    implementation(Dependencies.Dagger.android)
-    implementation(Dependencies.Dagger.androidSupport)
-    kapt(Dependencies.Dagger.compiler)
-    kapt(Dependencies.Dagger.androidProcessor)
+    implementation(Dependencies.Hilt.android)
+    kapt(Dependencies.Hilt.compiler)
 
     implementation(Dependencies.Ask.ask)
 
