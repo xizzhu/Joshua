@@ -20,19 +20,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.ActivityScope
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.SettingsManager
 
 @Module
+@InstallIn(ActivityComponent::class)
 object SettingsModule {
-    @ActivityScope
     @Provides
     fun provideSettingsViewPresenter(settingsViewModel: SettingsViewModel,
                                      settingsActivity: SettingsActivity): SettingsPresenter =
             SettingsPresenter(settingsViewModel, settingsActivity)
 
-    @ActivityScope
     @Provides
     fun provideSettingsViewModel(settingsActivity: SettingsActivity,
                                  settingsManager: SettingsManager,

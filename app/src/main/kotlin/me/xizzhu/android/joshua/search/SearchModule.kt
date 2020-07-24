@@ -20,28 +20,27 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.search.result.SearchResultListPresenter
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
 
 @Module
+@InstallIn(ActivityComponent::class)
 object SearchModule {
-    @ActivityScope
     @Provides
     fun provideSearchToolbarPresenter(searchViewModel: SearchViewModel,
                                       searchActivity: SearchActivity): SearchToolbarPresenter =
             SearchToolbarPresenter(searchViewModel, searchActivity)
 
-    @ActivityScope
     @Provides
     fun provideSearchResultListPresenter(navigator: Navigator, searchViewModel: SearchViewModel,
                                          searchActivity: SearchActivity): SearchResultListPresenter =
             SearchResultListPresenter(navigator, searchViewModel, searchActivity)
 
-    @ActivityScope
     @Provides
     fun provideSearchViewModel(searchActivity: SearchActivity,
                                bibleReadingManager: BibleReadingManager,

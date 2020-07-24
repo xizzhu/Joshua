@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.annotated.notes
 
+import dagger.hilt.android.AndroidEntryPoint
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesActivity
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -28,4 +29,5 @@ class NotesViewModel(bibleReadingManager: BibleReadingManager,
                      settingsManager: SettingsManager)
     : BaseAnnotatedVersesViewModel<Note>(bibleReadingManager, notesManager, settingsManager)
 
+@AndroidEntryPoint
 class NotesActivity : BaseAnnotatedVersesActivity<Note, NotesActivity>()

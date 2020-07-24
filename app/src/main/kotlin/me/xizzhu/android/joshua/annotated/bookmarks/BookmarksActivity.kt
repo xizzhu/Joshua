@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.annotated.bookmarks
 
+import dagger.hilt.android.AndroidEntryPoint
 import me.xizzhu.android.joshua.annotated.*
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
@@ -27,4 +28,5 @@ class BookmarksViewModel(bibleReadingManager: BibleReadingManager,
                          settingsManager: SettingsManager)
     : BaseAnnotatedVersesViewModel<Bookmark>(bibleReadingManager, bookmarksManager, settingsManager)
 
+@AndroidEntryPoint
 class BookmarksActivity : BaseAnnotatedVersesActivity<Bookmark, BookmarksActivity>()

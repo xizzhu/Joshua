@@ -20,21 +20,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.ActivityScope
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.StrongNumberManager
 
 @Module
+@InstallIn(ActivityComponent::class)
 object StrongNumberListModule {
-    @ActivityScope
     @Provides
     fun provideStrongNumberListPresenter(navigator: Navigator, strongNumberListViewModel: StrongNumberListViewModel,
                                          strongNumberListActivity: StrongNumberListActivity): StrongNumberListPresenter =
             StrongNumberListPresenter(navigator, strongNumberListViewModel, strongNumberListActivity)
 
-    @ActivityScope
     @Provides
     fun provideStrongNumberViewModel(strongNumberListActivity: StrongNumberListActivity,
                                      bibleReadingManager: BibleReadingManager,

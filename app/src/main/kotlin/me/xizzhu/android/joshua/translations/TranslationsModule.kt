@@ -20,20 +20,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.core.SettingsManager
 
 @Module
+@InstallIn(ActivityComponent::class)
 object TranslationsModule {
-    @ActivityScope
     @Provides
     fun provideTranslationListPresenter(translationsViewModel: TranslationsViewModel,
                                         translationsActivity: TranslationsActivity): TranslationListPresenter =
             TranslationListPresenter(translationsViewModel, translationsActivity)
 
-    @ActivityScope
     @Provides
     fun provideTranslationsViewModel(translationsActivity: TranslationsActivity,
                                      bibleReadingManager: BibleReadingManager,

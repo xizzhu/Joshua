@@ -17,11 +17,13 @@
 package me.xizzhu.android.joshua.progress
 
 import android.os.Bundle
+import dagger.hilt.android.AndroidEntryPoint
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class ReadingProgressActivity : BaseSettingsActivity() {
     @Inject
     lateinit var readingProgressViewModel: ReadingProgressViewModel

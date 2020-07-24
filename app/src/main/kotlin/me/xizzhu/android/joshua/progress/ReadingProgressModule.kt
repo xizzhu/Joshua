@@ -20,22 +20,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.ActivityScope
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgressManager
 import me.xizzhu.android.joshua.core.SettingsManager
 
 @Module
+@InstallIn(ActivityComponent::class)
 object ReadingProgressModule {
-    @ActivityScope
     @Provides
     fun provideReadingProgressPresenter(navigator: Navigator,
                                         readingProgressViewModel: ReadingProgressViewModel,
                                         readingProgressActivity: ReadingProgressActivity): ReadingProgressPresenter =
             ReadingProgressPresenter(navigator, readingProgressViewModel, readingProgressActivity)
 
-    @ActivityScope
     @Provides
     fun provideReadingProgressViewModel(readingProgressActivity: ReadingProgressActivity,
                                         bibleReadingManager: BibleReadingManager,

@@ -20,9 +20,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
 import me.xizzhu.android.joshua.reading.verse.VersePresenter
-import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.reading.detail.VerseDetailPresenter
@@ -30,36 +31,31 @@ import me.xizzhu.android.joshua.reading.search.SearchButtonPresenter
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarPresenter
 
 @Module
+@InstallIn(ActivityComponent::class)
 object ReadingModule {
-    @ActivityScope
     @Provides
     fun provideReadingToolbarPresenter(navigator: Navigator, readingViewModel: ReadingViewModel,
                                        readingActivity: ReadingActivity): ReadingToolbarPresenter =
             ReadingToolbarPresenter(navigator, readingViewModel, readingActivity)
 
-    @ActivityScope
     @Provides
     fun provideChapterListPresenter(readingViewModel: ReadingViewModel, readingActivity: ReadingActivity): ChapterListPresenter =
             ChapterListPresenter(readingViewModel, readingActivity)
 
-    @ActivityScope
     @Provides
     fun provideSearchButtonPresenter(navigator: Navigator, readingViewModel: ReadingViewModel,
                                      readingActivity: ReadingActivity): SearchButtonPresenter =
             SearchButtonPresenter(navigator, readingViewModel, readingActivity)
 
-    @ActivityScope
     @Provides
     fun provideVersePresenter(readingViewModel: ReadingViewModel, readingActivity: ReadingActivity): VersePresenter =
             VersePresenter(readingViewModel, readingActivity)
 
-    @ActivityScope
     @Provides
     fun provideVerseDetailPresenter(navigator: Navigator, readingViewModel: ReadingViewModel,
                                     readingActivity: ReadingActivity): VerseDetailPresenter =
             VerseDetailPresenter(navigator, readingViewModel, readingActivity)
 
-    @ActivityScope
     @Provides
     fun provideReadingViewModel(readingActivity: ReadingActivity,
                                 bibleReadingManager: BibleReadingManager,

@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.search
 
 import android.os.Bundle
+import dagger.hilt.android.AndroidEntryPoint
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
@@ -26,6 +27,7 @@ import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarViewHolder
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class SearchActivity : BaseSettingsActivity() {
     @Inject
     lateinit var searchViewModel: SearchViewModel

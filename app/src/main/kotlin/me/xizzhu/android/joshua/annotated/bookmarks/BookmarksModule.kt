@@ -20,7 +20,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.ActivityScope
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
@@ -33,20 +34,18 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
 
 @Module
+@InstallIn(ActivityComponent::class)
 object BookmarksModule {
-    @ActivityScope
     @Provides
     fun provideToolbarPresenter(bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>,
                                 bookmarksActivity: BookmarksActivity): AnnotatedVersesToolbarPresenter<Bookmark, BookmarksActivity> =
             AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, bookmarksViewModel, bookmarksActivity)
 
-    @ActivityScope
     @Provides
     fun provideBookmarksListPresenter(navigator: Navigator, bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>,
                                       bookmarksActivity: BookmarksActivity): BaseAnnotatedVersesPresenter<Bookmark, BookmarksActivity> =
             BookmarksListPresenter(navigator, bookmarksViewModel, bookmarksActivity)
 
-    @ActivityScope
     @Provides
     fun provideBookmarksViewModel(bookmarksActivity: BookmarksActivity,
                                   bibleReadingManager: BibleReadingManager,

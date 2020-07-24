@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua
 
+import android.app.Application
 import dagger.Module
 import dagger.Provides
 import me.xizzhu.android.joshua.core.*
@@ -24,68 +25,61 @@ import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpStrongNumberService
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpTranslationService
-import javax.inject.Scope
 import javax.inject.Singleton
 
-@Scope
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ActivityScope
-
 @Module
-class AppModule(private val app: App) {
+object AppModule {
     @Provides
     @Singleton
-    fun provideApp(): App = app
+    fun provideApp(application: Application): App = application as App
 
-    companion object {
-        @Provides
-        @Singleton
-        fun provideNavigator(): Navigator = Navigator()
+    @Provides
+    @Singleton
+    fun provideNavigator(): Navigator = Navigator()
 
-        @Provides
-        @Singleton
-        fun provideBackupManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>,
-                                 highlightRepository: VerseAnnotationRepository<Highlight>,
-                                 noteRepository: VerseAnnotationRepository<Note>,
-                                 readingProgressRepository: ReadingProgressRepository): BackupManager = BackupManager
+    @Provides
+    @Singleton
+    fun provideBackupManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>,
+                             highlightRepository: VerseAnnotationRepository<Highlight>,
+                             noteRepository: VerseAnnotationRepository<Note>,
+                             readingProgressRepository: ReadingProgressRepository): BackupManager = BackupManager
 
-        @Provides
-        @Singleton
-        fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository,
-                                       translationRepository: TranslationRepository): BibleReadingManager = BibleReadingManager
+    @Provides
+    @Singleton
+    fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository,
+                                   translationRepository: TranslationRepository): BibleReadingManager = BibleReadingManager
 
-        @Provides
-        @Singleton
-        fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): VerseAnnotationManager<Bookmark> =
-                VerseAnnotationManager(bookmarkRepository)
+    @Provides
+    @Singleton
+    fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): VerseAnnotationManager<Bookmark> =
+            VerseAnnotationManager(bookmarkRepository)
 
-        @Provides
-        @Singleton
-        fun provideHighlightManager(highlightRepository: VerseAnnotationRepository<Highlight>): VerseAnnotationManager<Highlight> =
-                VerseAnnotationManager(highlightRepository)
+    @Provides
+    @Singleton
+    fun provideHighlightManager(highlightRepository: VerseAnnotationRepository<Highlight>): VerseAnnotationManager<Highlight> =
+            VerseAnnotationManager(highlightRepository)
 
-        @Provides
-        @Singleton
-        fun provideNoteManager(noteRepository: VerseAnnotationRepository<Note>): VerseAnnotationManager<Note> =
-                VerseAnnotationManager(noteRepository)
+    @Provides
+    @Singleton
+    fun provideNoteManager(noteRepository: VerseAnnotationRepository<Note>): VerseAnnotationManager<Note> =
+            VerseAnnotationManager(noteRepository)
 
-        @Provides
-        @Singleton
-        fun provideReadingProgressManager(bibleReadingRepository: BibleReadingRepository,
-                                          readingProgressRepository: ReadingProgressRepository): ReadingProgressManager = ReadingProgressManager
+    @Provides
+    @Singleton
+    fun provideReadingProgressManager(bibleReadingRepository: BibleReadingRepository,
+                                      readingProgressRepository: ReadingProgressRepository): ReadingProgressManager = ReadingProgressManager
 
-        @Provides
-        @Singleton
-        fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager = SettingsManager
+    @Provides
+    @Singleton
+    fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager = SettingsManager
 
-        @Provides
-        @Singleton
-        fun provideStrongNumberManager(strongNumberRepository: StrongNumberRepository): StrongNumberManager = StrongNumberManager
+    @Provides
+    @Singleton
+    fun provideStrongNumberManager(strongNumberRepository: StrongNumberRepository): StrongNumberManager = StrongNumberManager
 
-        @Provides
-        @Singleton
-        fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager = TranslationManager
-    }
+    @Provides
+    @Singleton
+    fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager = TranslationManager
 }
 
 @Module
