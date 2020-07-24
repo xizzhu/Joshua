@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.settings
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
@@ -28,6 +29,9 @@ import me.xizzhu.android.joshua.core.SettingsManager
 @Module
 @InstallIn(ActivityComponent::class)
 object SettingsModule {
+    @Provides
+    fun provideSettingsActivity(activity: Activity): SettingsActivity = activity as SettingsActivity
+
     @Provides
     fun provideSettingsViewPresenter(settingsViewModel: SettingsViewModel,
                                      settingsActivity: SettingsActivity): SettingsPresenter =

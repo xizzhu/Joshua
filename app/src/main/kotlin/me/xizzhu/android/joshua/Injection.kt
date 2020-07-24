@@ -16,29 +16,18 @@
 
 package me.xizzhu.android.joshua
 
-import android.app.Activity
 import android.app.Application
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.components.SingletonComponent
-import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.core.repository.*
 import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
-import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
-import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpStrongNumberService
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpTranslationService
 import me.xizzhu.android.joshua.core.serializer.android.BackupJsonSerializer
-import me.xizzhu.android.joshua.progress.ReadingProgressActivity
-import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.search.SearchActivity
-import me.xizzhu.android.joshua.settings.SettingsActivity
-import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
-import me.xizzhu.android.joshua.translations.TranslationsActivity
 import javax.inject.Singleton
 
 @Module
@@ -149,35 +138,4 @@ object RepositoryModule {
     @Singleton
     fun provideTranslationRepository(androidDatabase: AndroidDatabase): TranslationRepository =
             TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService())
-}
-
-@Module
-@InstallIn(ActivityComponent::class)
-object ActivityModule {
-    @Provides
-    fun provideBookmarksActivity(activity: Activity): BookmarksActivity = activity as BookmarksActivity
-
-    @Provides
-    fun provideHighlightsActivity(activity: Activity): HighlightsActivity = activity as HighlightsActivity
-
-    @Provides
-    fun provideNotesActivity(activity: Activity): NotesActivity = activity as NotesActivity
-
-    @Provides
-    fun provideReadingProgressActivity(activity: Activity): ReadingProgressActivity = activity as ReadingProgressActivity
-
-    @Provides
-    fun provideReadingActivity(activity: Activity): ReadingActivity = activity as ReadingActivity
-
-    @Provides
-    fun provideSearchActivity(activity: Activity): SearchActivity = activity as SearchActivity
-
-    @Provides
-    fun provideSettingsActivity(activity: Activity): SettingsActivity = activity as SettingsActivity
-
-    @Provides
-    fun provideStrongNumberListActivity(activity: Activity): StrongNumberListActivity = activity as StrongNumberListActivity
-
-    @Provides
-    fun provideTranslationsActivity(activity: Activity): TranslationsActivity = activity as TranslationsActivity
 }

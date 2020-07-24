@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
@@ -33,6 +34,9 @@ import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarPresenter
 @Module
 @InstallIn(ActivityComponent::class)
 object ReadingModule {
+    @Provides
+    fun provideReadingActivity(activity: Activity): ReadingActivity = activity as ReadingActivity
+
     @Provides
     fun provideReadingToolbarPresenter(navigator: Navigator, readingViewModel: ReadingViewModel,
                                        readingActivity: ReadingActivity): ReadingToolbarPresenter =

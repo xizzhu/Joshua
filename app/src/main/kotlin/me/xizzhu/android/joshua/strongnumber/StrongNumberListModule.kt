@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
@@ -30,6 +31,9 @@ import me.xizzhu.android.joshua.core.StrongNumberManager
 @Module
 @InstallIn(ActivityComponent::class)
 object StrongNumberListModule {
+    @Provides
+    fun provideStrongNumberListActivity(activity: Activity): StrongNumberListActivity = activity as StrongNumberListActivity
+
     @Provides
     fun provideStrongNumberListPresenter(navigator: Navigator, strongNumberListViewModel: StrongNumberListViewModel,
                                          strongNumberListActivity: StrongNumberListActivity): StrongNumberListPresenter =

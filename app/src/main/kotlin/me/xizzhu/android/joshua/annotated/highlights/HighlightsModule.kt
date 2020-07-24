@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.annotated.highlights
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
@@ -36,6 +37,9 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 @Module
 @InstallIn(ActivityComponent::class)
 object HighlightsModule {
+    @Provides
+    fun provideHighlightsActivity(activity: Activity): HighlightsActivity = activity as HighlightsActivity
+
     @Provides
     fun provideToolbarPresenter(highlightsViewModel: BaseAnnotatedVersesViewModel<Highlight>,
                                 highlightsActivity: HighlightsActivity): AnnotatedVersesToolbarPresenter<Highlight, HighlightsActivity> =

@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.translations
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
@@ -29,6 +30,9 @@ import me.xizzhu.android.joshua.core.SettingsManager
 @Module
 @InstallIn(ActivityComponent::class)
 object TranslationsModule {
+    @Provides
+    fun provideTranslationsActivity(activity: Activity): TranslationsActivity = activity as TranslationsActivity
+
     @Provides
     fun provideTranslationListPresenter(translationsViewModel: TranslationsViewModel,
                                         translationsActivity: TranslationsActivity): TranslationListPresenter =

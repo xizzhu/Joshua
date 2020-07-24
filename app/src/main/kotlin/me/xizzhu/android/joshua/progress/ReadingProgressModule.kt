@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.progress
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
@@ -30,6 +31,9 @@ import me.xizzhu.android.joshua.core.SettingsManager
 @Module
 @InstallIn(ActivityComponent::class)
 object ReadingProgressModule {
+    @Provides
+    fun provideReadingProgressActivity(activity: Activity): ReadingProgressActivity = activity as ReadingProgressActivity
+
     @Provides
     fun provideReadingProgressPresenter(navigator: Navigator,
                                         readingProgressViewModel: ReadingProgressViewModel,

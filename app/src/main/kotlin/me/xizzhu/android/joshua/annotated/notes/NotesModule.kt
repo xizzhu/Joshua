@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.annotated.notes
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
@@ -36,6 +37,9 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 @Module
 @InstallIn(ActivityComponent::class)
 object NotesModule {
+    @Provides
+    fun provideNotesActivity(activity: Activity): NotesActivity = activity as NotesActivity
+
     @Provides
     fun provideToolbarPresenter(notesViewModel: BaseAnnotatedVersesViewModel<Note>,
                                 notesActivity: NotesActivity): AnnotatedVersesToolbarPresenter<Note, NotesActivity> =

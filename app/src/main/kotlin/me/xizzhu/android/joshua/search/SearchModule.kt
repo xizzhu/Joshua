@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.search
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
@@ -31,6 +32,9 @@ import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
 @Module
 @InstallIn(ActivityComponent::class)
 object SearchModule {
+    @Provides
+    fun provideSearchActivity(activity: Activity): SearchActivity = activity as SearchActivity
+
     @Provides
     fun provideSearchToolbarPresenter(searchViewModel: SearchViewModel,
                                       searchActivity: SearchActivity): SearchToolbarPresenter =

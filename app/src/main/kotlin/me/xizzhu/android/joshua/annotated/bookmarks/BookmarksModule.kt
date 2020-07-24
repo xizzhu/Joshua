@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.annotated.bookmarks
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
@@ -36,6 +37,9 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 @Module
 @InstallIn(ActivityComponent::class)
 object BookmarksModule {
+    @Provides
+    fun provideBookmarksActivity(activity: Activity): BookmarksActivity = activity as BookmarksActivity
+
     @Provides
     fun provideToolbarPresenter(bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>,
                                 bookmarksActivity: BookmarksActivity): AnnotatedVersesToolbarPresenter<Bookmark, BookmarksActivity> =
