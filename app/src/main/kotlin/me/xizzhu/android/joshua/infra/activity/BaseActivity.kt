@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.infra.activity
 import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
-import dagger.android.AndroidInjection
 import me.xizzhu.android.logger.Log
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -27,7 +26,6 @@ abstract class BaseActivity : AppCompatActivity() {
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         Log.i(tag, "onCreate()")
     }
