@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.ActionBarDrawerToggle
+import dagger.hilt.android.AndroidEntryPoint
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
@@ -36,6 +37,7 @@ import me.xizzhu.android.joshua.reading.verse.VersePresenter
 import me.xizzhu.android.joshua.reading.verse.VerseViewHolder
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class ReadingActivity : BaseSettingsActivity() {
     companion object {
         private const val KEY_OPEN_NOTE = "me.xizzhu.android.joshua.KEY_OPEN_NOTE"

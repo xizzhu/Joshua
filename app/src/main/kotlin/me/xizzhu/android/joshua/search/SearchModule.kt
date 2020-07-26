@@ -16,32 +16,39 @@
 
 package me.xizzhu.android.joshua.search
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.scopes.ActivityScoped
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.search.result.SearchResultListPresenter
 import me.xizzhu.android.joshua.search.toolbar.SearchToolbarPresenter
 
 @Module
+@InstallIn(ActivityComponent::class)
 object SearchModule {
-    @ActivityScope
+    @Provides
+    fun provideSearchActivity(activity: Activity): SearchActivity = activity as SearchActivity
+
+    @ActivityScoped
     @Provides
     fun provideSearchToolbarPresenter(searchViewModel: SearchViewModel,
                                       searchActivity: SearchActivity): SearchToolbarPresenter =
             SearchToolbarPresenter(searchViewModel, searchActivity)
 
-    @ActivityScope
+    @ActivityScoped
     @Provides
     fun provideSearchResultListPresenter(navigator: Navigator, searchViewModel: SearchViewModel,
                                          searchActivity: SearchActivity): SearchResultListPresenter =
             SearchResultListPresenter(navigator, searchViewModel, searchActivity)
 
-    @ActivityScope
+    @ActivityScoped
     @Provides
     fun provideSearchViewModel(searchActivity: SearchActivity,
                                bibleReadingManager: BibleReadingManager,

@@ -86,7 +86,7 @@ object Versions {
         }
     }
 
-    const val dagger = "2.28.3"
+    const val hilt = "2.28.3-alpha"
 
     const val ask = "0.5.2"
 
@@ -159,12 +159,10 @@ object Dependencies {
         }
     }
 
-    object Dagger {
-        const val dagger = "com.google.dagger:dagger:${Versions.dagger}"
-        const val android = "com.google.dagger:dagger-android:${Versions.dagger}"
-        const val androidSupport = "com.google.dagger:dagger-android-support:${Versions.dagger}"
-        const val compiler = "com.google.dagger:dagger-compiler:${Versions.dagger}"
-        const val androidProcessor = "com.google.dagger:dagger-android-processor:${Versions.dagger}"
+    object Hilt {
+        const val classpath = "com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}"
+        const val android = "com.google.dagger:hilt-android:${Versions.hilt}"
+        const val compiler = "com.google.dagger:hilt-android-compiler:${Versions.hilt}"
     }
 
     object Ask {

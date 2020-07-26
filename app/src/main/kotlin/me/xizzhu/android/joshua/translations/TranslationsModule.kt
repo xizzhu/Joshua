@@ -16,24 +16,31 @@
 
 package me.xizzhu.android.joshua.translations
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.scopes.ActivityScoped
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.ActivityScope
 import me.xizzhu.android.joshua.core.SettingsManager
 
 @Module
+@InstallIn(ActivityComponent::class)
 object TranslationsModule {
-    @ActivityScope
+    @Provides
+    fun provideTranslationsActivity(activity: Activity): TranslationsActivity = activity as TranslationsActivity
+
+    @ActivityScoped
     @Provides
     fun provideTranslationListPresenter(translationsViewModel: TranslationsViewModel,
                                         translationsActivity: TranslationsActivity): TranslationListPresenter =
             TranslationListPresenter(translationsViewModel, translationsActivity)
 
-    @ActivityScope
+    @ActivityScoped
     @Provides
     fun provideTranslationsViewModel(translationsActivity: TranslationsActivity,
                                      bibleReadingManager: BibleReadingManager,

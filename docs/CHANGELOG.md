@@ -1,6 +1,12 @@
 CHANGELOG
 ---------
 
+#### Next release
+- Refactoring:
+  - Migrate to use Hilt (#196)
+- Update dependencies:
+  - Dagger Hilt to 2.28.3-alpha
+
 #### v0.16.1 (2020-07-23)
 - New features:
   - Add default color for highlight (#193)

@@ -16,23 +16,7 @@
 
 package me.xizzhu.android.joshua
 
-import dagger.android.AndroidInjector
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
-import javax.inject.Inject
+import dagger.hilt.android.HiltAndroidApp
 
-class App : BaseApp(), HasAndroidInjector {
-    private lateinit var appComponent: AppComponent
-
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
-
-    override fun onCreate() {
-        super.onCreate()
-
-        appComponent = DaggerAppComponent.builder().appModule(AppModule(this)).build()
-        appComponent.inject(this)
-    }
-
-    override fun androidInjector(): AndroidInjector<Any> = dispatchingAndroidInjector
-}
+@HiltAndroidApp
+class App : BaseApp()

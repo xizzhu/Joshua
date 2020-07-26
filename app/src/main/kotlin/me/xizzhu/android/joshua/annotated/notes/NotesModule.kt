@@ -16,11 +16,14 @@
 
 package me.xizzhu.android.joshua.annotated.notes
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
-import me.xizzhu.android.joshua.ActivityScope
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.scopes.ActivityScoped
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
@@ -33,20 +36,24 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
 
 @Module
+@InstallIn(ActivityComponent::class)
 object NotesModule {
-    @ActivityScope
+    @Provides
+    fun provideNotesActivity(activity: Activity): NotesActivity = activity as NotesActivity
+
+    @ActivityScoped
     @Provides
     fun provideToolbarPresenter(notesViewModel: BaseAnnotatedVersesViewModel<Note>,
                                 notesActivity: NotesActivity): AnnotatedVersesToolbarPresenter<Note, NotesActivity> =
             AnnotatedVersesToolbarPresenter(R.string.title_notes, notesViewModel, notesActivity)
 
-    @ActivityScope
+    @ActivityScoped
     @Provides
     fun provideNotesListPresenter(navigator: Navigator, notesViewModel: BaseAnnotatedVersesViewModel<Note>,
                                   notesActivity: NotesActivity): BaseAnnotatedVersesPresenter<Note, NotesActivity> =
             NotesListPresenter(navigator, notesViewModel, notesActivity)
 
-    @ActivityScope
+    @ActivityScoped
     @Provides
     fun provideNotesViewModel(notesActivity: NotesActivity,
                               bibleReadingManager: BibleReadingManager,

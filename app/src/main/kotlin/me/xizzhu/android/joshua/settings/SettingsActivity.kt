@@ -18,11 +18,12 @@ package me.xizzhu.android.joshua.settings
 
 import android.content.Intent
 import android.os.Bundle
-import dagger.android.AndroidInjection
+import dagger.hilt.android.AndroidEntryPoint
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.infra.activity.BaseActivity
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class SettingsActivity : BaseActivity() {
     @Inject
     lateinit var settingsViewModel: SettingsViewModel
@@ -31,7 +32,6 @@ class SettingsActivity : BaseActivity() {
     lateinit var settingsPresenter: SettingsPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_settings)
