@@ -5,7 +5,9 @@ CHANGELOG
 - Refactoring:
   - Migrate to use Hilt (#196)
 - Update dependencies:
+  - AndroidX AppCompat to 1.2.0, Material to 1.2.0
   - Dagger Hilt to 2.28.3-alpha
+  - Mockito to 3.4.6
 
 #### v0.16.1 (2020-07-23)
 - New features:
