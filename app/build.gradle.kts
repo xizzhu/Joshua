@@ -149,7 +149,6 @@ dependencies {
     androidTestImplementation(Dependencies.AndroidX.Test.rules)
     androidTestImplementation(Dependencies.AndroidX.Test.Espresso.core)
     androidTestImplementation(Dependencies.AndroidX.Test.Espresso.contrib)
-    androidTestImplementation(Dependencies.Mockito.mockito)
     androidTestImplementation(Dependencies.Mockito.android)
 }
 
