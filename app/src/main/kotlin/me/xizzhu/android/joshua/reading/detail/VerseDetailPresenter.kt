@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.detail
 
-import android.content.DialogInterface
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
@@ -86,12 +85,11 @@ class VerseDetailPresenter(
                     activity.dialog(R.string.text_pick_highlight_color,
                             activity.resources.getStringArray(R.array.text_colors),
                             max(0, Highlight.AVAILABLE_COLORS.indexOf(verseDetail?.highlightColor
-                                    ?: Highlight.COLOR_NONE)),
-                            DialogInterface.OnClickListener { dialog, which ->
-                                updateHighlight(Highlight.AVAILABLE_COLORS[which])
+                                    ?: Highlight.COLOR_NONE))) { dialog, which ->
+                        updateHighlight(Highlight.AVAILABLE_COLORS[which])
 
-                                dialog.dismiss()
-                            })
+                        dialog.dismiss()
+                    }
                 }
                 else -> updateHighlight(if (verseDetail?.highlightColor == Highlight.COLOR_NONE) {
                     defaultHighlightColor
@@ -162,7 +160,7 @@ class VerseDetailPresenter(
                 }.catch { e ->
                     Log.e(tag, "Failed to download Strong's numberrs", e)
                     activity.dialog(true, R.string.dialog_download_error,
-                            DialogInterface.OnClickListener { _, _ -> downloadStrongNumber() })
+                            { _, _ -> downloadStrongNumber() })
                 }.launchIn(coroutineScope)
     }
 
@@ -176,7 +174,7 @@ class VerseDetailPresenter(
         } catch (e: Exception) {
             Log.e(tag, "Failed to open Strong's number list activity", e)
             activity.dialog(true, R.string.dialog_navigation_error,
-                    DialogInterface.OnClickListener { _, _ -> onStrongNumberClicked(strongNumber) })
+                    { _, _ -> onStrongNumberClicked(strongNumber) })
         }
     }
 
@@ -200,7 +198,7 @@ class VerseDetailPresenter(
                 }.catch { e ->
                     Log.e(tag, "Failed to load verse detail", e)
                     activity.dialog(true, R.string.dialog_load_verse_detail_error,
-                            DialogInterface.OnClickListener { _, _ -> loadVerseDetail(verseIndex) })
+                            { _, _ -> loadVerseDetail(verseIndex) })
                 }.launchIn(coroutineScope)
     }
 

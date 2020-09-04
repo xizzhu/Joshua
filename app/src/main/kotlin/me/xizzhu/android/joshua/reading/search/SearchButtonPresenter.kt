@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.search
 
-import android.content.DialogInterface
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
@@ -51,8 +50,7 @@ class SearchButtonPresenter(
             navigator.navigate(activity, Navigator.SCREEN_SEARCH)
         } catch (e: Exception) {
             Log.e(tag, "Failed to open search activity", e)
-            activity.dialog(true, R.string.dialog_navigation_error,
-                    DialogInterface.OnClickListener { _, _ -> openSearch() })
+            activity.dialog(true, R.string.dialog_navigation_error, { _, _ -> openSearch() })
         }
     }
 

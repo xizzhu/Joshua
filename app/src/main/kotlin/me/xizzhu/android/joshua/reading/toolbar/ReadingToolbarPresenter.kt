@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.toolbar
 
-import android.content.DialogInterface
 import androidx.annotation.UiThread
 import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
@@ -107,7 +106,7 @@ class ReadingToolbarPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update current translation", e)
                 activity.dialog(true, R.string.dialog_update_translation_error,
-                        DialogInterface.OnClickListener { _, _ -> updateCurrentTranslation(translationShortName) })
+                        { _, _ -> updateCurrentTranslation(translationShortName) })
             }
         }
     }
@@ -117,8 +116,7 @@ class ReadingToolbarPresenter(
             navigator.navigate(activity, screen)
         } catch (e: Exception) {
             Log.e(tag, "Failed to open activity", e)
-            activity.dialog(true, R.string.dialog_navigation_error,
-                    DialogInterface.OnClickListener { _, _ -> startActivity(screen) })
+            activity.dialog(true, R.string.dialog_navigation_error, { _, _ -> startActivity(screen) })
         }
     }
 
@@ -175,8 +173,7 @@ class ReadingToolbarPresenter(
             if (viewModel.hasDownloadedTranslation()) return@launch
 
             activity.dialog(false, R.string.dialog_no_translation_downloaded,
-                    DialogInterface.OnClickListener { _, _ -> startActivity(Navigator.SCREEN_TRANSLATIONS) },
-                    DialogInterface.OnClickListener { _, _ -> activity.finish() })
+                    { _, _ -> startActivity(Navigator.SCREEN_TRANSLATIONS) }, { _, _ -> activity.finish() })
         }
     }
 }

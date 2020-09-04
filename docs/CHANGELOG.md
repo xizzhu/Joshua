@@ -5,9 +5,25 @@ CHANGELOG
 - Refactoring:
   - Migrate to use Hilt (#196)
 - Update dependencies:
-  - AndroidX AppCompat to 1.2.0, Material to 1.2.0
+  - Gradle to 6.6.1
+  - Android build tool to 30.0.2
+  - Kotlin:
+    - Kotlin to 1.4.0
+    - Coroutines to 1.3.9
+  - AndroidX:
+    - AppCompat to 1.2.0
+    - ConstraintLayout to 2.0.0
+    - DrawerLayout to 1.1.1
+    - Material to 1.2.1
+    - JUnit to 1.1.2
+    - Test Rules to 1.3.0
+    - Espresso to 3.3.0
+  - Firebase:
+    - Analytics to 17.5.0
+    - Crashlytics plugin to 2.2.1, Crashlytics to 17.2.1
   - Dagger Hilt to 2.28.3-alpha
-  - Mockito to 3.4.6
+  - Logger to 0.3.0
+  - Mockito to 3.5.10
 
 #### v0.16.1 (2020-07-23)
 - New features:

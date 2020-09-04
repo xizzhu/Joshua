@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua.settings
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.app.Activity
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.util.TypedValue
@@ -86,12 +85,10 @@ class SettingsPresenter(
         }
 
         viewHolder.fontSize.setOnClickListener {
-            activity.dialog(R.string.settings_title_font_size,
-                    fontSizeTexts, currentSettings!!.fontSizeScale - 1,
-                    DialogInterface.OnClickListener { dialog, which ->
-                        saveFontSizeScale(which + 1)
-                        dialog.dismiss()
-                    })
+            activity.dialog(R.string.settings_title_font_size, fontSizeTexts, currentSettings!!.fontSizeScale - 1) { dialog, which ->
+                saveFontSizeScale(which + 1)
+                dialog.dismiss()
+            }
         }
 
         viewHolder.keepScreenOn.setOnCheckedChangeListener { _, isChecked -> saveKeepScreenOn(isChecked) }
@@ -106,11 +103,10 @@ class SettingsPresenter(
 
         viewHolder.defaultHighlightColor.setOnClickListener {
             activity.dialog(R.string.text_pick_highlight_color, highlightColorTexts,
-                    max(0, Highlight.AVAILABLE_COLORS.indexOf(currentSettings?.defaultHighlightColor ?: Highlight.COLOR_NONE)),
-                    DialogInterface.OnClickListener { dialog, which ->
-                        saveDefaultHighlightColor(Highlight.AVAILABLE_COLORS[which])
-                        dialog.dismiss()
-                    })
+                    max(0, Highlight.AVAILABLE_COLORS.indexOf(currentSettings?.defaultHighlightColor ?: Highlight.COLOR_NONE))) { dialog, which ->
+                saveDefaultHighlightColor(Highlight.AVAILABLE_COLORS[which])
+                dialog.dismiss()
+            }
         }
 
         viewHolder.backup.setOnClickListener {
@@ -161,7 +157,7 @@ class SettingsPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save font size scale", e)
                 activity.dialog(true, R.string.dialog_update_settings_error,
-                        DialogInterface.OnClickListener { _, _ -> saveFontSizeScale(fontSizeScale) })
+                        { _, _ -> saveFontSizeScale(fontSizeScale) })
             }
         }
     }
@@ -173,7 +169,7 @@ class SettingsPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save keep screen on", e)
                 activity.dialog(true, R.string.dialog_update_settings_error,
-                        DialogInterface.OnClickListener { _, _ -> saveKeepScreenOn(keepScreenOn) })
+                        { _, _ -> saveKeepScreenOn(keepScreenOn) })
             }
         }
     }
@@ -186,7 +182,7 @@ class SettingsPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save night mode on", e)
                 activity.dialog(true, R.string.dialog_update_settings_error,
-                        DialogInterface.OnClickListener { _, _ -> saveNightModeOn(nightModeOn) })
+                        { _, _ -> saveNightModeOn(nightModeOn) })
             }
         }
     }
@@ -198,7 +194,7 @@ class SettingsPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save simple reading mode on", e)
                 activity.dialog(true, R.string.dialog_update_settings_error,
-                        DialogInterface.OnClickListener { _, _ -> saveSimpleReadingModeOn(simpleReadingModeOn) })
+                        { _, _ -> saveSimpleReadingModeOn(simpleReadingModeOn) })
             }
         }
     }
@@ -210,7 +206,7 @@ class SettingsPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save hiding search button", e)
                 activity.dialog(true, R.string.dialog_update_settings_error,
-                        DialogInterface.OnClickListener { _, _ -> saveHideSearchButton(hideSearchButton) })
+                        { _, _ -> saveHideSearchButton(hideSearchButton) })
             }
         }
     }
@@ -222,7 +218,7 @@ class SettingsPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save consolidating verses for sharing", e)
                 activity.dialog(true, R.string.dialog_update_settings_error,
-                        DialogInterface.OnClickListener { _, _ -> saveConsolidateVersesForSharing(consolidateVerses) })
+                        { _, _ -> saveConsolidateVersesForSharing(consolidateVerses) })
             }
         }
     }
@@ -234,7 +230,7 @@ class SettingsPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save default highlight color", e)
                 activity.dialog(true, R.string.dialog_update_settings_error,
-                        DialogInterface.OnClickListener { _, _ -> saveDefaultHighlightColor(color) })
+                        { _, _ -> saveDefaultHighlightColor(color) })
             }
         }
     }
@@ -255,8 +251,7 @@ class SettingsPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to backup data", e)
                 dismissBackupRestoreDialog()
-                activity.dialog(true, R.string.dialog_backup_error,
-                        DialogInterface.OnClickListener { _, _ -> backup(uri) })
+                activity.dialog(true, R.string.dialog_backup_error, { _, _ -> backup(uri) })
             }
         }
     }
@@ -292,8 +287,7 @@ class SettingsPresenter(
                         // See https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/e9339c69d6e1856856db88413614d3d3
                         Log.e(tag, "Failed to backup data", e)
                         dismissBackupRestoreDialog()
-                        activity.dialog(true, R.string.dialog_restore_error,
-                                DialogInterface.OnClickListener { _, _ -> restore(uri) })
+                        activity.dialog(true, R.string.dialog_restore_error, { _, _ -> restore(uri) })
                     }
                     else -> throw e
                 }

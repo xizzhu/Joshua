@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.chapter
 
-import android.content.DialogInterface
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
@@ -56,7 +55,7 @@ class ChapterListPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select chapter", e)
                 activity.dialog(true, R.string.dialog_chapter_selection_error,
-                        DialogInterface.OnClickListener { _, _ -> selectChapter(bookIndex, chapterIndex) })
+                        { _, _ -> selectChapter(bookIndex, chapterIndex) })
             }
         }
     }

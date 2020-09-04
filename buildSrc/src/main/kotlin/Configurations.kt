@@ -38,7 +38,7 @@ object Versions {
 
     object Sdk {
         const val classpath = "4.0.1"
-        const val buildTools = "30.0.1"
+        const val buildTools = "30.0.2"
         const val compile = 30
         const val min = 21
         const val target = 30
@@ -48,8 +48,8 @@ object Versions {
 
     object Kotlin {
         const val jvmTarget = "1.8"
-        const val core = "1.3.72"
-        const val coroutines = "1.3.8"
+        const val core = "1.4.0"
+        const val coroutines = "1.3.9"
     }
 
     object AndroidX {
@@ -60,29 +60,29 @@ object Versions {
         const val lifecycle = "2.2.0"
 
         object View {
-            const val constraintLayout = "1.1.3"
+            const val constraintLayout = "2.0.0"
             const val coordinatorLayout = "1.1.0"
-            const val drawerLayout = "1.1.0"
-            const val material = "1.2.0"
+            const val drawerLayout = "1.1.1"
+            const val material = "1.2.1"
             const val recyclerView = "1.1.0"
             const val swipeRefreshLayout = "1.1.0"
             const val viewPager2 = "1.0.0"
         }
 
         object Test {
-            const val junit = "1.1.1"
-            const val rules = "1.2.0"
-            const val espresso = "3.2.0"
+            const val junit = "1.1.2"
+            const val rules = "1.3.0"
+            const val espresso = "3.3.0"
         }
     }
 
     object Firebase {
         const val classpath = "4.3.3"
-        const val analytics = "17.4.4"
+        const val analytics = "17.5.0"
 
         object Crashlytics {
-            const val classpath = "2.2.0"
-            const val crashlytics = "17.1.1"
+            const val classpath = "2.2.1"
+            const val crashlytics = "17.2.1"
         }
     }
 
@@ -90,11 +90,11 @@ object Versions {
 
     const val ask = "0.5.2"
 
-    const val logger = "0.2.0"
+    const val logger = "0.3.0"
 
     const val stetho = "1.5.1"
 
-    const val mockito = "3.4.6"
+    const val mockito = "3.5.10"
 }
 
 object Dependencies {
@@ -108,7 +108,6 @@ object Dependencies {
 
     object Kotlin {
         const val classpath = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.Kotlin.core}"
-        const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.Kotlin.core}"
         const val coroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.Kotlin.coroutines}"
         const val test = "org.jetbrains.kotlin:kotlin-test-junit:${Versions.Kotlin.core}"
         const val coroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.Kotlin.coroutines}"
