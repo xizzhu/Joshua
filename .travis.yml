@@ -22,7 +22,7 @@ branches:
 
 before_install:
   - yes | sdkmanager "platforms;android-30"
-  - yes | sdkmanager "build-tools;30.0.1"
+  - yes | sdkmanager "build-tools;30.0.2"
 
 before_script:
   - android list targets
