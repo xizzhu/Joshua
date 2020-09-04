@@ -110,7 +110,6 @@ tasks.withType(Test::class.java) {
 }
 
 dependencies {
-    implementation(Dependencies.Kotlin.stdlib)
     implementation(Dependencies.Kotlin.coroutinesAndroid)
 
     implementation(Dependencies.AndroidX.activity)

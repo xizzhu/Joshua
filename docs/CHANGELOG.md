@@ -7,6 +7,9 @@ CHANGELOG
 - Update dependencies:
   - Gradle to 6.6.1
   - Android build tool to 30.0.2
+  - Kotlin:
+    - Kotlin to 1.4.0
+    - Coroutines to 1.3.9
   - AndroidX:
     - AppCompat to 1.2.0
     - ConstraintLayout to 2.0.0

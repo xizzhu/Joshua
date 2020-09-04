@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.search.result
 
-import android.content.DialogInterface
 import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.VisibleForTesting
@@ -94,7 +93,7 @@ class SearchResultListPresenter(
                         viewHolder.loadingSpinner.visibility = View.GONE
                         viewHolder.searchResultListView.visibility = View.GONE
                         activity.dialog(false, R.string.dialog_search_error,
-                                DialogInterface.OnClickListener { _, _ -> search(searchRequest) })
+                                { _, _ -> search(searchRequest) })
                     }
                 }.launchIn(coroutineScope)
     }
@@ -110,7 +109,7 @@ class SearchResultListPresenter(
                 lastVerseBookIndex = currentVerseBookIndex
             }
             items.add(SearchItem(verse.verseIndex, bookShortNames[currentVerseBookIndex],
-                    verse.text.text, query, this@SearchResultListPresenter::selectVerse))
+                    verse.text.text, query, ::selectVerse))
         }
         return items
     }
@@ -124,7 +123,7 @@ class SearchResultListPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
                 activity.dialog(true, R.string.dialog_verse_selection_error,
-                        DialogInterface.OnClickListener { _, _ -> selectVerse(verseToSelect) })
+                        { _, _ -> selectVerse(verseToSelect) })
             }
         }
     }

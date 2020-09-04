@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import android.content.DialogInterface
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.UiThread
@@ -129,7 +128,7 @@ class VersePresenter(
                 }.catch { e ->
                     Log.e(tag, "Failed to load verses", e)
                     activity.dialog(true, R.string.dialog_verse_load_error,
-                            DialogInterface.OnClickListener { _, _ -> loadVerses(bookIndex, chapterIndex) })
+                            { _, _ -> loadVerses(bookIndex, chapterIndex) })
                 }.launchIn(coroutineScope)
     }
 
@@ -191,12 +190,11 @@ class VersePresenter(
                 Highlight.COLOR_NONE -> {
                     activity.dialog(R.string.text_pick_highlight_color,
                             activity.resources.getStringArray(R.array.text_colors),
-                            max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
-                            DialogInterface.OnClickListener { dialog, which ->
-                                updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
+                            max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor))) { dialog, which ->
+                        updateHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
 
-                                dialog.dismiss()
-                            })
+                        dialog.dismiss()
+                    }
                 }
                 else -> {
                     updateHighlight(

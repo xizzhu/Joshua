@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.annotated
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -76,8 +75,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
                     Log.e(tag, "Failed to load annotated verses", e)
                     viewHolder.loadingSpinner.visibility = View.GONE
                     activity.dialog(false, R.string.dialog_load_annotated_verses_error,
-                            DialogInterface.OnClickListener { _, _ -> loadAnnotatedVerses(loadingRequest) },
-                            DialogInterface.OnClickListener { _, _ -> activity.finish() })
+                            { _, _ -> loadAnnotatedVerses(loadingRequest) }, { _, _ -> activity.finish() })
                 }.launchIn(coroutineScope)
     }
 
@@ -161,7 +159,7 @@ abstract class BaseAnnotatedVersesPresenter<V : VerseAnnotation, A : BaseAnnotat
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
                 activity.dialog(true, R.string.dialog_verse_selection_error,
-                        DialogInterface.OnClickListener { _, _ -> openVerse(verseToOpen) })
+                        { _, _ -> openVerse(verseToOpen) })
             }
         }
     }

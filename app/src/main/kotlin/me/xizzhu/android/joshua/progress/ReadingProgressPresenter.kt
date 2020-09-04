@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.progress
 
-import android.content.DialogInterface
 import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.VisibleForTesting
@@ -76,8 +75,8 @@ class ReadingProgressPresenter(
                     Log.e(tag, "Failed to load reading progress", e)
                     viewHolder.loadingSpinner.visibility = View.GONE
                     activity.dialog(false, R.string.dialog_load_reading_progress_error,
-                            DialogInterface.OnClickListener { _, _ -> loadReadingProgress() },
-                            DialogInterface.OnClickListener { _, _ -> activity.finish() })
+                            { _, _ -> loadReadingProgress() },
+                            { _, _ -> activity.finish() })
                 }.launchIn(coroutineScope)
     }
 
@@ -112,8 +111,7 @@ class ReadingProgressPresenter(
                 }
             }
             detailItems.add(ReadingProgressDetailItem(bookNames[bookIndex], bookIndex, chaptersRead,
-                    chaptersReadCount, this@ReadingProgressPresenter::onBookClicked,
-                    this@ReadingProgressPresenter::openChapter, expanded[bookIndex]))
+                    chaptersReadCount, ::onBookClicked, ::openChapter, expanded[bookIndex]))
         }
         return mutableListOf<BaseItem>(ReadingProgressSummaryItem(readingProgress.continuousReadingDays,
                 totalChaptersRead, finishedBooks, finishedOldTestament, finishedNewTestament))

@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
-import android.content.DialogInterface
 import android.text.SpannableStringBuilder
 import android.view.View
 import android.widget.ProgressBar
@@ -72,8 +71,7 @@ class StrongNumberListPresenter(
                     Log.e(tag, "Failed to load Strong's number list", e)
                     viewHolder.loadingSpinner.visibility = View.GONE
                     activity.dialog(false, R.string.dialog_load_strong_number_list_error,
-                            DialogInterface.OnClickListener { _, _ -> loadStrongNumber() },
-                            DialogInterface.OnClickListener { _, _ -> activity.finish() })
+                            { _, _ -> loadStrongNumber() }, { _, _ -> activity.finish() })
                 }.launchIn(coroutineScope)
     }
 
@@ -93,7 +91,7 @@ class StrongNumberListPresenter(
             }
 
             items.add(VerseStrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex],
-                    verse.text.text, this@StrongNumberListPresenter::openVerse))
+                    verse.text.text, ::openVerse))
         }
 
         return items
@@ -115,7 +113,7 @@ class StrongNumberListPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select verse and open reading activity", e)
                 activity.dialog(true, R.string.dialog_verse_selection_error,
-                        DialogInterface.OnClickListener { _, _ -> openVerse(verseToOpen) })
+                        { _, _ -> openVerse(verseToOpen) })
             }
         }
     }

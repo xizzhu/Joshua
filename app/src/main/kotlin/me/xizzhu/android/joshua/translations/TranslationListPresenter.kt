@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.translations
 
-import android.content.DialogInterface
 import android.view.View
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -96,8 +95,7 @@ class TranslationListPresenter(
                 }.catch {
                     viewHolder.swipeRefreshLayout.isRefreshing = false
                     activity.dialog(false, R.string.dialog_load_translation_list_error,
-                            DialogInterface.OnClickListener { _, _ -> loadTranslationList(forceRefresh) },
-                            DialogInterface.OnClickListener { _, _ -> activity.finish() })
+                            { _, _ -> loadTranslationList(forceRefresh) }, { _, _ -> activity.finish() })
                 }.launchIn(coroutineScope)
     }
 
@@ -126,8 +124,7 @@ class TranslationListPresenter(
             items.add(TranslationItem(
                     translationInfo,
                     translationInfo.downloaded && translationInfo.shortName == currentTranslation,
-                    this@TranslationListPresenter::onTranslationClicked,
-                    this@TranslationListPresenter::onTranslationLongClicked
+                    ::onTranslationClicked, ::onTranslationLongClicked
             ))
         }
         return items
@@ -151,7 +148,7 @@ class TranslationListPresenter(
             } catch (e: Exception) {
                 Log.e(tag, "Failed to select translation and close translation management activity", e)
                 activity.dialog(true, R.string.dialog_update_translation_error,
-                        DialogInterface.OnClickListener { _, _ -> updateCurrentTranslationAndFinishActivity(translationShortName) })
+                        { _, _ -> updateCurrentTranslationAndFinishActivity(translationShortName) })
             }
         }
     }
@@ -159,7 +156,7 @@ class TranslationListPresenter(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun confirmAndDownloadTranslation(translationToDownload: TranslationInfo) {
         activity.dialog(true, activity.getString(R.string.dialog_download_translation_confirmation, translationToDownload.name),
-                DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
+                { _, _ -> downloadTranslation(translationToDownload) })
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -198,7 +195,7 @@ class TranslationListPresenter(
                 }.catch { e ->
                     Log.e(tag, "Failed to download translation", e)
                     activity.dialog(true, R.string.dialog_download_error,
-                            DialogInterface.OnClickListener { _, _ -> downloadTranslation(translationToDownload) })
+                            { _, _ -> downloadTranslation(translationToDownload) })
                 }.launchIn(coroutineScope)
     }
 
@@ -216,7 +213,7 @@ class TranslationListPresenter(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun confirmAndRemoveTranslation(translationToRemove: TranslationInfo) {
         activity.dialog(true, activity.getString(R.string.dialog_delete_translation_confirmation, translationToRemove.name),
-                DialogInterface.OnClickListener { _, _ -> removeTranslation(translationToRemove) })
+                { _, _ -> removeTranslation(translationToRemove) })
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -241,7 +238,7 @@ class TranslationListPresenter(
                 }.catch { e ->
                     Log.e(tag, "Failed to remove translation", e)
                     activity.dialog(true, R.string.dialog_delete_error,
-                            DialogInterface.OnClickListener { _, _ -> removeTranslation(translationToRemove) })
+                            { _, _ -> removeTranslation(translationToRemove) })
                 }.launchIn(coroutineScope)
     }
 
