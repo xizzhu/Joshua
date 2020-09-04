@@ -4,6 +4,8 @@ CHANGELOG
 #### Next release
 - Refactoring:
   - Migrate to use Hilt (#196)
+- Bug fixes:
+  - Use CopyOnWriteArrayList to store analytics providers
 - Update dependencies:
   - Gradle to 6.6.1
   - Android build tool to 30.0.2

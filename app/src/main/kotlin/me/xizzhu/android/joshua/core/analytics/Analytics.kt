@@ -16,6 +16,8 @@
 
 package me.xizzhu.android.joshua.core.analytics
 
+import java.util.concurrent.CopyOnWriteArrayList
+
 interface AnalyticsProvider {
     fun track(event: String, params: Map<String, Any>?)
 }
@@ -28,12 +30,10 @@ object Analytics {
     const val PARAM_DOWNLOAD_TIME: String = "download_time"
     const val PARAM_INSTALL_TIME: String = "install_time"
 
-    private val providers: ArrayList<AnalyticsProvider> = ArrayList()
+    private val providers = CopyOnWriteArrayList<AnalyticsProvider>()
 
     fun addProvider(provider: AnalyticsProvider) {
-        if (!providers.contains(provider)) {
-            providers.add(provider)
-        }
+        providers.addIfAbsent(provider)
     }
 
     fun removeProvider(provider: AnalyticsProvider) {
