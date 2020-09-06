@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next release
+#### v0.16.2 (2020-09-04)
 - Refactoring:
   - Migrate to use Hilt (#196)
 - Bug fixes:
