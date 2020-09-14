@@ -32,6 +32,7 @@ import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.search.SearchRequest
 import me.xizzhu.android.joshua.search.SearchViewModel
 import me.xizzhu.android.joshua.ui.hideKeyboard
+import me.xizzhu.android.logger.Log
 
 data class SearchToolbarViewHolder(val searchToolbar: SearchToolbar) : ViewHolder
 
@@ -63,8 +64,16 @@ class SearchToolbarPresenter(
 
         with(viewHolder.searchToolbar) {
             setOnQueryTextListener(onQueryTextListener)
-            setSearchableInfo((activity.getSystemService(Context.SEARCH_SERVICE) as SearchManager)
-                    .getSearchableInfo(activity.componentName))
+
+            try {
+                setSearchableInfo((activity.getSystemService(Context.SEARCH_SERVICE) as SearchManager)
+                        .getSearchableInfo(activity.componentName))
+            } catch (e: Exception) {
+                // Do nothing if it fails on some weird devices.
+                // https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/526587497106cd43ddd9ea7568d34f94
+                Log.e(this@SearchToolbarPresenter.tag, "", e)
+            }
+
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.action_clear_search_history -> {
