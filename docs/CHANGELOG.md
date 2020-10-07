@@ -4,6 +4,7 @@ CHANGELOG
 #### Next Release
 - Bug fixes:
   - Do not crash if it fails to set searchable info
+  - Catch exception in case error occurred while observing downloaded translations
 
 #### v0.16.2 (2020-09-04)
 - Refactoring:
