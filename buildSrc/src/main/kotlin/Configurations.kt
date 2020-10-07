@@ -37,7 +37,7 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "4.0.1"
+        const val classpath = "4.0.2"
         const val buildTools = "30.0.2"
         const val compile = 30
         const val min = 21
@@ -48,7 +48,7 @@ object Versions {
 
     object Kotlin {
         const val jvmTarget = "1.8"
-        const val core = "1.4.0"
+        const val core = "1.4.10"
         const val coroutines = "1.3.9"
     }
 
@@ -60,7 +60,7 @@ object Versions {
         const val lifecycle = "2.2.0"
 
         object View {
-            const val constraintLayout = "2.0.0"
+            const val constraintLayout = "2.0.2"
             const val coordinatorLayout = "1.1.0"
             const val drawerLayout = "1.1.1"
             const val material = "1.2.1"
@@ -77,16 +77,16 @@ object Versions {
     }
 
     object Firebase {
-        const val classpath = "4.3.3"
-        const val analytics = "17.5.0"
+        const val classpath = "4.3.4"
+        const val analytics = "17.6.0"
 
         object Crashlytics {
             const val classpath = "2.2.1"
-            const val crashlytics = "17.2.1"
+            const val crashlytics = "17.2.2"
         }
     }
 
-    const val hilt = "2.28.3-alpha"
+    const val hilt = "2.29.1-alpha"
 
     const val ask = "0.5.2"
 
@@ -94,7 +94,7 @@ object Versions {
 
     const val stetho = "1.5.1"
 
-    const val mockito = "3.5.10"
+    const val mockito = "3.5.13"
 }
 
 object Dependencies {

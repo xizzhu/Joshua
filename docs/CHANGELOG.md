@@ -5,6 +5,13 @@ CHANGELOG
 - Bug fixes:
   - Do not crash if it fails to set searchable info
   - Catch exception in case error occurred while observing downloaded translations
+- Update dependencies:
+  - Android Gradle Plugin to 4.0.2
+  - Kotlin to 1.4.10
+  - AndroidX ConstraintLayout to 2.0.2
+  - Firebase plugin to 4.3.4, Analytics to 17.6.0, Crashlytics to 17.2.2
+  - Dagger Hilt to 2.29.1-alpha
+  - Mockito to 3.5.13
 
 #### v0.16.2 (2020-09-04)
 - Refactoring:
