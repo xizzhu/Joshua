@@ -38,7 +38,11 @@ class ProgressDialog(private val dialog: AlertDialog, private val progressBar: P
     }
 
     fun dismiss() {
-        dialog.dismiss()
+        try {
+            dialog.dismiss()
+        } catch (_: Exception) {
+            // We don't care if it fails.
+        }
     }
 
     fun isShowing(): Boolean = dialog.isShowing
