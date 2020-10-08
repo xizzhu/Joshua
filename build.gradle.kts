@@ -19,8 +19,6 @@ buildscript {
         google()
         mavenCentral()
         jcenter()
-
-        maven("https://maven.fabric.io/public")
     }
     dependencies {
         classpath(Dependencies.Sdk.classpath)
