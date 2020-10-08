@@ -28,6 +28,7 @@ buildscript {
         classpath(Dependencies.Coveralls.classpath)
         classpath(Dependencies.Firebase.classpath)
         classpath(Dependencies.Firebase.Crashlytics.classpath)
+        classpath(Dependencies.Firebase.Perf.classpath)
         classpath(Dependencies.Hilt.classpath)
     }
 }
