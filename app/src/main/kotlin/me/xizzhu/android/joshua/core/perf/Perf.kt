@@ -17,7 +17,17 @@
 package me.xizzhu.android.joshua.core.perf
 
 object Perf {
-    private lateinit var traceFactory: (String) -> Trace
+    private var traceFactory: (String) -> Trace = {
+        object : Trace {
+            override fun start() {
+                // Do nothing.
+            }
+
+            override fun stop() {
+                // Do nothing.
+            }
+        }
+    }
 
     fun initialize(traceFactory: (String) -> Trace) {
         this.traceFactory = traceFactory
