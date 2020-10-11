@@ -5,6 +5,8 @@ CHANGELOG
 - Bug fixes:
   - Do not crash if it fails to set searchable info
   - Catch exception in case error occurred while observing downloaded translations
+- Changes:
+  - Use Firebase Perf to track translation and SN download and install time instead of Firebase Analytics
 - Update dependencies:
   - Android Gradle Plugin to 4.0.2
   - Kotlin to 1.4.10
