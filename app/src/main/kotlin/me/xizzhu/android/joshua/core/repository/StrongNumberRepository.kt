@@ -22,10 +22,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.analytics.Analytics
+import me.xizzhu.android.joshua.core.perf.Perf
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
-import me.xizzhu.android.joshua.utils.elapsedRealtime
 import me.xizzhu.android.logger.Log
 
 class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNumberStorage,
@@ -44,7 +43,6 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun download(versesDownloadProgress: Channel<Int>, wordsDownloadProgress: Channel<Int>) = channelFlow {
-        val start = elapsedRealtime()
         Log.i(TAG, "Start downloading Strong number")
 
         versesDownloadProgress.offer(0)
@@ -57,19 +55,14 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
         val remoteWords = remoteStrongNumberStorage.fetchWords(wordsDownloadProgress)
         val remoteIndexes = remoteIndexesAsync.await()
         Log.i(TAG, "Strong number downloaded")
-        val downloadFinished = elapsedRealtime()
 
         versesDownloadProgress.close()
         wordsDownloadProgress.close()
         offer(100)
 
-        localStrongNumberStorage.save(remoteIndexes.indexes, remoteIndexes.reverseIndexes, remoteWords.words)
+        Perf.trace("install_sn") {
+            localStrongNumberStorage.save(remoteIndexes.indexes, remoteIndexes.reverseIndexes, remoteWords.words)
+        }
         Log.i(TAG, "Strong number saved to database")
-        val installFinished = elapsedRealtime()
-
-        Analytics.track(Analytics.EVENT_DOWNLOAD_STRONG_NUMBER, mapOf(
-                Pair(Analytics.PARAM_DOWNLOAD_TIME, downloadFinished - start),
-                Pair(Analytics.PARAM_INSTALL_TIME, installFinished - downloadFinished)
-        ))
     }
 }

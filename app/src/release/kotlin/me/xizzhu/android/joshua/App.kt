@@ -18,8 +18,6 @@ package me.xizzhu.android.joshua
 
 import android.app.Application
 import me.xizzhu.android.joshua.core.logger.android.CrashlyticsLogger
-import me.xizzhu.android.joshua.core.analytics.Analytics
-import me.xizzhu.android.joshua.core.analytics.android.FirebaseAnalyticsProvider
 import me.xizzhu.android.logger.Log
 
 abstract class BaseApp : Application() {
@@ -27,6 +25,5 @@ abstract class BaseApp : Application() {
         super.onCreate()
 
         Log.addLogger(CrashlyticsLogger())
-        Analytics.addProvider(FirebaseAnalyticsProvider(this))
     }
 }

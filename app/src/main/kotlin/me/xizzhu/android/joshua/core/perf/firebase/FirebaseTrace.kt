@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua
+package me.xizzhu.android.joshua.core.perf.firebase
 
-import dagger.hilt.android.HiltAndroidApp
-import me.xizzhu.android.joshua.core.perf.Perf
-import me.xizzhu.android.joshua.core.perf.firebase.firebaseTraceFactory
+import com.google.firebase.perf.FirebasePerformance
+import me.xizzhu.android.joshua.core.perf.Trace
 
-@HiltAndroidApp
-class App : BaseApp() {
-    override fun onCreate() {
-        super.onCreate()
+fun firebaseTraceFactory(name: String): Trace = FirebaseTrace(name)
 
-        Perf.initialize(::firebaseTraceFactory)
+class FirebaseTrace(name: String) : Trace {
+    private val trace = FirebasePerformance.getInstance().newTrace(name)
+
+    override fun start() {
+        trace.start()
+    }
+
+    override fun stop() {
+        trace.stop()
     }
 }
