@@ -37,7 +37,7 @@ class HttpTranslationService : RemoteTranslationService {
         val verses = HashMap<Pair<Int, Int>, List<String>>()
 
         var progress = -1
-        ZipInputStream(BufferedInputStream(getInputStream("${translationInfo.shortName}.zip")))
+        ZipInputStream(BufferedInputStream(getInputStream("translations/${translationInfo.shortName}.zip")))
                 .forEachIndexed { index, entryName, contentReader ->
                     if (entryName == "books.json") {
                         bookNamesShortNamesPair = contentReader.readBooksJson()
