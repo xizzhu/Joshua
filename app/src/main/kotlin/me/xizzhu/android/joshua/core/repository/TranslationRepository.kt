@@ -29,12 +29,11 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.core.analytics.Analytics
+import me.xizzhu.android.joshua.core.perf.Perf
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.utils.currentTimeMillis
-import me.xizzhu.android.joshua.utils.elapsedRealtime
 import me.xizzhu.android.logger.Log
 
 class TranslationRepository(private val localTranslationStorage: LocalTranslationStorage,
@@ -172,24 +171,19 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     suspend fun downloadTranslation(downloadProgressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
-        val start = elapsedRealtime()
         Log.i(TAG, "Start downloading translation - ${translationInfo.shortName}")
         val translation = remoteTranslationService.fetchTranslation(
                 downloadProgressChannel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))
         Log.i(TAG, "Translation downloaded")
         downloadProgressChannel.send(100)
-        val downloadFinished = elapsedRealtime()
 
-        localTranslationStorage.saveTranslation(translation.translationInfo.toTranslationInfo(true),
-                translation.bookNames, translation.bookShortNames, translation.verses)
+        Perf.trace("install_translation") {
+            localTranslationStorage.saveTranslation(
+                    translation.translationInfo.toTranslationInfo(true),
+                    translation.bookNames, translation.bookShortNames, translation.verses
+            )
+        }
         Log.i(TAG, "Translation saved to database")
-        val installFinished = elapsedRealtime()
-
-        Analytics.track(Analytics.EVENT_DOWNLOAD_TRANSLATION, mapOf(
-                Pair(Analytics.PARAM_ITEM_ID, translationInfo.shortName),
-                Pair(Analytics.PARAM_DOWNLOAD_TIME, downloadFinished - start),
-                Pair(Analytics.PARAM_INSTALL_TIME, installFinished - downloadFinished)
-        ))
     }
 
     suspend fun removeTranslation(translationInfo: TranslationInfo) {

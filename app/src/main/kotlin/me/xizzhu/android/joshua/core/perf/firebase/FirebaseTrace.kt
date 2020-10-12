@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath(Dependencies.Sdk.classpath)
-        classpath(Dependencies.Kotlin.classpath)
-        classpath(Dependencies.Coveralls.classpath)
-        classpath(Dependencies.Firebase.classpath)
-        classpath(Dependencies.Firebase.Crashlytics.classpath)
-        classpath(Dependencies.Firebase.Perf.classpath)
-        classpath(Dependencies.Hilt.classpath)
-    }
-}
+package me.xizzhu.android.joshua.core.perf.firebase
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter()
+import com.google.firebase.perf.FirebasePerformance
+import me.xizzhu.android.joshua.core.perf.Trace
 
-        maven("https://jitpack.io")
+fun firebaseTraceFactory(name: String): Trace = FirebaseTrace(name)
+
+class FirebaseTrace(name: String) : Trace {
+    private val trace = FirebasePerformance.getInstance().newTrace(name)
+
+    override fun start() {
+        trace.start()
+    }
+
+    override fun stop() {
+        trace.stop()
     }
 }

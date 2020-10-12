@@ -129,6 +129,7 @@ dependencies {
 
     implementation(Dependencies.Firebase.analytics)
     implementation(Dependencies.Firebase.Crashlytics.crashlytics)
+    implementation(Dependencies.Firebase.Perf.perf)
 
     implementation(Dependencies.Hilt.android)
     kapt(Dependencies.Hilt.compiler)
@@ -155,4 +156,5 @@ dependencies {
 apply {
     plugin("com.google.gms.google-services")
     plugin("com.google.firebase.crashlytics")
+    plugin("com.google.firebase.firebase-perf")
 }
