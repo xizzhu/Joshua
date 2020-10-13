@@ -7,8 +7,9 @@ CHANGELOG
   - Catch exception in case error occurred while observing downloaded translations
 - Changes:
   - Use Firebase Perf to track translation and SN download and install time instead of Firebase Analytics
+  - Remove Stetho (#198)
 - Update dependencies:
-  - Android Gradle Plugin to 4.0.2
+  - Android Gradle Plugin to 4.1.0
   - Kotlin to 1.4.10
   - AndroidX ConstraintLayout to 2.0.2
   - Firebase plugin to 4.3.4, Analytics to 17.6.0, Crashlytics to 17.2.2

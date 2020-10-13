@@ -37,7 +37,7 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "4.0.2"
+        const val classpath = "4.1.0"
         const val buildTools = "30.0.2"
         const val compile = 30
         const val min = 21
@@ -96,8 +96,6 @@ object Versions {
     const val ask = "0.5.2"
 
     const val logger = "0.3.0"
-
-    const val stetho = "1.5.1"
 
     const val mockito = "3.5.13"
 }
@@ -180,10 +178,6 @@ object Dependencies {
 
     object Logger {
         const val logger = "com.github.xizzhu:Logger:${Versions.logger}"
-    }
-
-    object Stetho {
-        const val stetho = "com.facebook.stetho:stetho:${Versions.stetho}"
     }
 
     object Mockito {

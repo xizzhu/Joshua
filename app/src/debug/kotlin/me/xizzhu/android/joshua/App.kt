@@ -19,7 +19,6 @@ package me.xizzhu.android.joshua
 import android.app.Application
 import android.os.StrictMode
 import androidx.annotation.CallSuper
-import com.facebook.stetho.Stetho
 import me.xizzhu.android.logger.Log
 import me.xizzhu.android.logger.LogcatLogger
 
@@ -28,7 +27,6 @@ abstract class BaseApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        Stetho.initializeWithDefaults(this)
         StrictMode.enableDefaults()
 
         Log.addLogger(LogcatLogger())
