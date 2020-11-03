@@ -9,12 +9,13 @@ CHANGELOG
   - Use Firebase Perf to track translation and SN download and install time instead of Firebase Analytics
   - Remove Stetho (#198)
 - Update dependencies:
+  - Gradle to 6.7
   - Android Gradle Plugin to 4.1.0
   - Kotlin to 1.4.10
-  - AndroidX ConstraintLayout to 2.0.2
-  - Firebase plugin to 4.3.4, Analytics to 17.6.0, Crashlytics to 17.2.2
+  - AndroidX Core to 1.3.2, ConstraintLayout to 2.0.4
+  - Firebase plugin to 4.3.4, Analytics to 18.0.0, Crashlytics to 17.2.2
   - Dagger Hilt to 2.29.1-alpha
-  - Mockito to 3.5.13
+  - Mockito to 3.6.0
 
 #### v0.16.2 (2020-09-04)
 - Refactoring:

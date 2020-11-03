@@ -56,11 +56,11 @@ object Versions {
         const val activity = "1.1.0"
         const val annotation = "1.1.0"
         const val appCompat = "1.2.0"
-        const val core = "1.3.1"
+        const val core = "1.3.2"
         const val lifecycle = "2.2.0"
 
         object View {
-            const val constraintLayout = "2.0.2"
+            const val constraintLayout = "2.0.4"
             const val coordinatorLayout = "1.1.0"
             const val drawerLayout = "1.1.1"
             const val material = "1.2.1"
@@ -78,7 +78,7 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.4"
-        const val analytics = "17.6.0"
+        const val analytics = "18.0.0"
 
         object Crashlytics {
             const val classpath = "2.2.1"
@@ -86,7 +86,7 @@ object Versions {
         }
 
         object Perf {
-            const val classpath = "1.3.2"
+            const val classpath = "1.3.3"
             const val perf = "19.0.9"
         }
     }
@@ -97,7 +97,7 @@ object Versions {
 
     const val logger = "0.3.0"
 
-    const val mockito = "3.5.13"
+    const val mockito = "3.6.0"
 }
 
 object Dependencies {
