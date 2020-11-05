@@ -20,10 +20,9 @@ import androidx.collection.LruCache
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -38,58 +37,56 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
 
     private val cache: BibleReadingCache = BibleReadingCache()
 
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
-    private val currentVerseIndex: BroadcastChannel<VerseIndex> = ConflatedBroadcastChannel()
-    private val currentTranslationShortName: ConflatedBroadcastChannel<String> = ConflatedBroadcastChannel()
-    private val parallelTranslations: ConflatedBroadcastChannel<List<String>> = ConflatedBroadcastChannel()
+    private val _currentVerseIndex = MutableStateFlow<VerseIndex?>(null)
+    val currentVerseIndex: Flow<VerseIndex> = _currentVerseIndex.filterNotNull()
+
+    private val _currentTranslation = MutableStateFlow<String?>(null)
+    val currentTranslation: Flow<String> = _currentTranslation.filterNotNull()
+
+    private val _parallelTranslations = MutableStateFlow<List<String>?>(null)
+    val parallelTranslations: Flow<List<String>> = _parallelTranslations.filterNotNull()
 
     init {
         GlobalScope.launch(initDispatcher) {
             try {
-                currentVerseIndex.offer(localReadingStorage.readCurrentVerseIndex())
+                _currentVerseIndex.value = localReadingStorage.readCurrentVerseIndex()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize current verse index", e)
-                currentVerseIndex.offer(VerseIndex.INVALID)
+                _currentVerseIndex.value = VerseIndex.INVALID
             }
             try {
-                currentTranslationShortName.offer(localReadingStorage.readCurrentTranslation())
+                _currentTranslation.value = localReadingStorage.readCurrentTranslation()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize current translation", e)
-                currentTranslationShortName.offer("")
+                _currentTranslation.value = ""
             }
             try {
-                parallelTranslations.offer(localReadingStorage.readParallelTranslations())
+                _parallelTranslations.value = localReadingStorage.readParallelTranslations()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize parallel translations", e)
-                parallelTranslations.offer(emptyList())
+                _parallelTranslations.value = emptyList()
             }
         }
     }
 
-    fun currentVerseIndex(): Flow<VerseIndex> = currentVerseIndex.asFlow()
-
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        currentVerseIndex.offer(verseIndex)
+        _currentVerseIndex.value = verseIndex
         localReadingStorage.saveCurrentVerseIndex(verseIndex)
     }
 
-    fun currentTranslation(): Flow<String> = currentTranslationShortName.asFlow()
-
     suspend fun saveCurrentTranslation(translationShortName: String) {
-        currentTranslationShortName.offer(translationShortName)
+        _currentTranslation.value = translationShortName
         localReadingStorage.saveCurrentTranslation(translationShortName)
     }
 
-    fun parallelTranslations(): Flow<List<String>> = parallelTranslations.asFlow()
-
     suspend fun requestParallelTranslation(translationShortName: String) {
-        parallelTranslations.value.toMutableSet().run {
+        (_parallelTranslations.value?.toMutableSet() ?: mutableSetOf()).run {
             if (add(translationShortName)) saveParallelTranslations(toList())
         }
     }
 
     suspend fun removeParallelTranslation(translationShortName: String) {
-        parallelTranslations.value.toMutableSet().run {
+        (_parallelTranslations.value?.toMutableSet() ?: mutableSetOf()).run {
             if (remove(translationShortName)) saveParallelTranslations(toList())
         }
     }
@@ -99,7 +96,7 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
     }
 
     suspend fun saveParallelTranslations(parallelTranslations: List<String>) {
-        this.parallelTranslations.offer(parallelTranslations)
+        _parallelTranslations.value = parallelTranslations
         localReadingStorage.saveParallelTranslations(parallelTranslations)
     }
 

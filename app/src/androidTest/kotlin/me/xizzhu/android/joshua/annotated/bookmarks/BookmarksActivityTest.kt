@@ -40,11 +40,11 @@ class BookmarksActivityTest {
 
     @Test
     fun testEmptyBookmarks() {
-        BibleReadingManager.currentTranslation.offer(MockContents.kjvShortName)
+        BibleReadingManager.currentTranslation.value = MockContents.kjvShortName
         val robot = BookmarksActivityRobot(activityRule.activity)
                 .isNoBookmarksDisplayed()
 
-        BookmarksRepository.sortOrder.offer(Constants.SORT_BY_BOOK)
+        BookmarksRepository._sortOrder.value = Constants.SORT_BY_BOOK
         robot.isNoBookmarksDisplayed()
     }
 
@@ -55,7 +55,7 @@ class BookmarksActivityTest {
                 Bookmark(VerseIndex(0, 0, 4), now),
                 Bookmark(VerseIndex(0, 0, 0), now)
         )
-        BibleReadingManager.currentTranslation.offer(MockContents.kjvShortName)
+        BibleReadingManager.currentTranslation.value = MockContents.kjvShortName
         BookmarksRepository.annotations = bookmarks
         BookmarksActivityRobot(activityRule.activity)
                 .areBookmarksDisplayed(bookmarks.map { bookmark ->

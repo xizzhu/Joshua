@@ -21,12 +21,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.perf.Perf
@@ -46,10 +43,11 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         const val TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS = 7L * 24L * 3600L * 1000L // 7 day
     }
 
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
     private val translationsLock: Any = Any()
-    private val availableTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
-    private val downloadedTranslationsChannel: ConflatedBroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel()
+    private val _availableTranslations = MutableStateFlow<List<TranslationInfo>?>(null)
+    val availableTranslations: Flow<List<TranslationInfo>> = _availableTranslations.filterNotNull()
+    private val _downloadedTranslations = MutableStateFlow<List<TranslationInfo>?>(null)
+    val downloadedTranslations: Flow<List<TranslationInfo>> = _downloadedTranslations.filterNotNull()
 
     init {
         GlobalScope.launch(initDispatcher) {
@@ -80,13 +78,9 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
     }
 
     private fun notifyTranslationsUpdated(available: List<TranslationInfo>, downloaded: List<TranslationInfo>) {
-        availableTranslationsChannel.offer(available)
-        downloadedTranslationsChannel.offer(downloaded)
+        _availableTranslations.value = available
+        _downloadedTranslations.value = downloaded
     }
-
-    fun availableTranslations(): Flow<List<TranslationInfo>> = availableTranslationsChannel.asFlow()
-
-    fun downloadedTranslations(): Flow<List<TranslationInfo>> = downloadedTranslationsChannel.asFlow()
 
     suspend fun reload(forceRefresh: Boolean) {
         val translations = if (forceRefresh || translationListTooOld()) {
@@ -155,12 +149,12 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
         val (available, downloaded) = synchronized(translationsLock) {
             val available = mutableListOf<TranslationInfo>().apply {
-                availableTranslationsChannel.valueOrNull?.let { addAll(it) }
+                _availableTranslations.value?.let { addAll(it) }
                 removeAll { it.shortName == translationToDownload.shortName }
             }
 
             val downloaded = mutableListOf<TranslationInfo>().apply {
-                downloadedTranslationsChannel.valueOrNull?.let { addAll(it) }
+                _downloadedTranslations.value?.let { addAll(it) }
                 add(translationToDownload.copy(downloaded = true))
             }
 
@@ -194,12 +188,12 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         val (available, downloaded) = synchronized(translationsLock) {
             var removed = false
             val downloaded = mutableListOf<TranslationInfo>().apply {
-                downloadedTranslationsChannel.valueOrNull?.let { addAll(it) }
+                _downloadedTranslations.value?.let { addAll(it) }
                 removed = removeAll { it.shortName == translationInfo.shortName }
             }
 
             val available = mutableListOf<TranslationInfo>().apply {
-                availableTranslationsChannel.valueOrNull?.let { addAll(it) }
+                _availableTranslations.value?.let { addAll(it) }
                 if (removed) {
                     add(translationInfo.copy(downloaded = false))
                 }

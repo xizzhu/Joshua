@@ -60,7 +60,7 @@ class SearchResultListPresenter(
     }
 
     private fun observeSearchRequest() {
-        viewModel.searchRequest()
+        viewModel.searchRequest
                 .debounce(250L)
                 .distinctUntilChangedBy { it.query }
                 .mapLatest { it }

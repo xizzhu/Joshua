@@ -19,8 +19,6 @@ package me.xizzhu.android.joshua.reading
 import androidx.annotation.IntDef
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
@@ -84,17 +82,19 @@ class ReadingViewModel(
         private val highlightManager: VerseAnnotationManager<Highlight>, private val noteManager: VerseAnnotationManager<Note>,
         private val strongNumberManager: StrongNumberManager, settingsManager: SettingsManager, openNoteWhenCreated: Boolean
 ) : BaseSettingsViewModel(settingsManager) {
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
-    private val verseDetailRequest: BroadcastChannel<VerseDetailRequest> = ConflatedBroadcastChannel()
-    private val verseUpdates: BroadcastChannel<VerseUpdate> = ConflatedBroadcastChannel()
+    private val _verseDetailRequest = MutableStateFlow<VerseDetailRequest?>(null)
+    val verseDetailRequest: Flow<VerseDetailRequest> = _verseDetailRequest.filterNotNull()
+
+    private val _verseUpdates = MutableStateFlow<VerseUpdate?>(null)
+    val verseUpdates: Flow<VerseUpdate> = _verseUpdates.filterNotNull()
 
     init {
         if (openNoteWhenCreated) {
             viewModelScope.launch {
                 bibleReadingManager.currentVerseIndex().first().let { verseIndex ->
                     if (verseIndex.isValid()) {
-                        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
-                        verseDetailRequest.offer(VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE))
+                        _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED)
+                        _verseDetailRequest.value = VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE)
                     }
                 }
             }
@@ -260,30 +260,30 @@ class ReadingViewModel(
     suspend fun saveBookmark(verseIndex: VerseIndex, hasBookmark: Boolean) {
         if (hasBookmark) {
             bookmarkManager.remove(verseIndex)
-            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_REMOVED))
+            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_REMOVED)
         } else {
             bookmarkManager.save(Bookmark(verseIndex, currentTimeMillis()))
-            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED))
+            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED)
         }
     }
 
     suspend fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor color: Int) {
         if (color == Highlight.COLOR_NONE) {
             highlightManager.remove(verseIndex)
-            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE))
+            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE)
         } else {
             highlightManager.save(Highlight(verseIndex, color, currentTimeMillis()))
-            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
+            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color)
         }
     }
 
     suspend fun saveNote(verseIndex: VerseIndex, note: String) {
         if (note.isEmpty()) {
             noteManager.remove(verseIndex)
-            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED))
+            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED)
         } else {
             noteManager.save(Note(verseIndex, note, currentTimeMillis()))
-            verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED))
+            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED)
         }
     }
 
@@ -299,16 +299,12 @@ class ReadingViewModel(
         readingProgressManager.stopTracking()
     }
 
-    fun verseUpdates(): Flow<VerseUpdate> = verseUpdates.asFlow()
-
-    fun verseDetailRequest(): Flow<VerseDetailRequest> = verseDetailRequest.asFlow()
-
     fun requestVerseDetail(request: VerseDetailRequest) {
-        verseDetailRequest.offer(request)
+        _verseDetailRequest.value = request
     }
 
     fun closeVerseDetail(verseIndex: VerseIndex) {
         // Note: As of now, this is only called by verse detail presenter, so no need to tell it to hide.
-        verseUpdates.offer(VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED))
+        _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED)
     }
 }

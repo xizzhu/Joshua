@@ -64,7 +64,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
         `when`(searchActivity.lifecycle).thenReturn(lifecycle)
         `when`(searchViewModel.settings()).thenReturn(emptyFlow())
-        `when`(searchViewModel.searchRequest()).thenReturn(emptyFlow())
+        `when`(searchViewModel.searchRequest).thenReturn(emptyFlow())
 
         searchResultViewHolder = SearchResultViewHolder(loadingSpinner, searchResultListView)
         searchResultListPresenter = SearchResultListPresenter(navigator, searchViewModel, searchActivity, testCoroutineScope)
@@ -83,7 +83,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSearchRequest() = runBlocking {
         val query = "query"
-        `when`(searchViewModel.searchRequest()).thenReturn(flowOf(SearchRequest(query, false)))
+        `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, false)))
         `when`(searchViewModel.search(query))
                 .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList())))
 
@@ -105,7 +105,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSearchRequestWithInstantSearch() = runBlocking {
         val query = "query"
-        `when`(searchViewModel.searchRequest()).thenReturn(flowOf(SearchRequest(query, true)))
+        `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, true)))
         `when`(searchViewModel.search(query))
                 .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList())))
 
@@ -123,7 +123,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSearchRequestWithException() = runBlocking {
         val query = "query"
-        `when`(searchViewModel.searchRequest()).thenReturn(flowOf(SearchRequest(query, false)))
+        `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, false)))
         `when`(searchViewModel.search(query)).thenReturn(flow { throw RuntimeException() })
 
         searchResultListPresenter.onCreate()

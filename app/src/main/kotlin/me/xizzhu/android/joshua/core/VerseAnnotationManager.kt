@@ -48,7 +48,7 @@ data class Highlight(override val verseIndex: VerseIndex, @ColorInt val color: I
 data class Note(override val verseIndex: VerseIndex, val note: String, override val timestamp: Long) : VerseAnnotation(verseIndex, timestamp)
 
 class VerseAnnotationManager<T : VerseAnnotation>(private val verseAnnotationRepository: VerseAnnotationRepository<T>) {
-    fun sortOrder(): Flow<Int> = verseAnnotationRepository.sortOrder()
+    fun sortOrder(): Flow<Int> = verseAnnotationRepository.sortOrder
 
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         verseAnnotationRepository.saveSortOrder(sortOrder)

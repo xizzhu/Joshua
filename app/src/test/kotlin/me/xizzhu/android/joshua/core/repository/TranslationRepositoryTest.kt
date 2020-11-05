@@ -49,9 +49,9 @@ class TranslationRepositoryTest : BaseUnitTest() {
         val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
 
         assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo),
-                translationRepository.downloadedTranslations().first())
+                translationRepository.downloadedTranslations.first())
         assertEquals(listOf(MockContents.cuvTranslationInfo),
-                translationRepository.availableTranslations().first())
+                translationRepository.availableTranslations.first())
     }
 
     @Test
@@ -59,8 +59,8 @@ class TranslationRepositoryTest : BaseUnitTest() {
         `when`(localTranslationStorage.readTranslations()).thenThrow(RuntimeException("Random exception"))
         val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
 
-        assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
-        assertTrue(translationRepository.availableTranslations().first().isEmpty())
+        assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
+        assertTrue(translationRepository.availableTranslations.first().isEmpty())
     }
 
     @Test
@@ -68,16 +68,16 @@ class TranslationRepositoryTest : BaseUnitTest() {
         `when`(localTranslationStorage.readTranslations()).thenReturn(emptyList())
         val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
 
-        assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
-        assertTrue(translationRepository.availableTranslations().first().isEmpty())
+        assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
+        assertTrue(translationRepository.availableTranslations.first().isEmpty())
 
         translationRepository.updateTranslations(listOf(MockContents.kjvTranslationInfo,
                 MockContents.kjvDownloadedTranslationInfo, MockContents.kjvDownloadedTranslationInfo,
                 MockContents.kjvTranslationInfo, MockContents.kjvTranslationInfo,
                 MockContents.kjvDownloadedTranslationInfo))
 
-        assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations().first())
-        assertEquals(listOf(MockContents.kjvTranslationInfo), translationRepository.availableTranslations().first())
+        assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations.first())
+        assertEquals(listOf(MockContents.kjvTranslationInfo), translationRepository.availableTranslations.first())
     }
 
     @Test
@@ -88,8 +88,8 @@ class TranslationRepositoryTest : BaseUnitTest() {
             doReturn(listOf(MockContents.kjvTranslationInfo)).`when`(translationRepository).readTranslationsFromBackend()
 
             translationRepository.reload(true)
-            assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
-            assertEquals(listOf(MockContents.kjvTranslationInfo), translationRepository.availableTranslations().first())
+            assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
+            assertEquals(listOf(MockContents.kjvTranslationInfo), translationRepository.availableTranslations.first())
 
             verify(translationRepository, times(1)).readTranslationsFromBackend()
             verify(translationRepository, never()).readTranslationsFromLocal()
@@ -114,8 +114,8 @@ class TranslationRepositoryTest : BaseUnitTest() {
             doReturn(listOf(MockContents.kjvTranslationInfo)).`when`(translationRepository).readTranslationsFromBackend()
 
             translationRepository.reload(false)
-            assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
-            assertEquals(listOf(MockContents.kjvTranslationInfo), translationRepository.availableTranslations().first())
+            assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
+            assertEquals(listOf(MockContents.kjvTranslationInfo), translationRepository.availableTranslations.first())
 
             verify(translationRepository, times(1)).readTranslationsFromBackend()
             verify(translationRepository, never()).readTranslationsFromLocal()
@@ -131,8 +131,8 @@ class TranslationRepositoryTest : BaseUnitTest() {
             doThrow(RuntimeException("Random exception")).`when`(translationRepository).readTranslationsFromBackend()
 
             translationRepository.reload(false)
-            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations().first())
-            assertTrue(translationRepository.availableTranslations().first().isEmpty())
+            assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations.first())
+            assertTrue(translationRepository.availableTranslations.first().isEmpty())
 
             verify(translationRepository, times(1)).readTranslationsFromBackend()
             verify(translationRepository, times(1)).readTranslationsFromLocal()
@@ -147,8 +147,8 @@ class TranslationRepositoryTest : BaseUnitTest() {
             doReturn(false).`when`(translationRepository).translationListTooOld()
 
             translationRepository.reload(false)
-            assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
-            assertEquals(listOf(MockContents.kjvTranslationInfo), translationRepository.availableTranslations().first())
+            assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
+            assertEquals(listOf(MockContents.kjvTranslationInfo), translationRepository.availableTranslations.first())
 
             verify(translationRepository, never()).readTranslationsFromBackend()
             verify(translationRepository, times(1)).readTranslationsFromLocal()
@@ -164,8 +164,8 @@ class TranslationRepositoryTest : BaseUnitTest() {
             doReturn(listOf(MockContents.kjvTranslationInfo)).`when`(translationRepository).readTranslationsFromBackend()
 
             translationRepository.reload(false)
-            assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
-            assertEquals(listOf(MockContents.kjvTranslationInfo), translationRepository.availableTranslations().first())
+            assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
+            assertEquals(listOf(MockContents.kjvTranslationInfo), translationRepository.availableTranslations.first())
 
             verify(translationRepository, times(1)).readTranslationsFromBackend()
             verify(translationRepository, times(1)).readTranslationsFromLocal()
@@ -243,12 +243,12 @@ class TranslationRepositoryTest : BaseUnitTest() {
         doAnswer { Unit }.`when`(translationRepository).downloadTranslation(any(), any())
 
         translationRepository.updateTranslations(listOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo))
-        assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
-        assertEquals(setOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo), translationRepository.availableTranslations().first().toSet())
+        assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
+        assertEquals(setOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo), translationRepository.availableTranslations.first().toSet())
 
         assertTrue(translationRepository.downloadTranslation(MockContents.kjvTranslationInfo).toList().isEmpty())
-        assertEquals(listOf(MockContents.cuvTranslationInfo), translationRepository.availableTranslations().first())
-        assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations().first())
+        assertEquals(listOf(MockContents.cuvTranslationInfo), translationRepository.availableTranslations.first())
+        assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations.first())
     }
 
     @Test
@@ -280,13 +280,13 @@ class TranslationRepositoryTest : BaseUnitTest() {
         `when`(localTranslationStorage.readTranslations()).thenReturn(emptyList())
         val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
 
-        assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
-        assertTrue(translationRepository.availableTranslations().first().isEmpty())
+        assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
+        assertTrue(translationRepository.availableTranslations.first().isEmpty())
 
         translationRepository.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, false))
 
-        assertTrue(translationRepository.availableTranslations().first().isEmpty())
-        assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
+        assertTrue(translationRepository.availableTranslations.first().isEmpty())
+        assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
     }
 
     @Test
@@ -295,11 +295,11 @@ class TranslationRepositoryTest : BaseUnitTest() {
         val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
 
         translationRepository.updateTranslations(listOf(MockContents.cuvTranslationInfo, MockContents.kjvDownloadedTranslationInfo))
-        assertEquals(listOf(MockContents.cuvTranslationInfo), translationRepository.availableTranslations().first())
-        assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations().first())
+        assertEquals(listOf(MockContents.cuvTranslationInfo), translationRepository.availableTranslations.first())
+        assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations.first())
 
         translationRepository.removeTranslation(MockContents.kjvDownloadedTranslationInfo)
-        assertEquals(setOf(MockContents.kjvTranslationInfo, MockContents.cuvTranslationInfo), translationRepository.availableTranslations().first().toSet())
-        assertTrue(translationRepository.downloadedTranslations().first().isEmpty())
+        assertEquals(setOf(MockContents.kjvTranslationInfo, MockContents.cuvTranslationInfo), translationRepository.availableTranslations.first().toSet())
+        assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
     }
 }

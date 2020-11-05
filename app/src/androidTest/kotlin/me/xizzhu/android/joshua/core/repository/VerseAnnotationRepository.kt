@@ -16,15 +16,15 @@
 
 package me.xizzhu.android.joshua.core.repository
 
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import me.xizzhu.android.joshua.core.*
 import java.lang.UnsupportedOperationException
 
 open class VerseAnnotationRepository<T : VerseAnnotation> {
-    val sortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
+    val _sortOrder = MutableStateFlow<Int?>(null)
+    val sortOrder: Flow<Int> = _sortOrder.filterNotNull()
     var annotations: List<T> = emptyList()
 
     init {
@@ -32,14 +32,12 @@ open class VerseAnnotationRepository<T : VerseAnnotation> {
     }
 
     open fun reset() {
-        sortOrder.offer(Constants.DEFAULT_SORT_ORDER)
+        _sortOrder.value = Constants.DEFAULT_SORT_ORDER
         annotations = emptyList()
     }
 
-    fun sortOrder(): Flow<Int> = sortOrder.asFlow()
-
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
-        this.sortOrder.offer(sortOrder)
+        _sortOrder.value = sortOrder
     }
 
     suspend fun read(@Constants.SortOrder sortOrder: Int): List<T> = annotations

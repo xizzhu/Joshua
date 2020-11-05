@@ -53,7 +53,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 SearchRequest("", true),
                 SearchRequest("3", true)
         )
-        val searchRequest = async { searchViewModel.searchRequest().take(requests.size).toList() }
+        val searchRequest = async { searchViewModel.searchRequest.take(requests.size).toList() }
         requests.forEach { searchViewModel.requestSearch(it) }
 
         assertEquals(requests, searchRequest.await())

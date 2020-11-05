@@ -31,7 +31,7 @@ data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fon
 }
 
 class SettingsManager(private val settingsRepository: SettingsRepository) {
-    fun settings(): Flow<Settings> = settingsRepository.settings()
+    fun settings(): Flow<Settings> = settingsRepository.settings
 
     suspend fun saveSettings(settings: Settings) {
         settingsRepository.saveSettings(settings)

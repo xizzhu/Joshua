@@ -36,7 +36,7 @@ class SearchActivityTest {
 
     @Test
     fun testSearch() {
-        BibleReadingManager.currentTranslation.offer(MockContents.kjvShortName)
+        BibleReadingManager.currentTranslation.value = MockContents.kjvShortName
 
         SearchActivityRobot(activityRule.activity)
                 .typeToSearchBox("query")

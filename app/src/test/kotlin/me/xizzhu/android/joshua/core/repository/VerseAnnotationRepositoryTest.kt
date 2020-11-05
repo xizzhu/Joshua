@@ -37,24 +37,24 @@ class VerseAnnotationRepositoryTest : BaseUnitTest() {
     fun testObserveInitialSortOrder() = runBlocking {
         `when`(localVerseAnnotationStorage.readSortOrder()).thenReturn(Constants.SORT_BY_BOOK)
         verseAnnotationRepository = VerseAnnotationRepository(localVerseAnnotationStorage, testDispatcher)
-        assertEquals(Constants.SORT_BY_BOOK, verseAnnotationRepository.sortOrder().first())
+        assertEquals(Constants.SORT_BY_BOOK, verseAnnotationRepository.sortOrder.first())
     }
 
     @Test
     fun testObserveInitialSortOrderWithException() = runBlocking {
         `when`(localVerseAnnotationStorage.readSortOrder()).thenThrow(RuntimeException("Random exception"))
         verseAnnotationRepository = VerseAnnotationRepository(localVerseAnnotationStorage, testDispatcher)
-        assertEquals(Constants.DEFAULT_SORT_ORDER, verseAnnotationRepository.sortOrder().first())
+        assertEquals(Constants.DEFAULT_SORT_ORDER, verseAnnotationRepository.sortOrder.first())
     }
 
     @Test
     fun testSaveThenReadSortOrder() = runBlocking {
         `when`(localVerseAnnotationStorage.readSortOrder()).thenReturn(Constants.DEFAULT_SORT_ORDER)
         verseAnnotationRepository = VerseAnnotationRepository(localVerseAnnotationStorage, testDispatcher)
-        assertEquals(Constants.DEFAULT_SORT_ORDER, verseAnnotationRepository.sortOrder().first())
+        assertEquals(Constants.DEFAULT_SORT_ORDER, verseAnnotationRepository.sortOrder.first())
 
         verseAnnotationRepository.saveSortOrder(Constants.SORT_BY_BOOK)
         verify(localVerseAnnotationStorage, times(1)).saveSortOrder(Constants.SORT_BY_BOOK)
-        assertEquals(Constants.SORT_BY_BOOK, verseAnnotationRepository.sortOrder().first())
+        assertEquals(Constants.SORT_BY_BOOK, verseAnnotationRepository.sortOrder.first())
     }
 }

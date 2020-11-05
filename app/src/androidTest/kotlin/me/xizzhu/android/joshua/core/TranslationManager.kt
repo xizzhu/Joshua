@@ -16,16 +16,13 @@
 
 package me.xizzhu.android.joshua.core
 
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.tests.MockContents
 
 object TranslationManager {
-    private val availableTranslations = ConflatedBroadcastChannel<List<TranslationInfo>>()
-    private val downloadedTranslations = ConflatedBroadcastChannel<List<TranslationInfo>>()
+    private val availableTranslations = MutableStateFlow<List<TranslationInfo>?>(null)
+    private val downloadedTranslations = MutableStateFlow<List<TranslationInfo>?>(null)
     var throwErrorWhenLoadingTranslationList = false
     var throwErrorWhenDownloadingTranslation = false
 
@@ -34,16 +31,16 @@ object TranslationManager {
     }
 
     fun reset() {
-        availableTranslations.offer(listOf(MockContents.kjvTranslationInfo, MockContents.cuvTranslationInfo))
-        downloadedTranslations.offer(emptyList())
+        availableTranslations.value = listOf(MockContents.kjvTranslationInfo, MockContents.cuvTranslationInfo)
+        downloadedTranslations.value = emptyList()
         throwErrorWhenLoadingTranslationList = false
         throwErrorWhenDownloadingTranslation = false
     }
 
     fun availableTranslations(): Flow<List<TranslationInfo>> =
-            if (throwErrorWhenLoadingTranslationList) flow { throw RuntimeException() } else availableTranslations.asFlow()
+            if (throwErrorWhenLoadingTranslationList) flow { throw RuntimeException() } else availableTranslations.filterNotNull()
 
-    fun downloadedTranslations(): Flow<List<TranslationInfo>> = downloadedTranslations.asFlow()
+    fun downloadedTranslations(): Flow<List<TranslationInfo>> = downloadedTranslations.filterNotNull()
 
     suspend fun reload(forceRefresh: Boolean) {
     }
@@ -54,14 +51,14 @@ object TranslationManager {
         if (throwErrorWhenDownloadingTranslation) throw RuntimeException()
         emit(99)
 
-        availableTranslations.send(availableTranslations.value.toMutableList().apply {
+        availableTranslations.value = availableTranslations.value!!.toMutableList().apply {
             removeIf { it.shortName == translationToDownload.shortName }
-        })
-        downloadedTranslations.send(downloadedTranslations.value.toMutableList().apply {
+        }
+        downloadedTranslations.value = downloadedTranslations.value!!.toMutableList().apply {
             add(translationToDownload.copy(downloaded = true))
-        })
+        }
 
-        if (downloadedTranslations.value.size == 1) {
+        if (downloadedTranslations.value!!.size == 1) {
             BibleReadingManager.saveCurrentTranslation(translationToDownload.shortName)
         }
 
@@ -69,11 +66,11 @@ object TranslationManager {
     }
 
     suspend fun removeTranslation(translationToRemove: TranslationInfo) {
-        availableTranslations.send(availableTranslations.value.toMutableList().apply {
+        availableTranslations.value = availableTranslations.value!!.toMutableList().apply {
             add(translationToRemove.copy(downloaded = false))
-        })
-        downloadedTranslations.send(downloadedTranslations.value.toMutableList().apply {
+        }
+        downloadedTranslations.value = downloadedTranslations.value!!.toMutableList().apply {
             removeIf { it.shortName == translationToRemove.shortName }
-        })
+        }
     }
 }

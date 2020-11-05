@@ -49,7 +49,7 @@ object Versions {
     object Kotlin {
         const val jvmTarget = "1.8"
         const val core = "1.4.10"
-        const val coroutines = "1.3.9"
+        const val coroutines = "1.4.0"
     }
 
     object AndroidX {

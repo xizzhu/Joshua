@@ -289,6 +289,6 @@ class VersePresenter(
             viewHolder.versePager.setCurrentItem(newVerseIndexViewData.verseIndex.toPagePosition(), false)
         }.launchIn(coroutineScope)
 
-        viewModel.verseUpdates().onEach { adapter.notifyVerseUpdate(it) }.launchIn(coroutineScope)
+        viewModel.verseUpdates.onEach { adapter.notifyVerseUpdate(it) }.launchIn(coroutineScope)
     }
 }

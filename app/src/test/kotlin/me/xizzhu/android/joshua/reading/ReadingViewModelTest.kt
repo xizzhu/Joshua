@@ -204,7 +204,7 @@ class ReadingViewModelTest : BaseUnitTest() {
     @Test
     fun testSaveBookmark() = runBlockingTest {
         currentTimeMillis = 1234L
-        val verseUpdates = async { readingViewModel.verseUpdates().take(2).toList() }
+        val verseUpdates = async { readingViewModel.verseUpdates.take(2).toList() }
 
         readingViewModel.saveBookmark(VerseIndex(1, 2, 3), true)
         readingViewModel.saveBookmark(VerseIndex(4, 5, 6), false)
@@ -225,7 +225,7 @@ class ReadingViewModelTest : BaseUnitTest() {
     @Test
     fun testSaveHighlight() = runBlockingTest {
         currentTimeMillis = 1234L
-        val verseUpdates = async { readingViewModel.verseUpdates().take(2).toList() }
+        val verseUpdates = async { readingViewModel.verseUpdates.take(2).toList() }
 
         readingViewModel.saveHighlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE)
         readingViewModel.saveHighlight(VerseIndex(4, 5, 6), Highlight.COLOR_NONE)
@@ -246,7 +246,7 @@ class ReadingViewModelTest : BaseUnitTest() {
     @Test
     fun testSaveNote() = runBlockingTest {
         currentTimeMillis = 1234L
-        val verseUpdates = async { readingViewModel.verseUpdates().take(2).toList() }
+        val verseUpdates = async { readingViewModel.verseUpdates.take(2).toList() }
 
         readingViewModel.saveNote(VerseIndex(1, 2, 3), "random notes")
         readingViewModel.saveNote(VerseIndex(4, 5, 6), "")

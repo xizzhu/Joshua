@@ -19,10 +19,9 @@ package me.xizzhu.android.joshua.core.repository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseAnnotation
@@ -37,25 +36,23 @@ class VerseAnnotationRepository<T : VerseAnnotation>(
         private val TAG = VerseAnnotationRepository::class.java.simpleName
     }
 
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
-    private val sortOrder: BroadcastChannel<Int> = ConflatedBroadcastChannel()
+    private val _sortOrder = MutableStateFlow<Int?>(null)
+    val sortOrder: Flow<Int> = _sortOrder.filterNotNull()
 
     init {
         GlobalScope.launch(initDispatcher) {
             try {
-                sortOrder.offer(localVerseAnnotationStorage.readSortOrder())
+                _sortOrder.value = localVerseAnnotationStorage.readSortOrder()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize sort order", e)
-                sortOrder.offer(Constants.DEFAULT_SORT_ORDER)
+                _sortOrder.value = Constants.DEFAULT_SORT_ORDER
             }
         }
     }
 
-    fun sortOrder(): Flow<Int> = sortOrder.asFlow()
-
     suspend fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         localVerseAnnotationStorage.saveSortOrder(sortOrder)
-        this.sortOrder.offer(sortOrder)
+        _sortOrder.value = sortOrder
     }
 
     suspend fun read(@Constants.SortOrder sortOrder: Int): List<T> = localVerseAnnotationStorage.read(sortOrder)

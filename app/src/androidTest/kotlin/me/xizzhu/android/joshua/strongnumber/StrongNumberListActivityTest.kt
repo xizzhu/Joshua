@@ -40,7 +40,7 @@ class StrongNumberListActivityTest {
     fun testStrongNumber() {
         val sn = "H7225"
         activityRule.launchActivity(Intent().putExtras(StrongNumberListActivity.bundle(sn)))
-        BibleReadingManager.currentTranslation.offer(MockContents.kjvShortName)
+        BibleReadingManager.currentTranslation.value = MockContents.kjvShortName
 
         StrongNumberListActivityRobot(activityRule.activity)
                 .isStrongNumberDisplayed(StrongNumberViewData(

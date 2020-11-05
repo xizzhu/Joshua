@@ -48,18 +48,18 @@ class TranslationsActivityTest {
                 .cancelLoadTranslationListRetryRequest()
 
         assertActivityDestroyed(activityRule.activity)
-        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
+        assertTrue(BibleReadingManager.currentTranslation.value!!.isEmpty())
     }
 
     @Test
     fun testNoDownloadedTranslation() {
         val robot = TranslationsActivityRobot(activityRule.activity)
                 .hasNoTranslationDownloaded()
-        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
+        assertTrue(BibleReadingManager.currentTranslation.value!!.isEmpty())
 
         robot.refresh()
                 .hasNoTranslationDownloaded()
-        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
+        assertTrue(BibleReadingManager.currentTranslation.value!!.isEmpty())
     }
 
     @Test
@@ -68,7 +68,7 @@ class TranslationsActivityTest {
                 .tryDownloadKjv()
                 .cancelDownloadRequest()
                 .hasNoTranslationDownloaded()
-        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
+        assertTrue(BibleReadingManager.currentTranslation.value!!.isEmpty())
     }
 
     @Test
@@ -78,7 +78,7 @@ class TranslationsActivityTest {
                 .confirmDownloadRequest()
                 .cancelDownload()
                 .hasNoTranslationDownloaded()
-        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
+        assertTrue(BibleReadingManager.currentTranslation.value!!.isEmpty())
     }
 
     @Test
@@ -92,12 +92,12 @@ class TranslationsActivityTest {
                 .isDownloadRetryRequestDialogDisplayed()
                 .confirmDownloadRetryRequest()
                 .waitUntilDownloadFinish()
-        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
+        assertTrue(BibleReadingManager.currentTranslation.value!!.isEmpty())
 
         robot.isDownloadRetryRequestDialogDisplayed()
                 .cancelDownloadRetryRequest()
                 .hasNoTranslationDownloaded()
-        assertTrue(BibleReadingManager.currentTranslation.value.isEmpty())
+        assertTrue(BibleReadingManager.currentTranslation.value!!.isEmpty())
     }
 
     @Test

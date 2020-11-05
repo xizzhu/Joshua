@@ -66,7 +66,7 @@ class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRep
         }
 
         lastTimestamp = elapsedRealtime()
-        currentVerseIndexObserver = bibleReadingRepository.currentVerseIndex()
+        currentVerseIndexObserver = bibleReadingRepository.currentVerseIndex
         GlobalScope.launch(Dispatchers.Main) {
             currentVerseIndexObserver?.filterIsValid()
                     ?.collect {
@@ -82,7 +82,7 @@ class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRep
             val verseIndex = currentVerseIndex
             if (!verseIndex.isValid()
                     || lastTimestamp == 0L
-                    || bibleReadingRepository.currentTranslation().first().isEmpty()) {
+                    || bibleReadingRepository.currentTranslation.first().isEmpty()) {
                 return
             }
 
