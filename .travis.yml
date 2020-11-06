@@ -9,7 +9,7 @@ android:
   components:
     - tools
     - platform-tools
-    - build-tools-30.0.1
+    - build-tools-30.0.2
     - android-30
     - sys-img-arm64-v8a-google_apis-25
 
