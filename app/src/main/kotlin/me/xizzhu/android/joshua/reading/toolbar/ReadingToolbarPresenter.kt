@@ -30,6 +30,7 @@ import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.ui.dialog
+import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 
 data class ReadingToolbarViewHolder(val readingToolbar: ReadingToolbar) : ViewHolder
@@ -61,7 +62,7 @@ class ReadingToolbarPresenter(
                 viewModel.requestParallelTranslation(translationShortName)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to request parallel translation", e)
-                // TODO
+                activity.toast(R.string.toast_unknown_error)
             }
         }
     }
@@ -72,7 +73,7 @@ class ReadingToolbarPresenter(
                 viewModel.removeParallelTranslation(translationShortName)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to remove parallel translation", e)
-                // TODO
+                activity.toast(R.string.toast_unknown_error)
             }
         }
     }

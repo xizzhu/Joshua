@@ -5,6 +5,7 @@ CHANGELOG
 - Bug fixes:
   - Do not crash if it fails to set searchable info
   - Catch exception in case error occurred while observing downloaded translations
+  - Show toast when failed to update bookmarks, highlights, and parallel translations
 - Changes:
   - Use Firebase Perf to track translation and SN download and install time instead of Firebase Analytics
   - Remove Stetho (#198)

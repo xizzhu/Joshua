@@ -177,7 +177,7 @@ class VersePresenter(
                 viewModel.saveBookmark(verseIndex, hasBookmark)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update bookmark", e)
-                // TODO
+                activity.toast(R.string.toast_unknown_error)
             }
         }
     }
@@ -215,7 +215,7 @@ class VersePresenter(
                 viewModel.saveHighlight(verseIndex, highlightColor)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to update highlight", e)
-                // TODO
+                activity.toast(R.string.toast_unknown_error)
             }
         }
     }
