@@ -301,10 +301,12 @@ class ReadingViewModel(
 
     fun requestVerseDetail(request: VerseDetailRequest) {
         _verseDetailRequest.value = request
+        _verseUpdates.value = VerseUpdate(request.verseIndex, VerseUpdate.VERSE_SELECTED)
     }
 
     fun closeVerseDetail(verseIndex: VerseIndex) {
         // Note: As of now, this is only called by verse detail presenter, so no need to tell it to hide.
+        _verseDetailRequest.value = null
         _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED)
     }
 }

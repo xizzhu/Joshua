@@ -162,7 +162,6 @@ class VersePresenter(
 
     private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailRequest.Companion.Content content: Int) {
         viewModel.requestVerseDetail(VerseDetailRequest(verseIndex, content))
-        adapter.selectVerse(verseIndex)
     }
 
     private fun onVerseLongClicked(verse: Verse) {
