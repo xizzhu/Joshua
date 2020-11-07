@@ -16,10 +16,7 @@
 
 package me.xizzhu.android.joshua.core
 
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.flow.asFlow
-
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
@@ -38,38 +35,38 @@ class BibleReadingManagerTest : BaseUnitTest() {
 
     @Test
     fun testObserveDownloadedTranslations() = runBlocking {
-        `when`(bibleReadingRepository.currentTranslation()).thenReturn(flowOf(""))
-        `when`(bibleReadingRepository.parallelTranslations()).thenReturn(flowOf(emptyList()))
-        val downloadedTranslationsChannel: BroadcastChannel<List<TranslationInfo>> = ConflatedBroadcastChannel(emptyList())
-        `when`(translationRepository.downloadedTranslations()).thenReturn(downloadedTranslationsChannel.asFlow())
+        `when`(bibleReadingRepository.currentTranslation).thenReturn(flowOf(""))
+        `when`(bibleReadingRepository.parallelTranslations).thenReturn(flowOf(emptyList()))
+        val downloadedTranslations = MutableStateFlow<List<TranslationInfo>>(emptyList())
+        `when`(translationRepository.downloadedTranslations).thenReturn(downloadedTranslations)
 
         // we need to create a BibleReadingManager instance to let TranslationRepository load downloaded translations
         val bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, testDispatcher)
 
         // downloads a translation
-        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo))
+        downloadedTranslations.value = listOf(MockContents.cuvTranslationInfo)
 
         // downloads another translation
-        `when`(bibleReadingRepository.currentTranslation()).thenReturn(flowOf(MockContents.cuvShortName))
-        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo))
+        `when`(bibleReadingRepository.currentTranslation).thenReturn(flowOf(MockContents.cuvShortName))
+        downloadedTranslations.value = listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo)
 
         // downloads yet another translation
-        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo, MockContents.kjvTranslationInfo))
+        downloadedTranslations.value = listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo, MockContents.kjvTranslationInfo)
 
         // requests a parallel
-        `when`(bibleReadingRepository.parallelTranslations()).thenReturn(flowOf(listOf(MockContents.bbeShortName)))
+        `when`(bibleReadingRepository.parallelTranslations).thenReturn(flowOf(listOf(MockContents.bbeShortName)))
 
         // requests another parallel
-        `when`(bibleReadingRepository.parallelTranslations()).thenReturn(flowOf(listOf(MockContents.bbeShortName, MockContents.kjvShortName)))
+        `when`(bibleReadingRepository.parallelTranslations).thenReturn(flowOf(listOf(MockContents.bbeShortName, MockContents.kjvShortName)))
 
         // removes a translation that is selected as parallel
-        downloadedTranslationsChannel.offer(listOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo))
+        downloadedTranslations.value = listOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo)
 
         // removes a translation that is selected as current
-        downloadedTranslationsChannel.offer(listOf(MockContents.kjvTranslationInfo))
+        downloadedTranslations.value = listOf(MockContents.kjvTranslationInfo)
 
         // removes all translations
-        downloadedTranslationsChannel.offer(emptyList())
+        downloadedTranslations.value = emptyList()
 
         with(inOrder(bibleReadingRepository)) {
             // initial state

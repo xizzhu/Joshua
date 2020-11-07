@@ -71,7 +71,7 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
 
     init {
         GlobalScope.launch(initDispatcher) {
-            translationRepository.downloadedTranslations().collect { translations ->
+            translationRepository.downloadedTranslations.collect { translations ->
                 try {
                     val downloadedTranslations = translations.map { it.shortName }.toSet()
 
@@ -97,19 +97,19 @@ class BibleReadingManager(private val bibleReadingRepository: BibleReadingReposi
         }
     }
 
-    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingRepository.currentVerseIndex()
+    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingRepository.currentVerseIndex
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
         bibleReadingRepository.saveCurrentVerseIndex(verseIndex)
     }
 
-    fun currentTranslation(): Flow<String> = bibleReadingRepository.currentTranslation()
+    fun currentTranslation(): Flow<String> = bibleReadingRepository.currentTranslation
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
         bibleReadingRepository.saveCurrentTranslation(translationShortName)
     }
 
-    fun parallelTranslations(): Flow<List<String>> = bibleReadingRepository.parallelTranslations()
+    fun parallelTranslations(): Flow<List<String>> = bibleReadingRepository.parallelTranslations
 
     suspend fun requestParallelTranslation(translationShortName: String) {
         bibleReadingRepository.requestParallelTranslation(translationShortName)

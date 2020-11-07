@@ -37,11 +37,11 @@ class HighlightsActivityTest {
 
     @Test
     fun testEmptyHighlights() {
-        BibleReadingManager.currentTranslation.offer(MockContents.kjvShortName)
+        BibleReadingManager.currentTranslation.value = MockContents.kjvShortName
         val robot = HighlightsActivityRobot(activityRule.activity)
                 .isNoHighlightsDisplayed()
 
-        HighlightsRepository.sortOrder.offer(Constants.SORT_BY_BOOK)
+        HighlightsRepository._sortOrder.value = Constants.SORT_BY_BOOK
         robot.isNoHighlightsDisplayed()
     }
 
@@ -52,7 +52,7 @@ class HighlightsActivityTest {
                 Highlight(VerseIndex(0, 0, 4), Highlight.COLOR_BLUE, now),
                 Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, now)
         )
-        BibleReadingManager.currentTranslation.offer(MockContents.kjvShortName)
+        BibleReadingManager.currentTranslation.value = MockContents.kjvShortName
         HighlightsRepository.annotations = highlights
         HighlightsActivityRobot(activityRule.activity)
                 .areHighlightsDisplayed(highlights.map { highlight ->

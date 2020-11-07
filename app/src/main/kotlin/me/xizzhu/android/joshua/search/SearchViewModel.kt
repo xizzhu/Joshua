@@ -16,13 +16,8 @@
 
 package me.xizzhu.android.joshua.search
 
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 
@@ -35,14 +30,12 @@ data class SearchResult(
 
 class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
                       settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    // TODO migrate when https://github.com/Kotlin/kotlinx.coroutines/issues/2034 is done
-    private val searchRequest: BroadcastChannel<SearchRequest> = ConflatedBroadcastChannel()
+    private val _searchRequest = MutableStateFlow<SearchRequest?>(null)
+    val searchRequest: Flow<SearchRequest> = _searchRequest.filterNotNull()
 
     fun requestSearch(request: SearchRequest) {
-        this.searchRequest.offer(request)
+        _searchRequest.value = request
     }
-
-    fun searchRequest(): Flow<SearchRequest> = searchRequest.asFlow()
 
     fun search(query: String): Flow<SearchResult> = flow {
         val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()

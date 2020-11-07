@@ -16,36 +16,36 @@
 
 package me.xizzhu.android.joshua.core
 
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterNotNull
 import me.xizzhu.android.joshua.tests.MockContents
 import kotlin.math.min
 
 object BibleReadingManager {
-    val currentTranslation = ConflatedBroadcastChannel<String>()
-    val currentVerseIndex = ConflatedBroadcastChannel<VerseIndex>()
+    val currentTranslation = MutableStateFlow<String?>(null)
+    val currentVerseIndex = MutableStateFlow<VerseIndex?>(null)
 
     init {
         reset()
     }
 
     fun reset() {
-        currentTranslation.offer("")
-        currentVerseIndex.offer(VerseIndex.INVALID)
+        currentTranslation.value = ""
+        currentVerseIndex.value = VerseIndex.INVALID
     }
 
-    fun currentVerseIndex(): Flow<VerseIndex> = currentVerseIndex.asFlow()
+    fun currentVerseIndex(): Flow<VerseIndex> = currentVerseIndex.filterNotNull()
 
     suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        currentVerseIndex.send(verseIndex)
+        currentVerseIndex.value = verseIndex
     }
 
-    fun currentTranslation(): Flow<String> = currentTranslation.asFlow()
+    fun currentTranslation(): Flow<String> = currentTranslation.filterNotNull()
 
     suspend fun saveCurrentTranslation(translationShortName: String) {
-        currentTranslation.send(translationShortName)
+        currentTranslation.value = translationShortName
     }
 
     fun parallelTranslations(): Flow<List<String>> = emptyFlow()

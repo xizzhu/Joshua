@@ -16,24 +16,24 @@
 
 package me.xizzhu.android.joshua.core
 
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 
 object SettingsManager {
-    val settings = ConflatedBroadcastChannel<Settings>()
+    val settings = MutableStateFlow<Settings?>(null)
 
     init {
         reset()
     }
 
     fun reset() {
-        settings.offer(Settings.DEFAULT)
+        settings.value = Settings.DEFAULT
     }
 
-    fun settings(): Flow<Settings> = settings.asFlow()
+    fun settings(): Flow<Settings> = settings.filterNotNull()
 
     suspend fun saveSettings(settings: Settings) {
-        SettingsManager.settings.send(settings)
+        this.settings.value = settings
     }
 }

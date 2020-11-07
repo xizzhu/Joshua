@@ -37,11 +37,11 @@ class NotesActivityTest {
 
     @Test
     fun testEmptyNotes() {
-        BibleReadingManager.currentTranslation.offer(MockContents.kjvShortName)
+        BibleReadingManager.currentTranslation.value = MockContents.kjvShortName
         val robot = NotesActivityRobot(activityRule.activity)
                 .isNoNotesDisplayed()
 
-        NotesRepository.sortOrder.offer(Constants.SORT_BY_BOOK)
+        NotesRepository._sortOrder.value = Constants.SORT_BY_BOOK
         robot.isNoNotesDisplayed()
     }
 
@@ -52,7 +52,7 @@ class NotesActivityTest {
                 Note(VerseIndex(0, 0, 4), "some random note", now),
                 Note(VerseIndex(0, 0, 0), "more sample", now)
         )
-        BibleReadingManager.currentTranslation.offer(MockContents.kjvShortName)
+        BibleReadingManager.currentTranslation.value = MockContents.kjvShortName
         NotesRepository.annotations = notes
         NotesActivityRobot(activityRule.activity)
                 .areNotesDisplayed(notes.map { note ->

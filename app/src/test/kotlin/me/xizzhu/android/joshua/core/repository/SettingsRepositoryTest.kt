@@ -39,7 +39,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
         `when`(localSettingsStorage.readSettings()).thenReturn(settings)
         settingsRepository = SettingsRepository(localSettingsStorage)
 
-        assertEquals(settings, settingsRepository.settings().first())
+        assertEquals(settings, settingsRepository.settings.first())
     }
 
     @Test
@@ -47,7 +47,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
         `when`(localSettingsStorage.readSettings()).thenThrow(RuntimeException("Random exception"))
         settingsRepository = SettingsRepository(localSettingsStorage)
 
-        assertEquals(Settings.DEFAULT, settingsRepository.settings().first())
+        assertEquals(Settings.DEFAULT, settingsRepository.settings.first())
     }
 
     @Test
@@ -57,6 +57,6 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
         val settings = Settings(false, true, 1, true, true, true, Highlight.COLOR_BLUE)
         settingsRepository.saveSettings(settings)
-        assertEquals(settings, settingsRepository.settings().first())
+        assertEquals(settings, settingsRepository.settings.first())
     }
 }

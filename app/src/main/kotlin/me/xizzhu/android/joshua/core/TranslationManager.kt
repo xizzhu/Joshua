@@ -23,9 +23,9 @@ data class TranslationInfo(val shortName: String, val name: String, val language
                            val size: Long, val downloaded: Boolean)
 
 class TranslationManager(private val translationRepository: TranslationRepository) {
-    fun availableTranslations(): Flow<List<TranslationInfo>> = translationRepository.availableTranslations()
+    fun availableTranslations(): Flow<List<TranslationInfo>> = translationRepository.availableTranslations
 
-    fun downloadedTranslations(): Flow<List<TranslationInfo>> = translationRepository.downloadedTranslations()
+    fun downloadedTranslations(): Flow<List<TranslationInfo>> = translationRepository.downloadedTranslations
 
     suspend fun reload(forceRefresh: Boolean) {
         translationRepository.reload(forceRefresh)

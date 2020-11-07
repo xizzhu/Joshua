@@ -181,7 +181,7 @@ class VerseDetailPresenter(
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreate() {
         viewModel.settings().onEach { viewHolder.verseDetailViewLayout.setSettings(it) }.launchIn(coroutineScope)
-        viewModel.verseDetailRequest().onEach {
+        viewModel.verseDetailRequest.onEach {
             loadVerseDetail(it.verseIndex)
             viewHolder.verseDetailViewLayout.show(it.content)
         }.launchIn(coroutineScope)

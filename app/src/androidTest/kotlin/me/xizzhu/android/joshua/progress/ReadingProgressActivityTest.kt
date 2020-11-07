@@ -45,7 +45,7 @@ class ReadingProgressActivityTest {
                         ReadingProgress.ChapterReadingStatus(63, 0, 1, 2L, 3L),
                         ReadingProgress.ChapterReadingStatus(64, 0, 1, 2L, 3L)
                 ))
-        BibleReadingManager.currentTranslation.offer(MockContents.kjvShortName)
+        BibleReadingManager.currentTranslation.value = MockContents.kjvShortName
         ReadingProgressManager.readingProgress = readingProgress
         activityRule.launchActivity(Intent())
 

@@ -41,7 +41,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
-        assertEquals(VerseIndex(1, 2, 3), bibleReadingRepository.currentVerseIndex().first())
+        assertEquals(VerseIndex(1, 2, 3), bibleReadingRepository.currentVerseIndex.first())
     }
 
     @Test
@@ -51,7 +51,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
-        assertFalse(bibleReadingRepository.currentVerseIndex().first().isValid())
+        assertFalse(bibleReadingRepository.currentVerseIndex.first().isValid())
     }
 
     @Test
@@ -62,7 +62,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         bibleReadingRepository.saveCurrentVerseIndex(VerseIndex(4, 5, 6))
-        assertEquals(VerseIndex(4, 5, 6), bibleReadingRepository.currentVerseIndex().first())
+        assertEquals(VerseIndex(4, 5, 6), bibleReadingRepository.currentVerseIndex.first())
     }
 
     @Test
@@ -72,7 +72,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
-        assertEquals(MockContents.kjvShortName, bibleReadingRepository.currentTranslation().first())
+        assertEquals(MockContents.kjvShortName, bibleReadingRepository.currentTranslation.first())
     }
 
     @Test
@@ -82,7 +82,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
-        assertTrue(bibleReadingRepository.currentTranslation().first().isEmpty())
+        assertTrue(bibleReadingRepository.currentTranslation.first().isEmpty())
     }
 
     @Test
@@ -93,7 +93,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         bibleReadingRepository.saveCurrentTranslation(MockContents.cuvShortName)
-        assertEquals(MockContents.cuvShortName, bibleReadingRepository.currentTranslation().first())
+        assertEquals(MockContents.cuvShortName, bibleReadingRepository.currentTranslation.first())
     }
 
     @Test
@@ -103,7 +103,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
         `when`(localReadingStorage.readParallelTranslations()).thenReturn(listOf(MockContents.cuvShortName))
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
-        assertEquals(listOf(MockContents.cuvShortName), bibleReadingRepository.parallelTranslations().first())
+        assertEquals(listOf(MockContents.cuvShortName), bibleReadingRepository.parallelTranslations.first())
     }
 
     @Test
@@ -113,7 +113,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
         `when`(localReadingStorage.readParallelTranslations()).thenThrow(RuntimeException("Random exception"))
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
-        assertTrue(bibleReadingRepository.parallelTranslations().first().isEmpty())
+        assertTrue(bibleReadingRepository.parallelTranslations.first().isEmpty())
     }
 
     @Test
@@ -125,27 +125,27 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
 
         // adds a parallel
         bibleReadingRepository.requestParallelTranslation(MockContents.kjvShortName)
-        assertEquals(listOf(MockContents.kjvShortName), bibleReadingRepository.parallelTranslations().first())
+        assertEquals(listOf(MockContents.kjvShortName), bibleReadingRepository.parallelTranslations.first())
         verify(localReadingStorage, times(1)).saveParallelTranslations(listOf(MockContents.kjvShortName))
 
         // adds the same parallel, and also a new one
         bibleReadingRepository.requestParallelTranslation(MockContents.kjvShortName)
         bibleReadingRepository.requestParallelTranslation(MockContents.cuvShortName)
-        assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName), bibleReadingRepository.parallelTranslations().first().toSet())
+        assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName), bibleReadingRepository.parallelTranslations.first().toSet())
         verify(localReadingStorage, times(1)).saveParallelTranslations(listOf(MockContents.kjvShortName, MockContents.cuvShortName))
 
         // removes a non-exist parallel
         bibleReadingRepository.removeParallelTranslation("not_exist")
-        assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName), bibleReadingRepository.parallelTranslations().first().toSet())
+        assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName), bibleReadingRepository.parallelTranslations.first().toSet())
 
         // removes a parallel
         bibleReadingRepository.removeParallelTranslation(MockContents.kjvShortName)
-        assertEquals(listOf(MockContents.cuvShortName), bibleReadingRepository.parallelTranslations().first())
+        assertEquals(listOf(MockContents.cuvShortName), bibleReadingRepository.parallelTranslations.first())
         verify(localReadingStorage, times(1)).saveParallelTranslations(listOf(MockContents.cuvShortName))
 
         // removes another parallel
         bibleReadingRepository.removeParallelTranslation(MockContents.cuvShortName)
-        assertTrue(bibleReadingRepository.parallelTranslations().first().isEmpty())
+        assertTrue(bibleReadingRepository.parallelTranslations.first().isEmpty())
         verify(localReadingStorage, times(1)).saveParallelTranslations(emptyList())
     }
 
@@ -159,10 +159,10 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
 
         bibleReadingRepository.requestParallelTranslation(MockContents.kjvShortName)
         bibleReadingRepository.requestParallelTranslation(MockContents.cuvShortName)
-        assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName), bibleReadingRepository.parallelTranslations().first().toSet())
+        assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName), bibleReadingRepository.parallelTranslations.first().toSet())
 
         bibleReadingRepository.clearParallelTranslation()
-        assertTrue(bibleReadingRepository.parallelTranslations().first().isEmpty())
+        assertTrue(bibleReadingRepository.parallelTranslations.first().isEmpty())
     }
 
     @Test
