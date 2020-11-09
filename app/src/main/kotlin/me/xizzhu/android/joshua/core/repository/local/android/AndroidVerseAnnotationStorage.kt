@@ -49,6 +49,10 @@ abstract class AndroidVerseAnnotationStorage<T : VerseAnnotation>(
         verseAnnotationDao.read(verseIndex)
     }
 
+    override suspend fun search(query: String): List<T> = withContext(Dispatchers.IO) {
+        verseAnnotationDao.search(query)
+    }
+
     override suspend fun save(verseAnnotation: T) {
         withContext(Dispatchers.IO) { verseAnnotationDao.save(verseAnnotation) }
     }

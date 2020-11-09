@@ -101,6 +101,11 @@ class SearchResultListPresenter(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun SearchResult.toItems(): List<BaseItem> {
         val items = ArrayList<BaseItem>(verses.size + Bible.BOOK_COUNT)
+
+        notes.forEach { note ->
+            // TODO
+        }
+
         var lastVerseBookIndex = -1
         verses.forEach { verse ->
             val currentVerseBookIndex = verse.verseIndex.bookIndex
@@ -111,6 +116,7 @@ class SearchResultListPresenter(
             items.add(SearchItem(verse.verseIndex, bookShortNames[currentVerseBookIndex],
                     verse.text.text, query, ::selectVerse))
         }
+
         return items
     }
 

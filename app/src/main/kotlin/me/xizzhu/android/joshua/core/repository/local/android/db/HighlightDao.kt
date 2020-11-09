@@ -17,14 +17,21 @@
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import android.database.sqlite.SQLiteOpenHelper
+import androidx.annotation.WorkerThread
 import me.xizzhu.android.ask.db.*
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
+import java.lang.UnsupportedOperationException
 
 class HighlightDao(sqliteHelper: SQLiteOpenHelper) : VerseAnnotationDao<Highlight>(sqliteHelper, TABLE_HIGHLIGHT) {
     companion object {
         private const val TABLE_HIGHLIGHT = "highlight"
         private const val COLUMN_COLOR = "color"
+    }
+
+    @WorkerThread
+    override fun searchVerseAnnotations(query: String): Query {
+        throw UnsupportedOperationException("Search not supported for highlights")
     }
 
     override fun MutableMap<String, ColumnModifiers>.putCustomColumnModifiers() {

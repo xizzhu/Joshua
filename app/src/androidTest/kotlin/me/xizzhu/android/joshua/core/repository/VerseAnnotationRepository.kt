@@ -48,6 +48,8 @@ open class VerseAnnotationRepository<T : VerseAnnotation> {
         throw UnsupportedOperationException()
     }
 
+    suspend fun search(query: String): List<T> = emptyList()
+
     suspend fun save(verseAnnotation: T) {}
 
     suspend fun save(verseAnnotations: List<T>) {}

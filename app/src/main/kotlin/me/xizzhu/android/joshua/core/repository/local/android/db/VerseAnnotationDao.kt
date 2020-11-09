@@ -32,7 +32,7 @@ abstract class VerseAnnotationDao<T : VerseAnnotation>(sqliteHelper: SQLiteOpenH
         private const val COLUMN_TIMESTAMP = "timestamp"
     }
 
-    private val db by lazy { sqliteHelper.writableDatabase }
+    protected val db by lazy { sqliteHelper.writableDatabase }
 
     @WorkerThread
     fun createTable(db: SQLiteDatabase) {
@@ -85,6 +85,22 @@ abstract class VerseAnnotationDao<T : VerseAnnotation>(sqliteHelper: SQLiteOpenH
             (COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)
 
     protected abstract fun defaultVerseAnnotation(verseIndex: VerseIndex): T
+
+    @WorkerThread
+    fun search(query: String): List<T> {
+        if (query.isBlank()) return emptyList()
+
+        return searchVerseAnnotations(query)
+                .orderBy(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX).toList { row ->
+                    row.toVerseAnnotation(
+                            VerseIndex(row.getInt(COLUMN_BOOK_INDEX), row.getInt(COLUMN_CHAPTER_INDEX), row.getInt(COLUMN_VERSE_INDEX)),
+                            row.getLong(COLUMN_TIMESTAMP)
+                    )
+                }
+    }
+
+    @WorkerThread
+    protected abstract fun searchVerseAnnotations(query: String): Query
 
     @WorkerThread
     fun save(verseAnnotation: T) {

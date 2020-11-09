@@ -85,7 +85,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         val query = "query"
         `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, false)))
         `when`(searchViewModel.search(query))
-                .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList())))
+                .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList(), emptyList())))
 
         searchResultListPresenter.onCreate()
 
@@ -107,7 +107,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         val query = "query"
         `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, true)))
         `when`(searchViewModel.search(query))
-                .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList())))
+                .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList(), emptyList())))
 
         searchResultListPresenter.onCreate()
 
@@ -152,6 +152,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
         val searchResult = SearchResult(
                 query, listOf(MockContents.kjvVerses[0]),
+                listOf(),
                 MockContents.kjvBookNames, MockContents.kjvBookShortNames
         )
         val actual = with(searchResultListPresenter) { searchResult.toItems() }

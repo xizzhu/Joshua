@@ -24,11 +24,12 @@ import me.xizzhu.android.joshua.utils.firstNotEmpty
 data class SearchRequest(val query: String, val instantSearch: Boolean)
 
 data class SearchResult(
-        val query: String, val verses: List<Verse>,
+        val query: String, val verses: List<Verse>, val notes: List<Note>,
         val bookNames: List<String>, val bookShortNames: List<String>
 )
 
 class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
+                      private val noteManager: VerseAnnotationManager<Note>,
                       settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
     private val _searchRequest = MutableStateFlow<SearchRequest?>(null)
     val searchRequest: Flow<SearchRequest> = _searchRequest.filterNotNull()
@@ -41,6 +42,7 @@ class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
         val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
         emit(SearchResult(
                 query, bibleReadingManager.search(currentTranslation, query),
+                noteManager.search(query),
                 bibleReadingManager.readBookNames(currentTranslation),
                 bibleReadingManager.readBookShortNames(currentTranslation)
         ))

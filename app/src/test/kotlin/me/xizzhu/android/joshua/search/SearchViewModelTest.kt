@@ -20,8 +20,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.mockito.Mock
@@ -33,6 +32,9 @@ class SearchViewModelTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
 
     @Mock
+    private lateinit var noteManager: VerseAnnotationManager<Note>
+
+    @Mock
     private lateinit var settingsManager: SettingsManager
 
     private lateinit var searchViewModel: SearchViewModel
@@ -41,7 +43,7 @@ class SearchViewModelTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        searchViewModel = SearchViewModel(bibleReadingManager, settingsManager)
+        searchViewModel = SearchViewModel(bibleReadingManager, noteManager, settingsManager)
     }
 
     @Test
@@ -67,11 +69,13 @@ class SearchViewModelTest : BaseUnitTest() {
         `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0]))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
         `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(noteManager.search(query)).thenReturn(listOf(Note(VerseIndex(1, 1, 1), "note", 12345L)))
 
         assertEquals(
                 listOf(
                         SearchResult(
                                 query, listOf(MockContents.kjvVerses[0]),
+                                listOf(Note(VerseIndex(1, 1, 1), "note", 12345L)),
                                 MockContents.kjvBookNames, MockContents.kjvBookShortNames
                         )
                 ),

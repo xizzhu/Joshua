@@ -31,6 +31,8 @@ interface LocalVerseAnnotationStorage<T : VerseAnnotation> {
 
     suspend fun read(verseIndex: VerseIndex): T
 
+    suspend fun search(query: String): List<T>
+
     suspend fun save(verseAnnotation: T)
 
     suspend fun save(verseAnnotations: List<T>)
