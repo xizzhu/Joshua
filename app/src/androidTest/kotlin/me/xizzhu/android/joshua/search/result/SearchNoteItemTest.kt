@@ -22,25 +22,29 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import org.junit.Assert.assertEquals
-import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class SearchItemTest : BaseUnitTest() {
+class SearchNoteItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_search_result, SearchItem(VerseIndex.INVALID, "", "", "", {}).viewType)
+        assertEquals(R.layout.item_search_note, SearchNoteItem(VerseIndex.INVALID, "", "", "", "", {}).viewType)
     }
 
     @Test
-    fun testTextForDisplay() {
-        val verseIndex = VerseIndex(1, 2, 3)
-        val bookShortName = MockContents.kjvBookShortNames[0]
-        val text = MockContents.kjvVerses[0].text.text
-        val expected = "$bookShortName ${verseIndex.chapterIndex + 1}:${verseIndex.verseIndex + 1}\n$text"
-        val actual = SearchItem(verseIndex, bookShortName, text, "", {}).textForDisplay.toString()
+    fun testVerseForDisplay() {
+        val expected = "Gen. 1:1 In the beginning God created the heaven and the earth."
+        val actual = SearchNoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, "", "", {}).verseForDisplay.toString()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testNoteForDisplay() {
+        val expected = "random note"
+        val actual = SearchNoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, "random note", "", {}).noteForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

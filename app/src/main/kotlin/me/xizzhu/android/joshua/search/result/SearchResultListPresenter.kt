@@ -102,8 +102,11 @@ class SearchResultListPresenter(
     fun SearchResult.toItems(): List<BaseItem> {
         val items = ArrayList<BaseItem>(verses.size + Bible.BOOK_COUNT)
 
-        notes.forEach { note ->
-            // TODO
+        if (notes.isNotEmpty()) {
+            items.add(TitleItem(activity.getString(R.string.title_notes), false))
+            notes.forEach { note ->
+                items.add(SearchNoteItem(note.verseIndex, bookShortNames[note.verseIndex.bookIndex], note.verse, note.note, query, ::selectVerse))
+            }
         }
 
         var lastVerseBookIndex = -1
@@ -113,7 +116,7 @@ class SearchResultListPresenter(
                 items.add(TitleItem(bookNames[currentVerseBookIndex], false))
                 lastVerseBookIndex = currentVerseBookIndex
             }
-            items.add(SearchItem(verse.verseIndex, bookShortNames[currentVerseBookIndex],
+            items.add(SearchVerseItem(verse.verseIndex, bookShortNames[currentVerseBookIndex],
                     verse.text.text, query, ::selectVerse))
         }
 

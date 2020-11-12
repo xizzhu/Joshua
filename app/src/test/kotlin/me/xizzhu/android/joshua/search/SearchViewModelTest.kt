@@ -69,13 +69,15 @@ class SearchViewModelTest : BaseUnitTest() {
         `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0]))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
         `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
-        `when`(noteManager.search(query)).thenReturn(listOf(Note(VerseIndex(1, 1, 1), "note", 12345L)))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 1))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 1), MockContents.kjvVerses[1])))
+        `when`(noteManager.search(query)).thenReturn(listOf(Note(VerseIndex(0, 0, 1), "note", 12345L)))
 
         assertEquals(
                 listOf(
                         SearchResult(
                                 query, listOf(MockContents.kjvVerses[0]),
-                                listOf(Note(VerseIndex(1, 1, 1), "note", 12345L)),
+                                listOf(SearchResult.Note(VerseIndex(0, 0, 1), "note", MockContents.kjvVerses[1].text.text)),
                                 MockContents.kjvBookNames, MockContents.kjvBookShortNames
                         )
                 ),

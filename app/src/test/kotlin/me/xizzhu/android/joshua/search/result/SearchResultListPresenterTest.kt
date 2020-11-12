@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.search.SearchActivity
@@ -44,14 +45,19 @@ import kotlin.test.assertEquals
 class SearchResultListPresenterTest : BaseUnitTest() {
     @Mock
     private lateinit var lifecycle: Lifecycle
+
     @Mock
     private lateinit var navigator: Navigator
+
     @Mock
     private lateinit var searchViewModel: SearchViewModel
+
     @Mock
     private lateinit var searchActivity: SearchActivity
+
     @Mock
     private lateinit var loadingSpinner: ProgressBar
+
     @Mock
     private lateinit var searchResultListView: CommonRecyclerView
 
@@ -63,6 +69,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         super.setup()
 
         `when`(searchActivity.lifecycle).thenReturn(lifecycle)
+        `when`(searchActivity.getString(R.string.title_notes)).thenReturn("Notes")
         `when`(searchViewModel.settings()).thenReturn(emptyFlow())
         `when`(searchViewModel.searchRequest).thenReturn(emptyFlow())
 
@@ -143,8 +150,10 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     fun testToItems() {
         val query = "query"
         val expected = listOf(
+                TitleItem("Notes", false),
+                SearchNoteItem(VerseIndex(0, 0, 1), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, "note", query, searchResultListPresenter::selectVerse),
                 TitleItem(MockContents.kjvBookNames[0], false),
-                SearchItem(
+                SearchVerseItem(
                         VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0],
                         MockContents.kjvVerses[0].text.text, query, searchResultListPresenter::selectVerse
                 )
@@ -152,7 +161,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
 
         val searchResult = SearchResult(
                 query, listOf(MockContents.kjvVerses[0]),
-                listOf(),
+                listOf(SearchResult.Note(VerseIndex(0, 0, 1), "note", MockContents.kjvVerses[0].text.text)),
                 MockContents.kjvBookNames, MockContents.kjvBookShortNames
         )
         val actual = with(searchResultListPresenter) { searchResult.toItems() }

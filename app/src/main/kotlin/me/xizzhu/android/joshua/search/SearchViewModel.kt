@@ -26,7 +26,9 @@ data class SearchRequest(val query: String, val instantSearch: Boolean)
 data class SearchResult(
         val query: String, val verses: List<Verse>, val notes: List<Note>,
         val bookNames: List<String>, val bookShortNames: List<String>
-)
+) {
+    data class Note(val verseIndex: VerseIndex, val note: String, val verse: String)
+}
 
 class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
                       private val noteManager: VerseAnnotationManager<Note>,
@@ -40,9 +42,17 @@ class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
 
     fun search(query: String): Flow<SearchResult> = flow {
         val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+        val notes = noteManager.search(query).let { notes ->
+            val verses = bibleReadingManager.readVerses(currentTranslation, notes.map { it.verseIndex })
+            arrayListOf<SearchResult.Note>().apply {
+                ensureCapacity(notes.size)
+                notes.forEach { note ->
+                    add(SearchResult.Note(note.verseIndex, note.note, verses[note.verseIndex]?.text?.text ?: ""))
+                }
+            }
+        }
         emit(SearchResult(
-                query, bibleReadingManager.search(currentTranslation, query),
-                noteManager.search(query),
+                query, bibleReadingManager.search(currentTranslation, query), notes,
                 bibleReadingManager.readBookNames(currentTranslation),
                 bibleReadingManager.readBookShortNames(currentTranslation)
         ))

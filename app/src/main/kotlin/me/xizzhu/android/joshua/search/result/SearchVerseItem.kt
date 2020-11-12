@@ -17,10 +17,7 @@
 package me.xizzhu.android.joshua.search.result
 
 import android.annotation.SuppressLint
-import android.graphics.Typeface
 import android.text.SpannableStringBuilder
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -32,10 +29,10 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import java.util.*
 
-data class SearchItem(val verseIndex: VerseIndex, private val bookShortName: String,
-                      private val text: String, private val query: String,
-                      val onClicked: (VerseIndex) -> Unit)
-    : BaseItem(R.layout.item_search_result, { inflater, parent -> SearchItemViewHolder(inflater, parent) }) {
+data class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: String,
+                           private val text: String, private val query: String,
+                           val onClicked: (VerseIndex) -> Unit)
+    : BaseItem(R.layout.item_search_verse, { inflater, parent -> SearchVerseItemViewHolder(inflater, parent) }) {
     companion object {
         // We don't expect users to change locale that frequently.
         @SuppressLint("ConstantLocale")
@@ -46,9 +43,6 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookShortName: Str
         private val KEYWORD_SIZE_SPAN = createKeywordSizeSpan()
         private val KEYWORD_STYLE_SPAN = createKeywordStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
-
-        private fun createKeywordSizeSpan() = RelativeSizeSpan(1.2F)
-        private fun createKeywordStyleSpan() = StyleSpan(Typeface.BOLD)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -80,15 +74,15 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookShortName: Str
     }
 }
 
-private class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<SearchItem>(inflater.inflate(R.layout.item_search_result, parent, false)) {
+private class SearchVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+    : BaseViewHolder<SearchVerseItem>(inflater.inflate(R.layout.item_search_verse, parent, false)) {
     private val text = itemView as TextView
 
     init {
         itemView.setOnClickListener { item?.let { it.onClicked(it.verseIndex) } }
     }
 
-    override fun bind(settings: Settings, item: SearchItem, payloads: List<Any>) {
+    override fun bind(settings: Settings, item: SearchVerseItem, payloads: List<Any>) {
         with(text) {
             updateSettingsWithPrimaryText(settings)
             text = item.textForDisplay

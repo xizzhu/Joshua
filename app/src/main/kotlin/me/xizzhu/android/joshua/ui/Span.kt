@@ -26,6 +26,9 @@ import android.text.style.StyleSpan
 fun createTitleSizeSpan() = RelativeSizeSpan(0.85F)
 fun createTitleStyleSpan() = StyleSpan(Typeface.BOLD)
 
+fun createKeywordSizeSpan() = RelativeSizeSpan(1.2F)
+fun createKeywordStyleSpan() = StyleSpan(Typeface.BOLD)
+
 fun SpannableStringBuilder.clearAll(): SpannableStringBuilder {
     clear()
     clearSpans()
