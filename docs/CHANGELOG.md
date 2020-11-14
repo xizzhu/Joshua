@@ -3,7 +3,7 @@ CHANGELOG
 
 #### Next Release
 - New features:
-  - Include notes in search results
+  - Include bookmarks, highlights, and notes in search results
 - Bug fixes:
   - Do not crash if it fails to set searchable info
   - Catch exception in case error occurred while observing downloaded translations

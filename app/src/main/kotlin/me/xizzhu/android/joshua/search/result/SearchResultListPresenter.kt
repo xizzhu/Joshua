@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.*
@@ -105,7 +106,25 @@ class SearchResultListPresenter(
         if (notes.isNotEmpty()) {
             items.add(TitleItem(activity.getString(R.string.title_notes), false))
             notes.forEach { note ->
-                items.add(SearchNoteItem(note.verseIndex, bookShortNames[note.verseIndex.bookIndex], note.verse, note.note, query, ::selectVerse))
+                items.add(SearchNoteItem(
+                        note.first.verseIndex, bookShortNames[note.first.verseIndex.bookIndex], note.second.text.text, note.first.note, query, ::selectVerse
+                ))
+            }
+        }
+
+        if (bookmarks.isNotEmpty()) {
+            items.add(TitleItem(activity.getString(R.string.title_bookmarks), false))
+            bookmarks.forEach { bookmark ->
+                items.add(SearchVerseItem(bookmark.first.verseIndex, bookShortNames[bookmark.first.verseIndex.bookIndex],
+                        bookmark.second.text.text, query, Highlight.COLOR_NONE, ::selectVerse))
+            }
+        }
+
+        if (highlights.isNotEmpty()) {
+            items.add(TitleItem(activity.getString(R.string.title_highlights), false))
+            highlights.forEach { highlight ->
+                items.add(SearchVerseItem(highlight.first.verseIndex, bookShortNames[highlight.first.verseIndex.bookIndex],
+                        highlight.second.text.text, query, highlight.first.color, ::selectVerse))
             }
         }
 
@@ -117,7 +136,7 @@ class SearchResultListPresenter(
                 lastVerseBookIndex = currentVerseBookIndex
             }
             items.add(SearchVerseItem(verse.verseIndex, bookShortNames[currentVerseBookIndex],
-                    verse.text.text, query, ::selectVerse))
+                    verse.text.text, query, Highlight.COLOR_NONE, ::selectVerse))
         }
 
         return items

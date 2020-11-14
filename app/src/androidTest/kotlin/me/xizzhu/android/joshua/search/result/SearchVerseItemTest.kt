@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.search.result
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -31,7 +32,7 @@ import org.junit.runner.RunWith
 class SearchVerseItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_search_verse, SearchVerseItem(VerseIndex.INVALID, "", "", "", {}).viewType)
+        assertEquals(R.layout.item_search_verse, SearchVerseItem(VerseIndex.INVALID, "", "", "", Highlight.COLOR_NONE, {}).viewType)
     }
 
     @Test
@@ -40,7 +41,7 @@ class SearchVerseItemTest : BaseUnitTest() {
         val bookShortName = MockContents.kjvBookShortNames[0]
         val text = MockContents.kjvVerses[0].text.text
         val expected = "$bookShortName ${verseIndex.chapterIndex + 1}:${verseIndex.verseIndex + 1}\n$text"
-        val actual = SearchVerseItem(verseIndex, bookShortName, text, "", {}).textForDisplay.toString()
+        val actual = SearchVerseItem(verseIndex, bookShortName, text, "", Highlight.COLOR_NONE, {}).textForDisplay.toString()
         assertEquals(expected, actual)
     }
 }

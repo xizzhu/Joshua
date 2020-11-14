@@ -43,7 +43,7 @@ class SearchActivityTest {
                 .startSearch()
                 .waitUntilSearchFinished()
                 .hasSearchResultShown(SearchResult(
-                        "query", MockContents.kjvVerses.subList(0, 5), listOf(),
+                        "query", MockContents.kjvVerses.subList(0, 5), listOf(), listOf(), listOf(),
                         MockContents.kjvBookNames, MockContents.kjvBookShortNames))
                 .clickSearchResultItem(1)
 

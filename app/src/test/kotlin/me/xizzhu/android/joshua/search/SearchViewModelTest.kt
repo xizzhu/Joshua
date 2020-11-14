@@ -32,6 +32,12 @@ class SearchViewModelTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
 
     @Mock
+    private lateinit var bookmarkManager: VerseAnnotationManager<Bookmark>
+
+    @Mock
+    private lateinit var highlightManager: VerseAnnotationManager<Highlight>
+
+    @Mock
     private lateinit var noteManager: VerseAnnotationManager<Note>
 
     @Mock
@@ -43,7 +49,7 @@ class SearchViewModelTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        searchViewModel = SearchViewModel(bibleReadingManager, noteManager, settingsManager)
+        searchViewModel = SearchViewModel(bibleReadingManager, bookmarkManager, highlightManager, noteManager, settingsManager)
     }
 
     @Test
@@ -66,18 +72,26 @@ class SearchViewModelTest : BaseUnitTest() {
         val currentTranslation = MockContents.kjvShortName
         val query = "query"
         `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
-        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0]))
+        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]))
         `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
         `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
         `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 1))))
                 .thenReturn(mapOf(Pair(VerseIndex(0, 0, 1), MockContents.kjvVerses[1])))
-        `when`(noteManager.search(query)).thenReturn(listOf(Note(VerseIndex(0, 0, 1), "note", 12345L)))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 2))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 2), MockContents.kjvVerses[2])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 3))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 3), MockContents.kjvVerses[3])))
+        `when`(bookmarkManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Bookmark(VerseIndex(0, 0, 1), 0L)))
+        `when`(highlightManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Highlight(VerseIndex(0, 0, 2), Highlight.COLOR_BLUE, 0L)))
+        `when`(noteManager.search(query)).thenReturn(listOf(Note(VerseIndex(0, 0, 3), "note", 0L)))
 
         assertEquals(
                 listOf(
                         SearchResult(
-                                query, listOf(MockContents.kjvVerses[0]),
-                                listOf(SearchResult.Note(VerseIndex(0, 0, 1), "note", MockContents.kjvVerses[1].text.text)),
+                                query, listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]),
+                                listOf(Pair(Bookmark(VerseIndex(0, 0, 1), 0L), MockContents.kjvVerses[1])),
+                                listOf(Pair(Highlight(VerseIndex(0, 0, 2), Highlight.COLOR_BLUE, 0L), MockContents.kjvVerses[2])),
+                                listOf(Pair(Note(VerseIndex(0, 0, 3), "note", 0L), MockContents.kjvVerses[3])),
                                 MockContents.kjvBookNames, MockContents.kjvBookShortNames
                         )
                 ),

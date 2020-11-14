@@ -24,13 +24,16 @@ import me.xizzhu.android.joshua.utils.firstNotEmpty
 data class SearchRequest(val query: String, val instantSearch: Boolean)
 
 data class SearchResult(
-        val query: String, val verses: List<Verse>, val notes: List<Note>,
+        val query: String, val verses: List<Verse>,
+        val bookmarks: List<Pair<Bookmark, Verse>>,
+        val highlights: List<Pair<Highlight, Verse>>,
+        val notes: List<Pair<Note, Verse>>,
         val bookNames: List<String>, val bookShortNames: List<String>
-) {
-    data class Note(val verseIndex: VerseIndex, val note: String, val verse: String)
-}
+)
 
 class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
+                      private val bookmarkManager: VerseAnnotationManager<Bookmark>,
+                      private val highlightManager: VerseAnnotationManager<Highlight>,
                       private val noteManager: VerseAnnotationManager<Note>,
                       settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
     private val _searchRequest = MutableStateFlow<SearchRequest?>(null)
@@ -42,17 +45,28 @@ class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
 
     fun search(query: String): Flow<SearchResult> = flow {
         val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+
+        val verses = bibleReadingManager.search(currentTranslation, query)
+        val versesWithIndexes = verses.associateBy { it.verseIndex }
+        val bookmarks = bookmarkManager.read(Constants.SORT_BY_BOOK).mapNotNull { bookmark ->
+            versesWithIndexes[bookmark.verseIndex]?.let { verse -> Pair(bookmark, verse) }
+        }
+        val highlights = highlightManager.read(Constants.SORT_BY_BOOK).mapNotNull { highlight ->
+            versesWithIndexes[highlight.verseIndex]?.let { verse -> Pair(highlight, verse) }
+        }
+
         val notes = noteManager.search(query).let { notes ->
-            val verses = bibleReadingManager.readVerses(currentTranslation, notes.map { it.verseIndex })
-            arrayListOf<SearchResult.Note>().apply {
+            val versesWithNotes = bibleReadingManager.readVerses(currentTranslation, notes.map { it.verseIndex })
+            arrayListOf<Pair<Note, Verse>>().apply {
                 ensureCapacity(notes.size)
                 notes.forEach { note ->
-                    add(SearchResult.Note(note.verseIndex, note.note, verses[note.verseIndex]?.text?.text ?: ""))
+                    add(Pair(note, versesWithNotes.getValue(note.verseIndex)))
                 }
             }
         }
+
         emit(SearchResult(
-                query, bibleReadingManager.search(currentTranslation, query), notes,
+                query, verses, bookmarks, highlights, notes,
                 bibleReadingManager.readBookNames(currentTranslation),
                 bibleReadingManager.readBookShortNames(currentTranslation)
         ))

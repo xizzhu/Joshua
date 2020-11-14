@@ -25,8 +25,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.search.SearchRequest
 import me.xizzhu.android.joshua.search.SearchResult
@@ -69,6 +68,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         super.setup()
 
         `when`(searchActivity.lifecycle).thenReturn(lifecycle)
+        `when`(searchActivity.getString(R.string.title_bookmarks)).thenReturn("Bookmarks")
+        `when`(searchActivity.getString(R.string.title_highlights)).thenReturn("Highlights")
         `when`(searchActivity.getString(R.string.title_notes)).thenReturn("Notes")
         `when`(searchViewModel.settings()).thenReturn(emptyFlow())
         `when`(searchViewModel.searchRequest).thenReturn(emptyFlow())
@@ -92,7 +93,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         val query = "query"
         `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, false)))
         `when`(searchViewModel.search(query))
-                .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList(), emptyList())))
+                .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList())))
 
         searchResultListPresenter.onCreate()
 
@@ -114,7 +115,7 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         val query = "query"
         `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, true)))
         `when`(searchViewModel.search(query))
-                .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList(), emptyList())))
+                .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList())))
 
         searchResultListPresenter.onCreate()
 
@@ -151,17 +152,29 @@ class SearchResultListPresenterTest : BaseUnitTest() {
         val query = "query"
         val expected = listOf(
                 TitleItem("Notes", false),
-                SearchNoteItem(VerseIndex(0, 0, 1), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, "note", query, searchResultListPresenter::selectVerse),
+                SearchNoteItem(VerseIndex(0, 0, 3), MockContents.kjvBookShortNames[0], MockContents.kjvVerses[3].text.text, "note", query, searchResultListPresenter::selectVerse),
+                TitleItem("Bookmarks", false),
+                SearchVerseItem(
+                        VerseIndex(0, 0, 1), MockContents.kjvBookShortNames[0],
+                        MockContents.kjvVerses[1].text.text, query, Highlight.COLOR_NONE, searchResultListPresenter::selectVerse
+                ),
+                TitleItem("Highlights", false),
+                SearchVerseItem(
+                        VerseIndex(0, 0, 2), MockContents.kjvBookShortNames[0],
+                        MockContents.kjvVerses[2].text.text, query, Highlight.COLOR_BLUE, searchResultListPresenter::selectVerse
+                ),
                 TitleItem(MockContents.kjvBookNames[0], false),
                 SearchVerseItem(
                         VerseIndex(0, 0, 0), MockContents.kjvBookShortNames[0],
-                        MockContents.kjvVerses[0].text.text, query, searchResultListPresenter::selectVerse
+                        MockContents.kjvVerses[0].text.text, query, Highlight.COLOR_NONE, searchResultListPresenter::selectVerse
                 )
         )
 
         val searchResult = SearchResult(
                 query, listOf(MockContents.kjvVerses[0]),
-                listOf(SearchResult.Note(VerseIndex(0, 0, 1), "note", MockContents.kjvVerses[0].text.text)),
+                listOf(Pair(Bookmark(VerseIndex(0, 0, 1), 0L), MockContents.kjvVerses[1])),
+                listOf(Pair(Highlight(VerseIndex(0, 0, 2), Highlight.COLOR_BLUE, 0L), MockContents.kjvVerses[2])),
+                listOf(Pair(Note(VerseIndex(0, 0, 3), "note", 0L), MockContents.kjvVerses[3])),
                 MockContents.kjvBookNames, MockContents.kjvBookShortNames
         )
         val actual = with(searchResultListPresenter) { searchResult.toItems() }
