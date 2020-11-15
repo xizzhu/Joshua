@@ -100,6 +100,166 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
+    fun testSearchWithoutBookmarks() = runBlocking {
+        val currentTranslation = MockContents.kjvShortName
+        val query = "query"
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
+        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 1))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 1), MockContents.kjvVerses[1])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 2))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 2), MockContents.kjvVerses[2])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 3))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 3), MockContents.kjvVerses[3])))
+        `when`(bookmarkManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Bookmark(VerseIndex(0, 0, 1), 0L)))
+        `when`(highlightManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Highlight(VerseIndex(0, 0, 2), Highlight.COLOR_BLUE, 0L)))
+        `when`(noteManager.search(query)).thenReturn(listOf(Note(VerseIndex(0, 0, 3), "note", 0L)))
+
+        assertEquals(
+                listOf(
+                        SearchResult(
+                                query, listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]),
+                                emptyList(),
+                                listOf(Pair(Highlight(VerseIndex(0, 0, 2), Highlight.COLOR_BLUE, 0L), MockContents.kjvVerses[2])),
+                                listOf(Pair(Note(VerseIndex(0, 0, 3), "note", 0L), MockContents.kjvVerses[3])),
+                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
+                        )
+                ),
+                searchViewModel.search(query, false, true, true).toList()
+        )
+    }
+
+    @Test
+    fun testSearchWithoutHighlights() = runBlocking {
+        val currentTranslation = MockContents.kjvShortName
+        val query = "query"
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
+        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 1))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 1), MockContents.kjvVerses[1])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 2))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 2), MockContents.kjvVerses[2])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 3))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 3), MockContents.kjvVerses[3])))
+        `when`(bookmarkManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Bookmark(VerseIndex(0, 0, 1), 0L)))
+        `when`(highlightManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Highlight(VerseIndex(0, 0, 2), Highlight.COLOR_BLUE, 0L)))
+        `when`(noteManager.search(query)).thenReturn(listOf(Note(VerseIndex(0, 0, 3), "note", 0L)))
+
+        assertEquals(
+                listOf(
+                        SearchResult(
+                                query, listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]),
+                                listOf(Pair(Bookmark(VerseIndex(0, 0, 1), 0L), MockContents.kjvVerses[1])),
+                                emptyList(),
+                                listOf(Pair(Note(VerseIndex(0, 0, 3), "note", 0L), MockContents.kjvVerses[3])),
+                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
+                        )
+                ),
+                searchViewModel.search(query, true, false, true).toList()
+        )
+    }
+
+    @Test
+    fun testSearchWithoutBookmarksAndHighlights() = runBlocking {
+        val currentTranslation = MockContents.kjvShortName
+        val query = "query"
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
+        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 1))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 1), MockContents.kjvVerses[1])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 2))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 2), MockContents.kjvVerses[2])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 3))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 3), MockContents.kjvVerses[3])))
+        `when`(bookmarkManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Bookmark(VerseIndex(0, 0, 1), 0L)))
+        `when`(highlightManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Highlight(VerseIndex(0, 0, 2), Highlight.COLOR_BLUE, 0L)))
+        `when`(noteManager.search(query)).thenReturn(listOf(Note(VerseIndex(0, 0, 3), "note", 0L)))
+
+        assertEquals(
+                listOf(
+                        SearchResult(
+                                query, listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]),
+                                emptyList(),
+                                emptyList(),
+                                listOf(Pair(Note(VerseIndex(0, 0, 3), "note", 0L), MockContents.kjvVerses[3])),
+                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
+                        )
+                ),
+                searchViewModel.search(query, false, false, true).toList()
+        )
+    }
+
+    @Test
+    fun testSearchWithoutNote() = runBlocking {
+        val currentTranslation = MockContents.kjvShortName
+        val query = "query"
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
+        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 1))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 1), MockContents.kjvVerses[1])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 2))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 2), MockContents.kjvVerses[2])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 3))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 3), MockContents.kjvVerses[3])))
+        `when`(bookmarkManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Bookmark(VerseIndex(0, 0, 1), 0L)))
+        `when`(highlightManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Highlight(VerseIndex(0, 0, 2), Highlight.COLOR_BLUE, 0L)))
+        `when`(noteManager.search(query)).thenReturn(listOf(Note(VerseIndex(0, 0, 3), "note", 0L)))
+
+        assertEquals(
+                listOf(
+                        SearchResult(
+                                query, listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]),
+                                listOf(Pair(Bookmark(VerseIndex(0, 0, 1), 0L), MockContents.kjvVerses[1])),
+                                listOf(Pair(Highlight(VerseIndex(0, 0, 2), Highlight.COLOR_BLUE, 0L), MockContents.kjvVerses[2])),
+                                emptyList(),
+                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
+                        )
+                ),
+                searchViewModel.search(query, true, true, false).toList()
+        )
+    }
+
+    @Test
+    fun testSearchWithoutBookmarksHighlightsAndNotes() = runBlocking {
+        val currentTranslation = MockContents.kjvShortName
+        val query = "query"
+        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
+        `when`(bibleReadingManager.search(currentTranslation, query)).thenReturn(listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]))
+        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
+        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 1))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 1), MockContents.kjvVerses[1])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 2))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 2), MockContents.kjvVerses[2])))
+        `when`(bibleReadingManager.readVerses(currentTranslation, listOf(VerseIndex(0, 0, 3))))
+                .thenReturn(mapOf(Pair(VerseIndex(0, 0, 3), MockContents.kjvVerses[3])))
+        `when`(bookmarkManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Bookmark(VerseIndex(0, 0, 1), 0L)))
+        `when`(highlightManager.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(Highlight(VerseIndex(0, 0, 2), Highlight.COLOR_BLUE, 0L)))
+        `when`(noteManager.search(query)).thenReturn(listOf(Note(VerseIndex(0, 0, 3), "note", 0L)))
+
+        assertEquals(
+                listOf(
+                        SearchResult(
+                                query, listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2], MockContents.kjvVerses[3]),
+                                emptyList(),
+                                emptyList(),
+                                emptyList(),
+                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
+                        )
+                ),
+                searchViewModel.search(query, false, false, false).toList()
+        )
+    }
+
+    @Test
     fun testSearchWithException() = runBlocking {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
