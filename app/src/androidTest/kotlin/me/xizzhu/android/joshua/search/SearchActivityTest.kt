@@ -42,7 +42,9 @@ class SearchActivityTest {
                 .typeToSearchBox("query")
                 .startSearch()
                 .waitUntilSearchFinished()
-                .hasSearchResultShown(SearchResult("query", MockContents.kjvVerses.subList(0, 5), MockContents.kjvBookNames, MockContents.kjvBookShortNames))
+                .hasSearchResultShown(SearchResult(
+                        "query", MockContents.kjvVerses.subList(0, 5), listOf(), listOf(), listOf(),
+                        MockContents.kjvBookNames, MockContents.kjvBookShortNames))
                 .clickSearchResultItem(1)
 
         assertEquals(VerseIndex(0, 0, 1), BibleReadingManager.currentVerseIndex.value)

@@ -21,6 +21,8 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 
 class SearchToolbar : Toolbar {
@@ -43,8 +45,40 @@ class SearchToolbar : Toolbar {
 
     private fun searchView(): SearchView = menu.findItem(R.id.action_search).actionView as SearchView
 
-    fun setOnQueryTextListener(listener: SearchView.OnQueryTextListener?) {
-        searchView().setOnQueryTextListener(listener)
+    fun initialize(includeBookmarks: Boolean, onIncludeBookmarksChanged: (Boolean) -> Unit,
+                   includeHighlights: Boolean, onIncludeHighlightsChanged: (Boolean) -> Unit,
+                   includeNotes: Boolean, onIncludeNotesChanged: (Boolean) -> Unit,
+                   onQueryTextList: SearchView.OnQueryTextListener, clearHistory: () -> Unit) {
+        menu.findItem(R.id.action_search_include_bookmarks).isChecked = includeBookmarks
+        menu.findItem(R.id.action_search_include_highlights).isChecked = includeHighlights
+        menu.findItem(R.id.action_search_include_notes).isChecked = includeNotes
+
+        searchView().setOnQueryTextListener(onQueryTextList)
+
+        setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_search_include_bookmarks -> {
+                    menuItem.isChecked = !menuItem.isChecked
+                    onIncludeBookmarksChanged(menuItem.isChecked)
+                    true
+                }
+                R.id.action_search_include_highlights -> {
+                    menuItem.isChecked = !menuItem.isChecked
+                    onIncludeHighlightsChanged(menuItem.isChecked)
+                    true
+                }
+                R.id.action_search_include_notes -> {
+                    menuItem.isChecked = !menuItem.isChecked
+                    onIncludeNotesChanged(menuItem.isChecked)
+                    true
+                }
+                R.id.action_clear_search_history -> {
+                    clearHistory()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     fun setSearchableInfo(searchable: SearchableInfo) {

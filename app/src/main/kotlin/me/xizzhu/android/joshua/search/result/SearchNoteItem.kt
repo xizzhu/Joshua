@@ -17,10 +17,8 @@
 package me.xizzhu.android.joshua.search.result
 
 import android.annotation.SuppressLint
-import android.graphics.Typeface
 import android.text.SpannableStringBuilder
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -32,43 +30,40 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import java.util.*
 
-data class SearchItem(val verseIndex: VerseIndex, private val bookShortName: String,
-                      private val text: String, private val query: String,
-                      val onClicked: (VerseIndex) -> Unit)
-    : BaseItem(R.layout.item_search_result, { inflater, parent -> SearchItemViewHolder(inflater, parent) }) {
+data class SearchNoteItem(val verseIndex: VerseIndex, private val bookShortName: String,
+                          private val verseText: String, private val note: String, private val query: String,
+                          val onClicked: (VerseIndex) -> Unit)
+    : BaseItem(R.layout.item_search_note, { inflater, parent -> SearchNoteItemViewHolder(inflater, parent) }) {
     companion object {
         // We don't expect users to change locale that frequently.
         @SuppressLint("ConstantLocale")
         private val DEFAULT_LOCALE = Locale.getDefault()
 
-        private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
         private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
         private val KEYWORD_SIZE_SPAN = createKeywordSizeSpan()
         private val KEYWORD_STYLE_SPAN = createKeywordStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
-
-        private fun createKeywordSizeSpan() = RelativeSizeSpan(1.2F)
-        private fun createKeywordStyleSpan() = StyleSpan(Typeface.BOLD)
     }
 
-    val textForDisplay: CharSequence by lazy {
+    val verseForDisplay: CharSequence by lazy {
         // format:
-        // <short book name> <chapter verseIndex>:<verse verseIndex>
-        // <verse text>
-        SPANNABLE_STRING_BUILDER.clearAll()
-                .append(bookShortName)
-                .append(' ')
+        // <book short name> <chapter index>:<verse index> <verse text>
+        return@lazy SPANNABLE_STRING_BUILDER.clearAll()
+                .append(bookShortName).append(' ')
                 .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                .setSpan(BOOK_NAME_SIZE_SPAN, BOOK_NAME_STYLE_SPAN)
-                .append('\n')
-                .append(text)
+                .setSpan(BOOK_NAME_STYLE_SPAN)
+                .append(' ').append(verseText)
+                .toCharSequence()
+    }
+
+    val noteForDisplay: CharSequence by lazy {
+        SPANNABLE_STRING_BUILDER.clearAll().append(note)
 
         // highlights the keywords
-        val textStartIndex = SPANNABLE_STRING_BUILDER.length - text.length
         val lowerCase = SPANNABLE_STRING_BUILDER.toString().toLowerCase(DEFAULT_LOCALE)
         for ((index, keyword) in query.trim().replace("\\s+", " ").split(" ").withIndex()) {
-            val start = lowerCase.indexOf(keyword.toLowerCase(DEFAULT_LOCALE), textStartIndex)
-            if (start > 0) {
+            val start = lowerCase.indexOf(keyword.toLowerCase(DEFAULT_LOCALE))
+            if (start >= 0) {
                 SPANNABLE_STRING_BUILDER.setSpan(
                         if (index == 0) KEYWORD_SIZE_SPAN else createKeywordSizeSpan(),
                         if (index == 0) KEYWORD_STYLE_SPAN else createKeywordStyleSpan(),
@@ -80,18 +75,24 @@ data class SearchItem(val verseIndex: VerseIndex, private val bookShortName: Str
     }
 }
 
-private class SearchItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<SearchItem>(inflater.inflate(R.layout.item_search_result, parent, false)) {
-    private val text = itemView as TextView
+private class SearchNoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+    : BaseViewHolder<SearchNoteItem>(inflater.inflate(R.layout.item_search_note, parent, false)) {
+    private val verse: TextView = itemView.findViewById(R.id.verse)
+    private val text: TextView = itemView.findViewById(R.id.text)
 
     init {
         itemView.setOnClickListener { item?.let { it.onClicked(it.verseIndex) } }
     }
 
-    override fun bind(settings: Settings, item: SearchItem, payloads: List<Any>) {
+    override fun bind(settings: Settings, item: SearchNoteItem, payloads: List<Any>) {
+        with(verse) {
+            setTextColor(settings.getPrimaryTextColor(resources))
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
+            text = item.verseForDisplay
+        }
         with(text) {
             updateSettingsWithPrimaryText(settings)
-            text = item.textForDisplay
+            text = item.noteForDisplay
         }
     }
 }

@@ -61,6 +61,8 @@ class VerseAnnotationRepository<T : VerseAnnotation>(
 
     suspend fun read(verseIndex: VerseIndex): T = localVerseAnnotationStorage.read(verseIndex)
 
+    suspend fun search(query: String): List<T> = localVerseAnnotationStorage.search(query)
+
     suspend fun save(verseAnnotation: T) {
         localVerseAnnotationStorage.save(verseAnnotation)
     }

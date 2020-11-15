@@ -9,6 +9,24 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/action_search_include_bookmarks"
+        android:checkable="true"
+        android:title="@string/action_search_include_bookmarks"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_search_include_highlights"
+        android:checkable="true"
+        android:title="@string/action_search_include_highlights"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_search_include_notes"
+        android:checkable="true"
+        android:title="@string/action_search_include_notes"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_clear_search_history"
         android:title="@string/action_clear_search_history"
         app:showAsAction="never" />

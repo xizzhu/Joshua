@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.activity.BaseSettingsPresenter
 import me.xizzhu.android.joshua.infra.arch.*
@@ -69,7 +70,7 @@ class SearchResultListPresenter(
     }
 
     private fun search(searchRequest: SearchRequest) {
-        viewModel.search(searchRequest.query)
+        viewModel.search(searchRequest.query, searchRequest.includeBookmarks, searchRequest.includeHighlights, searchRequest.includeNotes)
                 .onStart {
                     if (!searchRequest.instantSearch) {
                         viewHolder.loadingSpinner.fadeIn()
@@ -101,6 +102,32 @@ class SearchResultListPresenter(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun SearchResult.toItems(): List<BaseItem> {
         val items = ArrayList<BaseItem>(verses.size + Bible.BOOK_COUNT)
+
+        if (notes.isNotEmpty()) {
+            items.add(TitleItem(activity.getString(R.string.title_notes), false))
+            notes.forEach { note ->
+                items.add(SearchNoteItem(
+                        note.first.verseIndex, bookShortNames[note.first.verseIndex.bookIndex], note.second.text.text, note.first.note, query, ::selectVerse
+                ))
+            }
+        }
+
+        if (bookmarks.isNotEmpty()) {
+            items.add(TitleItem(activity.getString(R.string.title_bookmarks), false))
+            bookmarks.forEach { bookmark ->
+                items.add(SearchVerseItem(bookmark.first.verseIndex, bookShortNames[bookmark.first.verseIndex.bookIndex],
+                        bookmark.second.text.text, query, Highlight.COLOR_NONE, ::selectVerse))
+            }
+        }
+
+        if (highlights.isNotEmpty()) {
+            items.add(TitleItem(activity.getString(R.string.title_highlights), false))
+            highlights.forEach { highlight ->
+                items.add(SearchVerseItem(highlight.first.verseIndex, bookShortNames[highlight.first.verseIndex.bookIndex],
+                        highlight.second.text.text, query, highlight.first.color, ::selectVerse))
+            }
+        }
+
         var lastVerseBookIndex = -1
         verses.forEach { verse ->
             val currentVerseBookIndex = verse.verseIndex.bookIndex
@@ -108,9 +135,10 @@ class SearchResultListPresenter(
                 items.add(TitleItem(bookNames[currentVerseBookIndex], false))
                 lastVerseBookIndex = currentVerseBookIndex
             }
-            items.add(SearchItem(verse.verseIndex, bookShortNames[currentVerseBookIndex],
-                    verse.text.text, query, ::selectVerse))
+            items.add(SearchVerseItem(verse.verseIndex, bookShortNames[currentVerseBookIndex],
+                    verse.text.text, query, Highlight.COLOR_NONE, ::selectVerse))
         }
+
         return items
     }
 
