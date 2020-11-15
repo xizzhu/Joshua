@@ -29,6 +29,9 @@
     <string name="action_highlights">Highlights</string>
     <string name="action_notes">Notes</string>
     <string name="action_search">Search</string>
+    <string name="action_search_include_bookmarks">Bookmarks</string>
+    <string name="action_search_include_highlights">Highlights</string>
+    <string name="action_search_include_notes">Notes</string>
     <string name="action_clear_search_history">Delete Search History</string>
     <string name="action_settings">Settings</string>
 

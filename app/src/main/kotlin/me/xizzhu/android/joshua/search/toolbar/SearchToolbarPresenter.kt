@@ -41,11 +41,14 @@ class SearchToolbarPresenter(
         coroutineScope: CoroutineScope = searchActivity.lifecycleScope
 ) : BaseSettingsPresenter<SearchToolbarViewHolder, SearchViewModel, SearchActivity>(searchViewModel, searchActivity, coroutineScope) {
     private val searchRecentSuggestions: SearchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(searchActivity)
+    private var includeBookmarks: Boolean = true
+    private var includeHighlights: Boolean = true
+    private var includeNotes: Boolean = true
 
     private val onQueryTextListener = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String): Boolean {
             searchRecentSuggestions.saveRecentQuery(query, null)
-            viewModel.requestSearch(SearchRequest(query, false))
+            viewModel.requestSearch(SearchRequest(query, false, includeBookmarks, includeHighlights, includeNotes))
             viewHolder.searchToolbar.hideKeyboard()
 
             // so that the system can close the search suggestion
@@ -53,7 +56,7 @@ class SearchToolbarPresenter(
         }
 
         override fun onQueryTextChange(newText: String): Boolean {
-            viewModel.requestSearch(SearchRequest(newText, true))
+            viewModel.requestSearch(SearchRequest(newText, true, includeBookmarks, includeHighlights, includeNotes))
             return true
         }
     }
@@ -63,7 +66,17 @@ class SearchToolbarPresenter(
         super.onBind()
 
         with(viewHolder.searchToolbar) {
-            setOnQueryTextListener(onQueryTextListener)
+            initialize(
+                    includeBookmarks,
+                    onIncludeBookmarksChanged = { includeBookmarks = it },
+                    includeHighlights,
+                    onIncludeHighlightsChanged = { includeHighlights = it },
+                    includeNotes,
+                    onIncludeNotesChanged = { includeNotes = it },
+                    onQueryTextListener,
+                    clearHistory = {
+                        coroutineScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() }
+                    })
 
             try {
                 setSearchableInfo((activity.getSystemService(Context.SEARCH_SERVICE) as SearchManager)
@@ -72,16 +85,6 @@ class SearchToolbarPresenter(
                 // Do nothing if it fails on some weird devices.
                 // https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/526587497106cd43ddd9ea7568d34f94
                 Log.e(this@SearchToolbarPresenter.tag, "", e)
-            }
-
-            setOnMenuItemClickListener { menuItem ->
-                when (menuItem.itemId) {
-                    R.id.action_clear_search_history -> {
-                        coroutineScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() }
-                        true
-                    }
-                    else -> false
-                }
             }
         }
     }

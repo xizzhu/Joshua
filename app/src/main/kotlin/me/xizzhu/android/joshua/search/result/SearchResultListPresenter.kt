@@ -70,7 +70,7 @@ class SearchResultListPresenter(
     }
 
     private fun search(searchRequest: SearchRequest) {
-        viewModel.search(searchRequest.query)
+        viewModel.search(searchRequest.query, searchRequest.includeBookmarks, searchRequest.includeHighlights, searchRequest.includeNotes)
                 .onStart {
                     if (!searchRequest.instantSearch) {
                         viewHolder.loadingSpinner.fadeIn()
