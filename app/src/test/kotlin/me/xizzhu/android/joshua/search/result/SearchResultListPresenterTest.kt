@@ -91,8 +91,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSearchRequest() = runBlocking {
         val query = "query"
-        `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, false)))
-        `when`(searchViewModel.search(query))
+        `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, false, true, false, true)))
+        `when`(searchViewModel.search(query, true, false, true))
                 .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList())))
 
         searchResultListPresenter.onCreate()
@@ -113,8 +113,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSearchRequestWithInstantSearch() = runBlocking {
         val query = "query"
-        `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, true)))
-        `when`(searchViewModel.search(query))
+        `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, true, false, false, true)))
+        `when`(searchViewModel.search(query, false, false, true))
                 .thenReturn(flowOf(SearchResult(query, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList())))
 
         searchResultListPresenter.onCreate()
@@ -131,8 +131,8 @@ class SearchResultListPresenterTest : BaseUnitTest() {
     @Test
     fun testObserveSearchRequestWithException() = runBlocking {
         val query = "query"
-        `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, false)))
-        `when`(searchViewModel.search(query)).thenReturn(flow { throw RuntimeException() })
+        `when`(searchViewModel.searchRequest).thenReturn(flowOf(SearchRequest(query, false, true, true, true)))
+        `when`(searchViewModel.search(query, true, true, true)).thenReturn(flow { throw RuntimeException() })
 
         searchResultListPresenter.onCreate()
 

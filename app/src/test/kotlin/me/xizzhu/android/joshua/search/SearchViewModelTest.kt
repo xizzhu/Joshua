@@ -55,11 +55,11 @@ class SearchViewModelTest : BaseUnitTest() {
     @Test
     fun testSearchRequest() = runBlockingTest {
         val requests = listOf(
-                SearchRequest("1", true),
-                SearchRequest("2", false),
-                SearchRequest("", false),
-                SearchRequest("", true),
-                SearchRequest("3", true)
+                SearchRequest("1", true, true, false, true),
+                SearchRequest("2", false, false, false, false),
+                SearchRequest("", false, true, true, true),
+                SearchRequest("", true, false, false, true),
+                SearchRequest("3", true, true, true, false)
         )
         val searchRequest = async { searchViewModel.searchRequest.take(requests.size).toList() }
         requests.forEach { searchViewModel.requestSearch(it) }
@@ -95,7 +95,7 @@ class SearchViewModelTest : BaseUnitTest() {
                                 MockContents.kjvBookNames, MockContents.kjvBookShortNames
                         )
                 ),
-                searchViewModel.search(query).toList()
+                searchViewModel.search(query, true, true, true).toList()
         )
     }
 
@@ -104,7 +104,7 @@ class SearchViewModelTest : BaseUnitTest() {
         val e = RuntimeException("random exception")
         `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
 
-        searchViewModel.search("")
+        searchViewModel.search("", true, true, true)
                 .onCompletion { assertEquals(e, it) }
                 .catch { }
                 .collect()
