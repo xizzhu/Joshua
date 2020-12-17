@@ -14,13 +14,13 @@ CHANGELOG
 - Refactoring:
   - Replace broadcast channel with state flow
 - Update dependencies:
-  - Gradle to 6.7
-  - Android Gradle Plugin to 4.1.0
-  - Kotlin to 1.4.10, Coroutines to 1.4.0
+  - Gradle to 6.7.1
+  - Android Gradle Plugin to 4.1.1
+  - Kotlin to 1.4.21, Coroutines to 1.4.2
   - AndroidX Core to 1.3.2, ConstraintLayout to 2.0.4
-  - Firebase plugin to 4.3.4, Analytics to 18.0.0, Crashlytics to 17.2.2
-  - Dagger Hilt to 2.29.1-alpha
-  - Mockito to 3.6.0
+  - Firebase plugin to 4.3.4, Analytics to 18.0.0, Crashlytics to 17.3.0, Crashlytics plugin to 2.4.1
+  - Dagger Hilt to 2.30.1-alpha
+  - Mockito to 3.6.28
 
 #### v0.16.2 (2020-09-04)
 - Refactoring:

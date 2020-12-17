@@ -37,7 +37,7 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "4.1.0"
+        const val classpath = "4.1.1"
         const val buildTools = "30.0.2"
         const val compile = 30
         const val min = 21
@@ -48,8 +48,8 @@ object Versions {
 
     object Kotlin {
         const val jvmTarget = "1.8"
-        const val core = "1.4.10"
-        const val coroutines = "1.4.0"
+        const val core = "1.4.21"
+        const val coroutines = "1.4.2"
     }
 
     object AndroidX {
@@ -81,23 +81,23 @@ object Versions {
         const val analytics = "18.0.0"
 
         object Crashlytics {
-            const val classpath = "2.2.1"
-            const val crashlytics = "17.2.2"
+            const val classpath = "2.4.1"
+            const val crashlytics = "17.3.0"
         }
 
         object Perf {
-            const val classpath = "1.3.3"
-            const val perf = "19.0.9"
+            const val classpath = "1.3.4"
+            const val perf = "19.0.11"
         }
     }
 
-    const val hilt = "2.29.1-alpha"
+    const val hilt = "2.30.1-alpha"
 
     const val ask = "0.5.2"
 
     const val logger = "0.3.0"
 
-    const val mockito = "3.6.0"
+    const val mockito = "3.6.28"
 }
 
 object Dependencies {
