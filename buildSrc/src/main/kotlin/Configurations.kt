@@ -95,7 +95,7 @@ object Versions {
 
     const val ask = "0.5.2"
 
-    const val logger = "0.3.0"
+    const val logger = "0.4.0"
 
     const val mockito = "3.6.28"
 }

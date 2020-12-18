@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua
 
 import android.app.Application
-import me.xizzhu.android.joshua.core.logger.android.CrashlyticsLogger
+import me.xizzhu.android.logger.CrashlyticsLogger
 import me.xizzhu.android.logger.Log
 
 abstract class BaseApp : Application() {

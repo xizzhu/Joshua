@@ -11,6 +11,7 @@ CHANGELOG
 - Changes:
   - Use Firebase Perf to track translation and SN download and install time instead of Firebase Analytics
   - Remove Stetho (#198)
+  - Use CrashlyticsLogger from Logger
 - Refactoring:
   - Replace broadcast channel with state flow
 - Update dependencies:
@@ -20,6 +21,7 @@ CHANGELOG
   - AndroidX Core to 1.3.2, ConstraintLayout to 2.0.4
   - Firebase plugin to 4.3.4, Analytics to 18.0.0, Crashlytics to 17.3.0, Crashlytics plugin to 2.4.1
   - Dagger Hilt to 2.30.1-alpha
+  - Logger to 0.4.0
   - Mockito to 3.6.28
 
 #### v0.16.2 (2020-09-04)
