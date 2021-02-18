@@ -37,8 +37,8 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "4.1.1"
-        const val buildTools = "30.0.2"
+        const val classpath = "4.1.2"
+        const val buildTools = "30.0.3"
         const val compile = 30
         const val min = 21
         const val target = 30
@@ -48,22 +48,22 @@ object Versions {
 
     object Kotlin {
         const val jvmTarget = "1.8"
-        const val core = "1.4.21"
+        const val core = "1.4.30"
         const val coroutines = "1.4.2"
     }
 
     object AndroidX {
-        const val activity = "1.1.0"
+        const val activity = "1.2.0"
         const val annotation = "1.1.0"
         const val appCompat = "1.2.0"
         const val core = "1.3.2"
-        const val lifecycle = "2.2.0"
+        const val lifecycle = "2.3.0"
 
         object View {
             const val constraintLayout = "2.0.4"
             const val coordinatorLayout = "1.1.0"
             const val drawerLayout = "1.1.1"
-            const val material = "1.2.1"
+            const val material = "1.3.0"
             const val recyclerView = "1.1.0"
             const val swipeRefreshLayout = "1.1.0"
             const val viewPager2 = "1.0.0"
@@ -77,27 +77,27 @@ object Versions {
     }
 
     object Firebase {
-        const val classpath = "4.3.4"
-        const val analytics = "18.0.0"
+        const val classpath = "4.3.5"
+        const val analytics = "18.0.2"
 
         object Crashlytics {
-            const val classpath = "2.4.1"
-            const val crashlytics = "17.3.0"
+            const val classpath = "2.5.0"
+            const val crashlytics = "17.3.1"
         }
 
         object Perf {
             const val classpath = "1.3.4"
-            const val perf = "19.0.11"
+            const val perf = "19.1.1"
         }
     }
 
-    const val hilt = "2.30.1-alpha"
+    const val hilt = "2.32-alpha"
 
     const val ask = "0.5.2"
 
     const val logger = "0.4.0"
 
-    const val mockito = "3.6.28"
+    const val mockito = "3.7.7"
 }
 
 object Dependencies {
