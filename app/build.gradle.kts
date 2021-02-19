@@ -80,7 +80,9 @@ android {
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
 
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Temporarily use proguard-android.txt instead of proguard-android-optimize.txt as a workaround of an R8 issue:
+            // https://issuetracker.google.com/issues/174167294
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
@@ -99,7 +101,7 @@ android {
         exclude("META-INF/LGPL2.1")
         exclude("META-INF/licenses/*")
 
-        // workaround for https://github.com/Kotlin/kotlinx.coroutines/issues/2023
+        // https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-debug#debug-agent-and-android
         exclude("win32-x86/attach_hotspot_windows.dll")
         exclude("win32-x86-64/attach_hotspot_windows.dll")
     }

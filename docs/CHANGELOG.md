@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.17.0 (2021-02-19)
 - New features:
   - Include bookmarks, highlights, and notes in search results
 - Bug fixes:
