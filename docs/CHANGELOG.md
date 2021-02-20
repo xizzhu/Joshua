@@ -1,6 +1,11 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Bug fixes:
+  - Properly update "consolidated sharing" setting switch
+  - Should run backup & restore on IO thread
+
 #### v0.17.0 (2021-02-19)
 - New features:
   - Include bookmarks, highlights, and notes in search results

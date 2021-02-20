@@ -16,10 +16,13 @@
 
 package me.xizzhu.android.joshua.core
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.*
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.joshua.utils.mergeSort
+import java.io.InputStream
+import java.io.OutputStream
 
 class BackupManager(private val serializer: Serializer,
                     private val bookmarkRepository: VerseAnnotationRepository<Bookmark>,
@@ -35,7 +38,12 @@ class BackupManager(private val serializer: Serializer,
     data class Data(val bookmarks: List<Bookmark>, val highlights: List<Highlight>,
                     val notes: List<Note>, val readingProgress: ReadingProgress)
 
-    suspend fun prepareForBackup(): String = withContext(Dispatchers.Default) {
+    suspend fun backup(to: OutputStream) = withContext(Dispatchers.IO) {
+        to.write(prepareForBackup().toByteArray(Charsets.UTF_8))
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal suspend fun prepareForBackup(): String = withContext(Dispatchers.Default) {
         val bookmarksAsync = async { bookmarkRepository.read(Constants.SORT_BY_BOOK) }
         val highlightsAsync = async { highlightRepository.read(Constants.SORT_BY_BOOK) }
         val notesAsync = async { noteRepository.read(Constants.SORT_BY_BOOK) }
@@ -44,13 +52,16 @@ class BackupManager(private val serializer: Serializer,
                 Data(bookmarksAsync.await(), highlightsAsync.await(), notesAsync.await(), readingProgressAsync.await()))
     }
 
-    suspend fun restore(content: String) {
-        withContext(Dispatchers.Default) {
-            val data = serializer.deserialize(content)
-            arrayOf(loadAndMergeBookmarksAsync(data.bookmarks), loadAndMergeHighlightsAsync(data.highlights),
-                    loadAndMergeNotesAsync(data.notes), loadAndMergeReadingProgressAsync(data.readingProgress)
-            ).forEach { it.await() }
-        }
+    suspend fun restore(from: InputStream) = withContext(Dispatchers.IO) {
+        restore(String(from.readBytes(), Charsets.UTF_8))
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal suspend fun restore(content: String) = withContext(Dispatchers.Default) {
+        val data = serializer.deserialize(content)
+        arrayOf(loadAndMergeBookmarksAsync(data.bookmarks), loadAndMergeHighlightsAsync(data.highlights),
+                loadAndMergeNotesAsync(data.notes), loadAndMergeReadingProgressAsync(data.readingProgress)
+        ).forEach { it.await() }
     }
 
     private fun CoroutineScope.loadAndMergeBookmarksAsync(backupBookmarks: List<Bookmark>): Deferred<Unit> = async {

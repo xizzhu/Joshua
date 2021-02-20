@@ -98,6 +98,7 @@ object Versions {
     const val logger = "0.4.0"
 
     const val mockito = "3.7.7"
+    const val mockk = "1.10.6"
 }
 
 object Dependencies {
@@ -183,5 +184,9 @@ object Dependencies {
     object Mockito {
         const val mockito = "org.mockito:mockito-core:${Versions.mockito}"
         const val android = "org.mockito:mockito-android:${Versions.mockito}"
+    }
+
+    object Mockk {
+        const val mockk = "io.mockk:mockk:${Versions.mockk}"
     }
 }
