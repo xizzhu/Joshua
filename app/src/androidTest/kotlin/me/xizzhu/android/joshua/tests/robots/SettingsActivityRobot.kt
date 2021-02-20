@@ -21,14 +21,14 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.settings.SettingsActivity
-import me.xizzhu.android.joshua.settings.SettingsPresenter
+import me.xizzhu.android.joshua.settings.SettingsViewModel
 import me.xizzhu.android.joshua.tests.action.click
 import me.xizzhu.android.joshua.tests.matchers.viewWithText
 
 class SettingsActivityRobot(activity: SettingsActivity) : BaseRobot<SettingsActivity, SettingsActivityRobot>(activity) {
     fun selectFontSize(fontSize: Int): SettingsActivityRobot {
         click(R.id.font_size)
-        viewWithText(SettingsPresenter.fontSizeTexts[fontSize]).inRoot(isDialog()).perform(click())
+        viewWithText(SettingsViewModel.fontSizeTexts[fontSize]).inRoot(isDialog()).perform(click())
         return self()
     }
 

@@ -17,8 +17,6 @@
 package me.xizzhu.android.joshua.settings
 
 import android.app.Activity
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,24 +33,20 @@ object SettingsModule {
 
     @ActivityScoped
     @Provides
-    fun provideSettingsViewPresenter(settingsViewModel: SettingsViewModel,
-                                     settingsActivity: SettingsActivity): SettingsPresenter =
-            SettingsPresenter(settingsViewModel, settingsActivity)
+    fun provideSettingsInteractor(settingsManager: SettingsManager): SettingsInteractor = SettingsInteractor(settingsManager)
 
     @ActivityScoped
     @Provides
-    fun provideSettingsViewModel(settingsActivity: SettingsActivity,
-                                 settingsManager: SettingsManager,
-                                 backupManager: BackupManager): SettingsViewModel {
-        val factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-                    return SettingsViewModel(settingsManager, backupManager) as T
-                }
+    fun provideSettingsViewModel(settingsInteractor: SettingsInteractor, settingsActivity: SettingsActivity): SettingsViewModel =
+            SettingsViewModel(settingsInteractor, settingsActivity)
 
-                throw IllegalArgumentException("Unsupported model class - $modelClass")
-            }
-        }
-        return ViewModelProvider(settingsActivity, factory).get(SettingsViewModel::class.java)
-    }
+    @ActivityScoped
+    @Provides
+    fun provideBackupInteractor(backupManager: BackupManager, settingsManager: SettingsManager): BackupInteractor =
+            BackupInteractor(backupManager, settingsManager)
+
+    @ActivityScoped
+    @Provides
+    fun provideBackupViewModel(backupInteractor: BackupInteractor, settingsActivity: SettingsActivity): BackupViewModel =
+            BackupViewModel(backupInteractor, settingsActivity)
 }
