@@ -7,7 +7,7 @@ env:
 
 android:
   components:
-    - tools
+    - cmdline-tools
     - platform-tools
     - build-tools-31
     - android-30
