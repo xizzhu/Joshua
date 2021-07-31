@@ -33,19 +33,19 @@ android {
         jvmTarget = Versions.Kotlin.jvmTarget
     }
 
-    buildToolsVersion(Versions.Sdk.buildTools)
-    compileSdkVersion(Versions.Sdk.compile)
+    buildToolsVersion = Versions.Sdk.buildTools
+    compileSdk = 30
 
     defaultConfig {
         applicationId = Configurations.applicationId
 
-        minSdkVersion(Versions.Sdk.min)
-        targetSdkVersion(Versions.Sdk.target)
+        minSdk = Versions.Sdk.min
+        targetSdk = Versions.Sdk.target
 
         versionCode = Versions.App.code
         versionName = Versions.App.name
 
-        resConfigs(Configurations.supportedLocales)
+        resourceConfigurations.addAll(Configurations.supportedLocales)
 
         testInstrumentationRunner = Dependencies.AndroidX.Test.runner
     }
@@ -96,18 +96,16 @@ android {
     }
 
     packagingOptions {
-        exclude("META-INF/atomicfu.kotlin_module")
-        exclude("META-INF/AL2.0")
-        exclude("META-INF/LGPL2.1")
-        exclude("META-INF/licenses/*")
+        resources.excludes.addAll(listOf(
+                "META-INF/atomicfu.kotlin_module", "META-INF/AL2.0", "META-INF/LGPL2.1", "META-INF/licenses/*",
 
-        // https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-debug#debug-agent-and-android
-        exclude("win32-x86/attach_hotspot_windows.dll")
-        exclude("win32-x86-64/attach_hotspot_windows.dll")
+                // https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-debug#debug-agent-and-android
+                "win32-x86/attach_hotspot_windows.dll", "win32-x86-64/attach_hotspot_windows.dll"
+        ))
     }
 }
 
-tasks.withType(Test::class.java) {
+tasks.withType(Test::class) {
     maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 }
 

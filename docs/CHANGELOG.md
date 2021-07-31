@@ -1,6 +1,17 @@
 CHANGELOG
 ---------
 
+#### Next Release
+- Update dependencies:
+  - Gradle to 7.1.1
+  - Java to 11
+  - Android Gradle plugin to 7.0.0, build tool to 31.0.0
+  - Kotlin to 1.5.21, Coroutines to 1.5.1
+  - AndroidX Activity to 1.3.0, Annotations to 1.2.0, AppCompat to 1.3.1, Core to 1.6.0, Lifecycle to 2.3.1, Constraint Layout to 2.1.0, Material Component to 1.4.0, Recycler View to 1.2.1, Espresso to 3.4.0, Test Rules to 1.4.0
+  - Firebase plugin to 4.3.8, Analytics to 19.0.0, Crashlytics plugin to 2.7.1, Crashlytics to 18.2.0, Perf plugin to 1.4.0, Perf to 20.0.2
+  - Dagger Hilt to 2.38.1
+  - Mockito to 3.11.2
+
 #### v0.17.0 (2021-02-19)
 - New features:
   - Include bookmarks, highlights, and notes in search results

@@ -9,12 +9,12 @@ android:
   components:
     - tools
     - platform-tools
-    - build-tools-30.0.2
+    - build-tools-31
     - android-30
     - sys-img-arm64-v8a-google_apis-25
 
 jdk:
-  - oraclejdk8
+  - oraclejdk11
 
 branches:
   only:
@@ -22,7 +22,7 @@ branches:
 
 before_install:
   - yes | sdkmanager "platforms;android-30"
-  - yes | sdkmanager "build-tools;30.0.2"
+  - yes | sdkmanager "build-tools;31.0.0"
 
 before_script:
   - android list targets
