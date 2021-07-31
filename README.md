@@ -26,9 +26,15 @@ Main Features
 
 We currently support tens of different translations, with more added regularly. A full list of available translations can be found [here](docs/TRANSLATIONS.md).
 
+Donations
+---------
+If you would like to support this project, feel free to donate. Your support is highly appreciated. Thank you!
+* [PayPal](https://paypal.me/xizzhu)
+* [Venmo](https://www.venmo.com/u/xizzhu)
+
 License
 -------
-    Copyright (C) 2020 Xizhi Zhu
+    Copyright (C) 2021 Xizhi Zhu
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
