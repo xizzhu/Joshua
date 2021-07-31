@@ -18,7 +18,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        jcenter()
     }
     dependencies {
         classpath(Dependencies.Sdk.classpath)
@@ -35,7 +34,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter()
 
         maven("https://jitpack.io")
     }
