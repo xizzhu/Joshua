@@ -51,7 +51,7 @@ data class SettingsViewHolder(val display: SettingSectionHeader, val fontSize: S
                               val hideSearchButton: SwitchCompat, val consolidatedSharing: SwitchCompat,
                               val defaultHighlightColor: SettingButton, val backupRestore: SettingSectionHeader,
                               val backup: SettingButton, val restore: SettingButton, val about: SettingSectionHeader,
-                              val rate: SettingButton, val version: SettingButton) : ViewHolder
+                              val rate: SettingButton, val website: SettingButton, val version: SettingButton) : ViewHolder
 
 class SettingsPresenter(
         settingsViewModel: SettingsViewModel, settingsActivity: SettingsActivity,
@@ -142,6 +142,16 @@ class SettingsPresenter(
                         .setData(Uri.parse("market://details?id=me.xizzhu.android.joshua")))
             } catch (e: Exception) {
                 Log.e(tag, "Failed to start activity to rate app", e)
+                activity.toast(R.string.toast_unknown_error)
+            }
+        }
+
+        viewHolder.website.setOnClickListener {
+            try {
+                activity.startActivity(Intent(Intent.ACTION_VIEW)
+                        .setData(Uri.parse("https://xizzhu.me/pages/about-joshua/")))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to start activity to visit website", e)
                 activity.toast(R.string.toast_unknown_error)
             }
         }
@@ -361,6 +371,7 @@ class SettingsPresenter(
             backup.setTextColor(primaryTextColor, secondaryTextColor)
             restore.setTextColor(primaryTextColor, secondaryTextColor)
             rate.setTextColor(primaryTextColor, secondaryTextColor)
+            website.setTextColor(primaryTextColor, secondaryTextColor)
             version.setTextColor(primaryTextColor, secondaryTextColor)
         }
     }
@@ -394,6 +405,7 @@ class SettingsPresenter(
             restore.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
             about.setTextSize(bodyTextSize.roundToInt())
             rate.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
+            website.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
             version.setTextSize(bodyTextSize.roundToInt(), captionTextSize.roundToInt())
         }
     }

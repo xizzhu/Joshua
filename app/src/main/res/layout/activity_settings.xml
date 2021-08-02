@@ -120,6 +120,12 @@
                 app:settingButtonTitle="@string/settings_title_rate" />
 
             <me.xizzhu.android.joshua.settings.widgets.SettingButton
+                android:id="@+id/website"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:settingButtonTitle="@string/settings_title_website" />
+
+            <me.xizzhu.android.joshua.settings.widgets.SettingButton
                 android:id="@+id/version"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

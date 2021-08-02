@@ -2,7 +2,9 @@ CHANGELOG
 ---------
 
 #### Next Release
-- - Bug fixes:
+- New features:
+  - Add link to website
+- Bug fixes:
   - Properly update "consolidated sharing" setting switch
 - Update dependencies:
   - Gradle to 7.1.1
