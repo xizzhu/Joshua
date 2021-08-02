@@ -142,7 +142,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
 
     fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> = channelFlow {
         val downloadProgressChannel = Channel<Int>(Channel.CONFLATED)
-        launch { downloadProgressChannel.consumeEach { offer(it) } }
+        launch { downloadProgressChannel.consumeEach { trySend(it) } }
 
         downloadTranslation(downloadProgressChannel, translationToDownload)
         downloadProgressChannel.close()

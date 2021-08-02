@@ -34,7 +34,7 @@ android {
     }
 
     buildToolsVersion = Versions.Sdk.buildTools
-    compileSdk = 30
+    compileSdk = Versions.Sdk.compile
 
     defaultConfig {
         applicationId = Configurations.applicationId

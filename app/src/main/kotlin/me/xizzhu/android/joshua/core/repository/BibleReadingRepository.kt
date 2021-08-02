@@ -130,14 +130,14 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
 private class LruStringCache(maxSize: Int) : LruCache<String, List<String>>(maxSize) {
     // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
     override fun sizeOf(key: String, value: List<String>): Int =
-            key.length * 4 + value.sumBy { it.length * 4 }
+            key.length * 4 + value.sumOf { it.length * 4 }
 }
 
 private class LruVerseCache(maxSize: Int) : LruCache<String, List<Verse>>(maxSize) {
     // each Verse contains 3 integers and 2 strings (we don't cache parallel translations yet)
     // strings are UTF-16 encoded (with a length of one or two 16-bit code units)
     override fun sizeOf(key: String, verses: List<Verse>): Int =
-            key.length * 4 + verses.sumBy { 12 + (it.text.translationShortName.length + it.text.text.length) * 4 }
+            key.length * 4 + verses.sumOf { 12 + (it.text.translationShortName.length + it.text.text.length) * 4 }
 }
 
 private class BibleReadingCache {

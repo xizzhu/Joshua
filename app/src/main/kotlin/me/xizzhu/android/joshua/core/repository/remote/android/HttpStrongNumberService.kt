@@ -57,7 +57,7 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                     val currentProgress = index / 12
                     if (currentProgress > progress) {
                         progress = currentProgress
-                        channel.offer(progress)
+                        channel.trySend(progress)
                     }
                 }
 
@@ -79,7 +79,7 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                             }.forEach { (sn, meaning) -> words["H$sn"] = meaning }
 
                             progress += 50
-                            channel.offer(progress)
+                            channel.trySend(progress)
                         }
                         "greek.json" -> {
                             contentReader.readStrongNumberWords().apply {
@@ -89,7 +89,7 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                             }.forEach { (sn, meaning) -> words["G$sn"] = meaning }
 
                             progress += 50
-                            channel.offer(progress)
+                            channel.trySend(progress)
                         }
                         else -> throw IllegalStateException("Unknown entry ($entryName) in Strong number words")
                     }

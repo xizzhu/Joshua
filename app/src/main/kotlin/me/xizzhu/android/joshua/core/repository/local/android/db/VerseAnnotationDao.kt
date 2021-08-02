@@ -32,7 +32,7 @@ abstract class VerseAnnotationDao<T : VerseAnnotation>(sqliteHelper: SQLiteOpenH
         private const val COLUMN_TIMESTAMP = "timestamp"
     }
 
-    protected val db by lazy { sqliteHelper.writableDatabase }
+    protected val db: SQLiteDatabase by lazy { sqliteHelper.writableDatabase }
 
     @WorkerThread
     fun createTable(db: SQLiteDatabase) {

@@ -50,7 +50,7 @@ class HttpTranslationService : RemoteTranslationService {
                     val currentProgress = index / 12
                     if (currentProgress > progress) {
                         progress = currentProgress
-                        channel.offer(progress)
+                        channel.trySend(progress)
                     }
                 }
 

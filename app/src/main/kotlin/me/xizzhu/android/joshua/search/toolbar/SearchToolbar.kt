@@ -21,8 +21,6 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 
 class SearchToolbar : Toolbar {

@@ -45,10 +45,10 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
     fun download(versesDownloadProgress: Channel<Int>, wordsDownloadProgress: Channel<Int>) = channelFlow {
         Log.i(TAG, "Start downloading Strong number")
 
-        versesDownloadProgress.offer(0)
-        wordsDownloadProgress.offer(0)
+        versesDownloadProgress.trySend(0)
+        wordsDownloadProgress.trySend(0)
         versesDownloadProgress.consumeAsFlow().combine(wordsDownloadProgress.consumeAsFlow()) { v, w ->
-            offer((v * 0.9 + w * 0.1).toInt())
+            trySend((v * 0.9 + w * 0.1).toInt())
         }.launchIn(this)
 
         val remoteIndexesAsync = async { remoteStrongNumberStorage.fetchIndexes(versesDownloadProgress) }
@@ -58,7 +58,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
 
         versesDownloadProgress.close()
         wordsDownloadProgress.close()
-        offer(100)
+        trySend(100)
 
         Perf.trace("install_sn") {
             localStrongNumberStorage.save(remoteIndexes.indexes, remoteIndexes.reverseIndexes, remoteWords.words)

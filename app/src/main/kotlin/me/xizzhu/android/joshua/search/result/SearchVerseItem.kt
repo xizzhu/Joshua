@@ -65,9 +65,9 @@ data class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName
 
         // highlights the keywords
         val textStartIndex = SPANNABLE_STRING_BUILDER.length - text.length
-        val lowerCase = SPANNABLE_STRING_BUILDER.toString().toLowerCase(DEFAULT_LOCALE)
+        val lowerCase = SPANNABLE_STRING_BUILDER.toString().lowercase(DEFAULT_LOCALE)
         for ((index, keyword) in query.trim().replace("\\s+", " ").split(" ").withIndex()) {
-            val start = lowerCase.indexOf(keyword.toLowerCase(DEFAULT_LOCALE), textStartIndex)
+            val start = lowerCase.indexOf(keyword.lowercase(DEFAULT_LOCALE), textStartIndex)
             if (start > 0) {
                 SPANNABLE_STRING_BUILDER.setSpan(
                         if (index == 0) KEYWORD_SIZE_SPAN else createKeywordSizeSpan(),

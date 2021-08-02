@@ -60,9 +60,9 @@ data class SearchNoteItem(val verseIndex: VerseIndex, private val bookShortName:
         SPANNABLE_STRING_BUILDER.clearAll().append(note)
 
         // highlights the keywords
-        val lowerCase = SPANNABLE_STRING_BUILDER.toString().toLowerCase(DEFAULT_LOCALE)
+        val lowerCase = SPANNABLE_STRING_BUILDER.toString().lowercase(DEFAULT_LOCALE)
         for ((index, keyword) in query.trim().replace("\\s+", " ").split(" ").withIndex()) {
-            val start = lowerCase.indexOf(keyword.toLowerCase(DEFAULT_LOCALE))
+            val start = lowerCase.indexOf(keyword.lowercase(DEFAULT_LOCALE))
             if (start >= 0) {
                 SPANNABLE_STRING_BUILDER.setSpan(
                         if (index == 0) KEYWORD_SIZE_SPAN else createKeywordSizeSpan(),
