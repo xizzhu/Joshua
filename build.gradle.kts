@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Xizhi Zhu
+ * Copyright (C) 2021 Xizhi Zhu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        jcenter()
     }
     dependencies {
         classpath(Dependencies.Sdk.classpath)
@@ -35,7 +34,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter()
 
         maven("https://jitpack.io")
     }

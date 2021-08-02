@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Xizhi Zhu
+ * Copyright (C) 2021 Xizhi Zhu
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,7 +206,7 @@ class BaseAnnotatedVersesPresenterTest : BaseUnitTest() {
         `when`(resources.getStringArray(R.array.text_months)).thenReturn(Array(12) { it.toString() })
 
         val calendar = Calendar.getInstance()
-        calendar.set(Calendar.YEAR, 2020)
+        calendar.set(Calendar.YEAR, 2021)
         currentTimeMillis = System.currentTimeMillis()
         calendar.set(Calendar.DAY_OF_YEAR, 1)
         calendar.set(Calendar.YEAR, 2019)
