@@ -323,6 +323,7 @@ class SettingsPresenter(
             it.nightModeOn.isChecked = settings.nightModeOn
             it.simpleReadingMode.isChecked = settings.simpleReadingModeOn
             it.hideSearchButton.isChecked = settings.hideSearchButton
+            it.consolidatedSharing.isChecked = settings.consolidateVersesForSharing
             it.defaultHighlightColor.setDescription(highlightColorTexts[Highlight.AVAILABLE_COLORS.indexOf(settings.defaultHighlightColor)])
         }
 

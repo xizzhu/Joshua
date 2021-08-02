@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next Release
+- - Bug fixes:
+  - Properly update "consolidated sharing" setting switch
 - Update dependencies:
   - Gradle to 7.1.1
   - Java to 11
