@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next Release
+#### v0.17.1 (2021-08-02)
 - New features:
   - Add link to website
 - Changes:
