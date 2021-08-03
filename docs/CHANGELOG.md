@@ -4,6 +4,8 @@ CHANGELOG
 #### Next Release
 - New features:
   - Add link to website
+- Changes:
+  - Re-enable proguard-android-optimize
 - Bug fixes:
   - Properly update "consolidated sharing" setting switch
 - Update dependencies:
