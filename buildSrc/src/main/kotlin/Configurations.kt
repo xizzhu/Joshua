@@ -32,10 +32,6 @@ object Versions {
         }
     }
 
-    object Coveralls {
-        const val classpath = "2.8.3"
-    }
-
     object Sdk {
         const val classpath = "7.0.0"
         const val buildTools = "31.0.0"
@@ -48,12 +44,12 @@ object Versions {
 
     object Kotlin {
         const val jvmTarget = "11"
-        const val core = "1.5.21"
+        const val core = "1.5.30"
         const val coroutines = "1.5.1"
     }
 
     object AndroidX {
-        const val activity = "1.3.0"
+        const val activity = "1.3.1"
         const val annotation = "1.2.0"
         const val appCompat = "1.3.1"
         const val core = "1.6.0"
@@ -77,12 +73,12 @@ object Versions {
     }
 
     object Firebase {
-        const val classpath = "4.3.8"
-        const val analytics = "19.0.0"
+        const val classpath = "4.3.10"
+        const val analytics = "19.0.1"
 
         object Crashlytics {
             const val classpath = "2.7.1"
-            const val crashlytics = "18.2.0"
+            const val crashlytics = "18.2.1"
         }
 
         object Perf {
@@ -97,16 +93,12 @@ object Versions {
 
     const val logger = "0.4.0"
 
-    const val mockito = "3.11.2"
+    const val mockito = "3.12.3"
 }
 
 object Dependencies {
     object Sdk {
         const val classpath = "com.android.tools.build:gradle:${Versions.Sdk.classpath}"
-    }
-
-    object Coveralls {
-        const val classpath = "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${Versions.Coveralls.classpath}"
     }
 
     object Kotlin {
