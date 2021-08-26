@@ -23,9 +23,15 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.*
+import me.xizzhu.android.joshua.ui.append
+import me.xizzhu.android.joshua.ui.clearAll
+import me.xizzhu.android.joshua.ui.createTitleSizeSpan
+import me.xizzhu.android.joshua.ui.createTitleStyleSpan
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
+import me.xizzhu.android.joshua.ui.setSpan
+import me.xizzhu.android.joshua.ui.toCharSequence
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class VerseStrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: String,
                                  private val verseText: String, val onClick: (VerseIndex) -> Unit)

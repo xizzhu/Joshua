@@ -80,35 +80,33 @@ class SettingsViewModel(
             ""
         }
 
-        interactor.settings()
-                .onEach { settings ->
-                    val resources = activity.resources
-                    settingsViewData.value = ViewData.Success(SettingsViewData(
-                            fontSizes = fontSizeTexts,
-                            currentFontSize = settings.fontSizeScale - 1,
-                            animateFontSize = shouldAnimateFontSize,
-                            bodyTextSizeInPixel = settings.getBodyTextSize(resources),
-                            captionTextSizeInPixel = settings.getCaptionTextSize(resources),
-                            keepScreenOn = settings.keepScreenOn,
-                            nightModeOn = settings.nightModeOn,
-                            animateColor = shouldAnimateColor,
-                            backgroundColor = settings.getBackgroundColor(),
-                            primaryTextColor = settings.getPrimaryTextColor(resources),
-                            secondaryTextColor = settings.getSecondaryTextColor(resources),
-                            simpleReadingModeOn = settings.simpleReadingModeOn,
-                            hideSearchButton = settings.hideSearchButton,
-                            consolidateVersesForSharing = settings.consolidateVersesForSharing,
-                            defaultHighlightColor = HighlightColorViewData.fromHighlightColor(settings.defaultHighlightColor),
-                            version = version
-                    ))
+        settings().onEach { settings ->
+            val resources = activity.resources
+            settingsViewData.value = ViewData.Success(SettingsViewData(
+                    fontSizes = fontSizeTexts,
+                    currentFontSize = settings.fontSizeScale - 1,
+                    animateFontSize = shouldAnimateFontSize,
+                    bodyTextSizeInPixel = settings.getBodyTextSize(resources),
+                    captionTextSizeInPixel = settings.getCaptionTextSize(resources),
+                    keepScreenOn = settings.keepScreenOn,
+                    nightModeOn = settings.nightModeOn,
+                    animateColor = shouldAnimateColor,
+                    backgroundColor = settings.getBackgroundColor(),
+                    primaryTextColor = settings.getPrimaryTextColor(resources),
+                    secondaryTextColor = settings.getSecondaryTextColor(resources),
+                    simpleReadingModeOn = settings.simpleReadingModeOn,
+                    hideSearchButton = settings.hideSearchButton,
+                    consolidateVersesForSharing = settings.consolidateVersesForSharing,
+                    defaultHighlightColor = HighlightColorViewData.fromHighlightColor(settings.defaultHighlightColor),
+                    version = version
+            ))
 
-                    shouldAnimateFontSize = false
-                    shouldAnimateColor = false
-                }
-                .launchIn(coroutineScope)
+            shouldAnimateFontSize = false
+            shouldAnimateColor = false
+        }.launchIn(coroutineScope)
     }
 
-    fun settings(): Flow<ViewData<SettingsViewData>> = settingsViewData.filterNotNull()
+    fun settingsViewData(): Flow<ViewData<SettingsViewData>> = settingsViewData.filterNotNull()
 
     fun saveFontSizeScale(fontSizeScale: Int): Flow<ViewData<Unit>> = updateSettings {
         shouldAnimateFontSize = true

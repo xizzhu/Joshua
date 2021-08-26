@@ -146,6 +146,7 @@ dependencies {
     testImplementation(Dependencies.Kotlin.coroutinesTest)
     testImplementation(Dependencies.Mockito.mockito)
     testImplementation(Dependencies.Mockk.mockk)
+    testImplementation(Dependencies.Robolectric.robolectric)
 
     androidTestImplementation(Dependencies.Kotlin.test)
     androidTestImplementation(Dependencies.Kotlin.coroutinesTest)

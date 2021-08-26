@@ -20,9 +20,12 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
+import kotlin.test.Test
 
+@RunWith(RobolectricTestRunner::class)
 class VerseStrongNumberItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
@@ -31,11 +34,10 @@ class VerseStrongNumberItemTest : BaseUnitTest() {
 
     @Test
     fun testTextForDisplay() {
-        assertEquals(
-                "Gen. 1:1 In the beginning God created the heaven and the earth.",
-                VerseStrongNumberItem(
-                        MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, {}
-                ).textForDisplay.toString()
+        val actual = VerseStrongNumberItem(
+                MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, {}
         )
+        assertEquals(VerseIndex(0, 0, 0), actual.verseIndex)
+        assertEquals("Gen. 1:1 In the beginning God created the heaven and the earth.", actual.textForDisplay.toString())
     }
 }

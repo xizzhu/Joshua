@@ -64,6 +64,10 @@ object MockContents {
             Verse(VerseIndex(0, 0, 8), Verse.Text(kjvShortName, "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so."), emptyList()),
             Verse(VerseIndex(0, 0, 9), Verse.Text(kjvShortName, "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good."), emptyList())
     )
+    val kjvExtraVerses: List<Verse> = listOf(
+            Verse(VerseIndex(0, 9, 9), Verse.Text(kjvShortName, "And the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar."), emptyList()),
+            Verse(VerseIndex(1, 22, 18), Verse.Text(kjvShortName, "The first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk."), emptyList())
+    )
     const val kjvTranslationInfoJson = "{\"translations\":[{\"name\":\"Authorized King James\",\"shortName\":\"KJV\",\"language\":\"en_gb\",\"size\":1860978}]}"
     val kjvRemoteTranslationInfo = RemoteTranslationInfo(kjvShortName, "Authorized King James", "en_gb", 1860978L)
 
@@ -140,7 +144,7 @@ object MockContents {
             VerseIndex(39, 0, 0) to listOf("G976", "G1078", "G2424", "G5547", "G5207", "G1138", "G5207", "G11")
     )
     val strongNumberReverseIndex = mapOf(
-            "H7225" to listOf(VerseIndex(0, 0, 0)),
+            "H7225" to listOf(VerseIndex(0, 0, 0), VerseIndex(0, 9, 9)),
             "H1254" to listOf(VerseIndex(0, 0, 0)),
             "G976" to listOf(VerseIndex(39, 0, 0)),
             "G1078" to listOf(VerseIndex(39, 0, 0))

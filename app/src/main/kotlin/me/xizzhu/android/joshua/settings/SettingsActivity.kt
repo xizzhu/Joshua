@@ -66,7 +66,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
     }
 
     private fun observeSettings() {
-        settingsViewModel.settings()
+        settingsViewModel.settingsViewData()
                 .onEach(
                         onLoading = { /* Do nothing. */ },
                         onSuccess = {

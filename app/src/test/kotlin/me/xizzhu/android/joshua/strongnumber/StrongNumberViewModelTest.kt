@@ -16,66 +16,73 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
-import kotlinx.coroutines.flow.*
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.core.StrongNumber
+import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import org.mockito.Mock
-import org.mockito.Mockito.*
+import me.xizzhu.android.joshua.ui.recyclerview.TextItem
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
+@RunWith(RobolectricTestRunner::class)
 class StrongNumberViewModelTest : BaseUnitTest() {
-    @Mock
-    private lateinit var bibleReadingManager: BibleReadingManager
-    @Mock
-    private lateinit var strongNumberManager: StrongNumberManager
-    @Mock
-    private lateinit var settingsManager: SettingsManager
+    private lateinit var navigator: Navigator
+    private lateinit var strongNumberInteractor: StrongNumberInteractor
+    private lateinit var strongNumberActivity: StrongNumberActivity
 
-    private lateinit var strongNumberListViewModel: StrongNumberListViewModel
+    private lateinit var strongNumberViewModel: StrongNumberViewModel
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        strongNumberListViewModel = StrongNumberListViewModel(bibleReadingManager, strongNumberManager, settingsManager)
+        navigator = mockk()
+        strongNumberInteractor = mockk()
+        strongNumberActivity = mockk()
+
+        strongNumberViewModel = StrongNumberViewModel(navigator, strongNumberInteractor, strongNumberActivity, testCoroutineScope)
     }
 
     @Test
-    fun testStrongNumber() = runBlocking {
-        val currentTranslation = MockContents.kjvShortName
+    fun `test strongNumber`() = runBlocking {
         val sn = "H7225"
-        val strongNumber = StrongNumber(sn, MockContents.strongNumberWords.getValue(sn))
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", currentTranslation))
-        `when`(bibleReadingManager.readBookNames(currentTranslation)).thenReturn(MockContents.kjvBookNames)
-        `when`(bibleReadingManager.readBookShortNames(currentTranslation)).thenReturn(MockContents.kjvBookShortNames)
-        `when`(bibleReadingManager.readVerses(currentTranslation, MockContents.strongNumberReverseIndex.getValue(sn)))
-                .thenReturn(mapOf(VerseIndex(0, 0, 0) to MockContents.kjvVerses[0]))
-        `when`(strongNumberManager.readStrongNumber(sn)).thenReturn(strongNumber)
-        `when`(strongNumberManager.readVerseIndexes(sn)).thenReturn(MockContents.strongNumberReverseIndex.getValue(sn))
+        coEvery { strongNumberInteractor.strongNumber(sn) } returns StrongNumber(sn, MockContents.strongNumberWords.getValue(sn))
+        coEvery { strongNumberInteractor.verses(sn) } returns listOf(MockContents.kjvVerses[0], MockContents.kjvExtraVerses[0], MockContents.kjvExtraVerses[1])
+        coEvery { strongNumberInteractor.bookNames() } returns MockContents.kjvBookNames
+        coEvery { strongNumberInteractor.bookShortNames() } returns MockContents.kjvBookShortNames
 
+        strongNumberViewModel.loadStrongNumber(sn)
+
+        val actual = strongNumberViewModel.strongNumber().first()
+        assertTrue(actual is BaseViewModel.ViewData.Success)
+        assertEquals(6, actual.data.items.size)
         assertEquals(
-                listOf(
-                        StrongNumberViewData(
-                                strongNumber, listOf(MockContents.kjvVerses[0]),
-                                MockContents.kjvBookNames, MockContents.kjvBookShortNames
-                        )
-                ),
-                strongNumberListViewModel.strongNumber(sn).toList()
+                "H7225 beginning, chief(-est), first(-fruits, part, time), principal thing.",
+                (actual.data.items[0] as TextItem).title.toString()
         )
-    }
-
-    @Test
-    fun testStrongNumberWithException() = runBlocking {
-        val e = RuntimeException("random exception")
-        `when`(bibleReadingManager.currentTranslation()).thenThrow(e)
-
-        strongNumberListViewModel.strongNumber("")
-                .onCompletion { assertEquals(e, it) }
-                .catch { }
-                .collect()
+        assertEquals("Genesis", (actual.data.items[1] as TitleItem).title.toString())
+        assertEquals(
+                "Gen. 1:1 In the beginning God created the heaven and the earth.",
+                (actual.data.items[2] as VerseStrongNumberItem).textForDisplay.toString()
+        )
+        assertEquals(
+                "Gen. 10:10 And the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar.",
+                (actual.data.items[3] as VerseStrongNumberItem).textForDisplay.toString()
+        )
+        assertEquals("Exodus", (actual.data.items[4] as TitleItem).title.toString())
+        assertEquals(
+                "Ex. 23:19 The first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.",
+                (actual.data.items[5] as VerseStrongNumberItem).textForDisplay.toString()
+        )
     }
 }

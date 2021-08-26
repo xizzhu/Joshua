@@ -33,7 +33,7 @@ import me.xizzhu.android.joshua.reading.ReadingActivity
 import me.xizzhu.android.joshua.reading.ReadingViewModel
 import me.xizzhu.android.joshua.reading.VerseDetailViewData
 import me.xizzhu.android.joshua.reading.verse.toStringForSharing
-import me.xizzhu.android.joshua.strongnumber.StrongNumberListActivity
+import me.xizzhu.android.joshua.strongnumber.StrongNumberActivity
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.utils.copyToClipBoard
 import me.xizzhu.android.logger.Log
@@ -169,8 +169,7 @@ class VerseDetailPresenter(
 
     private fun onStrongNumberClicked(strongNumber: String) {
         try {
-            navigator.navigate(activity, Navigator.SCREEN_STRONG_NUMBER,
-                    StrongNumberListActivity.bundle(strongNumber))
+            navigator.navigate(activity, Navigator.SCREEN_STRONG_NUMBER, StrongNumberActivity.bundle(strongNumber))
         } catch (e: Exception) {
             Log.e(tag, "Failed to open Strong's number list activity", e)
             activity.dialog(true, R.string.dialog_navigation_error,

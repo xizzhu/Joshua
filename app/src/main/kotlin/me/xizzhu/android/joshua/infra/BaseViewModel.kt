@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.infra
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.transform
+import me.xizzhu.android.joshua.core.Settings
 
 abstract class BaseViewModel<BI : BaseInteractor, BA : BaseActivity<*>>(
         protected val interactor: BI, protected val activity: BA, protected val coroutineScope: CoroutineScope
@@ -30,6 +31,8 @@ abstract class BaseViewModel<BI : BaseInteractor, BA : BaseActivity<*>>(
     }
 
     protected val tag: String = javaClass.simpleName
+
+    fun settings(): Flow<Settings> = interactor.settings()
 }
 
 inline fun <D> Flow<BaseViewModel.ViewData<D>>.onFailure(crossinline onFailure: (Throwable) -> Unit): Flow<BaseViewModel.ViewData<D>> = transform { value ->

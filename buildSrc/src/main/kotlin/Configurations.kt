@@ -95,6 +95,7 @@ object Versions {
 
     const val mockito = "3.12.3"
     const val mockk = "1.12.0"
+    const val robolectric = "4.5"
 }
 
 object Dependencies {
@@ -180,5 +181,9 @@ object Dependencies {
 
     object Mockk {
         const val mockk = "io.mockk:mockk:${Versions.mockk}"
+    }
+
+    object Robolectric {
+        const val robolectric = "org.robolectric:robolectric:${Versions.robolectric}"
     }
 }
