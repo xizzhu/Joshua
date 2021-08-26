@@ -22,10 +22,13 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.databinding.ActivityStrongNumberBinding
 import me.xizzhu.android.joshua.infra.BaseActivity
 import me.xizzhu.android.joshua.infra.onEach
+import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -44,7 +47,7 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>() {
 
         observeSettings()
         observeStrongNumber()
-        strongNumberViewModel.loadStrongNumber(intent.getStringExtra(KEY_STRONG_NUMBER) ?: "")
+        loadStrongNumber()
     }
 
     private fun observeSettings() {
@@ -63,7 +66,6 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>() {
                             }
                         },
                         onSuccess = {
-                            println("--> ${it.items}")
                             with(viewBinding) {
                                 strongNumberList.setItems(it.items)
                                 strongNumberList.fadeIn()
@@ -71,11 +73,19 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>() {
                             }
                         },
                         onFailure = {
-                            // TODO
-                            it.printStackTrace()
+                            Log.e(tag, "Error while loading Strong's numbers", it)
+                            with(viewBinding) {
+                                loadingSpinner.visibility = View.GONE
+                                dialog(false, R.string.dialog_load_strong_number_list_error,
+                                        { _, _ -> loadStrongNumber() }, { _, _ -> finish() })
+                            }
                         }
                 )
                 .launchIn(lifecycleScope)
+    }
+
+    private fun loadStrongNumber() {
+        strongNumberViewModel.loadStrongNumber(intent.getStringExtra(KEY_STRONG_NUMBER) ?: "")
     }
 
     override fun inflateViewBinding(): ActivityStrongNumberBinding = ActivityStrongNumberBinding.inflate(layoutInflater)
