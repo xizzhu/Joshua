@@ -22,6 +22,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.scopes.ActivityScoped
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.SettingsManager
 
@@ -37,8 +38,9 @@ object SettingsModule {
 
     @ActivityScoped
     @Provides
-    fun provideSettingsViewModel(settingsInteractor: SettingsInteractor, settingsActivity: SettingsActivity): SettingsViewModel =
-            SettingsViewModel(settingsInteractor, settingsActivity)
+    fun provideSettingsViewModel(
+            navigator: Navigator, settingsInteractor: SettingsInteractor, settingsActivity: SettingsActivity
+    ): SettingsViewModel = SettingsViewModel(navigator, settingsInteractor, settingsActivity)
 
     @ActivityScoped
     @Provides

@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.annotation.IntDef
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarksActivity
@@ -41,9 +42,14 @@ class Navigator {
         const val SCREEN_NOTES = 6
         const val SCREEN_SETTINGS = 7
         const val SCREEN_STRONG_NUMBER = 8
+        const val SCREEN_RATE_ME = 9
+        const val SCREEN_WEBSITE = 10
 
-        @IntDef(SCREEN_READING, SCREEN_SEARCH, SCREEN_TRANSLATIONS, SCREEN_READING_PROGRESS,
-                SCREEN_BOOKMARKS, SCREEN_HIGHLIGHTS, SCREEN_NOTES, SCREEN_SETTINGS, SCREEN_STRONG_NUMBER)
+        @IntDef(
+                SCREEN_READING, SCREEN_SEARCH, SCREEN_TRANSLATIONS, SCREEN_READING_PROGRESS,
+                SCREEN_BOOKMARKS, SCREEN_HIGHLIGHTS, SCREEN_NOTES, SCREEN_SETTINGS, SCREEN_STRONG_NUMBER,
+                SCREEN_RATE_ME, SCREEN_WEBSITE
+        )
         @Retention(AnnotationRetention.SOURCE)
         annotation class Screen
     }
@@ -59,9 +65,15 @@ class Navigator {
             SCREEN_NOTES -> Intent(activity, NotesActivity::class.java)
             SCREEN_SETTINGS -> Intent(activity, SettingsActivity::class.java)
             SCREEN_STRONG_NUMBER -> Intent(activity, StrongNumberActivity::class.java)
+            SCREEN_RATE_ME -> Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=me.xizzhu.android.joshua"))
+            SCREEN_WEBSITE -> Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://xizzhu.me/pages/about-joshua/"))
             else -> throw IllegalArgumentException("Unknown screen - $screen")
         }
         extras?.let { intent.putExtras(it) }
         activity.startActivity(intent)
+    }
+
+    fun goBack(activity: Activity) {
+        activity.finish()
     }
 }

@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.settings
 
-import android.content.Intent
-import android.net.Uri
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
@@ -26,12 +24,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.infra.BaseViewModel
+import me.xizzhu.android.joshua.infra.act
+import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.logger.Log
 
@@ -60,7 +60,10 @@ class SettingsViewData(
 )
 
 class SettingsViewModel(
-        settingsInteractor: SettingsInteractor, settingsActivity: SettingsActivity, coroutineScope: CoroutineScope = settingsActivity.lifecycleScope
+        private val navigator: Navigator,
+        settingsInteractor: SettingsInteractor,
+        settingsActivity: SettingsActivity,
+        coroutineScope: CoroutineScope = settingsActivity.lifecycleScope
 ) : BaseViewModel<SettingsInteractor, SettingsActivity>(settingsInteractor, settingsActivity, coroutineScope) {
     companion object {
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -113,16 +116,8 @@ class SettingsViewModel(
         interactor.saveFontSizeScale(fontSizeScale + 1)
     }
 
-    private inline fun updateSettings(crossinline op: suspend () -> Unit): Flow<ViewData<Unit>> = flow {
-        try {
-            emit(ViewData.Loading())
-            op()
-            emit(ViewData.Success(Unit))
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to save settings", e)
-            emit(ViewData.Failure(e))
-        }
-    }
+    private inline fun updateSettings(crossinline op: suspend () -> Unit): Flow<ViewData<Unit>> =
+            act(op).onFailure { Log.e(tag, "Failed to save settings", it) }
 
     fun saveKeepScreenOn(keepScreenOn: Boolean): Flow<ViewData<Unit>> = updateSettings { interactor.saveKeepScreenOn(keepScreenOn) }
 
@@ -142,25 +137,9 @@ class SettingsViewModel(
     fun saveDefaultHighlightColor(highlightColor: HighlightColorViewData): Flow<ViewData<Unit>> =
             updateSettings { interactor.saveDefaultHighlightColor(highlightColor.color) }
 
-    fun rateMe() {
-        try {
-            // TODO Move to Navigator
-            activity.startActivity(Intent(Intent.ACTION_VIEW)
-                    .setData(Uri.parse("market://details?id=me.xizzhu.android.joshua")))
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to start activity to rate app", e)
-            activity.toast(R.string.toast_unknown_error)
-        }
-    }
+    fun rateMe(): Flow<ViewData<Unit>> = act { navigator.navigate(activity, Navigator.SCREEN_RATE_ME) }
+            .onFailure { Log.e(tag, "Failed to start activity to rate app", it) }
 
-    fun openWebsite() {
-        try {
-            // TODO Move to Navigator
-            activity.startActivity(Intent(Intent.ACTION_VIEW)
-                    .setData(Uri.parse("https://xizzhu.me/pages/about-joshua/")))
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to start activity to visit website", e)
-            activity.toast(R.string.toast_unknown_error)
-        }
-    }
+    fun openWebsite(): Flow<ViewData<Unit>> = act { navigator.navigate(activity, Navigator.SCREEN_WEBSITE) }
+            .onFailure { Log.e(tag, "Failed to start activity to visit website", it) }
 }

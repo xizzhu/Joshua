@@ -229,8 +229,8 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
                     CODE_SELECT_FILE_FOR_RESTORE
             )
         }
-        rate.setOnClickListener { settingsViewModel.rateMe() }
-        website.setOnClickListener { settingsViewModel.openWebsite() }
+        rate.setOnClickListener { settingsViewModel.rateMe().onFailure { toast(R.string.toast_unknown_error) }.launchIn(lifecycleScope) }
+        website.setOnClickListener { settingsViewModel.openWebsite().onFailure { toast(R.string.toast_unknown_error) }.launchIn(lifecycleScope) }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
