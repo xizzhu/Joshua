@@ -20,13 +20,20 @@ import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.launchIn
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.BaseViewModel
+import me.xizzhu.android.joshua.infra.onFailure
+import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
 import me.xizzhu.android.joshua.ui.createTitleSizeSpan
 import me.xizzhu.android.joshua.ui.createTitleStyleSpan
+import me.xizzhu.android.joshua.ui.dialog
+import me.xizzhu.android.joshua.ui.lifecycleScope
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.setSpan
@@ -34,7 +41,7 @@ import me.xizzhu.android.joshua.ui.toCharSequence
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
 data class VerseStrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: String,
-                                 private val verseText: String, val onClick: (VerseIndex) -> Unit)
+                                 private val verseText: String, val onClick: (VerseIndex) -> Flow<BaseViewModel.ViewData<Unit>>)
     : BaseItem(R.layout.item_verse_strong_number, { inflater, parent -> VerseStrongNumberItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
@@ -59,7 +66,18 @@ private class VerseStrongNumberItemViewHolder(inflater: LayoutInflater, parent: 
     private val text: TextView = itemView.findViewById(R.id.text)
 
     init {
-        itemView.setOnClickListener { item?.let { it.onClick(it.verseIndex) } }
+        itemView.setOnClickListener { openVerse() }
+    }
+
+    private fun openVerse() {
+        item?.let { item ->
+            item.onClick(item.verseIndex)
+                    .onFailure {
+                        itemView.activity().dialog(true, R.string.dialog_verse_selection_error,
+                                { _, _ -> openVerse() })
+                    }
+                    .launchIn(itemView.lifecycleScope())
+        }
     }
 
     override fun bind(settings: Settings, item: VerseStrongNumberItem, payloads: List<Any>) {

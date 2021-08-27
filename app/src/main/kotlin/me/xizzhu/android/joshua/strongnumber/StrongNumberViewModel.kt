@@ -24,16 +24,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
-import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
+import me.xizzhu.android.joshua.infra.act
+import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.ui.createTitleSizeSpan
 import me.xizzhu.android.joshua.ui.createTitleStyleSpan
-import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -91,8 +90,7 @@ class StrongNumberViewModel(
                 currentBookIndex = verseIndex.bookIndex
             }
 
-            items.add(VerseStrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex],
-                    verse.text.text, ::openVerse))
+            items.add(VerseStrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex], verse.text.text, ::openVerse))
         }
 
         return items
@@ -104,18 +102,10 @@ class StrongNumberViewModel(
                     .append(' ').append(strongNumber.meaning)
                     .toCharSequence()
 
-    private fun openVerse(verseToOpen: VerseIndex) {
-        coroutineScope.launch {
-            try {
-                interactor.saveCurrentVerseIndex(verseToOpen)
-                navigator.navigate(activity, Navigator.SCREEN_READING)
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to select verse and open reading activity", e)
-                activity.dialog(true, R.string.dialog_verse_selection_error,
-                        { _, _ -> openVerse(verseToOpen) })
-            }
-        }
-    }
+    private fun openVerse(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = act {
+        interactor.saveCurrentVerseIndex(verseToOpen)
+        navigator.navigate(activity, Navigator.SCREEN_READING)
+    }.onFailure { Log.e(tag, "Failed to select verse and open reading activity", it) }
 
     fun strongNumber(): Flow<ViewData<StrongNumberViewData>> = strongNumberViewData.filterNotNull()
 
