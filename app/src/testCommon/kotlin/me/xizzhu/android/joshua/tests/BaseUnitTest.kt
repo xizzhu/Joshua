@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import java.util.*
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
@@ -39,6 +40,7 @@ abstract class BaseUnitTest {
     open fun setup() {
         Dispatchers.setMain(testDispatcher)
         mockCloseable = MockitoAnnotations.openMocks(this)
+        Locale.setDefault(Locale.US)
     }
 
     @CallSuper

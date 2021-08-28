@@ -17,13 +17,12 @@
 package me.xizzhu.android.joshua.translations
 
 import android.app.Activity
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.scopes.ActivityScoped
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -36,25 +35,13 @@ object TranslationsModule {
 
     @ActivityScoped
     @Provides
-    fun provideTranslationListPresenter(translationsViewModel: TranslationsViewModel,
-                                        translationsActivity: TranslationsActivity): TranslationListPresenter =
-            TranslationListPresenter(translationsViewModel, translationsActivity)
+    fun provideTranslationsInteractor(
+            bibleReadingManager: BibleReadingManager, translationManager: TranslationManager, settingsManager: SettingsManager
+    ): TranslationsInteractor = TranslationsInteractor(bibleReadingManager, translationManager, settingsManager)
 
     @ActivityScoped
     @Provides
-    fun provideTranslationsViewModel(translationsActivity: TranslationsActivity,
-                                     bibleReadingManager: BibleReadingManager,
-                                     translationManager: TranslationManager,
-                                     settingsManager: SettingsManager): TranslationsViewModel {
-        val factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                if (modelClass.isAssignableFrom(TranslationsViewModel::class.java)) {
-                    return TranslationsViewModel(bibleReadingManager, translationManager, settingsManager) as T
-                }
-
-                throw IllegalArgumentException("Unsupported model class - $modelClass")
-            }
-        }
-        return ViewModelProvider(translationsActivity, factory).get(TranslationsViewModel::class.java)
-    }
+    fun provideTranslationsViewModel(
+            navigator: Navigator, translationsInteractor: TranslationsInteractor, translationsActivity: TranslationsActivity
+    ): TranslationsViewModel = TranslationsViewModel(navigator, translationsInteractor, translationsActivity)
 }

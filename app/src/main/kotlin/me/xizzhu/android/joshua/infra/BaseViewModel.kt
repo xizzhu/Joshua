@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.infra
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.transform
 import me.xizzhu.android.joshua.core.Settings
 
@@ -33,6 +34,20 @@ abstract class BaseViewModel<BI : BaseInteractor, BA : BaseActivity<*>>(
     protected val tag: String = javaClass.simpleName
 
     fun settings(): Flow<Settings> = interactor.settings()
+}
+
+inline fun <R> act(crossinline op: suspend () -> R): Flow<BaseViewModel.ViewData<R>> = flow {
+    try {
+        emit(BaseViewModel.ViewData.Loading())
+        emit(BaseViewModel.ViewData.Success(op()))
+    } catch (e: Exception) {
+        emit(BaseViewModel.ViewData.Failure(e))
+    }
+}
+
+inline fun <D> Flow<BaseViewModel.ViewData<D>>.onSuccess(crossinline onSuccess: (D) -> Unit): Flow<BaseViewModel.ViewData<D>> = transform { value ->
+    if (value is BaseViewModel.ViewData.Success) onSuccess(value.data)
+    return@transform emit(value)
 }
 
 inline fun <D> Flow<BaseViewModel.ViewData<D>>.onFailure(crossinline onFailure: (Throwable) -> Unit): Flow<BaseViewModel.ViewData<D>> = transform { value ->

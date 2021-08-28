@@ -20,6 +20,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
+import android.app.Activity
 import android.content.Context
 import android.content.res.TypedArray
 import android.text.TextUtils
@@ -29,8 +30,15 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.StyleableRes
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 
 private const val ANIMATION_DURATION = 300L
+
+fun View.activity(): Activity = context as Activity
+
+fun View.lifecycleScope(): LifecycleCoroutineScope = (context as LifecycleOwner).lifecycleScope
 
 fun View.fadeIn() {
     if (visibility == View.VISIBLE) {

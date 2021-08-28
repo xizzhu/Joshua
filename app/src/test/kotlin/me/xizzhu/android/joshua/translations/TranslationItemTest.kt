@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.translations
 
+import kotlinx.coroutines.flow.emptyFlow
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -25,12 +26,12 @@ import kotlin.test.assertEquals
 class TranslationItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_translation, TranslationItem(MockContents.kjvTranslationInfo, true, {}, { _, _ -> }).viewType)
+        assertEquals(R.layout.item_translation, TranslationItem(MockContents.kjvTranslationInfo, true, { emptyFlow() }, { emptyFlow() }, { emptyFlow() }).viewType)
     }
 
     @Test
     fun testRightDrawable() {
-        assertEquals(0, TranslationItem(MockContents.kjvTranslationInfo, false, {}, { _, _ -> }).rightDrawable)
-        assertEquals(R.drawable.ic_check, TranslationItem(MockContents.kjvTranslationInfo, true, {}, { _, _ -> }).rightDrawable)
+        assertEquals(0, TranslationItem(MockContents.kjvTranslationInfo, false, { emptyFlow() }, { emptyFlow() }, { emptyFlow() }).rightDrawable)
+        assertEquals(R.drawable.ic_check, TranslationItem(MockContents.kjvTranslationInfo, true, { emptyFlow() }, { emptyFlow() }, { emptyFlow() }).rightDrawable)
     }
 }

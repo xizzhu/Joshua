@@ -16,37 +16,113 @@
 
 package me.xizzhu.android.joshua.translations
 
-import kotlinx.coroutines.flow.*
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.SettingsManager
+import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import me.xizzhu.android.joshua.infra.BaseViewModel
+import me.xizzhu.android.joshua.infra.act
+import me.xizzhu.android.joshua.infra.onFailure
+import me.xizzhu.android.joshua.infra.onSuccess
+import me.xizzhu.android.joshua.ui.TranslationInfoComparator
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import me.xizzhu.android.logger.Log
+import java.util.*
 
-data class TranslationList(val currentTranslation: String,
-                           val availableTranslations: List<TranslationInfo>,
-                           val downloadedTranslations: List<TranslationInfo>)
+class TranslationsViewData(val items: List<BaseItem>)
 
-class TranslationsViewModel(private val bibleReadingManager: BibleReadingManager,
-                            private val translationManager: TranslationManager,
-                            settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    fun translationList(forceRefresh: Boolean): Flow<TranslationList> = flow {
-        translationManager.reload(forceRefresh)
-        emit(TranslationList(
-                bibleReadingManager.currentTranslation().first(),
-                translationManager.availableTranslations().first(),
-                translationManager.downloadedTranslations().first()
-        ))
+class TranslationsViewModel(
+        private val navigator: Navigator,
+        translationsInteractor: TranslationsInteractor,
+        translationsActivity: TranslationsActivity,
+        coroutineScope: CoroutineScope = translationsActivity.lifecycleScope
+) : BaseViewModel<TranslationsInteractor, TranslationsActivity>(translationsInteractor, translationsActivity, coroutineScope) {
+    private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_NAME)
+    private val translations: MutableStateFlow<ViewData<TranslationsViewData>?> = MutableStateFlow(null)
+
+    init {
+        coroutineScope.launch { loadTranslations() }
     }
 
-    suspend fun saveCurrentTranslation(translationShortName: String) {
-        bibleReadingManager.saveCurrentTranslation(translationShortName)
+    private suspend fun loadTranslations() {
+        val items: ArrayList<BaseItem> = ArrayList()
+        val availableTranslations = interactor.availableTranslations().sortedWith(translationComparator)
+        val downloadedTranslations = interactor.downloadedTranslations().sortedWith(translationComparator)
+        if (availableTranslations.isEmpty() && downloadedTranslations.isEmpty()) {
+            translations.value = ViewData.Failure(IllegalStateException("No available nor downloaded translation"))
+            return
+        }
+        val currentTranslation = interactor.currentTranslation()
+        items.addAll(downloadedTranslations.toItems(currentTranslation))
+        if (availableTranslations.isNotEmpty()) {
+            items.add(TitleItem(activity.getString(R.string.header_available_translations), false))
+            items.addAll(availableTranslations.toItems(currentTranslation))
+        }
+        translations.value = ViewData.Success(TranslationsViewData(items))
     }
 
-    fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> =
-            translationManager.downloadTranslation(translationToDownload)
+    private fun List<TranslationInfo>.toItems(currentTranslation: String): List<BaseItem> {
+        val items: ArrayList<BaseItem> = ArrayList()
+        var currentLanguage = ""
+        for (translationInfo in this@toItems) {
+            val language = translationInfo.language.split("_")[0]
+            if (currentLanguage != language) {
+                items.add(TitleItem(Locale(language).displayLanguage, true))
+                currentLanguage = language
+            }
+            items.add(TranslationItem(
+                    translationInfo,
+                    translationInfo.downloaded && translationInfo.shortName == currentTranslation,
+                    ::selectTranslation, ::downloadTranslation, ::removeTranslation
+            ))
+        }
+        return items
+    }
 
-    fun removeTranslation(translationToRemove: TranslationInfo): Flow<Unit> = flow {
-        translationManager.removeTranslation(translationToRemove)
+    private fun selectTranslation(translationToSelect: TranslationInfo): Flow<ViewData<Unit>> = act {
+        interactor.saveCurrentTranslation(translationToSelect.shortName)
+        navigator.goBack(activity)
+    }.onFailure { Log.e(tag, "Failed to select translation and close translation management activity", it) }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun downloadTranslation(translationToDownload: TranslationInfo): Flow<ViewData<Int>> =
+            interactor.downloadTranslation(translationToDownload)
+                    .map { progress ->
+                        when (progress) {
+                            -1 -> ViewData.Failure(CancellationException("Translation downloading cancelled by user"))
+                            in 0 until 100 -> ViewData.Loading(progress)
+                            else -> ViewData.Success(100)
+                        }
+                    }
+                    .catch { e ->
+                        Log.e(tag, "Failed to download translation", e)
+                        emit(ViewData.Failure(e))
+                    }
+                    .onSuccess { refreshTranslations(false) }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun removeTranslation(translationToDownload: TranslationInfo): Flow<ViewData<Unit>> = act {
+        interactor.removeTranslation(translationToDownload)
+    }.onSuccess { refreshTranslations(false) }.onFailure { Log.e(tag, "Failed to remove translation", it) }
+
+    fun translations(): Flow<ViewData<TranslationsViewData>> = translations.filterNotNull()
+
+    fun refreshTranslations(forceRefresh: Boolean) {
+        coroutineScope.launch {
+            translations.value = ViewData.Loading()
+            interactor.refreshTranslationList(forceRefresh)
+            // After the refresh, if no change is detected, nothing will be emitted, therefore we need to manually load here.
+            loadTranslations()
+        }
     }
 }

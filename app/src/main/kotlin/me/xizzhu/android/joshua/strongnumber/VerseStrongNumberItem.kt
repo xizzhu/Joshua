@@ -40,8 +40,8 @@ import me.xizzhu.android.joshua.ui.setSpan
 import me.xizzhu.android.joshua.ui.toCharSequence
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class VerseStrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: String,
-                                 private val verseText: String, val onClick: (VerseIndex) -> Flow<BaseViewModel.ViewData<Unit>>)
+class VerseStrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: String,
+                            private val verseText: String, val onClick: (VerseIndex) -> Flow<BaseViewModel.ViewData<Unit>>)
     : BaseItem(R.layout.item_verse_strong_number, { inflater, parent -> VerseStrongNumberItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
@@ -72,10 +72,7 @@ private class VerseStrongNumberItemViewHolder(inflater: LayoutInflater, parent: 
     private fun openVerse() {
         item?.let { item ->
             item.onClick(item.verseIndex)
-                    .onFailure {
-                        itemView.activity().dialog(true, R.string.dialog_verse_selection_error,
-                                { _, _ -> openVerse() })
-                    }
+                    .onFailure { itemView.activity().dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse() }) }
                     .launchIn(itemView.lifecycleScope())
         }
     }

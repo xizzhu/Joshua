@@ -73,6 +73,7 @@ object MockContents {
 
     const val bbeShortName = "BBE"
     val bbeTranslationInfo = TranslationInfo(bbeShortName, "Basic English", "en_us", 1869733L, false)
+    val bbeDownloadedTranslationInfo = TranslationInfo(bbeShortName, "Basic English", "en_us", 1869733L, true)
     val bbeBookNames: List<String> = listOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
     val bbeBookShortNames: List<String> = listOf("Gen.", "Ex.", "Lev.", "Num.", "Deut.")
     val bbeVerses: List<Verse> = listOf(
