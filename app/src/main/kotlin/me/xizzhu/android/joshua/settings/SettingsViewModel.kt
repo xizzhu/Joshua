@@ -24,11 +24,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.act
 import me.xizzhu.android.joshua.infra.onFailure
@@ -61,10 +64,10 @@ class SettingsViewData(
 
 class SettingsViewModel(
         private val navigator: Navigator,
-        settingsInteractor: SettingsInteractor,
+        settingsManager: SettingsManager,
         settingsActivity: SettingsActivity,
         coroutineScope: CoroutineScope = settingsActivity.lifecycleScope
-) : BaseViewModel<SettingsInteractor, SettingsActivity>(settingsInteractor, settingsActivity, coroutineScope) {
+) : BaseViewModel<SettingsActivity>(settingsManager, settingsActivity, coroutineScope) {
     companion object {
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
@@ -113,29 +116,38 @@ class SettingsViewModel(
 
     fun saveFontSizeScale(fontSizeScale: Int): Flow<ViewData<Unit>> = updateSettings {
         shouldAnimateFontSize = true
-        interactor.saveFontSizeScale(fontSizeScale + 1)
+        settingsManager.saveSettings(currentSettings().copy(fontSizeScale = fontSizeScale + 1))
     }
 
     private inline fun updateSettings(crossinline op: suspend () -> Unit): Flow<ViewData<Unit>> =
             act(op).onFailure { Log.e(tag, "Failed to save settings", it) }
 
-    fun saveKeepScreenOn(keepScreenOn: Boolean): Flow<ViewData<Unit>> = updateSettings { interactor.saveKeepScreenOn(keepScreenOn) }
+    private suspend fun currentSettings(): Settings = settings().first()
+
+    fun saveKeepScreenOn(keepScreenOn: Boolean): Flow<ViewData<Unit>> = updateSettings {
+        settingsManager.saveSettings(currentSettings().copy(keepScreenOn = keepScreenOn))
+    }
 
     fun saveNightModeOn(nightModeOn: Boolean): Flow<ViewData<Unit>> = updateSettings {
         shouldAnimateColor = true
-        interactor.saveNightModeOn(nightModeOn)
+        settingsManager.saveSettings(currentSettings().copy(nightModeOn = nightModeOn))
     }
 
-    fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean): Flow<ViewData<Unit>> =
-            updateSettings { interactor.saveSimpleReadingModeOn(simpleReadingModeOn) }
+    fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean): Flow<ViewData<Unit>> = updateSettings {
+        settingsManager.saveSettings(currentSettings().copy(simpleReadingModeOn = simpleReadingModeOn))
+    }
 
-    fun saveHideSearchButton(hideSearchButton: Boolean): Flow<ViewData<Unit>> = updateSettings { interactor.saveHideSearchButton(hideSearchButton) }
+    fun saveHideSearchButton(hideSearchButton: Boolean): Flow<ViewData<Unit>> = updateSettings {
+        settingsManager.saveSettings(currentSettings().copy(hideSearchButton = hideSearchButton))
+    }
 
-    fun saveConsolidateVersesForSharing(consolidateVerses: Boolean): Flow<ViewData<Unit>> =
-            updateSettings { interactor.saveConsolidateVersesForSharing(consolidateVerses) }
+    fun saveConsolidateVersesForSharing(consolidateVerses: Boolean): Flow<ViewData<Unit>> = updateSettings {
+        settingsManager.saveSettings(currentSettings().copy(consolidateVersesForSharing = consolidateVerses))
+    }
 
-    fun saveDefaultHighlightColor(highlightColor: HighlightColorViewData): Flow<ViewData<Unit>> =
-            updateSettings { interactor.saveDefaultHighlightColor(highlightColor.color) }
+    fun saveDefaultHighlightColor(highlightColor: HighlightColorViewData): Flow<ViewData<Unit>> = updateSettings {
+        settingsManager.saveSettings(currentSettings().copy(defaultHighlightColor = highlightColor.color))
+    }
 
     fun rateMe(): Flow<ViewData<Unit>> = act { navigator.navigate(activity, Navigator.SCREEN_RATE_ME) }
             .onFailure { Log.e(tag, "Failed to start activity to rate app", it) }

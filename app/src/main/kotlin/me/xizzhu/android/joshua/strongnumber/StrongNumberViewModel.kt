@@ -25,7 +25,10 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.StrongNumber
+import me.xizzhu.android.joshua.core.StrongNumberManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
@@ -38,16 +41,19 @@ import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.ui.setSpan
 import me.xizzhu.android.joshua.ui.toCharSequence
+import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 
 class StrongNumberViewData(val items: List<BaseItem>)
 
 class StrongNumberViewModel(
         private val navigator: Navigator,
-        strongNumberInteractor: StrongNumberInteractor,
+        private val bibleReadingManager: BibleReadingManager,
+        private val strongNumberManager: StrongNumberManager,
+        settingsManager: SettingsManager,
         strongNumberActivity: StrongNumberActivity,
         coroutineScope: CoroutineScope = strongNumberActivity.lifecycleScope
-) : BaseViewModel<StrongNumberInteractor, StrongNumberActivity>(strongNumberInteractor, strongNumberActivity, coroutineScope) {
+) : BaseViewModel<StrongNumberActivity>(settingsManager, strongNumberActivity, coroutineScope) {
     private val strongNumber: MutableStateFlow<String?> = MutableStateFlow(null)
     private val strongNumberViewData: MutableStateFlow<ViewData<StrongNumberViewData>?> = MutableStateFlow(null)
 
@@ -60,12 +66,14 @@ class StrongNumberViewModel(
                         return@onEach
                     }
 
+                    val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
                     strongNumberViewData.value = ViewData.Success(StrongNumberViewData(
                             items = buildStrongNumberItems(
-                                    strongNumber = interactor.strongNumber(sn),
-                                    verses = interactor.verses(sn),
-                                    bookNames = interactor.bookNames(),
-                                    bookShortNames = interactor.bookShortNames()
+                                    strongNumber = strongNumberManager.readStrongNumber(sn),
+                                    verses = bibleReadingManager.readVerses(currentTranslation, strongNumberManager.readVerseIndexes(sn)).values
+                                            .sortedBy { with(it.verseIndex) { bookIndex * 100000 + chapterIndex * 1000 + verseIndex } },
+                                    bookNames = bibleReadingManager.readBookNames(currentTranslation),
+                                    bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
                             )
                     ))
                 }
@@ -103,7 +111,7 @@ class StrongNumberViewModel(
                     .toCharSequence()
 
     private fun openVerse(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = act {
-        interactor.saveCurrentVerseIndex(verseToOpen)
+        bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
         navigator.navigate(activity, Navigator.SCREEN_READING)
     }.onFailure { Log.e(tag, "Failed to select verse and open reading activity", it) }
 

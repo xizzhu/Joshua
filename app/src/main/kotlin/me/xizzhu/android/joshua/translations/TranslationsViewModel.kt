@@ -24,11 +24,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.act
 import me.xizzhu.android.joshua.infra.onFailure
@@ -43,10 +47,12 @@ class TranslationsViewData(val items: List<BaseItem>)
 
 class TranslationsViewModel(
         private val navigator: Navigator,
-        translationsInteractor: TranslationsInteractor,
+        private val bibleReadingManager: BibleReadingManager,
+        private val translationManager: TranslationManager,
+        settingsManager: SettingsManager,
         translationsActivity: TranslationsActivity,
         coroutineScope: CoroutineScope = translationsActivity.lifecycleScope
-) : BaseViewModel<TranslationsInteractor, TranslationsActivity>(translationsInteractor, translationsActivity, coroutineScope) {
+) : BaseViewModel<TranslationsActivity>(settingsManager, translationsActivity, coroutineScope) {
     private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_NAME)
     private val translations: MutableStateFlow<ViewData<TranslationsViewData>?> = MutableStateFlow(null)
 
@@ -56,13 +62,13 @@ class TranslationsViewModel(
 
     private suspend fun loadTranslations() {
         val items: ArrayList<BaseItem> = ArrayList()
-        val availableTranslations = interactor.availableTranslations().sortedWith(translationComparator)
-        val downloadedTranslations = interactor.downloadedTranslations().sortedWith(translationComparator)
+        val availableTranslations = translationManager.availableTranslations().first().sortedWith(translationComparator)
+        val downloadedTranslations = translationManager.downloadedTranslations().first().sortedWith(translationComparator)
         if (availableTranslations.isEmpty() && downloadedTranslations.isEmpty()) {
             translations.value = ViewData.Failure(IllegalStateException("No available nor downloaded translation"))
             return
         }
-        val currentTranslation = interactor.currentTranslation()
+        val currentTranslation = bibleReadingManager.currentTranslation().first()
         items.addAll(downloadedTranslations.toItems(currentTranslation))
         if (availableTranslations.isNotEmpty()) {
             items.add(TitleItem(activity.getString(R.string.header_available_translations), false))
@@ -90,13 +96,13 @@ class TranslationsViewModel(
     }
 
     private fun selectTranslation(translationToSelect: TranslationInfo): Flow<ViewData<Unit>> = act {
-        interactor.saveCurrentTranslation(translationToSelect.shortName)
+        bibleReadingManager.saveCurrentTranslation(translationToSelect.shortName)
         navigator.goBack(activity)
     }.onFailure { Log.e(tag, "Failed to select translation and close translation management activity", it) }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun downloadTranslation(translationToDownload: TranslationInfo): Flow<ViewData<Int>> =
-            interactor.downloadTranslation(translationToDownload)
+            translationManager.downloadTranslation(translationToDownload)
                     .map { progress ->
                         when (progress) {
                             -1 -> ViewData.Failure(CancellationException("Translation downloading cancelled by user"))
@@ -112,7 +118,7 @@ class TranslationsViewModel(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun removeTranslation(translationToDownload: TranslationInfo): Flow<ViewData<Unit>> = act {
-        interactor.removeTranslation(translationToDownload)
+        translationManager.removeTranslation(translationToDownload)
     }.onSuccess { refreshTranslations(false) }.onFailure { Log.e(tag, "Failed to remove translation", it) }
 
     fun translations(): Flow<ViewData<TranslationsViewData>> = translations.filterNotNull()
@@ -120,7 +126,7 @@ class TranslationsViewModel(
     fun refreshTranslations(forceRefresh: Boolean) {
         coroutineScope.launch {
             translations.value = ViewData.Loading()
-            interactor.refreshTranslationList(forceRefresh)
+            translationManager.reload(forceRefresh)
             // After the refresh, if no change is detected, nothing will be emitted, therefore we need to manually load here.
             loadTranslations()
         }

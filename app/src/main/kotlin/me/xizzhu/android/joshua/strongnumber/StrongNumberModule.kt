@@ -35,13 +35,11 @@ object StrongNumberModule {
 
     @ActivityScoped
     @Provides
-    fun provideStrongNumberInteractor(
-            bibleReadingManager: BibleReadingManager, strongNumberManager: StrongNumberManager, settingsManager: SettingsManager
-    ): StrongNumberInteractor = StrongNumberInteractor(bibleReadingManager, strongNumberManager, settingsManager)
-
-    @ActivityScoped
-    @Provides
     fun provideStrongNumberViewModel(
-            navigator: Navigator, strongNumberInteractor: StrongNumberInteractor, strongNumberActivity: StrongNumberActivity
-    ): StrongNumberViewModel = StrongNumberViewModel(navigator, strongNumberInteractor, strongNumberActivity)
+            navigator: Navigator,
+            bibleReadingManager: BibleReadingManager,
+            strongNumberManager: StrongNumberManager,
+            settingsManager: SettingsManager,
+            strongNumberActivity: StrongNumberActivity
+    ): StrongNumberViewModel = StrongNumberViewModel(navigator, bibleReadingManager, strongNumberManager, settingsManager, strongNumberActivity)
 }

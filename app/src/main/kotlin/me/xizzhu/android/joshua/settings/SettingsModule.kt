@@ -34,21 +34,12 @@ object SettingsModule {
 
     @ActivityScoped
     @Provides
-    fun provideSettingsInteractor(settingsManager: SettingsManager): SettingsInteractor = SettingsInteractor(settingsManager)
-
-    @ActivityScoped
-    @Provides
     fun provideSettingsViewModel(
-            navigator: Navigator, settingsInteractor: SettingsInteractor, settingsActivity: SettingsActivity
-    ): SettingsViewModel = SettingsViewModel(navigator, settingsInteractor, settingsActivity)
+            navigator: Navigator, settingsManager: SettingsManager, settingsActivity: SettingsActivity
+    ): SettingsViewModel = SettingsViewModel(navigator, settingsManager, settingsActivity)
 
     @ActivityScoped
     @Provides
-    fun provideBackupInteractor(backupManager: BackupManager, settingsManager: SettingsManager): BackupInteractor =
-            BackupInteractor(backupManager, settingsManager)
-
-    @ActivityScoped
-    @Provides
-    fun provideBackupViewModel(backupInteractor: BackupInteractor, settingsActivity: SettingsActivity): BackupViewModel =
-            BackupViewModel(backupInteractor, settingsActivity)
+    fun provideBackupViewModel(backupManager: BackupManager, settingsManager: SettingsManager, settingsActivity: SettingsActivity): BackupViewModel =
+            BackupViewModel(backupManager, settingsManager, settingsActivity)
 }

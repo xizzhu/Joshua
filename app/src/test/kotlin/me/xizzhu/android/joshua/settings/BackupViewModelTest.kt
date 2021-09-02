@@ -24,6 +24,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.BackupManager
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import java.io.InputStream
@@ -38,7 +40,8 @@ class BackupViewModelTest : BaseUnitTest() {
     private lateinit var inputStream: InputStream
     private lateinit var outputStream: OutputStream
     private lateinit var resolver: ContentResolver
-    private lateinit var backupInteractor: BackupInteractor
+    private lateinit var backupManager: BackupManager
+    private lateinit var settingsManager: SettingsManager
     private lateinit var settingsActivity: SettingsActivity
     private lateinit var backupViewModel: BackupViewModel
 
@@ -53,13 +56,14 @@ class BackupViewModelTest : BaseUnitTest() {
             every { openInputStream(uri) } returns inputStream
             every { openOutputStream(uri) } returns outputStream
         }
-        backupInteractor = mockk<BackupInteractor>().apply {
+        backupManager = mockk<BackupManager>().apply {
             coEvery { backup(outputStream) } returns Unit
             coEvery { restore(inputStream) } returns Unit
         }
+        settingsManager = mockk()
         settingsActivity = mockk<SettingsActivity>().apply { every { contentResolver } returns resolver }
 
-        backupViewModel = BackupViewModel(backupInteractor, settingsActivity, testCoroutineScope)
+        backupViewModel = BackupViewModel(backupManager, settingsManager, settingsActivity, testCoroutineScope)
     }
 
     @Test
@@ -83,7 +87,7 @@ class BackupViewModelTest : BaseUnitTest() {
     @Test
     fun `test backup with error from interactor`(): Unit = runBlocking {
         val ex = RuntimeException("Random")
-        coEvery { backupInteractor.backup(outputStream) } throws ex
+        coEvery { backupManager.backup(outputStream) } throws ex
 
         val actual = backupViewModel.backup(uri).toList()
         assertEquals(2, actual.size)
@@ -120,7 +124,7 @@ class BackupViewModelTest : BaseUnitTest() {
     @Test
     fun `test restore with error from interactor`(): Unit = runBlocking {
         val ex = RuntimeException("Random")
-        coEvery { backupInteractor.restore(inputStream) } throws ex
+        coEvery { backupManager.restore(inputStream) } throws ex
 
         val actual = backupViewModel.restore(uri).toList()
         assertEquals(2, actual.size)

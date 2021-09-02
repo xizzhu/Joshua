@@ -19,9 +19,13 @@ package me.xizzhu.android.joshua.strongnumber
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.StrongNumber
+import me.xizzhu.android.joshua.core.StrongNumberManager
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -37,7 +41,9 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 class StrongNumberViewModelTest : BaseUnitTest() {
     private lateinit var navigator: Navigator
-    private lateinit var strongNumberInteractor: StrongNumberInteractor
+    private lateinit var bibleReadingManager: BibleReadingManager
+    private lateinit var strongNumberManager: StrongNumberManager
+    private lateinit var settingsManager: SettingsManager
     private lateinit var strongNumberActivity: StrongNumberActivity
 
     private lateinit var strongNumberViewModel: StrongNumberViewModel
@@ -47,19 +53,29 @@ class StrongNumberViewModelTest : BaseUnitTest() {
         super.setup()
 
         navigator = mockk()
-        strongNumberInteractor = mockk()
+        bibleReadingManager = mockk()
+        strongNumberManager = mockk()
+        settingsManager = mockk()
         strongNumberActivity = mockk()
 
-        strongNumberViewModel = StrongNumberViewModel(navigator, strongNumberInteractor, strongNumberActivity, testCoroutineScope)
+        strongNumberViewModel = StrongNumberViewModel(navigator, bibleReadingManager, strongNumberManager, settingsManager, strongNumberActivity, testCoroutineScope)
     }
 
     @Test
     fun `test strongNumber`() = runBlocking {
         val sn = "H7225"
-        coEvery { strongNumberInteractor.strongNumber(sn) } returns StrongNumber(sn, MockContents.strongNumberWords.getValue(sn))
-        coEvery { strongNumberInteractor.verses(sn) } returns listOf(MockContents.kjvVerses[0], MockContents.kjvExtraVerses[0], MockContents.kjvExtraVerses[1])
-        coEvery { strongNumberInteractor.bookNames() } returns MockContents.kjvBookNames
-        coEvery { strongNumberInteractor.bookShortNames() } returns MockContents.kjvBookShortNames
+        coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
+        coEvery { strongNumberManager.readStrongNumber(sn) } returns StrongNumber(sn, MockContents.strongNumberWords.getValue(sn))
+        coEvery { strongNumberManager.readVerseIndexes(sn) } returns MockContents.strongNumberReverseIndex.getValue(sn)
+        coEvery {
+            bibleReadingManager.readVerses(MockContents.kjvShortName, MockContents.strongNumberReverseIndex.getValue(sn))
+        } returns mapOf(
+                Pair(MockContents.kjvExtraVerses[0].verseIndex, MockContents.kjvExtraVerses[0]),
+                Pair(MockContents.kjvExtraVerses[1].verseIndex, MockContents.kjvExtraVerses[1]),
+                Pair(MockContents.kjvVerses[0].verseIndex, MockContents.kjvVerses[0])
+        )
+        coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
+        coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
 
         strongNumberViewModel.loadStrongNumber(sn)
 

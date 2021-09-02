@@ -24,13 +24,18 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.BackupManager
+import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.logger.Log
 import java.io.IOException
 
 class BackupViewModel(
-        backupInteractor: BackupInteractor, settingsActivity: SettingsActivity, coroutineScope: CoroutineScope = settingsActivity.lifecycleScope
-) : BaseViewModel<BackupInteractor, SettingsActivity>(backupInteractor, settingsActivity, coroutineScope) {
+        private val backupManager: BackupManager,
+        settingsManager: SettingsManager,
+        settingsActivity: SettingsActivity,
+        coroutineScope: CoroutineScope = settingsActivity.lifecycleScope
+) : BaseViewModel<SettingsActivity>(settingsManager, settingsActivity, coroutineScope) {
     fun backup(uri: Uri?): Flow<ViewData<Int>> = flow {
         if (uri == null) {
             emit(ViewData.Failure(IllegalArgumentException("Null URI")))
@@ -40,7 +45,7 @@ class BackupViewModel(
         emit(ViewData.Loading())
         try {
             activity.contentResolver.openOutputStream(uri)
-                    ?.use { interactor.backup(it) }
+                    ?.use { backupManager.backup(it) }
                     ?: throw IOException("Failed to open Uri for backup - $uri")
             emit(ViewData.Success(R.string.toast_backed_up))
         } catch (e: Exception) {
@@ -58,7 +63,7 @@ class BackupViewModel(
         emit(ViewData.Loading())
         try {
             activity.contentResolver.openInputStream(uri)
-                    ?.use { interactor.restore(it) }
+                    ?.use { backupManager.restore(it) }
                     ?: throw IOException("Failed to open Uri for restore - $uri")
             emit(ViewData.Success(R.string.toast_restored))
         } catch (t: Throwable) {

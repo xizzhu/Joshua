@@ -46,6 +46,8 @@ class SettingsRepository(private val localSettingsStorage: LocalSettingsStorage,
     }
 
     suspend fun saveSettings(settings: Settings) {
+        if (settings == _settings.value) return
+
         localSettingsStorage.saveSettings(settings)
         _settings.value = settings
     }

@@ -35,13 +35,11 @@ object TranslationsModule {
 
     @ActivityScoped
     @Provides
-    fun provideTranslationsInteractor(
-            bibleReadingManager: BibleReadingManager, translationManager: TranslationManager, settingsManager: SettingsManager
-    ): TranslationsInteractor = TranslationsInteractor(bibleReadingManager, translationManager, settingsManager)
-
-    @ActivityScoped
-    @Provides
     fun provideTranslationsViewModel(
-            navigator: Navigator, translationsInteractor: TranslationsInteractor, translationsActivity: TranslationsActivity
-    ): TranslationsViewModel = TranslationsViewModel(navigator, translationsInteractor, translationsActivity)
+            navigator: Navigator,
+            bibleReadingManager: BibleReadingManager,
+            translationManager: TranslationManager,
+            settingsManager: SettingsManager,
+            translationsActivity: TranslationsActivity
+    ): TranslationsViewModel = TranslationsViewModel(navigator, bibleReadingManager, translationManager, settingsManager, translationsActivity)
 }

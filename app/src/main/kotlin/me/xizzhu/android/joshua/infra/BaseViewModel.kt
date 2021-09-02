@@ -21,9 +21,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.transform
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.SettingsManager
 
-abstract class BaseViewModel<BI : BaseInteractor, BA : BaseActivity<*>>(
-        protected val interactor: BI, protected val activity: BA, protected val coroutineScope: CoroutineScope
+abstract class BaseViewModel<BA : BaseActivity<*>>(
+        protected val settingsManager: SettingsManager, protected val activity: BA, protected val coroutineScope: CoroutineScope
 ) {
     sealed class ViewData<T> {
         data class Loading<T>(val data: T? = null) : ViewData<T>()
@@ -33,7 +34,7 @@ abstract class BaseViewModel<BI : BaseInteractor, BA : BaseActivity<*>>(
 
     protected val tag: String = javaClass.simpleName
 
-    fun settings(): Flow<Settings> = interactor.settings()
+    fun settings(): Flow<Settings> = settingsManager.settings()
 }
 
 inline fun <R> act(crossinline op: suspend () -> R): Flow<BaseViewModel.ViewData<R>> = flow {
