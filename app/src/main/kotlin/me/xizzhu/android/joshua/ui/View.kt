@@ -36,9 +36,9 @@ import androidx.lifecycle.lifecycleScope
 
 private const val ANIMATION_DURATION = 300L
 
-fun View.activity(): Activity = context as Activity
+val View.activity: Activity get() = context as Activity
 
-fun View.lifecycleScope(): LifecycleCoroutineScope = (context as LifecycleOwner).lifecycleScope
+val View.lifecycleScope: LifecycleCoroutineScope get() = (context as LifecycleOwner).lifecycleScope
 
 fun View.fadeIn() {
     if (visibility == View.VISIBLE) {

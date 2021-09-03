@@ -87,15 +87,15 @@ private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGr
     private fun selectTranslation() {
         item?.let { item ->
             item.selectTranslation(item.translationInfo)
-                    .onFailure { itemView.activity().dialog(true, R.string.dialog_update_translation_error, { _, _ -> selectTranslation() }) }
-                    .launchIn(itemView.lifecycleScope())
+                    .onFailure { itemView.activity.dialog(true, R.string.dialog_update_translation_error, { _, _ -> selectTranslation() }) }
+                    .launchIn(itemView.lifecycleScope)
         }
     }
 
     private fun confirmAndDownloadTranslation() {
         val translationName = item?.translationInfo?.name ?: return
-        itemView.activity().dialog(
-                true, itemView.activity().getString(R.string.dialog_download_translation_confirmation, translationName),
+        itemView.activity.dialog(
+                true, itemView.activity.getString(R.string.dialog_download_translation_confirmation, translationName),
                 { _, _ -> downloadTranslation() }
         )
     }
@@ -106,9 +106,9 @@ private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGr
             // just in case the user clicks too fast
             return
         }
-        downloadTranslationDialog = itemView.activity().progressDialog(R.string.dialog_downloading, 100) { downloadTranslationJob?.cancel() }
+        downloadTranslationDialog = itemView.activity.progressDialog(R.string.dialog_downloading, 100) { downloadTranslationJob?.cancel() }
 
-        downloadTranslationJob = itemView.lifecycleScope().launchWhenStarted {
+        downloadTranslationJob = itemView.lifecycleScope.launchWhenStarted {
             item.downloadTranslation(item.translationInfo)
                     .onEach(
                             onLoading = { progress ->
@@ -125,10 +125,10 @@ private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGr
                                 }
                             },
                             onSuccess = {
-                                itemView.activity().toast(R.string.toast_downloaded)
+                                itemView.activity.toast(R.string.toast_downloaded)
                             },
                             onFailure = {
-                                itemView.activity().dialog(true, R.string.dialog_download_error, { _, _ -> downloadTranslation() })
+                                itemView.activity.dialog(true, R.string.dialog_download_error, { _, _ -> downloadTranslation() })
                             }
                     )
                     .onCompletion {
@@ -142,8 +142,8 @@ private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGr
 
     private fun confirmAndRemoveTranslation() {
         val translationName = item?.translationInfo?.name ?: return
-        itemView.activity().dialog(
-                true, itemView.activity().getString(R.string.dialog_delete_translation_confirmation, translationName),
+        itemView.activity.dialog(
+                true, itemView.activity.getString(R.string.dialog_delete_translation_confirmation, translationName),
                 { _, _ -> removeTranslation() }
         )
     }
@@ -154,21 +154,21 @@ private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGr
             // just in case the user clicks too fast
             return
         }
-        removeTranslationDialog = itemView.activity().indeterminateProgressDialog(R.string.dialog_deleting)
+        removeTranslationDialog = itemView.activity.indeterminateProgressDialog(R.string.dialog_deleting)
 
         removeTranslationJob = item.removeTranslation(item.translationInfo)
                 .onSuccess {
-                    itemView.activity().toast(R.string.toast_deleted)
+                    itemView.activity.toast(R.string.toast_deleted)
                 }
                 .onFailure {
-                    itemView.activity().dialog(true, R.string.dialog_delete_error, { _, _ -> removeTranslation() })
+                    itemView.activity.dialog(true, R.string.dialog_delete_error, { _, _ -> removeTranslation() })
                 }
                 .onCompletion {
                     removeTranslationDialog?.dismiss()
                     removeTranslationDialog = null
                     removeTranslationJob = null
                 }
-                .launchIn(itemView.lifecycleScope())
+                .launchIn(itemView.lifecycleScope)
     }
 
     override fun bind(settings: Settings, item: TranslationItem, payloads: List<Any>) {

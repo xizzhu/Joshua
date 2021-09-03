@@ -89,16 +89,16 @@ class StrongNumberViewModelTest : BaseUnitTest() {
         assertEquals("Genesis", (actual.data.items[1] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1 In the beginning God created the heaven and the earth.",
-                (actual.data.items[2] as VerseStrongNumberItem).textForDisplay.toString()
+                (actual.data.items[2] as StrongNumberItem).textForDisplay.toString()
         )
         assertEquals(
                 "Gen. 10:10 And the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar.",
-                (actual.data.items[3] as VerseStrongNumberItem).textForDisplay.toString()
+                (actual.data.items[3] as StrongNumberItem).textForDisplay.toString()
         )
         assertEquals("Exodus", (actual.data.items[4] as TitleItem).title.toString())
         assertEquals(
                 "Ex. 23:19 The first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.",
-                (actual.data.items[5] as VerseStrongNumberItem).textForDisplay.toString()
+                (actual.data.items[5] as StrongNumberItem).textForDisplay.toString()
         )
     }
 }

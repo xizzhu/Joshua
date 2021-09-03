@@ -40,9 +40,9 @@ import me.xizzhu.android.joshua.ui.setSpan
 import me.xizzhu.android.joshua.ui.toCharSequence
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-class VerseStrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: String,
-                            private val verseText: String, val onClick: (VerseIndex) -> Flow<BaseViewModel.ViewData<Unit>>)
-    : BaseItem(R.layout.item_verse_strong_number, { inflater, parent -> VerseStrongNumberItemViewHolder(inflater, parent) }) {
+class StrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: String,
+                       private val verseText: String, val onClick: (VerseIndex) -> Flow<BaseViewModel.ViewData<Unit>>)
+    : BaseItem(R.layout.item_verse_strong_number, { inflater, parent -> StrongNumberItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
         private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
@@ -61,8 +61,8 @@ class VerseStrongNumberItem(val verseIndex: VerseIndex, private val bookShortNam
     }
 }
 
-private class VerseStrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<VerseStrongNumberItem>(inflater.inflate(R.layout.item_verse_strong_number, parent, false)) {
+private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+    : BaseViewHolder<StrongNumberItem>(inflater.inflate(R.layout.item_verse_strong_number, parent, false)) {
     private val text: TextView = itemView.findViewById(R.id.text)
 
     init {
@@ -72,12 +72,12 @@ private class VerseStrongNumberItemViewHolder(inflater: LayoutInflater, parent: 
     private fun openVerse() {
         item?.let { item ->
             item.onClick(item.verseIndex)
-                    .onFailure { itemView.activity().dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse() }) }
-                    .launchIn(itemView.lifecycleScope())
+                    .onFailure { itemView.activity.dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse() }) }
+                    .launchIn(itemView.lifecycleScope)
         }
     }
 
-    override fun bind(settings: Settings, item: VerseStrongNumberItem, payloads: List<Any>) {
+    override fun bind(settings: Settings, item: StrongNumberItem, payloads: List<Any>) {
         with(text) {
             updateSettingsWithPrimaryText(settings)
             text = item.textForDisplay

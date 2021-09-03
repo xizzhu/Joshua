@@ -34,7 +34,7 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.infra.BaseViewModel
-import me.xizzhu.android.joshua.infra.act
+import me.xizzhu.android.joshua.infra.viewData
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.onSuccess
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
@@ -95,7 +95,7 @@ class TranslationsViewModel(
         return items
     }
 
-    private fun selectTranslation(translationToSelect: TranslationInfo): Flow<ViewData<Unit>> = act {
+    private fun selectTranslation(translationToSelect: TranslationInfo): Flow<ViewData<Unit>> = viewData {
         bibleReadingManager.saveCurrentTranslation(translationToSelect.shortName)
         navigator.goBack(activity)
     }.onFailure { Log.e(tag, "Failed to select translation and close translation management activity", it) }
@@ -117,7 +117,7 @@ class TranslationsViewModel(
                     .onSuccess { refreshTranslations(false) }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal fun removeTranslation(translationToDownload: TranslationInfo): Flow<ViewData<Unit>> = act {
+    internal fun removeTranslation(translationToDownload: TranslationInfo): Flow<ViewData<Unit>> = viewData {
         translationManager.removeTranslation(translationToDownload)
     }.onSuccess { refreshTranslations(false) }.onFailure { Log.e(tag, "Failed to remove translation", it) }
 

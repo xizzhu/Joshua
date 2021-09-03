@@ -22,8 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -32,7 +31,7 @@ import me.xizzhu.android.joshua.core.StrongNumberManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
-import me.xizzhu.android.joshua.infra.act
+import me.xizzhu.android.joshua.infra.viewData
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.ui.createTitleSizeSpan
 import me.xizzhu.android.joshua.ui.createTitleStyleSpan
@@ -54,31 +53,7 @@ class StrongNumberViewModel(
         strongNumberActivity: StrongNumberActivity,
         coroutineScope: CoroutineScope = strongNumberActivity.lifecycleScope
 ) : BaseViewModel<StrongNumberActivity>(settingsManager, strongNumberActivity, coroutineScope) {
-    private val strongNumber: MutableStateFlow<String?> = MutableStateFlow(null)
-    private val strongNumberViewData: MutableStateFlow<ViewData<StrongNumberViewData>?> = MutableStateFlow(null)
-
-    init {
-        strongNumber
-                .filterNotNull()
-                .onEach { sn ->
-                    if (sn.isEmpty()) {
-                        strongNumberViewData.value = ViewData.Failure(IllegalStateException("Requested Strong number is empty"))
-                        return@onEach
-                    }
-
-                    val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-                    strongNumberViewData.value = ViewData.Success(StrongNumberViewData(
-                            items = buildStrongNumberItems(
-                                    strongNumber = strongNumberManager.readStrongNumber(sn),
-                                    verses = bibleReadingManager.readVerses(currentTranslation, strongNumberManager.readVerseIndexes(sn)).values
-                                            .sortedBy { with(it.verseIndex) { bookIndex * 100000 + chapterIndex * 1000 + verseIndex } },
-                                    bookNames = bibleReadingManager.readBookNames(currentTranslation),
-                                    bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
-                            )
-                    ))
-                }
-                .launchIn(coroutineScope)
-    }
+    private val strongNumber: MutableStateFlow<ViewData<StrongNumberViewData>?> = MutableStateFlow(null)
 
     private fun buildStrongNumberItems(
             strongNumber: StrongNumber,
@@ -98,7 +73,7 @@ class StrongNumberViewModel(
                 currentBookIndex = verseIndex.bookIndex
             }
 
-            items.add(VerseStrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex], verse.text.text, ::openVerse))
+            items.add(StrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex], verse.text.text, ::openVerse))
         }
 
         return items
@@ -110,14 +85,30 @@ class StrongNumberViewModel(
                     .append(' ').append(strongNumber.meaning)
                     .toCharSequence()
 
-    private fun openVerse(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = act {
+    private fun openVerse(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
         bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
         navigator.navigate(activity, Navigator.SCREEN_READING)
     }.onFailure { Log.e(tag, "Failed to select verse and open reading activity", it) }
 
-    fun strongNumber(): Flow<ViewData<StrongNumberViewData>> = strongNumberViewData.filterNotNull()
+    fun strongNumber(): Flow<ViewData<StrongNumberViewData>> = strongNumber.filterNotNull()
 
     fun loadStrongNumber(sn: String) {
-        strongNumber.value = sn
+        if (sn.isEmpty()) {
+            strongNumber.value = ViewData.Failure(IllegalStateException("Requested Strong number is empty"))
+            return
+        }
+
+        coroutineScope.launch {
+            val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+            strongNumber.value = ViewData.Success(StrongNumberViewData(
+                    items = buildStrongNumberItems(
+                            strongNumber = strongNumberManager.readStrongNumber(sn),
+                            verses = bibleReadingManager.readVerses(currentTranslation, strongNumberManager.readVerseIndexes(sn)).values
+                                    .sortedBy { with(it.verseIndex) { bookIndex * 100000 + chapterIndex * 1000 + verseIndex } },
+                            bookNames = bibleReadingManager.readBookNames(currentTranslation),
+                            bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
+                    )
+            ))
+        }
     }
 }

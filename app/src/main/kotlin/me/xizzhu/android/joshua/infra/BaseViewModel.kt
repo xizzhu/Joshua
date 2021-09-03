@@ -37,7 +37,7 @@ abstract class BaseViewModel<BA : BaseActivity<*>>(
     fun settings(): Flow<Settings> = settingsManager.settings()
 }
 
-inline fun <R> act(crossinline op: suspend () -> R): Flow<BaseViewModel.ViewData<R>> = flow {
+inline fun <R> viewData(crossinline op: suspend () -> R): Flow<BaseViewModel.ViewData<R>> = flow {
     try {
         emit(BaseViewModel.ViewData.Loading())
         emit(BaseViewModel.ViewData.Success(op()))

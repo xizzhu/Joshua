@@ -33,7 +33,7 @@ import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.BaseViewModel
-import me.xizzhu.android.joshua.infra.act
+import me.xizzhu.android.joshua.infra.viewData
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.logger.Log
@@ -120,7 +120,7 @@ class SettingsViewModel(
     }
 
     private inline fun updateSettings(crossinline op: suspend () -> Unit): Flow<ViewData<Unit>> =
-            act(op).onFailure { Log.e(tag, "Failed to save settings", it) }
+            viewData(op).onFailure { Log.e(tag, "Failed to save settings", it) }
 
     private suspend fun currentSettings(): Settings = settings().first()
 
@@ -149,9 +149,9 @@ class SettingsViewModel(
         settingsManager.saveSettings(currentSettings().copy(defaultHighlightColor = highlightColor.color))
     }
 
-    fun rateMe(): Flow<ViewData<Unit>> = act { navigator.navigate(activity, Navigator.SCREEN_RATE_ME) }
+    fun rateMe(): Flow<ViewData<Unit>> = viewData { navigator.navigate(activity, Navigator.SCREEN_RATE_ME) }
             .onFailure { Log.e(tag, "Failed to start activity to rate app", it) }
 
-    fun openWebsite(): Flow<ViewData<Unit>> = act { navigator.navigate(activity, Navigator.SCREEN_WEBSITE) }
+    fun openWebsite(): Flow<ViewData<Unit>> = viewData { navigator.navigate(activity, Navigator.SCREEN_WEBSITE) }
             .onFailure { Log.e(tag, "Failed to start activity to visit website", it) }
 }

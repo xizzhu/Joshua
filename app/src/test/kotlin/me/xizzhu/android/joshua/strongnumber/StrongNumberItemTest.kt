@@ -27,15 +27,15 @@ import kotlin.test.assertEquals
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class VerseStrongNumberItemTest : BaseUnitTest() {
+class StrongNumberItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_verse_strong_number, VerseStrongNumberItem(VerseIndex.INVALID, "", "", { emptyFlow() }).viewType)
+        assertEquals(R.layout.item_verse_strong_number, StrongNumberItem(VerseIndex.INVALID, "", "", { emptyFlow() }).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
-        val actual = VerseStrongNumberItem(
+        val actual = StrongNumberItem(
                 MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, { emptyFlow() }
         )
         assertEquals(VerseIndex(0, 0, 0), actual.verseIndex)
