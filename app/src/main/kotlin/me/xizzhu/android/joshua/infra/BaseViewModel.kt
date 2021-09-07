@@ -16,16 +16,15 @@
 
 package me.xizzhu.android.joshua.infra
 
-import kotlinx.coroutines.CoroutineScope
+import android.app.Application
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.transform
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 
-abstract class BaseViewModel<BA : BaseActivity<*>>(
-        protected val settingsManager: SettingsManager, protected val activity: BA, protected val coroutineScope: CoroutineScope
-) {
+abstract class BaseViewModel(protected val settingsManager: SettingsManager, protected val application: Application) : ViewModel() {
     sealed class ViewData<T> {
         data class Loading<T>(val data: T? = null) : ViewData<T>()
         data class Success<T>(val data: T) : ViewData<T>()

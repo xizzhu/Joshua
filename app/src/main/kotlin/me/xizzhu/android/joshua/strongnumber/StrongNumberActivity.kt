@@ -18,29 +18,32 @@ package me.xizzhu.android.joshua.strongnumber
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.databinding.ActivityStrongNumberBinding
 import me.xizzhu.android.joshua.infra.BaseActivity
 import me.xizzhu.android.joshua.infra.onEach
+import me.xizzhu.android.joshua.infra.onFailure
+import me.xizzhu.android.joshua.infra.onSuccess
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.logger.Log
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>() {
+class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>(), StrongNumberItem.Callback {
     companion object {
         private const val KEY_STRONG_NUMBER = "me.xizzhu.android.joshua.KEY_STRONG_NUMBER"
 
         fun bundle(strongNumber: String): Bundle = Bundle().apply { putString(KEY_STRONG_NUMBER, strongNumber) }
     }
 
-    @Inject
-    lateinit var strongNumberViewModel: StrongNumberViewModel
+    private val strongNumberViewModel: StrongNumberViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,4 +92,11 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>() {
     }
 
     override fun inflateViewBinding(): ActivityStrongNumberBinding = ActivityStrongNumberBinding.inflate(layoutInflater)
+
+    override fun openVerse(verseToOpen: VerseIndex) {
+        strongNumberViewModel.openVerse(verseToOpen)
+                .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
+                .onFailure { dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse(verseToOpen) }) }
+                .launchIn(lifecycleScope)
+    }
 }

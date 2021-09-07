@@ -16,11 +16,13 @@
 
 package me.xizzhu.android.joshua.settings
 
+import android.app.Application
 import android.content.ContentResolver
 import android.net.Uri
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.R
@@ -35,15 +37,15 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class BackupViewModelTest : BaseUnitTest() {
+class SettingsViewModelTest : BaseUnitTest() {
     private lateinit var uri: Uri
     private lateinit var inputStream: InputStream
     private lateinit var outputStream: OutputStream
     private lateinit var resolver: ContentResolver
     private lateinit var backupManager: BackupManager
     private lateinit var settingsManager: SettingsManager
-    private lateinit var settingsActivity: SettingsActivity
-    private lateinit var backupViewModel: BackupViewModel
+    private lateinit var application: Application
+    private lateinit var settingsViewModel: SettingsViewModel
 
     @BeforeTest
     override fun setup() {
@@ -61,14 +63,15 @@ class BackupViewModelTest : BaseUnitTest() {
             coEvery { restore(inputStream) } returns Unit
         }
         settingsManager = mockk()
-        settingsActivity = mockk<SettingsActivity>().apply { every { contentResolver } returns resolver }
+        every { settingsManager.settings() } returns emptyFlow()
+        application = mockk<Application>().apply { every { contentResolver } returns resolver }
 
-        backupViewModel = BackupViewModel(backupManager, settingsManager, settingsActivity, testCoroutineScope)
+        settingsViewModel = SettingsViewModel(backupManager, settingsManager, application)
     }
 
     @Test
     fun `test backup with null uri`(): Unit = runBlocking {
-        val actual = backupViewModel.backup(null).toList()
+        val actual = settingsViewModel.backup(null).toList()
         assertEquals(1, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Failure)
     }
@@ -76,9 +79,9 @@ class BackupViewModelTest : BaseUnitTest() {
     @Test
     fun `test backup with error`(): Unit = runBlocking {
         val ex = RuntimeException("Random")
-        every { settingsActivity.contentResolver } throws ex
+        every { application.contentResolver } throws ex
 
-        val actual = backupViewModel.backup(mockk()).toList()
+        val actual = settingsViewModel.backup(mockk()).toList()
         assertEquals(2, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
         assertEquals(ex, (actual[1] as BaseViewModel.ViewData.Failure).throwable)
@@ -89,7 +92,7 @@ class BackupViewModelTest : BaseUnitTest() {
         val ex = RuntimeException("Random")
         coEvery { backupManager.backup(outputStream) } throws ex
 
-        val actual = backupViewModel.backup(uri).toList()
+        val actual = settingsViewModel.backup(uri).toList()
         assertEquals(2, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
         assertEquals(ex, (actual[1] as BaseViewModel.ViewData.Failure).throwable)
@@ -97,7 +100,7 @@ class BackupViewModelTest : BaseUnitTest() {
 
     @Test
     fun `test backup`(): Unit = runBlocking {
-        val actual = backupViewModel.backup(uri).toList()
+        val actual = settingsViewModel.backup(uri).toList()
         assertEquals(2, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
         assertEquals(R.string.toast_backed_up, (actual[1] as BaseViewModel.ViewData.Success<Int>).data)
@@ -105,7 +108,7 @@ class BackupViewModelTest : BaseUnitTest() {
 
     @Test
     fun `test restore with null uri`(): Unit = runBlocking {
-        val actual = backupViewModel.restore(null).toList()
+        val actual = settingsViewModel.restore(null).toList()
         assertEquals(1, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Failure)
     }
@@ -113,9 +116,9 @@ class BackupViewModelTest : BaseUnitTest() {
     @Test
     fun `test restore with error`(): Unit = runBlocking {
         val ex = RuntimeException("Random")
-        every { settingsActivity.contentResolver } throws ex
+        every { application.contentResolver } throws ex
 
-        val actual = backupViewModel.restore(mockk()).toList()
+        val actual = settingsViewModel.restore(mockk()).toList()
         assertEquals(2, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
         assertEquals(ex, (actual[1] as BaseViewModel.ViewData.Failure).throwable)
@@ -126,7 +129,7 @@ class BackupViewModelTest : BaseUnitTest() {
         val ex = RuntimeException("Random")
         coEvery { backupManager.restore(inputStream) } throws ex
 
-        val actual = backupViewModel.restore(uri).toList()
+        val actual = settingsViewModel.restore(uri).toList()
         assertEquals(2, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
         assertEquals(ex, (actual[1] as BaseViewModel.ViewData.Failure).throwable)
@@ -134,7 +137,7 @@ class BackupViewModelTest : BaseUnitTest() {
 
     @Test
     fun `test restore`(): Unit = runBlocking {
-        val actual = backupViewModel.restore(uri).toList()
+        val actual = settingsViewModel.restore(uri).toList()
         assertEquals(2, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
         assertEquals(R.string.toast_restored, (actual[1] as BaseViewModel.ViewData.Success<Int>).data)

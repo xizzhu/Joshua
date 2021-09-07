@@ -16,12 +16,12 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
+import android.app.Application
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.StrongNumber
@@ -40,11 +40,10 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class StrongNumberViewModelTest : BaseUnitTest() {
-    private lateinit var navigator: Navigator
     private lateinit var bibleReadingManager: BibleReadingManager
     private lateinit var strongNumberManager: StrongNumberManager
     private lateinit var settingsManager: SettingsManager
-    private lateinit var strongNumberActivity: StrongNumberActivity
+    private lateinit var application: Application
 
     private lateinit var strongNumberViewModel: StrongNumberViewModel
 
@@ -52,13 +51,12 @@ class StrongNumberViewModelTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        navigator = mockk()
         bibleReadingManager = mockk()
         strongNumberManager = mockk()
         settingsManager = mockk()
-        strongNumberActivity = mockk()
+        application = mockk()
 
-        strongNumberViewModel = StrongNumberViewModel(navigator, bibleReadingManager, strongNumberManager, settingsManager, strongNumberActivity, testCoroutineScope)
+        strongNumberViewModel = StrongNumberViewModel(bibleReadingManager, strongNumberManager, settingsManager, application)
     }
 
     @Test

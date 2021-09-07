@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
-import kotlinx.coroutines.flow.emptyFlow
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -30,13 +29,13 @@ import kotlin.test.Test
 class StrongNumberItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_verse_strong_number, StrongNumberItem(VerseIndex.INVALID, "", "", { emptyFlow() }).viewType)
+        assertEquals(R.layout.item_verse_strong_number, StrongNumberItem(VerseIndex.INVALID, "", "").viewType)
     }
 
     @Test
     fun testTextForDisplay() {
         val actual = StrongNumberItem(
-                MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, { emptyFlow() }
+                MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text
         )
         assertEquals(VerseIndex(0, 0, 0), actual.verseIndex)
         assertEquals("Gen. 1:1 In the beginning God created the heaven and the earth.", actual.textForDisplay.toString())

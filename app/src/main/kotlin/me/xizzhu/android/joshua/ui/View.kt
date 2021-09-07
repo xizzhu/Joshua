@@ -30,15 +30,10 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.StyleableRes
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 
 private const val ANIMATION_DURATION = 300L
 
 val View.activity: Activity get() = context as Activity
-
-val View.lifecycleScope: LifecycleCoroutineScope get() = (context as LifecycleOwner).lifecycleScope
 
 fun View.fadeIn() {
     if (visibility == View.VISIBLE) {

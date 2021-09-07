@@ -16,13 +16,17 @@
 
 package me.xizzhu.android.joshua.utils
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.content.*
 import android.content.pm.LabeledIntent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
+
+val Context.application: Application get() = applicationContext as Application
 
 // On older devices, this only works on the threads with loopers.
 fun Context.copyToClipBoard(label: CharSequence, text: CharSequence) {
@@ -47,6 +51,7 @@ fun Activity.share(title: String, text: String) {
             ?: throw RuntimeException("Failed to create chooser for sharing")
 }
 
+@SuppressLint("QueryPermissionsNeeded")
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 fun PackageManager.chooserForSharing(packageToExclude: String, title: String, text: String): Intent? {
     val sendIntent = Intent(Intent.ACTION_SEND).setType("text/plain")

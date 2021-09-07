@@ -20,11 +20,16 @@ import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.databinding.ActivitySettingsBinding
 import me.xizzhu.android.logger.Log
+import javax.inject.Inject
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     protected val tag: String = javaClass.simpleName
+
+    @Inject
+    protected lateinit var navigator: Navigator
 
     protected lateinit var viewBinding: VB
 

@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.translations
 
+import android.app.Application
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -26,7 +27,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -41,19 +41,16 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TranslationsViewModelTest : BaseUnitTest() {
-    private lateinit var navigator: Navigator
     private lateinit var bibleReadingManager: BibleReadingManager
     private lateinit var translationManager: TranslationManager
     private lateinit var settingsManager: SettingsManager
-    private lateinit var translationsActivity: TranslationsActivity
+    private lateinit var application: Application
 
     private lateinit var translationsViewModel: TranslationsViewModel
 
     @BeforeTest
     override fun setup() {
         super.setup()
-
-        navigator = mockk()
 
         bibleReadingManager = mockk()
         coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.cuvShortName)
@@ -64,10 +61,10 @@ class TranslationsViewModelTest : BaseUnitTest() {
 
         settingsManager = mockk()
 
-        translationsActivity = mockk()
-        every { translationsActivity.getString(R.string.header_available_translations) } returns "AVAILABLE TRANSLATIONS"
+        application = mockk()
+        every { application.getString(R.string.header_available_translations) } returns "AVAILABLE TRANSLATIONS"
 
-        translationsViewModel = spyk(TranslationsViewModel(navigator, bibleReadingManager, translationManager, settingsManager, translationsActivity, testCoroutineScope))
+        translationsViewModel = spyk(TranslationsViewModel(bibleReadingManager, translationManager, settingsManager, application))
     }
 
     @Test

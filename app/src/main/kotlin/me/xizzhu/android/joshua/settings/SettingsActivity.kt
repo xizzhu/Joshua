@@ -22,12 +22,14 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
+import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.databinding.ActivitySettingsBinding
 import me.xizzhu.android.joshua.infra.onEach
@@ -38,7 +40,6 @@ import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.indeterminateProgressDialog
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
-import javax.inject.Inject
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
@@ -48,11 +49,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
         private const val CODE_SELECT_FILE_FOR_RESTORE = 9998
     }
 
-    @Inject
-    lateinit var settingsViewModel: SettingsViewModel
-
-    @Inject
-    lateinit var backupViewModel: BackupViewModel
+    private val settingsViewModel: SettingsViewModel by viewModels()
 
     private var currentSettingsViewData: SettingsViewData? = null
 
@@ -229,14 +226,28 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
                     CODE_SELECT_FILE_FOR_RESTORE
             )
         }
-        rate.setOnClickListener { settingsViewModel.rateMe().onFailure { toast(R.string.toast_unknown_error) }.launchIn(lifecycleScope) }
-        website.setOnClickListener { settingsViewModel.openWebsite().onFailure { toast(R.string.toast_unknown_error) }.launchIn(lifecycleScope) }
+        rate.setOnClickListener {
+            try {
+                navigator.navigate(this@SettingsActivity, Navigator.SCREEN_RATE_ME)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to start activity to rate app", e)
+                toast(R.string.toast_unknown_error)
+            }
+        }
+        website.setOnClickListener {
+            try {
+                navigator.navigate(this@SettingsActivity, Navigator.SCREEN_WEBSITE)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to start activity to visit website", e)
+                toast(R.string.toast_unknown_error)
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            CODE_CREATE_FILE_FOR_BACKUP -> if (resultCode == Activity.RESULT_OK) backupRestore(backupViewModel.backup(data?.data))
-            CODE_SELECT_FILE_FOR_RESTORE -> if (resultCode == Activity.RESULT_OK) backupRestore(backupViewModel.restore(data?.data))
+            CODE_CREATE_FILE_FOR_BACKUP -> if (resultCode == Activity.RESULT_OK) backupRestore(settingsViewModel.backup(data?.data))
+            CODE_SELECT_FILE_FOR_RESTORE -> if (resultCode == Activity.RESULT_OK) backupRestore(settingsViewModel.restore(data?.data))
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }

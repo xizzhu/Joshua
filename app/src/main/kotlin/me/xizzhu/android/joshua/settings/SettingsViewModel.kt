@@ -16,19 +16,24 @@
 
 package me.xizzhu.android.joshua.settings
 
+import android.app.Application
+import android.net.Uri
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -37,6 +42,8 @@ import me.xizzhu.android.joshua.infra.viewData
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.logger.Log
+import java.io.IOException
+import javax.inject.Inject
 
 enum class HighlightColorViewData(@Highlight.Companion.AvailableColor val color: Int, @StringRes val label: Int) {
     NONE(Highlight.COLOR_NONE, R.string.text_highlight_color_none),
@@ -62,12 +69,10 @@ class SettingsViewData(
         val version: String
 )
 
-class SettingsViewModel(
-        private val navigator: Navigator,
-        settingsManager: SettingsManager,
-        settingsActivity: SettingsActivity,
-        coroutineScope: CoroutineScope = settingsActivity.lifecycleScope
-) : BaseViewModel<SettingsActivity>(settingsManager, settingsActivity, coroutineScope) {
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+        private val backupManager: BackupManager, settingsManager: SettingsManager, application: Application
+) : BaseViewModel(settingsManager, application) {
     companion object {
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
@@ -80,14 +85,14 @@ class SettingsViewModel(
 
     init {
         val version = try {
-            activity.applicationContext.packageManager.getPackageInfo(activity.packageName, 0).versionName
+            application.packageManager.getPackageInfo(application.packageName, 0).versionName
         } catch (e: Exception) {
             Log.e(tag, "Failed to load app version", e)
             ""
         }
 
         settings().onEach { settings ->
-            val resources = activity.resources
+            val resources = application.resources
             settingsViewData.value = ViewData.Success(SettingsViewData(
                     fontSizes = fontSizeTexts,
                     currentFontSize = settings.fontSizeScale - 1,
@@ -109,7 +114,7 @@ class SettingsViewModel(
 
             shouldAnimateFontSize = false
             shouldAnimateColor = false
-        }.launchIn(coroutineScope)
+        }.launchIn(viewModelScope)
     }
 
     fun settingsViewData(): Flow<ViewData<SettingsViewData>> = settingsViewData.filterNotNull()
@@ -149,9 +154,47 @@ class SettingsViewModel(
         settingsManager.saveSettings(currentSettings().copy(defaultHighlightColor = highlightColor.color))
     }
 
-    fun rateMe(): Flow<ViewData<Unit>> = viewData { navigator.navigate(activity, Navigator.SCREEN_RATE_ME) }
-            .onFailure { Log.e(tag, "Failed to start activity to rate app", it) }
+    fun backup(uri: Uri?): Flow<ViewData<Int>> = flow {
+        if (uri == null) {
+            emit(ViewData.Failure(IllegalArgumentException("Null URI")))
+            return@flow
+        }
 
-    fun openWebsite(): Flow<ViewData<Unit>> = viewData { navigator.navigate(activity, Navigator.SCREEN_WEBSITE) }
-            .onFailure { Log.e(tag, "Failed to start activity to visit website", it) }
+        emit(ViewData.Loading())
+        try {
+            application.contentResolver.openOutputStream(uri)
+                    ?.use { backupManager.backup(it) }
+                    ?: throw IOException("Failed to open Uri for backup - $uri")
+            emit(ViewData.Success(R.string.toast_backed_up))
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to backup data", e)
+            emit(ViewData.Failure(e))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    fun restore(uri: Uri?): Flow<ViewData<Int>> = flow {
+        if (uri == null) {
+            emit(ViewData.Failure(IllegalArgumentException("Null URI")))
+            return@flow
+        }
+
+        emit(ViewData.Loading())
+        try {
+            application.contentResolver.openInputStream(uri)
+                    ?.use { backupManager.restore(it) }
+                    ?: throw IOException("Failed to open Uri for restore - $uri")
+            emit(ViewData.Success(R.string.toast_restored))
+        } catch (t: Throwable) {
+            when (t) {
+                is Exception, is OutOfMemoryError -> {
+                    // Catching OutOfMemoryError here, because there're cases when users try to
+                    // open a huge file.
+                    // See https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/e9339c69d6e1856856db88413614d3d3
+                    Log.e(tag, "Failed to restore data", t)
+                    emit(ViewData.Failure(t))
+                }
+                else -> throw t
+            }
+        }
+    }.flowOn(Dispatchers.IO)
 }
