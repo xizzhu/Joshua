@@ -42,7 +42,7 @@
         <activity android:name=".translations.TranslationsActivity" />
 
         <provider
-            android:name=".search.toolbar.RecentSearchProvider"
+            android:name=".search.RecentSearchProvider"
             android:authorities="${applicationId}.search.RecentSearchProvider"
             android:exported="false" />
 

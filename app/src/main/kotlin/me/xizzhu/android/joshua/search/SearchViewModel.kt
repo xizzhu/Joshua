@@ -16,85 +16,208 @@
 
 package me.xizzhu.android.joshua.search
 
-import kotlinx.coroutines.flow.*
-import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import android.app.Application
+import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.BaseViewModel
+import me.xizzhu.android.joshua.infra.onFailure
+import me.xizzhu.android.joshua.infra.viewData
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.firstNotEmpty
+import me.xizzhu.android.logger.Log
+import javax.inject.Inject
 
-data class SearchRequest(
-        val query: String, val instantSearch: Boolean,
-        val includeBookmarks: Boolean, val includeHighlights: Boolean, val includeNotes: Boolean
-)
+class SearchResultViewData(val items: List<BaseItem>, val query: String, val instanceSearch: Boolean, val toast: String)
 
-data class SearchResult(
-        val query: String, val verses: List<Verse>,
-        val bookmarks: List<Pair<Bookmark, Verse>>,
-        val highlights: List<Pair<Highlight, Verse>>,
-        val notes: List<Pair<Note, Verse>>,
-        val bookNames: List<String>, val bookShortNames: List<String>
-)
+@HiltViewModel
+class SearchViewModel @Inject constructor(
+        private val bibleReadingManager: BibleReadingManager,
+        private val bookmarkManager: VerseAnnotationManager<Bookmark>,
+        private val highlightManager: VerseAnnotationManager<Highlight>,
+        private val noteManager: VerseAnnotationManager<Note>,
+        settingsManager: SettingsManager,
+        application: Application
+) : BaseViewModel(settingsManager, application) {
+    private class SearchRequest(val query: String, val instanceSearch: Boolean)
 
-class SearchViewModel(private val bibleReadingManager: BibleReadingManager,
-                      private val bookmarkManager: VerseAnnotationManager<Bookmark>,
-                      private val highlightManager: VerseAnnotationManager<Highlight>,
-                      private val noteManager: VerseAnnotationManager<Note>,
-                      settingsManager: SettingsManager) : BaseSettingsViewModel(settingsManager) {
-    private val _searchRequest = MutableStateFlow<SearchRequest?>(null)
-    val searchRequest: Flow<SearchRequest> = _searchRequest.filterNotNull()
+    var includeBookmarks: Boolean = true
+    var includeHighlights: Boolean = true
+    var includeNotes: Boolean = true
 
-    fun requestSearch(request: SearchRequest) {
-        _searchRequest.value = request
+    private val searchRequest: MutableStateFlow<SearchRequest?> = MutableStateFlow(null)
+    private val searchResult: MutableStateFlow<ViewData<SearchResultViewData>?> = MutableStateFlow(null)
+
+    init {
+        searchRequest.filterNotNull()
+                .debounce(250L)
+                .distinctUntilChangedBy { it.query }
+                .mapLatest { it }
+                .onEach { doSearch(it.query, it.instanceSearch) }
+                .launchIn(viewModelScope)
     }
 
-    fun search(query: String, includeBookmarks: Boolean, includeHighlights: Boolean, includeNotes: Boolean): Flow<SearchResult> = flow {
-        val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+    fun searchResult(): Flow<ViewData<SearchResultViewData>> = searchResult.filterNotNull()
 
-        val verses = bibleReadingManager.search(currentTranslation, query)
-        val bookmarks: List<Pair<Bookmark, Verse>>
-        val highlights: List<Pair<Highlight, Verse>>
-        if (includeBookmarks || includeHighlights) {
-            val versesWithIndexes = verses.associateBy { it.verseIndex }
-            bookmarks = if (includeBookmarks) {
-                bookmarkManager.read(Constants.SORT_BY_BOOK).mapNotNull { bookmark ->
-                    versesWithIndexes[bookmark.verseIndex]?.let { verse -> Pair(bookmark, verse) }
-                }
-            } else {
-                emptyList()
-            }
-            highlights = if (includeHighlights) {
-                highlightManager.read(Constants.SORT_BY_BOOK).mapNotNull { highlight ->
-                    versesWithIndexes[highlight.verseIndex]?.let { verse -> Pair(highlight, verse) }
-                }
-            } else {
-                emptyList()
-            }
-        } else {
-            bookmarks = emptyList()
-            highlights = emptyList()
+    fun search(query: String, instanceSearch: Boolean) {
+        searchRequest.value = SearchRequest(query, instanceSearch)
+    }
+
+    fun retrySearch() {
+        val searchRequest = searchRequest.value ?: return
+        doSearch(searchRequest.query, searchRequest.instanceSearch)
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun doSearch(query: String, instanceSearch: Boolean) {
+        if (query.isEmpty()) {
+            searchResult.value = ViewData.Success(SearchResultViewData(emptyList(), "", instanceSearch, ""))
+            return
         }
 
-        val notes = if (includeNotes) {
-            noteManager.search(query).let { notes ->
-                val versesWithNotes = bibleReadingManager.readVerses(currentTranslation, notes.map { it.verseIndex })
-                arrayListOf<Pair<Note, Verse>>().apply {
-                    ensureCapacity(notes.size)
-                    notes.forEach { note ->
-                        add(Pair(note, versesWithNotes.getValue(note.verseIndex)))
+        viewModelScope.launch {
+            try {
+                if (!instanceSearch) {
+                    searchResult.value = ViewData.Loading()
+                }
+
+                val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+                val verses = bibleReadingManager.search(currentTranslation, query)
+                val bookmarks: List<Pair<Bookmark, Verse>>
+                val highlights: List<Pair<Highlight, Verse>>
+                if (includeBookmarks || includeHighlights) {
+                    val versesWithIndexes = verses.associateBy { it.verseIndex }
+                    bookmarks = if (includeBookmarks) {
+                        bookmarkManager.read(Constants.SORT_BY_BOOK).mapNotNull { bookmark ->
+                            versesWithIndexes[bookmark.verseIndex]?.let { verse -> Pair(bookmark, verse) }
+                        }
+                    } else {
+                        emptyList()
                     }
+                    highlights = if (includeHighlights) {
+                        highlightManager.read(Constants.SORT_BY_BOOK).mapNotNull { highlight ->
+                            versesWithIndexes[highlight.verseIndex]?.let { verse -> Pair(highlight, verse) }
+                        }
+                    } else {
+                        emptyList()
+                    }
+                } else {
+                    bookmarks = emptyList()
+                    highlights = emptyList()
                 }
+
+                val notes = if (includeNotes) {
+                    noteManager.search(query)
+                            .takeIf { it.isNotEmpty() }
+                            ?.let { notes ->
+                                val versesWithNotes = bibleReadingManager.readVerses(currentTranslation, notes.map { it.verseIndex })
+                                arrayListOf<Pair<Note, Verse>>().apply {
+                                    ensureCapacity(notes.size)
+                                    notes.forEach { note ->
+                                        add(Pair(note, versesWithNotes.getValue(note.verseIndex)))
+                                    }
+                                }
+                            }
+                            ?: emptyList()
+                } else {
+                    emptyList()
+                }
+
+                val bookNames = bibleReadingManager.readBookNames(currentTranslation)
+                val bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
+
+                searchResult.value = ViewData.Success(SearchResultViewData(
+                        items = buildSearchResultItems(
+                                query = query,
+                                verses = verses,
+                                bookmarks = bookmarks,
+                                highlights = highlights,
+                                notes = notes,
+                                bookNames = bookNames,
+                                bookShortNames = bookShortNames
+                        ),
+                        query = query,
+                        instanceSearch = instanceSearch,
+                        toast = application.getString(R.string.toast_verses_searched, notes.size + bookmarks.size + highlights.size + verses.size)
+                ))
+            } catch (e: Exception) {
+                Log.e(tag, "Error occurred which searching, query=$query instanceSearch=$instanceSearch, includeBookmarks=$includeBookmarks, includeHighlights=$includeHighlights, includeNotes=includeNotes", e)
+                searchResult.value = ViewData.Failure(e)
             }
-        } else {
-            emptyList()
+        }
+    }
+
+    private fun buildSearchResultItems(
+            query: String, verses: List<Verse>, bookmarks: List<Pair<Bookmark, Verse>>, highlights: List<Pair<Highlight, Verse>>,
+            notes: List<Pair<Note, Verse>>, bookNames: List<String>, bookShortNames: List<String>
+    ): List<BaseItem> {
+        val items = ArrayList<BaseItem>(
+                (if (notes.isEmpty()) 0 else notes.size + 1)
+                        + (if (bookmarks.isEmpty()) 0 else bookmarks.size + 1)
+                        + (if (highlights.isEmpty()) 0 else highlights.size + 1)
+                        + verses.size + Bible.BOOK_COUNT
+        )
+
+        if (notes.isNotEmpty()) {
+            items.add(TitleItem(application.getString(R.string.title_notes), false))
+            notes.forEach { note ->
+                items.add(SearchNoteItem(
+                        note.first.verseIndex, bookShortNames[note.first.verseIndex.bookIndex], note.second.text.text, note.first.note, query
+                ))
+            }
         }
 
-        emit(SearchResult(
-                query, verses, bookmarks, highlights, notes,
-                bibleReadingManager.readBookNames(currentTranslation),
-                bibleReadingManager.readBookShortNames(currentTranslation)
-        ))
+        if (bookmarks.isNotEmpty()) {
+            items.add(TitleItem(application.getString(R.string.title_bookmarks), false))
+            bookmarks.forEach { bookmark ->
+                items.add(SearchVerseItem(bookmark.first.verseIndex, bookShortNames[bookmark.first.verseIndex.bookIndex],
+                        bookmark.second.text.text, query, Highlight.COLOR_NONE))
+            }
+        }
+
+        if (highlights.isNotEmpty()) {
+            items.add(TitleItem(application.getString(R.string.title_highlights), false))
+            highlights.forEach { highlight ->
+                items.add(SearchVerseItem(highlight.first.verseIndex, bookShortNames[highlight.first.verseIndex.bookIndex],
+                        highlight.second.text.text, query, highlight.first.color))
+            }
+        }
+
+        var lastVerseBookIndex = -1
+        verses.forEach { verse ->
+            val currentVerseBookIndex = verse.verseIndex.bookIndex
+            if (lastVerseBookIndex != currentVerseBookIndex) {
+                items.add(TitleItem(bookNames[currentVerseBookIndex], false))
+                lastVerseBookIndex = currentVerseBookIndex
+            }
+            items.add(SearchVerseItem(verse.verseIndex, bookShortNames[currentVerseBookIndex], verse.text.text, query, Highlight.COLOR_NONE))
+        }
+
+        return items
     }
 
-    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-    }
+    fun openVerse(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
+        bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
+    }.onFailure { Log.e(tag, "Failed to select verse and open reading activity", it) }
 }

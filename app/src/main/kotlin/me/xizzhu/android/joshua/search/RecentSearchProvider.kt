@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.toolbar
+package me.xizzhu.android.joshua.search
 
 import android.content.Context
 import android.content.SearchRecentSuggestionsProvider
@@ -26,8 +26,7 @@ class RecentSearchProvider : SearchRecentSuggestionsProvider() {
         private const val AUTHORITY = "${BuildConfig.APPLICATION_ID}.search.RecentSearchProvider"
         private const val MODE = DATABASE_MODE_QUERIES
 
-        fun createSearchRecentSuggestions(context: Context): SearchRecentSuggestions =
-                SearchRecentSuggestions(context, AUTHORITY, MODE)
+        fun createSearchRecentSuggestions(context: Context): SearchRecentSuggestions = SearchRecentSuggestions(context, AUTHORITY, MODE)
     }
 
     init {

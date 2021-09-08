@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.result
+package me.xizzhu.android.joshua.search
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -34,10 +34,9 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import java.util.*
 
-data class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: String,
-                           private val text: String, private val query: String,
-                           @ColorInt private val highlightColor: Int,
-                           val onClicked: (VerseIndex) -> Unit)
+class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: String,
+                      private val text: String, private val query: String,
+                      @ColorInt private val highlightColor: Int)
     : BaseItem(R.layout.item_search_verse, { inflater, parent -> SearchVerseItemViewHolder(inflater, parent) }) {
     companion object {
         // We don't expect users to change locale that frequently.
@@ -49,6 +48,10 @@ data class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName
         private val KEYWORD_SIZE_SPAN = createKeywordSizeSpan()
         private val KEYWORD_STYLE_SPAN = createKeywordStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+    }
+
+    interface Callback {
+        fun openVerse(verseToOpen: VerseIndex)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -94,7 +97,12 @@ private class SearchVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
     private val text = itemView as TextView
 
     init {
-        itemView.setOnClickListener { item?.let { it.onClicked(it.verseIndex) } }
+        itemView.setOnClickListener {
+            item?.let { item ->
+                (itemView.activity as? SearchVerseItem.Callback)?.openVerse(item.verseIndex)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement SearchVerseItem.Callback")
+            }
+        }
     }
 
     override fun bind(settings: Settings, item: SearchVerseItem, payloads: List<Any>) {

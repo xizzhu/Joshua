@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.toolbar
+package me.xizzhu.android.joshua.search
 
 import android.app.SearchableInfo
 import android.content.Context
@@ -46,12 +46,12 @@ class SearchToolbar : Toolbar {
     fun initialize(includeBookmarks: Boolean, onIncludeBookmarksChanged: (Boolean) -> Unit,
                    includeHighlights: Boolean, onIncludeHighlightsChanged: (Boolean) -> Unit,
                    includeNotes: Boolean, onIncludeNotesChanged: (Boolean) -> Unit,
-                   onQueryTextList: SearchView.OnQueryTextListener, clearHistory: () -> Unit) {
+                   onQueryTextListener: SearchView.OnQueryTextListener, clearHistory: () -> Unit) {
         menu.findItem(R.id.action_search_include_bookmarks).isChecked = includeBookmarks
         menu.findItem(R.id.action_search_include_highlights).isChecked = includeHighlights
         menu.findItem(R.id.action_search_include_notes).isChecked = includeNotes
 
-        searchView().setOnQueryTextListener(onQueryTextList)
+        searchView().setOnQueryTextListener(onQueryTextListener)
 
         setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {

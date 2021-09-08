@@ -33,7 +33,6 @@ import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.onSuccess
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
-import me.xizzhu.android.logger.Log
 
 @AndroidEntryPoint
 class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>(), StrongNumberItem.Callback {
@@ -76,7 +75,6 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>(), Strong
                             }
                         },
                         onFailure = {
-                            Log.e(tag, "Error while loading Strong's numbers", it)
                             with(viewBinding) {
                                 loadingSpinner.visibility = View.GONE
                                 dialog(false, R.string.dialog_load_strong_number_list_error,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.result
+package me.xizzhu.android.joshua.search
 
 import android.annotation.SuppressLint
 import android.text.SpannableStringBuilder
@@ -30,9 +30,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import java.util.*
 
-data class SearchNoteItem(val verseIndex: VerseIndex, private val bookShortName: String,
-                          private val verseText: String, private val note: String, private val query: String,
-                          val onClicked: (VerseIndex) -> Unit)
+class SearchNoteItem(val verseIndex: VerseIndex, private val bookShortName: String,
+                     private val verseText: String, private val note: String, private val query: String)
     : BaseItem(R.layout.item_search_note, { inflater, parent -> SearchNoteItemViewHolder(inflater, parent) }) {
     companion object {
         // We don't expect users to change locale that frequently.
@@ -43,6 +42,10 @@ data class SearchNoteItem(val verseIndex: VerseIndex, private val bookShortName:
         private val KEYWORD_SIZE_SPAN = createKeywordSizeSpan()
         private val KEYWORD_STYLE_SPAN = createKeywordStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+    }
+
+    interface Callback {
+        fun openVerse(verseToOpen: VerseIndex)
     }
 
     val verseForDisplay: CharSequence by lazy {
@@ -81,7 +84,12 @@ private class SearchNoteItemViewHolder(inflater: LayoutInflater, parent: ViewGro
     private val text: TextView = itemView.findViewById(R.id.text)
 
     init {
-        itemView.setOnClickListener { item?.let { it.onClicked(it.verseIndex) } }
+        itemView.setOnClickListener {
+            item?.let { item ->
+                (itemView.activity as? SearchNoteItem.Callback)?.openVerse(item.verseIndex)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement SearchNoteItem.Callback")
+            }
+        }
     }
 
     override fun bind(settings: Settings, item: SearchNoteItem, payloads: List<Any>) {

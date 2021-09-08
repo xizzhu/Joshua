@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search.result
+package me.xizzhu.android.joshua.search
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@RunWith(AndroidJUnit4::class)
-@SmallTest
+@RunWith(RobolectricTestRunner::class)
 class SearchNoteItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_search_note, SearchNoteItem(VerseIndex.INVALID, "", "", "", "", {}).viewType)
+        assertEquals(R.layout.item_search_note, SearchNoteItem(VerseIndex.INVALID, "", "", "", "").viewType)
     }
 
     @Test
     fun testVerseForDisplay() {
-        val expected = "Gen. 1:1 In the beginning God created the heaven and the earth."
-        val actual = SearchNoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, "", "", {}).verseForDisplay.toString()
-        assertEquals(expected, actual)
+        assertEquals(
+                "Gen. 1:1 In the beginning God created the heaven and the earth.",
+                SearchNoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, "", "").verseForDisplay.toString()
+        )
     }
 
     @Test
     fun testNoteForDisplay() {
-        val expected = "random note"
-        val actual = SearchNoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, "random note", "", {}).noteForDisplay.toString()
-        assertEquals(expected, actual)
+        assertEquals(
+                "random note",
+                SearchNoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, "random note", "").noteForDisplay.toString()
+        )
     }
 }
