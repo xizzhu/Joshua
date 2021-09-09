@@ -114,7 +114,7 @@ class StrongNumberViewModel @Inject constructor(
         }
     }
 
-    fun openVerse(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
+    fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
         bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
     }.onFailure { Log.e(tag, "Failed to select verse and open reading activity", it) }
 }

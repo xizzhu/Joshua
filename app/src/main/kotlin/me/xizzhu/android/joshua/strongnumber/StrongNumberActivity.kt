@@ -92,7 +92,7 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>(), Strong
     override fun inflateViewBinding(): ActivityStrongNumberBinding = ActivityStrongNumberBinding.inflate(layoutInflater)
 
     override fun openVerse(verseToOpen: VerseIndex) {
-        strongNumberViewModel.openVerse(verseToOpen)
+        strongNumberViewModel.saveCurrentVerseIndex(verseToOpen)
                 .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
                 .onFailure { dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse(verseToOpen) }) }
                 .launchIn(lifecycleScope)

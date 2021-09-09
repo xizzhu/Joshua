@@ -139,7 +139,7 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>(), SearchNoteItem.Cal
     override fun inflateViewBinding(): ActivitySearchBinding = ActivitySearchBinding.inflate(layoutInflater)
 
     override fun openVerse(verseToOpen: VerseIndex) {
-        searchViewModel.openVerse(verseToOpen)
+        searchViewModel.saveCurrentVerseIndex(verseToOpen)
                 .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
                 .onFailure { dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse(verseToOpen) }) }
                 .launchIn(lifecycleScope)
