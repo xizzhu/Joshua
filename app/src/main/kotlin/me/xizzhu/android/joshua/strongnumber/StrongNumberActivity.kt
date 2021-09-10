@@ -53,9 +53,7 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>(), Strong
     }
 
     private fun observeSettings() {
-        strongNumberViewModel.settings()
-                .onEach { viewBinding.strongNumberList.setSettings(it) }
-                .launchIn(lifecycleScope)
+        strongNumberViewModel.settings().onEach { viewBinding.strongNumberList.setSettings(it) }.launchIn(lifecycleScope)
     }
 
     private fun observeStrongNumber() {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.annotated.toolbar
+package me.xizzhu.android.joshua.annotated
 
 import android.content.Context
 import android.util.AttributeSet

@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.annotated.notes.list
+package me.xizzhu.android.joshua.annotated.notes
 
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 
+@RunWith(RobolectricTestRunner::class)
 class NoteItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_note, NoteItem(VerseIndex.INVALID, "", "", "", {}).viewType)
+        assertEquals(R.layout.item_note, NoteItem(VerseIndex.INVALID, "", "", "").viewType)
     }
 
     @Test
     fun testTextForDisplay() {
-        val expected = "Gen. 1:1 In the beginning God created the heaven and the earth."
-        val actual = NoteItem(MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, "", {}).textForDisplay.toString()
-        assertEquals(expected, actual)
+        assertEquals(
+                "Gen. 1:1 In the beginning God created the heaven and the earth.",
+                NoteItem(
+                        MockContents.kjvVerses[0].verseIndex, MockContents.kjvBookShortNames[0], MockContents.kjvVerses[0].text.text, ""
+                ).textForDisplay.toString()
+        )
     }
 }

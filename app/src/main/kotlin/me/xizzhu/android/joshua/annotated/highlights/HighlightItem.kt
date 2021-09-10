@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.annotated.highlights.list
+package me.xizzhu.android.joshua.annotated.highlights
 
 import android.graphics.Color
 import android.text.SpannableStringBuilder
@@ -33,15 +33,18 @@ import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class HighlightItem(val verseIndex: VerseIndex, private val bookName: String,
-                         private val bookShortName: String, private val verseText: String,
-                         @ColorInt private val highlightColor: Int, @Constants.SortOrder private val sortOrder: Int,
-                         val onClick: (VerseIndex) -> Unit)
-    : BaseItem(R.layout.item_highlight, { inflater, parent -> HighlightItemViewHolder(inflater, parent) }) {
+class HighlightItem(
+        val verseIndex: VerseIndex, private val bookName: String, private val bookShortName: String,
+        private val verseText: String, @ColorInt private val highlightColor: Int, @Constants.SortOrder private val sortOrder: Int
+) : BaseItem(R.layout.item_highlight, { inflater, parent -> HighlightItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
         private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+    }
+
+    interface Callback {
+        fun openVerse(verseToOpen: VerseIndex)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -77,7 +80,12 @@ private class HighlightItemViewHolder(inflater: LayoutInflater, parent: ViewGrou
     private val text: TextView = itemView.findViewById(R.id.text)
 
     init {
-        itemView.setOnClickListener { item?.let { it.onClick(it.verseIndex) } }
+        itemView.setOnClickListener {
+            item?.let { item ->
+                (itemView.activity as? HighlightItem.Callback)?.openVerse(item.verseIndex)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement HighlightItem.Callback")
+            }
+        }
     }
 
     override fun bind(settings: Settings, item: HighlightItem, payloads: List<Any>) {

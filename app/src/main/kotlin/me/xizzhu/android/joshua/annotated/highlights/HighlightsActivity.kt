@@ -16,18 +16,29 @@
 
 package me.xizzhu.android.joshua.annotated.highlights
 
+import android.app.Application
 import dagger.hilt.android.AndroidEntryPoint
-import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesActivity
-import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesActivity
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import javax.inject.Inject
 
-class HighlightsViewModel(bibleReadingManager: BibleReadingManager,
-                          highlightsManager: VerseAnnotationManager<Highlight>,
-                          settingsManager: SettingsManager)
-    : BaseAnnotatedVersesViewModel<Highlight>(bibleReadingManager, highlightsManager, settingsManager)
+@HiltViewModel
+class HighlightsViewModel @Inject constructor(
+        bibleReadingManager: BibleReadingManager,
+        highlightsManager: VerseAnnotationManager<Highlight>,
+        settingsManager: SettingsManager,
+        application: Application
+) : AnnotatedVersesViewModel<Highlight>(bibleReadingManager, highlightsManager, R.string.text_no_highlights, settingsManager, application) {
+    override fun buildBaseItem(annotatedVerse: Highlight, bookName: String, bookShortName: String, verseText: String, sortOrder: Int): BaseItem =
+            HighlightItem(annotatedVerse.verseIndex, bookName, bookShortName, verseText, annotatedVerse.color, sortOrder)
+}
 
 @AndroidEntryPoint
-class HighlightsActivity : BaseAnnotatedVersesActivity<Highlight, HighlightsActivity>()
+class HighlightsActivity : AnnotatedVersesActivity<Highlight>(R.string.title_highlights)

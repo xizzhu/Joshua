@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.annotated.bookmarks.list
+package me.xizzhu.android.joshua.annotated.bookmarks
 
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
@@ -28,15 +28,18 @@ import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class BookmarkItem(val verseIndex: VerseIndex, private val bookName: String,
-                        private val bookShortName: String, private val verseText: String,
-                        @Constants.SortOrder private val sortOrder: Int,
-                        val onClick: (VerseIndex) -> Unit)
-    : BaseItem(R.layout.item_bookmark, { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }) {
+class BookmarkItem(
+        val verseIndex: VerseIndex, private val bookName: String, private val bookShortName: String,
+        private val verseText: String, @Constants.SortOrder private val sortOrder: Int
+) : BaseItem(R.layout.item_bookmark, { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
         private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+    }
+
+    interface Callback {
+        fun openVerse(verseToOpen: VerseIndex)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -68,7 +71,12 @@ private class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup
     private val text: TextView = itemView.findViewById(R.id.text)
 
     init {
-        itemView.setOnClickListener { item?.let { it.onClick(it.verseIndex) } }
+        itemView.setOnClickListener {
+            item?.let { item ->
+                (itemView.activity as? BookmarkItem.Callback)?.openVerse(item.verseIndex)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement BookmarkItem.Callback")
+            }
+        }
     }
 
     override fun bind(settings: Settings, item: BookmarkItem, payloads: List<Any>) {

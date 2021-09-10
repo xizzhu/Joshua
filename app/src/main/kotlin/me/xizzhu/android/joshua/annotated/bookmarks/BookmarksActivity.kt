@@ -16,17 +16,26 @@
 
 package me.xizzhu.android.joshua.annotated.bookmarks
 
+import android.app.Application
 import dagger.hilt.android.AndroidEntryPoint
-import me.xizzhu.android.joshua.annotated.*
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesActivity
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
-class BookmarksViewModel(bibleReadingManager: BibleReadingManager,
-                         bookmarksManager: VerseAnnotationManager<Bookmark>,
-                         settingsManager: SettingsManager)
-    : BaseAnnotatedVersesViewModel<Bookmark>(bibleReadingManager, bookmarksManager, settingsManager)
+class BookmarksViewModel(
+        bibleReadingManager: BibleReadingManager,
+        bookmarksManager: VerseAnnotationManager<Bookmark>,
+        settingsManager: SettingsManager,
+        application: Application
+) : AnnotatedVersesViewModel<Bookmark>(bibleReadingManager, bookmarksManager, R.string.text_no_bookmarks, settingsManager, application) {
+    override fun buildBaseItem(annotatedVerse: Bookmark, bookName: String, bookShortName: String, verseText: String, sortOrder: Int): BaseItem =
+            BookmarkItem(annotatedVerse.verseIndex, bookName, bookShortName, verseText, sortOrder)
+}
 
 @AndroidEntryPoint
-class BookmarksActivity : BaseAnnotatedVersesActivity<Bookmark, BookmarksActivity>()
+class BookmarksActivity : AnnotatedVersesActivity<Bookmark>(R.string.title_bookmarks)

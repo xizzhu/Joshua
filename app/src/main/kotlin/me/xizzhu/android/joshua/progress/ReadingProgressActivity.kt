@@ -46,9 +46,7 @@ class ReadingProgressActivity : BaseActivity<ActivityReadingProgressBinding>(), 
     }
 
     private fun observeSettings() {
-        readingProgressViewModel.settings()
-                .onEach { viewBinding.readingProgressList.setSettings(it) }
-                .launchIn(lifecycleScope)
+        readingProgressViewModel.settings().onEach { viewBinding.readingProgressList.setSettings(it) }.launchIn(lifecycleScope)
     }
 
     private fun observeReadingProgress() {

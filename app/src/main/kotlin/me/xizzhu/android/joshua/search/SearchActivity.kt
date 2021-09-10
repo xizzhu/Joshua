@@ -59,9 +59,7 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>(), SearchNoteItem.Cal
     }
 
     private fun observeSettings() {
-        searchViewModel.settings()
-                .onEach { viewBinding.searchResult.setSettings(it) }
-                .launchIn(lifecycleScope)
+        searchViewModel.settings().onEach { viewBinding.searchResult.setSettings(it) }.launchIn(lifecycleScope)
     }
 
     private fun observeSearchResults() {

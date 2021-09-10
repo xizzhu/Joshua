@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.annotated.notes.list
+package me.xizzhu.android.joshua.annotated.notes
 
 import android.text.SpannableStringBuilder
 import android.util.TypedValue
@@ -28,13 +28,15 @@ import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class NoteItem(val verseIndex: VerseIndex, private val bookShortName: String,
-                    private val verseText: String, val note: String,
-                    val onClicked: (VerseIndex) -> Unit)
+class NoteItem(val verseIndex: VerseIndex, private val bookShortName: String, private val verseText: String, val note: String)
     : BaseItem(R.layout.item_note, { inflater, parent -> NoteItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+    }
+
+    interface Callback {
+        fun openVerse(verseToOpen: VerseIndex)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -55,7 +57,12 @@ private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     private val text: TextView = itemView.findViewById(R.id.text)
 
     init {
-        itemView.setOnClickListener { item?.let { it.onClicked(it.verseIndex) } }
+        itemView.setOnClickListener {
+            item?.let { item ->
+                (itemView.activity as? NoteItem.Callback)?.openVerse(item.verseIndex)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement NoteItem.Callback")
+            }
+        }
     }
 
     override fun bind(settings: Settings, item: NoteItem, payloads: List<Any>) {

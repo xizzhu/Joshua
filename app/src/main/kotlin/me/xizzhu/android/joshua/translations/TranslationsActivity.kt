@@ -61,9 +61,7 @@ class TranslationsActivity : BaseActivity<ActivityTranslationManagementBinding>(
     }
 
     private fun observeSettings() {
-        translationsViewModel.settings()
-                .onEach { viewBinding.translationList.setSettings(it) }
-                .launchIn(lifecycleScope)
+        translationsViewModel.settings().onEach { viewBinding.translationList.setSettings(it) }.launchIn(lifecycleScope)
     }
 
     private fun observeTranslationList() {

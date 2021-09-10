@@ -53,6 +53,7 @@
     <string name="dialog_search_error">Error occurred during search, retry?</string>
     <string name="dialog_verse_selection_error">Failed to select the verse, retry?</string>
     <string name="dialog_navigation_error">Failed to navigate, retry?</string>
+    <string name="dialog_save_sort_order_error">Failed to save sort order, retry?</string>
     <string name="dialog_load_reading_progress_error">Failed to load reading progress, retry?</string>
     <string name="dialog_load_strong_number_list_error">Failed to load Strong\'s numbers, retry?</string>
     <string name="dialog_load_annotated_verses_error">Failed to load, retry?</string>
