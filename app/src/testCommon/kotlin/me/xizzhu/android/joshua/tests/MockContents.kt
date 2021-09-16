@@ -111,6 +111,7 @@ object MockContents {
 
     const val msgShortName = "MSG"
     val msgTranslationInfo = TranslationInfo(msgShortName, "The Message Bible", "en_us", 2066687L, false)
+    val msgDownloadedTranslationInfo = TranslationInfo(msgShortName, "The Message Bible", "en_us", 2066687L, false)
     val msgBookNames: List<String> = listOf("Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy")
     val msgBookShortNames: List<String> = listOf("Gen.", "Ex.", "Lev.", "Num.", "Deut.")
     val msgVerses: List<Verse> = listOf(

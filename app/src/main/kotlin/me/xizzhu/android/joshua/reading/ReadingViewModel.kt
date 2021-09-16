@@ -16,50 +16,53 @@
 
 package me.xizzhu.android.joshua.reading
 
+import android.app.Application
 import androidx.annotation.IntDef
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
+import me.xizzhu.android.joshua.infra.BaseViewModel
+import me.xizzhu.android.joshua.infra.onFailure
+import me.xizzhu.android.joshua.infra.viewData
+import me.xizzhu.android.joshua.reading.detail.StrongNumberItem
+import me.xizzhu.android.joshua.reading.detail.VerseTextItem
+import me.xizzhu.android.joshua.reading.verse.toSimpleVerseItems
+import me.xizzhu.android.joshua.reading.verse.toVerseItems
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.utils.currentTimeMillis
 import me.xizzhu.android.joshua.utils.filterIsValid
 import me.xizzhu.android.joshua.utils.filterNotEmpty
 import me.xizzhu.android.joshua.utils.firstNotEmpty
+import me.xizzhu.android.logger.Log
+import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
-data class ChapterListViewData(val currentVerseIndex: VerseIndex, val bookNames: List<String>)
-
-data class CurrentVerseIndexViewData(val verseIndex: VerseIndex, val bookName: String, val bookShortName: String)
-
-data class CurrentTranslationViewData(val currentTranslation: String, val parallelTranslations: List<String>)
-
-data class VersesViewData(
-        val simpleReadingModeOn: Boolean, val verses: List<Verse>,
-        val bookmarks: List<Bookmark>, val highlights: List<Highlight>, val notes: List<Note>
+class CurrentReadingStatusViewData(
+        val currentTranslation: String, val parallelTranslations: List<String>, val downloadedTranslations: List<String>,
+        val currentVerseIndex: VerseIndex, val bookNames: List<String>, val bookShortNames: List<String>
 )
 
-data class VerseDetailViewData(
-        val verseIndex: VerseIndex, val followingEmptyVerseCount: Int, val verseTexts: List<VerseText>,
-        val bookmarked: Boolean, @Highlight.Companion.AvailableColor val highlightColor: Int,
-        val note: String, val strongNumbers: List<StrongNumber>
-) {
-    data class VerseText(val text: Verse.Text, val bookName: String)
-}
+class VersesViewData(val items: List<BaseItem>)
 
-data class VerseDetailRequest(val verseIndex: VerseIndex, @Content val content: Int) {
-    companion object {
-        const val VERSES = 0
-        const val NOTE = 1
-        const val STRONG_NUMBER = 2
+class VerseDetailViewData(
+        val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
+        var bookmarked: Boolean, @Highlight.Companion.AvailableColor var highlightColor: Int, var note: String,
+        var strongNumberItems: List<StrongNumberItem>
+)
 
-        @IntDef(VERSES, NOTE, STRONG_NUMBER)
-        @Retention(AnnotationRetention.SOURCE)
-        annotation class Content
-    }
-}
-
-data class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int, val data: Any? = null) {
+class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int, val data: Any? = null) {
     companion object {
         const val VERSE_SELECTED = 1
         const val VERSE_DESELECTED = 2
@@ -76,116 +79,104 @@ data class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int
     }
 }
 
-class ReadingViewModel(
-        private val bibleReadingManager: BibleReadingManager, private val readingProgressManager: ReadingProgressManager,
-        private val translationManager: TranslationManager, private val bookmarkManager: VerseAnnotationManager<Bookmark>,
-        private val highlightManager: VerseAnnotationManager<Highlight>, private val noteManager: VerseAnnotationManager<Note>,
-        private val strongNumberManager: StrongNumberManager, settingsManager: SettingsManager, openNoteWhenCreated: Boolean
-) : BaseSettingsViewModel(settingsManager) {
-    private val _verseDetailRequest = MutableStateFlow<VerseDetailRequest?>(null)
-    val verseDetailRequest: Flow<VerseDetailRequest> = _verseDetailRequest.filterNotNull()
-
-    private val _verseUpdates = MutableStateFlow<VerseUpdate?>(null)
-    val verseUpdates: Flow<VerseUpdate> = _verseUpdates.filterNotNull()
+@HiltViewModel
+class ReadingViewModel @Inject constructor(
+        private val bibleReadingManager: BibleReadingManager,
+        private val readingProgressManager: ReadingProgressManager,
+        private val translationManager: TranslationManager,
+        private val bookmarkManager: VerseAnnotationManager<Bookmark>,
+        private val highlightManager: VerseAnnotationManager<Highlight>,
+        private val noteManager: VerseAnnotationManager<Note>,
+        private val strongNumberManager: StrongNumberManager,
+        settingsManager: SettingsManager,
+        application: Application
+) : BaseViewModel(settingsManager, application) {
+    private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
+    private val currentReadingStatus: MutableStateFlow<ViewData<CurrentReadingStatusViewData>> = MutableStateFlow(ViewData.Loading())
+    private val verseUpdates: MutableSharedFlow<VerseUpdate> = MutableSharedFlow()
 
     init {
-        if (openNoteWhenCreated) {
-            viewModelScope.launch {
-                bibleReadingManager.currentVerseIndex().first().let { verseIndex ->
-                    if (verseIndex.isValid()) {
-                        _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED)
-                        _verseDetailRequest.value = VerseDetailRequest(verseIndex, VerseDetailRequest.NOTE)
-                    }
-                }
-            }
-        }
-    }
-
-    fun downloadedTranslations(): Flow<List<TranslationInfo>> =
-            translationManager.downloadedTranslations().distinctUntilChanged()
-
-    suspend fun hasDownloadedTranslation(): Boolean =
-            translationManager.downloadedTranslations().first().isNotEmpty()
-
-    fun currentTranslation(): Flow<String> =
-            bibleReadingManager.currentTranslation().filterNotEmpty()
-
-    fun currentTranslationViewData(): Flow<CurrentTranslationViewData> =
-            combine(bibleReadingManager.currentTranslation().filterNotEmpty(),
-                    bibleReadingManager.parallelTranslations()) { current, parallel ->
-                CurrentTranslationViewData(current, parallel)
-            }
-
-    suspend fun saveCurrentTranslation(translationShortName: String) {
-        bibleReadingManager.saveCurrentTranslation(translationShortName)
-    }
-
-    suspend fun requestParallelTranslation(translationShortName: String) {
-        bibleReadingManager.requestParallelTranslation(translationShortName)
-    }
-
-    suspend fun removeParallelTranslation(translationShortName: String) {
-        bibleReadingManager.removeParallelTranslation(translationShortName)
-    }
-
-    suspend fun clearParallelTranslation() {
-        bibleReadingManager.clearParallelTranslation()
-    }
-
-    fun currentVerseIndex(): Flow<VerseIndex> = bibleReadingManager.currentVerseIndex().filterIsValid()
-
-    suspend fun saveCurrentVerseIndex(verseIndex: VerseIndex) {
-        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
-    }
-
-    fun currentVerseIndexViewData(): Flow<CurrentVerseIndexViewData> =
-            combine(bibleReadingManager.currentTranslation().filterNotEmpty(),
-                    bibleReadingManager.currentVerseIndex().filterIsValid()) { currentTranslation, currentVerseIndex ->
-                CurrentVerseIndexViewData(
-                        currentVerseIndex,
-                        bibleReadingManager.readBookNames(currentTranslation)[currentVerseIndex.bookIndex],
-                        bibleReadingManager.readBookShortNames(currentTranslation)[currentVerseIndex.bookIndex]
-                )
-            }
-
-    fun chapterList(): Flow<ChapterListViewData> =
-            combine(bibleReadingManager.currentVerseIndex().filterIsValid(),
-                    bibleReadingManager.currentTranslation()
-                            .filterNotEmpty()
-                            .map { bibleReadingManager.readBookNames(it) }) { currentVerseIndex, bookNames ->
-                ChapterListViewData(currentVerseIndex, bookNames)
-            }
-
-    fun bookName(translationShortName: String, bookIndex: Int): Flow<String> = flow {
-        emit(bibleReadingManager.readBookNames(translationShortName)[bookIndex])
-    }
-
-    fun verses(bookIndex: Int, chapterIndex: Int): Flow<VersesViewData> = flow {
-        coroutineScope {
-            val bookmarks = async { bookmarkManager.read(bookIndex, chapterIndex) }
-            val highlights = async { highlightManager.read(bookIndex, chapterIndex) }
-            val notes = async { noteManager.read(bookIndex, chapterIndex) }
-            val verses = async {
-                val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-                val parallelTranslations = bibleReadingManager.parallelTranslations().first()
-                if (parallelTranslations.isEmpty()) {
-                    bibleReadingManager.readVerses(currentTranslation, bookIndex, chapterIndex)
-                } else {
-                    bibleReadingManager.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
-                }
-            }
-            emit(VersesViewData(
-                    settings().first().simpleReadingModeOn, verses.await(),
-                    bookmarks.await(), highlights.await(), notes.await()
+        combine(
+                bibleReadingManager.currentTranslation().filterNotEmpty(),
+                bibleReadingManager.parallelTranslations(),
+                translationManager.downloadedTranslations(),
+                bibleReadingManager.currentVerseIndex().filterIsValid(),
+        ) { currentTranslation, parallelTranslations, downloadedTranslations, currentVerseIndex ->
+            currentReadingStatus.value = ViewData.Success(CurrentReadingStatusViewData(
+                    currentTranslation = currentTranslation,
+                    parallelTranslations = parallelTranslations,
+                    downloadedTranslations = downloadedTranslations.sortedWith(translationComparator).map { it.shortName },
+                    currentVerseIndex = currentVerseIndex,
+                    bookNames = bibleReadingManager.readBookNames(currentTranslation),
+                    bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
             ))
+        }.launchIn(viewModelScope)
+    }
+
+    fun currentReadingStatus(): Flow<ViewData<CurrentReadingStatusViewData>> = currentReadingStatus
+
+    suspend fun hasDownloadedTranslation(): Boolean = translationManager.downloadedTranslations().first().isNotEmpty()
+
+    fun selectTranslation(translationToSelect: String): Flow<ViewData<Unit>> = viewData {
+        bibleReadingManager.saveCurrentTranslation(translationToSelect)
+
+        try {
+            bibleReadingManager.removeParallelTranslation(translationToSelect)
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to remove the selected translation from parallel", e)
+        }
+    }.onFailure { Log.e(tag, "Failed to select translation", it) }
+
+    fun requestParallelTranslation(translation: String): Flow<ViewData<Unit>> = viewData {
+        bibleReadingManager.requestParallelTranslation(translation)
+    }.onFailure { Log.e(tag, "Failed to request parallel translation", it) }
+
+    fun removeParallelTranslation(translation: String): Flow<ViewData<Unit>> = viewData {
+        bibleReadingManager.removeParallelTranslation(translation)
+    }.onFailure { Log.e(tag, "Failed to remove parallel translation", it) }
+
+    suspend fun currentVerseIndex(): VerseIndex = bibleReadingManager.currentVerseIndex().first { it.isValid() }
+
+    fun selectCurrentVerseIndex(verseIndex: VerseIndex): Flow<ViewData<Unit>> = viewData {
+        bibleReadingManager.saveCurrentVerseIndex(verseIndex)
+    }.onFailure { Log.e(tag, "Failed to select verse index", it) }
+
+    suspend fun bookName(translationShortName: String, bookIndex: Int): String {
+        return bibleReadingManager.readBookNames(translationShortName)[bookIndex]
+    }
+
+    fun loadVerses(bookIndex: Int, chapterIndex: Int): Flow<ViewData<VersesViewData>> = viewData {
+        coroutineScope {
+            val highlights = async { highlightManager.read(bookIndex, chapterIndex) }
+
+            val simpleReadingModeOn = settings().first().simpleReadingModeOn
+            val bookmarks = if (simpleReadingModeOn) null else async { bookmarkManager.read(bookIndex, chapterIndex) }
+            val notes = if (simpleReadingModeOn) null else async { noteManager.read(bookIndex, chapterIndex) }
+
+            val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+            val parallelTranslations = bibleReadingManager.parallelTranslations().first()
+            val verses = if (parallelTranslations.isEmpty()) {
+                bibleReadingManager.readVerses(currentTranslation, bookIndex, chapterIndex)
+            } else {
+                bibleReadingManager.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
+            }
+            val items = if (simpleReadingModeOn) {
+                verses.toSimpleVerseItems(highlights.await())
+            } else {
+                verses.toVerseItems(bookmarks!!.await(), highlights.await(), notes!!.await())
+            }
+
+            VersesViewData(
+                    items = items
+            )
         }
     }
 
-    fun verseDetail(verseIndex: VerseIndex): Flow<VerseDetailViewData> = flow {
+    fun loadVerseDetail(verseIndex: VerseIndex): Flow<ViewData<VerseDetailViewData>> = viewData {
         coroutineScope {
             val bookmarked = async { bookmarkManager.read(verseIndex).isValid() }
-            val highlightColor = async { highlightManager.read(verseIndex).color }
-            val note = async { noteManager.read(verseIndex).note }
+            val highlightColor = async { highlightManager.read(verseIndex).takeIf { it.isValid() }?.color ?: Highlight.COLOR_NONE }
+            val note = async { noteManager.read(verseIndex).takeIf { it.isValid() }?.note ?: "" }
             val strongNumbers = async { strongNumberManager.readStrongNumber(verseIndex) }
 
             // build the verse
@@ -233,80 +224,93 @@ class ReadingViewModel(
                 followingEmptyVerseCount++
             }
 
-            // step 3: constructs verse texts
-            val verseTexts = ArrayList<VerseDetailViewData.VerseText>(parallelTranslations.size + 1)
-            verseTexts.add(VerseDetailViewData.VerseText(
-                    verse.text,
-                    bibleReadingManager.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
+            // step 3: constructs verse text items
+            val verseTextItems = ArrayList<VerseTextItem>(parallelTranslations.size + 1)
+            verseTextItems.add(VerseTextItem(
+                    verseIndex = verseIndex,
+                    followingEmptyVerseCount = followingEmptyVerseCount,
+                    verseText = verse.text,
+                    bookName = bibleReadingManager.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
             ))
             parallelTranslations.forEachIndexed { index, translation ->
-                verseTexts.add(VerseDetailViewData.VerseText(
-                        Verse.Text(translation, parallel[index].toString()),
-                        bibleReadingManager.readBookNames(translation)[verse.verseIndex.bookIndex]
+                verseTextItems.add(VerseTextItem(
+                        verseIndex = verseIndex,
+                        followingEmptyVerseCount = followingEmptyVerseCount,
+                        verseText = Verse.Text(translation, parallel[index].toString()),
+                        bookName = bibleReadingManager.readBookNames(translation)[verse.verseIndex.bookIndex]
                 ))
             }
 
-            emit(VerseDetailViewData(
-                    verseIndex, followingEmptyVerseCount, verseTexts,
-                    bookmarked.await(), highlightColor.await(), note.await(), strongNumbers.await()
-            ))
+            VerseDetailViewData(
+                    verseIndex = verseIndex,
+                    verseTextItems = verseTextItems,
+                    bookmarked = bookmarked.await(),
+                    highlightColor = highlightColor.await(),
+                    note = note.await(),
+                    strongNumberItems = strongNumbers.await().map { StrongNumberItem(it) }
+            )
         }
     }
 
-    suspend fun readVerses(translationShortName: String, parallelTranslations: List<String>,
-                           bookIndex: Int, chapterIndex: Int): List<Verse> =
-            bibleReadingManager.readVerses(translationShortName, parallelTranslations, bookIndex, chapterIndex)
+    fun verseUpdates(): Flow<VerseUpdate> = verseUpdates
 
-    suspend fun saveBookmark(verseIndex: VerseIndex, hasBookmark: Boolean) {
-        if (hasBookmark) {
-            bookmarkManager.remove(verseIndex)
-            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_REMOVED)
-        } else {
+    fun updateVerse(update: VerseUpdate) {
+        viewModelScope.launch { verseUpdates.emit(update) }
+    }
+
+    fun saveBookmark(verseIndex: VerseIndex, toBeBookmarked: Boolean): Flow<ViewData<Unit>> = viewData {
+        if (toBeBookmarked) {
             bookmarkManager.save(Bookmark(verseIndex, currentTimeMillis()))
-            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED)
+            verseUpdates.emit(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_ADDED))
+        } else {
+            bookmarkManager.remove(verseIndex)
+            verseUpdates.emit(VerseUpdate(verseIndex, VerseUpdate.BOOKMARK_REMOVED))
         }
-    }
+    }.onFailure { Log.e(tag, "Failed to update bookmark", it) }
 
-    suspend fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor color: Int) {
+    fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor color: Int): Flow<ViewData<Unit>> = viewData {
         if (color == Highlight.COLOR_NONE) {
             highlightManager.remove(verseIndex)
-            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE)
+            verseUpdates.emit(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE))
         } else {
             highlightManager.save(Highlight(verseIndex, color, currentTimeMillis()))
-            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color)
+            verseUpdates.emit(VerseUpdate(verseIndex, VerseUpdate.HIGHLIGHT_UPDATED, color))
         }
-    }
+    }.onFailure { Log.e(tag, "Failed to update highlight", it) }
 
-    suspend fun saveNote(verseIndex: VerseIndex, note: String) {
+    fun saveNote(verseIndex: VerseIndex, note: String): Flow<ViewData<Unit>> = viewData {
         if (note.isEmpty()) {
             noteManager.remove(verseIndex)
-            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED)
+            verseUpdates.emit(VerseUpdate(verseIndex, VerseUpdate.NOTE_REMOVED))
         } else {
             noteManager.save(Note(verseIndex, note, currentTimeMillis()))
-            _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED)
+            verseUpdates.emit(VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED))
         }
     }
 
-    suspend fun readStrongNumber(verseIndex: VerseIndex): List<StrongNumber> = strongNumberManager.readStrongNumber(verseIndex)
+    fun downloadStrongNumber(): Flow<ViewData<Int>> =
+            strongNumberManager.download()
+                    .map { progress ->
+                        when (progress) {
+                            -1 -> ViewData.Failure(CancellationException("Strong Number downloading cancelled by user"))
+                            in 0 until 100 -> ViewData.Loading(progress)
+                            else -> ViewData.Success(100)
+                        }
+                    }
+                    .catch { e ->
+                        Log.e(tag, "Failed to download Strong Number", e)
+                        emit(ViewData.Failure(e))
+                    }
 
-    fun downloadStrongNumber(): Flow<Int> = strongNumberManager.download()
+    fun strongNumbers(verseIndex: VerseIndex): Flow<ViewData<List<StrongNumberItem>>> = viewData {
+        strongNumberManager.readStrongNumber(verseIndex).map { StrongNumberItem(it) }
+    }
 
-    fun startTracking() {
+    fun startTrackingReadingProgress() {
         readingProgressManager.startTracking()
     }
 
-    fun stopTracking() {
+    fun stopTrackingReadingProgress() {
         readingProgressManager.stopTracking()
-    }
-
-    fun requestVerseDetail(request: VerseDetailRequest) {
-        _verseDetailRequest.value = request
-        _verseUpdates.value = VerseUpdate(request.verseIndex, VerseUpdate.VERSE_SELECTED)
-    }
-
-    fun closeVerseDetail(verseIndex: VerseIndex) {
-        // Note: As of now, this is only called by verse detail presenter, so no need to tell it to hide.
-        _verseDetailRequest.value = null
-        _verseUpdates.value = VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED)
     }
 }

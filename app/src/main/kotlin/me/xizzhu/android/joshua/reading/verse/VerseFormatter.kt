@@ -31,8 +31,9 @@ private val bookNameSizeSpan = createTitleSizeSpan()
 private val bookNameStyleSpan = createTitleStyleSpan()
 private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
 
-fun SpannableStringBuilder.format(verse: Verse, followingEmptyVerseCount: Int,
-                                  simpleReadingModeOn: Boolean, @ColorInt highlightColor: Int): CharSequence {
+fun SpannableStringBuilder.format(
+        verse: Verse, followingEmptyVerseCount: Int, simpleReadingModeOn: Boolean, @ColorInt highlightColor: Int
+): CharSequence {
     clearAll()
 
     if (verse.parallel.isEmpty()) {
@@ -69,15 +70,17 @@ fun SpannableStringBuilder.format(verse: Verse, followingEmptyVerseCount: Int,
 
 private fun SpannableStringBuilder.setHighlight(verse: Verse, @ColorInt highlightColor: Int): SpannableStringBuilder {
     if (highlightColor != Highlight.COLOR_NONE) {
-        setSpan(BackgroundColorSpan(highlightColor),
-                ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK),
-                length - verse.text.text.length, length)
+        setSpan(
+                span1 = BackgroundColorSpan(highlightColor),
+                span2 = ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK),
+                start = length - verse.text.text.length,
+                end = length
+        )
     }
     return this
 }
 
-private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Text,
-                                          followingEmptyVerseCount: Int): SpannableStringBuilder {
+private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Text, followingEmptyVerseCount: Int): SpannableStringBuilder {
     if (isNotEmpty()) {
         append('\n').append('\n')
     }
@@ -90,6 +93,5 @@ private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Te
         append('-').append(verseIndex.verseIndex + followingEmptyVerseCount + 1)
     }
     val end = length
-    return setSpan(createTitleSizeSpan(), createTitleStyleSpan(), start, end)
-            .append('\n').append(text.text)
+    return setSpan(createTitleSizeSpan(), createTitleStyleSpan(), start, end).append('\n').append(text.text)
 }

@@ -19,20 +19,24 @@ package me.xizzhu.android.joshua.reading.detail
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.StrongNumber
+import me.xizzhu.android.joshua.databinding.ItemStrongNumberBinding
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class StrongNumberItem(val strongNumber: StrongNumber, val onClicked: (String) -> Unit)
+class StrongNumberItem(val strongNumber: StrongNumber)
     : BaseItem(R.layout.item_strong_number, { inflater, parent -> StrongNumberItemViewHolder(inflater, parent) }) {
     companion object {
         private val STRONG_NUMBER_SIZE_SPAN = createTitleSizeSpan()
         private val STRONG_NUMBER_STYLE_SPAN = createTitleStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+    }
+
+    interface Callback {
+        fun openStrongNumber(strongNumber: String)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -50,15 +54,20 @@ data class StrongNumberItem(val strongNumber: StrongNumber, val onClicked: (Stri
 }
 
 private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<StrongNumberItem>(inflater.inflate(R.layout.item_strong_number, parent, false)) {
-    private val strongNumber: TextView = itemView.findViewById(R.id.strong_number)
+    : BaseViewHolder<StrongNumberItem>(ItemStrongNumberBinding.inflate(inflater, parent, false).root) {
+    private val viewBinding: ItemStrongNumberBinding = ItemStrongNumberBinding.bind(itemView)
 
     init {
-        itemView.setOnClickListener { item?.let { it.onClicked(it.strongNumber.sn) } }
+        itemView.setOnClickListener {
+            item?.let { item ->
+                (itemView.activity as? StrongNumberItem.Callback)?.openStrongNumber(item.strongNumber.sn)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement StrongNumberItem.Callback")
+            }
+        }
     }
 
     override fun bind(settings: Settings, item: StrongNumberItem, payloads: List<Any>) {
-        with(strongNumber) {
+        with(viewBinding.strongNumber) {
             updateSettingsWithPrimaryText(settings)
             text = item.textForDisplay
         }

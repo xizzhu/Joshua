@@ -34,7 +34,7 @@ fun Context.copyToClipBoard(label: CharSequence, text: CharSequence) {
             .setPrimaryClip(ClipData.newPlainText(label, text))
 }
 
-fun Activity.share(title: String, text: String) {
+fun Activity.shareToSystem(title: String, text: String) {
     val chooser = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         // Seems starting from Android 10, Direct Share doesn't work if we provides extra intents
         // to Intent.createChooser through Intent.EXTRA_INITIAL_INTENTS. Therefore, simply do this,
@@ -47,8 +47,7 @@ fun Activity.share(title: String, text: String) {
         // ref. https://developers.facebook.com/bugs/332619626816423
         packageManager.chooserForSharing("com.facebook.katana", title, text)
     }
-    chooser?.let { startActivity(it) }
-            ?: throw RuntimeException("Failed to create chooser for sharing")
+    chooser?.let { startActivity(it) } ?: throw RuntimeException("Failed to create chooser for sharing")
 }
 
 @SuppressLint("QueryPermissionsNeeded")

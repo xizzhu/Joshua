@@ -23,33 +23,44 @@ import android.text.style.ForegroundColorSpan
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@RunWith(RobolectricTestRunner::class)
 class VerseFormatterTest : BaseUnitTest() {
     @Test
     fun testFormat() {
-        assertEquals("1:1 ${MockContents.kjvVerses[0].text.text}",
-                SpannableStringBuilder().format(MockContents.kjvVerses[0], 0, false, Highlight.COLOR_NONE).toString())
+        assertEquals(
+                "1:1 In the beginning God created the heaven and the earth.",
+                SpannableStringBuilder().format(MockContents.kjvVerses[0], 0, false, Highlight.COLOR_NONE).toString()
+        )
     }
 
     @Test
     fun testFormatWithSimpleReadingMode() {
-        assertEquals(MockContents.kjvVerses[0].text.text,
-                SpannableStringBuilder().format(MockContents.kjvVerses[0], 0, true, Highlight.COLOR_NONE).toString())
+        assertEquals(
+                "In the beginning God created the heaven and the earth.",
+                SpannableStringBuilder().format(MockContents.kjvVerses[0], 0, true, Highlight.COLOR_NONE).toString()
+        )
     }
 
     @Test
     fun testFormatWithFollowingEmptyVerse() {
-        assertEquals("1:1-2 ${MockContents.msgVerses[0].text.text}",
-                SpannableStringBuilder().format(MockContents.msgVerses[0], 1, false, Highlight.COLOR_NONE).toString())
+        assertEquals(
+                "1:1-2 First this: God created the Heavens and Earth—all you see, all you don't see. Earth was a soup of nothingness, a bottomless emptiness, an inky blackness. God's Spirit brooded like a bird above the watery abyss.",
+                SpannableStringBuilder().format(MockContents.msgVerses[0], 1, false, Highlight.COLOR_NONE).toString()
+        )
     }
 
     @Test
     fun testFormatWithHighlight() {
         val ssb = SpannableStringBuilder()
-        assertEquals("1:1 ${MockContents.kjvVerses[0].text.text}",
-                ssb.format(MockContents.kjvVerses[0], 0, false, Highlight.COLOR_PINK).toString())
+        assertEquals(
+                "1:1 In the beginning God created the heaven and the earth.",
+                ssb.format(MockContents.kjvVerses[0], 0, false, Highlight.COLOR_PINK).toString()
+        )
 
         val actualBackgroundColorSpans = ssb.getSpans(0, ssb.length, BackgroundColorSpan::class.java)
         assertEquals(1, actualBackgroundColorSpans.size)
@@ -63,8 +74,10 @@ class VerseFormatterTest : BaseUnitTest() {
     @Test
     fun testFormatWithBlueHighlight() {
         val ssb = SpannableStringBuilder()
-        assertEquals("1:1 ${MockContents.kjvVerses[0].text.text}",
-                ssb.format(MockContents.kjvVerses[0], 0, false, Highlight.COLOR_BLUE).toString())
+        assertEquals(
+                "1:1 In the beginning God created the heaven and the earth.",
+                ssb.format(MockContents.kjvVerses[0], 0, false, Highlight.COLOR_BLUE).toString()
+        )
 
         val actualBackgroundColorSpans = ssb.getSpans(0, ssb.length, BackgroundColorSpan::class.java)
         assertEquals(1, actualBackgroundColorSpans.size)

@@ -18,69 +18,339 @@ package me.xizzhu.android.joshua.reading
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.view.ActionMode
+import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsActivity
-import me.xizzhu.android.joshua.infra.activity.BaseSettingsViewModel
-import me.xizzhu.android.joshua.reading.chapter.ChapterListPresenter
-import me.xizzhu.android.joshua.reading.chapter.ChapterListViewHolder
-import me.xizzhu.android.joshua.reading.chapter.ReadingDrawerLayout
-import me.xizzhu.android.joshua.reading.detail.VerseDetailPresenter
-import me.xizzhu.android.joshua.reading.detail.VerseDetailViewHolder
-import me.xizzhu.android.joshua.reading.search.SearchButtonPresenter
-import me.xizzhu.android.joshua.reading.search.SearchButtonViewHolder
-import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
-import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarPresenter
-import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarViewHolder
-import me.xizzhu.android.joshua.reading.verse.VersePresenter
-import me.xizzhu.android.joshua.reading.verse.VerseViewHolder
-import javax.inject.Inject
+import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.databinding.ActivityReadingBinding
+import me.xizzhu.android.joshua.infra.BaseActivity
+import me.xizzhu.android.joshua.infra.onEach
+import me.xizzhu.android.joshua.infra.onFailure
+import me.xizzhu.android.joshua.infra.onSuccess
+import me.xizzhu.android.joshua.reading.detail.StrongNumberItem
+import me.xizzhu.android.joshua.reading.detail.VerseDetailViewLayout
+import me.xizzhu.android.joshua.reading.detail.VerseTextItem
+import me.xizzhu.android.joshua.reading.verse.SimpleVerseItem
+import me.xizzhu.android.joshua.reading.verse.VerseItem
+import me.xizzhu.android.joshua.reading.verse.VersePagerAdapter
+import me.xizzhu.android.joshua.reading.verse.toBookIndex
+import me.xizzhu.android.joshua.reading.verse.toChapterIndex
+import me.xizzhu.android.joshua.reading.verse.toPagePosition
+import me.xizzhu.android.joshua.reading.verse.toStringForSharing
+import me.xizzhu.android.joshua.strongnumber.StrongNumberActivity
+import me.xizzhu.android.joshua.ui.ProgressDialog
+import me.xizzhu.android.joshua.ui.dialog
+import me.xizzhu.android.joshua.ui.progressDialog
+import me.xizzhu.android.joshua.ui.toast
+import me.xizzhu.android.joshua.utils.copyToClipBoard
+import me.xizzhu.android.joshua.utils.shareToSystem
+import me.xizzhu.android.logger.Log
+import kotlin.math.max
 
 @AndroidEntryPoint
-class ReadingActivity : BaseSettingsActivity() {
+class ReadingActivity : BaseActivity<ActivityReadingBinding>(), SimpleVerseItem.Callback, VerseItem.Callback,
+        VerseTextItem.Callback, StrongNumberItem.Callback {
     companion object {
         private const val KEY_OPEN_NOTE = "me.xizzhu.android.joshua.KEY_OPEN_NOTE"
 
         fun bundleForOpenNote(): Bundle = Bundle().apply { putBoolean(KEY_OPEN_NOTE, true) }
     }
 
-    @Inject
-    lateinit var readingViewModel: ReadingViewModel
+    private val readingViewModel: ReadingViewModel by viewModels()
 
-    @Inject
-    lateinit var readingToolbarPresenter: ReadingToolbarPresenter
+    private var downloadStrongNumberJob: Job? = null
+    private var downloadStrongNumberDialog: ProgressDialog? = null
 
-    @Inject
-    lateinit var chapterListPresenter: ChapterListPresenter
+    private val selectedVerses: MutableSet<Verse> = mutableSetOf()
+    private var currentTranslation: String = ""
+    private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
+    private var currentBookName: String = ""
 
-    @Inject
-    lateinit var searchButtonPresenter: SearchButtonPresenter
+    private var actionMode: ActionMode? = null
+    private val actionModeCallback = object : ActionMode.Callback {
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.menuInflater.inflate(R.menu.menu_verse_selection, menu)
+            return true
+        }
 
-    @Inject
-    lateinit var versePresenter: VersePresenter
+        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
 
-    @Inject
-    lateinit var verseDetailPresenter: VerseDetailPresenter
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = when (item.itemId) {
+            R.id.action_copy -> {
+                copy()
+                true
+            }
+            R.id.action_share -> {
+                share()
+                true
+            }
+            else -> false
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode) {
+            selectedVerses.forEach { verse -> versePagerAdapter.deselectVerse(verse.verseIndex) }
+            selectedVerses.clear()
+            actionMode = null
+        }
+    }
+
+    private fun copy() {
+        lifecycleScope.launch {
+            try {
+                copyToClipBoard(
+                        label = "$currentTranslation $currentBookName",
+                        text = selectedVerses.toStringForSharing(currentBookName, readingViewModel.settings().first().consolidateVersesForSharing)
+                )
+                toast(R.string.toast_verses_copied)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to copy", e)
+                toast(R.string.toast_unknown_error)
+            } finally {
+                actionMode?.finish()
+            }
+        }
+    }
+
+    private fun share() {
+        lifecycleScope.launch {
+            try {
+                if (selectedVerses.isEmpty()) return@launch
+
+                shareToSystem(
+                        title = getString(R.string.text_share_with),
+                        text = selectedVerses.toStringForSharing(currentBookName, readingViewModel.settings().first().consolidateVersesForSharing)
+                )
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to share", e)
+                toast(R.string.toast_unknown_error)
+            } finally {
+                actionMode?.finish()
+            }
+        }
+    }
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
-    private lateinit var readingDrawerLayout: ReadingDrawerLayout
+    private lateinit var versePagerAdapter: VersePagerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_reading)
+        initializeUi()
+        observeSettings()
+        observeCurrentReadingStatus()
+        observeVerseUpdates()
+    }
 
-        val toolbar: ReadingToolbar = findViewById(R.id.toolbar)
-        readingDrawerLayout = findViewById(R.id.drawer_layout)
-        drawerToggle = ActionBarDrawerToggle(this, readingDrawerLayout, toolbar, 0, 0)
-        readingDrawerLayout.addDrawerListener(drawerToggle)
+    private fun initializeUi() = with(viewBinding) {
+        drawerToggle = ActionBarDrawerToggle(this@ReadingActivity, drawerLayout, toolbar, 0, 0)
+        drawerLayout.addDrawerListener(drawerToggle)
 
-        readingToolbarPresenter.bind(ReadingToolbarViewHolder(toolbar))
-        chapterListPresenter.bind(ChapterListViewHolder(readingDrawerLayout, findViewById(R.id.chapter_list_view)))
-        searchButtonPresenter.bind(SearchButtonViewHolder(findViewById(R.id.search)))
-        versePresenter.bind(VerseViewHolder(findViewById(R.id.verse_view_pager)))
-        verseDetailPresenter.bind(VerseDetailViewHolder(findViewById(R.id.verse_detail_view)))
+        toolbar.initialize(
+                requestParallelTranslation = ::requestParallelTranslation,
+                removeParallelTranslation = ::removeParallelTranslation,
+                selectCurrentTranslation = ::selectTranslation,
+                navigate = ::startActivity
+        )
+
+        chapterListView.initialize(::selectChapter)
+
+        versePagerAdapter = VersePagerAdapter(this@ReadingActivity, ::loadVerses, ::updateCurrentVerse)
+        verseViewPager.offscreenPageLimit = 1
+        verseViewPager.adapter = versePagerAdapter
+        verseViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                val bookIndex = position.toBookIndex()
+                val chapterIndex = position.toChapterIndex()
+                lifecycleScope.launch {
+                    val currentVerseIndex = readingViewModel.currentVerseIndex()
+                    if (bookIndex != currentVerseIndex.bookIndex || chapterIndex != currentVerseIndex.chapterIndex) {
+                        selectChapter(bookIndex, chapterIndex)
+                    }
+                }
+            }
+        })
+
+        search.setOnClickListener { startActivity(Navigator.SCREEN_SEARCH) }
+
+        val openNoteWhenCreated = intent.getBooleanExtra(KEY_OPEN_NOTE, false)
+        verseDetailView.initialize(
+                onClicked = ::hideVerseDetail,
+                updateBookmark = ::onBookmarkClicked,
+                updateHighlight = ::onHighlightClicked,
+                updateNote = ::saveNote,
+                requestStrongNumber = ::downloadStrongNumber,
+                hide = !openNoteWhenCreated
+        )
+        if (openNoteWhenCreated) {
+            lifecycleScope.launch { showVerseDetail(readingViewModel.currentVerseIndex(), VerseDetailViewLayout.VERSE_DETAIL_NOTE) }
+        }
+    }
+
+    private fun requestParallelTranslation(translation: String) {
+        readingViewModel.requestParallelTranslation(translation).launchIn(lifecycleScope)
+    }
+
+    private fun removeParallelTranslation(translation: String) {
+        readingViewModel.removeParallelTranslation(translation).launchIn(lifecycleScope)
+    }
+
+    private fun selectTranslation(translation: String) {
+        readingViewModel.selectTranslation(translation)
+                .onFailure { dialog(true, R.string.dialog_update_translation_error, { _, _ -> selectTranslation(translation) }) }
+                .launchIn(lifecycleScope)
+    }
+
+    private fun startActivity(@Navigator.Companion.Screen screen: Int, extras: Bundle? = null) {
+        try {
+            navigator.navigate(this, screen, extras)
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to open activity", e)
+            dialog(true, R.string.dialog_navigation_error, { _, _ -> startActivity(screen) })
+        }
+    }
+
+    private fun selectChapter(bookIndex: Int, chapterIndex: Int) {
+        readingViewModel.selectCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
+                .onFailure { dialog(true, R.string.dialog_chapter_selection_error, { _, _ -> selectChapter(bookIndex, chapterIndex) }) }
+                .launchIn(lifecycleScope)
+    }
+
+    private fun loadVerses(bookIndex: Int, chapterIndex: Int) {
+        readingViewModel.loadVerses(bookIndex, chapterIndex)
+                .onSuccess { verses -> versePagerAdapter.setVerses(bookIndex, chapterIndex, verses.items) }
+                .onFailure { e ->
+                    Log.e(tag, "Failed to load verses", e)
+                    dialog(true, R.string.dialog_verse_load_error, { _, _ -> loadVerses(bookIndex, chapterIndex) })
+                }
+                .launchIn(lifecycleScope)
+    }
+
+    private fun updateCurrentVerse(verseIndex: VerseIndex) {
+        readingViewModel.selectCurrentVerseIndex(verseIndex).launchIn(lifecycleScope)
+    }
+
+    private fun downloadStrongNumber() {
+        if (downloadStrongNumberJob != null || downloadStrongNumberDialog != null) {
+            // just in case the user clicks too fast
+            return
+        }
+        downloadStrongNumberDialog = progressDialog(R.string.dialog_downloading, 100) { downloadStrongNumberJob?.cancel() }
+
+        lifecycleScope.launchWhenStarted {
+            readingViewModel.downloadStrongNumber()
+                    .onEach(
+                            onLoading = { progress ->
+                                when (progress) {
+                                    in 0 until 99 -> {
+                                        downloadStrongNumberDialog?.setProgress(progress!!)
+                                    }
+                                    else -> {
+                                        downloadStrongNumberDialog?.run {
+                                            setTitle(R.string.dialog_installing)
+                                            setIsIndeterminate(true)
+                                        }
+                                    }
+                                }
+                            },
+                            onSuccess = {
+                                toast(R.string.toast_downloaded)
+
+                                viewBinding.verseDetailView.verseDetail?.let { verseDetail ->
+                                    readingViewModel.strongNumbers(verseDetail.verseIndex)
+                                            .onSuccess { viewBinding.verseDetailView.setStrongNumbers(it) }
+                                            .launchIn(lifecycleScope)
+                                }
+                            },
+                            onFailure = {
+                                dialog(true, R.string.dialog_download_error, { _, _ -> downloadStrongNumber() })
+                            }
+                    )
+                    .onCompletion {
+                        downloadStrongNumberDialog?.dismiss()
+                        downloadStrongNumberDialog = null
+                        downloadStrongNumberJob = null
+                    }
+                    .collect()
+        }
+    }
+
+    private fun observeSettings() {
+        readingViewModel.settings().onEach { settings ->
+            if (settings.hideSearchButton) {
+                viewBinding.search.hide()
+            } else {
+                viewBinding.search.show()
+            }
+
+            versePagerAdapter.settings = settings
+            viewBinding.verseDetailView.setSettings(settings)
+        }.launchIn(lifecycleScope)
+    }
+
+    private fun observeCurrentReadingStatus() {
+        readingViewModel.currentReadingStatus()
+                .onSuccess { currentReadingStatus ->
+                    with(viewBinding) {
+                        toolbar.title = "${currentReadingStatus.bookShortNames[currentReadingStatus.currentVerseIndex.bookIndex]}, ${currentReadingStatus.currentVerseIndex.chapterIndex + 1}"
+                        toolbar.setData(
+                                currentTranslation = currentReadingStatus.currentTranslation,
+                                parallelTranslations = currentReadingStatus.parallelTranslations,
+                                downloadedTranslations = currentReadingStatus.downloadedTranslations
+                        )
+
+                        chapterListView.setData(currentReadingStatus.currentVerseIndex, currentReadingStatus.bookNames)
+                        drawerLayout.hide()
+
+                        versePagerAdapter.setCurrent(
+                                verseIndex = currentReadingStatus.currentVerseIndex,
+                                translation = currentReadingStatus.currentTranslation,
+                                parallel = currentReadingStatus.parallelTranslations
+                        )
+                        verseViewPager.setCurrentItem(currentReadingStatus.currentVerseIndex.toPagePosition(), false)
+                    }
+                    hideVerseDetail()
+
+                    actionMode?.let { actionMode ->
+                        if (currentVerseIndex.bookIndex != currentReadingStatus.currentVerseIndex.bookIndex
+                                || currentVerseIndex.chapterIndex != currentReadingStatus.currentVerseIndex.chapterIndex) {
+                            actionMode.finish()
+                        }
+                    }
+
+                    currentTranslation = currentReadingStatus.currentTranslation
+                    currentVerseIndex = currentReadingStatus.currentVerseIndex
+                    currentBookName = currentReadingStatus.bookNames[currentReadingStatus.currentVerseIndex.bookIndex]
+                }.launchIn(lifecycleScope)
+    }
+
+    private fun hideVerseDetail(): Boolean {
+        val verseIndex = viewBinding.verseDetailView.verseDetail?.verseIndex ?: return false
+        return if (viewBinding.verseDetailView.hide()) {
+            readingViewModel.updateVerse(VerseUpdate(verseIndex, VerseUpdate.VERSE_DESELECTED))
+            true
+        } else {
+            false
+        }
+    }
+
+    private fun observeVerseUpdates() {
+        readingViewModel.verseUpdates().onEach { versePagerAdapter.notifyVerseUpdate(it) }.launchIn(lifecycleScope)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -88,13 +358,23 @@ class ReadingActivity : BaseSettingsActivity() {
         drawerToggle.syncState()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        lifecycleScope.launch {
+            if (readingViewModel.hasDownloadedTranslation()) return@launch
+
+            dialog(false, R.string.dialog_no_translation_downloaded, { _, _ -> startActivity(Navigator.SCREEN_TRANSLATIONS) }, { _, _ -> finish() })
+        }
+    }
+
     override fun onResume() {
         super.onResume()
-        readingViewModel.startTracking()
+        readingViewModel.startTrackingReadingProgress()
     }
 
     override fun onPause() {
-        readingViewModel.stopTracking()
+        readingViewModel.stopTrackingReadingProgress()
         super.onPause()
     }
 
@@ -104,12 +384,124 @@ class ReadingActivity : BaseSettingsActivity() {
     }
 
     override fun onBackPressed() {
-        if (!verseDetailPresenter.close() && !readingDrawerLayout.hide()) {
+        if (!viewBinding.drawerLayout.hide() && !hideVerseDetail()) {
             super.onBackPressed()
         }
     }
 
-    override fun getBaseSettingsViewModel(): BaseSettingsViewModel = readingViewModel
+    override fun inflateViewBinding(): ActivityReadingBinding = ActivityReadingBinding.inflate(layoutInflater)
 
-    fun openNoteWhenCreated() = intent.getBooleanExtra(KEY_OPEN_NOTE, false)
+    override fun onVerseClicked(verse: Verse) {
+        if (actionMode == null) {
+            showVerseDetail(verse.verseIndex, VerseDetailViewLayout.VERSE_DETAIL_VERSES)
+            return
+        }
+
+        if (selectedVerses.contains(verse)) {
+            // de-select the verse
+            selectedVerses.remove(verse)
+            if (selectedVerses.isEmpty()) {
+                actionMode?.finish()
+            }
+
+            versePagerAdapter.deselectVerse(verse.verseIndex)
+        } else {
+            // select the verse
+            selectedVerses.add(verse)
+            versePagerAdapter.selectVerse(verse.verseIndex)
+        }
+    }
+
+    private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailViewLayout.Companion.VerseDetail content: Int) {
+        readingViewModel.loadVerseDetail(verseIndex)
+                .onEach(
+                        onLoading = { viewBinding.verseDetailView.verseDetail = null },
+                        onSuccess = {
+                            with(viewBinding.verseDetailView) {
+                                verseDetail = it
+                                show(content)
+                            }
+                            readingViewModel.updateVerse(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
+                        },
+                        onFailure = { e ->
+                            Log.e(tag, "Failed to load verses", e)
+                            dialog(true, R.string.dialog_load_verse_detail_error, { _, _ -> showVerseDetail(verseIndex, content) })
+                        }
+                )
+                .launchIn(lifecycleScope)
+    }
+
+    override fun onVerseLongClicked(verse: Verse) {
+        if (actionMode == null) {
+            actionMode = startSupportActionMode(actionModeCallback)
+        }
+        onVerseClicked(verse)
+    }
+
+    override fun onBookmarkClicked(verseIndex: VerseIndex, currentlyBookmarked: Boolean) {
+        val toBeBookmarked = !currentlyBookmarked
+        readingViewModel.saveBookmark(verseIndex = verseIndex, toBeBookmarked = toBeBookmarked)
+                .onSuccess { viewBinding.verseDetailView.setBookmarked(toBeBookmarked) }
+                .onFailure { toast(R.string.toast_unknown_error) }
+                .launchIn(lifecycleScope)
+    }
+
+    override fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int) {
+        lifecycleScope.launch {
+            val defaultHighlightColor = readingViewModel.settings().first().defaultHighlightColor
+            if (Highlight.COLOR_NONE == defaultHighlightColor) {
+                dialog(R.string.text_pick_highlight_color,
+                        resources.getStringArray(R.array.text_colors),
+                        max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor))) { dialog, which ->
+                    saveHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
+
+                    dialog.dismiss()
+                }
+            } else {
+                saveHighlight(verseIndex, if (currentHighlightColor == Highlight.COLOR_NONE) defaultHighlightColor else Highlight.COLOR_NONE)
+            }
+        }
+    }
+
+    private fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
+        readingViewModel.saveHighlight(verseIndex, highlightColor)
+                .onSuccess { viewBinding.verseDetailView.setHighlightColor(highlightColor) }
+                .onFailure { toast(R.string.toast_unknown_error) }
+                .launchIn(lifecycleScope)
+    }
+
+    override fun onNoteClicked(verseIndex: VerseIndex) {
+        showVerseDetail(verseIndex, VerseDetailViewLayout.VERSE_DETAIL_NOTE)
+    }
+
+    private fun saveNote(verseIndex: VerseIndex, note: String) {
+        readingViewModel.saveNote(verseIndex, note)
+                .onSuccess { viewBinding.verseDetailView.setNote(note) }
+                .onFailure { toast(R.string.toast_unknown_error) }
+                .launchIn(lifecycleScope)
+    }
+
+    override fun onVerseTextClicked(translation: String) {
+        selectTranslation(translation)
+    }
+
+    override fun onVerseTextLongClicked(verse: Verse) {
+        lifecycleScope.launch {
+            try {
+                val bookName = readingViewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex)
+                copyToClipBoard(
+                        label = "${verse.text.translationShortName} $bookName",
+                        text = verse.toStringForSharing(bookName)
+                )
+                toast(R.string.toast_verses_copied)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to copy", e)
+                toast(R.string.toast_unknown_error)
+            }
+        }
+    }
+
+    override fun openStrongNumber(strongNumber: String) {
+        startActivity(Navigator.SCREEN_STRONG_NUMBER, StrongNumberActivity.bundle(strongNumber))
+    }
 }

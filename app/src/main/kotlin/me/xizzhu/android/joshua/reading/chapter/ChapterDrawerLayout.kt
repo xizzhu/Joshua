@@ -21,11 +21,9 @@ import android.util.AttributeSet
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 
-class ReadingDrawerLayout : DrawerLayout {
+class ChapterDrawerLayout : DrawerLayout {
     constructor(context: Context) : super(context)
-
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     /**

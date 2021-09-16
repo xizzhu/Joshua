@@ -22,33 +22,38 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@RunWith(RobolectricTestRunner::class)
 class VerseTextItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_verse_text, VerseTextItem(VerseIndex.INVALID, 0, Verse.Text.INVALID, "", {}, {}).viewType)
+        assertEquals(R.layout.item_verse_text, VerseTextItem(VerseIndex.INVALID, 0, Verse.Text.INVALID, "").viewType)
     }
 
     @Test
     fun testTextForDisplay() {
-        val expected = "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth."
-        val actual = VerseTextItem(MockContents.kjvVerses[0].verseIndex, 0, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0], {}, {}).textForDisplay.toString()
-        assertEquals(expected, actual)
+        assertEquals(
+                "KJV, Genesis 1:1\nIn the beginning God created the heaven and the earth.",
+                VerseTextItem(MockContents.kjvVerses[0].verseIndex, 0, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0]).textForDisplay.toString()
+        )
     }
 
     @Test
     fun testTextForDisplayWithFollowingEmptyVerse() {
-        val expected = "KJV, Genesis 1:1-2\nIn the beginning God created the heaven and the earth."
-        val actual = VerseTextItem(MockContents.kjvVerses[0].verseIndex, 1, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0], {}, {}).textForDisplay.toString()
-        assertEquals(expected, actual)
+        assertEquals(
+                "KJV, Genesis 1:1-2\nIn the beginning God created the heaven and the earth.",
+                VerseTextItem(MockContents.kjvVerses[0].verseIndex, 1, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0]).textForDisplay.toString()
+        )
     }
 
     @Test
     fun testTextForDisplayWithInvalidVerse() {
-        assertTrue(VerseTextItem(VerseIndex.INVALID, 0, Verse.Text.INVALID, "", {}, {}).textForDisplay.isEmpty())
-        assertTrue(VerseTextItem(VerseIndex.INVALID, 0, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0], {}, {}).textForDisplay.isEmpty())
-        assertTrue(VerseTextItem(MockContents.kjvVerses[0].verseIndex, 0, Verse.Text.INVALID, "", {}, {}).textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(VerseIndex.INVALID, 0, Verse.Text.INVALID, "").textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(VerseIndex.INVALID, 0, MockContents.kjvVerses[0].text, MockContents.kjvBookNames[0]).textForDisplay.isEmpty())
+        assertTrue(VerseTextItem(MockContents.kjvVerses[0].verseIndex, 0, Verse.Text.INVALID, "").textForDisplay.isEmpty())
     }
 }

@@ -20,27 +20,31 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@RunWith(RobolectricTestRunner::class)
 class StrongNumberItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_strong_number, StrongNumberItem(StrongNumber("", ""), {}).viewType)
+        assertEquals(R.layout.item_strong_number, StrongNumberItem(StrongNumber("", "")).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
-        val expected = "H7225\nbeginning, chief(-est), first(-fruits, part, time), principal thing."
-        val actual = StrongNumberItem(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225")), {}).textForDisplay.toString()
-        assertEquals(expected, actual)
+        assertEquals(
+                "H7225\nbeginning, chief(-est), first(-fruits, part, time), principal thing.",
+                StrongNumberItem(StrongNumber("H7225", MockContents.strongNumberWords.getValue("H7225"))).textForDisplay.toString()
+        )
     }
 
     @Test
     fun testTextForDisplayWithInvalidStrongNumber() {
-        assertTrue(StrongNumberItem(StrongNumber.INVALID, {}).textForDisplay.isEmpty())
-        assertTrue(StrongNumberItem(StrongNumber("random", ""), {}).textForDisplay.isEmpty())
-        assertTrue(StrongNumberItem(StrongNumber("", "random"), {}).textForDisplay.isEmpty())
+        assertTrue(StrongNumberItem(StrongNumber.INVALID).textForDisplay.isEmpty())
+        assertTrue(StrongNumberItem(StrongNumber("random", "")).textForDisplay.isEmpty())
+        assertTrue(StrongNumberItem(StrongNumber("", "random")).textForDisplay.isEmpty())
     }
 }

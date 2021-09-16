@@ -177,7 +177,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
             )
         }
         Log.i(TAG, "Translation saved to database")
-        downloadProgressChannel.send(100)
+        downloadProgressChannel.trySend(100)
     }
 
     suspend fun removeTranslation(translationInfo: TranslationInfo) {

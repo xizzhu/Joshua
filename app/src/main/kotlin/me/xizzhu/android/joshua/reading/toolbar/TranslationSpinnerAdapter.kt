@@ -21,89 +21,79 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.CheckBox
 import android.widget.CompoundButton
-import android.widget.TextView
-import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.databinding.SpinnerDropDownBinding
+import me.xizzhu.android.joshua.databinding.SpinnerSelectedBinding
 
-class TranslationSpinnerAdapter(context: Context, onParallelTranslationRequested: (String) -> Unit,
-                                onParallelTranslationRemoved: (String) -> Unit) : BaseAdapter() {
+class TranslationSpinnerAdapter(
+        context: Context, requestParallelTranslation: (String) -> Unit, removeParallelTranslation: (String) -> Unit
+) : BaseAdapter() {
     private val inflater = LayoutInflater.from(context)
 
     private val checkBoxListener = CompoundButton.OnCheckedChangeListener { checkBox, isChecked ->
         val translationShortName = checkBox.tag as String
         if (isChecked) {
-            onParallelTranslationRequested(translationShortName)
+            requestParallelTranslation(translationShortName)
         } else {
-            onParallelTranslationRemoved(translationShortName)
+            removeParallelTranslation(translationShortName)
         }
     }
 
     private var currentTranslation: String = ""
-    private val parallelTranslations: MutableSet<String> = mutableSetOf()
-    private val translationShortNames: MutableList<String> = mutableListOf()
+    private val parallelTranslations: MutableSet<String> = HashSet()
+    private val downloadedTranslations: MutableList<String> = ArrayList()
 
-    fun setCurrentTranslation(currentTranslation: String) {
+    fun setData(currentTranslation: String, parallelTranslations: List<String>, downloadedTranslations: List<String>) {
         this.currentTranslation = currentTranslation
-        notifyDataSetChanged()
-    }
 
-    fun setTranslationShortNames(translationShortNames: List<String>) {
-        this.translationShortNames.clear()
-        this.translationShortNames.addAll(translationShortNames)
-        notifyDataSetChanged()
-    }
-
-    fun setParallelTranslations(parallelTranslations: List<String>) {
         this.parallelTranslations.clear()
         this.parallelTranslations.addAll(parallelTranslations)
+
+        this.downloadedTranslations.clear()
+        this.downloadedTranslations.addAll(downloadedTranslations)
+
         notifyDataSetChanged()
     }
 
-    override fun getCount(): Int = translationShortNames.size
+    override fun getCount(): Int = downloadedTranslations.size
 
-    override fun getItem(position: Int): String = translationShortNames[position]
+    override fun getItem(position: Int): String = downloadedTranslations[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View =
-            (convertView ?: inflater.inflate(R.layout.spinner_selected, parent, false))
-                    .apply { (this as TextView).text = getItem(position) }
+            (convertView?.let { SpinnerSelectedBinding.bind(it) } ?: SpinnerSelectedBinding.inflate(inflater, parent, false))
+                    .apply { root.text = getItem(position) }
+                    .root
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val view = convertView
-                ?: inflater.inflate(R.layout.spinner_drop_down, parent, false).apply { tag = DropDownViewHolder(this) }
-        with(view.tag as DropDownViewHolder) {
-            val translationShortName = translationShortNames[position]
-            title.text = translationShortName
+        val spinner = convertView?.let { SpinnerDropDownBinding.bind(it) } ?: SpinnerDropDownBinding.inflate(inflater, parent, false)
 
-            // Nullify the listener to avoid unwanted callback when updating isChecked.
-            checkBox.setOnCheckedChangeListener(null)
+        val translationShortName = downloadedTranslations[position]
+        spinner.title.text = translationShortName
 
-            if (position < count - 1) {
-                if (currentTranslation == translationShortName) {
-                    checkBox.isEnabled = false
-                    checkBox.isChecked = true
-                } else {
-                    checkBox.isEnabled = true
-                    checkBox.isChecked = parallelTranslations.contains(translationShortName)
-                    checkBox.tag = translationShortName
+        // Nullify the listener to avoid unwanted callback when updating isChecked.
+        spinner.checkbox.setOnCheckedChangeListener(null)
 
-                    // Sets the listener after isChecked is updated.
-                    checkBox.setOnCheckedChangeListener(checkBoxListener)
-                }
-
-                checkBox.visibility = View.VISIBLE
+        if (position < count - 1) {
+            if (currentTranslation == translationShortName) {
+                spinner.checkbox.isEnabled = false
+                spinner.checkbox.isChecked = true
             } else {
-                // It's the last item ("More"), hide the check box.
-                checkBox.visibility = View.INVISIBLE
-            }
-        }
-        return view
-    }
-}
+                spinner.checkbox.isEnabled = true
+                spinner.checkbox.isChecked = parallelTranslations.contains(translationShortName)
+                spinner.checkbox.tag = translationShortName
 
-private class DropDownViewHolder(rootView: View) {
-    val title: TextView = rootView.findViewById(R.id.title)
-    val checkBox: CheckBox = rootView.findViewById(R.id.checkbox)
+                // Sets the listener after isChecked is updated.
+                spinner.checkbox.setOnCheckedChangeListener(checkBoxListener)
+            }
+
+            spinner.checkbox.visibility = View.VISIBLE
+        } else {
+            // It's the last item ("More"), hide the check box.
+            spinner.checkbox.visibility = View.INVISIBLE
+        }
+
+        return spinner.root
+    }
 }

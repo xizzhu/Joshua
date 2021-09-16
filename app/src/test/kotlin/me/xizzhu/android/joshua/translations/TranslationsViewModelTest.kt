@@ -58,6 +58,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
         translationManager = mockk()
         coEvery { translationManager.availableTranslations() } returns flowOf(listOf(MockContents.kjvTranslationInfo))
         coEvery { translationManager.downloadedTranslations() } returns flowOf(listOf(MockContents.cuvDownloadedTranslationInfo))
+        coEvery { translationManager.reload(any()) } returns Unit
 
         settingsManager = mockk()
 
@@ -83,7 +84,6 @@ class TranslationsViewModelTest : BaseUnitTest() {
     fun `test refreshTranslations without available and downloaded`() = runBlocking {
         coEvery { translationManager.availableTranslations() } returns flowOf(emptyList())
         coEvery { translationManager.downloadedTranslations() } returns flowOf(emptyList())
-        coEvery { translationManager.reload(true) } returns Unit
 
         translationsViewModel.refreshTranslations(true)
         assertTrue(translationsViewModel.translations().first() is BaseViewModel.ViewData.Failure)
@@ -92,7 +92,6 @@ class TranslationsViewModelTest : BaseUnitTest() {
     @Test
     fun `test refreshTranslations without available`() = runBlocking {
         coEvery { translationManager.availableTranslations() } returns flowOf(emptyList())
-        coEvery { translationManager.reload(true) } returns Unit
 
         translationsViewModel.refreshTranslations(true)
 
@@ -106,7 +105,6 @@ class TranslationsViewModelTest : BaseUnitTest() {
     @Test
     fun `test refreshTranslations without downloaded`() = runBlocking {
         coEvery { translationManager.downloadedTranslations() } returns flowOf(emptyList())
-        coEvery { translationManager.reload(true) } returns Unit
 
         translationsViewModel.refreshTranslations(true)
 
@@ -122,7 +120,6 @@ class TranslationsViewModelTest : BaseUnitTest() {
     fun `test refreshTranslations`() = runBlocking {
         coEvery { translationManager.availableTranslations() } returns flowOf(listOf(MockContents.kjvTranslationInfo, MockContents.msgTranslationInfo))
         coEvery { translationManager.downloadedTranslations() } returns flowOf(listOf(MockContents.bbeDownloadedTranslationInfo, MockContents.cuvDownloadedTranslationInfo))
-        coEvery { translationManager.reload(true) } returns Unit
 
         translationsViewModel.refreshTranslations(true)
 

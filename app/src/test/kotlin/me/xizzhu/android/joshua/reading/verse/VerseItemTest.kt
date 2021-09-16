@@ -16,8 +16,6 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SmallTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -25,24 +23,28 @@ import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(AndroidJUnit4::class)
-@SmallTest
+@RunWith(RobolectricTestRunner::class)
 class VerseItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_verse, VerseItem(Verse.INVALID, 0, false, 0, false, {}, {}, {}, { _, _ -> }, { _, _ -> }).viewType)
+        assertEquals(R.layout.item_verse, VerseItem(Verse.INVALID, 0, false, 0, false).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
-        assertEquals("1:1 ${MockContents.kjvVerses[0].text.text}",
-                VerseItem(MockContents.kjvVerses[0], 0, false, 0, false, {}, {}, {}, { _, _ -> }, { _, _ -> }).textForDisplay.toString())
+        assertEquals(
+                "1:1 ${MockContents.kjvVerses[0].text.text}",
+                VerseItem(MockContents.kjvVerses[0], 0, false, 0, false).textForDisplay.toString()
+        )
     }
 
     @Test
     fun testTextForDisplayWithParallelTranslations() {
-        assertEquals("${MockContents.kjvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].text.text}\n\n${MockContents.cuvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].parallel[0].text}",
-                VerseItem(MockContents.kjvVersesWithCuvParallel[0], 0, false, 0, false, {}, {}, {}, { _, _ -> }, { _, _ -> }).textForDisplay.toString())
+        assertEquals(
+                "${MockContents.kjvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].text.text}\n\n${MockContents.cuvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].parallel[0].text}",
+                VerseItem(MockContents.kjvVersesWithCuvParallel[0], 0, false, 0, false).textForDisplay.toString()
+        )
     }
 }

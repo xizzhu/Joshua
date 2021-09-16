@@ -56,24 +56,36 @@ class TranslationsViewModel @Inject constructor(
     private val translations: MutableStateFlow<ViewData<TranslationsViewData>?> = MutableStateFlow(null)
 
     init {
-        viewModelScope.launch { loadTranslations() }
+        refreshTranslations(false)
     }
 
-    private suspend fun loadTranslations() {
-        val items: ArrayList<BaseItem> = ArrayList()
-        val availableTranslations = translationManager.availableTranslations().first().sortedWith(translationComparator)
-        val downloadedTranslations = translationManager.downloadedTranslations().first().sortedWith(translationComparator)
-        if (availableTranslations.isEmpty() && downloadedTranslations.isEmpty()) {
-            translations.value = ViewData.Failure(IllegalStateException("No available nor downloaded translation"))
-            return
+    fun selectTranslation(translationToSelect: TranslationInfo): Flow<ViewData<Unit>> = viewData {
+        bibleReadingManager.saveCurrentTranslation(translationToSelect.shortName)
+    }.onFailure { Log.e(tag, "Failed to select translation", it) }
+
+    fun translations(): Flow<ViewData<TranslationsViewData>> = translations.filterNotNull()
+
+    fun refreshTranslations(forceRefresh: Boolean) {
+        viewModelScope.launch {
+            translations.value = ViewData.Loading()
+            translationManager.reload(forceRefresh)
+
+            // After the refresh, if no change is detected, nothing will be emitted, therefore we need to manually load here.
+            val items: ArrayList<BaseItem> = ArrayList()
+            val availableTranslations = translationManager.availableTranslations().first().sortedWith(translationComparator)
+            val downloadedTranslations = translationManager.downloadedTranslations().first().sortedWith(translationComparator)
+            if (availableTranslations.isEmpty() && downloadedTranslations.isEmpty()) {
+                translations.value = ViewData.Failure(IllegalStateException("No available nor downloaded translation"))
+                return@launch
+            }
+            val currentTranslation = bibleReadingManager.currentTranslation().first()
+            items.addAll(downloadedTranslations.toItems(currentTranslation))
+            if (availableTranslations.isNotEmpty()) {
+                items.add(TitleItem(application.getString(R.string.header_available_translations), false))
+                items.addAll(availableTranslations.toItems(currentTranslation))
+            }
+            translations.value = ViewData.Success(TranslationsViewData(items))
         }
-        val currentTranslation = bibleReadingManager.currentTranslation().first()
-        items.addAll(downloadedTranslations.toItems(currentTranslation))
-        if (availableTranslations.isNotEmpty()) {
-            items.add(TitleItem(application.getString(R.string.header_available_translations), false))
-            items.addAll(availableTranslations.toItems(currentTranslation))
-        }
-        translations.value = ViewData.Success(TranslationsViewData(items))
     }
 
     private fun List<TranslationInfo>.toItems(currentTranslation: String): List<BaseItem> {
@@ -88,21 +100,6 @@ class TranslationsViewModel @Inject constructor(
             items.add(TranslationItem(translationInfo, translationInfo.downloaded && translationInfo.shortName == currentTranslation))
         }
         return items
-    }
-
-    fun selectTranslation(translationToSelect: TranslationInfo): Flow<ViewData<Unit>> = viewData {
-        bibleReadingManager.saveCurrentTranslation(translationToSelect.shortName)
-    }.onFailure { Log.e(tag, "Failed to select translation and close translation management activity", it) }
-
-    fun translations(): Flow<ViewData<TranslationsViewData>> = translations.filterNotNull()
-
-    fun refreshTranslations(forceRefresh: Boolean) {
-        viewModelScope.launch {
-            translations.value = ViewData.Loading()
-            translationManager.reload(forceRefresh)
-            // After the refresh, if no change is detected, nothing will be emitted, therefore we need to manually load here.
-            loadTranslations()
-        }
     }
 
     fun downloadTranslation(translationToDownload: TranslationInfo): Flow<ViewData<Int>> =

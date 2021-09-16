@@ -21,23 +21,29 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.databinding.ItemSimpleVerseBinding
 import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int,
-                           private val followingEmptyVerseCount: Int, @ColorInt var highlightColor: Int,
-                           val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit, var selected: Boolean = false)
-    : BaseItem(R.layout.item_simple_verse, { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }) {
+class SimpleVerseItem(
+        val verse: Verse, private val totalVerseCount: Int, private val followingEmptyVerseCount: Int,
+        @ColorInt var highlightColor: Int, var selected: Boolean = false
+) : BaseItem(R.layout.item_simple_verse, { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }) {
     companion object {
         private val STRING_BUILDER = StringBuilder()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+    }
+
+    interface Callback {
+        fun onVerseClicked(verse: Verse)
+
+        fun onVerseLongClicked(verse: Verse)
     }
 
     val indexForDisplay: CharSequence by lazy {
@@ -80,39 +86,40 @@ data class SimpleVerseItem(val verse: Verse, private val totalVerseCount: Int,
 }
 
 private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<SimpleVerseItem>(inflater.inflate(R.layout.item_simple_verse, parent, false)) {
+    : BaseViewHolder<SimpleVerseItem>(ItemSimpleVerseBinding.inflate(inflater, parent, false).root) {
     private val resources = itemView.resources
-    private val index = itemView.findViewById(R.id.index) as TextView
-    private val text = itemView.findViewById(R.id.text) as TextView
-    private val divider = itemView.findViewById(R.id.divider) as View
-
-    init {
-        itemView.setOnClickListener { item?.let { it.onClicked(it.verse) } }
-        itemView.setOnLongClickListener {
-            item?.let { it.onLongClicked(it.verse) }
-            return@setOnLongClickListener true
+    private val viewBinding = ItemSimpleVerseBinding.bind(itemView).apply {
+        root.setOnClickListener { item?.let { callback().onVerseClicked(it.verse) } }
+        root.setOnLongClickListener {
+            return@setOnLongClickListener item?.let {
+                callback().onVerseLongClicked(it.verse)
+                true
+            } ?: false
         }
     }
+
+    private fun callback(): SimpleVerseItem.Callback = (itemView.activity as? SimpleVerseItem.Callback)
+            ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement SimpleVerseItem.Callback")
 
     override fun bind(settings: Settings, item: SimpleVerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {
             val textColor = if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources)
             val textSize = settings.getBodyTextSize(resources)
 
-            text.text = item.textForDisplay
-            text.setTextColor(textColor)
-            text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+            viewBinding.text.text = item.textForDisplay
+            viewBinding.text.setTextColor(textColor)
+            viewBinding.text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
 
             if (item.verse.parallel.isEmpty()) {
-                index.text = item.indexForDisplay
-                index.setTextColor(textColor)
-                index.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize * 0.85F)
-                index.visibility = View.VISIBLE
+                viewBinding.index.text = item.indexForDisplay
+                viewBinding.index.setTextColor(textColor)
+                viewBinding.index.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize * 0.85F)
+                viewBinding.index.visibility = View.VISIBLE
 
-                divider.visibility = View.GONE
+                viewBinding.divider.visibility = View.GONE
             } else {
-                index.visibility = View.GONE
-                divider.visibility = View.VISIBLE
+                viewBinding.index.visibility = View.GONE
+                viewBinding.divider.visibility = View.VISIBLE
             }
 
             itemView.isSelected = item.selected
@@ -124,20 +131,20 @@ private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
                         item.selected = true
                         itemView.isSelected = true
                         if (settings.nightModeOn) {
-                            text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
+                            viewBinding.text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
                         }
                     }
                     VerseUpdate.VERSE_DESELECTED -> {
                         item.selected = false
                         itemView.isSelected = false
                         if (settings.nightModeOn) {
-                            text.animateTextColor(settings.getPrimaryTextColor(resources))
+                            viewBinding.text.animateTextColor(settings.getPrimaryTextColor(resources))
                         }
                     }
                     VerseUpdate.HIGHLIGHT_UPDATED -> {
                         item.highlightColor = update.data as Int
                         item.textForDisplay = ""
-                        text.text = item.textForDisplay
+                        viewBinding.text.text = item.textForDisplay
                     }
                 }
             }

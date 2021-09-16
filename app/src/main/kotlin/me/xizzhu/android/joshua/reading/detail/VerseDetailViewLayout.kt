@@ -21,53 +21,43 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.util.AttributeSet
-import android.view.View
+import android.view.LayoutInflater
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.tabs.TabLayout
+import androidx.annotation.IntDef
 import com.google.android.material.tabs.TabLayoutMediator
-import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.reading.VerseDetailRequest
-import me.xizzhu.android.joshua.reading.detail.pages.VerseDetailPagerAdapter
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.databinding.InnerVerseDetailViewBinding
+import me.xizzhu.android.joshua.reading.VerseDetailViewData
 import me.xizzhu.android.joshua.ui.*
 
 class VerseDetailViewLayout : FrameLayout {
     companion object {
+        const val VERSE_DETAIL_VERSES = 0
+        const val VERSE_DETAIL_NOTE = 1
+        const val VERSE_DETAIL_STRONG_NUMBER = 2
+
+        @IntDef(VERSE_DETAIL_VERSES, VERSE_DETAIL_NOTE, VERSE_DETAIL_STRONG_NUMBER)
+        @Retention(AnnotationRetention.SOURCE)
+        annotation class VerseDetail
+
         private val ON_COLOR_FILTER = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
         private val OFF_COLOR_FILTER = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
     }
 
     constructor(context: Context) : super(context)
-
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     private val adapter = VerseDetailPagerAdapter(context)
-    private val header: LinearLayout
-    private val tabLayout: TabLayout
-    private val viewPager: ViewPager2
-    private val highlight: ImageView
-    private val bookmark: ImageView
-
-    init {
-        View.inflate(context, R.layout.inner_verse_detail_view, this)
-        header = findViewById(R.id.header)
-        viewPager = findViewById<ViewPager2>(R.id.view_pager).apply { adapter = this@VerseDetailViewLayout.adapter }
-        tabLayout = findViewById<TabLayout>(R.id.tab_layout).apply {
-            TabLayoutMediator(this, viewPager) { tab, position ->
-                tab.text = adapter.pageTitle(position)
-            }.attach()
-        }
-        highlight = findViewById(R.id.highlight)
-        bookmark = findViewById(R.id.bookmark)
+    private val viewBinding = InnerVerseDetailViewBinding.inflate(LayoutInflater.from(context), this).apply {
+        viewPager.adapter = adapter
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = adapter.pageTitle(position)
+        }.attach()
 
         viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
@@ -77,14 +67,30 @@ class VerseDetailViewLayout : FrameLayout {
         })
     }
 
-    fun initialize(onClicked: () -> Boolean, onBookmarkClicked: () -> Unit,
-                   onHighlightClicked: () -> Unit, onNoteUpdated: (String) -> Unit,
-                   onNoStrongNumberClicked: () -> Unit, hide: Boolean) {
+    var verseDetail: VerseDetailViewData?
+        get() = adapter.verseDetail
+        set(value) {
+            adapter.verseDetail = value
+            viewBinding.bookmark.colorFilter = if (verseDetail?.bookmarked == true) ON_COLOR_FILTER else OFF_COLOR_FILTER
+            viewBinding.highlight.colorFilter = if (verseDetail?.highlightColor != Highlight.COLOR_NONE) ON_COLOR_FILTER else OFF_COLOR_FILTER
+        }
+
+    fun initialize(
+            onClicked: () -> Boolean, updateBookmark: (VerseIndex, Boolean) -> Unit,
+            updateHighlight: (VerseIndex, Int) -> Unit, updateNote: (VerseIndex, String) -> Unit,
+            requestStrongNumber: () -> Unit, hide: Boolean
+    ) {
         setOnClickListener { onClicked() }
-        bookmark.setOnClickListener { onBookmarkClicked() }
-        highlight.setOnClickListener { onHighlightClicked() }
-        adapter.onNoteUpdated = onNoteUpdated
-        adapter.onNoStrongNumberClicked = onNoStrongNumberClicked
+        viewBinding.bookmark.setOnClickListener {
+            adapter.verseDetail?.let { updateBookmark(it.verseIndex, it.bookmarked) }
+        }
+        viewBinding.highlight.setOnClickListener {
+            adapter.verseDetail?.let { updateHighlight(it.verseIndex, it.highlightColor) }
+        }
+        adapter.initialize(
+                updateNote = updateNote,
+                requestStrongNumber = requestStrongNumber
+        )
 
         if (hide) post { hide() }
     }
@@ -92,29 +98,50 @@ class VerseDetailViewLayout : FrameLayout {
     fun setSettings(settings: Settings) {
         adapter.settings = settings
 
-        header.setBackgroundColor(if (settings.nightModeOn) 0xFF222222.toInt() else 0xFFEEEEEE.toInt())
-        viewPager.setBackgroundColor(settings.getBackgroundColor())
-        resources.let { tabLayout.setTabTextColors(settings.getSecondaryTextColor(it), settings.getPrimaryTextColor(it)) }
+        viewBinding.header.setBackgroundColor(if (settings.nightModeOn) 0xFF222222.toInt() else 0xFFEEEEEE.toInt())
+        viewBinding.viewPager.setBackgroundColor(settings.getBackgroundColor())
+        resources.let { viewBinding.tabLayout.setTabTextColors(settings.getSecondaryTextColor(it), settings.getPrimaryTextColor(it)) }
     }
 
-    fun setVerseDetail(verseDetail: VerseDetail) {
-        adapter.verseDetail = verseDetail
-        bookmark.colorFilter = if (verseDetail.bookmarked) ON_COLOR_FILTER else OFF_COLOR_FILTER
-        highlight.colorFilter = if (verseDetail.highlightColor != Highlight.COLOR_NONE) ON_COLOR_FILTER else OFF_COLOR_FILTER
+    fun setBookmarked(bookmarked: Boolean) {
+        adapter.verseDetail?.bookmarked = bookmarked
+        viewBinding.bookmark.colorFilter = if (bookmarked) ON_COLOR_FILTER else OFF_COLOR_FILTER
     }
 
-    fun show(@VerseDetailRequest.Companion.Content content: Int) {
+    fun setHighlightColor(@Highlight.Companion.AvailableColor highlightColor: Int) {
+        adapter.verseDetail?.highlightColor = highlightColor
+        viewBinding.highlight.colorFilter = if (highlightColor != Highlight.COLOR_NONE) ON_COLOR_FILTER else OFF_COLOR_FILTER
+    }
+
+    fun setNote(note: String) {
+        adapter.verseDetail?.note = note
+    }
+
+    fun setStrongNumbers(strongNumbers: List<StrongNumberItem>) {
+        adapter.verseDetail?.strongNumberItems = strongNumbers
+        adapter.notifyItemChanged(VerseDetailPagerAdapter.PAGE_STRONG_NUMBER)
+    }
+
+    fun show(@VerseDetail verseDetail: Int) {
         animate().translationY(0.0F)
-        viewPager.currentItem = when (content) {
-            VerseDetailRequest.VERSES -> VerseDetailPagerAdapter.PAGE_VERSES
-            VerseDetailRequest.NOTE -> VerseDetailPagerAdapter.PAGE_NOTE
-            VerseDetailRequest.STRONG_NUMBER -> VerseDetailPagerAdapter.PAGE_STRONG_NUMBER
+        viewBinding.viewPager.currentItem = when (verseDetail) {
+            VERSE_DETAIL_VERSES -> VerseDetailPagerAdapter.PAGE_VERSES
+            VERSE_DETAIL_NOTE -> VerseDetailPagerAdapter.PAGE_NOTE
+            VERSE_DETAIL_STRONG_NUMBER -> VerseDetailPagerAdapter.PAGE_STRONG_NUMBER
             else -> 0
         }
     }
 
-    fun hide() {
+    /**
+     * @return true if verse detail view was open, or false otherwise
+     */
+    fun hide(): Boolean {
         animate().translationY(height.toFloat())
         hideKeyboard()
+
+        return adapter.verseDetail?.let {
+            adapter.verseDetail = null
+            true
+        } ?: false
     }
 }

@@ -28,14 +28,19 @@ import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class VerseTextItem(val verseIndex: VerseIndex, private val followingEmptyVerseCount: Int,
-                         val verseText: Verse.Text, private val bookName: String,
-                         val onClicked: (String) -> Unit, val onLongClicked: (Verse) -> Unit)
-    : BaseItem(R.layout.item_verse_text, { inflater, parent -> VerseTextItemViewHolder(inflater, parent) }) {
+class VerseTextItem(
+        val verseIndex: VerseIndex, followingEmptyVerseCount: Int, val verseText: Verse.Text, private val bookName: String
+) : BaseItem(R.layout.item_verse_text, { inflater, parent -> VerseTextItemViewHolder(inflater, parent) }) {
     companion object {
         private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
         private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+    }
+
+    interface Callback {
+        fun onVerseTextClicked(translation: String)
+
+        fun onVerseTextLongClicked(verse: Verse)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -64,12 +69,17 @@ private class VerseTextItemViewHolder(inflater: LayoutInflater, parent: ViewGrou
     private val text: TextView = itemView.findViewById(R.id.text)
 
     init {
-        itemView.setOnClickListener { item?.let { it.onClicked(it.verseText.translationShortName) } }
+        itemView.setOnClickListener { item?.let { callback().onVerseTextClicked(it.verseText.translationShortName) } }
         itemView.setOnLongClickListener {
-            item?.let { it.onLongClicked(Verse(it.verseIndex, it.verseText, emptyList())) }
-            return@setOnLongClickListener true
+            return@setOnLongClickListener item?.let { item ->
+                callback().onVerseTextLongClicked(Verse(item.verseIndex, item.verseText, emptyList()))
+                true
+            } ?: false
         }
     }
+
+    private fun callback(): VerseTextItem.Callback = (itemView.activity as? VerseTextItem.Callback)
+            ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement VerseTextItem.Callback")
 
     override fun bind(settings: Settings, item: VerseTextItem, payloads: List<Any>) {
         with(text) {
