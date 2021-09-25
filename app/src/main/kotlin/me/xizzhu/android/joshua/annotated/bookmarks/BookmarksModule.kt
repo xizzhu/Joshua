@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.annotated.bookmarks
 
 import android.app.Activity
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.Module
@@ -24,12 +25,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.scopes.ActivityScoped
-import me.xizzhu.android.joshua.Navigator
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesViewModel
-import me.xizzhu.android.joshua.annotated.BaseAnnotatedVersesPresenter
-import me.xizzhu.android.joshua.annotated.bookmarks.list.BookmarksListPresenter
-import me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbarPresenter
+import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -43,29 +39,21 @@ object BookmarksModule {
 
     @ActivityScoped
     @Provides
-    fun provideToolbarPresenter(bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>,
-                                bookmarksActivity: BookmarksActivity): AnnotatedVersesToolbarPresenter<Bookmark, BookmarksActivity> =
-            AnnotatedVersesToolbarPresenter(R.string.title_bookmarks, bookmarksViewModel, bookmarksActivity)
-
-    @ActivityScoped
-    @Provides
-    fun provideBookmarksListPresenter(navigator: Navigator, bookmarksViewModel: BaseAnnotatedVersesViewModel<Bookmark>,
-                                      bookmarksActivity: BookmarksActivity): BaseAnnotatedVersesPresenter<Bookmark, BookmarksActivity> =
-            BookmarksListPresenter(navigator, bookmarksViewModel, bookmarksActivity)
-
-    @ActivityScoped
-    @Provides
-    fun provideBookmarksViewModel(bookmarksActivity: BookmarksActivity,
-                                  bibleReadingManager: BibleReadingManager,
-                                  bookmarksManager: VerseAnnotationManager<Bookmark>,
-                                  settingsManager: SettingsManager): BaseAnnotatedVersesViewModel<Bookmark> {
+    fun provideBookmarksViewModel(
+            bookmarksActivity: BookmarksActivity,
+            bibleReadingManager: BibleReadingManager,
+            bookmarksManager: VerseAnnotationManager<Bookmark>,
+            settingsManager: SettingsManager,
+            application: Application
+    ): AnnotatedVersesViewModel<Bookmark> {
         val factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(BookmarksViewModel::class.java)) {
-                    return BookmarksViewModel(bibleReadingManager, bookmarksManager, settingsManager) as T
+                    return BookmarksViewModel(bibleReadingManager, bookmarksManager, settingsManager, application) as T
                 }
 
                 throw IllegalArgumentException("Unsupported model class - $modelClass")
+
             }
         }
         return ViewModelProvider(bookmarksActivity, factory).get(BookmarksViewModel::class.java)

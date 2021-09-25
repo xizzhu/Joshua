@@ -25,15 +25,17 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class ReadingProgressSummaryItem(val continuousReadingDays: Int, val chaptersRead: Int,
-                                      val finishedBooks: Int, val finishedOldTestament: Int,
-                                      val finishedNewTestament: Int)
-    : BaseItem(R.layout.item_reading_progress_header, { inflater, parent -> ReadingProgressSummaryItemViewHolder(inflater, parent) })
+class ReadingProgressSummaryItem(
+        val continuousReadingDays: Int, val chaptersRead: Int, val finishedBooks: Int,
+        val finishedOldTestament: Int, val finishedNewTestament: Int
+) : BaseItem(R.layout.item_reading_progress_header, { inflater, parent -> ReadingProgressSummaryItemViewHolder(inflater, parent) })
 
 private class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressSummaryItem>(inflater.inflate(R.layout.item_reading_progress_header, parent, false)) {
@@ -68,12 +70,16 @@ private class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, par
     }
 }
 
-data class ReadingProgressDetailItem(val bookName: String, val bookIndex: Int,
-                                     val chaptersRead: List<Boolean>, val chaptersReadCount: Int,
-                                     val onBookClicked: (Int, Boolean) -> Unit,
-                                     val onChapterClicked: (Int, Int) -> Unit,
-                                     var expanded: Boolean)
-    : BaseItem(R.layout.item_reading_progress, { inflater, parent -> ReadingProgressDetailItemViewHolder(inflater, parent) })
+class ReadingProgressDetailItem(
+        val bookName: String, val bookIndex: Int,
+        val chaptersRead: List<Boolean>, val chaptersReadCount: Int,
+        val onBookClicked: (Int, Boolean) -> Unit,
+        var expanded: Boolean
+) : BaseItem(R.layout.item_reading_progress, { inflater, parent -> ReadingProgressDetailItemViewHolder(inflater, parent) }) {
+    interface Callback {
+        fun openVerse(verseToOpen: VerseIndex)
+    }
+}
 
 private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<ReadingProgressDetailItem>(inflater.inflate(R.layout.item_reading_progress, parent, false)) {
@@ -88,7 +94,12 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
     private val chapters: LinearLayout = itemView.findViewById(R.id.chapters)
 
     private val onClickListener: View.OnClickListener = View.OnClickListener { v ->
-        item?.let { it.onChapterClicked(it.bookIndex, v.tag as Int) }
+        item?.let {
+            item?.let { item ->
+                (itemView.activity as? ReadingProgressDetailItem.Callback)?.openVerse(VerseIndex(item.bookIndex, v.tag as Int, 0))
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement ReadingProgressDetailItem.Callback")
+            }
+        }
     }
 
     private lateinit var settings: Settings

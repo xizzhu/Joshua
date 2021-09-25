@@ -50,6 +50,10 @@ android {
         testInstrumentationRunner = Dependencies.AndroidX.Test.runner
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     sourceSets {
         getByName("main").java.srcDirs("src/main/kotlin")
         getByName("debug").java.srcDirs("src/debug/kotlin")
@@ -141,6 +145,8 @@ dependencies {
     testImplementation(Dependencies.Kotlin.test)
     testImplementation(Dependencies.Kotlin.coroutinesTest)
     testImplementation(Dependencies.Mockito.mockito)
+    testImplementation(Dependencies.Mockk.mockk)
+    testImplementation(Dependencies.Robolectric.robolectric)
 
     androidTestImplementation(Dependencies.Kotlin.test)
     androidTestImplementation(Dependencies.Kotlin.coroutinesTest)

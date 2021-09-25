@@ -53,13 +53,11 @@
     <string name="dialog_search_error">Error occurred during search, retry?</string>
     <string name="dialog_verse_selection_error">Failed to select the verse, retry?</string>
     <string name="dialog_navigation_error">Failed to navigate, retry?</string>
+    <string name="dialog_save_sort_order_error">Failed to save sort order, retry?</string>
     <string name="dialog_load_reading_progress_error">Failed to load reading progress, retry?</string>
     <string name="dialog_load_strong_number_list_error">Failed to load Strong\'s numbers, retry?</string>
     <string name="dialog_load_annotated_verses_error">Failed to load, retry?</string>
-    <string name="dialog_update_settings_error">Failed to update settings, retry?</string>
     <string name="dialog_load_verse_detail_error">Failed to load verse detail, retry?</string>
-    <string name="dialog_backup_error">Failed to backup, retry?</string>
-    <string name="dialog_restore_error">Failed to restore, retry?</string>
 
     <!--
     %1$s: month, %2$d: date, %3$d: year
@@ -67,6 +65,12 @@
     <string name="text_date">%1$s %2$d, %3$d</string>
     <string name="text_date_without_year">%1$s %2$d</string>
     <string name="text_pick_highlight_color">Select highlight color</string>
+    <string name="text_highlight_color_none">None</string>
+    <string name="text_highlight_color_yellow">Yellow</string>
+    <string name="text_highlight_color_pink">Pink</string>
+    <string name="text_highlight_color_purple">Purple</string>
+    <string name="text_highlight_color_green">Green</string>
+    <string name="text_highlight_color_blue">Blue</string>
 
     <string name="text_restore_from">Restore from</string>
     <string name="text_share_with">Share with</string>

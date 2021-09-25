@@ -4,6 +4,8 @@ CHANGELOG
 #### Next release
 - Changes:
   - Remove coveralls plugin
+- Bug fixes:
+  - Should run backup & restore on IO thread
 - Update dependencies:
   - Kotlin to 1.5.30
   - AndroidX Activity to 1.3.1

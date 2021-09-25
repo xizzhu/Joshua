@@ -16,102 +16,130 @@
 
 package me.xizzhu.android.joshua.settings
 
-import kotlinx.coroutines.flow.flowOf
+import android.app.Application
+import android.content.ContentResolver
+import android.net.Uri
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.BackupManager
-import me.xizzhu.android.joshua.core.Highlight
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.mockito.Mock
-import org.mockito.Mockito.*
+import java.io.InputStream
+import java.io.OutputStream
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SettingsViewModelTest : BaseUnitTest() {
-    @Mock
-    private lateinit var settingsManager: SettingsManager
-
-    @Mock
+    private lateinit var uri: Uri
+    private lateinit var inputStream: InputStream
+    private lateinit var outputStream: OutputStream
+    private lateinit var resolver: ContentResolver
     private lateinit var backupManager: BackupManager
-
+    private lateinit var settingsManager: SettingsManager
+    private lateinit var application: Application
     private lateinit var settingsViewModel: SettingsViewModel
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        `when`(settingsManager.settings()).thenReturn(flowOf(Settings.DEFAULT))
-        settingsViewModel = SettingsViewModel(settingsManager, backupManager)
+        uri = mockk()
+        inputStream = mockk<InputStream>().apply { every { close() } returns Unit }
+        outputStream = mockk<OutputStream>().apply { every { close() } returns Unit }
+        resolver = mockk<ContentResolver>().apply {
+            every { openInputStream(uri) } returns inputStream
+            every { openOutputStream(uri) } returns outputStream
+        }
+        backupManager = mockk<BackupManager>().apply {
+            coEvery { backup(outputStream) } returns Unit
+            coEvery { restore(inputStream) } returns Unit
+        }
+        settingsManager = mockk()
+        every { settingsManager.settings() } returns emptyFlow()
+        application = mockk<Application>().apply { every { contentResolver } returns resolver }
+
+        settingsViewModel = SettingsViewModel(backupManager, settingsManager, application)
     }
 
     @Test
-    fun testSaveFontSizeScale() = runBlocking {
-        settingsViewModel.saveFontSizeScale(Settings.DEFAULT.fontSizeScale)
-        verify(settingsManager, never()).saveSettings(any())
-
-        val updatedSettings = Settings.DEFAULT.copy(fontSizeScale = 1)
-        settingsViewModel.saveFontSizeScale(updatedSettings.fontSizeScale)
-        verify(settingsManager, times(1)).saveSettings(updatedSettings)
+    fun `test backup with null uri`(): Unit = runBlocking {
+        val actual = settingsViewModel.backup(null).toList()
+        assertEquals(1, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Failure)
     }
 
     @Test
-    fun testSaveKeepScreenOn() = runBlocking {
-        settingsViewModel.saveKeepScreenOn(Settings.DEFAULT.keepScreenOn)
-        verify(settingsManager, never()).saveSettings(any())
+    fun `test backup with error`(): Unit = runBlocking {
+        val ex = RuntimeException("Random")
+        every { application.contentResolver } throws ex
 
-        val updatedSettings = Settings.DEFAULT.copy(keepScreenOn = false)
-        settingsViewModel.saveKeepScreenOn(updatedSettings.keepScreenOn)
-        verify(settingsManager, times(1)).saveSettings(updatedSettings)
+        val actual = settingsViewModel.backup(mockk()).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertEquals(ex, (actual[1] as BaseViewModel.ViewData.Failure).throwable)
     }
 
     @Test
-    fun testSaveNightModeOn() = runBlocking {
-        settingsViewModel.saveNightModeOn(Settings.DEFAULT.nightModeOn)
-        verify(settingsManager, never()).saveSettings(any())
+    fun `test backup with error from interactor`(): Unit = runBlocking {
+        val ex = RuntimeException("Random")
+        coEvery { backupManager.backup(outputStream) } throws ex
 
-        val updatedSettings = Settings.DEFAULT.copy(nightModeOn = true)
-        settingsViewModel.saveNightModeOn(updatedSettings.nightModeOn)
-        verify(settingsManager, times(1)).saveSettings(updatedSettings)
+        val actual = settingsViewModel.backup(uri).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertEquals(ex, (actual[1] as BaseViewModel.ViewData.Failure).throwable)
     }
 
     @Test
-    fun testSaveSimpleReadingModeOn() = runBlocking {
-        settingsViewModel.saveSimpleReadingModeOn(Settings.DEFAULT.simpleReadingModeOn)
-        verify(settingsManager, never()).saveSettings(any())
-
-        val updatedSettings = Settings.DEFAULT.copy(simpleReadingModeOn = true)
-        settingsViewModel.saveSimpleReadingModeOn(updatedSettings.simpleReadingModeOn)
-        verify(settingsManager, times(1)).saveSettings(updatedSettings)
+    fun `test backup`(): Unit = runBlocking {
+        val actual = settingsViewModel.backup(uri).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertEquals(R.string.toast_backed_up, (actual[1] as BaseViewModel.ViewData.Success<Int>).data)
     }
 
     @Test
-    fun testSaveHideSearchButton() = runBlocking {
-        settingsViewModel.saveHideSearchButton(Settings.DEFAULT.hideSearchButton)
-        verify(settingsManager, never()).saveSettings(any())
-
-        val updatedSettings = Settings.DEFAULT.copy(hideSearchButton = true)
-        settingsViewModel.saveHideSearchButton(updatedSettings.hideSearchButton)
-        verify(settingsManager, times(1)).saveSettings(updatedSettings)
+    fun `test restore with null uri`(): Unit = runBlocking {
+        val actual = settingsViewModel.restore(null).toList()
+        assertEquals(1, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Failure)
     }
 
     @Test
-    fun testSaveConsolidateVersesForSharing() = runBlocking {
-        settingsViewModel.saveConsolidateVersesForSharing(Settings.DEFAULT.consolidateVersesForSharing)
-        verify(settingsManager, never()).saveSettings(any())
+    fun `test restore with error`(): Unit = runBlocking {
+        val ex = RuntimeException("Random")
+        every { application.contentResolver } throws ex
 
-        val updatedSettings = Settings.DEFAULT.copy(consolidateVersesForSharing = true)
-        settingsViewModel.saveConsolidateVersesForSharing(updatedSettings.consolidateVersesForSharing)
-        verify(settingsManager, times(1)).saveSettings(updatedSettings)
+        val actual = settingsViewModel.restore(mockk()).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertEquals(ex, (actual[1] as BaseViewModel.ViewData.Failure).throwable)
     }
 
     @Test
-    fun testSaveDefaultHighlightColor() = runBlocking {
-        settingsViewModel.saveDefaultHighlightColor(Settings.DEFAULT.defaultHighlightColor)
-        verify(settingsManager, never()).saveSettings(any())
+    fun `test restore with error from interactor`(): Unit = runBlocking {
+        val ex = RuntimeException("Random")
+        coEvery { backupManager.restore(inputStream) } throws ex
 
-        val updatedSettings = Settings.DEFAULT.copy(defaultHighlightColor = Highlight.COLOR_PURPLE)
-        settingsViewModel.saveDefaultHighlightColor(updatedSettings.defaultHighlightColor)
-        verify(settingsManager, times(1)).saveSettings(updatedSettings)
+        val actual = settingsViewModel.restore(uri).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertEquals(ex, (actual[1] as BaseViewModel.ViewData.Failure).throwable)
+    }
+
+    @Test
+    fun `test restore`(): Unit = runBlocking {
+        val actual = settingsViewModel.restore(uri).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertEquals(R.string.toast_restored, (actual[1] as BaseViewModel.ViewData.Success<Int>).data)
     }
 }

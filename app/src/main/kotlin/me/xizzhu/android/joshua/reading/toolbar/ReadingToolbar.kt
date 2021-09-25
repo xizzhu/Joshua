@@ -26,10 +26,10 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 
 class ReadingToolbar : Toolbar {
+    private var spinnerPosition = -1
+
     constructor(context: Context) : super(context)
-
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
@@ -37,17 +37,28 @@ class ReadingToolbar : Toolbar {
         inflateMenu(R.menu.menu_bible_reading)
     }
 
-    fun initialize(onParallelTranslationRequested: (String) -> Unit,
-                   onParallelTranslationRemoved: (String) -> Unit,
-                   onTranslationSelected: (String) -> Unit,
-                   onScreenRequested: (Int) -> Unit) {
+    fun initialize(
+            requestParallelTranslation: (String) -> Unit, removeParallelTranslation: (String) -> Unit,
+            selectCurrentTranslation: (String) -> Unit, navigate: (Int) -> Unit
+    ) {
         with(spinner()) {
-            adapter = TranslationSpinnerAdapter(context = context,
-                    onParallelTranslationRequested = onParallelTranslationRequested,
-                    onParallelTranslationRemoved = onParallelTranslationRemoved)
+            adapter = TranslationSpinnerAdapter(
+                    context = context,
+                    requestParallelTranslation = requestParallelTranslation,
+                    removeParallelTranslation = removeParallelTranslation
+            )
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                    onTranslationSelected(spinnerAdapter().getItem(position))
+                    val spinnerAdapter = spinnerAdapter()
+                    if (position == spinnerAdapter.count - 1) {
+                        // selected "More", re-select the current translation,
+                        // and start translations management activity
+                        if (spinnerPosition >= 0) setSelection(spinnerPosition)
+                        navigate(Navigator.SCREEN_TRANSLATIONS)
+                    } else {
+                        spinnerPosition = position
+                        selectCurrentTranslation(spinnerAdapter.getItem(position))
+                    }
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) {
@@ -58,27 +69,27 @@ class ReadingToolbar : Toolbar {
         setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_reading_progress -> {
-                    onScreenRequested(Navigator.SCREEN_READING_PROGRESS)
+                    navigate(Navigator.SCREEN_READING_PROGRESS)
                     true
                 }
                 R.id.action_bookmarks -> {
-                    onScreenRequested(Navigator.SCREEN_BOOKMARKS)
+                    navigate(Navigator.SCREEN_BOOKMARKS)
                     true
                 }
                 R.id.action_highlights -> {
-                    onScreenRequested(Navigator.SCREEN_HIGHLIGHTS)
+                    navigate(Navigator.SCREEN_HIGHLIGHTS)
                     true
                 }
                 R.id.action_notes -> {
-                    onScreenRequested(Navigator.SCREEN_NOTES)
+                    navigate(Navigator.SCREEN_NOTES)
                     true
                 }
                 R.id.action_search -> {
-                    onScreenRequested(Navigator.SCREEN_SEARCH)
+                    navigate(Navigator.SCREEN_SEARCH)
                     true
                 }
                 R.id.action_settings -> {
-                    onScreenRequested(Navigator.SCREEN_SETTINGS)
+                    navigate(Navigator.SCREEN_SETTINGS)
                     true
                 }
                 else -> false
@@ -88,21 +99,25 @@ class ReadingToolbar : Toolbar {
 
     private fun spinner(): Spinner = menu.findItem(R.id.action_translations).actionView as Spinner
 
-    fun setSpinnerSelection(position: Int) {
-        spinner().setSelection(position)
-    }
+    fun setData(currentTranslation: String, parallelTranslations: List<String>, downloadedTranslations: List<String>) {
+        spinnerAdapter().setData(
+                currentTranslation = currentTranslation,
+                parallelTranslations = parallelTranslations,
+                downloadedTranslations = ArrayList<String>(downloadedTranslations.size + 1).apply {
+                    addAll(downloadedTranslations)
 
-    fun setCurrentTranslation(currentTranslation: String) {
-        spinnerAdapter().setCurrentTranslation(currentTranslation)
+                    // amends "More" to the end of the list
+                    add(context.getString(R.string.menu_more_translation))
+                }
+        )
+
+        downloadedTranslations.indexOfFirst { it == currentTranslation }
+                .takeIf { it >= 0 }
+                ?.let { position ->
+                    spinnerPosition = position
+                    spinner().setSelection(position)
+                }
     }
 
     private fun spinnerAdapter(): TranslationSpinnerAdapter = spinner().adapter as TranslationSpinnerAdapter
-
-    fun setTranslationShortNames(translationShortNames: List<String>) {
-        spinnerAdapter().setTranslationShortNames(translationShortNames)
-    }
-
-    fun setParallelTranslations(parallelTranslations: List<String>) {
-        spinnerAdapter().setParallelTranslations(parallelTranslations)
-    }
 }

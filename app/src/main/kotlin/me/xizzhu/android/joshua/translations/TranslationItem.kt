@@ -22,24 +22,50 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 
-data class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean,
-                           val onClicked: (TranslationInfo) -> Unit,
-                           val onLongClicked: (TranslationInfo, Boolean) -> Unit,
-                           val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0)
-    : BaseItem(R.layout.item_translation, { inflater, parent -> TranslationItemViewHolder(inflater, parent) })
+class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean,
+                      val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0)
+    : BaseItem(R.layout.item_translation, { inflater, parent -> TranslationItemViewHolder(inflater, parent) }) {
+    interface Callback {
+        fun selectTranslation(translationToSelect: TranslationInfo)
+
+        fun downloadTranslation(translationToDownload: TranslationInfo)
+
+        fun removeTranslation(translationToRemove: TranslationInfo)
+    }
+}
 
 private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<TranslationItem>(inflater.inflate(R.layout.item_translation, parent, false)) {
+    private val callback: TranslationItem.Callback
+        get() = (itemView.activity as? TranslationItem.Callback)
+                ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement TranslationItem.Callback")
     private val textView = itemView as TextView
 
     init {
-        itemView.setOnClickListener { item?.let { it.onClicked(it.translationInfo) } }
+        itemView.setOnClickListener {
+            item?.let { item ->
+                if (item.translationInfo.downloaded) {
+                    callback.selectTranslation(item.translationInfo)
+                } else {
+                    callback.downloadTranslation(item.translationInfo)
+                }
+            }
+        }
         itemView.setOnLongClickListener {
-            item?.let { it.onLongClicked(it.translationInfo, it.isCurrentTranslation) }
+            item?.let { item ->
+                if (item.translationInfo.downloaded) {
+                    if (!item.isCurrentTranslation) {
+                        callback.removeTranslation(item.translationInfo)
+                    }
+                } else {
+                    callback.downloadTranslation(item.translationInfo)
+                }
+            }
             return@setOnLongClickListener true
         }
     }

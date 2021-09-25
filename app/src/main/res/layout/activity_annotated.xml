@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <me.xizzhu.android.joshua.annotated.toolbar.AnnotatedVersesToolbar
+        <me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"

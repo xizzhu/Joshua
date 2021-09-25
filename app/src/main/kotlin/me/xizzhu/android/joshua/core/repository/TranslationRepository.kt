@@ -169,7 +169,6 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
         val translation = remoteTranslationService.fetchTranslation(
                 downloadProgressChannel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))
         Log.i(TAG, "Translation downloaded")
-        downloadProgressChannel.send(100)
 
         Perf.trace("install_translation") {
             localTranslationStorage.saveTranslation(
@@ -178,6 +177,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
             )
         }
         Log.i(TAG, "Translation saved to database")
+        downloadProgressChannel.trySend(100)
     }
 
     suspend fun removeTranslation(translationInfo: TranslationInfo) {

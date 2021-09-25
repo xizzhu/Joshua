@@ -16,251 +16,174 @@
 
 package me.xizzhu.android.joshua.reading
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
+import android.app.Application
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runBlockingTest
-import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.ReadingProgressManager
+import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.StrongNumber
+import me.xizzhu.android.joshua.core.StrongNumberManager
+import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.utils.currentTimeMillis
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class ReadingViewModelTest : BaseUnitTest() {
-    @Mock
     private lateinit var bibleReadingManager: BibleReadingManager
-
-    @Mock
     private lateinit var readingProgressManager: ReadingProgressManager
-
-    @Mock
     private lateinit var translationManager: TranslationManager
-
-    @Mock
     private lateinit var bookmarkManager: VerseAnnotationManager<Bookmark>
-
-    @Mock
     private lateinit var highlightManager: VerseAnnotationManager<Highlight>
-
-    @Mock
     private lateinit var noteManager: VerseAnnotationManager<Note>
-
-    @Mock
     private lateinit var strongNumberManager: StrongNumberManager
-
-    @Mock
     private lateinit var settingsManager: SettingsManager
+    private lateinit var application: Application
 
     private lateinit var readingViewModel: ReadingViewModel
 
-    @BeforeTest
     override fun setup() {
         super.setup()
 
-        readingViewModel = ReadingViewModel(bibleReadingManager, readingProgressManager, translationManager,
-                bookmarkManager, highlightManager, noteManager, strongNumberManager, settingsManager, false)
-    }
+        bibleReadingManager = mockk()
+        every { bibleReadingManager.currentTranslation() } returns emptyFlow()
+        every { bibleReadingManager.parallelTranslations() } returns emptyFlow()
+        every { bibleReadingManager.currentVerseIndex() } returns emptyFlow()
+        readingProgressManager = mockk()
+        translationManager = mockk()
+        every { translationManager.downloadedTranslations() } returns emptyFlow()
+        bookmarkManager = mockk()
+        highlightManager = mockk()
+        noteManager = mockk()
+        strongNumberManager = mockk()
+        settingsManager = mockk()
+        application = mockk()
 
-    @Test
-    fun testDownloadedTranslations() = runBlocking {
-        `when`(translationManager.downloadedTranslations()).thenReturn(
-                flowOf(
-                        emptyList(),
-                        emptyList(),
-                        listOf(MockContents.kjvTranslationInfo, MockContents.bbeTranslationInfo),
-                        listOf(MockContents.kjvTranslationInfo, MockContents.bbeTranslationInfo),
-                        listOf(MockContents.bbeTranslationInfo)
-                )
-        )
-
-        assertEquals(
-                listOf(
-                        emptyList(),
-                        listOf(MockContents.kjvTranslationInfo, MockContents.bbeTranslationInfo),
-                        listOf(MockContents.bbeTranslationInfo)
-                ),
-                readingViewModel.downloadedTranslations().toList()
+        readingViewModel = ReadingViewModel(
+                bibleReadingManager, readingProgressManager, translationManager,
+                bookmarkManager, highlightManager, noteManager,
+                strongNumberManager, settingsManager, application
         )
     }
 
     @Test
-    fun testHasDownloadedTranslation() = runBlocking {
-        `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(emptyList()))
-        assertFalse(readingViewModel.hasDownloadedTranslation())
-
-        `when`(translationManager.downloadedTranslations()).thenReturn(flowOf(listOf(MockContents.bbeTranslationInfo)))
-        assertTrue(readingViewModel.hasDownloadedTranslation())
-    }
-
-    @Test
-    fun testCurrentTranslation() = runBlocking {
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
-
-        assertEquals(listOf(MockContents.kjvShortName), readingViewModel.currentTranslation().toList())
-    }
-
-    @Test
-    fun testCurrentTranslationViewData() = runBlocking {
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
-        `when`(bibleReadingManager.parallelTranslations()).thenReturn(flowOf(emptyList(), listOf(MockContents.cuvShortName)))
-
-        assertEquals(
-                listOf(
-                        CurrentTranslationViewData(MockContents.kjvShortName, emptyList()),
-                        CurrentTranslationViewData(MockContents.kjvShortName, listOf(MockContents.cuvShortName))
-                ),
-                readingViewModel.currentTranslationViewData().toList()
-        )
-    }
-
-    @Test
-    fun testCurrentVerseIndex() = runBlocking {
-        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(
-                flowOf(VerseIndex.INVALID, VerseIndex(1, 2, 3), VerseIndex.INVALID, VerseIndex.INVALID)
-        )
-
-        assertEquals(
-                listOf(VerseIndex(1, 2, 3)),
-                readingViewModel.currentVerseIndex().toList()
-        )
-    }
-
-    @Test
-    fun testCurrentVerseIndexViewData() = runBlocking {
-        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex.INVALID, VerseIndex(0, 0, 0)))
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
-        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
-        `when`(bibleReadingManager.readBookShortNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookShortNames)
-
-        assertEquals(
-                listOf(CurrentVerseIndexViewData(
-                        VerseIndex(0, 0, 0),
-                        MockContents.kjvBookNames[0],
-                        MockContents.kjvBookShortNames[0]
-                )),
-                readingViewModel.currentVerseIndexViewData().toList()
-        )
-    }
-
-    @Test
-    fun testChapterList() = runBlocking {
-        `when`(bibleReadingManager.currentVerseIndex()).thenReturn(flowOf(VerseIndex(0, 0, 0)))
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
-        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
-
-        assertEquals(
-                listOf(ChapterListViewData(VerseIndex(0, 0, 0), MockContents.kjvBookNames)),
-                readingViewModel.chapterList().toList()
-        )
-    }
-
-    @Test
-    fun testBookName() = runBlocking {
-        val e = RuntimeException("random exception")
-        `when`(bibleReadingManager.readBookNames(MockContents.cuvShortName)).thenThrow(e)
-        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
-
-        assertEquals(
-                listOf(MockContents.kjvBookNames[0]),
-                readingViewModel.bookName(MockContents.kjvShortName, 0).toList()
-        )
-    }
-
-    @Test
-    fun testBookNameWithException() = runBlocking {
-        val e = RuntimeException("random exception")
-        `when`(bibleReadingManager.readBookNames(MockContents.cuvShortName)).thenThrow(e)
-        `when`(bibleReadingManager.readBookNames(MockContents.kjvShortName)).thenReturn(MockContents.kjvBookNames)
-
-        readingViewModel.bookName(MockContents.cuvShortName, 0)
-                .onCompletion { assertEquals(e, it) }
-                .catch {}
-                .collect()
-    }
-
-    @Test
-    fun testVerses() = runBlocking {
+    fun `test loadVerseDetail`() = testDispatcher.runBlockingTest {
         val verseIndex = VerseIndex(0, 0, 0)
-        val verses = MockContents.kjvVerses
-        val bookmarks = listOf(Bookmark(verseIndex, 123L))
-        val highlights = listOf(Highlight(verseIndex, Highlight.COLOR_BLUE, 456L))
-        val notes = listOf(Note(verseIndex, "random note", 789L))
-        `when`(bibleReadingManager.currentTranslation()).thenReturn(flowOf("", MockContents.kjvShortName, "", ""))
-        `when`(bibleReadingManager.parallelTranslations()).thenReturn(flowOf(emptyList()))
-        `when`(bibleReadingManager.readVerses(MockContents.kjvShortName, verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(verses)
-        `when`(bookmarkManager.read(verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(bookmarks)
-        `when`(highlightManager.read(verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(highlights)
-        `when`(noteManager.read(verseIndex.bookIndex, verseIndex.chapterIndex)).thenReturn(notes)
-        `when`(settingsManager.settings()).thenReturn(flowOf(Settings.DEFAULT))
+        coEvery { bookmarkManager.read(verseIndex) } returns Bookmark(verseIndex, 12345L)
+        coEvery { highlightManager.read(verseIndex) } returns Highlight(verseIndex, Highlight.COLOR_PURPLE, 12345L)
+        coEvery { noteManager.read(verseIndex) } returns Note(verseIndex, "just a note", 12345L)
+        coEvery { strongNumberManager.readStrongNumber(verseIndex) } returns MockContents.strongNumber.getValue(verseIndex)
+        every { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
+        every { translationManager.downloadedTranslations() } returns flowOf(listOf(
+                MockContents.kjvDownloadedTranslationInfo, MockContents.cuvDownloadedTranslationInfo, MockContents.bbeDownloadedTranslationInfo
+        ))
+        coEvery {
+            bibleReadingManager.readVerses(
+                    MockContents.kjvShortName, listOf(MockContents.bbeShortName, MockContents.cuvShortName),
+                    verseIndex.bookIndex, verseIndex.chapterIndex
+            )
+        } returns MockContents.kjvVersesWithBbeCuvParallel
+        coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
+        coEvery { bibleReadingManager.readBookNames(MockContents.bbeShortName) } returns MockContents.bbeBookNames
+        coEvery { bibleReadingManager.readBookNames(MockContents.cuvShortName) } returns MockContents.cuvBookNames
 
+        val actual = readingViewModel.loadVerseDetail(verseIndex).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertEquals(VerseIndex(0, 0, 0), (actual[1] as BaseViewModel.ViewData.Success).data.verseIndex)
+        assertEquals(3, (actual[1] as BaseViewModel.ViewData.Success).data.verseTextItems.size)
+        (actual[1] as BaseViewModel.ViewData.Success).data.verseTextItems.forEachIndexed { index, item ->
+            assertEquals(VerseIndex(0, 0, 0), item.verseIndex)
+            assertEquals(
+                    when (index) {
+                        0 -> Verse.Text("KJV", "In the beginning God created the heaven and the earth.")
+                        1 -> Verse.Text("BBE", "At the first God made the heaven and the earth.")
+                        2 -> Verse.Text("中文和合本", "起初神创造天地。")
+                        else -> fail()
+                    },
+                    item.verseText
+            )
+        }
+        assertTrue((actual[1] as BaseViewModel.ViewData.Success).data.bookmarked)
+        assertEquals(Highlight.COLOR_PURPLE, (actual[1] as BaseViewModel.ViewData.Success).data.highlightColor)
+        assertEquals("just a note", (actual[1] as BaseViewModel.ViewData.Success).data.note)
         assertEquals(
-                listOf(VersesViewData(Settings.DEFAULT.simpleReadingModeOn, verses, bookmarks, highlights, notes)),
-                readingViewModel.verses(verseIndex.bookIndex, verseIndex.chapterIndex).toList()
+                listOf(
+                        StrongNumber("H7225", "beginning, chief(-est), first(-fruits, part, time), principal thing."),
+                        StrongNumber("H1254", "choose, create (creator), cut down, dispatch, do, make (fat)."),
+                        StrongNumber("H430", "angels, [idiom] exceeding, God (gods) (-dess, -ly), [idiom] (very) great, judges, [idiom] mighty."),
+                        StrongNumber("H853", "(as such unrepresented in English)."),
+                        StrongNumber("H8064", "mantle"),
+                        StrongNumber("H776", "[idiom] common, country, earth, field, ground, land, [idiom] natins, way, [phrase] wilderness, world.")
+                ),
+                (actual[1] as BaseViewModel.ViewData.Success).data.strongNumberItems.map { it.strongNumber }
         )
     }
 
     @Test
-    fun testSaveBookmark() = runBlockingTest {
-        currentTimeMillis = 1234L
-        val verseUpdates = async { readingViewModel.verseUpdates.take(2).toList() }
+    fun `test loadVerseDetail with empty verses`() = testDispatcher.runBlockingTest {
+        val verseIndex = VerseIndex(0, 0, 0)
+        coEvery { bookmarkManager.read(verseIndex) } returns Bookmark(verseIndex, 0L)
+        coEvery { highlightManager.read(verseIndex) } returns Highlight(verseIndex, Highlight.COLOR_PURPLE, 0L)
+        coEvery { noteManager.read(verseIndex) } returns Note(verseIndex, "just a note", 0L)
+        coEvery { strongNumberManager.readStrongNumber(verseIndex) } returns MockContents.strongNumber.getValue(verseIndex)
+        every { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.msgShortName)
+        every { translationManager.downloadedTranslations() } returns flowOf(listOf(
+                MockContents.kjvDownloadedTranslationInfo, MockContents.msgDownloadedTranslationInfo
+        ))
+        coEvery {
+            bibleReadingManager.readVerses(
+                    MockContents.msgShortName, listOf(MockContents.kjvShortName), verseIndex.bookIndex, verseIndex.chapterIndex
+            )
+        } returns MockContents.msgVersesWithKjvParallel
+        coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
+        coEvery { bibleReadingManager.readBookNames(MockContents.msgShortName) } returns MockContents.msgBookNames
 
-        readingViewModel.saveBookmark(VerseIndex(1, 2, 3), true)
-        readingViewModel.saveBookmark(VerseIndex(4, 5, 6), false)
-
-        with(inOrder(bookmarkManager)) {
-            verify(bookmarkManager, times(1)).remove(VerseIndex(1, 2, 3))
-            verify(bookmarkManager, times(1)).save(Bookmark(VerseIndex(4, 5, 6), 1234L))
+        val actual = readingViewModel.loadVerseDetail(verseIndex).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertEquals(VerseIndex(0, 0, 0), (actual[1] as BaseViewModel.ViewData.Success).data.verseIndex)
+        assertEquals(2, (actual[1] as BaseViewModel.ViewData.Success).data.verseTextItems.size)
+        (actual[1] as BaseViewModel.ViewData.Success).data.verseTextItems.forEachIndexed { index, item ->
+            assertEquals(VerseIndex(0, 0, 0), item.verseIndex)
+            assertEquals(
+                    when (index) {
+                        0 -> Verse.Text("MSG", "First this: God created the Heavens and Earth—all you see, all you don't see. Earth was a soup of nothingness, a bottomless emptiness, an inky blackness. God's Spirit brooded like a bird above the watery abyss.")
+                        1 -> Verse.Text("KJV", "In the beginning God created the heaven and the earth. And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.")
+                        else -> fail()
+                    },
+                    item.verseText
+            )
         }
+        assertFalse((actual[1] as BaseViewModel.ViewData.Success).data.bookmarked)
+        assertEquals(Highlight.COLOR_NONE, (actual[1] as BaseViewModel.ViewData.Success).data.highlightColor)
+        assertTrue((actual[1] as BaseViewModel.ViewData.Success).data.note.isEmpty())
         assertEquals(
                 listOf(
-                        VerseUpdate(VerseIndex(1, 2, 3), VerseUpdate.BOOKMARK_REMOVED),
-                        VerseUpdate(VerseIndex(4, 5, 6), VerseUpdate.BOOKMARK_ADDED)
+                        StrongNumber("H7225", "beginning, chief(-est), first(-fruits, part, time), principal thing."),
+                        StrongNumber("H1254", "choose, create (creator), cut down, dispatch, do, make (fat)."),
+                        StrongNumber("H430", "angels, [idiom] exceeding, God (gods) (-dess, -ly), [idiom] (very) great, judges, [idiom] mighty."),
+                        StrongNumber("H853", "(as such unrepresented in English)."),
+                        StrongNumber("H8064", "mantle"),
+                        StrongNumber("H776", "[idiom] common, country, earth, field, ground, land, [idiom] natins, way, [phrase] wilderness, world.")
                 ),
-                verseUpdates.await()
-        )
-    }
-
-    @Test
-    fun testSaveHighlight() = runBlockingTest {
-        currentTimeMillis = 1234L
-        val verseUpdates = async { readingViewModel.verseUpdates.take(2).toList() }
-
-        readingViewModel.saveHighlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE)
-        readingViewModel.saveHighlight(VerseIndex(4, 5, 6), Highlight.COLOR_NONE)
-
-        with(inOrder(highlightManager)) {
-            verify(highlightManager, times(1)).save(Highlight(VerseIndex(1, 2, 3), Highlight.COLOR_BLUE, 1234L))
-            verify(highlightManager, times(1)).remove(VerseIndex(4, 5, 6))
-        }
-        assertEquals(
-                listOf(
-                        VerseUpdate(VerseIndex(1, 2, 3), VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_BLUE),
-                        VerseUpdate(VerseIndex(4, 5, 6), VerseUpdate.HIGHLIGHT_UPDATED, Highlight.COLOR_NONE)
-                ),
-                verseUpdates.await()
-        )
-    }
-
-    @Test
-    fun testSaveNote() = runBlockingTest {
-        currentTimeMillis = 1234L
-        val verseUpdates = async { readingViewModel.verseUpdates.take(2).toList() }
-
-        readingViewModel.saveNote(VerseIndex(1, 2, 3), "random notes")
-        readingViewModel.saveNote(VerseIndex(4, 5, 6), "")
-
-        with(inOrder(noteManager)) {
-            verify(noteManager, times(1)).save(Note(VerseIndex(1, 2, 3), "random notes", 1234L))
-            verify(noteManager, times(1)).remove(VerseIndex(4, 5, 6))
-        }
-        assertEquals(
-                listOf(
-                        VerseUpdate(VerseIndex(1, 2, 3), VerseUpdate.NOTE_ADDED),
-                        VerseUpdate(VerseIndex(4, 5, 6), VerseUpdate.NOTE_REMOVED)
-                ),
-                verseUpdates.await()
+                (actual[1] as BaseViewModel.ViewData.Success).data.strongNumberItems.map { it.strongNumber }
         )
     }
 }

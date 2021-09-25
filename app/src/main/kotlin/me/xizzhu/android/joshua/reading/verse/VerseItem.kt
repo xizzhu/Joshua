@@ -19,8 +19,6 @@ package me.xizzhu.android.joshua.reading.verse
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
@@ -29,21 +27,32 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Color
 import android.util.TypedValue
-import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.databinding.ItemVerseBinding
 import me.xizzhu.android.joshua.reading.VerseUpdate
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
-data class VerseItem(val verse: Verse, private val followingEmptyVerseCount: Int,
-                     var hasNote: Boolean, @ColorInt var highlightColor: Int, var hasBookmark: Boolean,
-                     val onClicked: (Verse) -> Unit, val onLongClicked: (Verse) -> Unit,
-                     val onNoteClicked: (VerseIndex) -> Unit, val onHighlightClicked: (VerseIndex, Int) -> Unit,
-                     val onBookmarkClicked: (VerseIndex, Boolean) -> Unit, var selected: Boolean = false)
-    : BaseItem(R.layout.item_verse, { inflater, parent -> VerseItemViewHolder(inflater, parent) }) {
+class VerseItem(
+        val verse: Verse, private val followingEmptyVerseCount: Int,
+        var hasBookmark: Boolean, @Highlight.Companion.AvailableColor var highlightColor: Int, var hasNote: Boolean,
+        var selected: Boolean = false
+) : BaseItem(R.layout.item_verse, { inflater, parent -> VerseItemViewHolder(inflater, parent) }) {
     companion object {
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+    }
+
+    interface Callback {
+        fun onVerseClicked(verse: Verse)
+
+        fun onVerseLongClicked(verse: Verse)
+
+        fun onBookmarkClicked(verseIndex: VerseIndex, currentlyBookmarked: Boolean)
+
+        fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int)
+
+        fun onNoteClicked(verseIndex: VerseIndex)
     }
 
     var textForDisplay: CharSequence = ""
@@ -56,38 +65,38 @@ data class VerseItem(val verse: Verse, private val followingEmptyVerseCount: Int
 }
 
 private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<VerseItem>(inflater.inflate(R.layout.item_verse, parent, false)) {
+    : BaseViewHolder<VerseItem>(ItemVerseBinding.inflate(inflater, parent, false).root) {
     companion object {
         private val ON = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
         private val OFF = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
     }
 
     private val resources = itemView.resources
-    private val text = itemView.findViewById<TextView>(R.id.text)
-    private val bookmark = itemView.findViewById<ImageView>(R.id.bookmark)
-    private val highlight = itemView.findViewById<ImageView>(R.id.highlight)
-    private val note = itemView.findViewById<ImageView>(R.id.note)
-
-    init {
-        itemView.setOnClickListener { item?.let { it.onClicked(it.verse) } }
-        itemView.setOnLongClickListener {
-            item?.let { it.onLongClicked(it.verse) }
-            return@setOnLongClickListener true
+    private val viewBinding = ItemVerseBinding.bind(itemView).apply {
+        root.setOnClickListener { item?.let { callback().onVerseClicked(it.verse) } }
+        root.setOnLongClickListener {
+            return@setOnLongClickListener item?.let {
+                callback().onVerseLongClicked(it.verse)
+                true
+            } ?: false
         }
-        bookmark.setOnClickListener { item?.let { it.onBookmarkClicked(it.verse.verseIndex, it.hasBookmark) } }
-        highlight.setOnClickListener { item?.let { it.onHighlightClicked(it.verse.verseIndex, it.highlightColor) } }
-        note.setOnClickListener { item?.let { it.onNoteClicked(it.verse.verseIndex) } }
+        bookmark.setOnClickListener { item?.let { callback().onBookmarkClicked(it.verse.verseIndex, it.hasBookmark) } }
+        highlight.setOnClickListener { item?.let { callback().onHighlightClicked(it.verse.verseIndex, it.highlightColor) } }
+        note.setOnClickListener { item?.let { callback().onNoteClicked(it.verse.verseIndex) } }
     }
+
+    private fun callback(): VerseItem.Callback = (itemView.activity as? VerseItem.Callback)
+            ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement VerseItem.Callback")
 
     override fun bind(settings: Settings, item: VerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {
-            text.text = item.textForDisplay
-            text.setTextColor(if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources))
-            text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+            viewBinding.text.text = item.textForDisplay
+            viewBinding.text.setTextColor(if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources))
+            viewBinding.text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
 
-            bookmark.colorFilter = if (item.hasBookmark) ON else OFF
-            highlight.colorFilter = if (item.highlightColor != Highlight.COLOR_NONE) ON else OFF
-            note.colorFilter = if (item.hasNote) ON else OFF
+            viewBinding.bookmark.colorFilter = if (item.hasBookmark) ON else OFF
+            viewBinding.highlight.colorFilter = if (item.highlightColor != Highlight.COLOR_NONE) ON else OFF
+            viewBinding.note.colorFilter = if (item.hasNote) ON else OFF
 
             itemView.isSelected = item.selected
         } else {
@@ -98,37 +107,37 @@ private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
                         item.selected = true
                         itemView.isSelected = true
                         if (settings.nightModeOn) {
-                            text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
+                            viewBinding.text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
                         }
                     }
                     VerseUpdate.VERSE_DESELECTED -> {
                         item.selected = false
                         itemView.isSelected = false
                         if (settings.nightModeOn) {
-                            text.animateTextColor(settings.getPrimaryTextColor(resources))
+                            viewBinding.text.animateTextColor(settings.getPrimaryTextColor(resources))
                         }
                     }
                     VerseUpdate.NOTE_ADDED -> {
                         item.hasNote = true
-                        note.colorFilter = ON
+                        viewBinding.note.colorFilter = ON
                     }
                     VerseUpdate.NOTE_REMOVED -> {
                         item.hasNote = false
-                        note.colorFilter = OFF
+                        viewBinding.note.colorFilter = OFF
                     }
                     VerseUpdate.BOOKMARK_ADDED -> {
                         item.hasBookmark = true
-                        bookmark.colorFilter = ON
+                        viewBinding.bookmark.colorFilter = ON
                     }
                     VerseUpdate.BOOKMARK_REMOVED -> {
                         item.hasBookmark = false
-                        bookmark.colorFilter = OFF
+                        viewBinding.bookmark.colorFilter = OFF
                     }
                     VerseUpdate.HIGHLIGHT_UPDATED -> {
                         item.highlightColor = update.data as Int
                         item.textForDisplay = ""
-                        text.text = item.textForDisplay
-                        highlight.colorFilter = if (item.highlightColor != Highlight.COLOR_NONE) ON else OFF
+                        viewBinding.text.text = item.textForDisplay
+                        viewBinding.highlight.colorFilter = if (item.highlightColor != Highlight.COLOR_NONE) ON else OFF
                     }
                 }
             }

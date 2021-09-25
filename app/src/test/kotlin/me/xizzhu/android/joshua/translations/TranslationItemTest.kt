@@ -25,12 +25,12 @@ import kotlin.test.assertEquals
 class TranslationItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_translation, TranslationItem(MockContents.kjvTranslationInfo, true, {}, { _, _ -> }).viewType)
+        assertEquals(R.layout.item_translation, TranslationItem(MockContents.kjvTranslationInfo, true).viewType)
     }
 
     @Test
     fun testRightDrawable() {
-        assertEquals(0, TranslationItem(MockContents.kjvTranslationInfo, false, {}, { _, _ -> }).rightDrawable)
-        assertEquals(R.drawable.ic_check, TranslationItem(MockContents.kjvTranslationInfo, true, {}, { _, _ -> }).rightDrawable)
+        assertEquals(0, TranslationItem(MockContents.kjvTranslationInfo, false).rightDrawable)
+        assertEquals(R.drawable.ic_check, TranslationItem(MockContents.kjvTranslationInfo, true).rightDrawable)
     }
 }

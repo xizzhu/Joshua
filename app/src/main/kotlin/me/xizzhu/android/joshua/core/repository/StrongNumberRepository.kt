@@ -26,6 +26,7 @@ import me.xizzhu.android.joshua.core.perf.Perf
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
 import me.xizzhu.android.logger.Log
+import kotlin.math.min
 
 class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNumberStorage,
                              private val remoteStrongNumberStorage: RemoteStrongNumberStorage) {
@@ -48,7 +49,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
         versesDownloadProgress.trySend(0)
         wordsDownloadProgress.trySend(0)
         versesDownloadProgress.consumeAsFlow().combine(wordsDownloadProgress.consumeAsFlow()) { v, w ->
-            trySend((v * 0.9 + w * 0.1).toInt())
+            trySend(min(99, (v * 0.9 + w * 0.1).toInt()))
         }.launchIn(this)
 
         val remoteIndexesAsync = async { remoteStrongNumberStorage.fetchIndexes(versesDownloadProgress) }
@@ -58,11 +59,11 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
 
         versesDownloadProgress.close()
         wordsDownloadProgress.close()
-        trySend(100)
 
         Perf.trace("install_sn") {
             localStrongNumberStorage.save(remoteIndexes.indexes, remoteIndexes.reverseIndexes, remoteWords.words)
         }
         Log.i(TAG, "Strong number saved to database")
+        trySend(100)
     }
 }

@@ -16,7 +16,9 @@
 
 package me.xizzhu.android.joshua.utils
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.content.*
 import android.content.pm.LabeledIntent
 import android.content.pm.PackageManager
@@ -24,13 +26,15 @@ import android.os.Build
 import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 
+val Context.application: Application get() = applicationContext as Application
+
 // On older devices, this only works on the threads with loopers.
 fun Context.copyToClipBoard(label: CharSequence, text: CharSequence) {
     (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
             .setPrimaryClip(ClipData.newPlainText(label, text))
 }
 
-fun Activity.share(title: String, text: String) {
+fun Activity.shareToSystem(title: String, text: String) {
     val chooser = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         // Seems starting from Android 10, Direct Share doesn't work if we provides extra intents
         // to Intent.createChooser through Intent.EXTRA_INITIAL_INTENTS. Therefore, simply do this,
@@ -43,10 +47,10 @@ fun Activity.share(title: String, text: String) {
         // ref. https://developers.facebook.com/bugs/332619626816423
         packageManager.chooserForSharing("com.facebook.katana", title, text)
     }
-    chooser?.let { startActivity(it) }
-            ?: throw RuntimeException("Failed to create chooser for sharing")
+    chooser?.let { startActivity(it) } ?: throw RuntimeException("Failed to create chooser for sharing")
 }
 
+@SuppressLint("QueryPermissionsNeeded")
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 fun PackageManager.chooserForSharing(packageToExclude: String, title: String, text: String): Intent? {
     val sendIntent = Intent(Intent.ACTION_SEND).setType("text/plain")

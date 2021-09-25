@@ -24,9 +24,7 @@ import kotlin.test.assertEquals
 class ReadingProgressItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_reading_progress_header, ReadingProgressSummaryItem(
-                0, 0, 0, 0, 0).viewType)
-        assertEquals(R.layout.item_reading_progress, ReadingProgressDetailItem(
-                "", 0, emptyList(), 0, { _, _ -> }, { _, _ -> }, false).viewType)
+        assertEquals(R.layout.item_reading_progress_header, ReadingProgressSummaryItem(0, 0, 0, 0, 0).viewType)
+        assertEquals(R.layout.item_reading_progress, ReadingProgressDetailItem("", 0, emptyList(), 0, { _, _ -> }, false).viewType)
     }
 }
