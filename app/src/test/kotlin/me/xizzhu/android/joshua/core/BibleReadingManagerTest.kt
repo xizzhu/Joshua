@@ -16,84 +16,127 @@
 
 package me.xizzhu.android.joshua.core
 
-import kotlinx.coroutines.flow.MutableStateFlow
+import io.mockk.coEvery
+import io.mockk.coVerifySequence
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import org.mockito.Mock
-import org.mockito.Mockito.*
 import kotlin.test.*
 
 class BibleReadingManagerTest : BaseUnitTest() {
-    @Mock
     private lateinit var bibleReadingRepository: BibleReadingRepository
-    @Mock
     private lateinit var translationRepository: TranslationRepository
 
-    @Test
-    fun testObserveDownloadedTranslations() = runBlocking {
-        `when`(bibleReadingRepository.currentTranslation).thenReturn(flowOf(""))
-        `when`(bibleReadingRepository.parallelTranslations).thenReturn(flowOf(emptyList()))
-        val downloadedTranslations = MutableStateFlow<List<TranslationInfo>>(emptyList())
-        `when`(translationRepository.downloadedTranslations).thenReturn(downloadedTranslations)
+    @BeforeTest
+    override fun setup() {
+        super.setup()
 
-        // we need to create a BibleReadingManager instance to let TranslationRepository load downloaded translations
+        bibleReadingRepository = mockk()
+
+        translationRepository = mockk()
+        every { translationRepository.downloadedTranslations } returns emptyFlow()
+    }
+
+    @Test
+    fun `test updateDownloadedTranslations() with no translations downloaded`() = runBlocking {
+        coEvery { bibleReadingRepository.saveCurrentTranslation("") } returns Unit
+        coEvery { bibleReadingRepository.clearParallelTranslation() } returns Unit
+
+        val bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, testDispatcher)
+        bibleReadingManager.updateDownloadedTranslations(emptyList())
+        coVerifySequence {
+            bibleReadingRepository.saveCurrentTranslation("")
+            bibleReadingRepository.clearParallelTranslation()
+        }
+    }
+
+    @Test
+    fun `test updateDownloadedTranslations() for first downloaded translation`() = runBlocking {
+        coEvery { bibleReadingRepository.saveCurrentTranslation(MockContents.cuvShortName) } returns Unit
+        every { bibleReadingRepository.currentTranslation } returns flowOf("")
+
+        val bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, testDispatcher)
+        bibleReadingManager.updateDownloadedTranslations(listOf(MockContents.cuvTranslationInfo))
+        coVerifySequence {
+            bibleReadingRepository.currentTranslation
+            bibleReadingRepository.saveCurrentTranslation(MockContents.cuvShortName)
+            bibleReadingRepository.parallelTranslations
+        }
+    }
+
+    @Test
+    fun `test updateDownloadedTranslations() with translations already downloaded`() = runBlocking {
+        every { bibleReadingRepository.currentTranslation } returns flowOf(MockContents.kjvShortName)
+
+        val bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, testDispatcher)
+        bibleReadingManager.updateDownloadedTranslations(listOf(MockContents.cuvDownloadedTranslationInfo, MockContents.kjvDownloadedTranslationInfo))
+        coVerifySequence {
+            bibleReadingRepository.currentTranslation
+            bibleReadingRepository.parallelTranslations
+        }
+    }
+
+    @Test
+    fun `test updateDownloadedTranslations() with parallel translations`() = runBlocking {
+        every { bibleReadingRepository.currentTranslation } returns flowOf(MockContents.kjvShortName)
+        every { bibleReadingRepository.parallelTranslations } returns flowOf(listOf(MockContents.cuvShortName))
+
         val bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, testDispatcher)
 
-        // downloads a translation
-        downloadedTranslations.value = listOf(MockContents.cuvTranslationInfo)
+        // Two translations are downloaded.
+        bibleReadingManager.updateDownloadedTranslations(listOf(
+                MockContents.cuvDownloadedTranslationInfo, MockContents.kjvDownloadedTranslationInfo
+        ))
+        // Two more translations are downloaded.
+        bibleReadingManager.updateDownloadedTranslations(listOf(
+                MockContents.cuvDownloadedTranslationInfo,
+                MockContents.kjvDownloadedTranslationInfo,
+                MockContents.bbeDownloadedTranslationInfo,
+                MockContents.msgDownloadedTranslationInfo
+        ))
+        // One translation is removed.
+        bibleReadingManager.updateDownloadedTranslations(listOf(
+                MockContents.cuvDownloadedTranslationInfo, MockContents.kjvDownloadedTranslationInfo, MockContents.bbeDownloadedTranslationInfo
+        ))
+        // One translation, which is also a parallel, is removed. Should update the parallel.
+        bibleReadingManager.updateDownloadedTranslations(listOf(
+                MockContents.kjvDownloadedTranslationInfo, MockContents.bbeDownloadedTranslationInfo
+        ))
+        every { bibleReadingRepository.parallelTranslations } returns flowOf(emptyList())
+        // One more translation installed, and current translation removed. Should update the current.
+        coEvery { bibleReadingRepository.saveCurrentTranslation(MockContents.bbeShortName) } returns Unit
+        bibleReadingManager.updateDownloadedTranslations(listOf(
+                MockContents.bbeDownloadedTranslationInfo, MockContents.msgDownloadedTranslationInfo
+        ))
 
-        // downloads another translation
-        `when`(bibleReadingRepository.currentTranslation).thenReturn(flowOf(MockContents.cuvShortName))
-        downloadedTranslations.value = listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo)
+        coVerifySequence {
+            // Two translations are downloaded.
+            bibleReadingRepository.currentTranslation
+            bibleReadingRepository.parallelTranslations
 
-        // downloads yet another translation
-        downloadedTranslations.value = listOf(MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo, MockContents.kjvTranslationInfo)
+            // Two more translations are downloaded.
+            bibleReadingRepository.currentTranslation
+            bibleReadingRepository.parallelTranslations
 
-        // requests a parallel
-        `when`(bibleReadingRepository.parallelTranslations).thenReturn(flowOf(listOf(MockContents.bbeShortName)))
+            // One translation is removed.
+            bibleReadingRepository.currentTranslation
+            bibleReadingRepository.parallelTranslations
 
-        // requests another parallel
-        `when`(bibleReadingRepository.parallelTranslations).thenReturn(flowOf(listOf(MockContents.bbeShortName, MockContents.kjvShortName)))
+            // One translation, which is also a parallel, is removed. Should update the parallel.
+            bibleReadingRepository.currentTranslation
+            bibleReadingRepository.parallelTranslations
+            bibleReadingRepository.saveParallelTranslations(emptyList())
 
-        // removes a translation that is selected as parallel
-        downloadedTranslations.value = listOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo)
-
-        // removes a translation that is selected as current
-        downloadedTranslations.value = listOf(MockContents.kjvTranslationInfo)
-
-        // removes all translations
-        downloadedTranslations.value = emptyList()
-
-        with(inOrder(bibleReadingRepository)) {
-            // initial state
-            verify(bibleReadingRepository, times(1)).saveCurrentTranslation("")
-            verify(bibleReadingRepository, times(1)).clearParallelTranslation()
-
-            // downloads a translation
-            verify(bibleReadingRepository, times(1)).saveCurrentTranslation(MockContents.cuvShortName)
-
-            // downloads another translation (nothing here)
-
-            // downloads yet another translation (nothing here)
-
-            // requests a parallel (nothing here)
-
-            // requests another parallel (nothing here)
-
-            // removes a translation that is selected as parallel
-            verify(bibleReadingRepository, times(1)).saveParallelTranslations(listOf(MockContents.kjvShortName))
-
-            // // removes a translation that is selected as current
-            verify(bibleReadingRepository, times(1)).saveCurrentTranslation(MockContents.kjvShortName)
-            verify(bibleReadingRepository, times(1)).saveParallelTranslations(emptyList())
-
-            // removes all translations
-            verify(bibleReadingRepository, times(1)).saveCurrentTranslation("")
-            verify(bibleReadingRepository, times(1)).clearParallelTranslation()
+            // One more translation installed, and current translation removed. Should update the current.
+            bibleReadingRepository.currentTranslation
+            bibleReadingRepository.saveCurrentTranslation(MockContents.bbeShortName)
+            bibleReadingRepository.parallelTranslations
         }
     }
 }

@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -62,38 +63,41 @@ data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<
     }
 }
 
-class BibleReadingManager(private val bibleReadingRepository: BibleReadingRepository,
-                          translationRepository: TranslationRepository,
-                          initDispatcher: CoroutineDispatcher = Dispatchers.IO) {
+class BibleReadingManager(
+        private val bibleReadingRepository: BibleReadingRepository,
+        translationRepository: TranslationRepository,
+        initDispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
     companion object {
         private val TAG = BibleReadingManager::class.java.simpleName
     }
 
     init {
-        GlobalScope.launch(initDispatcher) {
-            translationRepository.downloadedTranslations.collect { translations ->
-                try {
-                    val downloadedTranslations = translations.map { it.shortName }.toSet()
+        GlobalScope.launch(initDispatcher) { translationRepository.downloadedTranslations.collect(::updateDownloadedTranslations) }
+    }
 
-                    if (downloadedTranslations.isEmpty()) {
-                        bibleReadingRepository.saveCurrentTranslation("")
-                        bibleReadingRepository.clearParallelTranslation()
-                    } else {
-                        var currentTranslation = currentTranslation().first()
-                        if (currentTranslation.isEmpty() || !downloadedTranslations.contains(currentTranslation)) {
-                            currentTranslation = translations.first().shortName
-                            bibleReadingRepository.saveCurrentTranslation(currentTranslation)
-                        }
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    suspend fun updateDownloadedTranslations(translations: List<TranslationInfo>) {
+        try {
+            val downloadedTranslations = translations.map { it.shortName }.toSet()
 
-                        parallelTranslations().first().let { current ->
-                            val updated = current.filter { currentTranslation != it && downloadedTranslations.contains(it) }
-                            if (current != updated) bibleReadingRepository.saveParallelTranslations(updated)
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error occurred while observing downloaded translations", e)
+            if (downloadedTranslations.isEmpty()) {
+                bibleReadingRepository.saveCurrentTranslation("")
+                bibleReadingRepository.clearParallelTranslation()
+            } else {
+                var currentTranslation = currentTranslation().first()
+                if (currentTranslation.isEmpty() || !downloadedTranslations.contains(currentTranslation)) {
+                    currentTranslation = translations.first().shortName
+                    bibleReadingRepository.saveCurrentTranslation(currentTranslation)
+                }
+
+                parallelTranslations().first().let { current ->
+                    val updated = current.filter { currentTranslation != it && downloadedTranslations.contains(it) }
+                    if (current != updated) bibleReadingRepository.saveParallelTranslations(updated)
                 }
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error occurred while observing downloaded translations", e)
         }
     }
 

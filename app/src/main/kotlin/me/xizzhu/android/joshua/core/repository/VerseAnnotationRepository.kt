@@ -31,7 +31,8 @@ import me.xizzhu.android.logger.Log
 
 class VerseAnnotationRepository<T : VerseAnnotation>(
         private val localVerseAnnotationStorage: LocalVerseAnnotationStorage<T>,
-        initDispatcher: CoroutineDispatcher = Dispatchers.IO) {
+        initDispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
     companion object {
         private val TAG = VerseAnnotationRepository::class.java.simpleName
     }

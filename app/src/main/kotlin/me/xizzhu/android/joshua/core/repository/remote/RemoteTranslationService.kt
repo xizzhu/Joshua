@@ -19,24 +19,22 @@ package me.xizzhu.android.joshua.core.repository.remote
 import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.joshua.core.TranslationInfo
 
-data class RemoteTranslationInfo(val shortName: String,
-                                 val name: String,
-                                 val language: String,
-                                 val size: Long) {
+data class RemoteTranslationInfo(val shortName: String, val name: String, val language: String, val size: Long) {
     companion object {
         fun fromTranslationInfo(translationInfo: TranslationInfo): RemoteTranslationInfo =
-                RemoteTranslationInfo(translationInfo.shortName, translationInfo.name,
-                        translationInfo.language, translationInfo.size)
+                RemoteTranslationInfo(translationInfo.shortName, translationInfo.name, translationInfo.language, translationInfo.size)
     }
 
     fun toTranslationInfo(downloaded: Boolean): TranslationInfo =
             TranslationInfo(shortName, name, language, size, downloaded)
 }
 
-data class RemoteTranslation(val translationInfo: RemoteTranslationInfo,
-                             val bookNames: List<String>,
-                             val bookShortNames: List<String>,
-                             val verses: Map<Pair<Int, Int>, List<String>>)
+data class RemoteTranslation(
+        val translationInfo: RemoteTranslationInfo,
+        val bookNames: List<String>,
+        val bookShortNames: List<String>,
+        val verses: Map<Pair<Int, Int>, List<String>>
+)
 
 interface RemoteTranslationService {
     suspend fun fetchTranslations(): List<RemoteTranslationInfo>

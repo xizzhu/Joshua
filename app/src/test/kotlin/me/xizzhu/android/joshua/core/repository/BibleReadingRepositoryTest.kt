@@ -16,123 +16,133 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mock
-import org.mockito.Mockito.*
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class BibleReadingRepositoryTest : BaseUnitTest() {
-    @Mock
     private lateinit var localReadingStorage: LocalReadingStorage
 
-    @Test
-    fun testObserveInitialCurrentVerseIndex() = runBlocking {
-        `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
-        `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-        `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
-        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
+    @BeforeTest
+    override fun setup() {
+        super.setup()
+        localReadingStorage = mockk()
+    }
 
+    @Test
+    fun `test currentVerseIndex from constructor`() = runBlocking {
+        coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
+        coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
+        coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
+
+        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
         assertEquals(VerseIndex(1, 2, 3), bibleReadingRepository.currentVerseIndex.first())
     }
 
     @Test
-    fun testObserveInitialCurrentVerseIndexWithException() = runBlocking {
-        `when`(localReadingStorage.readCurrentVerseIndex()).thenThrow(RuntimeException("Random exception"))
-        `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-        `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
-        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
+    fun `test currentVerseIndex from constructor with exception`() = runBlocking {
+        coEvery { localReadingStorage.readCurrentVerseIndex() } throws RuntimeException("Random exception")
+        coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
+        coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
 
+        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
         assertFalse(bibleReadingRepository.currentVerseIndex.first().isValid())
     }
 
     @Test
-    fun testSaveCurrentVerseIndex() = runBlocking {
-        `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
-        `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-        `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
-        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
+    fun `test saveCurrentVerseIndex()`() = runBlocking {
+        coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
+        coEvery { localReadingStorage.saveCurrentVerseIndex(any()) } returns Unit
+        coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
+        coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
 
+        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
         bibleReadingRepository.saveCurrentVerseIndex(VerseIndex(4, 5, 6))
         assertEquals(VerseIndex(4, 5, 6), bibleReadingRepository.currentVerseIndex.first())
     }
 
     @Test
-    fun testObserveInitialCurrentTranslation() = runBlocking {
-        `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
-        `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-        `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
-        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
+    fun `test currentTranslation from constructor`() = runBlocking {
+        coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
+        coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
+        coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
 
+        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
         assertEquals(MockContents.kjvShortName, bibleReadingRepository.currentTranslation.first())
     }
 
     @Test
-    fun testObserveInitialCurrentTranslationWithException() = runBlocking {
-        `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
-        `when`(localReadingStorage.readCurrentTranslation()).thenThrow(RuntimeException("Random exception"))
-        `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
-        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
+    fun `test currentTranslation from constructor with exception`() = runBlocking {
+        coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
+        coEvery { localReadingStorage.readCurrentTranslation() } throws RuntimeException("Random exception")
+        coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
 
+        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
         assertTrue(bibleReadingRepository.currentTranslation.first().isEmpty())
     }
 
     @Test
-    fun testSaveCurrentTranslation() = runBlocking {
-        `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
-        `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-        `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
-        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
+    fun `test saveCurrentTranslation()`() = runBlocking {
+        coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
+        coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
+        coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
+        coEvery { localReadingStorage.saveCurrentTranslation(any()) } returns Unit
 
+        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
         bibleReadingRepository.saveCurrentTranslation(MockContents.cuvShortName)
         assertEquals(MockContents.cuvShortName, bibleReadingRepository.currentTranslation.first())
     }
 
     @Test
-    fun testObserveInitialParallelTranslations() = runBlocking {
-        `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
-        `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-        `when`(localReadingStorage.readParallelTranslations()).thenReturn(listOf(MockContents.cuvShortName))
-        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
+    fun `test parallelTranslations from constructor`() = runBlocking {
+        coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
+        coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
+        coEvery { localReadingStorage.readParallelTranslations() } returns listOf(MockContents.cuvShortName)
 
+        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
         assertEquals(listOf(MockContents.cuvShortName), bibleReadingRepository.parallelTranslations.first())
     }
 
     @Test
-    fun testObserveInitialParallelTranslationsWithException() = runBlocking {
-        `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
-        `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-        `when`(localReadingStorage.readParallelTranslations()).thenThrow(RuntimeException("Random exception"))
-        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
+    fun `test parallelTranslations from constructor with exception`() = runBlocking {
+        coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
+        coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
+        coEvery { localReadingStorage.readParallelTranslations() } throws RuntimeException("Random exception")
 
+        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
         assertTrue(bibleReadingRepository.parallelTranslations.first().isEmpty())
     }
 
     @Test
-    fun testUpdateParallelTranslations() = runBlocking {
-        `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
-        `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-        `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
+    fun `test requestParallelTranslation() and removeParallelTranslation()`() = runBlocking {
+        coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
+        coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
+        coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
+        coEvery { localReadingStorage.saveParallelTranslations(any()) } returns Unit
+
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         // adds a parallel
         bibleReadingRepository.requestParallelTranslation(MockContents.kjvShortName)
         assertEquals(listOf(MockContents.kjvShortName), bibleReadingRepository.parallelTranslations.first())
-        verify(localReadingStorage, times(1)).saveParallelTranslations(listOf(MockContents.kjvShortName))
+        coVerify(exactly = 1) { localReadingStorage.saveParallelTranslations(listOf(MockContents.kjvShortName)) }
 
         // adds the same parallel, and also a new one
         bibleReadingRepository.requestParallelTranslation(MockContents.kjvShortName)
         bibleReadingRepository.requestParallelTranslation(MockContents.cuvShortName)
         assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName), bibleReadingRepository.parallelTranslations.first().toSet())
-        verify(localReadingStorage, times(1)).saveParallelTranslations(listOf(MockContents.kjvShortName, MockContents.cuvShortName))
+        coVerify(exactly = 1) { localReadingStorage.saveParallelTranslations(listOf(MockContents.kjvShortName, MockContents.cuvShortName)) }
 
         // removes a non-exist parallel
         bibleReadingRepository.removeParallelTranslation("not_exist")
@@ -141,22 +151,22 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
         // removes a parallel
         bibleReadingRepository.removeParallelTranslation(MockContents.kjvShortName)
         assertEquals(listOf(MockContents.cuvShortName), bibleReadingRepository.parallelTranslations.first())
-        verify(localReadingStorage, times(1)).saveParallelTranslations(listOf(MockContents.cuvShortName))
+        coVerify(exactly = 1) { localReadingStorage.saveParallelTranslations(listOf(MockContents.cuvShortName)) }
 
         // removes another parallel
         bibleReadingRepository.removeParallelTranslation(MockContents.cuvShortName)
         assertTrue(bibleReadingRepository.parallelTranslations.first().isEmpty())
-        verify(localReadingStorage, times(1)).saveParallelTranslations(emptyList())
+        coVerify(exactly = 1) { localReadingStorage.saveParallelTranslations(emptyList()) }
     }
 
-
     @Test
-    fun testClearParallelTranslations() = runBlocking {
-        `when`(localReadingStorage.readCurrentVerseIndex()).thenReturn(VerseIndex(1, 2, 3))
-        `when`(localReadingStorage.readCurrentTranslation()).thenReturn(MockContents.kjvShortName)
-        `when`(localReadingStorage.readParallelTranslations()).thenReturn(emptyList())
-        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
+    fun `test clearParallelTranslation()`() = runBlocking {
+        coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
+        coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
+        coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
+        coEvery { localReadingStorage.saveParallelTranslations(any()) } returns Unit
 
+        val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
         bibleReadingRepository.requestParallelTranslation(MockContents.kjvShortName)
         bibleReadingRepository.requestParallelTranslation(MockContents.cuvShortName)
         assertEquals(setOf(MockContents.kjvShortName, MockContents.cuvShortName), bibleReadingRepository.parallelTranslations.first().toSet())
@@ -166,59 +176,44 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testReadBookNames() = runBlocking {
+    fun `test readBookNames()`() = runBlocking {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         // no cache yet, read from LocalReadingStorage
-        `when`(localReadingStorage.readBookNames(MockContents.kjvShortName))
-                .thenReturn(MockContents.kjvBookNames)
-        assertEquals(MockContents.kjvBookNames,
-                bibleReadingRepository.readBookNames(MockContents.kjvShortName))
+        coEvery { localReadingStorage.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
+        assertEquals(MockContents.kjvBookNames, bibleReadingRepository.readBookNames(MockContents.kjvShortName))
 
         // has cache now, read from there
-        `when`(localReadingStorage.readBookNames(anyString()))
-                .thenThrow(IllegalStateException("Should read from in-memory cache"))
-        assertEquals(MockContents.kjvBookNames,
-                bibleReadingRepository.readBookNames(MockContents.kjvShortName))
+        coEvery { localReadingStorage.readBookNames(any()) } throws IllegalStateException("Should read from in-memory cache")
+        assertEquals(MockContents.kjvBookNames, bibleReadingRepository.readBookNames(MockContents.kjvShortName))
     }
 
     @Test
-    fun testReadBookShortNames() = runBlocking {
+    fun `test readBookShortNames()`() = runBlocking {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         // no cache yet, read from LocalReadingStorage
-        `when`(localReadingStorage.readBookShortNames(MockContents.kjvShortName))
-                .thenReturn(MockContents.kjvBookShortNames)
-        assertEquals(MockContents.kjvBookShortNames,
-                bibleReadingRepository.readBookShortNames(MockContents.kjvShortName))
+        coEvery { localReadingStorage.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
+        assertEquals(MockContents.kjvBookShortNames, bibleReadingRepository.readBookShortNames(MockContents.kjvShortName))
 
         // has cache now, read from there
-        `when`(localReadingStorage.readBookShortNames(anyString()))
-                .thenThrow(IllegalStateException("Should read from in-memory cache"))
-        assertEquals(MockContents.kjvBookShortNames,
-                bibleReadingRepository.readBookShortNames(MockContents.kjvShortName))
+        coEvery { localReadingStorage.readBookShortNames(any()) } throws IllegalStateException("Should read from in-memory cache")
+        assertEquals(MockContents.kjvBookShortNames, bibleReadingRepository.readBookShortNames(MockContents.kjvShortName))
     }
 
     @Test
-    fun testReadVerses() = runBlocking {
+    fun `test readVerses()`() = runBlocking {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         // no cache yet, read from LocalReadingStorage
-        `when`(localReadingStorage.readBookNames(MockContents.kjvShortName))
-                .thenReturn(MockContents.kjvBookNames)
-        `when`(localReadingStorage.readBookShortNames(MockContents.kjvShortName))
-                .thenReturn(MockContents.kjvBookShortNames)
-        `when`(localReadingStorage.readVerses(MockContents.kjvShortName, 0, 0))
-                .thenReturn(MockContents.kjvVerses)
-        assertEquals(MockContents.kjvVerses,
-                bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0))
+        coEvery { localReadingStorage.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
+        coEvery { localReadingStorage.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
+        coEvery { localReadingStorage.readVerses(MockContents.kjvShortName, 0, 0) } returns MockContents.kjvVerses
+        assertEquals(MockContents.kjvVerses, bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0))
 
         // has cache now, read from there
-        `when`(localReadingStorage.readBookNames(anyString()))
-                .thenThrow(IllegalStateException("Should read from in-memory cache"))
-        `when`(localReadingStorage.readVerses(anyString(), anyInt(), anyInt()))
-                .thenThrow(IllegalStateException("Should read from in-memory cache"))
-        assertEquals(MockContents.kjvVerses,
-                bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0))
+        coEvery { localReadingStorage.readBookNames(any()) } throws IllegalStateException("Should read from in-memory cache")
+        coEvery { localReadingStorage.readVerses(any(), any(), any()) } throws IllegalStateException("Should read from in-memory cache")
+        assertEquals(MockContents.kjvVerses, bibleReadingRepository.readVerses(MockContents.kjvShortName, 0, 0))
     }
 }

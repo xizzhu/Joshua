@@ -23,7 +23,7 @@ import kotlin.test.assertTrue
 
 class ReadingProgressTest : BaseUnitTest() {
     @Test
-    fun testValidChapterReadingStatus() {
+    fun `test valid ChapterReadingStatus`() {
         for (bookIndex in 0 until Bible.BOOK_COUNT) {
             for (chapterIndex in 0 until Bible.getChapterCount(bookIndex)) {
                 assertTrue(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 0, 0L, 0L).isValid())
@@ -32,7 +32,7 @@ class ReadingProgressTest : BaseUnitTest() {
     }
 
     @Test
-    fun testInvalidChapterReadingStatus() {
+    fun `test invalid ChapterReadingStatus`() {
         assertFalse(ReadingProgress.ChapterReadingStatus(-1, 0, 0, 0L, 0L).isValid())
         assertFalse(ReadingProgress.ChapterReadingStatus(Bible.BOOK_COUNT, 0, 0, 0L, 0L).isValid())
         assertFalse(ReadingProgress.ChapterReadingStatus(0, -1, 0, 0L, 0L).isValid())
@@ -43,12 +43,12 @@ class ReadingProgressTest : BaseUnitTest() {
     }
 
     @Test
-    fun testValidReadingProgress() {
+    fun `test valid ReadingProgress`() {
         assertTrue(ReadingProgress(0, 0L, listOf(ReadingProgress.ChapterReadingStatus(0, 0, 0, 0L, 0L))).isValid())
     }
 
     @Test
-    fun testInvalidReadingProgress() {
+    fun `test invalid ReadingProgress`() {
         assertFalse(ReadingProgress(-1, 0L, listOf(ReadingProgress.ChapterReadingStatus(0, 0, 0, 0L, 0L))).isValid())
         assertFalse(ReadingProgress(0, -1L, listOf(ReadingProgress.ChapterReadingStatus(0, 0, 0, 0L, 0L))).isValid())
         assertFalse(ReadingProgress(0, 0L, listOf(ReadingProgress.ChapterReadingStatus(-1, 0, 0, 0L, 0L))).isValid())
