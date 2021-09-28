@@ -23,8 +23,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.mockito.Mockito
-import org.mockito.MockitoAnnotations
 import java.util.*
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -33,13 +31,10 @@ abstract class BaseUnitTest {
     protected val testDispatcher = TestCoroutineDispatcher()
     protected val testCoroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + testDispatcher)
 
-    private lateinit var mockCloseable: AutoCloseable
-
     @CallSuper
     @BeforeTest
     open fun setup() {
         Dispatchers.setMain(testDispatcher)
-        mockCloseable = MockitoAnnotations.openMocks(this)
         Locale.setDefault(Locale.US)
     }
 
@@ -48,12 +43,5 @@ abstract class BaseUnitTest {
     open fun tearDown() {
         Dispatchers.resetMain()
         testDispatcher.cleanupTestCoroutines()
-        mockCloseable.close()
-    }
-
-    protected fun <T> any(): T {
-        // Mockito.any() returns null, but Kotlin hates it, so we have this hack here.
-        Mockito.any<T>()
-        return null as T
     }
 }

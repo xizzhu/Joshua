@@ -144,7 +144,6 @@ dependencies {
 
     testImplementation(Dependencies.Kotlin.test)
     testImplementation(Dependencies.Kotlin.coroutinesTest)
-    testImplementation(Dependencies.Mockito.mockito)
     testImplementation(Dependencies.Mockk.mockk)
     testImplementation(Dependencies.Robolectric.robolectric)
 
@@ -154,7 +153,6 @@ dependencies {
     androidTestImplementation(Dependencies.AndroidX.Test.rules)
     androidTestImplementation(Dependencies.AndroidX.Test.Espresso.core)
     androidTestImplementation(Dependencies.AndroidX.Test.Espresso.contrib)
-    androidTestImplementation(Dependencies.Mockito.android)
 }
 
 apply {

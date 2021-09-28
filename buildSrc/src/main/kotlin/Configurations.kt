@@ -93,7 +93,6 @@ object Versions {
 
     const val logger = "0.4.0"
 
-    const val mockito = "3.12.3"
     const val mockk = "1.12.0"
     const val robolectric = "4.5"
 }
@@ -172,11 +171,6 @@ object Dependencies {
 
     object Logger {
         const val logger = "com.github.xizzhu:Logger:${Versions.logger}"
-    }
-
-    object Mockito {
-        const val mockito = "org.mockito:mockito-core:${Versions.mockito}"
-        const val android = "org.mockito:mockito-android:${Versions.mockito}"
     }
 
     object Mockk {
