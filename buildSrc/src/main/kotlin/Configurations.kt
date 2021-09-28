@@ -66,9 +66,7 @@ object Versions {
         }
 
         object Test {
-            const val junit = "1.1.3"
-            const val rules = "1.4.0"
-            const val espresso = "3.4.0"
+            const val core = "1.4.0"
         }
     }
 
@@ -93,7 +91,6 @@ object Versions {
 
     const val logger = "0.4.0"
 
-    const val mockito = "3.12.3"
     const val mockk = "1.12.0"
     const val robolectric = "4.5"
 }
@@ -133,15 +130,7 @@ object Dependencies {
         }
 
         object Test {
-            const val junit = "androidx.test.ext:junit:${Versions.AndroidX.Test.junit}"
-            const val rules = "androidx.test:rules:${Versions.AndroidX.Test.rules}"
-
-            const val runner = "androidx.test.runner.AndroidJUnitRunner"
-
-            object Espresso {
-                const val core = "androidx.test.espresso:espresso-core:${Versions.AndroidX.Test.espresso}"
-                const val contrib = "androidx.test.espresso:espresso-contrib:${Versions.AndroidX.Test.espresso}"
-            }
+            const val core = "androidx.test:core:${Versions.AndroidX.Test.core}"
         }
     }
 
@@ -172,11 +161,6 @@ object Dependencies {
 
     object Logger {
         const val logger = "com.github.xizzhu:Logger:${Versions.logger}"
-    }
-
-    object Mockito {
-        const val mockito = "org.mockito:mockito-core:${Versions.mockito}"
-        const val android = "org.mockito:mockito-android:${Versions.mockito}"
     }
 
     object Mockk {

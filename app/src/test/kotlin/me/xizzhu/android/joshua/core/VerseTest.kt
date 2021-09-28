@@ -23,19 +23,19 @@ import kotlin.test.assertTrue
 
 class VerseTest : BaseUnitTest() {
     @Test
-    fun testValidText() {
+    fun `test valid Verse_Text`() {
         assertTrue(Verse.Text("translationShortName", "").isValid())
         assertTrue(Verse.Text("translationShortName", "some random text").isValid())
     }
 
     @Test
-    fun testInvalidText() {
+    fun `test invalid Verse_Text`() {
         assertFalse(Verse.Text("", "").isValid())
         assertFalse(Verse.Text("", "some random text").isValid())
     }
 
     @Test
-    fun testValidVerse() {
+    fun `test valid Verse`() {
         assertTrue(
                 Verse(
                         VerseIndex(0, 0, 0),
@@ -65,7 +65,7 @@ class VerseTest : BaseUnitTest() {
     }
 
     @Test
-    fun testInvalidVerse() {
+    fun `test invalid Verse`() {
         assertFalse(
                 Verse(
                         VerseIndex.INVALID,

@@ -16,14 +16,14 @@
 
 package me.xizzhu.android.joshua.ui
 
+import io.mockk.every
+import io.mockk.spyk
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.spy
 import java.util.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TranslationInfoComparatorTest : BaseUnitTest() {
@@ -37,21 +37,21 @@ class TranslationInfoComparatorTest : BaseUnitTest() {
     private lateinit var comparatorLanguageThenShortName: TranslationInfoComparator
     private lateinit var defaultLocale: Locale
 
-    @Before
+    @BeforeTest
     override fun setup() {
         super.setup()
 
         defaultLocale = Locale.getDefault()
         Locale.setDefault(Locale.US)
 
-        comparatorLanguageThenName = spy(TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_NAME))
-        `when`(comparatorLanguageThenName.userLanguage()).thenReturn(Locale.US.displayLanguage)
+        comparatorLanguageThenName = spyk(TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_NAME))
+        every { comparatorLanguageThenName.userLanguage() } returns Locale.US.displayLanguage
 
-        comparatorLanguageThenShortName = spy(TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME))
-        `when`(comparatorLanguageThenShortName.userLanguage()).thenReturn(Locale.US.displayLanguage)
+        comparatorLanguageThenShortName = spyk(TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME))
+        every { comparatorLanguageThenShortName.userLanguage() } returns Locale.US.displayLanguage
     }
 
-    @After
+    @AfterTest
     override fun tearDown() {
         Locale.setDefault(defaultLocale)
 

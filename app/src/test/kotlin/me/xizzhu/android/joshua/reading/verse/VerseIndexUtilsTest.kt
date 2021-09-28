@@ -19,7 +19,7 @@ package me.xizzhu.android.joshua.reading.verse
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class VerseIndexUtilsTest : BaseUnitTest() {

@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.core.repository.remote.android
 
 import android.util.JsonReader
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withContext
@@ -28,32 +29,39 @@ import java.util.zip.ZipInputStream
 
 class HttpTranslationService : RemoteTranslationService {
     override suspend fun fetchTranslations(): List<RemoteTranslationInfo> = withContext(Dispatchers.IO) {
-        return@withContext JsonReader(BufferedReader(InputStreamReader(getInputStream("list.json"), "UTF-8")))
-                .use { reader -> reader.readListJson() }
+        return@withContext toRemoteTranslations(getInputStream("list.json"))
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun toRemoteTranslations(inputStream: InputStream): List<RemoteTranslationInfo> =
+            JsonReader(BufferedReader(InputStreamReader(inputStream, "UTF-8"))).use { reader -> reader.readListJson() }
+
     override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation = withContext(Dispatchers.IO) {
+        return@withContext toRemoteTranslation(channel, translationInfo, getInputStream("translations/${translationInfo.shortName}.zip"))
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun toRemoteTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo, inputStream: InputStream): RemoteTranslation {
         lateinit var bookNamesShortNamesPair: Pair<List<String>, List<String>>
         val verses = HashMap<Pair<Int, Int>, List<String>>()
 
         var progress = -1
-        ZipInputStream(BufferedInputStream(getInputStream("translations/${translationInfo.shortName}.zip")))
-                .forEachIndexed { index, entryName, contentReader ->
-                    if (entryName == "books.json") {
-                        bookNamesShortNamesPair = contentReader.readBooksJson()
-                    } else {
-                        val (bookIndex, chapterIndex) = entryName.substring(0, entryName.length - 5).split("-")
-                        verses[Pair(bookIndex.toInt(), chapterIndex.toInt())] = contentReader.readChapterJson()
-                    }
+        ZipInputStream(BufferedInputStream(inputStream)).forEachIndexed { index, entryName, contentReader ->
+            if (entryName == "books.json") {
+                bookNamesShortNamesPair = contentReader.readBooksJson()
+            } else {
+                val (bookIndex, chapterIndex) = entryName.substring(0, entryName.length - 5).split("-")
+                verses[Pair(bookIndex.toInt(), chapterIndex.toInt())] = contentReader.readChapterJson()
+            }
 
-                    // only emits if the progress is actually changed
-                    val currentProgress = index / 12
-                    if (currentProgress > progress) {
-                        progress = currentProgress
-                        channel.trySend(progress)
-                    }
-                }
+            // only emits if the progress is actually changed
+            val currentProgress = index / 12
+            if (currentProgress > progress) {
+                progress = currentProgress
+                channel.trySend(progress)
+            }
+        }
 
-        return@withContext RemoteTranslation(translationInfo, bookNamesShortNamesPair.first, bookNamesShortNamesPair.second, verses)
+        return RemoteTranslation(translationInfo, bookNamesShortNamesPair.first, bookNamesShortNamesPair.second, verses)
     }
 }

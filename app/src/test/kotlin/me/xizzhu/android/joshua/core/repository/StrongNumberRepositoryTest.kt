@@ -16,6 +16,9 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
@@ -25,16 +28,12 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberIndexes
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberWords
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import org.mockito.Mock
-import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class StrongNumberRepositoryTest : BaseUnitTest() {
-    @Mock
     private lateinit var localStrongNumberStorage: LocalStrongNumberStorage
-    @Mock
     private lateinit var remoteStrongNumberStorage: RemoteStrongNumberStorage
 
     private lateinit var strongNumberRepository: StrongNumberRepository
@@ -43,16 +42,19 @@ class StrongNumberRepositoryTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
+        localStrongNumberStorage = mockk()
+        remoteStrongNumberStorage = mockk()
         strongNumberRepository = StrongNumberRepository(localStrongNumberStorage, remoteStrongNumberStorage)
     }
 
     @Test
-    fun testDownload() = runBlocking {
+    fun `test download()`() = runBlocking {
+        coEvery { localStrongNumberStorage.save(any(), any(), any()) } returns Unit
+        coEvery { remoteStrongNumberStorage.fetchIndexes(any()) } returns RemoteStrongNumberIndexes(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex)
+        coEvery { remoteStrongNumberStorage.fetchWords(any()) } returns RemoteStrongNumberWords(MockContents.strongNumberWords)
+
         val versesDownloadProgress = Channel<Int>()
         val wordsDownloadProgress = Channel<Int>()
-        `when`(remoteStrongNumberStorage.fetchIndexes(versesDownloadProgress)).thenReturn(RemoteStrongNumberIndexes(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex))
-        `when`(remoteStrongNumberStorage.fetchWords(wordsDownloadProgress)).thenReturn(RemoteStrongNumberWords(MockContents.strongNumberWords))
-
         var called = false
         strongNumberRepository.download(versesDownloadProgress, wordsDownloadProgress)
                 .collect {
@@ -62,7 +64,8 @@ class StrongNumberRepositoryTest : BaseUnitTest() {
         assertTrue(called)
         assertTrue(versesDownloadProgress.isClosedForSend && versesDownloadProgress.isClosedForReceive)
         assertTrue(wordsDownloadProgress.isClosedForSend && wordsDownloadProgress.isClosedForReceive)
-        verify(localStrongNumberStorage, times(1)).save(
-                MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex, MockContents.strongNumberWords)
+        coVerify(exactly = 1) {
+            localStrongNumberStorage.save(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex, MockContents.strongNumberWords)
+        }
     }
 }

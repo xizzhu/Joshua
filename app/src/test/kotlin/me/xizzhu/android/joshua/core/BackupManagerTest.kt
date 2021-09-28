@@ -16,251 +16,287 @@
 
 package me.xizzhu.android.joshua.core
 
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.mockito.Mock
-import org.mockito.Mockito.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class BackupManagerTest : BaseUnitTest() {
-    @Mock
     private lateinit var serializer: BackupManager.Serializer
-    @Mock
     private lateinit var bookmarkRepository: VerseAnnotationRepository<Bookmark>
-    @Mock
     private lateinit var highlightRepository: VerseAnnotationRepository<Highlight>
-    @Mock
     private lateinit var noteRepository: VerseAnnotationRepository<Note>
-    @Mock
     private lateinit var readingProgressRepository: ReadingProgressRepository
-
     private lateinit var backupManager: BackupManager
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        runBlocking {
-            `when`(bookmarkRepository.read(Constants.SORT_BY_BOOK)).thenReturn(emptyList())
-            `when`(highlightRepository.read(Constants.SORT_BY_BOOK)).thenReturn(emptyList())
-            `when`(noteRepository.read(Constants.SORT_BY_BOOK)).thenReturn(emptyList())
-            `when`(readingProgressRepository.read()).thenReturn(ReadingProgress(0, 0L, emptyList()))
-            backupManager = BackupManager(serializer, bookmarkRepository, highlightRepository, noteRepository, readingProgressRepository)
-        }
+        serializer = mockk()
+        bookmarkRepository = mockk()
+        coEvery { bookmarkRepository.read(Constants.SORT_BY_BOOK) } returns emptyList()
+        coEvery { bookmarkRepository.save(any() as List<Bookmark>) } returns Unit
+        highlightRepository = mockk()
+        coEvery { highlightRepository.read(Constants.SORT_BY_BOOK) } returns emptyList()
+        coEvery { highlightRepository.save(any() as List<Highlight>) } returns Unit
+        noteRepository = mockk()
+        coEvery { noteRepository.read(Constants.SORT_BY_BOOK) } returns emptyList()
+        coEvery { noteRepository.save(any() as List<Note>) } returns Unit
+        readingProgressRepository = mockk()
+        coEvery { readingProgressRepository.read() } returns ReadingProgress(0, 0L, emptyList())
+        coEvery { readingProgressRepository.save(any()) } returns Unit
+
+        backupManager = BackupManager(serializer, bookmarkRepository, highlightRepository, noteRepository, readingProgressRepository)
     }
 
     @Test
-    fun testPrepareForBackup() {
-        runBlocking {
-            `when`(serializer.serialize(any())).thenReturn("random value")
-            assertEquals("random value", backupManager.prepareForBackup())
-        }
+    fun `test prepareForBackup()`() = runBlocking {
+        every { serializer.serialize(any()) } returns "random value"
+        assertEquals("random value", backupManager.prepareForBackup())
     }
 
     @Test(expected = RuntimeException::class)
-    fun testPrepareForBackupWithException() {
-        runBlocking {
-            `when`(serializer.serialize(any())).thenThrow(RuntimeException("Random exception"))
-            backupManager.prepareForBackup()
-        }
+    fun `test prepareForBackup() with exception`(): Unit = runBlocking {
+        every { serializer.serialize(any()) } throws RuntimeException("Random exception")
+
+        backupManager.prepareForBackup()
+        fail()
     }
 
     @Test(expected = RuntimeException::class)
-    fun testPrepareForBackupWithAsyncFailed() {
-        runBlocking {
-            `when`(bookmarkRepository.read(Constants.SORT_BY_BOOK)).thenThrow(RuntimeException("Random exception"))
-            backupManager.prepareForBackup()
+    fun `test prepareForBackup() with failure in async operations`(): Unit = runBlocking {
+        coEvery { bookmarkRepository.read(Constants.SORT_BY_BOOK) } throws RuntimeException("Random exception")
+
+        backupManager.prepareForBackup()
+        fail()
+    }
+
+    @Test
+    fun `test restore() with minimum content`() = runBlocking {
+        every { serializer.deserialize("") } returns BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList()))
+        coEvery { readingProgressRepository.save(ReadingProgress(1, 2L, emptyList())) } returns Unit
+
+        backupManager.restore("")
+        coVerify(exactly = 1) {
+            bookmarkRepository.save(emptyList())
+            highlightRepository.save(emptyList())
+            noteRepository.save(emptyList())
+            readingProgressRepository.save(ReadingProgress(1, 2L, emptyList()))
         }
     }
 
     @Test
-    fun testRestoreWithMinimumContent() {
-        runBlocking {
-            `when`(serializer.deserialize("")).thenReturn(BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList())))
-            backupManager.restore("")
-            verify(readingProgressRepository, times(1)).save(ReadingProgress(1, 2L, emptyList()))
-        }
-    }
+    fun `test restore() with bookmarks`() = runBlocking {
+        coEvery { bookmarkRepository.read(Constants.SORT_BY_BOOK) } returns listOf(
+                Bookmark(VerseIndex(0, 1, 2), 3L),
+                Bookmark(VerseIndex(4, 5, 6), 7L)
+        )
+        every { serializer.deserialize("") } returns BackupManager.Data(
+                listOf(
+                        Bookmark(VerseIndex(0, 1, 2), 33L),
+                        Bookmark(VerseIndex(0, 1, 3), 456L),
+                        Bookmark(VerseIndex(4, 5, 6), 1L)
+                ),
+                emptyList(),
+                emptyList(),
+                ReadingProgress(0, 0L, emptyList())
+        )
 
-    @Test
-    fun testRestoreWithBookmarks() {
-        runBlocking {
-            `when`(bookmarkRepository.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(
-                    Bookmark(VerseIndex(0, 1, 2), 3L),
-                    Bookmark(VerseIndex(4, 5, 6), 7L)
-            ))
-            `when`(serializer.deserialize("")).thenReturn(
-                    BackupManager.Data(
-                            listOf(
-                                    Bookmark(VerseIndex(0, 1, 2), 33L),
-                                    Bookmark(VerseIndex(0, 1, 3), 456L),
-                                    Bookmark(VerseIndex(4, 5, 6), 1L)
-                            ),
-                            emptyList(),
-                            emptyList(),
-                            ReadingProgress(0, 0L, emptyList())
-                    )
-            )
-
-            backupManager.restore("")
-            verify(bookmarkRepository, times(1)).save(listOf(
+        backupManager.restore("")
+        coVerify(exactly = 1) {
+            bookmarkRepository.save(listOf(
                     Bookmark(VerseIndex(0, 1, 2), 33L),
                     Bookmark(VerseIndex(0, 1, 3), 456L),
                     Bookmark(VerseIndex(4, 5, 6), 7L)
             ))
+            highlightRepository.save(emptyList())
+            noteRepository.save(emptyList())
+            readingProgressRepository.save(ReadingProgress(0, 0L, emptyList()))
         }
     }
 
     @Test
-    fun testRestoreWithHighlights() {
-        runBlocking {
-            `when`(highlightRepository.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(
-                    Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_YELLOW, 3L),
-                    Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_BLUE, 7L)
-            ))
-            `when`(serializer.deserialize("")).thenReturn(
-                    BackupManager.Data(
-                            emptyList(),
-                            listOf(
-                                    Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_GREEN, 33L),
-                                    Highlight(VerseIndex(0, 1, 3), Highlight.COLOR_PINK, 456L),
-                                    Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_PURPLE, 1L)
-                            ),
-                            emptyList(),
-                            ReadingProgress(0, 0L, emptyList())
-                    )
-            )
+    fun `test restore() with highlights`() = runBlocking {
+        coEvery { highlightRepository.read(Constants.SORT_BY_BOOK) } returns listOf(
+                Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_YELLOW, 3L),
+                Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_BLUE, 7L)
+        )
+        every { serializer.deserialize("") } returns BackupManager.Data(
+                emptyList(),
+                listOf(
+                        Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_GREEN, 33L),
+                        Highlight(VerseIndex(0, 1, 3), Highlight.COLOR_PINK, 456L),
+                        Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_PURPLE, 1L)
+                ),
+                emptyList(),
+                ReadingProgress(0, 0L, emptyList())
+        )
 
-            backupManager.restore("")
-            verify(highlightRepository, times(1)).save(listOf(
+        backupManager.restore("")
+        coVerify(exactly = 1) {
+            bookmarkRepository.save(emptyList())
+            highlightRepository.save(listOf(
                     Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_GREEN, 33L),
                     Highlight(VerseIndex(0, 1, 3), Highlight.COLOR_PINK, 456L),
                     Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_BLUE, 7L)
             ))
+            noteRepository.save(emptyList())
+            readingProgressRepository.save(ReadingProgress(0, 0L, emptyList()))
         }
     }
 
     @Test
-    fun testRestoreWithNotes() {
-        runBlocking {
-            `when`(noteRepository.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(
-                    Note(VerseIndex(0, 1, 2), "random note", 3L),
-                    Note(VerseIndex(4, 5, 6), "random note 2", 7L)
-            ))
-            `when`(serializer.deserialize("")).thenReturn(
-                    BackupManager.Data(
-                            emptyList(),
-                            emptyList(),
-                            listOf(
-                                    Note(VerseIndex(0, 1, 2), "newer random note", 33L),
-                                    Note(VerseIndex(0, 1, 3), "another random note", 456L),
-                                    Note(VerseIndex(4, 5, 6), "older random note", 1L)
-                            ),
-                            ReadingProgress(0, 0L, emptyList())
-                    )
-            )
+    fun `test restore() with notes`() = runBlocking {
+        coEvery { noteRepository.read(Constants.SORT_BY_BOOK) } returns listOf(
+                Note(VerseIndex(0, 1, 2), "random note", 3L),
+                Note(VerseIndex(4, 5, 6), "random note 2", 7L)
+        )
+        every { serializer.deserialize("") } returns BackupManager.Data(
+                emptyList(),
+                emptyList(),
+                listOf(
+                        Note(VerseIndex(0, 1, 2), "newer random note", 33L),
+                        Note(VerseIndex(0, 1, 3), "another random note", 456L),
+                        Note(VerseIndex(4, 5, 6), "older random note", 1L)
+                ),
+                ReadingProgress(0, 0L, emptyList())
+        )
 
-            backupManager.restore("")
-            verify(noteRepository, times(1)).save(listOf(
+        backupManager.restore("")
+        coVerify(exactly = 1) {
+            bookmarkRepository.save(emptyList())
+            highlightRepository.save(emptyList())
+            noteRepository.save(listOf(
                     Note(VerseIndex(0, 1, 2), "newer random note", 33L),
                     Note(VerseIndex(0, 1, 3), "another random note", 456L),
                     Note(VerseIndex(4, 5, 6), "random note 2", 7L)
             ))
+            readingProgressRepository.save(ReadingProgress(0, 0L, emptyList()))
         }
     }
 
     @Test
-    fun testRestoreWithReadingProgress() {
-        runBlocking {
-            `when`(readingProgressRepository.read()).thenReturn(ReadingProgress(0, 0L, listOf(
-                    ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
-                    ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
-            )))
-            `when`(serializer.deserialize("")).thenReturn(BackupManager.Data(emptyList(), emptyList(), emptyList(),
-                    ReadingProgress(1, 2L, listOf(
+    fun `test restore() with reading progress`() = runBlocking {
+        coEvery { readingProgressRepository.read() } returns ReadingProgress(
+                continuousReadingDays = 0,
+                lastReadingTimestamp = 0L,
+                chapterReadingStatus = listOf(
+                        ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
+                        ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
+                )
+        )
+        every { serializer.deserialize("") } returns BackupManager.Data(
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                ReadingProgress(
+                        continuousReadingDays = 1,
+                        lastReadingTimestamp = 2L,
+                        chapterReadingStatus = listOf(
+                                ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 55L),
+                                ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 5L),
+                                ReadingProgress.ChapterReadingStatus(5, 6, 7, 2L, 1L)
+                        )
+                )
+        )
+
+        backupManager.restore("")
+        coVerify(exactly = 1) {
+            bookmarkRepository.save(emptyList())
+            highlightRepository.save(emptyList())
+            noteRepository.save(emptyList())
+            readingProgressRepository.save(ReadingProgress(
+                    continuousReadingDays = 1,
+                    lastReadingTimestamp = 2L,
+                    chapterReadingStatus = listOf(
                             ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 55L),
                             ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 5L),
-                            ReadingProgress.ChapterReadingStatus(5, 6, 7, 2L, 1L)
-                    ))))
-
-            backupManager.restore("")
-            verify(readingProgressRepository, times(1)).save(ReadingProgress(1, 2L, listOf(
-                    ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 55L),
-                    ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 5L),
-                    ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
-            )))
+                            ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
+                    )
+            ))
         }
     }
 
     @Test
-    fun testRestoreWithEverything() {
-        runBlocking {
-            `when`(bookmarkRepository.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(
-                    Bookmark(VerseIndex(0, 1, 2), 3L),
-                    Bookmark(VerseIndex(4, 5, 6), 7L)
-            ))
-            `when`(highlightRepository.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(
-                    Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_YELLOW, 3L),
-                    Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_BLUE, 7L)
-            ))
-            `when`(noteRepository.read(Constants.SORT_BY_BOOK)).thenReturn(listOf(
-                    Note(VerseIndex(0, 1, 2), "random note", 3L),
-                    Note(VerseIndex(4, 5, 6), "random note 2", 7L)
-            ))
-            `when`(readingProgressRepository.read()).thenReturn(ReadingProgress(0, 0L, listOf(
-                    ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
-                    ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
-            )))
-            `when`(serializer.deserialize("")).thenReturn(
-                    BackupManager.Data(
-                            listOf(
-                                    Bookmark(VerseIndex(0, 1, 2), 33L),
-                                    Bookmark(VerseIndex(0, 1, 3), 456L),
-                                    Bookmark(VerseIndex(4, 5, 6), 1L)
-                            ),
-                            listOf(
-                                    Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_GREEN, 33L),
-                                    Highlight(VerseIndex(0, 1, 3), Highlight.COLOR_PINK, 456L),
-                                    Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_PURPLE, 1L)
-                            ),
-                            listOf(
-                                    Note(VerseIndex(0, 1, 2), "newer random note", 33L),
-                                    Note(VerseIndex(0, 1, 3), "another random note", 456L),
-                                    Note(VerseIndex(4, 5, 6), "older random note", 1L)
-                            ),
-                            ReadingProgress(1, 2L, listOf(
-                                    ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 55L),
-                                    ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 5L),
-                                    ReadingProgress.ChapterReadingStatus(5, 6, 7, 2L, 1L)
-                            ))
-                    )
-            )
+    fun `test restore()`() = runBlocking {
+        coEvery { bookmarkRepository.read(Constants.SORT_BY_BOOK) } returns listOf(
+                Bookmark(VerseIndex(0, 1, 2), 3L),
+                Bookmark(VerseIndex(4, 5, 6), 7L)
+        )
+        coEvery { highlightRepository.read(Constants.SORT_BY_BOOK) } returns listOf(
+                Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_YELLOW, 3L),
+                Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_BLUE, 7L)
+        )
+        coEvery { noteRepository.read(Constants.SORT_BY_BOOK) } returns listOf(
+                Note(VerseIndex(0, 1, 2), "random note", 3L),
+                Note(VerseIndex(4, 5, 6), "random note 2", 7L)
+        )
+        coEvery { readingProgressRepository.read() } returns ReadingProgress(0, 0L, listOf(
+                ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 4L),
+                ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
+        ))
+        every { serializer.deserialize("") } returns BackupManager.Data(
+                listOf(
+                        Bookmark(VerseIndex(0, 1, 2), 33L),
+                        Bookmark(VerseIndex(0, 1, 3), 456L),
+                        Bookmark(VerseIndex(4, 5, 6), 1L)
+                ),
+                listOf(
+                        Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_GREEN, 33L),
+                        Highlight(VerseIndex(0, 1, 3), Highlight.COLOR_PINK, 456L),
+                        Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_PURPLE, 1L)
+                ),
+                listOf(
+                        Note(VerseIndex(0, 1, 2), "newer random note", 33L),
+                        Note(VerseIndex(0, 1, 3), "another random note", 456L),
+                        Note(VerseIndex(4, 5, 6), "older random note", 1L)
+                ),
+                ReadingProgress(
+                        continuousReadingDays = 1,
+                        lastReadingTimestamp = 2L,
+                        chapterReadingStatus = listOf(
+                                ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 55L),
+                                ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 5L),
+                                ReadingProgress.ChapterReadingStatus(5, 6, 7, 2L, 1L)
+                        )
+                )
+        )
 
-            backupManager.restore("")
-            verify(bookmarkRepository, times(1)).save(listOf(
+        backupManager.restore("")
+        coVerify(exactly = 1) {
+            bookmarkRepository.save(listOf(
                     Bookmark(VerseIndex(0, 1, 2), 33L),
                     Bookmark(VerseIndex(0, 1, 3), 456L),
                     Bookmark(VerseIndex(4, 5, 6), 7L)
             ))
-            verify(highlightRepository, times(1)).save(listOf(
+            highlightRepository.save(listOf(
                     Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_GREEN, 33L),
                     Highlight(VerseIndex(0, 1, 3), Highlight.COLOR_PINK, 456L),
                     Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_BLUE, 7L)
             ))
-            verify(noteRepository, times(1)).save(listOf(
+            noteRepository.save(listOf(
                     Note(VerseIndex(0, 1, 2), "newer random note", 33L),
                     Note(VerseIndex(0, 1, 3), "another random note", 456L),
                     Note(VerseIndex(4, 5, 6), "random note 2", 7L)
             ))
-            verify(readingProgressRepository, times(1)).save(ReadingProgress(1, 2L, listOf(
-                    ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 55L),
-                    ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 5L),
-                    ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
-            )))
+            readingProgressRepository.save(ReadingProgress(
+                    continuousReadingDays = 1,
+                    lastReadingTimestamp = 2L,
+                    chapterReadingStatus = listOf(
+                            ReadingProgress.ChapterReadingStatus(0, 1, 2, 3L, 55L),
+                            ReadingProgress.ChapterReadingStatus(1, 2, 3, 4L, 5L),
+                            ReadingProgress.ChapterReadingStatus(5, 6, 7, 8L, 9L)
+                    )
+            ))
         }
     }
 }

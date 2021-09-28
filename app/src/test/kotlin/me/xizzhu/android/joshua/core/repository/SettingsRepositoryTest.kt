@@ -46,7 +46,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveInitialSettings() = runBlocking {
+    fun `test observe settings within constructor`() = runBlocking {
         val settings = Settings(false, true, 3, false, false, true, Highlight.COLOR_PINK)
         coEvery { localSettingsStorage.readSettings() } returns settings
 
@@ -56,7 +56,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testObserveInitialSettingsWithException() = runBlocking {
+    fun `test observe settings within constructor with exception`() = runBlocking {
         coEvery { localSettingsStorage.readSettings() } throws RuntimeException("Random exception")
         settingsRepository = SettingsRepository(localSettingsStorage)
 
@@ -64,56 +64,56 @@ class SettingsRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun testSaveThenReadSettings() = runBlocking {
+    fun `test saveSettings()`() = runBlocking {
         val settings = Settings(false, true, 1, true, true, true, Highlight.COLOR_BLUE)
         settingsRepository.saveSettings(settings)
         assertEquals(settings, settingsRepository.settings.first())
     }
 
     @Test
-    fun `test saveSettings does nothing if setting remains unchanged`() = runBlocking {
+    fun `test saveSettings() does nothing if setting remains unchanged`() = runBlocking {
         settingsRepository.saveSettings(Settings.DEFAULT)
         settingsRepository.saveSettings(Settings.DEFAULT)
         coVerify(exactly = 0) { localSettingsStorage.saveSettings((any())) }
     }
 
     @Test
-    fun testSaveFontSizeScale() = runBlocking {
-        saveUpdatedSettings(Settings.DEFAULT.copy(fontSizeScale = 1))
+    fun `test saveSettings() for font size scale`() = runBlocking {
+        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(fontSizeScale = 1))
     }
 
-    private suspend fun saveUpdatedSettings(updatedSettings: Settings) {
+    private suspend fun saveUpdatedSettingsAndVerifySaveSettingsIsCalled(updatedSettings: Settings) {
         settingsRepository.saveSettings(updatedSettings)
         coVerify(exactly = 1) { localSettingsStorage.saveSettings(updatedSettings) }
     }
 
     @Test
-    fun testSaveKeepScreenOn() = runBlocking {
-        saveUpdatedSettings(Settings.DEFAULT.copy(keepScreenOn = false))
+    fun `test saveSettings() for keeping screen on`() = runBlocking {
+        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(keepScreenOn = false))
     }
 
     @Test
-    fun testSaveNightModeOn() = runBlocking {
-        saveUpdatedSettings(Settings.DEFAULT.copy(nightModeOn = true))
+    fun `test saveSettings() for night mode on`() = runBlocking {
+        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(nightModeOn = true))
     }
 
     @Test
-    fun testSaveSimpleReadingModeOn() = runBlocking {
-        saveUpdatedSettings(Settings.DEFAULT.copy(simpleReadingModeOn = true))
+    fun `test saveSettings() for for simple reading mode on`() = runBlocking {
+        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(simpleReadingModeOn = true))
     }
 
     @Test
-    fun testSaveHideSearchButton() = runBlocking {
-        saveUpdatedSettings(Settings.DEFAULT.copy(hideSearchButton = true))
+    fun `test saveSettings() for hiding search button`() = runBlocking {
+        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(hideSearchButton = true))
     }
 
     @Test
-    fun testSaveConsolidateVersesForSharing() = runBlocking {
-        saveUpdatedSettings(Settings.DEFAULT.copy(consolidateVersesForSharing = true))
+    fun `test saveSettings() for for consolidating verses for sharing`() = runBlocking {
+        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(consolidateVersesForSharing = true))
     }
 
     @Test
-    fun testSaveDefaultHighlightColor() = runBlocking {
-        saveUpdatedSettings(Settings.DEFAULT.copy(defaultHighlightColor = Highlight.COLOR_PURPLE))
+    fun `test saveSettings() for highlight color`() = runBlocking {
+        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(defaultHighlightColor = Highlight.COLOR_PURPLE))
     }
 }

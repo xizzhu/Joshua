@@ -17,35 +17,36 @@
 package me.xizzhu.android.joshua.core
 
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.Assert
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class VerseIndexTest : BaseUnitTest() {
     @Test
-    fun testValidIndex() {
+    fun `test valid VerseIndex`() {
         for (bookIndex in 0 until Bible.BOOK_COUNT) {
             for (chapterIndex in 0 until Bible.getChapterCount(bookIndex)) {
-                Assert.assertTrue(VerseIndex(bookIndex, chapterIndex, 0).isValid())
+                assertTrue(VerseIndex(bookIndex, chapterIndex, 0).isValid())
             }
         }
     }
 
     @Test
-    fun testInvalidBookIndex() {
-        Assert.assertFalse(VerseIndex(-1, 0, 0).isValid())
-        Assert.assertFalse(VerseIndex(Bible.BOOK_COUNT, 0, 0).isValid())
+    fun `test VerseIndex with invalid book index`() {
+        assertFalse(VerseIndex(-1, 0, 0).isValid())
+        assertFalse(VerseIndex(Bible.BOOK_COUNT, 0, 0).isValid())
     }
 
     @Test
-    fun testInvalidChapterIndex() {
+    fun `test VerseIndex with invalid chapter index`() {
         for (bookIndex in 0 until Bible.BOOK_COUNT) {
-            Assert.assertFalse(VerseIndex(bookIndex, -1, 0).isValid())
-            Assert.assertFalse(VerseIndex(bookIndex, Bible.getChapterCount(bookIndex), 0).isValid())
+            assertFalse(VerseIndex(bookIndex, -1, 0).isValid())
+            assertFalse(VerseIndex(bookIndex, Bible.getChapterCount(bookIndex), 0).isValid())
         }
     }
 
     @Test
-    fun testInvalidVerseIndex() {
-        Assert.assertFalse(VerseIndex(0, 0, -1).isValid())
+    fun `test VerseIndex with invalid verse index`() {
+        assertFalse(VerseIndex(0, 0, -1).isValid())
     }
 }

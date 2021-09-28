@@ -26,7 +26,7 @@ import java.util.zip.ZipInputStream
 private const val TIMEOUT_IN_MILLISECONDS = 30000 // 30 seconds
 private const val BASE_URL = "https://xizzhu.me/bible/download"
 
-fun getInputStream(relativeUrl: String): InputStream =
+internal fun getInputStream(relativeUrl: String): InputStream =
         URL("$BASE_URL/$relativeUrl")
                 .openConnection()
                 .apply {

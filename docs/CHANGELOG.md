@@ -4,13 +4,14 @@ CHANGELOG
 #### Next release
 - Changes:
   - Remove coveralls plugin
+  - Use Roblectric for instrumented tests
+  - Replace Mockito by Mockk (#201)
 - Bug fixes:
   - Should run backup & restore on IO thread
 - Update dependencies:
   - Kotlin to 1.5.30
   - AndroidX Activity to 1.3.1
   - Firebase Analytics to 19.0.1, Crashlytics to 18.2.1, Google Services plugin to 4.3.10
-  - Mockito to 3.12.3
 
 #### v0.17.1 (2021-08-02)
 - New features:

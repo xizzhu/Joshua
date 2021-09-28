@@ -16,45 +16,55 @@
 
 package me.xizzhu.android.joshua.core.repository
 
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.repository.local.LocalVerseAnnotationStorage
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.mockito.Mock
-import org.mockito.Mockito.*
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class VerseAnnotationRepositoryTest : BaseUnitTest() {
-    @Mock
     private lateinit var localVerseAnnotationStorage: LocalVerseAnnotationStorage<Bookmark>
 
-    private lateinit var verseAnnotationRepository: VerseAnnotationRepository<Bookmark>
+    @BeforeTest
+    override fun setup() {
+        super.setup()
+
+        localVerseAnnotationStorage = mockk()
+    }
 
     @Test
-    fun testObserveInitialSortOrder() = runBlocking {
-        `when`(localVerseAnnotationStorage.readSortOrder()).thenReturn(Constants.SORT_BY_BOOK)
-        verseAnnotationRepository = VerseAnnotationRepository(localVerseAnnotationStorage, testDispatcher)
+    fun `test sortOrder from constructor`() = runBlocking {
+        coEvery { localVerseAnnotationStorage.readSortOrder() } returns Constants.SORT_BY_BOOK
+
+        val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testDispatcher)
         assertEquals(Constants.SORT_BY_BOOK, verseAnnotationRepository.sortOrder.first())
     }
 
     @Test
-    fun testObserveInitialSortOrderWithException() = runBlocking {
-        `when`(localVerseAnnotationStorage.readSortOrder()).thenThrow(RuntimeException("Random exception"))
-        verseAnnotationRepository = VerseAnnotationRepository(localVerseAnnotationStorage, testDispatcher)
+    fun `test sortOrder from constructor with exception`() = runBlocking {
+        coEvery { localVerseAnnotationStorage.readSortOrder() } throws RuntimeException("Random exception")
+
+        val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testDispatcher)
         assertEquals(Constants.DEFAULT_SORT_ORDER, verseAnnotationRepository.sortOrder.first())
     }
 
     @Test
-    fun testSaveThenReadSortOrder() = runBlocking {
-        `when`(localVerseAnnotationStorage.readSortOrder()).thenReturn(Constants.DEFAULT_SORT_ORDER)
-        verseAnnotationRepository = VerseAnnotationRepository(localVerseAnnotationStorage, testDispatcher)
+    fun `test saveSortOrder()`() = runBlocking {
+        coEvery { localVerseAnnotationStorage.readSortOrder() } returns Constants.DEFAULT_SORT_ORDER
+        coEvery { localVerseAnnotationStorage.saveSortOrder(Constants.SORT_BY_BOOK) } returns Unit
+
+        val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testDispatcher)
         assertEquals(Constants.DEFAULT_SORT_ORDER, verseAnnotationRepository.sortOrder.first())
 
         verseAnnotationRepository.saveSortOrder(Constants.SORT_BY_BOOK)
-        verify(localVerseAnnotationStorage, times(1)).saveSortOrder(Constants.SORT_BY_BOOK)
+        coVerify(exactly = 1) { localVerseAnnotationStorage.saveSortOrder(Constants.SORT_BY_BOOK) }
         assertEquals(Constants.SORT_BY_BOOK, verseAnnotationRepository.sortOrder.first())
     }
 }
