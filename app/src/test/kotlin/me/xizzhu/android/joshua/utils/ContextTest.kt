@@ -20,43 +20,44 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SmallTest
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
+import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-@RunWith(AndroidJUnit4::class)
-@SmallTest
+@RunWith(RobolectricTestRunner::class)
 class ContextTest : BaseUnitTest() {
-    @Mock
     private lateinit var packageManager: PackageManager
-
-    private lateinit var resolveInfoList: MutableList<ResolveInfo>
+    private lateinit var resolveInfoList: List<ResolveInfo>
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        resolveInfoList = mutableListOf()
-        for (i in 0 until 10) {
-            val activityInfo = mock(ActivityInfo::class.java)
-            activityInfo.name = "name$i"
-            activityInfo.packageName = "packageName$i"
+        packageManager = mockk()
 
-            val resolveInfo = mock(ResolveInfo::class.java)
-            resolveInfo.activityInfo = activityInfo
-            resolveInfoList.add(resolveInfo)
+        resolveInfoList = ArrayList<ResolveInfo>().apply {
+            repeat(10) { i ->
+                val activityInfo = ActivityInfo().apply {
+                    name = "name$i"
+                    packageName = "packageName$i"
+                }
+
+                val resolveInfo = spyk(ResolveInfo()).apply {
+                    this.activityInfo = activityInfo
+                    every { iconResource } returns 0
+                    every { loadLabel(packageManager) } returns ""
+                }
+                add(resolveInfo)
+            }
         }
-
-        `when`(packageManager.queryIntentActivities(any(), ArgumentMatchers.anyInt())).thenReturn(resolveInfoList)
+        every { packageManager.queryIntentActivities(any(), any()) } returns resolveInfoList
     }
 
     @Test
