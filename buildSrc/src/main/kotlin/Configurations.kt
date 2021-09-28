@@ -66,9 +66,7 @@ object Versions {
         }
 
         object Test {
-            const val junit = "1.1.3"
-            const val rules = "1.4.0"
-            const val espresso = "3.4.0"
+            const val core = "1.4.0"
         }
     }
 
@@ -132,15 +130,7 @@ object Dependencies {
         }
 
         object Test {
-            const val junit = "androidx.test.ext:junit:${Versions.AndroidX.Test.junit}"
-            const val rules = "androidx.test:rules:${Versions.AndroidX.Test.rules}"
-
-            const val runner = "androidx.test.runner.AndroidJUnitRunner"
-
-            object Espresso {
-                const val core = "androidx.test.espresso:espresso-core:${Versions.AndroidX.Test.espresso}"
-                const val contrib = "androidx.test.espresso:espresso-contrib:${Versions.AndroidX.Test.espresso}"
-            }
+            const val core = "androidx.test:core:${Versions.AndroidX.Test.core}"
         }
     }
 

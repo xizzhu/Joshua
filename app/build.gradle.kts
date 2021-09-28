@@ -46,8 +46,6 @@ android {
         versionName = Versions.App.name
 
         resourceConfigurations.addAll(Configurations.supportedLocales)
-
-        testInstrumentationRunner = Dependencies.AndroidX.Test.runner
     }
 
     buildFeatures {
@@ -59,8 +57,7 @@ android {
         getByName("debug").java.srcDirs("src/debug/kotlin")
         getByName("release").java.srcDirs("src/release/kotlin")
 
-        getByName("test").java.srcDirs("src/testCommon/kotlin", "src/test/kotlin")
-        getByName("androidTest").java.srcDirs("src/testCommon/kotlin", "src/androidTest/kotlin")
+        getByName("test").java.srcDirs("src/test/kotlin")
     }
 
     signingConfigs {
@@ -144,15 +141,9 @@ dependencies {
 
     testImplementation(Dependencies.Kotlin.test)
     testImplementation(Dependencies.Kotlin.coroutinesTest)
+    testImplementation(Dependencies.AndroidX.Test.core)
     testImplementation(Dependencies.Mockk.mockk)
     testImplementation(Dependencies.Robolectric.robolectric)
-
-    androidTestImplementation(Dependencies.Kotlin.test)
-    androidTestImplementation(Dependencies.Kotlin.coroutinesTest)
-    androidTestImplementation(Dependencies.AndroidX.Test.junit)
-    androidTestImplementation(Dependencies.AndroidX.Test.rules)
-    androidTestImplementation(Dependencies.AndroidX.Test.Espresso.core)
-    androidTestImplementation(Dependencies.AndroidX.Test.Espresso.contrib)
 }
 
 apply {

@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.ui.recyclerview
 
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TextItemTest : BaseUnitTest() {

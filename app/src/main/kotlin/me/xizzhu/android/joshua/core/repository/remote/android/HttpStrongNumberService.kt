@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core.repository.remote.android
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withContext
@@ -26,78 +27,87 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberIndexes
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberWords
 import java.io.BufferedInputStream
+import java.io.InputStream
 import java.util.zip.ZipInputStream
 
 class HttpStrongNumberService : RemoteStrongNumberStorage {
     override suspend fun fetchIndexes(channel: SendChannel<Int>): RemoteStrongNumberIndexes = withContext(Dispatchers.IO) {
+        return@withContext toRemoteStrongNumberIndexes(channel, getInputStream("tools/sn_indexes.zip"))
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun toRemoteStrongNumberIndexes(channel: SendChannel<Int>, inputStream: InputStream): RemoteStrongNumberIndexes {
         val indexes = hashMapOf<VerseIndex, List<String>>()
         val reverseIndexes = hashMapOf<String, HashSet<VerseIndex>>()
 
         var progress = -1
-        ZipInputStream(BufferedInputStream(getInputStream("tools/sn_indexes.zip")))
-                .forEachIndexed { index, entryName, contentReader ->
-                    val book: Int
-                    val chapter: Int
-                    entryName.substring(0, entryName.length - 5).split("-").run {
-                        book = get(0).toInt()
-                        chapter = get(1).toInt()
-                    }
-                    contentReader.readStrongNumberVerses().forEach { (verse, strongWords) ->
-                        val verseIndex = VerseIndex(book, chapter, verse - 1)
-                        strongWords.map { if (book < Bible.OLD_TESTAMENT_COUNT) "H$it" else "G$it" }.run {
-                            indexes[verseIndex] = this
-                            forEach { sn ->
-                                (reverseIndexes[sn]
-                                        ?: HashSet<VerseIndex>().apply { reverseIndexes[sn] = this }).add(verseIndex)
-                            }
-                        }
-                    }
-
-                    // only emits if the progress is actually changed
-                    val currentProgress = index / 12
-                    if (currentProgress > progress) {
-                        progress = currentProgress
-                        channel.trySend(progress)
+        ZipInputStream(BufferedInputStream(inputStream)).forEachIndexed { index, entryName, contentReader ->
+            val book: Int
+            val chapter: Int
+            entryName.substring(0, entryName.length - 5).split("-").run {
+                book = get(0).toInt()
+                chapter = get(1).toInt()
+            }
+            contentReader.readStrongNumberVerses().forEach { (verse, strongWords) ->
+                val verseIndex = VerseIndex(book, chapter, verse - 1)
+                strongWords.map { if (book < Bible.OLD_TESTAMENT_COUNT) "H$it" else "G$it" }.run {
+                    indexes[verseIndex] = this
+                    forEach { sn ->
+                        (reverseIndexes[sn]
+                                ?: HashSet<VerseIndex>().apply { reverseIndexes[sn] = this }).add(verseIndex)
                     }
                 }
+            }
 
-        return@withContext RemoteStrongNumberIndexes(indexes, reverseIndexes.mapValues { (_, verseIndexes) -> verseIndexes.toList() })
+            // only emits if the progress is actually changed
+            val currentProgress = index / 12
+            if (currentProgress > progress) {
+                progress = currentProgress
+                channel.trySend(progress)
+            }
+        }
+
+        return RemoteStrongNumberIndexes(indexes, reverseIndexes.mapValues { (_, verseIndexes) -> verseIndexes.toList() })
     }
 
     override suspend fun fetchWords(channel: SendChannel<Int>): RemoteStrongNumberWords = withContext(Dispatchers.IO) {
+        return@withContext toRemoteStrongNumberWords(channel, getInputStream("tools/sn_en.zip"))
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun toRemoteStrongNumberWords(channel: SendChannel<Int>, inputStream: InputStream): RemoteStrongNumberWords {
         val words = hashMapOf<String, String>()
 
         var progress = 0
-        ZipInputStream(BufferedInputStream(getInputStream("tools/sn_en.zip")))
-                .forEachIndexed { _, entryName, contentReader ->
-                    when (entryName) {
-                        "hebrew.json" -> {
-                            contentReader.readStrongNumberWords().apply {
-                                if (size != Constants.STRONG_NUMBER_HEBREW_COUNT) {
-                                    throw IllegalStateException("Incorrect Strong number Hebrew words count: $size")
-                                }
-                            }.forEach { (sn, meaning) -> words["H$sn"] = meaning }
-
-                            progress += 50
-                            channel.trySend(progress)
+        ZipInputStream(BufferedInputStream(inputStream)).forEachIndexed { _, entryName, contentReader ->
+            when (entryName) {
+                "hebrew.json" -> {
+                    contentReader.readStrongNumberWords().apply {
+                        if (size != Constants.STRONG_NUMBER_HEBREW_COUNT) {
+                            throw IllegalStateException("Incorrect Strong number Hebrew words count: $size")
                         }
-                        "greek.json" -> {
-                            contentReader.readStrongNumberWords().apply {
-                                if (size != Constants.STRONG_NUMBER_GREEK_COUNT) {
-                                    throw IllegalStateException("Incorrect Strong number Greek words count: $size")
-                                }
-                            }.forEach { (sn, meaning) -> words["G$sn"] = meaning }
+                    }.forEach { (sn, meaning) -> words["H$sn"] = meaning }
 
-                            progress += 50
-                            channel.trySend(progress)
-                        }
-                        else -> throw IllegalStateException("Unknown entry ($entryName) in Strong number words")
-                    }
+                    progress += 50
+                    channel.trySend(progress)
                 }
+                "greek.json" -> {
+                    contentReader.readStrongNumberWords().apply {
+                        if (size != Constants.STRONG_NUMBER_GREEK_COUNT) {
+                            throw IllegalStateException("Incorrect Strong number Greek words count: $size")
+                        }
+                    }.forEach { (sn, meaning) -> words["G$sn"] = meaning }
+
+                    progress += 50
+                    channel.trySend(progress)
+                }
+                else -> throw IllegalStateException("Unknown entry ($entryName) in Strong number words")
+            }
+        }
 
         if (words.size != Constants.STRONG_NUMBER_HEBREW_COUNT + Constants.STRONG_NUMBER_GREEK_COUNT) {
             throw IllegalStateException("Incorrect Strong number words count (${words.size})")
         }
-        return@withContext RemoteStrongNumberWords(words)
+        return RemoteStrongNumberWords(words)
     }
 }
