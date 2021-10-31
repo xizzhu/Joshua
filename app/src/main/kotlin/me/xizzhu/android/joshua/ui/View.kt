@@ -22,6 +22,7 @@ import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.TypedArray
 import android.text.TextUtils
 import android.util.TypedValue
@@ -33,7 +34,16 @@ import androidx.annotation.StyleableRes
 
 private const val ANIMATION_DURATION = 300L
 
-val View.activity: Activity get() = context as Activity
+val View.activity: Activity
+    get() {
+        var context = context
+        while (context !is Activity) {
+            if (context is ContextWrapper) {
+                context = context.baseContext
+            }
+        }
+        return context
+    }
 
 fun View.fadeIn() {
     if (visibility == View.VISIBLE) {

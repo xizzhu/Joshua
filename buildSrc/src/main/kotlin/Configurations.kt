@@ -36,7 +36,7 @@ object Versions {
         const val classpath = "7.0.3"
         const val buildTools = "31.0.0"
         const val compile = 31
-        const val min = 21
+        const val min = 19
         const val target = 31
     }
 
@@ -87,7 +87,7 @@ object Versions {
 
     const val ask = "0.5.2"
 
-    const val logger = "0.6.1"
+    const val logger = "0.7.0"
 
     const val mockk = "1.12.0"
     const val robolectric = "4.5"

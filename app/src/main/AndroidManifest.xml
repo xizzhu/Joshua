@@ -3,6 +3,9 @@
     package="me.xizzhu.android.joshua"
     android:installLocation="auto">
 
+    <uses-sdk xmlns:tools="http://schemas.android.com/tools"
+        tools:overrideLibrary="me.xizzhu.android.ask"/>
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 

@@ -45,6 +45,8 @@ android {
         versionCode = Versions.App.code
         versionName = Versions.App.name
 
+        multiDexEnabled = true
+
         resourceConfigurations.addAll(Configurations.supportedLocales)
     }
 
@@ -83,7 +85,7 @@ android {
 
             // Temporarily use proguard-android.txt instead of proguard-android-optimize.txt as a workaround of an R8 issue:
             // https://issuetracker.google.com/issues/174167294
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
@@ -112,6 +114,8 @@ tasks.withType(Test::class) {
 
 dependencies {
     implementation(Dependencies.Kotlin.coroutinesAndroid)
+
+    implementation("androidx.multidex:multidex:2.0.1")
 
     implementation(Dependencies.AndroidX.activity)
     implementation(Dependencies.AndroidX.annotation)

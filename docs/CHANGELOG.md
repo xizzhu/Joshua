@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next release
 - Changes:
+  - Lower Minimum SDK Version to 19 (Android 4.4)
   - Remove coveralls plugin
   - Use Roblectric for instrumented tests
   - Replace Mockito by Mockk (#201)

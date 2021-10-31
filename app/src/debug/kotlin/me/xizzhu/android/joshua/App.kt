@@ -19,10 +19,11 @@ package me.xizzhu.android.joshua
 import android.app.Application
 import android.os.StrictMode
 import androidx.annotation.CallSuper
+import androidx.multidex.MultiDexApplication
 import me.xizzhu.android.logger.Log
 import me.xizzhu.android.logger.LogcatLogger
 
-abstract class BaseApp : Application() {
+abstract class BaseApp : MultiDexApplication() {
     @CallSuper
     override fun onCreate() {
         super.onCreate()
