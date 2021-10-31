@@ -9,9 +9,14 @@ CHANGELOG
 - Bug fixes:
   - Should run backup & restore on IO thread
 - Update dependencies:
-  - Kotlin to 1.5.30
-  - AndroidX Activity to 1.3.1
-  - Firebase Analytics to 19.0.1, Crashlytics to 18.2.1, Google Services plugin to 4.3.10
+  - Gradle to 7.2
+  - Android Gradle Plugin to 7.0.3
+  - Compile and Target SDK to 31
+  - Kotlin to 1.5.31, Coroutines to 1.5.2
+  - AndroidX Activity to 1.4.0, Core to 1.7.0, Lifecycle to 1.4.0, Constraint Layout to 2.1.1
+  - Firebase BOM 29.0.0, Google Services plugin to 4.3.10, Crashlytics plugin to 2.8.0
+  - Hilt to 2.40
+  - Logger to 0.6.1
 
 #### v0.17.1 (2021-08-02)
 - New features:

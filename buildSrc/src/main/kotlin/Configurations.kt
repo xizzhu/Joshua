@@ -33,30 +33,30 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "7.0.0"
+        const val classpath = "7.0.3"
         const val buildTools = "31.0.0"
-        const val compile = 30
+        const val compile = 31
         const val min = 21
-        const val target = 30
+        const val target = 31
     }
 
     val java = JavaVersion.VERSION_11
 
     object Kotlin {
         const val jvmTarget = "11"
-        const val core = "1.5.30"
-        const val coroutines = "1.5.1"
+        const val core = "1.5.31"
+        const val coroutines = "1.5.2"
     }
 
     object AndroidX {
-        const val activity = "1.3.1"
+        const val activity = "1.4.0"
         const val annotation = "1.2.0"
         const val appCompat = "1.3.1"
-        const val core = "1.6.0"
-        const val lifecycle = "2.3.1"
+        const val core = "1.7.0"
+        const val lifecycle = "2.4.0"
 
         object View {
-            const val constraintLayout = "2.1.0"
+            const val constraintLayout = "2.1.1"
             const val coordinatorLayout = "1.1.0"
             const val drawerLayout = "1.1.1"
             const val material = "1.4.0"
@@ -72,24 +72,22 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.10"
-        const val analytics = "19.0.1"
+        const val bom = "29.0.0"
 
         object Crashlytics {
-            const val classpath = "2.7.1"
-            const val crashlytics = "18.2.1"
+            const val classpath = "2.8.0"
         }
 
         object Perf {
             const val classpath = "1.4.0"
-            const val perf = "20.0.2"
         }
     }
 
-    const val hilt = "2.38.1"
+    const val hilt = "2.40"
 
     const val ask = "0.5.2"
 
-    const val logger = "0.4.0"
+    const val logger = "0.6.1"
 
     const val mockk = "1.12.0"
     const val robolectric = "4.5"
@@ -136,16 +134,17 @@ object Dependencies {
 
     object Firebase {
         const val classpath = "com.google.gms:google-services:${Versions.Firebase.classpath}"
-        const val analytics = "com.google.firebase:firebase-analytics:${Versions.Firebase.analytics}"
+        const val bom = "com.google.firebase:firebase-bom:${Versions.Firebase.bom}"
+        const val analytics = "com.google.firebase:firebase-analytics"
 
         object Crashlytics {
             const val classpath = "com.google.firebase:firebase-crashlytics-gradle:${Versions.Firebase.Crashlytics.classpath}"
-            const val crashlytics = "com.google.firebase:firebase-crashlytics:${Versions.Firebase.Crashlytics.crashlytics}"
+            const val crashlytics = "com.google.firebase:firebase-crashlytics"
         }
 
         object Perf {
             const val classpath = "com.google.firebase:perf-plugin:${Versions.Firebase.Perf.classpath}"
-            const val perf = "com.google.firebase:firebase-perf:${Versions.Firebase.Perf.perf}"
+            const val perf = "com.google.firebase:firebase-perf"
         }
     }
 
@@ -160,7 +159,7 @@ object Dependencies {
     }
 
     object Logger {
-        const val logger = "com.github.xizzhu:Logger:${Versions.logger}"
+        const val logger = "me.xizzhu:logger:${Versions.logger}"
     }
 
     object Mockk {

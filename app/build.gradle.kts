@@ -128,6 +128,7 @@ dependencies {
     implementation(Dependencies.AndroidX.View.swipeRefreshLayout)
     implementation(Dependencies.AndroidX.View.viewPager2)
 
+    implementation(platform(Dependencies.Firebase.bom))
     implementation(Dependencies.Firebase.analytics)
     implementation(Dependencies.Firebase.Crashlytics.crashlytics)
     implementation(Dependencies.Firebase.Perf.perf)
