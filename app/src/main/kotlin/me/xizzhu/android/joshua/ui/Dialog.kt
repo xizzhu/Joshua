@@ -66,8 +66,8 @@ fun Activity.dialog(cancelable: Boolean, @StringRes message: Int,
     AlertDialog.Builder(this)
             .setCancelable(cancelable)
             .setMessage(message)
-            .setPositiveButton(android.R.string.yes, onPositive)
-            .setNegativeButton(android.R.string.no, onNegative)
+            .setPositiveButton(android.R.string.ok, onPositive)
+            .setNegativeButton(android.R.string.cancel, onNegative)
             .show()
 }
 
@@ -78,8 +78,8 @@ fun Activity.dialog(cancelable: Boolean, message: CharSequence,
     AlertDialog.Builder(this)
             .setCancelable(cancelable)
             .setMessage(message)
-            .setPositiveButton(android.R.string.yes, onPositive)
-            .setNegativeButton(android.R.string.no, onNegative)
+            .setPositiveButton(android.R.string.ok, onPositive)
+            .setNegativeButton(android.R.string.cancel, onNegative)
             .show()
 }
 
