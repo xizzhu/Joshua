@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next release
+#### v0.18.0 (2021-10-31)
 - Changes:
   - Lower Minimum SDK Version to 19 (Android 4.4)
   - Remove coveralls plugin
