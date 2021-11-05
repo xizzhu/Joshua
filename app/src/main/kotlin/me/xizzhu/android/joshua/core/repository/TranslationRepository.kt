@@ -95,9 +95,6 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
                 readTranslationsFromBackend()
             }
         }
-        if (translations.isEmpty()) {
-            throw IllegalStateException("Empty translation list")
-        }
         updateTranslations(translations)
     }
 

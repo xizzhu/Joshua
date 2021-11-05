@@ -4,6 +4,8 @@ CHANGELOG
 #### Next release
 - Changes:
   - Remove Firebase Perf monitoring
+- Bug fixes:
+  - Should not crash if no translation is available
 
 #### v0.18.0 (2021-10-31)
 - Changes:
