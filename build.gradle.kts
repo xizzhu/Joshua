@@ -24,7 +24,6 @@ buildscript {
         classpath(Dependencies.Kotlin.classpath)
         classpath(Dependencies.Firebase.classpath)
         classpath(Dependencies.Firebase.Crashlytics.classpath)
-        classpath(Dependencies.Firebase.Perf.classpath)
         classpath(Dependencies.Hilt.classpath)
     }
 }

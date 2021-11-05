@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+#### Next release
+- Changes:
+  - Remove Firebase Perf monitoring
+
 #### v0.18.0 (2021-10-31)
 - Changes:
   - Lower Minimum SDK Version to 19 (Android 4.4)

@@ -77,10 +77,6 @@ object Versions {
         object Crashlytics {
             const val classpath = "2.8.0"
         }
-
-        object Perf {
-            const val classpath = "1.4.0"
-        }
     }
 
     const val hilt = "2.40"
@@ -140,11 +136,6 @@ object Dependencies {
         object Crashlytics {
             const val classpath = "com.google.firebase:firebase-crashlytics-gradle:${Versions.Firebase.Crashlytics.classpath}"
             const val crashlytics = "com.google.firebase:firebase-crashlytics"
-        }
-
-        object Perf {
-            const val classpath = "com.google.firebase:perf-plugin:${Versions.Firebase.Perf.classpath}"
-            const val perf = "com.google.firebase:firebase-perf"
         }
     }
 

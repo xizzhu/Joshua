@@ -26,7 +26,6 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.core.perf.Perf
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
@@ -170,12 +169,10 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
                 downloadProgressChannel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))
         Log.i(TAG, "Translation downloaded")
 
-        Perf.trace("install_translation") {
-            localTranslationStorage.saveTranslation(
-                    translation.translationInfo.toTranslationInfo(true),
-                    translation.bookNames, translation.bookShortNames, translation.verses
-            )
-        }
+        localTranslationStorage.saveTranslation(
+                translation.translationInfo.toTranslationInfo(true),
+                translation.bookNames, translation.bookShortNames, translation.verses
+        )
         Log.i(TAG, "Translation saved to database")
         downloadProgressChannel.trySend(100)
     }

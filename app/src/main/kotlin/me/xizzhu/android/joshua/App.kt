@@ -17,14 +17,6 @@
 package me.xizzhu.android.joshua
 
 import dagger.hilt.android.HiltAndroidApp
-import me.xizzhu.android.joshua.core.perf.Perf
-import me.xizzhu.android.joshua.core.perf.firebase.firebaseTraceFactory
 
 @HiltAndroidApp
-class App : BaseApp() {
-    override fun onCreate() {
-        super.onCreate()
-
-        Perf.initialize(::firebaseTraceFactory)
-    }
-}
+class App : BaseApp()

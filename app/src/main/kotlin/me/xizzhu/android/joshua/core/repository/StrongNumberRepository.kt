@@ -22,7 +22,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.perf.Perf
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
 import me.xizzhu.android.logger.Log
@@ -60,9 +59,7 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
         versesDownloadProgress.close()
         wordsDownloadProgress.close()
 
-        Perf.trace("install_sn") {
-            localStrongNumberStorage.save(remoteIndexes.indexes, remoteIndexes.reverseIndexes, remoteWords.words)
-        }
+        localStrongNumberStorage.save(remoteIndexes.indexes, remoteIndexes.reverseIndexes, remoteWords.words)
         Log.i(TAG, "Strong number saved to database")
         trySend(100)
     }
