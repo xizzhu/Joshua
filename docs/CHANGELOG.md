@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next release
+#### v0.18.1 (2021-11-05)
 - Changes:
   - Remove Firebase Perf monitoring
 - Bug fixes:
