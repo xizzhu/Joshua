@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+#### Next release
+- Bug fixes:
+  - Should not crash if currentSettingsViewData is not initialized yet
+
 #### v0.18.1 (2021-11-05)
 - Changes:
   - Remove Firebase Perf monitoring

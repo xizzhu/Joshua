@@ -103,9 +103,15 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
     }
 
     private fun animateTextSize(bodyTextSizeInPixel: Float, captionTextSizeInPixel: Float) {
+        val currentSettings = currentSettingsViewData
+        if (currentSettings == null) {
+            setTextSize(bodyTextSizeInPixel, captionTextSizeInPixel)
+            return
+        }
+
         ValueAnimator.ofFloat(0.0F, 1.0F).apply {
-            val fromBodyTextSizeInPixel = currentSettingsViewData!!.bodyTextSizeInPixel
-            val fromCaptionTextSizeInPixel = currentSettingsViewData!!.captionTextSizeInPixel
+            val fromBodyTextSizeInPixel = currentSettings.bodyTextSizeInPixel
+            val fromCaptionTextSizeInPixel = currentSettings.captionTextSizeInPixel
             addUpdateListener { animator ->
                 val fraction = animator.animatedValue as Float
                 setTextSize(
@@ -138,11 +144,17 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
     }
 
     private fun animateColor(@ColorInt backgroundColor: Int, @ColorInt primaryTextColor: Int, @ColorInt secondaryTextColor: Int) {
+        val currentSettings = currentSettingsViewData
+        if (currentSettings == null) {
+            setColor(backgroundColor, primaryTextColor, secondaryTextColor)
+            return
+        }
+
         ValueAnimator.ofFloat(0.0F, 1.0F).apply {
             val argbEvaluator = ArgbEvaluator()
-            val fromBackgroundColor = currentSettingsViewData!!.backgroundColor
-            val fromPrimaryTextColor = currentSettingsViewData!!.primaryTextColor
-            val fromSecondaryTextColor = currentSettingsViewData!!.secondaryTextColor
+            val fromBackgroundColor = currentSettings.backgroundColor
+            val fromPrimaryTextColor = currentSettings.primaryTextColor
+            val fromSecondaryTextColor = currentSettings.secondaryTextColor
             addUpdateListener { animator ->
                 val fraction = animator.animatedValue as Float
                 setColor(
