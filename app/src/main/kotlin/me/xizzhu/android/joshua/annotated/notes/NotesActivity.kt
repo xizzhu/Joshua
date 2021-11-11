@@ -43,6 +43,6 @@ class NotesViewModel @Inject constructor(
 }
 
 @AndroidEntryPoint
-class NotesActivity : AnnotatedVersesActivity<Note>(R.string.title_notes) {
+class NotesActivity : AnnotatedVersesActivity<Note, NotesViewModel>(R.string.title_notes) {
     override fun extrasForOpeningVerse(): Bundle = ReadingActivity.bundleForOpenNote()
 }

@@ -38,4 +38,4 @@ class BookmarksViewModel(
 }
 
 @AndroidEntryPoint
-class BookmarksActivity : AnnotatedVersesActivity<Bookmark>(R.string.title_bookmarks)
+class BookmarksActivity : AnnotatedVersesActivity<Bookmark, BookmarksViewModel>(R.string.title_bookmarks)

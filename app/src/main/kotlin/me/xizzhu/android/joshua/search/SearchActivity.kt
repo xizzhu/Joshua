@@ -44,7 +44,7 @@ import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 
 @AndroidEntryPoint
-class SearchActivity : BaseActivity<ActivitySearchBinding>(), SearchNoteItem.Callback, SearchVerseItem.Callback {
+class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback {
     private val searchViewModel: SearchViewModel by viewModels()
 
     private lateinit var searchRecentSuggestions: SearchRecentSuggestions
@@ -135,6 +135,8 @@ class SearchActivity : BaseActivity<ActivitySearchBinding>(), SearchNoteItem.Cal
     }
 
     override fun inflateViewBinding(): ActivitySearchBinding = ActivitySearchBinding.inflate(layoutInflater)
+
+    override fun viewModel(): SearchViewModel = searchViewModel
 
     override fun openVerse(verseToOpen: VerseIndex) {
         searchViewModel.saveCurrentVerseIndex(verseToOpen)

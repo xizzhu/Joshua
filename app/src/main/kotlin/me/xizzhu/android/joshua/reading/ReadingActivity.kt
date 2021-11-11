@@ -64,7 +64,7 @@ import me.xizzhu.android.logger.Log
 import kotlin.math.max
 
 @AndroidEntryPoint
-class ReadingActivity : BaseActivity<ActivityReadingBinding>(), SimpleVerseItem.Callback, VerseItem.Callback,
+class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>(), SimpleVerseItem.Callback, VerseItem.Callback,
         VerseTextItem.Callback, StrongNumberItem.Callback {
     companion object {
         private const val KEY_OPEN_NOTE = "me.xizzhu.android.joshua.KEY_OPEN_NOTE"
@@ -390,6 +390,8 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding>(), SimpleVerseItem.
     }
 
     override fun inflateViewBinding(): ActivityReadingBinding = ActivityReadingBinding.inflate(layoutInflater)
+
+    override fun viewModel(): ReadingViewModel = readingViewModel
 
     override fun onVerseClicked(verse: Verse) {
         if (actionMode == null) {

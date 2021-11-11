@@ -35,7 +35,7 @@ import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 
 @AndroidEntryPoint
-class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>(), StrongNumberItem.Callback {
+class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding, StrongNumberViewModel>(), StrongNumberItem.Callback {
     companion object {
         private const val KEY_STRONG_NUMBER = "me.xizzhu.android.joshua.KEY_STRONG_NUMBER"
 
@@ -88,6 +88,8 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding>(), Strong
     }
 
     override fun inflateViewBinding(): ActivityStrongNumberBinding = ActivityStrongNumberBinding.inflate(layoutInflater)
+
+    override fun viewModel(): StrongNumberViewModel = strongNumberViewModel
 
     override fun openVerse(verseToOpen: VerseIndex) {
         strongNumberViewModel.saveCurrentVerseIndex(verseToOpen)

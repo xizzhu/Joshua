@@ -39,11 +39,11 @@ import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import javax.inject.Inject
 
-abstract class AnnotatedVersesActivity<V : VerseAnnotation>(
+abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVersesViewModel<V>>(
         @StringRes private val toolbarText: Int
-) : BaseActivity<ActivityAnnotatedBinding>(), BookmarkItem.Callback, HighlightItem.Callback, NoteItem.Callback {
+) : BaseActivity<ActivityAnnotatedBinding, VM>(), BookmarkItem.Callback, HighlightItem.Callback, NoteItem.Callback {
     @Inject
-    lateinit var annotatedVersesViewModel: AnnotatedVersesViewModel<V>
+    lateinit var annotatedVersesViewModel: VM
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,6 +103,8 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation>(
     }
 
     override fun inflateViewBinding(): ActivityAnnotatedBinding = ActivityAnnotatedBinding.inflate(layoutInflater)
+
+    override fun viewModel(): VM = annotatedVersesViewModel
 
     override fun openVerse(verseToOpen: VerseIndex) {
         annotatedVersesViewModel.saveCurrentVerseIndex(verseToOpen)

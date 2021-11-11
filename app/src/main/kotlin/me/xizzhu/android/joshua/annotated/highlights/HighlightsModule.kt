@@ -25,7 +25,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.scopes.ActivityScoped
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -45,7 +44,7 @@ object HighlightsModule {
             highlightsManager: VerseAnnotationManager<Highlight>,
             settingsManager: SettingsManager,
             application: Application
-    ): AnnotatedVersesViewModel<Highlight> {
+    ): HighlightsViewModel {
         val factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(HighlightsViewModel::class.java)) {
@@ -56,6 +55,6 @@ object HighlightsModule {
 
             }
         }
-        return ViewModelProvider(highlightsActivity, factory).get(HighlightsViewModel::class.java)
+        return ViewModelProvider(highlightsActivity, factory)[HighlightsViewModel::class.java]
     }
 }

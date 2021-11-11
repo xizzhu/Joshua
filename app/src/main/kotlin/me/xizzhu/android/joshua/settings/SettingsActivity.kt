@@ -43,7 +43,7 @@ import me.xizzhu.android.logger.Log
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
-class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
+class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel>() {
     companion object {
         private const val CODE_CREATE_FILE_FOR_BACKUP = 9999
         private const val CODE_SELECT_FILE_FOR_RESTORE = 9998
@@ -287,4 +287,6 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
     }
 
     override fun inflateViewBinding(): ActivitySettingsBinding = ActivitySettingsBinding.inflate(layoutInflater)
+
+    override fun viewModel(): SettingsViewModel = settingsViewModel
 }

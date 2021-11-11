@@ -35,7 +35,7 @@ import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 
 @AndroidEntryPoint
-class ReadingProgressActivity : BaseActivity<ActivityReadingProgressBinding>(), ReadingProgressDetailItem.Callback {
+class ReadingProgressActivity : BaseActivity<ActivityReadingProgressBinding, ReadingProgressViewModel>(), ReadingProgressDetailItem.Callback {
     private val readingProgressViewModel: ReadingProgressViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,6 +83,8 @@ class ReadingProgressActivity : BaseActivity<ActivityReadingProgressBinding>(), 
     }
 
     override fun inflateViewBinding(): ActivityReadingProgressBinding = ActivityReadingProgressBinding.inflate(layoutInflater)
+
+    override fun viewModel(): ReadingProgressViewModel = readingProgressViewModel
 
     override fun openVerse(verseToOpen: VerseIndex) {
         readingProgressViewModel.saveCurrentVerseIndex(verseToOpen)

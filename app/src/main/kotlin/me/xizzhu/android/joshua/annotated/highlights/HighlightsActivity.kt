@@ -41,4 +41,4 @@ class HighlightsViewModel @Inject constructor(
 }
 
 @AndroidEntryPoint
-class HighlightsActivity : AnnotatedVersesActivity<Highlight>(R.string.title_highlights)
+class HighlightsActivity : AnnotatedVersesActivity<Highlight, HighlightsViewModel>(R.string.title_highlights)

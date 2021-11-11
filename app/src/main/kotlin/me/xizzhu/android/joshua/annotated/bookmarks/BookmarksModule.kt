@@ -25,7 +25,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.scopes.ActivityScoped
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -45,7 +44,7 @@ object BookmarksModule {
             bookmarksManager: VerseAnnotationManager<Bookmark>,
             settingsManager: SettingsManager,
             application: Application
-    ): AnnotatedVersesViewModel<Bookmark> {
+    ): BookmarksViewModel {
         val factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(BookmarksViewModel::class.java)) {
@@ -56,6 +55,6 @@ object BookmarksModule {
 
             }
         }
-        return ViewModelProvider(bookmarksActivity, factory).get(BookmarksViewModel::class.java)
+        return ViewModelProvider(bookmarksActivity, factory)[BookmarksViewModel::class.java]
     }
 }

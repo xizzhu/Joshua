@@ -19,12 +19,16 @@ package me.xizzhu.android.joshua.infra
 import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.Navigator
+import me.xizzhu.android.joshua.ui.getBackgroundColor
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 
-abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
+abstract class BaseActivity<VB : ViewBinding, VM : BaseViewModel> : AppCompatActivity() {
     protected val tag: String = javaClass.simpleName
 
     @Inject
@@ -39,9 +43,24 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
         viewBinding = inflateViewBinding()
         setContentView(viewBinding.root)
+
+        observeSettings()
     }
 
     protected abstract fun inflateViewBinding(): VB
+
+    protected abstract fun viewModel(): VM
+
+    private fun observeSettings() {
+        viewModel().settings()
+                .onEach { settings ->
+                    with(window.decorView) {
+                        keepScreenOn = settings.keepScreenOn
+                        setBackgroundColor(settings.getBackgroundColor())
+                    }
+                }
+                .launchIn(lifecycleScope)
+    }
 
     @CallSuper
     override fun onStart() {

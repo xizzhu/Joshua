@@ -43,7 +43,7 @@ import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 
 @AndroidEntryPoint
-class TranslationsActivity : BaseActivity<ActivityTranslationManagementBinding>(), TranslationItem.Callback {
+class TranslationsActivity : BaseActivity<ActivityTranslationManagementBinding, TranslationsViewModel>(), TranslationItem.Callback {
     private val translationsViewModel: TranslationsViewModel by viewModels()
 
     private var downloadTranslationJob: Job? = null
@@ -102,6 +102,8 @@ class TranslationsActivity : BaseActivity<ActivityTranslationManagementBinding>(
     }
 
     override fun inflateViewBinding(): ActivityTranslationManagementBinding = ActivityTranslationManagementBinding.inflate(layoutInflater)
+
+    override fun viewModel(): TranslationsViewModel = translationsViewModel
 
     override fun selectTranslation(translationToSelect: TranslationInfo) {
         translationsViewModel.selectTranslation(translationToSelect)
