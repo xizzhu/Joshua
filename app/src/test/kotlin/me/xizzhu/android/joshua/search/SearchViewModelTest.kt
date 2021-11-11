@@ -306,11 +306,19 @@ class SearchViewModelTest : BaseUnitTest() {
 
     @Test
     fun `test search() with verses and notes`() = testDispatcher.runBlockingTest {
-        coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 9))) } returns mapOf(
-                Pair(VerseIndex(0, 0, 9), MockContents.kjvVerses[9])
-        )
+        coEvery {
+            bibleReadingManager.readVerses(
+                    MockContents.kjvShortName,
+                    listOf(VerseIndex(0, 0, 9), VerseIndex(1, 2, 3))
+            )
+        } returns mapOf(Pair(VerseIndex(0, 0, 9), MockContents.kjvVerses[9]))
         coEvery { bibleReadingManager.search(MockContents.kjvShortName, "query") } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2])
-        coEvery { noteManager.search("query") } returns listOf(Note(VerseIndex(0, 0, 9), "just a note", 12345L))
+        coEvery { noteManager.search("query") } returns listOf(
+                Note(VerseIndex(0, 0, 9), "just a note", 12345L),
+                // no verse is available for this note, should be ignored
+                // https://github.com/xizzhu/Joshua/issues/153
+                Note(VerseIndex(1, 2, 3), "should be ignored", 54321L)
+        )
 
         searchViewModel.search("query", false)
         delay(1000L)

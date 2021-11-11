@@ -5,6 +5,7 @@ CHANGELOG
 - Bug fixes:
   - Should not crash if currentSettingsViewData is not initialized yet
   - Fixed background color when night mode is on
+  - Do not fail the search if a note is attached to a verse that does not exist in current translation
 
 #### v0.18.1 (2021-11-05)
 - Changes:

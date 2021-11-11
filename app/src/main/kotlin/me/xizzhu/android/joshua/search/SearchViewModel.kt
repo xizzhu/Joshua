@@ -135,7 +135,9 @@ class SearchViewModel @Inject constructor(
                                 arrayListOf<Pair<Note, Verse>>().apply {
                                     ensureCapacity(notes.size)
                                     notes.forEach { note ->
-                                        add(Pair(note, versesWithNotes.getValue(note.verseIndex)))
+                                        // TODO What to do if the notes is attached to a verse that is empty / not exist in this translation?
+                                        // https://github.com/xizzhu/Joshua/issues/153
+                                        versesWithNotes[note.verseIndex]?.let { add(Pair(note, it)) }
                                     }
                                 }
                             }
