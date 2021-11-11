@@ -100,13 +100,14 @@ class TranslationRepositoryTest : BaseUnitTest() {
         coVerify(exactly = 0) { translationRepository.readTranslationsFromLocal() }
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun `test reload() with force refresh with empty translations list`(): Unit = runBlocking {
         val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher))
         coEvery { translationRepository.readTranslationsFromBackend() } returns emptyList()
 
         translationRepository.reload(true)
-        fail()
+        assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
+        assertTrue(translationRepository.availableTranslations.first().isEmpty())
     }
 
     @Test
