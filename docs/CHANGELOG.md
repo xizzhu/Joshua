@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### v0.18.1 (2021-11-11)
+#### v0.18.2 (2021-11-11)
 - Bug fixes:
   - Should not crash if currentSettingsViewData is not initialized yet
   - Fixed background color when night mode is on
