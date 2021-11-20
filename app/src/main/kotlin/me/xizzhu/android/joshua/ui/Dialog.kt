@@ -44,8 +44,6 @@ class ProgressDialog(private val dialog: AlertDialog, private val progressBar: P
             // We don't care if it fails.
         }
     }
-
-    fun isShowing(): Boolean = dialog.isShowing
 }
 
 fun Activity.dialog(@StringRes title: Int, items: Array<String>, selected: Int,
@@ -84,6 +82,8 @@ fun Activity.dialog(cancelable: Boolean, message: CharSequence,
 }
 
 fun Activity.progressDialog(@StringRes title: Int, maxProgress: Int, onCancel: () -> Unit): ProgressDialog? {
+    if (isDestroyed) return null
+
     val progressBar = (View.inflate(this, R.layout.widget_progress_bar, null) as ProgressBar)
             .apply { max = maxProgress }
     return ProgressDialog(
