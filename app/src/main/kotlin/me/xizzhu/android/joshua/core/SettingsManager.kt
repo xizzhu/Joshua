@@ -19,12 +19,12 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
-data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fontSizeScale: Int,
+data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fontSizeScale: Float,
                     val simpleReadingModeOn: Boolean, val hideSearchButton: Boolean,
                     val consolidateVersesForSharing: Boolean,
                     @Highlight.Companion.AvailableColor val defaultHighlightColor: Int) {
     companion object {
-        val DEFAULT = Settings(keepScreenOn = true, nightModeOn = false, fontSizeScale = 2,
+        val DEFAULT = Settings(keepScreenOn = true, nightModeOn = false, fontSizeScale = 1.0F,
                 simpleReadingModeOn = false, hideSearchButton = false, consolidateVersesForSharing = false,
                 defaultHighlightColor = Highlight.COLOR_NONE)
     }

@@ -38,6 +38,7 @@ import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.indeterminateProgressDialog
+import me.xizzhu.android.joshua.ui.seekBarDialog
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 import kotlin.math.roundToInt
@@ -79,7 +80,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
         window.decorView.keepScreenOn = settingsViewData.keepScreenOn
 
         with(viewBinding) {
-            fontSize.setDescription(settingsViewData.fontSizes[settingsViewData.currentFontSize])
+            fontSize.setDescription("${settingsViewData.currentFontSizeScale}x")
             keepScreenOn.isChecked = settingsViewData.keepScreenOn
             nightModeOn.isChecked = settingsViewData.nightModeOn
             simpleReadingMode.isChecked = settingsViewData.simpleReadingModeOn
@@ -188,10 +189,38 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
     private fun initializeListeners(): Unit = with(viewBinding) {
         fontSize.setOnClickListener {
             currentSettingsViewData?.let { settings ->
-                dialog(R.string.settings_title_font_size, settings.fontSizes, settings.currentFontSize) { dialog, which ->
-                    settingsViewModel.saveFontSizeScale(which).onFailure { toast(R.string.toast_unknown_error) }.launchIn(lifecycleScope)
-                    dialog.dismiss()
-                }
+                seekBarDialog(
+                        title = R.string.settings_title_font_size,
+                        initialValue = settings.currentFontSizeScale,
+                        minValue = 0.5F,
+                        maxValue = 3.0F,
+                        onValueChanged = { value ->
+                            fontSize.setDescription("${value}x")
+                            setTextSize(
+                                    bodyTextSizeInPixel = settings.bodyTextSizeInPixel * value / settings.currentFontSizeScale,
+                                    captionTextSizeInPixel = settings.captionTextSizeInPixel * value / settings.currentFontSizeScale
+                            )
+                        },
+                        onPositive = { value ->
+                            // update current view data to avoid animating font changes after setting is saved
+                            currentSettingsViewData = settings.copy(
+                                    currentFontSizeScale = value,
+                                    bodyTextSizeInPixel = settings.bodyTextSizeInPixel * value / settings.currentFontSizeScale,
+                                    captionTextSizeInPixel = settings.captionTextSizeInPixel * value / settings.currentFontSizeScale
+                            )
+                            settingsViewModel.saveFontSizeScale(value)
+                                    .onFailure {
+                                        // reset the current view data
+                                        currentSettingsViewData = settings
+                                        animateTextSize(settings.bodyTextSizeInPixel, settings.captionTextSizeInPixel)
+
+                                        toast(R.string.toast_unknown_error)
+                                    }.launchIn(lifecycleScope)
+                        },
+                        onNegative = {
+                            setTextSize(settings.bodyTextSizeInPixel, settings.captionTextSizeInPixel)
+                        }
+                )
             }
         }
         keepScreenOn.setOnCheckedChangeListener { _, isChecked ->

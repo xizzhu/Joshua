@@ -20,7 +20,6 @@ import android.app.Application
 import android.net.Uri
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -59,8 +58,8 @@ enum class HighlightColorViewData(@Highlight.Companion.AvailableColor val color:
     }
 }
 
-class SettingsViewData(
-        val fontSizes: Array<String>, val currentFontSize: Int, val animateFontSize: Boolean,
+data class SettingsViewData(
+        val currentFontSizeScale: Float, val animateFontSize: Boolean,
         val bodyTextSizeInPixel: Float, val captionTextSizeInPixel: Float,
         val keepScreenOn: Boolean, val nightModeOn: Boolean, val animateColor: Boolean,
         @ColorInt val backgroundColor: Int, @ColorInt val primaryTextColor: Int, @ColorInt val secondaryTextColor: Int,
@@ -73,11 +72,6 @@ class SettingsViewData(
 class SettingsViewModel @Inject constructor(
         private val backupManager: BackupManager, settingsManager: SettingsManager, application: Application
 ) : BaseViewModel(settingsManager, application) {
-    companion object {
-        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-        val fontSizeTexts: Array<String> = arrayOf(".5x", "1x", "1.5x", "2x", "2.5x", "3x")
-    }
-
     private val settingsViewData: MutableStateFlow<ViewData<SettingsViewData>?> = MutableStateFlow(null)
 
     private var shouldAnimateFontSize = false
@@ -94,8 +88,7 @@ class SettingsViewModel @Inject constructor(
         settings().onEach { settings ->
             val resources = application.resources
             settingsViewData.value = ViewData.Success(SettingsViewData(
-                    fontSizes = fontSizeTexts,
-                    currentFontSize = settings.fontSizeScale - 1,
+                    currentFontSizeScale = settings.fontSizeScale,
                     animateFontSize = shouldAnimateFontSize,
                     bodyTextSizeInPixel = settings.getBodyTextSize(resources),
                     captionTextSizeInPixel = settings.getCaptionTextSize(resources),
@@ -119,9 +112,9 @@ class SettingsViewModel @Inject constructor(
 
     fun settingsViewData(): Flow<ViewData<SettingsViewData>> = settingsViewData.filterNotNull()
 
-    fun saveFontSizeScale(fontSizeScale: Int): Flow<ViewData<Unit>> = updateSettings {
+    fun saveFontSizeScale(fontSizeScale: Float): Flow<ViewData<Unit>> = updateSettings {
         shouldAnimateFontSize = true
-        settingsManager.saveSettings(currentSettings().copy(fontSizeScale = fontSizeScale + 1))
+        settingsManager.saveSettings(currentSettings().copy(fontSizeScale = fontSizeScale))
     }
 
     private inline fun updateSettings(crossinline op: suspend () -> Unit): Flow<ViewData<Unit>> =

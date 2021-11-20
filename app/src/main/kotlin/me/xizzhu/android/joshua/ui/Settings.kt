@@ -54,7 +54,7 @@ fun Settings.getBodyTextSize(resources: Resources): Float =
 private val textSizes = mutableMapOf<Int, Float>()
 
 private fun getTextSize(resources: Resources, @DimenRes fontSize: Int): Float {
-    return textSizes.getOrPut(fontSize, { resources.getDimension(fontSize) / 2.0F })
+    return textSizes.getOrPut(fontSize, { resources.getDimension(fontSize) })
 }
 
 fun Settings.getCaptionTextSize(resources: Resources): Float =

@@ -20,9 +20,11 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.view.View
 import android.widget.ProgressBar
+import android.widget.SeekBar
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import me.xizzhu.android.joshua.R
+import kotlin.math.roundToInt
 
 class ProgressDialog(private val dialog: AlertDialog, private val progressBar: ProgressBar) {
     fun setTitle(@StringRes title: Int) {
@@ -108,3 +110,45 @@ fun Activity.indeterminateProgressDialog(@StringRes title: Int): AlertDialog? {
             .create()
             .apply { show() }
 }
+
+fun Activity.seekBarDialog(
+        @StringRes title: Int,
+        initialValue: Float,
+        minValue: Float,
+        maxValue: Float,
+        onValueChanged: (Float) -> Unit,
+        onPositive: ((Float) -> Unit)? = null,
+        onNegative: (() -> Unit)? = null
+): AlertDialog? {
+    if (isDestroyed) return null
+
+    val view = View.inflate(this, R.layout.widget_seek_bar, null)
+    val seekBar = view.findViewById<SeekBar>(R.id.seek_bar)
+    with(seekBar) {
+        setProgress(initialValue, minValue, maxValue)
+        setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (fromUser) onValueChanged(calculateValue(minValue, maxValue))
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+    }
+    return AlertDialog.Builder(this)
+            .setCancelable(false)
+            .setTitle(title)
+            .setView(view)
+            .setPositiveButton(android.R.string.ok, onPositive?.let { { _, _ -> it(seekBar.calculateValue(minValue, maxValue)) } })
+            .setNegativeButton(android.R.string.cancel, onNegative?.let { { _, _ -> it() } })
+            .create()
+            .apply { show() }
+}
+
+private fun SeekBar.setProgress(value: Float, minValue: Float, maxValue: Float) {
+    progress = (max * (value - minValue) / (maxValue - minValue)).roundToInt()
+}
+
+private fun SeekBar.calculateValue(minValue: Float, maxValue: Float): Float =
+        minValue + (maxValue - minValue) * progress.toFloat() / max.toFloat()

@@ -4,6 +4,7 @@ CHANGELOG
 #### Next release
 - New features:
   - Click anywhere on toolbar to open chapter selection view and move to current book (#206)
+  - Add a seek bar to set font size scale (#206)
 - Update dependencies:
   - Gradle to 7.3
   - Kotlin to 1.6.0

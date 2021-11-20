@@ -47,7 +47,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test observe settings within constructor`() = runBlocking {
-        val settings = Settings(false, true, 3, false, false, true, Highlight.COLOR_PINK)
+        val settings = Settings(false, true, 2.0F, false, false, true, Highlight.COLOR_PINK)
         coEvery { localSettingsStorage.readSettings() } returns settings
 
         settingsRepository = SettingsRepository(localSettingsStorage)
@@ -65,7 +65,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test saveSettings()`() = runBlocking {
-        val settings = Settings(false, true, 1, true, true, true, Highlight.COLOR_BLUE)
+        val settings = Settings(false, true, 1.5F, true, true, true, Highlight.COLOR_BLUE)
         settingsRepository.saveSettings(settings)
         assertEquals(settings, settingsRepository.settings.first())
     }
@@ -79,7 +79,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test saveSettings() for font size scale`() = runBlocking {
-        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(fontSizeScale = 1))
+        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(fontSizeScale = 1.5F))
     }
 
     private suspend fun saveUpdatedSettingsAndVerifySaveSettingsIsCalled(updatedSettings: Settings) {
