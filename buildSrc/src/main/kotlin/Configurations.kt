@@ -44,14 +44,14 @@ object Versions {
 
     object Kotlin {
         const val jvmTarget = "11"
-        const val core = "1.5.31"
+        const val core = "1.6.0"
         const val coroutines = "1.5.2"
     }
 
     object AndroidX {
         const val activity = "1.4.0"
-        const val annotation = "1.2.0"
-        const val appCompat = "1.3.1"
+        const val annotation = "1.3.0"
+        const val appCompat = "1.4.0"
         const val core = "1.7.0"
         const val lifecycle = "2.4.0"
 
@@ -79,13 +79,13 @@ object Versions {
         }
     }
 
-    const val hilt = "2.40"
+    const val hilt = "2.40.1"
 
     const val ask = "0.5.2"
 
     const val logger = "0.7.0"
 
-    const val mockk = "1.12.0"
+    const val mockk = "1.12.1"
     const val robolectric = "4.5"
 }
 

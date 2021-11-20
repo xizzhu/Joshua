@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+#### Next release
+- Update dependencies:
+  - Gradle to 7.3
+  - Kotlin to 1.6.0
+  - AndroidX Annotations to 1.3.0, AppCompat to 1.4.0
+  - Hilt to 2.40.1
+  - Mockk to 1.12.1
+
 #### v0.18.2 (2021-11-11)
 - Bug fixes:
   - Should not crash if currentSettingsViewData is not initialized yet
