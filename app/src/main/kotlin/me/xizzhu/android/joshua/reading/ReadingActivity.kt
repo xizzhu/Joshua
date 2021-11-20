@@ -20,15 +20,18 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.view.ActionMode
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -40,6 +43,7 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.databinding.ActivityReadingBinding
 import me.xizzhu.android.joshua.infra.BaseActivity
+import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onEach
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.onSuccess
@@ -162,11 +166,28 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
     private fun initializeUi() = with(viewBinding) {
         drawerToggle = ActionBarDrawerToggle(this@ReadingActivity, drawerLayout, toolbar, 0, 0)
         drawerLayout.addDrawerListener(drawerToggle)
+        drawerLayout.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
+            override fun onDrawerOpened(drawerView: View) {
+                lifecycleScope.launch {
+                    try {
+                        readingViewModel.currentReadingStatus().firstOrNull()
+                                ?.let { currentReadingStatusViewData ->
+                                    if (currentReadingStatusViewData is BaseViewModel.ViewData.Success) {
+                                        viewBinding.chapterListView.expandBook(currentReadingStatusViewData.data.currentVerseIndex.bookIndex)
+                                    }
+                                }
+                    } catch (e: Exception) {
+                        Log.e(tag, "Error occurred while expanding current book", e)
+                    }
+                }
+            }
+        })
 
         toolbar.initialize(
                 requestParallelTranslation = ::requestParallelTranslation,
                 removeParallelTranslation = ::removeParallelTranslation,
                 selectCurrentTranslation = ::selectTranslation,
+                titleClicked = drawerLayout::open,
                 navigate = ::startActivity
         )
 

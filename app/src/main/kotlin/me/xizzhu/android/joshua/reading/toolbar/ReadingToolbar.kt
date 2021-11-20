@@ -38,8 +38,11 @@ class ReadingToolbar : Toolbar {
     }
 
     fun initialize(
-            requestParallelTranslation: (String) -> Unit, removeParallelTranslation: (String) -> Unit,
-            selectCurrentTranslation: (String) -> Unit, navigate: (Int) -> Unit
+            requestParallelTranslation: (String) -> Unit,
+            removeParallelTranslation: (String) -> Unit,
+            selectCurrentTranslation: (String) -> Unit,
+            titleClicked: () -> Unit,
+            navigate: (Int) -> Unit
     ) {
         with(spinner()) {
             adapter = TranslationSpinnerAdapter(
@@ -66,6 +69,7 @@ class ReadingToolbar : Toolbar {
                 }
             }
         }
+        setOnClickListener { titleClicked() }
         setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_reading_progress -> {

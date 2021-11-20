@@ -71,11 +71,13 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
 
     fun setData(currentVerseIndex: VerseIndex, bookNames: List<String>) {
         adapter.setData(currentVerseIndex, bookNames)
+        expandBook(currentVerseIndex.bookIndex)
+    }
 
-        val currentBookIndex = currentVerseIndex.bookIndex
-        lastExpandedGroup = currentBookIndex
-        expandGroup(currentBookIndex)
-        setSelectedGroup(currentBookIndex)
+    fun expandBook(bookIndex: Int) {
+        lastExpandedGroup = bookIndex
+        expandGroup(bookIndex)
+        setSelectedGroup(bookIndex)
     }
 }
 
