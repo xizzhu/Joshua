@@ -113,6 +113,8 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
     private fun copy() {
         lifecycleScope.launch {
             try {
+                if (selectedVerses.isEmpty()) return@launch
+
                 copyToClipBoard(
                         label = "$currentTranslation $currentBookName",
                         text = selectedVerses.toStringForSharing(currentBookName, readingViewModel.settings().first().consolidateVersesForSharing)
