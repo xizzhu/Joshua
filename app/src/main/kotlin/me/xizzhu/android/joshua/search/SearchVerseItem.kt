@@ -22,6 +22,7 @@ import android.text.SpannableStringBuilder
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.ColorInt
@@ -52,6 +53,8 @@ class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: Str
 
     interface Callback {
         fun openVerse(verseToOpen: VerseIndex)
+
+        fun showPreview(verseIndex: VerseIndex)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -102,6 +105,13 @@ private class SearchVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
                 (itemView.activity as? SearchVerseItem.Callback)?.openVerse(item.verseIndex)
                         ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement SearchVerseItem.Callback")
             }
+        }
+        itemView.setOnLongClickListener {
+            item?.let { item ->
+                (itemView.activity as? SearchVerseItem.Callback)?.showPreview(item.verseIndex)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement SearchVerseItem.Callback")
+            }
+            true
         }
     }
 

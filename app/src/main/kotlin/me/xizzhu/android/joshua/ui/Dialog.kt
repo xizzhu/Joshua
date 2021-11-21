@@ -24,6 +24,9 @@ import android.widget.SeekBar
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import kotlin.math.roundToInt
 
 class ProgressDialog(private val dialog: AlertDialog, private val progressBar: ProgressBar) {
@@ -152,3 +155,26 @@ private fun SeekBar.setProgress(value: Float, minValue: Float, maxValue: Float) 
 
 private fun SeekBar.calculateValue(minValue: Float, maxValue: Float): Float =
         minValue + (maxValue - minValue) * progress.toFloat() / max.toFloat()
+
+fun Activity.listDialog(
+        title: CharSequence,
+        settings: Settings,
+        items: List<BaseItem>,
+        selected: Int
+): AlertDialog? {
+    if (isDestroyed) return null
+
+    val view = View.inflate(this, R.layout.widget_recycler_view, null)
+    view.findViewById<CommonRecyclerView>(R.id.recycler_view).apply {
+        setBackgroundColor(settings.getBackgroundColor())
+        setSettings(settings)
+        setItems(items)
+        scrollToPosition(selected)
+    }
+    return AlertDialog.Builder(this)
+            .setCancelable(true)
+            .setTitle(title)
+            .setView(view)
+            .create()
+            .apply { show() }
+}

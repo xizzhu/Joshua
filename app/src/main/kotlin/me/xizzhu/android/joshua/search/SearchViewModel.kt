@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -36,6 +37,7 @@ import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
@@ -50,6 +52,8 @@ import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 
 class SearchResultViewData(val items: List<BaseItem>, val query: String, val instanceSearch: Boolean, val toast: String)
+
+class PreviewViewData(val settings: Settings, val title: String, val items: List<BaseItem>, val currentPosition: Int)
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -222,4 +226,17 @@ class SearchViewModel @Inject constructor(
     fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
         bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
     }.onFailure { Log.e(tag, "Failed to save current verse", it) }
+
+    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> = viewData {
+        val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+        val query = searchRequest.value?.query ?: ""
+        val items = bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex)
+                .map { VersePreviewItem(it, query) }
+        PreviewViewData(
+                settings = settings().first(),
+                title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",
+                items = items,
+                currentPosition = verseIndex.verseIndex
+        )
+    }.onFailure { Log.e(tag, "Failed to load verses for preview", it) }
 }

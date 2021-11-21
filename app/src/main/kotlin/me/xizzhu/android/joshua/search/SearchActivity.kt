@@ -40,11 +40,12 @@ import me.xizzhu.android.joshua.infra.onSuccess
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.hideKeyboard
+import me.xizzhu.android.joshua.ui.listDialog
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 
 @AndroidEntryPoint
-class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback {
+class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback, VersePreviewItem.Callback {
     private val searchViewModel: SearchViewModel by viewModels()
 
     private lateinit var searchRecentSuggestions: SearchRecentSuggestions
@@ -142,6 +143,13 @@ class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), S
         searchViewModel.saveCurrentVerseIndex(verseToOpen)
                 .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
                 .onFailure { dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse(verseToOpen) }) }
+                .launchIn(lifecycleScope)
+    }
+
+    override fun showPreview(verseIndex: VerseIndex) {
+        searchViewModel.loadVersesForPreview(verseIndex)
+                .onSuccess { preview -> listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) }
+                .onFailure { openVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
                 .launchIn(lifecycleScope)
     }
 }
