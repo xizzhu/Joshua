@@ -9,9 +9,14 @@
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
 
         <item name="actionModeBackground">@color/primary</item>
+        <item name="actionModeCloseButtonStyle">@style/AppActionModeCloseButtonStyle</item>
         <item name="windowActionModeOverlay">true</item>
 
         <item name="android:windowAnimationStyle">@style/AppWindowAnimationStyle</item>
+    </style>
+
+    <style name="AppActionModeCloseButtonStyle" parent="Widget.AppCompat.Light.ActionButton.CloseMode">
+        <item name="android:tint">@android:color/white</item>
     </style>
 
     <style name="AppWindowAnimationStyle">
