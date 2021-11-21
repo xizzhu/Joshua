@@ -31,6 +31,9 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.StyleableRes
+import androidx.viewpager2.widget.ViewPager2
+import me.xizzhu.android.logger.Log
+import androidx.recyclerview.widget.RecyclerView
 
 private const val ANIMATION_DURATION = 300L
 
@@ -105,5 +108,20 @@ fun TextView.setText(a: TypedArray, @StyleableRes index: Int) {
         if (!TextUtils.isEmpty(text)) {
             setText(text)
         }
+    }
+}
+
+fun ViewPager2.makeLessSensitive() {
+    try {
+        val recyclerViewField = ViewPager2::class.java.getDeclaredField("mRecyclerView")
+                .apply { isAccessible = true }
+        val touchSlopField = RecyclerView::class.java.getDeclaredField("mTouchSlop")
+                .apply { isAccessible = true }
+
+        val recyclerView = recyclerViewField.get(this)
+        val touchSlop = touchSlopField.get(recyclerView) as Int
+        touchSlopField.set(recyclerView, touchSlop * 2)
+    } catch (t: Throwable) {
+        Log.e("ViewPager2", "Error occurred while trying to make ViewPager2 less sensitive to swipe", t)
     }
 }

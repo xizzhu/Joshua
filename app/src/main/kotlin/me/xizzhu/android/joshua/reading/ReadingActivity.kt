@@ -60,6 +60,7 @@ import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import me.xizzhu.android.joshua.strongnumber.StrongNumberActivity
 import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.ui.dialog
+import me.xizzhu.android.joshua.ui.makeLessSensitive
 import me.xizzhu.android.joshua.ui.progressDialog
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.joshua.utils.copyToClipBoard
@@ -196,6 +197,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
         versePagerAdapter = VersePagerAdapter(this@ReadingActivity, ::loadVerses, ::updateCurrentVerse)
         verseViewPager.offscreenPageLimit = 1
         verseViewPager.adapter = versePagerAdapter
+        verseViewPager.makeLessSensitive()
         verseViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 val bookIndex = position.toBookIndex()
