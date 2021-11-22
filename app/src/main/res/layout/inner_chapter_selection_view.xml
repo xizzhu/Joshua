@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/chapter_selection_old_testament"
+        style="@style/Text.Body.Light"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_chapter_selection"
+        android:gravity="center"
+        android:padding="@dimen/padding"
+        android:text="@string/text_chapter_selection_old_testament"
+        android:textSize="@dimen/text_body"
+        app:layout_constraintEnd_toStartOf="@id/chapter_selection_new_testament"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/chapter_selection_new_testament"
+        style="@style/Text.Body.Light"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_chapter_selection"
+        android:gravity="center"
+        android:padding="@dimen/padding"
+        android:text="@string/text_chapter_selection_new_testament"
+        android:textSize="@dimen/text_body"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/chapter_selection_old_testament"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <me.xizzhu.android.joshua.reading.chapter.ChapterListView
+        android:id="@+id/chapter_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chapter_selection_old_testament" />
+</merge>

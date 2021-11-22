@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.reading.chapter
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +27,7 @@ import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
 import android.widget.ExpandableListView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -36,13 +38,14 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     private lateinit var adapter: ChapterListAdapter
     private var lastExpandedGroup: Int = -1
 
     init {
-        setBackgroundColor(Color.BLACK)
         divider = ColorDrawable(ContextCompat.getColor(context, android.R.color.darker_gray))
         dividerHeight = 1
         setGroupIndicator(null)
@@ -60,7 +63,6 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
                 lastExpandedGroup = groupPosition
             }
         }
-        smoothScrollToPosition(groupPosition)
         return true
     }
 
@@ -71,13 +73,15 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
 
     fun setData(currentVerseIndex: VerseIndex, bookNames: List<String>) {
         adapter.setData(currentVerseIndex, bookNames)
-        expandBook(currentVerseIndex.bookIndex)
+
+        val groupToExpand = currentVerseIndex.bookIndex
+        lastExpandedGroup = groupToExpand
+        expandGroup(groupToExpand)
+        setSelectedGroup(groupToExpand)
     }
 
-    fun expandBook(bookIndex: Int) {
-        lastExpandedGroup = bookIndex
-        expandGroup(bookIndex)
-        setSelectedGroup(bookIndex)
+    fun scrollToPosition(position: Int) {
+        smoothScrollToPositionFromTop(position, 0, 100)
     }
 }
 
@@ -98,7 +102,7 @@ private class ChapterListAdapter(context: Context, selectChapter: (Int, Int) -> 
         }
     }
 
-    private val bookNames = ArrayList<String>()
+    private var bookNames = emptyList<String>()
     private var currentVerseIndex = VerseIndex.INVALID
 
     override fun hasStableIds(): Boolean = false
@@ -164,9 +168,7 @@ private class ChapterListAdapter(context: Context, selectChapter: (Int, Int) -> 
 
     fun setData(currentVerseIndex: VerseIndex, bookNames: List<String>) {
         this.currentVerseIndex = currentVerseIndex
-
-        this.bookNames.clear()
-        this.bookNames.addAll(bookNames)
+        this.bookNames = bookNames
 
         notifyDataSetChanged()
     }

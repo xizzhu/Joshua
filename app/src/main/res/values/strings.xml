@@ -72,6 +72,9 @@
     <string name="text_highlight_color_green">Green</string>
     <string name="text_highlight_color_blue">Blue</string>
 
+    <string name="text_chapter_selection_old_testament">OT</string>
+    <string name="text_chapter_selection_new_testament">NT</string>
+
     <string name="text_restore_from">Restore from</string>
     <string name="text_share_with">Share with</string>
 

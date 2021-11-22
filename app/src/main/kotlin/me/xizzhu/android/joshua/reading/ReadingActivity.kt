@@ -169,17 +169,10 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
         drawerLayout.addDrawerListener(drawerToggle)
         drawerLayout.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
             override fun onDrawerOpened(drawerView: View) {
-                lifecycleScope.launch {
-                    try {
-                        readingViewModel.currentReadingStatus().firstOrNull()
-                                ?.let { currentReadingStatusViewData ->
-                                    if (currentReadingStatusViewData is BaseViewModel.ViewData.Success) {
-                                        viewBinding.chapterListView.expandBook(currentReadingStatusViewData.data.currentVerseIndex.bookIndex)
-                                    }
-                                }
-                    } catch (e: Exception) {
-                        Log.e(tag, "Error occurred while expanding current book", e)
-                    }
+                try {
+                    viewBinding.chapterSelectionView.expandCurrentBook()
+                } catch (e: Exception) {
+                    Log.e(tag, "Error occurred while expanding current book", e)
                 }
             }
         })
@@ -192,7 +185,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                 navigate = ::startActivity
         )
 
-        chapterListView.initialize(::selectChapter)
+        chapterSelectionView.initialize(::selectChapter)
 
         versePagerAdapter = VersePagerAdapter(this@ReadingActivity, ::loadVerses, ::updateCurrentVerse)
         verseViewPager.offscreenPageLimit = 1
@@ -339,7 +332,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                                 downloadedTranslations = currentReadingStatus.downloadedTranslations
                         )
 
-                        chapterListView.setData(currentReadingStatus.currentVerseIndex, currentReadingStatus.bookNames)
+                        chapterSelectionView.setData(currentReadingStatus.currentVerseIndex, currentReadingStatus.bookNames)
                         drawerLayout.hide()
 
                         versePagerAdapter.setCurrent(

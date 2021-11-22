@@ -6,6 +6,7 @@ CHANGELOG
   - Click anywhere on toolbar to open chapter selection view and move to current book (#206)
   - Add a seek bar to set font size scale (#206)
   - Long tap on search results to show preview
+  - Add "OT" and "NT" option to chapter selection view (#134)
 - Changes:
   - Make view pager for reading less sensitive to swipe
 - Bug fixes:
