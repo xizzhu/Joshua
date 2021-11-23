@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua
 
-import android.app.Application
 import android.os.StrictMode
 import androidx.annotation.CallSuper
 import androidx.multidex.MultiDexApplication

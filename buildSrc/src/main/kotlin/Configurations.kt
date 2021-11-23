@@ -54,6 +54,7 @@ object Versions {
         const val appCompat = "1.4.0"
         const val core = "1.7.0"
         const val lifecycle = "2.4.0"
+        const val multidex = "2.0.1"
 
         object View {
             const val constraintLayout = "2.1.1"
@@ -106,6 +107,7 @@ object Dependencies {
         const val annotation = "androidx.annotation:annotation:${Versions.AndroidX.annotation}"
         const val appCompat = "androidx.appcompat:appcompat:${Versions.AndroidX.appCompat}"
         const val core = "androidx.core:core:${Versions.AndroidX.core}"
+        const val multidex = "androidx.multidex:multidex:${Versions.AndroidX.multidex}"
 
         object Lifecycle {
             const val common = "androidx.lifecycle:lifecycle-common-java8:${Versions.AndroidX.lifecycle}"

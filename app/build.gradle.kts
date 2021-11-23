@@ -115,8 +115,7 @@ tasks.withType(Test::class) {
 dependencies {
     implementation(Dependencies.Kotlin.coroutinesAndroid)
 
-    implementation("androidx.multidex:multidex:2.0.1")
-
+    debugImplementation(Dependencies.AndroidX.multidex)
     implementation(Dependencies.AndroidX.activity)
     implementation(Dependencies.AndroidX.annotation)
     implementation(Dependencies.AndroidX.appCompat)
@@ -132,9 +131,9 @@ dependencies {
     implementation(Dependencies.AndroidX.View.swipeRefreshLayout)
     implementation(Dependencies.AndroidX.View.viewPager2)
 
-    implementation(platform(Dependencies.Firebase.bom))
-    implementation(Dependencies.Firebase.analytics)
-    implementation(Dependencies.Firebase.Crashlytics.crashlytics)
+    releaseImplementation(platform(Dependencies.Firebase.bom))
+    releaseImplementation(Dependencies.Firebase.analytics)
+    releaseImplementation(Dependencies.Firebase.Crashlytics.crashlytics)
 
     implementation(Dependencies.Hilt.android)
     kapt(Dependencies.Hilt.compiler)
