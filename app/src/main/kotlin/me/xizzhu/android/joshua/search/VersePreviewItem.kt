@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.search
 
-import android.annotation.SuppressLint
 import android.text.SpannableStringBuilder
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -29,8 +28,6 @@ import me.xizzhu.android.joshua.databinding.ItemVersePreviewBinding
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
-import me.xizzhu.android.joshua.ui.createKeywordSizeSpan
-import me.xizzhu.android.joshua.ui.createKeywordStyleSpan
 import me.xizzhu.android.joshua.ui.createTitleSizeSpan
 import me.xizzhu.android.joshua.ui.createTitleStyleSpan
 import me.xizzhu.android.joshua.ui.getBodyTextSize
@@ -45,14 +42,8 @@ class VersePreviewItem(
         val verse: Verse, private val query: String
 ) : BaseItem(R.layout.item_verse_preview, { inflater, parent -> VersePreviewItemViewHolder(inflater, parent) }) {
     companion object {
-        // We don't expect users to change locale that frequently.
-        @SuppressLint("ConstantLocale")
-        private val DEFAULT_LOCALE = Locale.getDefault()
-
         private val VERSE_INDEX_SIZE_SPAN = createTitleSizeSpan()
         private val VERSE_INDEX_STYLE_SPAN = createTitleStyleSpan()
-        private val KEYWORD_SIZE_SPAN = createKeywordSizeSpan()
-        private val KEYWORD_STYLE_SPAN = createKeywordStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -70,17 +61,7 @@ class VersePreviewItem(
                 .append(verse.text.text)
 
         // highlights the keywords
-        val textStartIndex = SPANNABLE_STRING_BUILDER.length - verse.text.text.length
-        val lowerCase = SPANNABLE_STRING_BUILDER.toString().lowercase(DEFAULT_LOCALE)
-        for ((index, keyword) in query.trim().replace("\\s+", " ").split(" ").withIndex()) {
-            val start = lowerCase.indexOf(keyword.lowercase(DEFAULT_LOCALE), textStartIndex)
-            if (start > 0) {
-                SPANNABLE_STRING_BUILDER.setSpan(
-                        if (index == 0) KEYWORD_SIZE_SPAN else createKeywordSizeSpan(),
-                        if (index == 0) KEYWORD_STYLE_SPAN else createKeywordStyleSpan(),
-                        start, start + keyword.length)
-            }
-        }
+        SPANNABLE_STRING_BUILDER.highlight(query, SPANNABLE_STRING_BUILDER.length - verse.text.text.length)
 
         return@lazy SPANNABLE_STRING_BUILDER.toCharSequence()
     }

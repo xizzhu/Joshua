@@ -16,13 +16,11 @@
 
 package me.xizzhu.android.joshua.search
 
-import android.annotation.SuppressLint
 import android.graphics.Color
 import android.text.SpannableStringBuilder
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.ColorInt
@@ -30,9 +28,16 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.ui.*
+import me.xizzhu.android.joshua.ui.activity
+import me.xizzhu.android.joshua.ui.append
+import me.xizzhu.android.joshua.ui.clearAll
+import me.xizzhu.android.joshua.ui.createTitleSizeSpan
+import me.xizzhu.android.joshua.ui.createTitleStyleSpan
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
+import me.xizzhu.android.joshua.ui.setSpan
+import me.xizzhu.android.joshua.ui.toCharSequence
+import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
 import java.util.*
 
 class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: String,
@@ -40,14 +45,8 @@ class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: Str
                       @ColorInt private val highlightColor: Int)
     : BaseItem(R.layout.item_search_verse, { inflater, parent -> SearchVerseItemViewHolder(inflater, parent) }) {
     companion object {
-        // We don't expect users to change locale that frequently.
-        @SuppressLint("ConstantLocale")
-        private val DEFAULT_LOCALE = Locale.getDefault()
-
         private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
         private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
-        private val KEYWORD_SIZE_SPAN = createKeywordSizeSpan()
-        private val KEYWORD_STYLE_SPAN = createKeywordStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -70,17 +69,7 @@ class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: Str
                 .append(text)
 
         // highlights the keywords
-        val textStartIndex = SPANNABLE_STRING_BUILDER.length - text.length
-        val lowerCase = SPANNABLE_STRING_BUILDER.toString().lowercase(DEFAULT_LOCALE)
-        for ((index, keyword) in query.trim().replace("\\s+", " ").split(" ").withIndex()) {
-            val start = lowerCase.indexOf(keyword.lowercase(DEFAULT_LOCALE), textStartIndex)
-            if (start > 0) {
-                SPANNABLE_STRING_BUILDER.setSpan(
-                        if (index == 0) KEYWORD_SIZE_SPAN else createKeywordSizeSpan(),
-                        if (index == 0) KEYWORD_STYLE_SPAN else createKeywordStyleSpan(),
-                        start, start + keyword.length)
-            }
-        }
+        SPANNABLE_STRING_BUILDER.highlight(query, SPANNABLE_STRING_BUILDER.length - text.length)
 
         // highlights the verse if needed
         if (highlightColor != Highlight.COLOR_NONE) {
