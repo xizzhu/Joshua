@@ -7,6 +7,7 @@ CHANGELOG
   - Add a seek bar to set font size scale (#206)
   - Long tap on search results to show preview
   - Add "OT" and "NT" option to chapter selection view (#134)
+  - Support resuming downloading translations and Strong's Numbers (#149)
 - Changes:
   - Make view pager for reading less sensitive to swipe
 - Bug fixes:

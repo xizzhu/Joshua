@@ -16,9 +16,7 @@
 
 package me.xizzhu.android.joshua.core.repository.remote.android
 
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
+import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
@@ -30,7 +28,6 @@ import java.io.ByteArrayInputStream
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class HttpTranslationServiceTest : BaseUnitTest() {
@@ -40,7 +37,7 @@ class HttpTranslationServiceTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        httpTranslationService = HttpTranslationService()
+        httpTranslationService = HttpTranslationService(ApplicationProvider.getApplicationContext())
     }
 
     @Test
@@ -70,21 +67,10 @@ class HttpTranslationServiceTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test toRemoteTranslation()`() = testDispatcher.runBlockingTest {
-        val channel = Channel<Int>()
-        var channelCalled = false
-        launch {
-            channel.consumeEach {
-                channelCalled = true
-                assertTrue(it in 0..100)
-            }
-        }
-
+    fun `test toRemoteTranslation()`() {
         val actual = httpTranslationService.toRemoteTranslation(
-                channel, MockContents.kjvRemoteTranslationInfo, javaClass.classLoader.getResourceAsStream("KJV.zip")
+                MockContents.kjvRemoteTranslationInfo, javaClass.classLoader.getResourceAsStream("KJV.zip")
         )
-        channel.close()
-        assertTrue(channelCalled)
         assertEquals(MockContents.kjvRemoteTranslationInfo, actual.translationInfo)
         assertEquals(Bible.BOOK_COUNT, actual.bookNames.size)
         assertEquals(Bible.TOTAL_CHAPTER_COUNT, actual.verses.size)

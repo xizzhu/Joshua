@@ -131,11 +131,11 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideStrongNumberRepository(androidDatabase: AndroidDatabase): StrongNumberRepository =
-            StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase), HttpStrongNumberService())
+    fun provideStrongNumberRepository(app: App, androidDatabase: AndroidDatabase): StrongNumberRepository =
+            StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase), HttpStrongNumberService(app))
 
     @Provides
     @Singleton
-    fun provideTranslationRepository(androidDatabase: AndroidDatabase): TranslationRepository =
-            TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService())
+    fun provideTranslationRepository(app: App, androidDatabase: AndroidDatabase): TranslationRepository =
+            TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService(app))
 }

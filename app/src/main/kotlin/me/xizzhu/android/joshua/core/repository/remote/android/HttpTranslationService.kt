@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core.repository.remote.android
 
+import android.content.Context
 import android.util.JsonReader
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +28,9 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import java.io.*
 import java.util.zip.ZipInputStream
 
-class HttpTranslationService : RemoteTranslationService {
+class HttpTranslationService(context: Context) : RemoteTranslationService {
+    private val cacheDir: File by lazy { File(context.cacheDir, "translations").apply { mkdirs() } }
+
     override suspend fun fetchTranslations(): List<RemoteTranslationInfo> = withContext(Dispatchers.IO) {
         return@withContext toRemoteTranslations(getInputStream("list.json"))
     }
@@ -36,32 +39,33 @@ class HttpTranslationService : RemoteTranslationService {
     internal fun toRemoteTranslations(inputStream: InputStream): List<RemoteTranslationInfo> =
             JsonReader(BufferedReader(InputStreamReader(inputStream, "UTF-8"))).use { reader -> reader.readListJson() }
 
-    override suspend fun fetchTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation = withContext(Dispatchers.IO) {
-        return@withContext toRemoteTranslation(channel, translationInfo, getInputStream("translations/${translationInfo.shortName}.zip"))
+    override suspend fun fetchTranslation(
+            downloadProgress: SendChannel<Int>, translationInfo: RemoteTranslationInfo
+    ): RemoteTranslation = withContext(Dispatchers.IO) {
+        return@withContext File(cacheDir, translationInfo.shortName).apply {
+            download(downloadProgress, "translations/${translationInfo.shortName}.zip", translationInfo.size, this)
+        }.let { downloaded ->
+            FileInputStream(downloaded).use { input ->
+                toRemoteTranslation(translationInfo, input)
+            }
+        }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal fun toRemoteTranslation(channel: SendChannel<Int>, translationInfo: RemoteTranslationInfo, inputStream: InputStream): RemoteTranslation {
-        lateinit var bookNamesShortNamesPair: Pair<List<String>, List<String>>
+    internal fun toRemoteTranslation(translationInfo: RemoteTranslationInfo, inputStream: InputStream): RemoteTranslation {
+        val bookNames = arrayListOf<String>()
+        val bookShortNames = arrayListOf<String>()
         val verses = HashMap<Pair<Int, Int>, List<String>>()
 
-        var progress = -1
-        ZipInputStream(BufferedInputStream(inputStream)).forEachIndexed { index, entryName, contentReader ->
+        ZipInputStream(BufferedInputStream(inputStream)).forEach { entryName, contentReader ->
             if (entryName == "books.json") {
-                bookNamesShortNamesPair = contentReader.readBooksJson()
+                contentReader.readBooksJson(bookNames, bookShortNames)
             } else {
                 val (bookIndex, chapterIndex) = entryName.substring(0, entryName.length - 5).split("-")
                 verses[Pair(bookIndex.toInt(), chapterIndex.toInt())] = contentReader.readChapterJson()
             }
-
-            // only emits if the progress is actually changed
-            val currentProgress = index / 12
-            if (currentProgress > progress) {
-                progress = currentProgress
-                channel.trySend(progress)
-            }
         }
 
-        return RemoteTranslation(translationInfo, bookNamesShortNamesPair.first, bookNamesShortNamesPair.second, verses)
+        return RemoteTranslation(translationInfo, bookNames, bookShortNames, verses)
     }
 }

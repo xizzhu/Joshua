@@ -191,8 +191,11 @@ class JsonParserTest : BaseUnitTest() {
                 "    \"2 Pet.\", \"1 John\", \"2 John\", \"3 John\", \"Jude\", \"Rev\"\n" +
                 "  ]\n" +
                 "}")).use {
+            val bookNames = arrayListOf<String>()
+            val bookShortNames = arrayListOf<String>()
+            it.readBooksJson(bookNames, bookShortNames)
             assertEquals(
-                    Pair(listOf(
+                    listOf(
                             "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua",
                             "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings",
                             "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job",
@@ -204,7 +207,11 @@ class JsonParserTest : BaseUnitTest() {
                             "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy",
                             "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter",
                             "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"
-                    ), listOf(
+                    ),
+                    bookNames
+            )
+            assertEquals(
+                    listOf(
                             "Gen.", "Ex.", "Lev.", "Num.", "Deut.", "Josh.",
                             "Judg.", "Ruth", "1 Sam.", "2 Sam.", "1 Kings", "2 Kings",
                             "1 Chron.", "2 Chron.", "Ezra", "Neh.", "Est.", "Job",
@@ -216,8 +223,9 @@ class JsonParserTest : BaseUnitTest() {
                             "Eph.", "Phil.", "Col.", "1 Thess.", "2 Thess.", "1 Tim.",
                             "2 Tim.", "Titus", "Philem.", "Heb.", "James", "1 Pet.",
                             "2 Pet.", "1 John", "2 John", "3 John", "Jude", "Rev"
-                    )),
-                    it.readBooksJson())
+                    ),
+                    bookShortNames
+            )
         }
     }
 
@@ -255,8 +263,11 @@ class JsonParserTest : BaseUnitTest() {
                 "  ],\n" +
                 "  \"extra\": \"something random\"\n" +
                 "}")).use {
+            val bookNames = arrayListOf<String>()
+            val bookShortNames = arrayListOf<String>()
+            it.readBooksJson(bookNames, bookShortNames)
             assertEquals(
-                    Pair(listOf(
+                    listOf(
                             "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua",
                             "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings",
                             "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job",
@@ -268,7 +279,11 @@ class JsonParserTest : BaseUnitTest() {
                             "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy",
                             "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter",
                             "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"
-                    ), listOf(
+                    ),
+                    bookNames
+            )
+            assertEquals(
+                    listOf(
                             "Gen.", "Ex.", "Lev.", "Num.", "Deut.", "Josh.",
                             "Judg.", "Ruth", "1 Sam.", "2 Sam.", "1 Kings", "2 Kings",
                             "1 Chron.", "2 Chron.", "Ezra", "Neh.", "Est.", "Job",
@@ -280,8 +295,9 @@ class JsonParserTest : BaseUnitTest() {
                             "Eph.", "Phil.", "Col.", "1 Thess.", "2 Thess.", "1 Tim.",
                             "2 Tim.", "Titus", "Philem.", "Heb.", "James", "1 Pet.",
                             "2 Pet.", "1 John", "2 John", "3 John", "Jude", "Rev"
-                    )),
-                    it.readBooksJson())
+                    ),
+                    bookShortNames
+            )
         }
     }
 
@@ -304,7 +320,7 @@ class JsonParserTest : BaseUnitTest() {
                 "    \"2 Tim.\", \"Titus\", \"Philem.\", \"Heb.\", \"James\", \"1 Pet.\",\n" +
                 "    \"2 Pet.\", \"1 John\", \"2 John\", \"3 John\", \"Jude\", \"Rev\"\n" +
                 "  ]\n" +
-                "}")).use { it.readBooksJson() }
+                "}")).use { it.readBooksJson(arrayListOf(), arrayListOf()) }
     }
 
     @Test(expected = RuntimeException::class)
@@ -339,7 +355,7 @@ class JsonParserTest : BaseUnitTest() {
                 "    \"2 Tim.\", \"Titus\", \"Philem.\", \"Heb.\", \"James\", \"1 Pet.\",\n" +
                 "    \"2 Pet.\", \"1 John\", \"2 John\", \"3 John\", \"Jude\", \"Rev\"\n" +
                 "  ]\n" +
-                "}")).use { it.readBooksJson() }
+                "}")).use { it.readBooksJson(arrayListOf(), arrayListOf()) }
     }
 
     @Test(expected = RuntimeException::class)
@@ -361,7 +377,7 @@ class JsonParserTest : BaseUnitTest() {
                 "    \"2 Timothy\", \"Titus\", \"Philemon\", \"Hebrews\", \"James\", \"1 Peter\",\n" +
                 "    \"2 Peter\", \"1 John\", \"2 John\", \"3 John\", \"Jude\", \"Revelation\"\n" +
                 "  ]\n" +
-                "}")).use { it.readBooksJson() }
+                "}")).use { it.readBooksJson(arrayListOf(), arrayListOf()) }
     }
 
     @Test(expected = RuntimeException::class)
@@ -396,7 +412,7 @@ class JsonParserTest : BaseUnitTest() {
                 "    \"2 Tim.\", \"Titus\", \"Philem.\", \"Heb.\", \"James\", \"1 Pet.\",\n" +
                 "    \"2 Pet.\", \"1 John\", \"2 John\", \"3 John\", \"Jude\"\n" +
                 "  ]\n" +
-                "}")).use { it.readBooksJson() }
+                "}")).use { it.readBooksJson(arrayListOf(), arrayListOf()) }
     }
 
     @Test

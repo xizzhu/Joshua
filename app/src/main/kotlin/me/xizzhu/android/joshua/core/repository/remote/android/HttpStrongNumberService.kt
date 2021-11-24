@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.core.repository.remote.android
 
+import android.content.Context
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
@@ -27,21 +28,30 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberIndexes
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberWords
 import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
 import java.util.zip.ZipInputStream
 
-class HttpStrongNumberService : RemoteStrongNumberStorage {
-    override suspend fun fetchIndexes(channel: SendChannel<Int>): RemoteStrongNumberIndexes = withContext(Dispatchers.IO) {
-        return@withContext toRemoteStrongNumberIndexes(channel, getInputStream("tools/sn_indexes.zip"))
+class HttpStrongNumberService(context: Context) : RemoteStrongNumberStorage {
+    private val cacheDir: File by lazy { File(context.cacheDir, "strongNumbers").apply { mkdirs() } }
+
+    override suspend fun fetchIndexes(downloadProgress: SendChannel<Int>): RemoteStrongNumberIndexes = withContext(Dispatchers.IO) {
+        return@withContext File(cacheDir, "sn_indexes").apply {
+            download(downloadProgress, "tools/sn_indexes.zip", 1195800, this) // TODO #21
+        }.let { downloaded ->
+            FileInputStream(downloaded).use { input ->
+                toRemoteStrongNumberIndexes(input)
+            }
+        }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal fun toRemoteStrongNumberIndexes(channel: SendChannel<Int>, inputStream: InputStream): RemoteStrongNumberIndexes {
+    internal fun toRemoteStrongNumberIndexes(inputStream: InputStream): RemoteStrongNumberIndexes {
         val indexes = hashMapOf<VerseIndex, List<String>>()
         val reverseIndexes = hashMapOf<String, HashSet<VerseIndex>>()
 
-        var progress = -1
-        ZipInputStream(BufferedInputStream(inputStream)).forEachIndexed { index, entryName, contentReader ->
+        ZipInputStream(BufferedInputStream(inputStream)).forEach { entryName, contentReader ->
             val book: Int
             val chapter: Int
             entryName.substring(0, entryName.length - 5).split("-").run {
@@ -58,28 +68,25 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                     }
                 }
             }
-
-            // only emits if the progress is actually changed
-            val currentProgress = index / 12
-            if (currentProgress > progress) {
-                progress = currentProgress
-                channel.trySend(progress)
-            }
         }
 
         return RemoteStrongNumberIndexes(indexes, reverseIndexes.mapValues { (_, verseIndexes) -> verseIndexes.toList() })
     }
 
-    override suspend fun fetchWords(channel: SendChannel<Int>): RemoteStrongNumberWords = withContext(Dispatchers.IO) {
-        return@withContext toRemoteStrongNumberWords(channel, getInputStream("tools/sn_en.zip"))
+    override suspend fun fetchWords(downloadProgress: SendChannel<Int>): RemoteStrongNumberWords = withContext(Dispatchers.IO) {
+        return@withContext File(cacheDir, "sn_en").apply {
+            download(downloadProgress, "tools/sn_en.zip", 190102, this) // TODO #21
+        }.let { downloaded ->
+            FileInputStream(downloaded).use { input ->
+                toRemoteStrongNumberWords(input)
+            }
+        }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal fun toRemoteStrongNumberWords(channel: SendChannel<Int>, inputStream: InputStream): RemoteStrongNumberWords {
+    internal fun toRemoteStrongNumberWords(inputStream: InputStream): RemoteStrongNumberWords {
         val words = hashMapOf<String, String>()
-
-        var progress = 0
-        ZipInputStream(BufferedInputStream(inputStream)).forEachIndexed { _, entryName, contentReader ->
+        ZipInputStream(BufferedInputStream(inputStream)).forEach { entryName, contentReader ->
             when (entryName) {
                 "hebrew.json" -> {
                     contentReader.readStrongNumberWords().apply {
@@ -87,9 +94,6 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                             throw IllegalStateException("Incorrect Strong number Hebrew words count: $size")
                         }
                     }.forEach { (sn, meaning) -> words["H$sn"] = meaning }
-
-                    progress += 50
-                    channel.trySend(progress)
                 }
                 "greek.json" -> {
                     contentReader.readStrongNumberWords().apply {
@@ -97,9 +101,6 @@ class HttpStrongNumberService : RemoteStrongNumberStorage {
                             throw IllegalStateException("Incorrect Strong number Greek words count: $size")
                         }
                     }.forEach { (sn, meaning) -> words["G$sn"] = meaning }
-
-                    progress += 50
-                    channel.trySend(progress)
                 }
                 else -> throw IllegalStateException("Unknown entry ($entryName) in Strong number words")
             }

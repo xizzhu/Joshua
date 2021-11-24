@@ -16,9 +16,7 @@
 
 package me.xizzhu.android.joshua.core.repository.remote.android
 
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
+import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Constants
@@ -39,23 +37,12 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        strongNumberService = HttpStrongNumberService()
+        strongNumberService = HttpStrongNumberService(ApplicationProvider.getApplicationContext())
     }
 
     @Test
     fun `test toRemoteStrongNumberIndexes()`() = testDispatcher.runBlockingTest {
-        val channel = Channel<Int>()
-        var channelCalled = false
-        launch {
-            channel.consumeEach {
-                channelCalled = true
-                assertTrue(it in 0..100)
-            }
-        }
-
-        val actual = strongNumberService.toRemoteStrongNumberIndexes(channel, javaClass.classLoader.getResourceAsStream("sn_indexes.zip"))
-        channel.close()
-        assertTrue(channelCalled)
+        val actual = strongNumberService.toRemoteStrongNumberIndexes(javaClass.classLoader.getResourceAsStream("sn_indexes.zip"))
         (0 until Bible.BOOK_COUNT).forEach { bookIndex ->
             (0 until Bible.getChapterCount(bookIndex)).forEach { chapterIndex ->
                 assertTrue(actual.indexes.containsKey(VerseIndex(bookIndex, chapterIndex, 0)))
@@ -66,18 +53,7 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
 
     @Test
     fun `test toRemoteStrongNumberWords()`() = testDispatcher.runBlockingTest {
-        val channel = Channel<Int>()
-        var channelCalled = false
-        launch {
-            channel.consumeEach {
-                channelCalled = true
-                assertTrue(it == 50 || it == 100)
-            }
-        }
-
-        val actual = strongNumberService.toRemoteStrongNumberWords(channel, javaClass.classLoader.getResourceAsStream("sn_en.zip"))
-        channel.close()
-        assertTrue(channelCalled)
+        val actual = strongNumberService.toRemoteStrongNumberWords(javaClass.classLoader.getResourceAsStream("sn_en.zip"))
         assertEquals(Constants.STRONG_NUMBER_HEBREW_COUNT + Constants.STRONG_NUMBER_GREEK_COUNT, actual.words.size)
     }
 }

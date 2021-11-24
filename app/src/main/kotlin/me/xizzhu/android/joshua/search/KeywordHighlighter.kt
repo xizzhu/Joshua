@@ -28,6 +28,8 @@ import java.util.*
 private val DEFAULT_LOCALE = Locale.getDefault()
 
 fun SpannableStringBuilder.highlight(query: String, start: Int): SpannableStringBuilder {
+    if (query.isBlank()) return this
+
     val lowercase = toString().lowercase(DEFAULT_LOCALE)
     for (keyword in query.trim().lowercase(DEFAULT_LOCALE).replace("\\s+", " ").split(" ")) {
         var startIndex = start
