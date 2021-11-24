@@ -37,11 +37,13 @@ import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.onSuccess
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.listDialog
+import me.xizzhu.android.joshua.ui.recyclerview.VersePreviewItem
 import javax.inject.Inject
 
 abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVersesViewModel<V>>(
         @StringRes private val toolbarText: Int
-) : BaseActivity<ActivityAnnotatedBinding, VM>(), BookmarkItem.Callback, HighlightItem.Callback, NoteItem.Callback {
+) : BaseActivity<ActivityAnnotatedBinding, VM>(), BookmarkItem.Callback, HighlightItem.Callback, NoteItem.Callback, VersePreviewItem.Callback {
     @Inject
     lateinit var annotatedVersesViewModel: VM
 
@@ -110,6 +112,13 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
         annotatedVersesViewModel.saveCurrentVerseIndex(verseToOpen)
                 .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING, extrasForOpeningVerse()) }
                 .onFailure { dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse(verseToOpen) }) }
+                .launchIn(lifecycleScope)
+    }
+
+    override fun showPreview(verseIndex: VerseIndex) {
+        annotatedVersesViewModel.loadVersesForPreview(verseIndex)
+                .onSuccess { preview -> listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) }
+                .onFailure { openVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
                 .launchIn(lifecycleScope)
     }
 

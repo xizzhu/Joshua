@@ -45,6 +45,8 @@ class HighlightItem(
 
     interface Callback {
         fun openVerse(verseToOpen: VerseIndex)
+
+        fun showPreview(verseIndex: VerseIndex)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -85,6 +87,13 @@ private class HighlightItemViewHolder(inflater: LayoutInflater, parent: ViewGrou
                 (itemView.activity as? HighlightItem.Callback)?.openVerse(item.verseIndex)
                         ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement HighlightItem.Callback")
             }
+        }
+        itemView.setOnLongClickListener {
+            item?.let { item ->
+                (itemView.activity as? HighlightItem.Callback)?.showPreview(item.verseIndex)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement HighlightItem.Callback")
+            }
+            true
         }
     }
 

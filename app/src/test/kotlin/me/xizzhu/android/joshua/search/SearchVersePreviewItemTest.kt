@@ -17,9 +17,7 @@
 package me.xizzhu.android.joshua.search
 
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
@@ -28,17 +26,17 @@ import kotlin.test.assertEquals
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class VersePreviewItemTest : BaseUnitTest() {
+class SearchVersePreviewItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_verse_preview, VersePreviewItem(Verse.INVALID, "").viewType)
+        assertEquals(R.layout.item_search_verse_preview, SearchVersePreviewItem(Verse.INVALID, "").viewType)
     }
 
     @Test
     fun testTextForDisplay() {
         assertEquals(
                 "1:1 In the beginning God created the heaven and the earth.",
-                VersePreviewItem(MockContents.kjvVerses[0], "").textForDisplay.toString()
+                SearchVersePreviewItem(MockContents.kjvVerses[0], "").textForDisplay.toString()
         )
     }
 }

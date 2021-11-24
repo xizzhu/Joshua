@@ -231,7 +231,7 @@ class SearchViewModel @Inject constructor(
         val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
         val query = searchRequest.value?.query ?: ""
         val items = bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex)
-                .map { VersePreviewItem(it, query) }
+                .map { SearchVersePreviewItem(it, query) }
         PreviewViewData(
                 settings = settings().first(),
                 title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",

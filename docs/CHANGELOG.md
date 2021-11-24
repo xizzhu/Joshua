@@ -5,7 +5,7 @@ CHANGELOG
 - New features:
   - Click anywhere on toolbar to open chapter selection view and move to current book (#206)
   - Add a seek bar to set font size scale (#206)
-  - Long tap on search results to show preview
+  - Long tap on search results, bookmarks, highlights, notes, and Strong's Numbers to show preview
   - Add "OT" and "NT" option to chapter selection view (#134)
   - Support resuming downloading translations and Strong's Numbers (#149)
 - Changes:
