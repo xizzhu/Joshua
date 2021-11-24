@@ -12,6 +12,7 @@ CHANGELOG
   - Make view pager for reading less sensitive to swipe
 - Bug fixes:
   - Set color of ActionMode's back arrow to white
+  - Skip empty verses in Strong's Numbers
 - Update dependencies:
   - Gradle to 7.3
   - Kotlin to 1.6.0

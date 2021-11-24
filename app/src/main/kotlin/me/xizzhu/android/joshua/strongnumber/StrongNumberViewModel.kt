@@ -66,13 +66,14 @@ class StrongNumberViewModel @Inject constructor(
 
         var currentBookIndex = -1
         verses.forEach { verse ->
+            if (verse.text.text.isEmpty()) return@forEach
+
             val verseIndex = verse.verseIndex
             val bookName = bookNames[verseIndex.bookIndex]
             if (verseIndex.bookIndex != currentBookIndex) {
                 items.add(TitleItem(bookName, false))
                 currentBookIndex = verseIndex.bookIndex
             }
-
             items.add(StrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex], verse.text.text))
         }
 
