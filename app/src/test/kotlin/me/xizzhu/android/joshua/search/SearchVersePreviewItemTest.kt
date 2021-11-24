@@ -29,14 +29,19 @@ import kotlin.test.Test
 class SearchVersePreviewItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_search_verse_preview, SearchVersePreviewItem(Verse.INVALID, "").viewType)
+        assertEquals(R.layout.item_search_verse_preview, SearchVersePreviewItem(Verse.INVALID, "", 0).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
         assertEquals(
                 "1:1 In the beginning God created the heaven and the earth.",
-                SearchVersePreviewItem(MockContents.kjvVerses[0], "").textForDisplay.toString()
+                SearchVersePreviewItem(MockContents.kjvVerses[0], "", 0).textForDisplay.toString()
+        )
+
+        assertEquals(
+                "1:1-2 First this: God created the Heavens and Earth—all you see, all you don't see. Earth was a soup of nothingness, a bottomless emptiness, an inky blackness. God's Spirit brooded like a bird above the watery abyss.",
+                SearchVersePreviewItem(MockContents.msgVerses[0], "", 1).textForDisplay.toString()
         )
     }
 }
