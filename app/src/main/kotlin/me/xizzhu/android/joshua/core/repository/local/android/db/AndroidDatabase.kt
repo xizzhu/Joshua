@@ -19,14 +19,11 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import me.xizzhu.android.ask.db.ConditionBuilder.eq
 import me.xizzhu.android.ask.db.firstOrDefault
-import me.xizzhu.android.ask.db.getFloat
 import me.xizzhu.android.ask.db.getString
 import me.xizzhu.android.ask.db.insert
 import me.xizzhu.android.ask.db.select
 import me.xizzhu.android.ask.db.transaction
-import me.xizzhu.android.joshua.core.Settings
 
 class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
