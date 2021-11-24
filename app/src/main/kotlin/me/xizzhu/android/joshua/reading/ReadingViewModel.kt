@@ -204,7 +204,7 @@ class ReadingViewModel @Inject constructor(
                     break
                 }
             }
-            if (verse == null) throw IllegalStateException("Failed to find target verse")
+            if (verse == null) throw IllegalStateException("Failed to find verse '$verseIndex' for translation '$currentTranslation'")
 
             // step 2: builds the parallel
             val parallel = Array(parallelTranslations.size) { StringBuilder() }
