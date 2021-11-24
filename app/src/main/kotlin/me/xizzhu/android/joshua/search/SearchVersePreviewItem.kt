@@ -39,7 +39,7 @@ import me.xizzhu.android.joshua.ui.toCharSequence
 import java.util.*
 
 class SearchVersePreviewItem(
-        val verse: Verse, private val query: String
+        val verse: Verse, private val query: String, private val followingEmptyVerseCount: Int
 ) : BaseItem(R.layout.item_search_verse_preview, { inflater, parent -> SearchVersePreviewItemViewHolder(inflater, parent) }) {
     companion object {
         private val VERSE_INDEX_SIZE_SPAN = createTitleSizeSpan()
@@ -55,8 +55,13 @@ class SearchVersePreviewItem(
         // format:
         // <chapter verseIndex>:<verse verseIndex> <verse text>
         SPANNABLE_STRING_BUILDER.clearAll()
-                .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
-                .setSpan(VERSE_INDEX_SIZE_SPAN, VERSE_INDEX_STYLE_SPAN)
+
+        SPANNABLE_STRING_BUILDER.append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
+        if (followingEmptyVerseCount > 0) {
+            SPANNABLE_STRING_BUILDER.append('-').append(verse.verseIndex.verseIndex + followingEmptyVerseCount + 1)
+        }
+
+        SPANNABLE_STRING_BUILDER.setSpan(VERSE_INDEX_SIZE_SPAN, VERSE_INDEX_STYLE_SPAN)
                 .append(' ')
                 .append(verse.text.text)
 
@@ -65,6 +70,43 @@ class SearchVersePreviewItem(
 
         return@lazy SPANNABLE_STRING_BUILDER.toCharSequence()
     }
+}
+
+fun List<Verse>.toSearchVersePreviewItems(query: String): List<SearchVersePreviewItem> {
+    val items = ArrayList<SearchVersePreviewItem>(size)
+
+    val verseIterator = iterator()
+    var verse: Verse? = null
+    while (verse != null || verseIterator.hasNext()) {
+        verse = verse ?: verseIterator.next()
+
+        val (nextVerse, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
+
+        items.add(SearchVersePreviewItem(verse, query, followingEmptyVerseCount))
+
+        verse = nextVerse
+    }
+
+    return items
+}
+
+// skips the empty verses
+private fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
+    var nextVerse: Verse? = null
+    while (hasNext()) {
+        nextVerse = next()
+        if (nextVerse.text.text.isEmpty()) {
+            nextVerse = null
+        } else {
+            break
+        }
+    }
+
+    val followingEmptyVerseCount = nextVerse
+            ?.let { it.verseIndex.verseIndex - 1 - current.verseIndex.verseIndex }
+            ?: 0
+
+    return Pair(nextVerse, followingEmptyVerseCount)
 }
 
 private class SearchVersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)

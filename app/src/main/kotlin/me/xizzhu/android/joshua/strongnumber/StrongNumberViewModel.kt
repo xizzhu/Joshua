@@ -40,7 +40,7 @@ import me.xizzhu.android.joshua.ui.createTitleStyleSpan
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import me.xizzhu.android.joshua.ui.recyclerview.VersePreviewItem
+import me.xizzhu.android.joshua.ui.recyclerview.toVersePreviewItems
 import me.xizzhu.android.joshua.ui.setSpan
 import me.xizzhu.android.joshua.ui.toCharSequence
 import me.xizzhu.android.joshua.utils.firstNotEmpty
@@ -126,8 +126,7 @@ class StrongNumberViewModel @Inject constructor(
 
     fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> = viewData {
         val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-        val items = bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex)
-                .map { VersePreviewItem(it) }
+        val items = bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex).toVersePreviewItems()
         PreviewViewData(
                 settings = settings().first(),
                 title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",
