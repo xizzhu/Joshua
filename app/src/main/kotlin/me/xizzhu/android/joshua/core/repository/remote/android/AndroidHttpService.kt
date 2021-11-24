@@ -145,8 +145,7 @@ private class TLS12SocketFactory(private val delegate: SSLSocketFactory) : SSLSo
     override fun getSupportedCipherSuites(): Array<String> = delegate.supportedCipherSuites
 }
 
-inline fun ZipInputStream.forEachIndexed(action: (index: Int, entryName: String, contentReader: JsonReader) -> Unit) = use {
-    var index = 0
+internal inline fun ZipInputStream.forEach(action: (entryName: String, contentReader: JsonReader) -> Unit) = use {
     val buffer = ByteArray(4096)
     val os = ByteArrayOutputStream()
     while (true) {
@@ -160,7 +159,7 @@ inline fun ZipInputStream.forEachIndexed(action: (index: Int, entryName: String,
         }
 
         val contentReader = JsonReader(StringReader(os.toString("UTF-8")))
-        action(index++, entryName, contentReader)
+        action(entryName, contentReader)
         contentReader.close()
     }
 }

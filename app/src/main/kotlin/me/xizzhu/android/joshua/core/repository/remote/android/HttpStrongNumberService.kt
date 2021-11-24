@@ -51,7 +51,7 @@ class HttpStrongNumberService(context: Context) : RemoteStrongNumberStorage {
         val indexes = hashMapOf<VerseIndex, List<String>>()
         val reverseIndexes = hashMapOf<String, HashSet<VerseIndex>>()
 
-        ZipInputStream(BufferedInputStream(inputStream)).forEachIndexed { index, entryName, contentReader ->
+        ZipInputStream(BufferedInputStream(inputStream)).forEach { entryName, contentReader ->
             val book: Int
             val chapter: Int
             entryName.substring(0, entryName.length - 5).split("-").run {
@@ -86,7 +86,7 @@ class HttpStrongNumberService(context: Context) : RemoteStrongNumberStorage {
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun toRemoteStrongNumberWords(inputStream: InputStream): RemoteStrongNumberWords {
         val words = hashMapOf<String, String>()
-        ZipInputStream(BufferedInputStream(inputStream)).forEachIndexed { _, entryName, contentReader ->
+        ZipInputStream(BufferedInputStream(inputStream)).forEach { entryName, contentReader ->
             when (entryName) {
                 "hebrew.json" -> {
                     contentReader.readStrongNumberWords().apply {

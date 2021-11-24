@@ -53,18 +53,19 @@ class HttpTranslationService(context: Context) : RemoteTranslationService {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun toRemoteTranslation(translationInfo: RemoteTranslationInfo, inputStream: InputStream): RemoteTranslation {
-        lateinit var bookNamesShortNamesPair: Pair<List<String>, List<String>>
+        val bookNames = arrayListOf<String>()
+        val bookShortNames = arrayListOf<String>()
         val verses = HashMap<Pair<Int, Int>, List<String>>()
 
-        ZipInputStream(BufferedInputStream(inputStream)).forEachIndexed { index, entryName, contentReader ->
+        ZipInputStream(BufferedInputStream(inputStream)).forEach { entryName, contentReader ->
             if (entryName == "books.json") {
-                bookNamesShortNamesPair = contentReader.readBooksJson()
+                contentReader.readBooksJson(bookNames, bookShortNames)
             } else {
                 val (bookIndex, chapterIndex) = entryName.substring(0, entryName.length - 5).split("-")
                 verses[Pair(bookIndex.toInt(), chapterIndex.toInt())] = contentReader.readChapterJson()
             }
         }
 
-        return RemoteTranslation(translationInfo, bookNamesShortNamesPair.first, bookNamesShortNamesPair.second, verses)
+        return RemoteTranslation(translationInfo, bookNames, bookShortNames, verses)
     }
 }

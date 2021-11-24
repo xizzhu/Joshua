@@ -24,7 +24,7 @@ import me.xizzhu.android.logger.Log
 
 private const val TAG = "JsonParser"
 
-fun JsonReader.readListJson(): List<RemoteTranslationInfo> {
+internal fun JsonReader.readListJson(): List<RemoteTranslationInfo> {
     beginObject()
     while (hasNext()) {
         when (nextName()) {
@@ -42,7 +42,7 @@ fun JsonReader.readListJson(): List<RemoteTranslationInfo> {
 }
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-fun JsonReader.readTranslationsArray(): List<RemoteTranslationInfo> {
+internal fun JsonReader.readTranslationsArray(): List<RemoteTranslationInfo> {
     val remoteTranslations = ArrayList<RemoteTranslationInfo>()
     beginArray()
     while (hasNext()) {
@@ -53,7 +53,7 @@ fun JsonReader.readTranslationsArray(): List<RemoteTranslationInfo> {
 }
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-fun JsonReader.readTranslation(): RemoteTranslationInfo? {
+internal fun JsonReader.readTranslation(): RemoteTranslationInfo? {
     var shortName: String? = null
     var name: String? = null
     var language: String? = null
@@ -79,17 +79,15 @@ fun JsonReader.readTranslation(): RemoteTranslationInfo? {
     return RemoteTranslationInfo(shortName, name, language, size)
 }
 
-fun JsonReader.readBooksJson(): Pair<List<String>, List<String>> {
-    var bookNames: List<String>? = null
-    var bookShortNames: List<String>? = null
+internal fun JsonReader.readBooksJson(bookNames: MutableList<String>, bookShortNames: MutableList<String>) {
     beginObject()
     while (hasNext()) {
         when (nextName()) {
             "name" -> skipValue()
             "shortName" -> skipValue()
             "language" -> skipValue()
-            "bookNames" -> bookNames = readStringsArray()
-            "bookShortNames" -> bookShortNames = readStringsArray()
+            "bookNames" -> readStringsArray(bookNames)
+            "bookShortNames" -> readStringsArray(bookShortNames)
             else -> {
                 skipValue()
                 Log.w(TAG, "Unsupported JSON format", RuntimeException("Unsupported JSON format in books.json"))
@@ -97,15 +95,13 @@ fun JsonReader.readBooksJson(): Pair<List<String>, List<String>> {
         }
     }
     endObject()
-    if (bookNames?.size == Bible.BOOK_COUNT && bookShortNames?.size == Bible.BOOK_COUNT) {
-        return Pair(bookNames, bookShortNames)
+    if (bookNames.size != Bible.BOOK_COUNT || bookShortNames.size != Bible.BOOK_COUNT) {
+        throw RuntimeException("Illegal JSON format in books.json")
     }
-    throw RuntimeException("Illegal JSON format in books.json")
 }
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-fun JsonReader.readStringsArray(): List<String> {
-    val strings = ArrayList<String>()
+internal fun JsonReader.readStringsArray(strings: MutableList<String> = ArrayList()): List<String> {
     beginArray()
     while (hasNext()) {
         strings.add(nextString())
@@ -114,7 +110,7 @@ fun JsonReader.readStringsArray(): List<String> {
     return strings
 }
 
-fun JsonReader.readChapterJson(): List<String> {
+internal fun JsonReader.readChapterJson(): List<String> {
     beginObject()
     while (hasNext()) {
         when (nextName()) {
@@ -133,7 +129,7 @@ fun JsonReader.readChapterJson(): List<String> {
     throw RuntimeException("Illegal format in chapter JSON")
 }
 
-fun JsonReader.readStrongNumberVerses(): Map<Int, List<Int>> {
+internal fun JsonReader.readStrongNumberVerses(): Map<Int, List<Int>> {
     val verses = hashMapOf<Int, List<Int>>()
     beginObject()
     while (hasNext()) {
@@ -155,7 +151,7 @@ fun JsonReader.readStrongNumberVerses(): Map<Int, List<Int>> {
 }
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-fun JsonReader.readIntsArray(): List<Int> {
+internal fun JsonReader.readIntsArray(): List<Int> {
     val ints = ArrayList<Int>()
     beginArray()
     while (hasNext()) {
@@ -165,7 +161,7 @@ fun JsonReader.readIntsArray(): List<Int> {
     return ints
 }
 
-fun JsonReader.readStrongNumberWords(): Map<Int, String> {
+internal fun JsonReader.readStrongNumberWords(): Map<Int, String> {
     val words = hashMapOf<Int, String>()
 
     beginObject()
