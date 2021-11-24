@@ -18,10 +18,14 @@ package me.xizzhu.android.joshua.core.repository.remote.android
 
 import android.os.Build
 import android.util.JsonReader
+import kotlinx.coroutines.channels.SendChannel
 import me.xizzhu.android.logger.Log
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.StringReader
+import java.net.HttpURLConnection
 import java.net.InetAddress
 import java.net.Socket
 import java.net.URL
@@ -39,37 +43,61 @@ private const val TAG = "AndroidHttpService"
 private const val TIMEOUT_IN_MILLISECONDS = 30000 // 30 seconds
 private const val BASE_URL = "https://xizzhu.me/bible/download"
 
-internal fun getInputStream(relativeUrl: String): InputStream =
-        URL("$BASE_URL/$relativeUrl")
-                .openConnection()
-                .apply {
-                    configureTLSIfNecessary()
-                    connectTimeout = TIMEOUT_IN_MILLISECONDS
-                    readTimeout = TIMEOUT_IN_MILLISECONDS
-                }.getInputStream()
+internal fun download(downloadProgress: SendChannel<Int>, relativeUrl: String, contentLength: Long, destination: File) {
+    if (destination.length() == contentLength) return
 
-inline fun ZipInputStream.forEachIndexed(action: (index: Int, entryName: String, contentReader: JsonReader) -> Unit) = use {
-    var index = 0
-    val buffer = ByteArray(4096)
-    val os = ByteArrayOutputStream()
-    while (true) {
-        val entryName = nextEntry?.name ?: break
+    var deleteDestinationOnError = true
+    try {
+        val connection = getHttpConnection(relativeUrl)
+        var downloaded = destination.length()
+        connection.addRequestProperty("range", "bytes=$downloaded-$contentLength")
 
-        os.reset()
-        while (true) {
-            val byteCount = read(buffer)
-            if (byteCount < 0) break
-            os.write(buffer, 0, byteCount)
+        val supportsRangeRequests = connection.supportsRangeRequests()
+        deleteDestinationOnError = !supportsRangeRequests
+        connection.inputStream.use { input ->
+            val buffer = ByteArray(4096)
+            var progress = (downloaded * 99 / contentLength).toInt()
+            FileOutputStream(destination, supportsRangeRequests).use { output ->
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read <= 0) break
+
+                    output.write(buffer, 0, read)
+                    downloaded += read
+
+                    // only emits if the progress is actually changed
+                    val currentProgress = (downloaded * 99 / contentLength).toInt()
+                    if (currentProgress > progress) {
+                        progress = currentProgress
+                        downloadProgress.trySend(progress)
+                    }
+                }
+            }
         }
-
-        val contentReader = JsonReader(StringReader(os.toString("UTF-8")))
-        action(index++, entryName, contentReader)
-        contentReader.close()
+    } catch (t: Throwable) {
+        if (deleteDestinationOnError) {
+            destination.delete()
+        }
+        throw t
     }
 }
 
+private fun getHttpConnection(relativeUrl: String): HttpURLConnection =
+        (URL("$BASE_URL/$relativeUrl").openConnection() as HttpURLConnection)
+                .apply {
+                    configureTLSIfNecessary()
+                    instanceFollowRedirects = true
+                    connectTimeout = TIMEOUT_IN_MILLISECONDS
+                    readTimeout = TIMEOUT_IN_MILLISECONDS
+                }
+
+private fun HttpURLConnection.supportsRangeRequests(): Boolean =
+        getHeaderField("accept-ranges") == "bytes" && contentLength > 0L
+
+internal fun getInputStream(relativeUrl: String): InputStream = getHttpConnection(relativeUrl).inputStream
+
 // For more details, see https://github.com/square/okhttp/issues/2372#issuecomment-244807676
-private fun URLConnection.configureTLSIfNecessary(): URLConnection {
+private fun HttpURLConnection.configureTLSIfNecessary(): URLConnection {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 && this is HttpsURLConnection) {
         return this
     }
@@ -115,4 +143,24 @@ private class TLS12SocketFactory(private val delegate: SSLSocketFactory) : SSLSo
     override fun getDefaultCipherSuites(): Array<String> = delegate.defaultCipherSuites
 
     override fun getSupportedCipherSuites(): Array<String> = delegate.supportedCipherSuites
+}
+
+inline fun ZipInputStream.forEachIndexed(action: (index: Int, entryName: String, contentReader: JsonReader) -> Unit) = use {
+    var index = 0
+    val buffer = ByteArray(4096)
+    val os = ByteArrayOutputStream()
+    while (true) {
+        val entryName = nextEntry?.name ?: break
+
+        os.reset()
+        while (true) {
+            val byteCount = read(buffer)
+            if (byteCount < 0) break
+            os.write(buffer, 0, byteCount)
+        }
+
+        val contentReader = JsonReader(StringReader(os.toString("UTF-8")))
+        action(index++, entryName, contentReader)
+        contentReader.close()
+    }
 }

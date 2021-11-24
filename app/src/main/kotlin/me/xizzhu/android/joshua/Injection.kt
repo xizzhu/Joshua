@@ -136,6 +136,6 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideTranslationRepository(androidDatabase: AndroidDatabase): TranslationRepository =
-            TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService())
+    fun provideTranslationRepository(app: App, androidDatabase: AndroidDatabase): TranslationRepository =
+            TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService(app))
 }
