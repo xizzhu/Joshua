@@ -131,8 +131,8 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideStrongNumberRepository(androidDatabase: AndroidDatabase): StrongNumberRepository =
-            StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase), HttpStrongNumberService())
+    fun provideStrongNumberRepository(app: App, androidDatabase: AndroidDatabase): StrongNumberRepository =
+            StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase), HttpStrongNumberService(app))
 
     @Provides
     @Singleton
