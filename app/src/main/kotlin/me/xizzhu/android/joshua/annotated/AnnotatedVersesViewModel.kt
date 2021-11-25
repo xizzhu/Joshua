@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseAnnotation
@@ -39,9 +40,12 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.viewData
+import me.xizzhu.android.joshua.strongnumber.PreviewViewData
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import me.xizzhu.android.joshua.ui.recyclerview.VersePreviewItem
+import me.xizzhu.android.joshua.ui.recyclerview.toVersePreviewItems
 import me.xizzhu.android.joshua.utils.currentTimeMillis
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
@@ -49,6 +53,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class AnnotatedVersesViewData(val items: List<BaseItem>)
+
+class PreviewViewData(val settings: Settings, val title: String, val items: List<BaseItem>, val currentPosition: Int)
 
 abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
         private val bibleReadingManager: BibleReadingManager,
@@ -191,4 +197,15 @@ abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
     fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
         bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
     }.onFailure { Log.e(tag, "Failed to save current verse", it) }
+
+    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> = viewData {
+        val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+        val items = bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex).toVersePreviewItems()
+        PreviewViewData(
+                settings = settings().first(),
+                title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",
+                items = items,
+                currentPosition = verseIndex.verseIndex
+        )
+    }.onFailure { Log.e(tag, "Failed to load verses for preview", it) }
 }

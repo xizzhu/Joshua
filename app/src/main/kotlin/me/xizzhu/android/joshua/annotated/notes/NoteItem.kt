@@ -37,6 +37,8 @@ class NoteItem(val verseIndex: VerseIndex, private val bookShortName: String, pr
 
     interface Callback {
         fun openVerse(verseToOpen: VerseIndex)
+
+        fun showPreview(verseIndex: VerseIndex)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -62,6 +64,13 @@ private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
                 (itemView.activity as? NoteItem.Callback)?.openVerse(item.verseIndex)
                         ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement NoteItem.Callback")
             }
+        }
+        itemView.setOnLongClickListener {
+            item?.let { item ->
+                (itemView.activity as? NoteItem.Callback)?.showPreview(item.verseIndex)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement NoteItem.Callback")
+            }
+            true
         }
     }
 

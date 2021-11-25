@@ -45,7 +45,7 @@ import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 
 @AndroidEntryPoint
-class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback, VersePreviewItem.Callback {
+class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback, SearchVersePreviewItem.Callback {
     private val searchViewModel: SearchViewModel by viewModels()
 
     private lateinit var searchRecentSuggestions: SearchRecentSuggestions

@@ -14,31 +14,34 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.search
+package me.xizzhu.android.joshua.ui.recyclerview
 
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertEquals
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class VersePreviewItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_verse_preview, VersePreviewItem(Verse.INVALID, "").viewType)
+        assertEquals(R.layout.item_verse_preview, VersePreviewItem(Verse.INVALID, 0).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
         assertEquals(
                 "1:1 In the beginning God created the heaven and the earth.",
-                VersePreviewItem(MockContents.kjvVerses[0], "").textForDisplay.toString()
+                VersePreviewItem(MockContents.kjvVerses[0], 0).textForDisplay.toString()
+        )
+
+        assertEquals(
+                "1:1-2 First this: God created the Heavens and Earth—all you see, all you don't see. Earth was a soup of nothingness, a bottomless emptiness, an inky blackness. God's Spirit brooded like a bird above the watery abyss.",
+                VersePreviewItem(MockContents.msgVerses[0], 1).textForDisplay.toString()
         )
     }
 }

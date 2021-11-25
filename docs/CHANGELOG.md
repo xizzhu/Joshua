@@ -5,13 +5,14 @@ CHANGELOG
 - New features:
   - Click anywhere on toolbar to open chapter selection view and move to current book (#206)
   - Add a seek bar to set font size scale (#206)
-  - Long tap on search results to show preview
+  - Long tap on search results, bookmarks, highlights, notes, and Strong's Numbers to show preview
   - Add "OT" and "NT" option to chapter selection view (#134)
   - Support resuming downloading translations and Strong's Numbers (#149)
 - Changes:
   - Make view pager for reading less sensitive to swipe
 - Bug fixes:
   - Set color of ActionMode's back arrow to white
+  - Skip empty verses in Strong's Numbers
 - Update dependencies:
   - Gradle to 7.3
   - Kotlin to 1.6.0

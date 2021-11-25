@@ -33,9 +33,11 @@ import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.onSuccess
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
+import me.xizzhu.android.joshua.ui.listDialog
+import me.xizzhu.android.joshua.ui.recyclerview.VersePreviewItem
 
 @AndroidEntryPoint
-class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding, StrongNumberViewModel>(), StrongNumberItem.Callback {
+class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding, StrongNumberViewModel>(), StrongNumberItem.Callback, VersePreviewItem.Callback {
     companion object {
         private const val KEY_STRONG_NUMBER = "me.xizzhu.android.joshua.KEY_STRONG_NUMBER"
 
@@ -95,6 +97,13 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding, StrongNum
         strongNumberViewModel.saveCurrentVerseIndex(verseToOpen)
                 .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
                 .onFailure { dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse(verseToOpen) }) }
+                .launchIn(lifecycleScope)
+    }
+
+    override fun showPreview(verseIndex: VerseIndex) {
+        strongNumberViewModel.loadVersesForPreview(verseIndex)
+                .onSuccess { preview -> listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) }
+                .onFailure { openVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
                 .launchIn(lifecycleScope)
     }
 }

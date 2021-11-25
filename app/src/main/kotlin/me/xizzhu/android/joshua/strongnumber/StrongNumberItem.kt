@@ -44,6 +44,8 @@ class StrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: St
 
     interface Callback {
         fun openVerse(verseToOpen: VerseIndex)
+
+        fun showPreview(verseIndex: VerseIndex)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -68,6 +70,13 @@ private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewG
                 (itemView.activity as? StrongNumberItem.Callback)?.openVerse(item.verseIndex)
                         ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement StrongNumberItem.Callback")
             }
+        }
+        itemView.setOnLongClickListener {
+            item?.let { item ->
+                (itemView.activity as? StrongNumberItem.Callback)?.showPreview(item.verseIndex)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement StrongNumberItem.Callback")
+            }
+            true
         }
     }
 

@@ -40,6 +40,8 @@ class BookmarkItem(
 
     interface Callback {
         fun openVerse(verseToOpen: VerseIndex)
+
+        fun showPreview(verseIndex: VerseIndex)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -76,6 +78,13 @@ private class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup
                 (itemView.activity as? BookmarkItem.Callback)?.openVerse(item.verseIndex)
                         ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement BookmarkItem.Callback")
             }
+        }
+        itemView.setOnLongClickListener {
+            item?.let { item ->
+                (itemView.activity as? BookmarkItem.Callback)?.showPreview(item.verseIndex)
+                        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement BookmarkItem.Callback")
+            }
+            true
         }
     }
 

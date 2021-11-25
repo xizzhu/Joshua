@@ -24,7 +24,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.databinding.ItemVersePreviewBinding
+import me.xizzhu.android.joshua.databinding.ItemSearchVersePreviewBinding
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
@@ -38,9 +38,9 @@ import me.xizzhu.android.joshua.ui.setSpan
 import me.xizzhu.android.joshua.ui.toCharSequence
 import java.util.*
 
-class VersePreviewItem(
-        val verse: Verse, private val query: String
-) : BaseItem(R.layout.item_verse_preview, { inflater, parent -> VersePreviewItemViewHolder(inflater, parent) }) {
+class SearchVersePreviewItem(
+        val verse: Verse, private val query: String, private val followingEmptyVerseCount: Int
+) : BaseItem(R.layout.item_search_verse_preview, { inflater, parent -> SearchVersePreviewItemViewHolder(inflater, parent) }) {
     companion object {
         private val VERSE_INDEX_SIZE_SPAN = createTitleSizeSpan()
         private val VERSE_INDEX_STYLE_SPAN = createTitleStyleSpan()
@@ -55,8 +55,13 @@ class VersePreviewItem(
         // format:
         // <chapter verseIndex>:<verse verseIndex> <verse text>
         SPANNABLE_STRING_BUILDER.clearAll()
-                .append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
-                .setSpan(VERSE_INDEX_SIZE_SPAN, VERSE_INDEX_STYLE_SPAN)
+
+        SPANNABLE_STRING_BUILDER.append(verse.verseIndex.chapterIndex + 1).append(':').append(verse.verseIndex.verseIndex + 1)
+        if (followingEmptyVerseCount > 0) {
+            SPANNABLE_STRING_BUILDER.append('-').append(verse.verseIndex.verseIndex + followingEmptyVerseCount + 1)
+        }
+
+        SPANNABLE_STRING_BUILDER.setSpan(VERSE_INDEX_SIZE_SPAN, VERSE_INDEX_STYLE_SPAN)
                 .append(' ')
                 .append(verse.text.text)
 
@@ -67,17 +72,54 @@ class VersePreviewItem(
     }
 }
 
-private class VersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<VersePreviewItem>(ItemVersePreviewBinding.inflate(inflater, parent, false).root) {
+fun List<Verse>.toSearchVersePreviewItems(query: String): List<SearchVersePreviewItem> {
+    val items = ArrayList<SearchVersePreviewItem>(size)
+
+    val verseIterator = iterator()
+    var verse: Verse? = null
+    while (verse != null || verseIterator.hasNext()) {
+        verse = verse ?: verseIterator.next()
+
+        val (nextVerse, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
+
+        items.add(SearchVersePreviewItem(verse, query, followingEmptyVerseCount))
+
+        verse = nextVerse
+    }
+
+    return items
+}
+
+// skips the empty verses
+private fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
+    var nextVerse: Verse? = null
+    while (hasNext()) {
+        nextVerse = next()
+        if (nextVerse.text.text.isEmpty()) {
+            nextVerse = null
+        } else {
+            break
+        }
+    }
+
+    val followingEmptyVerseCount = nextVerse
+            ?.let { it.verseIndex.verseIndex - 1 - current.verseIndex.verseIndex }
+            ?: 0
+
+    return Pair(nextVerse, followingEmptyVerseCount)
+}
+
+private class SearchVersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
+    : BaseViewHolder<SearchVersePreviewItem>(ItemSearchVersePreviewBinding.inflate(inflater, parent, false).root) {
     private val resources = itemView.resources
-    private val viewBinding = ItemVersePreviewBinding.bind(itemView).apply {
+    private val viewBinding = ItemSearchVersePreviewBinding.bind(itemView).apply {
         root.setOnClickListener { item?.let { callback().openVerse(it.verse.verseIndex) } }
     }
 
-    private fun callback(): VersePreviewItem.Callback = (itemView.activity as? VersePreviewItem.Callback)
-            ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement VersePreviewItem.Callback")
+    private fun callback(): SearchVersePreviewItem.Callback = (itemView.activity as? SearchVersePreviewItem.Callback)
+            ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement SearchVersePreviewItemViewHolder.Callback")
 
-    override fun bind(settings: Settings, item: VersePreviewItem, payloads: List<Any>) {
+    override fun bind(settings: Settings, item: SearchVersePreviewItem, payloads: List<Any>) {
         viewBinding.versePreview.text = item.textForDisplay
         viewBinding.versePreview.setTextColor(settings.getPrimaryTextColor(resources))
         viewBinding.versePreview.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
