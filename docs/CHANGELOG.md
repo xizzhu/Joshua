@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next release
+#### v0.19.0 (2021-11-26)
 - New features:
   - Click anywhere on toolbar to open chapter selection view and move to current book (#206)
   - Add a seek bar to set font size scale (#206)
