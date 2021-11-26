@@ -20,11 +20,13 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.annotation.IntDef
+import androidx.annotation.RequiresApi
 import com.google.android.material.tabs.TabLayoutMediator
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
@@ -50,6 +52,7 @@ class VerseDetailViewLayout : FrameLayout {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     private val adapter = VerseDetailPagerAdapter(context)

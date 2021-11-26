@@ -40,11 +40,9 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.viewData
-import me.xizzhu.android.joshua.strongnumber.PreviewViewData
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import me.xizzhu.android.joshua.ui.recyclerview.VersePreviewItem
 import me.xizzhu.android.joshua.ui.recyclerview.toVersePreviewItems
 import me.xizzhu.android.joshua.utils.currentTimeMillis
 import me.xizzhu.android.joshua.utils.firstNotEmpty

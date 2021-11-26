@@ -21,6 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/padding_big"
+            android:contentDescription="@string/action_search"
             android:src="@drawable/ic_search"
             app:backgroundTint="@color/primary"
             app:layout_behavior="me.xizzhu.android.joshua.reading.search.FloatingActionButtonScrollAwareBehavior" />

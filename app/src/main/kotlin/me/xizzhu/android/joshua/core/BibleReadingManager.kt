@@ -123,10 +123,6 @@ class BibleReadingManager(
         bibleReadingRepository.removeParallelTranslation(translationShortName)
     }
 
-    suspend fun clearParallelTranslation() {
-        bibleReadingRepository.clearParallelTranslation()
-    }
-
     suspend fun readBookNames(translationShortName: String): List<String> =
             bibleReadingRepository.readBookNames(translationShortName)
 

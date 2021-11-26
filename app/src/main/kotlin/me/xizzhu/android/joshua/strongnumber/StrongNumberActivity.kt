@@ -75,11 +75,8 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding, StrongNum
                             }
                         },
                         onFailure = {
-                            with(viewBinding) {
-                                loadingSpinner.visibility = View.GONE
-                                dialog(false, R.string.dialog_load_strong_number_list_error,
-                                        { _, _ -> loadStrongNumber() }, { _, _ -> finish() })
-                            }
+                            viewBinding.loadingSpinner.visibility = View.GONE
+                            dialog(false, R.string.dialog_load_strong_number_list_error, { _, _ -> loadStrongNumber() }, { _, _ -> finish() })
                         }
                 )
                 .launchIn(lifecycleScope)

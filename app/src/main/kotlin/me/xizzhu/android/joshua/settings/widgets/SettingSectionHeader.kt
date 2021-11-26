@@ -17,11 +17,13 @@
 package me.xizzhu.android.joshua.settings.widgets
 
 import android.content.Context
+import android.os.Build
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.Px
+import androidx.annotation.RequiresApi
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.ui.setText
 
@@ -38,6 +40,7 @@ class SettingSectionHeader : FrameLayout {
         init(context, attrs)
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         init(context, attrs)
     }
