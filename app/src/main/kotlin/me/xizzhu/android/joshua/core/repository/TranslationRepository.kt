@@ -177,6 +177,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
     suspend fun removeTranslation(translationInfo: TranslationInfo) {
         Log.i(TAG, "Start removing translation - ${translationInfo.shortName}")
         localTranslationStorage.removeTranslation(translationInfo)
+        remoteTranslationService.removeTranslationCache(RemoteTranslationInfo.fromTranslationInfo(translationInfo))
         Log.i(TAG, "Translation removed")
 
         val (available, downloaded) = synchronized(translationsLock) {

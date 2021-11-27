@@ -73,6 +73,10 @@ class HttpStrongNumberService(context: Context) : RemoteStrongNumberStorage {
         return RemoteStrongNumberIndexes(indexes, reverseIndexes.mapValues { (_, verseIndexes) -> verseIndexes.toList() })
     }
 
+    override suspend fun removeIndexesCache(): Unit = withContext(Dispatchers.IO) {
+        File(cacheDir, "sn_indexes").delete()
+    }
+
     override suspend fun fetchWords(downloadProgress: SendChannel<Int>): RemoteStrongNumberWords = withContext(Dispatchers.IO) {
         return@withContext File(cacheDir, "sn_en").apply {
             download(downloadProgress, "tools/sn_en.zip", 190102, this) // TODO #21
@@ -110,5 +114,9 @@ class HttpStrongNumberService(context: Context) : RemoteStrongNumberStorage {
             throw IllegalStateException("Incorrect Strong number words count (${words.size})")
         }
         return RemoteStrongNumberWords(words)
+    }
+
+    override suspend fun removeWordsCache(): Unit = withContext(Dispatchers.IO) {
+        File(cacheDir, "sn_en").delete()
     }
 }

@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+#### Next release
+- Bug fixes:
+  - Should also remove caches when removing translations
+
 #### v0.19.0 (2021-11-26)
 - New features:
   - Click anywhere on toolbar to open chapter selection view and move to current book (#206)

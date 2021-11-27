@@ -68,4 +68,8 @@ class HttpTranslationService(context: Context) : RemoteTranslationService {
 
         return RemoteTranslation(translationInfo, bookNames, bookShortNames, verses)
     }
+
+    override suspend fun removeTranslationCache(translationInfo: RemoteTranslationInfo): Unit = withContext(Dispatchers.IO) {
+        File(cacheDir, translationInfo.shortName).delete()
+    }
 }

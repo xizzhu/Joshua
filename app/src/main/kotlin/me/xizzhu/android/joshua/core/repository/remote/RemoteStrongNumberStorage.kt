@@ -27,5 +27,9 @@ data class RemoteStrongNumberWords(val words: Map<String, String>)
 interface RemoteStrongNumberStorage {
     suspend fun fetchIndexes(downloadProgress: SendChannel<Int>): RemoteStrongNumberIndexes
 
+    suspend fun removeIndexesCache()
+
     suspend fun fetchWords(downloadProgress: SendChannel<Int>): RemoteStrongNumberWords
+
+    suspend fun removeWordsCache()
 }

@@ -312,6 +312,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
     @Test
     fun `test removeTranslation() that does not exist`() = runBlocking {
         coEvery { localTranslationStorage.removeTranslation(any()) } returns Unit
+        coEvery { remoteTranslationService.removeTranslationCache(any()) } returns Unit
         val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
 
         assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
@@ -326,6 +327,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
     fun `test removeTranslation()`() = runBlocking {
         coEvery { localTranslationStorage.readTranslations() } returns listOf(MockContents.cuvTranslationInfo, MockContents.kjvDownloadedTranslationInfo)
         coEvery { localTranslationStorage.removeTranslation(MockContents.kjvDownloadedTranslationInfo) } returns Unit
+        coEvery { remoteTranslationService.removeTranslationCache(any()) } returns Unit
 
         val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
         assertEquals(listOf(MockContents.cuvTranslationInfo), translationRepository.availableTranslations.first())

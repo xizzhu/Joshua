@@ -40,4 +40,6 @@ interface RemoteTranslationService {
     suspend fun fetchTranslations(): List<RemoteTranslationInfo>
 
     suspend fun fetchTranslation(downloadProgress: SendChannel<Int>, translationInfo: RemoteTranslationInfo): RemoteTranslation
+
+    suspend fun removeTranslationCache(translationInfo: RemoteTranslationInfo)
 }
