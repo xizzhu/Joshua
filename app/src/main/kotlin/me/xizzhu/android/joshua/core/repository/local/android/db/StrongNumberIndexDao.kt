@@ -20,6 +20,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
 import me.xizzhu.android.ask.db.*
+import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 
 class StrongNumberIndexDao(sqliteHelper: SQLiteOpenHelper) {
@@ -49,7 +50,15 @@ class StrongNumberIndexDao(sqliteHelper: SQLiteOpenHelper) {
                 (COLUMN_BOOK_INDEX eq verseIndex.bookIndex) and
                         (COLUMN_CHAPTER_INDEX eq verseIndex.chapterIndex) and
                         (COLUMN_VERSE_INDEX eq verseIndex.verseIndex)
-            }.firstOrDefault(emptyList()) { row -> row.getString(COLUMN_STRONG_NUMBER).split("-") }
+            }.firstOrDefault(emptyList()) { row ->
+                row.getString(COLUMN_STRONG_NUMBER)
+                        .split("-")
+                        .filter { sn ->
+                            return@filter sn.substring(1).toIntOrNull()
+                                    ?.let { it in 1..(if (sn[0] == 'H') StrongNumber.TOTAL_HEBREW_ROOT_WORDS else StrongNumber.TOTAL_GREEK_ROOT_WORDS) }
+                                    ?: false
+                        }
+            }
 
     @WorkerThread
     fun replace(strongNumberIndexes: Map<VerseIndex, List<String>>) {

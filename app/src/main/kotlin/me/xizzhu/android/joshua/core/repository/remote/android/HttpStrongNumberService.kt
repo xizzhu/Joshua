@@ -23,6 +23,7 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberIndexes
@@ -60,7 +61,13 @@ class HttpStrongNumberService(context: Context) : RemoteStrongNumberStorage {
             }
             contentReader.readStrongNumberVerses().forEach { (verse, strongWords) ->
                 val verseIndex = VerseIndex(book, chapter, verse - 1)
-                strongWords.map { if (book < Bible.OLD_TESTAMENT_COUNT) "H$it" else "G$it" }.run {
+                strongWords.mapNotNull { sn ->
+                    if (book < Bible.OLD_TESTAMENT_COUNT) {
+                        if (sn in 1..StrongNumber.TOTAL_HEBREW_ROOT_WORDS) "H$sn" else null
+                    } else {
+                        if (sn in 1..StrongNumber.TOTAL_GREEK_ROOT_WORDS) "G$sn" else null
+                    }
+                }.run {
                     indexes[verseIndex] = this
                     forEach { sn ->
                         (reverseIndexes[sn]

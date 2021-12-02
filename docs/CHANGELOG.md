@@ -4,6 +4,7 @@ CHANGELOG
 #### Next release
 - Bug fixes:
   - Should also remove caches when removing translations
+  - Filter invalid Strong's Numbers
 
 #### v0.19.0 (2021-11-26)
 - New features:

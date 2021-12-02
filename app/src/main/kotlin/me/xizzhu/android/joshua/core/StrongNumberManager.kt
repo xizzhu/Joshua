@@ -21,6 +21,9 @@ import me.xizzhu.android.joshua.core.repository.StrongNumberRepository
 
 data class StrongNumber(val sn: String, val meaning: String) {
     companion object {
+        const val TOTAL_HEBREW_ROOT_WORDS = 8674
+        const val TOTAL_GREEK_ROOT_WORDS = 5624
+
         val INVALID = StrongNumber("", "")
     }
 
