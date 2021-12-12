@@ -34,16 +34,16 @@ object Versions {
 
     object Sdk {
         const val classpath = "7.0.3"
-        const val buildTools = "31.0.0"
-        const val compile = 31
+        const val buildTools = "32.0.0"
+        const val compile = 32
         const val min = 19
-        const val target = 31
+        const val target = 32
     }
 
     val java = JavaVersion.VERSION_11
 
     object Kotlin {
-        const val jvmTarget = "11"
+        val jvmTarget = java.toString()
         const val core = "1.6.0"
         const val coroutines = "1.5.2"
     }
@@ -57,10 +57,9 @@ object Versions {
         const val multidex = "2.0.1"
 
         object View {
-            const val constraintLayout = "2.1.1"
+            const val constraintLayout = "2.1.2"
             const val coordinatorLayout = "1.1.0"
             const val drawerLayout = "1.1.1"
-            const val material = "1.4.0"
             const val recyclerView = "1.2.1"
             const val swipeRefreshLayout = "1.1.0"
             const val viewPager2 = "1.0.0"
@@ -73,18 +72,17 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.10"
-        const val bom = "29.0.0"
+        const val bom = "29.0.2"
 
         object Crashlytics {
-            const val classpath = "2.8.0"
+            const val classpath = "2.8.1"
         }
     }
 
-    const val hilt = "2.40.1"
-
     const val ask = "0.5.2"
-
+    const val hilt = "2.40.5"
     const val logger = "0.7.0"
+    const val materialComponent = "1.4.0"
 
     const val mockk = "1.12.1"
     const val robolectric = "4.5"
@@ -119,7 +117,6 @@ object Dependencies {
             const val constraintLayout = "androidx.constraintlayout:constraintlayout:${Versions.AndroidX.View.constraintLayout}"
             const val coordinatorLayout = "androidx.coordinatorlayout:coordinatorlayout:${Versions.AndroidX.View.coordinatorLayout}"
             const val drawerLayout = "androidx.drawerlayout:drawerlayout:${Versions.AndroidX.View.drawerLayout}"
-            const val material = "com.google.android.material:material:${Versions.AndroidX.View.material}"
             const val recyclerView = "androidx.recyclerview:recyclerview:${Versions.AndroidX.View.recyclerView}"
             const val swipeRefreshLayout = "androidx.swiperefreshlayout:swiperefreshlayout:${Versions.AndroidX.View.swipeRefreshLayout}"
             const val viewPager2 = "androidx.viewpager2:viewpager2:${Versions.AndroidX.View.viewPager2}"
@@ -147,19 +144,10 @@ object Dependencies {
         const val compiler = "com.google.dagger:hilt-android-compiler:${Versions.hilt}"
     }
 
-    object Ask {
-        const val ask = "com.github.xizzhu:ask:${Versions.ask}"
-    }
+    const val ask = "com.github.xizzhu:ask:${Versions.ask}"
+    const val logger = "me.xizzhu:logger:${Versions.logger}"
+    const val materialComponent = "com.google.android.material:material:${Versions.materialComponent}"
 
-    object Logger {
-        const val logger = "me.xizzhu:logger:${Versions.logger}"
-    }
-
-    object Mockk {
-        const val mockk = "io.mockk:mockk:${Versions.mockk}"
-    }
-
-    object Robolectric {
-        const val robolectric = "org.robolectric:robolectric:${Versions.robolectric}"
-    }
+    const val mockk = "io.mockk:mockk:${Versions.mockk}"
+    const val robolectric = "org.robolectric:robolectric:${Versions.robolectric}"
 }

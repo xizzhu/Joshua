@@ -112,6 +112,12 @@ tasks.withType(Test::class) {
     maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = Versions.Kotlin.jvmTarget
+    }
+}
+
 dependencies {
     implementation(Dependencies.Kotlin.coroutinesAndroid)
 
@@ -126,7 +132,6 @@ dependencies {
     implementation(Dependencies.AndroidX.View.constraintLayout)
     implementation(Dependencies.AndroidX.View.coordinatorLayout)
     implementation(Dependencies.AndroidX.View.drawerLayout)
-    implementation(Dependencies.AndroidX.View.material)
     implementation(Dependencies.AndroidX.View.recyclerView)
     implementation(Dependencies.AndroidX.View.swipeRefreshLayout)
     implementation(Dependencies.AndroidX.View.viewPager2)
@@ -138,15 +143,15 @@ dependencies {
     implementation(Dependencies.Hilt.android)
     kapt(Dependencies.Hilt.compiler)
 
-    implementation(Dependencies.Ask.ask)
-
-    implementation(Dependencies.Logger.logger)
+    implementation(Dependencies.ask)
+    implementation(Dependencies.logger)
+    implementation(Dependencies.materialComponent)
 
     testImplementation(Dependencies.Kotlin.test)
     testImplementation(Dependencies.Kotlin.coroutinesTest)
     testImplementation(Dependencies.AndroidX.Test.core)
-    testImplementation(Dependencies.Mockk.mockk)
-    testImplementation(Dependencies.Robolectric.robolectric)
+    testImplementation(Dependencies.mockk)
+    testImplementation(Dependencies.robolectric)
 }
 
 apply {
