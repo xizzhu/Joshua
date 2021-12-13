@@ -32,7 +32,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.setSpan
 import me.xizzhu.android.joshua.ui.toCharSequence
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
+import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 
 class StrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: String, private val verseText: String)
     : BaseItem(R.layout.item_verse_strong_number, { inflater, parent -> StrongNumberItemViewHolder(inflater, parent) }) {
@@ -82,7 +82,7 @@ private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewG
 
     override fun bind(settings: Settings, item: StrongNumberItem, payloads: List<Any>) {
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.textForDisplay
         }
     }

@@ -8,7 +8,7 @@
     android:paddingEnd="@dimen/padding"
     android:paddingBottom="@dimen/padding_small">
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/continuous_reading_days_value"
         style="@style/Text.Body"
         android:layout_width="wrap_content"
@@ -17,7 +17,7 @@
         android:textStyle="bold"
         tools:text="10 days" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/continuous_reading_days_title"
         style="@style/Text.Body"
         android:layout_width="wrap_content"
@@ -25,7 +25,7 @@
         android:layout_alignBottom="@id/continuous_reading_days_value"
         android:text="@string/text_continuous_reading" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/chapters_read_value"
         style="@style/Text.Body"
         android:layout_width="wrap_content"
@@ -36,7 +36,7 @@
         android:textStyle="bold"
         tools:text="123" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/chapters_read_title"
         style="@style/Text.Body"
         android:layout_width="wrap_content"
@@ -44,7 +44,7 @@
         android:layout_alignBottom="@id/chapters_read_value"
         android:text="@string/text_chapters_read" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_books_value"
         style="@style/Text.Body"
         android:layout_width="wrap_content"
@@ -55,7 +55,7 @@
         android:textStyle="bold"
         tools:text="45" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_books_title"
         style="@style/Text.Body"
         android:layout_width="wrap_content"
@@ -63,7 +63,7 @@
         android:layout_alignBottom="@id/finished_books_value"
         android:text="@string/text_finished_books" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_old_testament_value"
         style="@style/Text.Body"
         android:layout_width="wrap_content"
@@ -73,7 +73,7 @@
         android:textStyle="bold"
         tools:text="12" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_old_testament_title"
         style="@style/Text.Body"
         android:layout_width="wrap_content"
@@ -82,7 +82,7 @@
         android:layout_marginStart="@dimen/padding_small"
         android:text="@string/text_finished_old_testament" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_new_testament_value"
         style="@style/Text.Body"
         android:layout_width="wrap_content"
@@ -92,7 +92,7 @@
         android:textStyle="bold"
         tools:text="3" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_new_testament_title"
         style="@style/Text.Body"
         android:layout_width="wrap_content"

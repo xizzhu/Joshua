@@ -68,7 +68,7 @@ private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewG
 
     override fun bind(settings: Settings, item: StrongNumberItem, payloads: List<Any>) {
         with(viewBinding.strongNumber) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.textForDisplay
         }
     }

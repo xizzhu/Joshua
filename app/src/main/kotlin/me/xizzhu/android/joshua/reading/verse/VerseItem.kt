@@ -91,8 +91,7 @@ private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     override fun bind(settings: Settings, item: VerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {
             viewBinding.text.text = item.textForDisplay
-            viewBinding.text.setTextColor(if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources))
-            viewBinding.text.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+            viewBinding.text.setPrimaryTextSize(settings)
 
             viewBinding.bookmark.colorFilter = if (item.hasBookmark) ON else OFF
             viewBinding.highlight.colorFilter = if (item.highlightColor != Highlight.COLOR_NONE) ON else OFF
@@ -105,17 +104,13 @@ private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
                 when (update.operation) {
                     VerseUpdate.VERSE_SELECTED -> {
                         item.selected = true
-                        itemView.isSelected = true
-                        if (settings.nightModeOn) {
-                            viewBinding.text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
-                        }
+                        viewBinding.root.isSelected = true
+                        viewBinding.text.isSelected = true
                     }
                     VerseUpdate.VERSE_DESELECTED -> {
                         item.selected = false
-                        itemView.isSelected = false
-                        if (settings.nightModeOn) {
-                            viewBinding.text.animateTextColor(settings.getPrimaryTextColor(resources))
-                        }
+                        viewBinding.root.isSelected = false
+                        viewBinding.text.isSelected = false
                     }
                     VerseUpdate.NOTE_ADDED -> {
                         item.hasNote = true

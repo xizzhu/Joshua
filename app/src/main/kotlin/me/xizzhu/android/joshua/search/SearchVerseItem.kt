@@ -37,7 +37,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.setSpan
 import me.xizzhu.android.joshua.ui.toCharSequence
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
+import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 import java.util.*
 
 class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: String,
@@ -106,7 +106,7 @@ private class SearchVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
 
     override fun bind(settings: Settings, item: SearchVerseItem, payloads: List<Any>) {
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.textForDisplay
         }
     }

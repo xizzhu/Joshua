@@ -20,10 +20,10 @@ import android.app.SearchableInfo
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.Toolbar
+import com.google.android.material.appbar.MaterialToolbar
 import me.xizzhu.android.joshua.R
 
-class SearchToolbar : Toolbar {
+class SearchToolbar : MaterialToolbar {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -31,8 +31,6 @@ class SearchToolbar : Toolbar {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
-        setLogo(R.drawable.ic_toolbar)
-
         inflateMenu(R.menu.menu_search)
         menu.findItem(R.id.action_search).expandActionView()
         with(searchView()) {

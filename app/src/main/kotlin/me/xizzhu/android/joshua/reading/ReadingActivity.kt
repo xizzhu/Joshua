@@ -88,7 +88,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
     private var actionMode: ActionMode? = null
     private val actionModeCallback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            mode.menuInflater.inflate(R.menu.menu_verse_selection, menu)
+            mode.menuInflater.inflate(R.menu.menu_reading_action_mode, menu)
             return true
         }
 

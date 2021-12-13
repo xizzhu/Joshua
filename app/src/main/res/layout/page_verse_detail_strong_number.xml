@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/empty_strong_number_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

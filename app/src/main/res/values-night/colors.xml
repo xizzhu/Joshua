@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="verse_pressed">#888888</color>
+    <color name="verse_selected">#888888</color>
+</resources>

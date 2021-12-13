@@ -99,7 +99,7 @@ private class SearchNoteItemViewHolder(inflater: LayoutInflater, parent: ViewGro
             text = item.verseForDisplay
         }
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.noteForDisplay
         }
     }

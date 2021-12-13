@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 app:settingButtonTitle="@string/settings_title_font_size" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/keep_screen_on"
                 style="@style/Text.Body"
                 android:layout_width="match_parent"
@@ -37,7 +37,7 @@
                 android:paddingEnd="@dimen/padding"
                 android:text="@string/settings_title_keep_screen_on" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/night_mode_on"
                 style="@style/Text.Body"
                 android:layout_width="match_parent"
@@ -53,7 +53,7 @@
                 android:layout_height="wrap_content"
                 app:settingSectionHeaderTitle="@string/settings_header_reading" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/simple_reading_mode"
                 style="@style/Text.Body"
                 android:layout_width="match_parent"
@@ -63,7 +63,7 @@
                 android:paddingEnd="@dimen/padding"
                 android:text="@string/settings_title_simple_reading" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/hide_search_button"
                 style="@style/Text.Body"
                 android:layout_width="match_parent"
@@ -73,7 +73,7 @@
                 android:paddingEnd="@dimen/padding"
                 android:text="@string/settings_title_hide_search_button" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/consolidated_sharing"
                 style="@style/Text.Body"
                 android:layout_width="match_parent"
@@ -137,11 +137,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:title="@string/title_settings" />
     </com.google.android.material.appbar.AppBarLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

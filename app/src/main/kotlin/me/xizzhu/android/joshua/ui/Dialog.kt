@@ -23,6 +23,7 @@ import android.widget.ProgressBar
 import android.widget.SeekBar
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -55,7 +56,7 @@ fun Activity.dialog(@StringRes title: Int, items: Array<String>, selected: Int,
                     onClicked: DialogInterface.OnClickListener) {
     if (isDestroyed) return
 
-    AlertDialog.Builder(this)
+    MaterialAlertDialogBuilder(this)
             .setCancelable(true)
             .setSingleChoiceItems(items, selected, onClicked)
             .setTitle(title)
@@ -66,7 +67,7 @@ fun Activity.dialog(cancelable: Boolean, @StringRes message: Int,
                     onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {
     if (isDestroyed) return
 
-    AlertDialog.Builder(this)
+    MaterialAlertDialogBuilder(this)
             .setCancelable(cancelable)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, onPositive)
@@ -78,7 +79,7 @@ fun Activity.dialog(cancelable: Boolean, message: CharSequence,
                     onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {
     if (isDestroyed) return
 
-    AlertDialog.Builder(this)
+    MaterialAlertDialogBuilder(this)
             .setCancelable(cancelable)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, onPositive)
@@ -92,26 +93,24 @@ fun Activity.progressDialog(@StringRes title: Int, maxProgress: Int, onCancel: (
     val progressBar = (View.inflate(this, R.layout.widget_progress_bar, null) as ProgressBar)
             .apply { max = maxProgress }
     return ProgressDialog(
-            AlertDialog.Builder(this)
+            MaterialAlertDialogBuilder(this)
                     .setTitle(title)
                     .setView(progressBar)
                     .setCancelable(true)
                     .setOnCancelListener { onCancel() }
                     .setNegativeButton(android.R.string.cancel) { _, _ -> onCancel() }
-                    .create()
-                    .apply { show() },
+                    .show(),
             progressBar)
 }
 
 fun Activity.indeterminateProgressDialog(@StringRes title: Int): AlertDialog? {
     if (isDestroyed) return null
 
-    return AlertDialog.Builder(this)
+    return MaterialAlertDialogBuilder(this)
             .setCancelable(false)
             .setTitle(title)
             .setView(View.inflate(this, R.layout.widget_indeterminate_progress_bar, null))
-            .create()
-            .apply { show() }
+            .show()
 }
 
 fun Activity.seekBarDialog(
@@ -139,14 +138,13 @@ fun Activity.seekBarDialog(
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
     }
-    return AlertDialog.Builder(this)
+    return MaterialAlertDialogBuilder(this)
             .setCancelable(false)
             .setTitle(title)
             .setView(view)
             .setPositiveButton(android.R.string.ok, onPositive?.let { { _, _ -> it(seekBar.calculateValue(minValue, maxValue)) } })
             .setNegativeButton(android.R.string.cancel, onNegative?.let { { _, _ -> it() } })
-            .create()
-            .apply { show() }
+            .show()
 }
 
 private fun SeekBar.setProgress(value: Float, minValue: Float, maxValue: Float) {
@@ -171,10 +169,9 @@ fun Activity.listDialog(
         setItems(items)
         scrollToPosition(selected)
     }
-    return AlertDialog.Builder(this)
+    return MaterialAlertDialogBuilder(this)
             .setCancelable(true)
             .setTitle(title)
             .setView(view)
-            .create()
-            .apply { show() }
+            .show()
 }

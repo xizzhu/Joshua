@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next release
+- Changes:
+  - Refactor to use Material3 theme
 - Bug fixes:
   - Properly set Kotlin JVM target to Java 11
 - Update dependencies:

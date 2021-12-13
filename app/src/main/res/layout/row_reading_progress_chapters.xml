@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="horizontal">
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         style="@style/Text.Body"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -12,7 +12,7 @@
         android:gravity="center"
         android:textSize="@dimen/text_body" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         style="@style/Text.Body"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -20,7 +20,7 @@
         android:gravity="center"
         android:textSize="@dimen/text_body" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         style="@style/Text.Body"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -28,7 +28,7 @@
         android:gravity="center"
         android:textSize="@dimen/text_body" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         style="@style/Text.Body"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -36,7 +36,7 @@
         android:gravity="center"
         android:textSize="@dimen/text_body" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         style="@style/Text.Body"
         android:layout_width="48dp"
         android:layout_height="48dp"

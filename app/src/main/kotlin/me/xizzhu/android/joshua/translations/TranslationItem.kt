@@ -25,7 +25,7 @@ import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
+import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 
 class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTranslation: Boolean,
                       val rightDrawable: Int = if (isCurrentTranslation) R.drawable.ic_check else 0)
@@ -72,7 +72,7 @@ private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGr
 
     override fun bind(settings: Settings, item: TranslationItem, payloads: List<Any>) {
         with(textView) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.translationInfo.name
             setCompoundDrawablesWithIntrinsicBounds(0, 0, item.rightDrawable, 0)
         }

@@ -60,12 +60,10 @@ private fun getTextSize(resources: Resources, @DimenRes fontSize: Int): Float {
 fun Settings.getCaptionTextSize(resources: Resources): Float =
         getTextSize(resources, R.dimen.text_caption) * fontSizeScale
 
-fun TextView.updateSettingsWithPrimaryText(settings: Settings) {
-    setTextColor(settings.getPrimaryTextColor(resources))
+fun TextView.setPrimaryTextSize(settings: Settings) {
     setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
 }
 
-fun TextView.updateSettingsWithSecondaryText(settings: Settings) {
-    setTextColor(settings.getSecondaryTextColor(resources))
+fun TextView.sSecondaryTextSize(settings: Settings) {
     setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
 }

@@ -10,7 +10,7 @@
     android:paddingEnd="@dimen/padding"
     android:paddingBottom="@dimen/padding_small">
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/verse"
         style="@style/Text.Body"
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
         android:ellipsize="end"
         android:maxLines="1" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/text"
         style="@style/Text.Body"
         android:layout_width="match_parent"

@@ -83,7 +83,7 @@ private class VerseTextItemViewHolder(inflater: LayoutInflater, parent: ViewGrou
 
     override fun bind(settings: Settings, item: VerseTextItem, payloads: List<Any>) {
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.textForDisplay
         }
     }

@@ -35,6 +35,7 @@ import me.xizzhu.android.joshua.databinding.PageVerseDetailVersesBinding
 import me.xizzhu.android.joshua.reading.VerseDetailViewData
 import me.xizzhu.android.joshua.ui.getBodyTextSize
 import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 
 class VerseDetailPagerAdapter(context: Context) : RecyclerView.Adapter<VerseDetailPage<*>>() {
     companion object {
@@ -143,8 +144,7 @@ private class NotePage(inflater: LayoutInflater, container: ViewGroup, updateNot
             setText(verseDetail.note)
             addTextChangedListener(textWatcher)
 
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
-            setTextColor(settings.getPrimaryTextColor(resources))
+            setPrimaryTextSize(settings)
         }
     }
 }

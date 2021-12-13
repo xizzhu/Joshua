@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.TranslationInfo
-import me.xizzhu.android.joshua.databinding.ActivityTranslationManagementBinding
+import me.xizzhu.android.joshua.databinding.ActivityTranslationsBinding
 import me.xizzhu.android.joshua.infra.BaseActivity
 import me.xizzhu.android.joshua.infra.onEach
 import me.xizzhu.android.joshua.infra.onFailure
@@ -43,7 +43,7 @@ import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
 
 @AndroidEntryPoint
-class TranslationsActivity : BaseActivity<ActivityTranslationManagementBinding, TranslationsViewModel>(), TranslationItem.Callback {
+class TranslationsActivity : BaseActivity<ActivityTranslationsBinding, TranslationsViewModel>(), TranslationItem.Callback {
     private val translationsViewModel: TranslationsViewModel by viewModels()
 
     private var downloadTranslationJob: Job? = null
@@ -92,7 +92,7 @@ class TranslationsActivity : BaseActivity<ActivityTranslationManagementBinding, 
 
     private fun initializeListeners() {
         with(viewBinding.swipeRefresher) {
-            setColorSchemeResources(R.color.primary_dark, R.color.primary, R.color.dark_cyan, R.color.dark_lime)
+            setColorSchemeResources(R.color.primary, R.color.secondary, R.color.dark_cyan, R.color.dark_lime)
             setOnRefreshListener { loadTranslationList() }
         }
     }
@@ -101,7 +101,7 @@ class TranslationsActivity : BaseActivity<ActivityTranslationManagementBinding, 
         translationsViewModel.refreshTranslations(true)
     }
 
-    override fun inflateViewBinding(): ActivityTranslationManagementBinding = ActivityTranslationManagementBinding.inflate(layoutInflater)
+    override fun inflateViewBinding(): ActivityTranslationsBinding = ActivityTranslationsBinding.inflate(layoutInflater)
 
     override fun viewModel(): TranslationsViewModel = translationsViewModel
 

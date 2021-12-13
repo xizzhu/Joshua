@@ -81,7 +81,7 @@ private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
             text = item.textForDisplay
         }
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.note
         }
     }

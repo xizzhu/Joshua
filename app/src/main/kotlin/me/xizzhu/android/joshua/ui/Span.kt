@@ -42,6 +42,11 @@ fun SpannableStringBuilder.setSpan(span: CharacterStyle): SpannableStringBuilder
 fun SpannableStringBuilder.setSpan(span1: CharacterStyle, span2: CharacterStyle): SpannableStringBuilder =
         setSpan(span1, 0, length).setSpan(span2, 0, length)
 
+fun SpannableStringBuilder.setSpans(spans: Array<CharacterStyle>): SpannableStringBuilder {
+    spans.forEach { setSpan(it) }
+    return this
+}
+
 fun SpannableStringBuilder.setSpan(span: CharacterStyle, start: Int, end: Int): SpannableStringBuilder {
     setSpan(span, start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
     return this

@@ -90,7 +90,7 @@ private class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup
 
     override fun bind(settings: Settings, item: BookmarkItem, payloads: List<Any>) {
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.textForDisplay
         }
     }
