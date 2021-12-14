@@ -44,16 +44,12 @@ import kotlin.math.roundToInt
 @AndroidEntryPoint
 class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel>() {
     private val settingsViewModel: SettingsViewModel by viewModels()
-
     private val createFileForBackupLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) backupRestore(settingsViewModel.backup(result.data?.data))
     }
-
     private val selectFileForRestoreLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) backupRestore(settingsViewModel.restore(result.data?.data))
     }
-
-    private var currentSettingsViewData: SettingsViewData? = null
 
     private var indeterminateProgressDialog: AlertDialog? = null
 
@@ -70,7 +66,6 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
                         onLoading = { /* Do nothing. */ },
                         onSuccess = {
                             updateView(it)
-                            currentSettingsViewData = it
                         },
                         onFailure = { /* Do nothing. */ }
                 )
@@ -115,54 +110,45 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
 
     private fun initializeListeners(): Unit = with(viewBinding) {
         fontSize.setOnClickListener {
-            currentSettingsViewData?.let { settings ->
-                seekBarDialog(
-                        title = R.string.settings_title_font_size,
-                        initialValue = settings.currentFontSizeScale,
-                        minValue = 0.5F,
-                        maxValue = 3.0F,
-                        onValueChanged = { value ->
-                            fontSize.setDescription("${value}x")
-                            setTextSize(
-                                    bodyTextSizeInPixel = settings.bodyTextSizeInPixel * value / settings.currentFontSizeScale,
-                                    captionTextSizeInPixel = settings.captionTextSizeInPixel * value / settings.currentFontSizeScale
-                            )
-                        },
-                        onPositive = { value ->
-                            // update current view data to avoid animating font changes after setting is saved
-                            currentSettingsViewData = settings.copy(
-                                    currentFontSizeScale = value,
-                                    bodyTextSizeInPixel = settings.bodyTextSizeInPixel * value / settings.currentFontSizeScale,
-                                    captionTextSizeInPixel = settings.captionTextSizeInPixel * value / settings.currentFontSizeScale
-                            )
-                            settingsViewModel.saveFontSizeScale(value)
-                                    .onFailure {
-                                        // reset the current view data
-                                        currentSettingsViewData = settings
-                                        fontSize.setDescription("${settings.currentFontSizeScale}x")
-                                        setTextSize(settings.bodyTextSizeInPixel, settings.captionTextSizeInPixel)
+            val settings = settingsViewModel.currentSettingsViewData() ?: return@setOnClickListener
+            seekBarDialog(
+                    title = R.string.settings_title_font_size,
+                    initialValue = settings.currentFontSizeScale,
+                    minValue = 0.5F,
+                    maxValue = 3.0F,
+                    onValueChanged = { value ->
+                        fontSize.setDescription("${value}x")
+                        setTextSize(
+                                bodyTextSizeInPixel = settings.bodyTextSizeInPixel * value / settings.currentFontSizeScale,
+                                captionTextSizeInPixel = settings.captionTextSizeInPixel * value / settings.currentFontSizeScale
+                        )
+                    },
+                    onPositive = { value ->
+                        settingsViewModel.saveFontSizeScale(value)
+                                .onFailure {
+                                    // reset the current view data
+                                    fontSize.setDescription("${settings.currentFontSizeScale}x")
+                                    setTextSize(settings.bodyTextSizeInPixel, settings.captionTextSizeInPixel)
 
-                                        toast(R.string.toast_unknown_error)
-                                    }.launchIn(lifecycleScope)
-                        },
-                        onNegative = {
-                            fontSize.setDescription("${settings.currentFontSizeScale}x")
-                            setTextSize(settings.bodyTextSizeInPixel, settings.captionTextSizeInPixel)
-                        }
-                )
-            }
+                                    toast(R.string.toast_unknown_error)
+                                }.launchIn(lifecycleScope)
+                    },
+                    onNegative = {
+                        fontSize.setDescription("${settings.currentFontSizeScale}x")
+                        setTextSize(settings.bodyTextSizeInPixel, settings.captionTextSizeInPixel)
+                    }
+            )
         }
         keepScreenOn.setOnCheckedChangeListener { _, isChecked ->
             settingsViewModel.saveKeepScreenOn(isChecked).onFailure { toast(R.string.toast_unknown_error) }.launchIn(lifecycleScope)
         }
         nightMode.setOnClickListener {
-            currentSettingsViewData?.let { settings ->
-                dialog(R.string.settings_title_pick_night_mode, resources.getStringArray(R.array.text_night_modes), settings.nightMode.ordinal) { dialog, which ->
-                    settingsViewModel.saveNightModeOn(SettingsViewData.NightMode.values()[which])
-                            .onFailure { toast(R.string.toast_unknown_error) }
-                            .launchIn(lifecycleScope)
-                    dialog.dismiss()
-                }
+            val nightMode = settingsViewModel.currentSettingsViewData()?.nightMode ?: return@setOnClickListener
+            dialog(R.string.settings_title_pick_night_mode, resources.getStringArray(R.array.text_night_modes), nightMode.ordinal) { dialog, which ->
+                settingsViewModel.saveNightModeOn(SettingsViewData.NightMode.values()[which])
+                        .onFailure { toast(R.string.toast_unknown_error) }
+                        .launchIn(lifecycleScope)
+                dialog.dismiss()
             }
         }
         simpleReadingMode.setOnCheckedChangeListener { _, isChecked ->
@@ -175,13 +161,12 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
             settingsViewModel.saveConsolidateVersesForSharing(isChecked).onFailure { toast(R.string.toast_unknown_error) }.launchIn(lifecycleScope)
         }
         defaultHighlightColor.setOnClickListener {
-            currentSettingsViewData?.let { settings ->
-                dialog(R.string.text_pick_highlight_color, resources.getStringArray(R.array.text_colors), settings.defaultHighlightColor.ordinal) { dialog, which ->
-                    settingsViewModel.saveDefaultHighlightColor(SettingsViewData.HighlightColor.values()[which])
-                            .onFailure { toast(R.string.toast_unknown_error) }
-                            .launchIn(lifecycleScope)
-                    dialog.dismiss()
-                }
+            val defaultHighlightColor = settingsViewModel.currentSettingsViewData()?.defaultHighlightColor ?: return@setOnClickListener
+            dialog(R.string.text_pick_highlight_color, resources.getStringArray(R.array.text_colors), defaultHighlightColor.ordinal) { dialog, which ->
+                settingsViewModel.saveDefaultHighlightColor(SettingsViewData.HighlightColor.values()[which])
+                        .onFailure { toast(R.string.toast_unknown_error) }
+                        .launchIn(lifecycleScope)
+                dialog.dismiss()
             }
         }
         backup.setOnClickListener {

@@ -111,6 +111,8 @@ class SettingsViewModel @Inject constructor(
 
     fun settingsViewData(): Flow<ViewData<SettingsViewData>> = settingsViewData.filterNotNull()
 
+    fun currentSettingsViewData(): SettingsViewData? = settingsViewData.value?.let { if (it is ViewData.Success) it.data else null }
+
     fun saveFontSizeScale(fontSizeScale: Float): Flow<ViewData<Unit>> = updateSettings {
         settingsManager.saveSettings(currentSettings().copy(fontSizeScale = fontSizeScale))
     }
