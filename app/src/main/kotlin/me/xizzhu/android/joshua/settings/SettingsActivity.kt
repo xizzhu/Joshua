@@ -139,12 +139,14 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
                                     .onFailure {
                                         // reset the current view data
                                         currentSettingsViewData = settings
+                                        fontSize.setDescription("${settings.currentFontSizeScale}x")
                                         setTextSize(settings.bodyTextSizeInPixel, settings.captionTextSizeInPixel)
 
                                         toast(R.string.toast_unknown_error)
                                     }.launchIn(lifecycleScope)
                         },
                         onNegative = {
+                            fontSize.setDescription("${settings.currentFontSizeScale}x")
                             setTextSize(settings.bodyTextSizeInPixel, settings.captionTextSizeInPixel)
                         }
                 )
