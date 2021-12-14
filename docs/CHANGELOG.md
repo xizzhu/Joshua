@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next release
+- New features:
+  - Support using system's day / night mode (#206)
 - Changes:
   - Refactor to use Material3 theme
 - Bug fixes:

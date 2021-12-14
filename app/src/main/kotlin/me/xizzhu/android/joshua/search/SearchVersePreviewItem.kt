@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.search
 
 import android.text.SpannableStringBuilder
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import me.xizzhu.android.joshua.R
@@ -30,10 +29,9 @@ import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
 import me.xizzhu.android.joshua.ui.createTitleSizeSpan
 import me.xizzhu.android.joshua.ui.createTitleStyleSpan
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
+import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 import me.xizzhu.android.joshua.ui.setSpan
 import me.xizzhu.android.joshua.ui.toCharSequence
 import java.util.*
@@ -111,7 +109,6 @@ private fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
 
 private class SearchVersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<SearchVersePreviewItem>(ItemSearchVersePreviewBinding.inflate(inflater, parent, false).root) {
-    private val resources = itemView.resources
     private val viewBinding = ItemSearchVersePreviewBinding.bind(itemView).apply {
         root.setOnClickListener { item?.let { callback().openVerse(it.verse.verseIndex) } }
     }
@@ -121,7 +118,6 @@ private class SearchVersePreviewItemViewHolder(inflater: LayoutInflater, parent:
 
     override fun bind(settings: Settings, item: SearchVersePreviewItem, payloads: List<Any>) {
         viewBinding.versePreview.text = item.textForDisplay
-        viewBinding.versePreview.setTextColor(settings.getPrimaryTextColor(resources))
-        viewBinding.versePreview.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+        viewBinding.versePreview.setPrimaryTextSize(settings)
     }
 }

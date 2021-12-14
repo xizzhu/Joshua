@@ -17,38 +17,13 @@
 package me.xizzhu.android.joshua.ui
 
 import android.content.res.Resources
-import android.graphics.Color
 import android.util.TypedValue
 import android.widget.TextView
 import androidx.annotation.*
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 
-@ColorInt
-fun Settings.getBackgroundColor(): Int = if (nightModeOn) Color.BLACK else Color.WHITE
-
-@ColorInt
-fun Settings.getPrimaryTextColor(resources: Resources): Int =
-        getTextColor(resources, nightModeOn, R.color.text_light_primary, R.color.text_dark_primary)
-
-private val textColors = mutableMapOf<Int, Int>()
-
-@ColorInt
-private fun getTextColor(resources: Resources, nightModeOn: Boolean,
-                         @ColorRes nightModeColor: Int, @ColorRes dayModeColor: Int): Int {
-    val key = if (nightModeOn) nightModeColor else dayModeColor
-    return textColors.getOrPut(key, { resources.getColor(key) })
-}
-
-@ColorInt
-fun Settings.getPrimarySelectedTextColor(resources: Resources): Int =
-        getTextColor(resources, nightModeOn, R.color.text_dark_primary, R.color.text_dark_primary)
-
-@ColorInt
-fun Settings.getSecondaryTextColor(resources: Resources): Int =
-        getTextColor(resources, nightModeOn, R.color.text_light_secondary, R.color.text_dark_secondary)
-
-fun Settings.getBodyTextSize(resources: Resources): Float =
+fun Settings.getPrimaryTextSize(resources: Resources): Float =
         getTextSize(resources, R.dimen.text_body) * fontSizeScale
 
 private val textSizes = mutableMapOf<Int, Float>()
@@ -57,13 +32,13 @@ private fun getTextSize(resources: Resources, @DimenRes fontSize: Int): Float {
     return textSizes.getOrPut(fontSize, { resources.getDimension(fontSize) })
 }
 
-fun Settings.getCaptionTextSize(resources: Resources): Float =
+fun Settings.getSecondaryTextSize(resources: Resources): Float =
         getTextSize(resources, R.dimen.text_caption) * fontSizeScale
 
 fun TextView.setPrimaryTextSize(settings: Settings) {
-    setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+    setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getPrimaryTextSize(resources))
 }
 
-fun TextView.sSecondaryTextSize(settings: Settings) {
-    setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
+fun TextView.setSecondaryTextSize(settings: Settings) {
+    setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getSecondaryTextSize(resources))
 }

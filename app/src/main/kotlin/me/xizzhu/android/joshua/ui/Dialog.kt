@@ -164,7 +164,6 @@ fun Activity.listDialog(
 
     val view = View.inflate(this, R.layout.widget_recycler_view, null)
     view.findViewById<CommonRecyclerView>(R.id.recycler_view).apply {
-        setBackgroundColor(settings.getBackgroundColor())
         setSettings(settings)
         setItems(items)
         scrollToPosition(selected)

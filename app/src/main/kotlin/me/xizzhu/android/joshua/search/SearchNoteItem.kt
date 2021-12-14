@@ -18,7 +18,6 @@ package me.xizzhu.android.joshua.search
 
 import android.annotation.SuppressLint
 import android.text.SpannableStringBuilder
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -94,8 +93,7 @@ private class SearchNoteItemViewHolder(inflater: LayoutInflater, parent: ViewGro
 
     override fun bind(settings: Settings, item: SearchNoteItem, payloads: List<Any>) {
         with(verse) {
-            setTextColor(settings.getPrimaryTextColor(resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
+            setSecondaryTextSize(settings)
             text = item.verseForDisplay
         }
         with(text) {

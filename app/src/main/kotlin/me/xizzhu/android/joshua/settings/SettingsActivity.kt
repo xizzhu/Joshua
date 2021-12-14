@@ -16,14 +16,12 @@
 
 package me.xizzhu.android.joshua.settings
 
-import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
 import androidx.activity.viewModels
-import androidx.annotation.ColorInt
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
@@ -82,7 +80,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
         with(viewBinding) {
             fontSize.setDescription("${settingsViewData.currentFontSizeScale}x")
             keepScreenOn.isChecked = settingsViewData.keepScreenOn
-            nightModeOn.isChecked = settingsViewData.nightModeOn
+            nightMode.setDescription(settingsViewData.nightMode.label)
             simpleReadingMode.isChecked = settingsViewData.simpleReadingModeOn
             hideSearchButton.isChecked = settingsViewData.hideSearchButton
             consolidatedSharing.isChecked = settingsViewData.consolidateVersesForSharing
@@ -94,12 +92,6 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
             animateTextSize(settingsViewData.bodyTextSizeInPixel, settingsViewData.captionTextSizeInPixel)
         } else {
             setTextSize(settingsViewData.bodyTextSizeInPixel, settingsViewData.captionTextSizeInPixel)
-        }
-
-        if (settingsViewData.animateColor) {
-            animateColor(settingsViewData.backgroundColor, settingsViewData.primaryTextColor, settingsViewData.secondaryTextColor)
-        } else {
-            setColor(settingsViewData.backgroundColor, settingsViewData.primaryTextColor, settingsViewData.secondaryTextColor)
         }
     }
 
@@ -128,7 +120,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
             display.setTextSize(bodyTextSizeInPixel.roundToInt())
             fontSize.setTextSize(bodyTextSizeInPixel.roundToInt(), captionTextSizeInPixel.roundToInt())
             keepScreenOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSizeInPixel)
-            nightModeOn.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSizeInPixel)
+            nightMode.setTextSize(bodyTextSizeInPixel.roundToInt(), captionTextSizeInPixel.roundToInt())
             reading.setTextSize(bodyTextSizeInPixel.roundToInt())
             simpleReadingMode.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSizeInPixel)
             hideSearchButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, bodyTextSizeInPixel)
@@ -141,48 +133,6 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
             rate.setTextSize(bodyTextSizeInPixel.roundToInt(), captionTextSizeInPixel.roundToInt())
             website.setTextSize(bodyTextSizeInPixel.roundToInt(), captionTextSizeInPixel.roundToInt())
             version.setTextSize(bodyTextSizeInPixel.roundToInt(), captionTextSizeInPixel.roundToInt())
-        }
-    }
-
-    private fun animateColor(@ColorInt backgroundColor: Int, @ColorInt primaryTextColor: Int, @ColorInt secondaryTextColor: Int) {
-        val currentSettings = currentSettingsViewData
-        if (currentSettings == null) {
-            setColor(backgroundColor, primaryTextColor, secondaryTextColor)
-            return
-        }
-
-        ValueAnimator.ofFloat(0.0F, 1.0F).apply {
-            val argbEvaluator = ArgbEvaluator()
-            val fromBackgroundColor = currentSettings.backgroundColor
-            val fromPrimaryTextColor = currentSettings.primaryTextColor
-            val fromSecondaryTextColor = currentSettings.secondaryTextColor
-            addUpdateListener { animator ->
-                val fraction = animator.animatedValue as Float
-                setColor(
-                        backgroundColor = argbEvaluator.evaluate(fraction, fromBackgroundColor, backgroundColor) as Int,
-                        primaryTextColor = argbEvaluator.evaluate(fraction, fromPrimaryTextColor, primaryTextColor) as Int,
-                        secondaryTextColor = argbEvaluator.evaluate(fraction, fromSecondaryTextColor, secondaryTextColor) as Int
-                )
-            }
-        }.start()
-    }
-
-    private fun setColor(@ColorInt backgroundColor: Int, @ColorInt primaryTextColor: Int, @ColorInt secondaryTextColor: Int) {
-        window.decorView.setBackgroundColor(backgroundColor)
-
-        with(viewBinding) {
-            fontSize.setTextColor(primaryTextColor, secondaryTextColor)
-            keepScreenOn.setTextColor(primaryTextColor)
-            nightModeOn.setTextColor(primaryTextColor)
-            simpleReadingMode.setTextColor(primaryTextColor)
-            hideSearchButton.setTextColor(primaryTextColor)
-            consolidatedSharing.setTextColor(primaryTextColor)
-            defaultHighlightColor.setTextColor(primaryTextColor, secondaryTextColor)
-            backup.setTextColor(primaryTextColor, secondaryTextColor)
-            restore.setTextColor(primaryTextColor, secondaryTextColor)
-            rate.setTextColor(primaryTextColor, secondaryTextColor)
-            website.setTextColor(primaryTextColor, secondaryTextColor)
-            version.setTextColor(primaryTextColor, secondaryTextColor)
         }
     }
 
@@ -226,8 +176,15 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
         keepScreenOn.setOnCheckedChangeListener { _, isChecked ->
             settingsViewModel.saveKeepScreenOn(isChecked).onFailure { toast(R.string.toast_unknown_error) }.launchIn(lifecycleScope)
         }
-        nightModeOn.setOnCheckedChangeListener { _, isChecked ->
-            settingsViewModel.saveNightModeOn(isChecked).onFailure { toast(R.string.toast_unknown_error) }.launchIn(lifecycleScope)
+        nightMode.setOnClickListener {
+            currentSettingsViewData?.let { settings ->
+                dialog(R.string.settings_title_pick_night_mode, resources.getStringArray(R.array.text_night_modes), settings.nightMode.ordinal) { dialog, which ->
+                    settingsViewModel.saveNightModeOn(SettingsViewData.NightMode.values()[which])
+                            .onFailure { toast(R.string.toast_unknown_error) }
+                            .launchIn(lifecycleScope)
+                    dialog.dismiss()
+                }
+            }
         }
         simpleReadingMode.setOnCheckedChangeListener { _, isChecked ->
             settingsViewModel.saveSimpleReadingModeOn(isChecked).onFailure { toast(R.string.toast_unknown_error) }.launchIn(lifecycleScope)

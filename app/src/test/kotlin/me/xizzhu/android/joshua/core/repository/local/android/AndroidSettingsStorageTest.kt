@@ -47,9 +47,9 @@ class AndroidSettingsStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveThenRead() {
         runBlocking {
-            androidSettingsStorage.saveSettings(Settings(false, true, 1.25F, false, false, false, Highlight.COLOR_PINK))
+            androidSettingsStorage.saveSettings(Settings(false, Settings.NIGHT_MODE_ON, 1.25F, false, false, false, Highlight.COLOR_PINK))
 
-            val expected = Settings(false, true, 1.25F, false, false, false, Highlight.COLOR_PINK)
+            val expected = Settings(false, Settings.NIGHT_MODE_ON, 1.25F, false, false, false, Highlight.COLOR_PINK)
             val actual = androidSettingsStorage.readSettings()
             assertEquals(expected, actual)
         }
@@ -58,10 +58,10 @@ class AndroidSettingsStorageTest : BaseSqliteTest() {
     @Test
     fun testSaveOverrideThenRead() {
         runBlocking {
-            androidSettingsStorage.saveSettings(Settings(true, false, 3.0F, true, true, true, Highlight.COLOR_PINK))
-            androidSettingsStorage.saveSettings(Settings(false, true, 2.0F, false, false, false, Highlight.COLOR_PURPLE))
+            androidSettingsStorage.saveSettings(Settings(true, Settings.NIGHT_MODE_OFF, 3.0F, true, true, true, Highlight.COLOR_PINK))
+            androidSettingsStorage.saveSettings(Settings(false, Settings.NIGHT_MODE_ON, 2.0F, false, false, false, Highlight.COLOR_PURPLE))
 
-            val expected = Settings(false, true, 2.0F, false, false, false, Highlight.COLOR_PURPLE)
+            val expected = Settings(false, Settings.NIGHT_MODE_ON, 2.0F, false, false, false, Highlight.COLOR_PURPLE)
             val actual = androidSettingsStorage.readSettings()
             assertEquals(expected, actual)
         }

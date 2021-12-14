@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.res.Resources
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,8 +32,6 @@ import me.xizzhu.android.joshua.databinding.PageVerseDetailNoteBinding
 import me.xizzhu.android.joshua.databinding.PageVerseDetailStrongNumberBinding
 import me.xizzhu.android.joshua.databinding.PageVerseDetailVersesBinding
 import me.xizzhu.android.joshua.reading.VerseDetailViewData
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
 import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 
 class VerseDetailPagerAdapter(context: Context) : RecyclerView.Adapter<VerseDetailPage<*>>() {
@@ -169,8 +166,7 @@ private class StrongNumberPage(inflater: LayoutInflater, container: ViewGroup, r
     private fun bindNoStrongNumberView(settings: Settings) {
         with(viewBinding) {
             emptyStrongNumberList.visibility = View.VISIBLE
-            emptyStrongNumberList.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(emptyStrongNumberList.resources))
-            emptyStrongNumberList.setTextColor(settings.getPrimaryTextColor(emptyStrongNumberList.resources))
+            emptyStrongNumberList.setPrimaryTextSize(settings)
 
             strongNumberList.visibility = View.GONE
         }

@@ -16,15 +16,24 @@
 
 package me.xizzhu.android.joshua.core
 
+import androidx.annotation.IntDef
 import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.core.repository.SettingsRepository
 
-data class Settings(val keepScreenOn: Boolean, val nightModeOn: Boolean, val fontSizeScale: Float,
+data class Settings(val keepScreenOn: Boolean, @NightMode val nightMode: Int, val fontSizeScale: Float,
                     val simpleReadingModeOn: Boolean, val hideSearchButton: Boolean,
                     val consolidateVersesForSharing: Boolean,
                     @Highlight.Companion.AvailableColor val defaultHighlightColor: Int) {
     companion object {
-        val DEFAULT = Settings(keepScreenOn = true, nightModeOn = false, fontSizeScale = 1.0F,
+        const val NIGHT_MODE_ON = 0
+        const val NIGHT_MODE_OFF = 1
+        const val NIGHT_MODE_FOLLOW_SYSTEM = 2
+
+        @IntDef(NIGHT_MODE_ON, NIGHT_MODE_OFF, NIGHT_MODE_FOLLOW_SYSTEM)
+        @Retention(AnnotationRetention.SOURCE)
+        annotation class NightMode
+
+        val DEFAULT = Settings(keepScreenOn = true, nightMode = NIGHT_MODE_OFF, fontSizeScale = 1.0F,
                 simpleReadingModeOn = false, hideSearchButton = false, consolidateVersesForSharing = false,
                 defaultHighlightColor = Highlight.COLOR_NONE)
     }

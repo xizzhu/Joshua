@@ -76,8 +76,7 @@ private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
 
     override fun bind(settings: Settings, item: NoteItem, payloads: List<Any>) {
         with(verse) {
-            setTextColor(settings.getPrimaryTextColor(resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
+            setSecondaryTextSize(settings)
             text = item.textForDisplay
         }
         with(text) {

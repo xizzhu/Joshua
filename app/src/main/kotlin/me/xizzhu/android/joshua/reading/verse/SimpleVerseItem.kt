@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.text.SpannableStringBuilder
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -87,7 +86,6 @@ class SimpleVerseItem(
 
 private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<SimpleVerseItem>(ItemSimpleVerseBinding.inflate(inflater, parent, false).root) {
-    private val resources = itemView.resources
     private val viewBinding = ItemSimpleVerseBinding.bind(itemView).apply {
         root.setOnClickListener { item?.let { callback().onVerseClicked(it.verse) } }
         root.setOnLongClickListener {
@@ -108,7 +106,7 @@ private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
 
             if (item.verse.parallel.isEmpty()) {
                 viewBinding.index.text = item.indexForDisplay
-                viewBinding.index.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources) * 0.85F)
+                viewBinding.index.setPrimaryTextSize(settings)
                 viewBinding.index.visibility = View.VISIBLE
 
                 viewBinding.divider.visibility = View.GONE

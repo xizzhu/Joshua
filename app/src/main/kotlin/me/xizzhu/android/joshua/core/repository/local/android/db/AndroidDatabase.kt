@@ -19,16 +19,19 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import androidx.appcompat.app.AppCompatDelegate
+import me.xizzhu.android.ask.db.delete
 import me.xizzhu.android.ask.db.firstOrDefault
 import me.xizzhu.android.ask.db.getString
 import me.xizzhu.android.ask.db.insert
 import me.xizzhu.android.ask.db.select
 import me.xizzhu.android.ask.db.transaction
+import me.xizzhu.android.joshua.core.Settings
 
 class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         const val DATABASE_NAME = "DATABASE_JOSHUA"
-        const val DATABASE_VERSION = 4
+        const val DATABASE_VERSION = 5
     }
 
     val bookmarkDao = BookmarkDao(this)
@@ -74,6 +77,17 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             db.insert("metadata", SQLiteDatabase.CONFLICT_REPLACE) {
                 it["key"] = "fontSizeScale"
                 it["value"] = newFontSizeScale.toString()
+            }
+        }
+        if (oldVersion <= 4) {
+            val nightModeOn = db.select("metadata", "value") { "key" eq "nightModeOn" }
+                    .firstOrDefault("false") { it.getString("value") }.toBoolean()
+            AppCompatDelegate.setDefaultNightMode(if (nightModeOn) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
+            db.delete("metadata") { "key" eq "nightModeOn" }
+
+            db.insert("metadata", SQLiteDatabase.CONFLICT_REPLACE) {
+                it["key"] = "nightMode"
+                it["value"] = if (nightModeOn) Settings.NIGHT_MODE_ON.toString() else Settings.NIGHT_MODE_OFF.toString()
             }
         }
     }
