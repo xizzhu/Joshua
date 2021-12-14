@@ -33,8 +33,7 @@ class BookmarkItem(
         private val verseText: String, @Constants.SortOrder private val sortOrder: Int
 ) : BaseItem(R.layout.item_bookmark, { inflater, parent -> BookmarkItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
-        private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
+        private val BOOK_NAME_SPANS = createTitleSpans()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -52,7 +51,7 @@ class BookmarkItem(
             // <book short name> <chapter verseIndex>:<verse verseIndex> <verse text>
             SPANNABLE_STRING_BUILDER.append(bookShortName).append(' ')
                     .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                    .setSpan(BOOK_NAME_STYLE_SPAN, BOOK_NAME_SIZE_SPAN)
+                    .setSpans(BOOK_NAME_SPANS)
                     .append(' ').append(verseText)
         } else {
             // format:
@@ -60,7 +59,7 @@ class BookmarkItem(
             // <verse text>
             SPANNABLE_STRING_BUILDER.append(bookName).append(' ')
                     .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                    .setSpan(BOOK_NAME_STYLE_SPAN, BOOK_NAME_SIZE_SPAN)
+                    .setSpans(BOOK_NAME_SPANS)
                     .append('\n').append(verseText)
         }
 

@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.annotated.notes
 
 import android.text.SpannableStringBuilder
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView

@@ -18,16 +18,15 @@ package me.xizzhu.android.joshua.search
 
 import android.annotation.SuppressLint
 import android.text.SpannableStringBuilder
-import me.xizzhu.android.joshua.ui.createKeywordSizeSpan
-import me.xizzhu.android.joshua.ui.createKeywordStyleSpan
-import me.xizzhu.android.joshua.ui.setSpan
+import me.xizzhu.android.joshua.ui.createKeywordSpans
+import me.xizzhu.android.joshua.ui.setSpans
 import java.util.*
 
 // We don't expect users to change locale that frequently.
 @SuppressLint("ConstantLocale")
 private val DEFAULT_LOCALE = Locale.getDefault()
 
-fun SpannableStringBuilder.highlight(query: String, start: Int): SpannableStringBuilder {
+fun SpannableStringBuilder.highlightKeyword(query: String, start: Int): SpannableStringBuilder {
     if (query.isBlank()) return this
 
     val lowercase = toString().lowercase(DEFAULT_LOCALE)
@@ -41,7 +40,7 @@ fun SpannableStringBuilder.highlight(query: String, start: Int): SpannableString
             }
 
             val keywordEnd = keywordStart + keyword.length
-            setSpan(createKeywordSizeSpan(), createKeywordStyleSpan(), keywordStart, keywordEnd)
+            setSpans(createKeywordSpans(), keywordStart, keywordEnd)
             startIndex = keywordEnd + 1
         }
     }

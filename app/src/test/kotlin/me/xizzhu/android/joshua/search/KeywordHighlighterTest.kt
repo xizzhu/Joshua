@@ -31,12 +31,12 @@ import kotlin.test.assertTrue
 class KeywordHighlighterTest : BaseUnitTest() {
     @Test
     fun `test highlight with no matching keyword`() {
-        with(SpannableStringBuilder("Gen. 1:1 In the beginning God created the heaven and the earth.").highlight("no-match", 0)) {
+        with(SpannableStringBuilder("Gen. 1:1 In the beginning God created the heaven and the earth.").highlightKeyword("no-match", 0)) {
             assertTrue(getSpans<RelativeSizeSpan>(0, length).isEmpty())
             assertTrue(getSpans<StyleSpan>(0, length).isEmpty())
         }
 
-        with(SpannableStringBuilder("Gen. 1:1 In the beginning God created the heaven and the earth.").highlight("gen", 9)) {
+        with(SpannableStringBuilder("Gen. 1:1 In the beginning God created the heaven and the earth.").highlightKeyword("gen", 9)) {
             assertTrue(getSpans<RelativeSizeSpan>(0, length).isEmpty())
             assertTrue(getSpans<StyleSpan>(0, length).isEmpty())
         }
@@ -45,7 +45,7 @@ class KeywordHighlighterTest : BaseUnitTest() {
     @Test
     fun `test highlight with one keyword and one match`() {
         val ssb = SpannableStringBuilder("Gen. 1:1 In the beginning God created the heaven and the earth.")
-                .highlight("god", 9)
+                .highlightKeyword("god", 9)
 
         val relativeSizeSpans = ssb.getSpans<RelativeSizeSpan>(0, ssb.length)
         assertEquals(1, relativeSizeSpans.size)
@@ -61,7 +61,7 @@ class KeywordHighlighterTest : BaseUnitTest() {
     @Test
     fun `test highlight with one keyword and multiple matches`() {
         val ssb = SpannableStringBuilder("Gen. 1:1 In the beginning God created the heaven and the earth.")
-                .highlight("The", 9)
+                .highlightKeyword("The", 9)
 
         val relativeSizeSpans = ssb.getSpans<RelativeSizeSpan>(0, ssb.length)
         assertEquals(3, relativeSizeSpans.size)
@@ -85,7 +85,7 @@ class KeywordHighlighterTest : BaseUnitTest() {
     @Test
     fun `test highlight with multiple keywords and multiple matches`() {
         val ssb = SpannableStringBuilder("Gen. 1:1 In the beginning God created the heaven and the earth.")
-                .highlight("The god", 9)
+                .highlightKeyword("The god", 9)
 
         val relativeSizeSpans = ssb.getSpans<RelativeSizeSpan>(0, ssb.length)
         assertEquals(4, relativeSizeSpans.size)

@@ -32,8 +32,7 @@ class VerseTextItem(
         val verseIndex: VerseIndex, followingEmptyVerseCount: Int, val verseText: Verse.Text, private val bookName: String
 ) : BaseItem(R.layout.item_verse_text, { inflater, parent -> VerseTextItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
-        private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
+        private val BOOK_NAME_SPANS = createTitleSpans()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -58,7 +57,7 @@ class VerseTextItem(
         if (followingEmptyVerseCount > 0) {
             SPANNABLE_STRING_BUILDER.append('-').append(verseIndex.verseIndex + followingEmptyVerseCount + 1)
         }
-        return@lazy SPANNABLE_STRING_BUILDER.setSpan(BOOK_NAME_STYLE_SPAN, BOOK_NAME_SIZE_SPAN)
+        return@lazy SPANNABLE_STRING_BUILDER.setSpans(BOOK_NAME_SPANS)
                 .append('\n').append(verseText.text)
                 .toCharSequence()
     }
