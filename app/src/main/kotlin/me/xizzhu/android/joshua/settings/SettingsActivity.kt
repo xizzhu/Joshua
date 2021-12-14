@@ -16,7 +16,6 @@
 
 package me.xizzhu.android.joshua.settings
 
-import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -75,8 +74,6 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
     }
 
     private fun updateView(settingsViewData: SettingsViewData) {
-        window.decorView.keepScreenOn = settingsViewData.keepScreenOn
-
         with(viewBinding) {
             fontSize.setDescription("${settingsViewData.currentFontSizeScale}x")
             keepScreenOn.isChecked = settingsViewData.keepScreenOn
@@ -88,31 +85,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
             version.setDescription(settingsViewData.version)
         }
 
-        if (settingsViewData.animateFontSize) {
-            animateTextSize(settingsViewData.bodyTextSizeInPixel, settingsViewData.captionTextSizeInPixel)
-        } else {
-            setTextSize(settingsViewData.bodyTextSizeInPixel, settingsViewData.captionTextSizeInPixel)
-        }
-    }
-
-    private fun animateTextSize(bodyTextSizeInPixel: Float, captionTextSizeInPixel: Float) {
-        val currentSettings = currentSettingsViewData
-        if (currentSettings == null) {
-            setTextSize(bodyTextSizeInPixel, captionTextSizeInPixel)
-            return
-        }
-
-        ValueAnimator.ofFloat(0.0F, 1.0F).apply {
-            val fromBodyTextSizeInPixel = currentSettings.bodyTextSizeInPixel
-            val fromCaptionTextSizeInPixel = currentSettings.captionTextSizeInPixel
-            addUpdateListener { animator ->
-                val fraction = animator.animatedValue as Float
-                setTextSize(
-                        bodyTextSizeInPixel = fromBodyTextSizeInPixel + fraction * (bodyTextSizeInPixel - fromBodyTextSizeInPixel),
-                        captionTextSizeInPixel = fromCaptionTextSizeInPixel + fraction * (captionTextSizeInPixel - fromCaptionTextSizeInPixel)
-                )
-            }
-        }.start()
+        setTextSize(settingsViewData.bodyTextSizeInPixel, settingsViewData.captionTextSizeInPixel)
     }
 
     private fun setTextSize(bodyTextSizeInPixel: Float, captionTextSizeInPixel: Float) {
@@ -162,7 +135,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
                                     .onFailure {
                                         // reset the current view data
                                         currentSettingsViewData = settings
-                                        animateTextSize(settings.bodyTextSizeInPixel, settings.captionTextSizeInPixel)
+                                        setTextSize(settings.bodyTextSizeInPixel, settings.captionTextSizeInPixel)
 
                                         toast(R.string.toast_unknown_error)
                                     }.launchIn(lifecycleScope)

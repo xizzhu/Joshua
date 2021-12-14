@@ -59,8 +59,7 @@ enum class HighlightColorViewData(@Highlight.Companion.AvailableColor val color:
 }
 
 data class SettingsViewData(
-        val currentFontSizeScale: Float, val animateFontSize: Boolean,
-        val bodyTextSizeInPixel: Float, val captionTextSizeInPixel: Float,
+        val currentFontSizeScale: Float, val bodyTextSizeInPixel: Float, val captionTextSizeInPixel: Float,
         val keepScreenOn: Boolean, val nightMode: NightMode, val simpleReadingModeOn: Boolean,
         val hideSearchButton: Boolean, val consolidateVersesForSharing: Boolean,
         val defaultHighlightColor: HighlightColorViewData, val version: String
@@ -85,8 +84,6 @@ class SettingsViewModel @Inject constructor(
 ) : BaseViewModel(settingsManager, application) {
     private val settingsViewData: MutableStateFlow<ViewData<SettingsViewData>?> = MutableStateFlow(null)
 
-    private var shouldAnimateFontSize = false
-
     init {
         val version = try {
             application.packageManager.getPackageInfo(application.packageName, 0).versionName
@@ -99,7 +96,6 @@ class SettingsViewModel @Inject constructor(
             val resources = application.resources
             settingsViewData.value = ViewData.Success(SettingsViewData(
                     currentFontSizeScale = settings.fontSizeScale,
-                    animateFontSize = shouldAnimateFontSize,
                     bodyTextSizeInPixel = settings.getPrimaryTextSize(resources),
                     captionTextSizeInPixel = settings.getSecondaryTextSize(resources),
                     keepScreenOn = settings.keepScreenOn,
@@ -110,15 +106,12 @@ class SettingsViewModel @Inject constructor(
                     defaultHighlightColor = HighlightColorViewData.fromHighlightColor(settings.defaultHighlightColor),
                     version = version
             ))
-
-            shouldAnimateFontSize = false
         }.launchIn(viewModelScope)
     }
 
     fun settingsViewData(): Flow<ViewData<SettingsViewData>> = settingsViewData.filterNotNull()
 
     fun saveFontSizeScale(fontSizeScale: Float): Flow<ViewData<Unit>> = updateSettings {
-        shouldAnimateFontSize = true
         settingsManager.saveSettings(currentSettings().copy(fontSizeScale = fontSizeScale))
     }
 
