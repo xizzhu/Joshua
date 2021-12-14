@@ -175,7 +175,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
         defaultHighlightColor.setOnClickListener {
             currentSettingsViewData?.let { settings ->
                 dialog(R.string.text_pick_highlight_color, resources.getStringArray(R.array.text_colors), settings.defaultHighlightColor.ordinal) { dialog, which ->
-                    settingsViewModel.saveDefaultHighlightColor(HighlightColorViewData.values()[which])
+                    settingsViewModel.saveDefaultHighlightColor(SettingsViewData.HighlightColor.values()[which])
                             .onFailure { toast(R.string.toast_unknown_error) }
                             .launchIn(lifecycleScope)
                     dialog.dismiss()

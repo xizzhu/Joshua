@@ -44,25 +44,11 @@ import me.xizzhu.android.logger.Log
 import java.io.IOException
 import javax.inject.Inject
 
-enum class HighlightColorViewData(@Highlight.Companion.AvailableColor val color: Int, @StringRes val label: Int) {
-    NONE(Highlight.COLOR_NONE, R.string.text_highlight_color_none),
-    YELLOW(Highlight.COLOR_YELLOW, R.string.text_highlight_color_yellow),
-    PINK(Highlight.COLOR_PINK, R.string.text_highlight_color_pink),
-    PURPLE(Highlight.COLOR_PURPLE, R.string.text_highlight_color_purple),
-    GREEN(Highlight.COLOR_GREEN, R.string.text_highlight_color_green),
-    BLUE(Highlight.COLOR_BLUE, R.string.text_highlight_color_blue);
-
-    companion object {
-        fun fromHighlightColor(@Highlight.Companion.AvailableColor color: Int): HighlightColorViewData =
-                values().first { it.color == color }
-    }
-}
-
 data class SettingsViewData(
         val currentFontSizeScale: Float, val bodyTextSizeInPixel: Float, val captionTextSizeInPixel: Float,
         val keepScreenOn: Boolean, val nightMode: NightMode, val simpleReadingModeOn: Boolean,
         val hideSearchButton: Boolean, val consolidateVersesForSharing: Boolean,
-        val defaultHighlightColor: HighlightColorViewData, val version: String
+        val defaultHighlightColor: HighlightColor, val version: String
 ) {
     enum class NightMode(
             @AppCompatDelegate.NightMode val systemValue: Int, @Settings.Companion.NightMode val nightMode: Int, @StringRes val label: Int
@@ -74,6 +60,20 @@ data class SettingsViewData(
         companion object {
             fun fromNightMode(@Settings.Companion.NightMode nightMode: Int): NightMode =
                     values().firstOrNull { it.nightMode == nightMode } ?: SYSTEM
+        }
+    }
+
+    enum class HighlightColor(@Highlight.Companion.AvailableColor val color: Int, @StringRes val label: Int) {
+        NONE(Highlight.COLOR_NONE, R.string.text_highlight_color_none),
+        YELLOW(Highlight.COLOR_YELLOW, R.string.text_highlight_color_yellow),
+        PINK(Highlight.COLOR_PINK, R.string.text_highlight_color_pink),
+        PURPLE(Highlight.COLOR_PURPLE, R.string.text_highlight_color_purple),
+        GREEN(Highlight.COLOR_GREEN, R.string.text_highlight_color_green),
+        BLUE(Highlight.COLOR_BLUE, R.string.text_highlight_color_blue);
+
+        companion object {
+            fun fromHighlightColor(@Highlight.Companion.AvailableColor color: Int): HighlightColor =
+                    values().first { it.color == color }
         }
     }
 }
@@ -103,7 +103,7 @@ class SettingsViewModel @Inject constructor(
                     simpleReadingModeOn = settings.simpleReadingModeOn,
                     hideSearchButton = settings.hideSearchButton,
                     consolidateVersesForSharing = settings.consolidateVersesForSharing,
-                    defaultHighlightColor = HighlightColorViewData.fromHighlightColor(settings.defaultHighlightColor),
+                    defaultHighlightColor = SettingsViewData.HighlightColor.fromHighlightColor(settings.defaultHighlightColor),
                     version = version
             ))
         }.launchIn(viewModelScope)
@@ -141,7 +141,7 @@ class SettingsViewModel @Inject constructor(
         settingsManager.saveSettings(currentSettings().copy(consolidateVersesForSharing = consolidateVerses))
     }
 
-    fun saveDefaultHighlightColor(highlightColor: HighlightColorViewData): Flow<ViewData<Unit>> = updateSettings {
+    fun saveDefaultHighlightColor(highlightColor: SettingsViewData.HighlightColor): Flow<ViewData<Unit>> = updateSettings {
         settingsManager.saveSettings(currentSettings().copy(defaultHighlightColor = highlightColor.color))
     }
 
