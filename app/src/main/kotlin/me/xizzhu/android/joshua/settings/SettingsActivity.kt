@@ -145,7 +145,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
         nightMode.setOnClickListener {
             val nightMode = settingsViewModel.currentSettingsViewData()?.nightMode ?: return@setOnClickListener
             dialog(R.string.settings_title_pick_night_mode, resources.getStringArray(R.array.text_night_modes), nightMode.ordinal) { dialog, which ->
-                settingsViewModel.saveNightModeOn(SettingsViewData.NightMode.values()[which])
+                settingsViewModel.saveNightMode(SettingsViewData.NightMode.values()[which])
                         .onFailure { toast(R.string.toast_unknown_error) }
                         .launchIn(lifecycleScope)
                 dialog.dismiss()

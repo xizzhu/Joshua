@@ -126,9 +126,9 @@ class SettingsViewModel @Inject constructor(
         settingsManager.saveSettings(currentSettings().copy(keepScreenOn = keepScreenOn))
     }
 
-    fun saveNightModeOn(nightMode: SettingsViewData.NightMode): Flow<ViewData<Unit>> = updateSettings {
-        AppCompatDelegate.setDefaultNightMode(nightMode.systemValue)
+    fun saveNightMode(nightMode: SettingsViewData.NightMode): Flow<ViewData<Unit>> = updateSettings {
         settingsManager.saveSettings(currentSettings().copy(nightMode = nightMode.nightMode))
+        AppCompatDelegate.setDefaultNightMode(nightMode.systemValue) // This will restart the activity, so do it AFTER the settings are saved.
     }
 
     fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean): Flow<ViewData<Unit>> = updateSettings {
