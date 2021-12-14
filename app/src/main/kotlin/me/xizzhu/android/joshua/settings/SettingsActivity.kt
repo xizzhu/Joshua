@@ -20,6 +20,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
@@ -42,12 +43,15 @@ import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel>() {
-    companion object {
-        private const val CODE_CREATE_FILE_FOR_BACKUP = 9999
-        private const val CODE_SELECT_FILE_FOR_RESTORE = 9998
+    private val settingsViewModel: SettingsViewModel by viewModels()
+
+    private val createFileForBackupLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) backupRestore(settingsViewModel.backup(result.data?.data))
     }
 
-    private val settingsViewModel: SettingsViewModel by viewModels()
+    private val selectFileForRestoreLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) backupRestore(settingsViewModel.restore(result.data?.data))
+    }
 
     private var currentSettingsViewData: SettingsViewData? = null
 
@@ -180,9 +184,8 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
         }
         backup.setOnClickListener {
             try {
-                startActivityForResult(
-                        Intent(Intent.ACTION_CREATE_DOCUMENT).setType("application/json").addCategory(Intent.CATEGORY_OPENABLE),
-                        CODE_CREATE_FILE_FOR_BACKUP
+                createFileForBackupLauncher.launch(
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).setType("application/json").addCategory(Intent.CATEGORY_OPENABLE)
                 )
             } catch (e: Exception) {
                 Log.e(tag, "Failed to start activity to create file for backup", e)
@@ -190,12 +193,9 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
             }
         }
         restore.setOnClickListener {
-            startActivityForResult(
-                    Intent.createChooser(
-                            Intent(Intent.ACTION_GET_CONTENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE), getString(R.string.text_restore_from)
-                    ),
-                    CODE_SELECT_FILE_FOR_RESTORE
-            )
+            selectFileForRestoreLauncher.launch(Intent.createChooser(
+                    Intent(Intent.ACTION_GET_CONTENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE), getString(R.string.text_restore_from)
+            ))
         }
         rate.setOnClickListener {
             try {
@@ -212,14 +212,6 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
                 Log.e(tag, "Failed to start activity to visit website", e)
                 toast(R.string.toast_unknown_error)
             }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            CODE_CREATE_FILE_FOR_BACKUP -> if (resultCode == Activity.RESULT_OK) backupRestore(settingsViewModel.backup(data?.data))
-            CODE_SELECT_FILE_FOR_RESTORE -> if (resultCode == Activity.RESULT_OK) backupRestore(settingsViewModel.restore(data?.data))
-            else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
