@@ -28,14 +28,16 @@
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:liftOnScroll="true">
 
             <me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_scrollFlags="scroll|enterAlways"
-                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+                app:menu="@menu/menu_reading"
+                app:title="@string/app_name" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <me.xizzhu.android.joshua.reading.detail.VerseDetailViewLayout

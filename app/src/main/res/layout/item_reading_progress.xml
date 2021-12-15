@@ -31,7 +31,7 @@
         app:layout_constraintEnd_toEndOf="@id/reading_progress_bar"
         app:layout_constraintTop_toBottomOf="@id/reading_progress_bar" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/book_name"
         style="@style/Text.Body"
         android:layout_width="wrap_content"

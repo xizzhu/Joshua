@@ -35,13 +35,12 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.viewData
 import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.ui.createTitleSizeSpan
-import me.xizzhu.android.joshua.ui.createTitleStyleSpan
+import me.xizzhu.android.joshua.ui.createTitleSpans
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.ui.recyclerview.toVersePreviewItems
-import me.xizzhu.android.joshua.ui.setSpan
+import me.xizzhu.android.joshua.ui.setSpans
 import me.xizzhu.android.joshua.ui.toCharSequence
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
@@ -87,7 +86,7 @@ class StrongNumberViewModel @Inject constructor(
 
     private fun formatStrongNumber(strongNumber: StrongNumber): CharSequence =
             SpannableStringBuilder().append(strongNumber.sn)
-                    .setSpan(createTitleStyleSpan(), createTitleSizeSpan())
+                    .setSpans(createTitleSpans())
                     .append(' ').append(strongNumber.meaning)
                     .toCharSequence()
 

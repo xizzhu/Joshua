@@ -26,19 +26,17 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
-import me.xizzhu.android.joshua.ui.createTitleSizeSpan
-import me.xizzhu.android.joshua.ui.createTitleStyleSpan
+import me.xizzhu.android.joshua.ui.createTitleSpans
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
-import me.xizzhu.android.joshua.ui.setSpan
 import me.xizzhu.android.joshua.ui.toCharSequence
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
+import me.xizzhu.android.joshua.ui.setPrimaryTextSize
+import me.xizzhu.android.joshua.ui.setSpans
 
 class StrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: String, private val verseText: String)
     : BaseItem(R.layout.item_verse_strong_number, { inflater, parent -> StrongNumberItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
-        private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
+        private val BOOK_NAME_SPANS = createTitleSpans()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -54,7 +52,7 @@ class StrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: St
         return@lazy SPANNABLE_STRING_BUILDER.clearAll()
                 .append(bookShortName).append(' ')
                 .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                .setSpan(BOOK_NAME_STYLE_SPAN, BOOK_NAME_SIZE_SPAN)
+                .setSpans(BOOK_NAME_SPANS)
                 .append(' ').append(verseText)
                 .toCharSequence()
     }
@@ -82,7 +80,7 @@ private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewG
 
     override fun bind(settings: Settings, item: StrongNumberItem, payloads: List<Any>) {
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.textForDisplay
         }
     }

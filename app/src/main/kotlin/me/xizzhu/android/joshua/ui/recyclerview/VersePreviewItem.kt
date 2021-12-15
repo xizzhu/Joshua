@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.text.SpannableStringBuilder
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import me.xizzhu.android.joshua.R
@@ -28,19 +27,16 @@ import me.xizzhu.android.joshua.databinding.ItemVersePreviewBinding
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
-import me.xizzhu.android.joshua.ui.createTitleSizeSpan
-import me.xizzhu.android.joshua.ui.createTitleStyleSpan
-import me.xizzhu.android.joshua.ui.getBodyTextSize
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
-import me.xizzhu.android.joshua.ui.setSpan
+import me.xizzhu.android.joshua.ui.createTitleSpans
+import me.xizzhu.android.joshua.ui.setPrimaryTextSize
+import me.xizzhu.android.joshua.ui.setSpans
 import me.xizzhu.android.joshua.ui.toCharSequence
 import java.util.*
 
 class VersePreviewItem(val verse: Verse, private val followingEmptyVerseCount: Int)
     : BaseItem(R.layout.item_verse_preview, { inflater, parent -> VersePreviewItemViewHolder(inflater, parent) }) {
     companion object {
-        private val VERSE_INDEX_SIZE_SPAN = createTitleSizeSpan()
-        private val VERSE_INDEX_STYLE_SPAN = createTitleStyleSpan()
+        private val VERSE_INDEX_SPANS = createTitleSpans()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -58,7 +54,7 @@ class VersePreviewItem(val verse: Verse, private val followingEmptyVerseCount: I
             SPANNABLE_STRING_BUILDER.append('-').append(verse.verseIndex.verseIndex + followingEmptyVerseCount + 1)
         }
 
-        SPANNABLE_STRING_BUILDER.setSpan(VERSE_INDEX_SIZE_SPAN, VERSE_INDEX_STYLE_SPAN)
+        SPANNABLE_STRING_BUILDER.setSpans(VERSE_INDEX_SPANS)
                 .append(' ')
                 .append(verse.text.text)
 
@@ -105,7 +101,6 @@ private fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
 
 private class VersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<VersePreviewItem>(ItemVersePreviewBinding.inflate(inflater, parent, false).root) {
-    private val resources = itemView.resources
     private val viewBinding = ItemVersePreviewBinding.bind(itemView).apply {
         root.setOnClickListener { item?.let { callback().openVerse(it.verse.verseIndex) } }
     }
@@ -115,7 +110,6 @@ private class VersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewG
 
     override fun bind(settings: Settings, item: VersePreviewItem, payloads: List<Any>) {
         viewBinding.versePreview.text = item.textForDisplay
-        viewBinding.versePreview.setTextColor(settings.getPrimaryTextColor(resources))
-        viewBinding.versePreview.setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getBodyTextSize(resources))
+        viewBinding.versePreview.setPrimaryTextSize(settings)
     }
 }

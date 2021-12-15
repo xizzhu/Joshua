@@ -16,28 +16,24 @@
 
 package me.xizzhu.android.joshua.search
 
-import android.graphics.Color
 import android.text.SpannableStringBuilder
-import android.text.style.BackgroundColorSpan
-import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
-import me.xizzhu.android.joshua.ui.createTitleSizeSpan
-import me.xizzhu.android.joshua.ui.createTitleStyleSpan
+import me.xizzhu.android.joshua.ui.createHighlightSpans
+import me.xizzhu.android.joshua.ui.createTitleSpans
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
-import me.xizzhu.android.joshua.ui.setSpan
 import me.xizzhu.android.joshua.ui.toCharSequence
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
+import me.xizzhu.android.joshua.ui.setPrimaryTextSize
+import me.xizzhu.android.joshua.ui.setSpans
 import java.util.*
 
 class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: String,
@@ -45,8 +41,7 @@ class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: Str
                       @ColorInt private val highlightColor: Int)
     : BaseItem(R.layout.item_search_verse, { inflater, parent -> SearchVerseItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
-        private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
+        private val BOOK_NAME_SPANS = createTitleSpans()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -64,21 +59,17 @@ class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: Str
                 .append(bookShortName)
                 .append(' ')
                 .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                .setSpan(BOOK_NAME_SIZE_SPAN, BOOK_NAME_STYLE_SPAN)
+                .setSpans(BOOK_NAME_SPANS)
                 .append('\n')
                 .append(text)
 
         // highlights the keywords
-        SPANNABLE_STRING_BUILDER.highlight(query, SPANNABLE_STRING_BUILDER.length - text.length)
+        SPANNABLE_STRING_BUILDER.highlightKeyword(query, SPANNABLE_STRING_BUILDER.length - text.length)
 
-        // highlights the verse if needed
-        if (highlightColor != Highlight.COLOR_NONE) {
-            SPANNABLE_STRING_BUILDER.setSpan(
-                    BackgroundColorSpan(highlightColor),
-                    ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK),
-                    SPANNABLE_STRING_BUILDER.length - text.length, SPANNABLE_STRING_BUILDER.length
-            )
-        }
+        // highlights the verse
+        SPANNABLE_STRING_BUILDER.setSpans(
+                createHighlightSpans(highlightColor), SPANNABLE_STRING_BUILDER.length - text.length, SPANNABLE_STRING_BUILDER.length
+        )
 
         return@lazy SPANNABLE_STRING_BUILDER.toCharSequence()
     }
@@ -106,7 +97,7 @@ private class SearchVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
 
     override fun bind(settings: Settings, item: SearchVerseItem, payloads: List<Any>) {
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.textForDisplay
         }
     }

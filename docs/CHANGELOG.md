@@ -2,6 +2,10 @@ CHANGELOG
 ---------
 
 #### Next release
+- New features:
+  - Support using system's day / night mode (#206)
+- Changes:
+  - Refactor to use Material3 theme
 - Bug fixes:
   - Properly set Kotlin JVM target to Java 11
 - Update dependencies:
@@ -10,6 +14,7 @@ CHANGELOG
   - AndroidX constraint layout to 2.1.2
   - Firebase BOM to 29.0.2, Crashlytics Gradle plugin to 2.8.1
   - Hilt to 2.40.5
+  - Material Component to 1.5.0-rc01
 
 #### v0.19.1 (2021-12-10)
 - Bug fixes:

@@ -22,11 +22,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.widget.Toolbar
+import com.google.android.material.appbar.MaterialToolbar
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 
-class AnnotatedVersesToolbar : Toolbar {
+class AnnotatedVersesToolbar : MaterialToolbar {
     var sortOrderUpdated: ((Int) -> Unit)? = null
     private val sortOrderSpinnerItemSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {

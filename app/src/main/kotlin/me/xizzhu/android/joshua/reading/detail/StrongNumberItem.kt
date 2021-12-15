@@ -30,8 +30,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 class StrongNumberItem(val strongNumber: StrongNumber)
     : BaseItem(R.layout.item_strong_number, { inflater, parent -> StrongNumberItemViewHolder(inflater, parent) }) {
     companion object {
-        private val STRONG_NUMBER_SIZE_SPAN = createTitleSizeSpan()
-        private val STRONG_NUMBER_STYLE_SPAN = createTitleStyleSpan()
+        private val STRONG_NUMBER_SPANS = createTitleSpans()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -47,7 +46,7 @@ class StrongNumberItem(val strongNumber: StrongNumber)
         // <meaning>
         return@lazy SPANNABLE_STRING_BUILDER.clearAll()
                 .append(strongNumber.sn)
-                .setSpan(STRONG_NUMBER_SIZE_SPAN, STRONG_NUMBER_STYLE_SPAN)
+                .setSpans(STRONG_NUMBER_SPANS)
                 .append('\n').append(strongNumber.meaning)
                 .toCharSequence()
     }
@@ -68,7 +67,7 @@ private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewG
 
     override fun bind(settings: Settings, item: StrongNumberItem, payloads: List<Any>) {
         with(viewBinding.strongNumber) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.textForDisplay
         }
     }

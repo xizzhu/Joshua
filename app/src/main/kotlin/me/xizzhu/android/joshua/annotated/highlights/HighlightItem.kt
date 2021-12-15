@@ -16,17 +16,13 @@
 
 package me.xizzhu.android.joshua.annotated.highlights
 
-import android.graphics.Color
 import android.text.SpannableStringBuilder
-import android.text.style.BackgroundColorSpan
-import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.*
@@ -38,8 +34,7 @@ class HighlightItem(
         private val verseText: String, @ColorInt private val highlightColor: Int, @Constants.SortOrder private val sortOrder: Int
 ) : BaseItem(R.layout.item_highlight, { inflater, parent -> HighlightItemViewHolder(inflater, parent) }) {
     companion object {
-        private val BOOK_NAME_SIZE_SPAN = createTitleSizeSpan()
-        private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
+        private val BOOK_NAME_SPANS = createTitleSpans()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -57,7 +52,7 @@ class HighlightItem(
             // <book short name> <chapter verseIndex>:<verse verseIndex> <verse text>
             SPANNABLE_STRING_BUILDER.append(bookShortName).append(' ')
                     .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                    .setSpan(BOOK_NAME_STYLE_SPAN, BOOK_NAME_SIZE_SPAN)
+                    .setSpans(BOOK_NAME_SPANS)
                     .append(' ')
         } else {
             // format:
@@ -65,14 +60,12 @@ class HighlightItem(
             // <verse text>
             SPANNABLE_STRING_BUILDER.append(bookName).append(' ')
                     .append(verseIndex.chapterIndex + 1).append(':').append(verseIndex.verseIndex + 1)
-                    .setSpan(BOOK_NAME_STYLE_SPAN, BOOK_NAME_SIZE_SPAN)
+                    .setSpans(BOOK_NAME_SPANS)
                     .append('\n')
         }
 
         return@lazy SPANNABLE_STRING_BUILDER.append(verseText)
-                .setSpan(BackgroundColorSpan(highlightColor),
-                        ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK),
-                        SPANNABLE_STRING_BUILDER.length - verseText.length, SPANNABLE_STRING_BUILDER.length)
+                .setSpans(createHighlightSpans(highlightColor), SPANNABLE_STRING_BUILDER.length - verseText.length, SPANNABLE_STRING_BUILDER.length)
                 .toCharSequence()
     }
 }
@@ -99,7 +92,7 @@ private class HighlightItemViewHolder(inflater: LayoutInflater, parent: ViewGrou
 
     override fun bind(settings: Settings, item: HighlightItem, payloads: List<Any>) {
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.textForDisplay
         }
     }

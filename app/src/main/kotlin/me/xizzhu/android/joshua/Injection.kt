@@ -21,6 +21,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.core.repository.*
 import me.xizzhu.android.joshua.core.repository.local.android.*
@@ -33,9 +36,15 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+    private val appScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     @Provides
     @Singleton
     fun provideApp(application: Application): App = application as App
+
+    @Provides
+    @Singleton
+    fun provideAppScope(): CoroutineScope = appScope
 
     @Provides
     @Singleton

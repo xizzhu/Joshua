@@ -47,7 +47,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test observe settings within constructor`() = runBlocking {
-        val settings = Settings(false, true, 2.0F, false, false, true, Highlight.COLOR_PINK)
+        val settings = Settings(false, Settings.NIGHT_MODE_FOLLOW_SYSTEM, 2.0F, false, false, true, Highlight.COLOR_PINK)
         coEvery { localSettingsStorage.readSettings() } returns settings
 
         settingsRepository = SettingsRepository(localSettingsStorage)
@@ -65,7 +65,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test saveSettings()`() = runBlocking {
-        val settings = Settings(false, true, 1.5F, true, true, true, Highlight.COLOR_BLUE)
+        val settings = Settings(false, Settings.NIGHT_MODE_ON, 1.5F, true, true, true, Highlight.COLOR_BLUE)
         settingsRepository.saveSettings(settings)
         assertEquals(settings, settingsRepository.settings.first())
     }
@@ -94,7 +94,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test saveSettings() for night mode on`() = runBlocking {
-        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(nightModeOn = true))
+        saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(nightMode = Settings.NIGHT_MODE_ON))
     }
 
     @Test

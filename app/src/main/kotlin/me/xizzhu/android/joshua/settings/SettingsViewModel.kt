@@ -18,8 +18,8 @@ package me.xizzhu.android.joshua.settings
 
 import android.app.Application
 import android.net.Uri
-import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -44,38 +44,45 @@ import me.xizzhu.android.logger.Log
 import java.io.IOException
 import javax.inject.Inject
 
-enum class HighlightColorViewData(@Highlight.Companion.AvailableColor val color: Int, @StringRes val label: Int) {
-    NONE(Highlight.COLOR_NONE, R.string.text_highlight_color_none),
-    YELLOW(Highlight.COLOR_YELLOW, R.string.text_highlight_color_yellow),
-    PINK(Highlight.COLOR_PINK, R.string.text_highlight_color_pink),
-    PURPLE(Highlight.COLOR_PURPLE, R.string.text_highlight_color_purple),
-    GREEN(Highlight.COLOR_GREEN, R.string.text_highlight_color_green),
-    BLUE(Highlight.COLOR_BLUE, R.string.text_highlight_color_blue);
+data class SettingsViewData(
+        val currentFontSizeScale: Float, val bodyTextSizeInPixel: Float, val captionTextSizeInPixel: Float,
+        val keepScreenOn: Boolean, val nightMode: NightMode, val simpleReadingModeOn: Boolean,
+        val hideSearchButton: Boolean, val consolidateVersesForSharing: Boolean,
+        val defaultHighlightColor: HighlightColor, val version: String
+) {
+    enum class NightMode(
+            @AppCompatDelegate.NightMode val systemValue: Int, @Settings.Companion.NightMode val nightMode: Int, @StringRes val label: Int
+    ) {
+        ON(AppCompatDelegate.MODE_NIGHT_YES, Settings.NIGHT_MODE_ON, R.string.settings_text_night_mode_on),
+        OFF(AppCompatDelegate.MODE_NIGHT_NO, Settings.NIGHT_MODE_OFF, R.string.settings_text_night_mode_off),
+        SYSTEM(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM, Settings.NIGHT_MODE_FOLLOW_SYSTEM, R.string.settings_text_night_mode_system);
 
-    companion object {
-        fun fromHighlightColor(@Highlight.Companion.AvailableColor color: Int): HighlightColorViewData =
-                values()[Highlight.AVAILABLE_COLORS.indexOf(color)]
+        companion object {
+            fun fromNightMode(@Settings.Companion.NightMode nightMode: Int): NightMode =
+                    values().firstOrNull { it.nightMode == nightMode } ?: SYSTEM
+        }
+    }
+
+    enum class HighlightColor(@Highlight.Companion.AvailableColor val color: Int, @StringRes val label: Int) {
+        NONE(Highlight.COLOR_NONE, R.string.text_highlight_color_none),
+        YELLOW(Highlight.COLOR_YELLOW, R.string.text_highlight_color_yellow),
+        PINK(Highlight.COLOR_PINK, R.string.text_highlight_color_pink),
+        PURPLE(Highlight.COLOR_PURPLE, R.string.text_highlight_color_purple),
+        GREEN(Highlight.COLOR_GREEN, R.string.text_highlight_color_green),
+        BLUE(Highlight.COLOR_BLUE, R.string.text_highlight_color_blue);
+
+        companion object {
+            fun fromHighlightColor(@Highlight.Companion.AvailableColor color: Int): HighlightColor =
+                    values().first { it.color == color }
+        }
     }
 }
-
-data class SettingsViewData(
-        val currentFontSizeScale: Float, val animateFontSize: Boolean,
-        val bodyTextSizeInPixel: Float, val captionTextSizeInPixel: Float,
-        val keepScreenOn: Boolean, val nightModeOn: Boolean, val animateColor: Boolean,
-        @ColorInt val backgroundColor: Int, @ColorInt val primaryTextColor: Int, @ColorInt val secondaryTextColor: Int,
-        val simpleReadingModeOn: Boolean, val hideSearchButton: Boolean, val consolidateVersesForSharing: Boolean,
-        val defaultHighlightColor: HighlightColorViewData,
-        val version: String
-)
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
         private val backupManager: BackupManager, settingsManager: SettingsManager, application: Application
 ) : BaseViewModel(settingsManager, application) {
     private val settingsViewData: MutableStateFlow<ViewData<SettingsViewData>?> = MutableStateFlow(null)
-
-    private var shouldAnimateFontSize = false
-    private var shouldAnimateColor = false
 
     init {
         val version = try {
@@ -89,31 +96,24 @@ class SettingsViewModel @Inject constructor(
             val resources = application.resources
             settingsViewData.value = ViewData.Success(SettingsViewData(
                     currentFontSizeScale = settings.fontSizeScale,
-                    animateFontSize = shouldAnimateFontSize,
-                    bodyTextSizeInPixel = settings.getBodyTextSize(resources),
-                    captionTextSizeInPixel = settings.getCaptionTextSize(resources),
+                    bodyTextSizeInPixel = settings.getPrimaryTextSize(resources),
+                    captionTextSizeInPixel = settings.getSecondaryTextSize(resources),
                     keepScreenOn = settings.keepScreenOn,
-                    nightModeOn = settings.nightModeOn,
-                    animateColor = shouldAnimateColor,
-                    backgroundColor = settings.getBackgroundColor(),
-                    primaryTextColor = settings.getPrimaryTextColor(resources),
-                    secondaryTextColor = settings.getSecondaryTextColor(resources),
+                    nightMode = SettingsViewData.NightMode.fromNightMode(settings.nightMode),
                     simpleReadingModeOn = settings.simpleReadingModeOn,
                     hideSearchButton = settings.hideSearchButton,
                     consolidateVersesForSharing = settings.consolidateVersesForSharing,
-                    defaultHighlightColor = HighlightColorViewData.fromHighlightColor(settings.defaultHighlightColor),
+                    defaultHighlightColor = SettingsViewData.HighlightColor.fromHighlightColor(settings.defaultHighlightColor),
                     version = version
             ))
-
-            shouldAnimateFontSize = false
-            shouldAnimateColor = false
         }.launchIn(viewModelScope)
     }
 
     fun settingsViewData(): Flow<ViewData<SettingsViewData>> = settingsViewData.filterNotNull()
 
+    fun currentSettingsViewData(): SettingsViewData? = settingsViewData.value?.let { if (it is ViewData.Success) it.data else null }
+
     fun saveFontSizeScale(fontSizeScale: Float): Flow<ViewData<Unit>> = updateSettings {
-        shouldAnimateFontSize = true
         settingsManager.saveSettings(currentSettings().copy(fontSizeScale = fontSizeScale))
     }
 
@@ -126,9 +126,9 @@ class SettingsViewModel @Inject constructor(
         settingsManager.saveSettings(currentSettings().copy(keepScreenOn = keepScreenOn))
     }
 
-    fun saveNightModeOn(nightModeOn: Boolean): Flow<ViewData<Unit>> = updateSettings {
-        shouldAnimateColor = true
-        settingsManager.saveSettings(currentSettings().copy(nightModeOn = nightModeOn))
+    fun saveNightMode(nightMode: SettingsViewData.NightMode): Flow<ViewData<Unit>> = updateSettings {
+        settingsManager.saveSettings(currentSettings().copy(nightMode = nightMode.nightMode))
+        AppCompatDelegate.setDefaultNightMode(nightMode.systemValue) // This will restart the activity, so do it AFTER the settings are saved.
     }
 
     fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean): Flow<ViewData<Unit>> = updateSettings {
@@ -143,7 +143,7 @@ class SettingsViewModel @Inject constructor(
         settingsManager.saveSettings(currentSettings().copy(consolidateVersesForSharing = consolidateVerses))
     }
 
-    fun saveDefaultHighlightColor(highlightColor: HighlightColorViewData): Flow<ViewData<Unit>> = updateSettings {
+    fun saveDefaultHighlightColor(highlightColor: SettingsViewData.HighlightColor): Flow<ViewData<Unit>> = updateSettings {
         settingsManager.saveSettings(currentSettings().copy(defaultHighlightColor = highlightColor.color))
     }
 

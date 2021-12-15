@@ -16,9 +16,7 @@
 
 package me.xizzhu.android.joshua.search
 
-import android.annotation.SuppressLint
 import android.text.SpannableStringBuilder
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -34,13 +32,7 @@ class SearchNoteItem(val verseIndex: VerseIndex, private val bookShortName: Stri
                      private val verseText: String, private val note: String, private val query: String)
     : BaseItem(R.layout.item_search_note, { inflater, parent -> SearchNoteItemViewHolder(inflater, parent) }) {
     companion object {
-        // We don't expect users to change locale that frequently.
-        @SuppressLint("ConstantLocale")
-        private val DEFAULT_LOCALE = Locale.getDefault()
-
         private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
-        private val KEYWORD_SIZE_SPAN = createKeywordSizeSpan()
-        private val KEYWORD_STYLE_SPAN = createKeywordStyleSpan()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
     }
 
@@ -61,18 +53,7 @@ class SearchNoteItem(val verseIndex: VerseIndex, private val bookShortName: Stri
 
     val noteForDisplay: CharSequence by lazy {
         SPANNABLE_STRING_BUILDER.clearAll().append(note)
-
-        // highlights the keywords
-        val lowerCase = SPANNABLE_STRING_BUILDER.toString().lowercase(DEFAULT_LOCALE)
-        for ((index, keyword) in query.trim().replace("\\s+", " ").split(" ").withIndex()) {
-            val start = lowerCase.indexOf(keyword.lowercase(DEFAULT_LOCALE))
-            if (start >= 0) {
-                SPANNABLE_STRING_BUILDER.setSpan(
-                        if (index == 0) KEYWORD_SIZE_SPAN else createKeywordSizeSpan(),
-                        if (index == 0) KEYWORD_STYLE_SPAN else createKeywordStyleSpan(),
-                        start, start + keyword.length)
-            }
-        }
+                .highlightKeyword(query, 0) // highlights the keywords
 
         return@lazy SPANNABLE_STRING_BUILDER.toCharSequence()
     }
@@ -94,12 +75,11 @@ private class SearchNoteItemViewHolder(inflater: LayoutInflater, parent: ViewGro
 
     override fun bind(settings: Settings, item: SearchNoteItem, payloads: List<Any>) {
         with(verse) {
-            setTextColor(settings.getPrimaryTextColor(resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
+            setSecondaryTextSize(settings)
             text = item.verseForDisplay
         }
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.noteForDisplay
         }
     }

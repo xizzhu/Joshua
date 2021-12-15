@@ -7,17 +7,16 @@
     android:paddingStart="@dimen/padding_small"
     android:paddingEnd="@dimen/padding">
 
-    <androidx.appcompat.widget.AppCompatCheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/checkbox"
         android:layout_width="40dp"
         android:layout_height="match_parent"
         android:focusable="false"
-        android:minHeight="@dimen/item_height"
-        android:theme="@style/AppCheckBoxStyle" />
+        android:minHeight="@dimen/item_height" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/title"
-        style="@style/Text.Body.Dark"
+        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"

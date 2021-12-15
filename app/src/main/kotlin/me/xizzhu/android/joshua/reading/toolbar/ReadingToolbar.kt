@@ -21,21 +21,16 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Spinner
-import androidx.appcompat.widget.Toolbar
+import com.google.android.material.appbar.MaterialToolbar
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 
-class ReadingToolbar : Toolbar {
+class ReadingToolbar : MaterialToolbar {
     private var spinnerPosition = -1
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
-    init {
-        setTitle(R.string.app_name)
-        inflateMenu(R.menu.menu_bible_reading)
-    }
 
     fun initialize(
             requestParallelTranslation: (String) -> Unit,

@@ -3,8 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:hint="@string/text_note"
-    android:padding="@dimen/padding"
-    android:textColorHint="@color/dark_gray">
+    android:padding="@dimen/padding">
 
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/note"

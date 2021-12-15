@@ -16,18 +16,32 @@
 
 package me.xizzhu.android.joshua.ui
 
+import android.graphics.Color
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.style.BackgroundColorSpan
 import android.text.style.CharacterStyle
+import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
+import androidx.annotation.ColorInt
+import me.xizzhu.android.joshua.core.Highlight
 
-fun createTitleSizeSpan() = RelativeSizeSpan(0.85F)
 fun createTitleStyleSpan() = StyleSpan(Typeface.BOLD)
+fun createTitleSpans(): Array<CharacterStyle> = arrayOf(RelativeSizeSpan(0.85F), createTitleStyleSpan())
 
-fun createKeywordSizeSpan() = RelativeSizeSpan(1.2F)
-fun createKeywordStyleSpan() = StyleSpan(Typeface.BOLD)
+fun createHighlightSpans(@ColorInt highlightColor: Int): Array<CharacterStyle> =
+        if (highlightColor != Highlight.COLOR_NONE) {
+            arrayOf(
+                    BackgroundColorSpan(highlightColor),
+                    ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK)
+            )
+        } else {
+            emptyArray()
+        }
+
+fun createKeywordSpans(): Array<CharacterStyle> = arrayOf(RelativeSizeSpan(1.2F), StyleSpan(Typeface.BOLD))
 
 fun SpannableStringBuilder.clearAll(): SpannableStringBuilder {
     clear()
@@ -37,17 +51,14 @@ fun SpannableStringBuilder.clearAll(): SpannableStringBuilder {
 
 fun SpannableStringBuilder.append(i: Int): SpannableStringBuilder = append(i.toString())
 
-fun SpannableStringBuilder.setSpan(span: CharacterStyle): SpannableStringBuilder = setSpan(span, 0, length)
-
-fun SpannableStringBuilder.setSpan(span1: CharacterStyle, span2: CharacterStyle): SpannableStringBuilder =
-        setSpan(span1, 0, length).setSpan(span2, 0, length)
-
-fun SpannableStringBuilder.setSpan(span: CharacterStyle, start: Int, end: Int): SpannableStringBuilder {
+fun SpannableStringBuilder.setSpan(span: CharacterStyle, start: Int = 0, end: Int = length): SpannableStringBuilder {
     setSpan(span, start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
     return this
 }
 
-fun SpannableStringBuilder.setSpan(span1: CharacterStyle, span2: CharacterStyle, start: Int, end: Int): SpannableStringBuilder =
-        setSpan(span1, start, end).setSpan(span2, start, end)
+fun SpannableStringBuilder.setSpans(spans: Array<CharacterStyle>, start: Int = 0, end: Int = length): SpannableStringBuilder {
+    spans.forEach { setSpan(it, start, end) }
+    return this
+}
 
 fun SpannableStringBuilder.toCharSequence(): CharSequence = subSequence(0, length)

@@ -16,19 +16,14 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import android.graphics.Color
 import android.text.SpannableStringBuilder
-import android.text.style.BackgroundColorSpan
-import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import androidx.annotation.ColorInt
-import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.*
 
-private val bookNameSizeSpan = createTitleSizeSpan()
-private val bookNameStyleSpan = createTitleStyleSpan()
+private val bookNameSpans = createTitleSpans()
 private val parallelVerseSizeSpan = RelativeSizeSpan(0.95F)
 
 fun SpannableStringBuilder.format(
@@ -46,7 +41,7 @@ fun SpannableStringBuilder.format(
             }
             append(' ')
 
-            setSpan(bookNameStyleSpan, bookNameSizeSpan, 0, length)
+            setSpans(bookNameSpans)
         }
 
         append(verse.text.text).setHighlight(verse, highlightColor)
@@ -68,17 +63,8 @@ fun SpannableStringBuilder.format(
     return toCharSequence()
 }
 
-private fun SpannableStringBuilder.setHighlight(verse: Verse, @ColorInt highlightColor: Int): SpannableStringBuilder {
-    if (highlightColor != Highlight.COLOR_NONE) {
-        setSpan(
-                span1 = BackgroundColorSpan(highlightColor),
-                span2 = ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK),
-                start = length - verse.text.text.length,
-                end = length
-        )
-    }
-    return this
-}
+private fun SpannableStringBuilder.setHighlight(verse: Verse, @ColorInt highlightColor: Int): SpannableStringBuilder =
+        setSpans(createHighlightSpans(highlightColor), length - verse.text.text.length, length)
 
 private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Text, followingEmptyVerseCount: Int): SpannableStringBuilder {
     if (isNotEmpty()) {
@@ -93,5 +79,5 @@ private fun SpannableStringBuilder.append(verseIndex: VerseIndex, text: Verse.Te
         append('-').append(verseIndex.verseIndex + followingEmptyVerseCount + 1)
     }
     val end = length
-    return setSpan(createTitleSizeSpan(), createTitleStyleSpan(), start, end).append('\n').append(text.text)
+    return setSpans(createTitleSpans(), start, end).append('\n').append(text.text)
 }

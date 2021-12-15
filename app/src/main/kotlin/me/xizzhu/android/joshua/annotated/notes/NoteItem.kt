@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.annotated.notes
 
 import android.text.SpannableStringBuilder
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -76,12 +75,11 @@ private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
 
     override fun bind(settings: Settings, item: NoteItem, payloads: List<Any>) {
         with(verse) {
-            setTextColor(settings.getPrimaryTextColor(resources))
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getCaptionTextSize(resources))
+            setSecondaryTextSize(settings)
             text = item.textForDisplay
         }
         with(text) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.note
         }
     }

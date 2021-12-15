@@ -24,7 +24,6 @@ import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import me.xizzhu.android.joshua.Navigator
-import me.xizzhu.android.joshua.ui.getBackgroundColor
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 
@@ -54,10 +53,7 @@ abstract class BaseActivity<VB : ViewBinding, VM : BaseViewModel> : AppCompatAct
     private fun observeSettings() {
         viewModel().settings()
                 .onEach { settings ->
-                    with(window.decorView) {
-                        keepScreenOn = settings.keepScreenOn
-                        setBackgroundColor(settings.getBackgroundColor())
-                    }
+                    window.decorView.keepScreenOn = settings.keepScreenOn
                 }
                 .launchIn(lifecycleScope)
     }

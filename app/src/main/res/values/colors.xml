@@ -2,8 +2,12 @@
 <resources>
 
     <color name="primary">#0038b8</color>
+    <color name="secondary">#7851a9</color>
+
+    <color name="verse_pressed">@color/light_gray</color>
+    <color name="verse_selected">@color/light_gray</color>
+
     <color name="primary_dark">#00008b</color>
-    <color name="accent">#7851a9</color>
 
     <color name="light_gray">#cccccc</color>
     <color name="dark_gray">#888888</color>
@@ -12,9 +16,7 @@
 
     <color name="text_dark_primary">#de000000</color>
     <color name="text_dark_secondary">#8a000000</color>
-    <color name="text_dark_disabled_hint">#61000000</color>
 
     <color name="text_light_primary">#ffffffff</color>
     <color name="text_light_secondary">#b3ffffff</color>
-    <color name="text_light_disabled_hint">#80ffffff</color>
 </resources>

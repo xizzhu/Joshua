@@ -18,8 +18,6 @@ package me.xizzhu.android.joshua.ui
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.ArgbEvaluator
-import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -29,7 +27,6 @@ import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
-import androidx.annotation.ColorInt
 import androidx.annotation.StyleableRes
 import androidx.viewpager2.widget.ViewPager2
 import me.xizzhu.android.logger.Log
@@ -83,19 +80,6 @@ fun View.hideKeyboard() {
     if (hasFocus()) {
         (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                 .hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
-    }
-}
-
-fun TextView.animateTextColor(@ColorInt to: Int) {
-    val from = currentTextColor
-    val argbEvaluator = ArgbEvaluator()
-    with(ValueAnimator.ofFloat(0.0F, 1.0F)) {
-        addUpdateListener { animator ->
-            val fraction = animator.animatedValue as Float
-            val color = argbEvaluator.evaluate(fraction, from, to) as Int
-            setTextColor(color)
-        }
-        setDuration(ANIMATION_DURATION).start()
     }
 }
 

@@ -21,7 +21,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
+import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 
 data class TextItem(val title: CharSequence)
     : BaseItem(R.layout.item_text, { inflater, parent -> TextItemViewHolder(inflater, parent) })
@@ -32,7 +32,7 @@ private class TextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
 
     override fun bind(settings: Settings, item: TextItem, payloads: List<Any>) {
         with(title) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.title
         }
     }

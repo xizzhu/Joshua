@@ -82,7 +82,7 @@ object Versions {
     const val ask = "0.5.2"
     const val hilt = "2.40.5"
     const val logger = "0.7.0"
-    const val materialComponent = "1.4.0"
+    const val materialComponent = "1.5.0-rc01"
 
     const val mockk = "1.12.1"
     const val robolectric = "4.5"

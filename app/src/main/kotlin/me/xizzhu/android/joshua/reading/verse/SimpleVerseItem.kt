@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.reading.verse
 
 import android.text.SpannableStringBuilder
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -87,7 +86,6 @@ class SimpleVerseItem(
 
 private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     : BaseViewHolder<SimpleVerseItem>(ItemSimpleVerseBinding.inflate(inflater, parent, false).root) {
-    private val resources = itemView.resources
     private val viewBinding = ItemSimpleVerseBinding.bind(itemView).apply {
         root.setOnClickListener { item?.let { callback().onVerseClicked(it.verse) } }
         root.setOnLongClickListener {
@@ -103,17 +101,12 @@ private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
 
     override fun bind(settings: Settings, item: SimpleVerseItem, payloads: List<Any>) {
         if (payloads.isEmpty()) {
-            val textColor = if (item.selected) settings.getPrimarySelectedTextColor(resources) else settings.getPrimaryTextColor(resources)
-            val textSize = settings.getBodyTextSize(resources)
-
             viewBinding.text.text = item.textForDisplay
-            viewBinding.text.setTextColor(textColor)
-            viewBinding.text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+            viewBinding.text.setPrimaryTextSize(settings)
 
             if (item.verse.parallel.isEmpty()) {
                 viewBinding.index.text = item.indexForDisplay
-                viewBinding.index.setTextColor(textColor)
-                viewBinding.index.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize * 0.85F)
+                viewBinding.index.setPrimaryTextSize(settings)
                 viewBinding.index.visibility = View.VISIBLE
 
                 viewBinding.divider.visibility = View.GONE
@@ -122,24 +115,20 @@ private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
                 viewBinding.divider.visibility = View.VISIBLE
             }
 
-            itemView.isSelected = item.selected
+            viewBinding.root.isSelected = item.selected
         } else {
             payloads.forEach { payload ->
                 val update = payload as VerseUpdate
                 when (update.operation) {
                     VerseUpdate.VERSE_SELECTED -> {
                         item.selected = true
-                        itemView.isSelected = true
-                        if (settings.nightModeOn) {
-                            viewBinding.text.animateTextColor(settings.getPrimarySelectedTextColor(resources))
-                        }
+                        viewBinding.root.isSelected = true
+                        viewBinding.text.isSelected = true
                     }
                     VerseUpdate.VERSE_DESELECTED -> {
                         item.selected = false
-                        itemView.isSelected = false
-                        if (settings.nightModeOn) {
-                            viewBinding.text.animateTextColor(settings.getPrimaryTextColor(resources))
-                        }
+                        viewBinding.root.isSelected = false
+                        viewBinding.text.isSelected = false
                     }
                     VerseUpdate.HIGHLIGHT_UPDATED -> {
                         item.highlightColor = update.data as Int

@@ -2,45 +2,62 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_gravity="bottom"
-        android:orientation="vertical">
+        android:background="?android:attr/colorBackground">
 
-        <LinearLayout
-            android:id="@+id/header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+        <View
+            android:id="@+id/top_divider"
+            style="@style/Divider.Horizontal"
+            android:background="@color/dark_gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tab_layout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:tabMode="scrollable" />
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/bookmark"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:scaleType="center"
+            android:src="@drawable/ic_bookmark"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_divider" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/highlight"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:background="?android:attr/selectableItemBackground"
-                android:padding="@dimen/padding_small"
-                android:src="@drawable/ic_highlight" />
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/highlight"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:scaleType="center"
+            android:src="@drawable/ic_highlight"
+            app:layout_constraintEnd_toStartOf="@id/bookmark"
+            app:layout_constraintTop_toBottomOf="@id/top_divider" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/bookmark"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:background="?android:attr/selectableItemBackground"
-                android:padding="@dimen/padding_small"
-                android:src="@drawable/ic_bookmark" />
-        </LinearLayout>
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            app:layout_constraintEnd_toStartOf="@id/highlight"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_divider"
+            app:tabMode="scrollable" />
+
+        <View
+            android:id="@+id/middle_divider"
+            style="@style/Divider.Horizontal"
+            android:background="@color/dark_gray"
+            app:layout_constraintBottom_toBottomOf="@id/tab_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/middle_divider" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </merge>

@@ -17,20 +17,26 @@
 package me.xizzhu.android.joshua.progress
 
 import android.graphics.Typeface
+import android.text.SpannableStringBuilder
+import android.text.style.CharacterStyle
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.ui.activity
-import me.xizzhu.android.joshua.ui.getPrimaryTextColor
+import me.xizzhu.android.joshua.ui.append
+import me.xizzhu.android.joshua.ui.clearAll
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
-import me.xizzhu.android.joshua.ui.updateSettingsWithPrimaryText
+import me.xizzhu.android.joshua.ui.setPrimaryTextSize
+import me.xizzhu.android.joshua.ui.setSpans
+import me.xizzhu.android.joshua.ui.toCharSequence
 
 class ReadingProgressSummaryItem(
         val continuousReadingDays: Int, val chaptersRead: Int, val finishedBooks: Int,
@@ -51,16 +57,16 @@ private class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, par
     private val finishedNewTestament: TextView = itemView.findViewById(R.id.finished_new_testament_value)
 
     override fun bind(settings: Settings, item: ReadingProgressSummaryItem, payloads: List<Any>) {
-        continuousReadingDaysTitle.updateSettingsWithPrimaryText(settings)
-        continuousReadingDays.updateSettingsWithPrimaryText(settings)
-        chaptersReadTitle.updateSettingsWithPrimaryText(settings)
-        chaptersRead.updateSettingsWithPrimaryText(settings)
-        finishedBooksTitle.updateSettingsWithPrimaryText(settings)
-        finishedBooks.updateSettingsWithPrimaryText(settings)
-        finishedOldTestamentTitle.updateSettingsWithPrimaryText(settings)
-        finishedOldTestament.updateSettingsWithPrimaryText(settings)
-        finishedNewTestamentTitle.updateSettingsWithPrimaryText(settings)
-        finishedNewTestament.updateSettingsWithPrimaryText(settings)
+        continuousReadingDaysTitle.setPrimaryTextSize(settings)
+        continuousReadingDays.setPrimaryTextSize(settings)
+        chaptersReadTitle.setPrimaryTextSize(settings)
+        chaptersRead.setPrimaryTextSize(settings)
+        finishedBooksTitle.setPrimaryTextSize(settings)
+        finishedBooks.setPrimaryTextSize(settings)
+        finishedOldTestamentTitle.setPrimaryTextSize(settings)
+        finishedOldTestament.setPrimaryTextSize(settings)
+        finishedNewTestamentTitle.setPrimaryTextSize(settings)
+        finishedNewTestament.setPrimaryTextSize(settings)
 
         continuousReadingDays.text = continuousReadingDays.resources.getString(R.string.text_continuous_reading_count, item.continuousReadingDays)
         chaptersRead.text = item.chaptersRead.toString()
@@ -85,10 +91,14 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
     : BaseViewHolder<ReadingProgressDetailItem>(inflater.inflate(R.layout.item_reading_progress, parent, false)) {
     companion object {
         private const val ROW_CHILD_COUNT = 5
+
+        private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+        private val CHAPTER_READ_SPANS: Array<CharacterStyle> = arrayOf(
+                ForegroundColorSpan(0xFF99CC00.toInt()), // R.color.dark_lime
+                StyleSpan(Typeface.BOLD)
+        )
     }
 
-    private val resources = itemView.resources
-    private val chapterReadColor = ContextCompat.getColor(itemView.context, R.color.dark_lime)
     private val bookName: TextView = itemView.findViewById(R.id.book_name)
     private val readingProgressBar: ReadingProgressBar = itemView.findViewById(R.id.reading_progress_bar)
     private val chapters: LinearLayout = itemView.findViewById(R.id.chapters)
@@ -102,8 +112,6 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
         }
     }
 
-    private lateinit var settings: Settings
-
     init {
         itemView.setOnClickListener {
             item?.let {
@@ -111,7 +119,7 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
                     chapters.visibility = View.GONE
                     it.expanded = false
                 } else {
-                    showChapters(settings, it)
+                    showChapters(it)
                     it.expanded = true
                 }
                 it.onBookClicked(it.bookIndex, it.expanded)
@@ -120,10 +128,8 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
     }
 
     override fun bind(settings: Settings, item: ReadingProgressDetailItem, payloads: List<Any>) {
-        this.settings = settings
-
         with(bookName) {
-            updateSettingsWithPrimaryText(settings)
+            setPrimaryTextSize(settings)
             text = item.bookName
         }
 
@@ -133,13 +139,13 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
         }
 
         if (item.expanded) {
-            showChapters(settings, item)
+            showChapters(item)
         } else {
             chapters.visibility = View.GONE
         }
     }
 
-    private fun showChapters(settings: Settings, item: ReadingProgressDetailItem) {
+    private fun showChapters(item: ReadingProgressDetailItem) {
         val rowCount = item.chaptersRead.size / ROW_CHILD_COUNT + if (item.chaptersRead.size % ROW_CHILD_COUNT == 0) 0 else 1
         with(chapters) {
             if (childCount > rowCount) {
@@ -164,14 +170,12 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
                         } else {
                             visibility = View.VISIBLE
                             tag = chapter
-                            text = (chapter + 1).toString()
+
+                            SPANNABLE_STRING_BUILDER.clearAll().append(chapter + 1)
                             if (item.chaptersRead[chapter]) {
-                                setTextColor(chapterReadColor)
-                                setTypeface(null, Typeface.BOLD)
-                            } else {
-                                setTextColor(settings.getPrimaryTextColor(this@ReadingProgressDetailItemViewHolder.resources))
-                                setTypeface(null, Typeface.NORMAL)
+                                SPANNABLE_STRING_BUILDER.setSpans(CHAPTER_READ_SPANS)
                             }
+                            text = SPANNABLE_STRING_BUILDER.toCharSequence()
                         }
                     }
                 }

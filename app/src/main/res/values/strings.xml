@@ -98,7 +98,7 @@
     <string name="settings_header_display">Display</string>
     <string name="settings_title_font_size">Font size</string>
     <string name="settings_title_keep_screen_on">Keep screen on</string>
-    <string name="settings_title_night_mode_on">Night mode</string>
+    <string name="settings_title_night_mode">Night mode</string>
     <string name="settings_header_reading">Reading</string>
     <string name="settings_title_simple_reading">Simple reading</string>
     <string name="settings_title_hide_search_button">Hide search button</string>
@@ -111,6 +111,12 @@
     <string name="settings_title_rate">Rate me on Google Play</string>
     <string name="settings_title_website">Visit website</string>
     <string name="settings_title_version">Version</string>
+
+    <string name="settings_title_pick_night_mode">Select night mode</string>
+    <string name="settings_text_night_mode_on">On</string>
+    <string name="settings_text_night_mode_off">Off</string>
+    <string name="settings_text_night_mode_system">Follow system</string>
+
     <string-array name="text_months">
         <item>Jan</item>
         <item>Feb</item>
@@ -133,9 +139,13 @@
         <item>Green</item>
         <item>Blue</item>
     </string-array>
-
     <string-array name="text_sort_order">
         <item>By date</item>
         <item>By book</item>
+    </string-array>
+    <string-array name="text_night_modes">
+        <item>On</item>
+        <item>Off</item>
+        <item>Follow system</item>
     </string-array>
 </resources>

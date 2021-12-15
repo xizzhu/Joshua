@@ -52,6 +52,7 @@ class VerseDetailViewLayout : FrameLayout {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
@@ -100,10 +101,6 @@ class VerseDetailViewLayout : FrameLayout {
 
     fun setSettings(settings: Settings) {
         adapter.settings = settings
-
-        viewBinding.header.setBackgroundColor(if (settings.nightModeOn) 0xFF222222.toInt() else 0xFFEEEEEE.toInt())
-        viewBinding.viewPager.setBackgroundColor(settings.getBackgroundColor())
-        resources.let { viewBinding.tabLayout.setTabTextColors(settings.getSecondaryTextColor(it), settings.getPrimaryTextColor(it)) }
     }
 
     fun setBookmarked(bookmarked: Boolean) {
