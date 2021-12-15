@@ -42,7 +42,6 @@ import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.hideKeyboard
 import me.xizzhu.android.joshua.ui.listDialog
 import me.xizzhu.android.joshua.ui.toast
-import me.xizzhu.android.logger.Log
 
 @AndroidEntryPoint
 class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback, SearchVersePreviewItem.Callback {
@@ -99,40 +98,35 @@ class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), S
     }
 
     private fun initializeListeners() {
-        with(viewBinding.toolbar) {
-            initialize(
-                    includeBookmarks = searchViewModel.includeBookmarks,
-                    onIncludeBookmarksChanged = { searchViewModel.includeBookmarks = it },
-                    includeHighlights = searchViewModel.includeHighlights,
-                    onIncludeHighlightsChanged = { searchViewModel.includeHighlights = it },
-                    includeNotes = searchViewModel.includeNotes,
-                    onIncludeNotesChanged = { searchViewModel.includeNotes = it },
-                    onQueryTextListener = object : SearchView.OnQueryTextListener {
-                        override fun onQueryTextSubmit(query: String): Boolean {
-                            searchRecentSuggestions.saveRecentQuery(query, null)
-                            searchViewModel.search(query, false)
-                            hideKeyboard()
+        viewBinding.toolbar.initialize(
+                includeBookmarks = searchViewModel.includeBookmarks,
+                onIncludeBookmarksChanged = { searchViewModel.includeBookmarks = it },
+                includeHighlights = searchViewModel.includeHighlights,
+                onIncludeHighlightsChanged = { searchViewModel.includeHighlights = it },
+                includeNotes = searchViewModel.includeNotes,
+                onIncludeNotesChanged = { searchViewModel.includeNotes = it },
+                onQueryTextListener = object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String): Boolean {
+                        searchRecentSuggestions.saveRecentQuery(query, null)
+                        searchViewModel.search(query, false)
+                        viewBinding.toolbar.hideKeyboard()
 
-                            // so that the system can close the search suggestion
-                            return false
-                        }
+                        // so that the system can close the search suggestion
+                        return false
+                    }
 
-                        override fun onQueryTextChange(newText: String): Boolean {
-                            searchViewModel.search(newText, true)
-                            return true
-                        }
-                    },
-                    clearHistory = { lifecycleScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() } }
-            )
+                    override fun onQueryTextChange(newText: String): Boolean {
+                        searchViewModel.search(newText, true)
+                        return true
+                    }
+                },
+                clearHistory = { lifecycleScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() } }
+        )
 
-            try {
-                setSearchableInfo((applicationContext.getSystemService(Context.SEARCH_SERVICE) as SearchManager).getSearchableInfo(componentName))
-            } catch (e: Exception) {
-                // Do nothing if it fails on some weird devices.
-                // https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/526587497106cd43ddd9ea7568d34f94
-                Log.e(this@SearchActivity.tag, "", e)
-            }
-        }
+        // It's possible that the system has no SearchManager available, and on some devices getSearchableInfo() could return null.
+        // See https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/45465ea5dc4f7722c6ce6b8889196249?time=last-seven-days&type=all
+        (applicationContext.getSystemService(Context.SEARCH_SERVICE) as? SearchManager)
+                ?.getSearchableInfo(componentName)?.let { viewBinding.toolbar.setSearchableInfo(it) }
     }
 
     override fun inflateViewBinding(): ActivitySearchBinding = ActivitySearchBinding.inflate(layoutInflater)
