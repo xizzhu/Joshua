@@ -19,11 +19,11 @@ package me.xizzhu.android.joshua.search
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.databinding.ItemSearchVerseBinding
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
@@ -31,8 +31,8 @@ import me.xizzhu.android.joshua.ui.createHighlightSpans
 import me.xizzhu.android.joshua.ui.createTitleSpans
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
-import me.xizzhu.android.joshua.ui.toCharSequence
 import me.xizzhu.android.joshua.ui.setPrimaryTextSize
+import me.xizzhu.android.joshua.ui.toCharSequence
 import me.xizzhu.android.joshua.ui.setSpans
 import java.util.*
 
@@ -76,9 +76,7 @@ class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: Str
 }
 
 private class SearchVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<SearchVerseItem>(inflater.inflate(R.layout.item_search_verse, parent, false)) {
-    private val text = itemView as TextView
-
+    : BaseViewHolder<SearchVerseItem, ItemSearchVerseBinding>(ItemSearchVerseBinding.inflate(inflater, parent, false)) {
     init {
         itemView.setOnClickListener {
             item?.let { item ->
@@ -96,7 +94,7 @@ private class SearchVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
     }
 
     override fun bind(settings: Settings, item: SearchVerseItem, payloads: List<Any>) {
-        with(text) {
+        with(viewBinding.root) {
             setPrimaryTextSize(settings)
             text = item.textForDisplay
         }

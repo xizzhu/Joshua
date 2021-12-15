@@ -29,6 +29,8 @@ import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.databinding.ItemReadingProgressBinding
+import me.xizzhu.android.joshua.databinding.ItemReadingProgressHeaderBinding
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
@@ -44,35 +46,25 @@ class ReadingProgressSummaryItem(
 ) : BaseItem(R.layout.item_reading_progress_header, { inflater, parent -> ReadingProgressSummaryItemViewHolder(inflater, parent) })
 
 private class ReadingProgressSummaryItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<ReadingProgressSummaryItem>(inflater.inflate(R.layout.item_reading_progress_header, parent, false)) {
-    private val continuousReadingDaysTitle: TextView = itemView.findViewById(R.id.continuous_reading_days_title)
-    private val continuousReadingDays: TextView = itemView.findViewById(R.id.continuous_reading_days_value)
-    private val chaptersReadTitle: TextView = itemView.findViewById(R.id.chapters_read_title)
-    private val chaptersRead: TextView = itemView.findViewById(R.id.chapters_read_value)
-    private val finishedBooksTitle: TextView = itemView.findViewById(R.id.finished_books_title)
-    private val finishedBooks: TextView = itemView.findViewById(R.id.finished_books_value)
-    private val finishedOldTestamentTitle: TextView = itemView.findViewById(R.id.finished_old_testament_title)
-    private val finishedOldTestament: TextView = itemView.findViewById(R.id.finished_old_testament_value)
-    private val finishedNewTestamentTitle: TextView = itemView.findViewById(R.id.finished_new_testament_title)
-    private val finishedNewTestament: TextView = itemView.findViewById(R.id.finished_new_testament_value)
-
+    : BaseViewHolder<ReadingProgressSummaryItem, ItemReadingProgressHeaderBinding>(ItemReadingProgressHeaderBinding.inflate(inflater, parent, false)) {
     override fun bind(settings: Settings, item: ReadingProgressSummaryItem, payloads: List<Any>) {
-        continuousReadingDaysTitle.setPrimaryTextSize(settings)
-        continuousReadingDays.setPrimaryTextSize(settings)
-        chaptersReadTitle.setPrimaryTextSize(settings)
-        chaptersRead.setPrimaryTextSize(settings)
-        finishedBooksTitle.setPrimaryTextSize(settings)
-        finishedBooks.setPrimaryTextSize(settings)
-        finishedOldTestamentTitle.setPrimaryTextSize(settings)
-        finishedOldTestament.setPrimaryTextSize(settings)
-        finishedNewTestamentTitle.setPrimaryTextSize(settings)
-        finishedNewTestament.setPrimaryTextSize(settings)
+        viewBinding.continuousReadingDaysTitle.setPrimaryTextSize(settings)
+        viewBinding.continuousReadingDaysValue.setPrimaryTextSize(settings)
+        viewBinding.chaptersReadTitle.setPrimaryTextSize(settings)
+        viewBinding.chaptersReadValue.setPrimaryTextSize(settings)
+        viewBinding.finishedBooksTitle.setPrimaryTextSize(settings)
+        viewBinding.finishedBooksValue.setPrimaryTextSize(settings)
+        viewBinding.finishedOldTestamentTitle.setPrimaryTextSize(settings)
+        viewBinding.finishedOldTestamentValue.setPrimaryTextSize(settings)
+        viewBinding.finishedNewTestamentTitle.setPrimaryTextSize(settings)
+        viewBinding.finishedNewTestamentValue.setPrimaryTextSize(settings)
 
-        continuousReadingDays.text = continuousReadingDays.resources.getString(R.string.text_continuous_reading_count, item.continuousReadingDays)
-        chaptersRead.text = item.chaptersRead.toString()
-        finishedBooks.text = item.finishedBooks.toString()
-        finishedOldTestament.text = item.finishedOldTestament.toString()
-        finishedNewTestament.text = item.finishedNewTestament.toString()
+        viewBinding.continuousReadingDaysValue.text =
+                viewBinding.continuousReadingDaysValue.resources.getString(R.string.text_continuous_reading_count, item.continuousReadingDays)
+        viewBinding.chaptersReadValue.text = item.chaptersRead.toString()
+        viewBinding.finishedBooksValue.text = item.finishedBooks.toString()
+        viewBinding.finishedOldTestamentValue.text = item.finishedOldTestament.toString()
+        viewBinding.finishedNewTestamentValue.text = item.finishedNewTestament.toString()
     }
 }
 
@@ -88,7 +80,7 @@ class ReadingProgressDetailItem(
 }
 
 private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<ReadingProgressDetailItem>(inflater.inflate(R.layout.item_reading_progress, parent, false)) {
+    : BaseViewHolder<ReadingProgressDetailItem, ItemReadingProgressBinding>(ItemReadingProgressBinding.inflate(inflater, parent, false)) {
     companion object {
         private const val ROW_CHILD_COUNT = 5
 
@@ -98,10 +90,6 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
                 StyleSpan(Typeface.BOLD)
         )
     }
-
-    private val bookName: TextView = itemView.findViewById(R.id.book_name)
-    private val readingProgressBar: ReadingProgressBar = itemView.findViewById(R.id.reading_progress_bar)
-    private val chapters: LinearLayout = itemView.findViewById(R.id.chapters)
 
     private val onClickListener: View.OnClickListener = View.OnClickListener { v ->
         item?.let {
@@ -116,7 +104,7 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
         itemView.setOnClickListener {
             item?.let {
                 if (it.expanded) {
-                    chapters.visibility = View.GONE
+                    viewBinding.chapters.visibility = View.GONE
                     it.expanded = false
                 } else {
                     showChapters(it)
@@ -128,12 +116,12 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
     }
 
     override fun bind(settings: Settings, item: ReadingProgressDetailItem, payloads: List<Any>) {
-        with(bookName) {
+        with(viewBinding.bookName) {
             setPrimaryTextSize(settings)
             text = item.bookName
         }
 
-        with(readingProgressBar) {
+        with(viewBinding.readingProgressBar) {
             progress = item.chaptersReadCount * maxProgress / item.chaptersRead.size
             text = "${item.chaptersReadCount} / ${item.chaptersRead.size}"
         }
@@ -141,13 +129,13 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
         if (item.expanded) {
             showChapters(item)
         } else {
-            chapters.visibility = View.GONE
+            viewBinding.chapters.visibility = View.GONE
         }
     }
 
     private fun showChapters(item: ReadingProgressDetailItem) {
         val rowCount = item.chaptersRead.size / ROW_CHILD_COUNT + if (item.chaptersRead.size % ROW_CHILD_COUNT == 0) 0 else 1
-        with(chapters) {
+        with(viewBinding.chapters) {
             if (childCount > rowCount) {
                 removeViews(rowCount, childCount - rowCount)
             }
@@ -161,7 +149,7 @@ private class ReadingProgressDetailItemViewHolder(private val inflater: LayoutIn
             }
 
             for (i in 0 until rowCount) {
-                val row = chapters.getChildAt(i) as LinearLayout
+                val row = viewBinding.chapters.getChildAt(i) as LinearLayout
                 for (j in 0 until ROW_CHILD_COUNT) {
                     val chapter = i * ROW_CHILD_COUNT + j
                     with(row.getChildAt(j) as TextView) {

@@ -85,10 +85,10 @@ class SimpleVerseItem(
 }
 
 private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<SimpleVerseItem>(ItemSimpleVerseBinding.inflate(inflater, parent, false).root) {
-    private val viewBinding = ItemSimpleVerseBinding.bind(itemView).apply {
-        root.setOnClickListener { item?.let { callback().onVerseClicked(it.verse) } }
-        root.setOnLongClickListener {
+    : BaseViewHolder<SimpleVerseItem, ItemSimpleVerseBinding>(ItemSimpleVerseBinding.inflate(inflater, parent, false)) {
+    init {
+        viewBinding.root.setOnClickListener { item?.let { callback().onVerseClicked(it.verse) } }
+        viewBinding.root.setOnLongClickListener {
             return@setOnLongClickListener item?.let {
                 callback().onVerseLongClicked(it.verse)
                 true

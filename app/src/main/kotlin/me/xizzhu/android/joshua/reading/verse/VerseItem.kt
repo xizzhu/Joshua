@@ -26,7 +26,6 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Color
-import android.util.TypedValue
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.databinding.ItemVerseBinding
 import me.xizzhu.android.joshua.reading.VerseUpdate
@@ -65,24 +64,23 @@ class VerseItem(
 }
 
 private class VerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<VerseItem>(ItemVerseBinding.inflate(inflater, parent, false).root) {
+    : BaseViewHolder<VerseItem, ItemVerseBinding>(ItemVerseBinding.inflate(inflater, parent, false)) {
     companion object {
         private val ON = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
         private val OFF = PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
     }
 
-    private val resources = itemView.resources
-    private val viewBinding = ItemVerseBinding.bind(itemView).apply {
-        root.setOnClickListener { item?.let { callback().onVerseClicked(it.verse) } }
-        root.setOnLongClickListener {
+    init {
+        viewBinding.root.setOnClickListener { item?.let { callback().onVerseClicked(it.verse) } }
+        viewBinding.root.setOnLongClickListener {
             return@setOnLongClickListener item?.let {
                 callback().onVerseLongClicked(it.verse)
                 true
             } ?: false
         }
-        bookmark.setOnClickListener { item?.let { callback().onBookmarkClicked(it.verse.verseIndex, it.hasBookmark) } }
-        highlight.setOnClickListener { item?.let { callback().onHighlightClicked(it.verse.verseIndex, it.highlightColor) } }
-        note.setOnClickListener { item?.let { callback().onNoteClicked(it.verse.verseIndex) } }
+        viewBinding.bookmark.setOnClickListener { item?.let { callback().onBookmarkClicked(it.verse.verseIndex, it.hasBookmark) } }
+        viewBinding.highlight.setOnClickListener { item?.let { callback().onHighlightClicked(it.verse.verseIndex, it.highlightColor) } }
+        viewBinding.note.setOnClickListener { item?.let { callback().onNoteClicked(it.verse.verseIndex) } }
     }
 
     private fun callback(): VerseItem.Callback = (itemView.activity as? VerseItem.Callback)

@@ -19,10 +19,10 @@ package me.xizzhu.android.joshua.annotated.notes
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.databinding.ItemNoteBinding
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
@@ -53,10 +53,7 @@ class NoteItem(val verseIndex: VerseIndex, private val bookShortName: String, pr
 }
 
 private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<NoteItem>(inflater.inflate(R.layout.item_note, parent, false)) {
-    private val verse: TextView = itemView.findViewById(R.id.verse)
-    private val text: TextView = itemView.findViewById(R.id.text)
-
+    : BaseViewHolder<NoteItem, ItemNoteBinding>(ItemNoteBinding.inflate(inflater, parent, false)) {
     init {
         itemView.setOnClickListener {
             item?.let { item ->
@@ -74,11 +71,11 @@ private class NoteItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
     }
 
     override fun bind(settings: Settings, item: NoteItem, payloads: List<Any>) {
-        with(verse) {
+        with(viewBinding.verse) {
             setSecondaryTextSize(settings)
             text = item.textForDisplay
         }
-        with(text) {
+        with(viewBinding.text) {
             setPrimaryTextSize(settings)
             text = item.note
         }

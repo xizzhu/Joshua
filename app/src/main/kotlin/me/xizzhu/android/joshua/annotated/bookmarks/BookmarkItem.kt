@@ -19,11 +19,11 @@ package me.xizzhu.android.joshua.annotated.bookmarks
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.databinding.ItemBookmarkBinding
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
@@ -68,17 +68,15 @@ class BookmarkItem(
 }
 
 private class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<BookmarkItem>(inflater.inflate(R.layout.item_bookmark, parent, false)) {
-    private val text: TextView = itemView.findViewById(R.id.text)
-
+    : BaseViewHolder<BookmarkItem, ItemBookmarkBinding>(ItemBookmarkBinding.inflate(inflater, parent, false)) {
     init {
-        itemView.setOnClickListener {
+        viewBinding.root.setOnClickListener {
             item?.let { item ->
                 (itemView.activity as? BookmarkItem.Callback)?.openVerse(item.verseIndex)
                         ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement BookmarkItem.Callback")
             }
         }
-        itemView.setOnLongClickListener {
+        viewBinding.root.setOnLongClickListener {
             item?.let { item ->
                 (itemView.activity as? BookmarkItem.Callback)?.showPreview(item.verseIndex)
                         ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement BookmarkItem.Callback")
@@ -88,7 +86,7 @@ private class BookmarkItemViewHolder(inflater: LayoutInflater, parent: ViewGroup
     }
 
     override fun bind(settings: Settings, item: BookmarkItem, payloads: List<Any>) {
-        with(text) {
+        with(viewBinding.text) {
             setPrimaryTextSize(settings)
             text = item.textForDisplay
         }

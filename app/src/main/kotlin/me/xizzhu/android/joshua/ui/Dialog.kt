@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.ui
 
 import android.app.Activity
 import android.content.DialogInterface
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.SeekBar
@@ -26,8 +27,9 @@ import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.databinding.WidgetRecyclerViewBinding
+import me.xizzhu.android.joshua.databinding.WidgetSeekBarBinding
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
 import kotlin.math.roundToInt
 
 class ProgressDialog(private val dialog: AlertDialog, private val progressBar: ProgressBar) {
@@ -124,25 +126,22 @@ fun Activity.seekBarDialog(
 ): AlertDialog? {
     if (isDestroyed) return null
 
-    val view = View.inflate(this, R.layout.widget_seek_bar, null)
-    val seekBar = view.findViewById<SeekBar>(R.id.seek_bar)
-    with(seekBar) {
-        setProgress(initialValue, minValue, maxValue)
-        setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                if (fromUser) onValueChanged(calculateValue(minValue, maxValue))
-            }
+    val viewBinding = WidgetSeekBarBinding.inflate(LayoutInflater.from(this))
+    viewBinding.seekBar.setProgress(initialValue, minValue, maxValue)
+    viewBinding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+            if (fromUser) onValueChanged(viewBinding.seekBar.calculateValue(minValue, maxValue))
+        }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+        override fun onStartTrackingTouch(seekBar: SeekBar) {}
 
-            override fun onStopTrackingTouch(seekBar: SeekBar) {}
-        })
-    }
+        override fun onStopTrackingTouch(seekBar: SeekBar) {}
+    })
     return MaterialAlertDialogBuilder(this)
             .setCancelable(false)
             .setTitle(title)
-            .setView(view)
-            .setPositiveButton(android.R.string.ok, onPositive?.let { { _, _ -> it(seekBar.calculateValue(minValue, maxValue)) } })
+            .setView(viewBinding.root)
+            .setPositiveButton(android.R.string.ok, onPositive?.let { { _, _ -> it(viewBinding.seekBar.calculateValue(minValue, maxValue)) } })
             .setNegativeButton(android.R.string.cancel, onNegative?.let { { _, _ -> it() } })
             .show()
 }
@@ -162,15 +161,13 @@ fun Activity.listDialog(
 ): AlertDialog? {
     if (isDestroyed) return null
 
-    val view = View.inflate(this, R.layout.widget_recycler_view, null)
-    view.findViewById<CommonRecyclerView>(R.id.recycler_view).apply {
-        setSettings(settings)
-        setItems(items)
-        scrollToPosition(selected)
-    }
+    val viewBinding = WidgetRecyclerViewBinding.inflate(LayoutInflater.from(this))
+    viewBinding.recyclerView.setSettings(settings)
+    viewBinding.recyclerView.setItems(items)
+    viewBinding.recyclerView.scrollToPosition(selected)
     return MaterialAlertDialogBuilder(this)
             .setCancelable(true)
             .setTitle(title)
-            .setView(view)
+            .setView(viewBinding.root)
             .show()
 }

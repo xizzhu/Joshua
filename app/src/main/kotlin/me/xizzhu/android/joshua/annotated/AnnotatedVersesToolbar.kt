@@ -25,6 +25,7 @@ import android.widget.*
 import com.google.android.material.appbar.MaterialToolbar
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.databinding.SpinnerDropDownBinding
 
 class AnnotatedVersesToolbar : MaterialToolbar {
     var sortOrderUpdated: ((Int) -> Unit)? = null
@@ -87,19 +88,14 @@ private class SortOrderSpinnerAdapter(context: Context) : BaseAdapter() {
             throw IllegalArgumentException("Unsupported sort order, position = $position")
         }
 
-        val viewHolder = convertView?.let { it.tag as DropDownViewHolder }
-                ?: DropDownViewHolder(inflater.inflate(R.layout.spinner_drop_down, parent, false))
+        val viewBinding = convertView?.let { it.tag as SpinnerDropDownBinding }
+                ?: SpinnerDropDownBinding.inflate(inflater, parent, false)
                         .apply {
-                            rootView.tag = this
-                            checkBox.isEnabled = false
+                            root.tag = this
+                            checkbox.isEnabled = false
                         }
-        viewHolder.title.text = getItem(position)
-        viewHolder.checkBox.isChecked = position == sortOrder
-        return viewHolder.rootView
+        viewBinding.title.text = getItem(position)
+        viewBinding.checkbox.isChecked = position == sortOrder
+        return viewBinding.root
     }
-}
-
-private class DropDownViewHolder(val rootView: View) {
-    val title: TextView = rootView.findViewById(R.id.title)
-    val checkBox: CheckBox = rootView.findViewById(R.id.checkbox)
 }

@@ -18,10 +18,10 @@ package me.xizzhu.android.joshua.translations
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.databinding.ItemTranslationBinding
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
@@ -40,11 +40,10 @@ class TranslationItem(val translationInfo: TranslationInfo, val isCurrentTransla
 }
 
 private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<TranslationItem>(inflater.inflate(R.layout.item_translation, parent, false)) {
+    : BaseViewHolder<TranslationItem, ItemTranslationBinding>(ItemTranslationBinding.inflate(inflater, parent, false)) {
     private val callback: TranslationItem.Callback
         get() = (itemView.activity as? TranslationItem.Callback)
                 ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement TranslationItem.Callback")
-    private val textView = itemView as TextView
 
     init {
         itemView.setOnClickListener {
@@ -71,7 +70,7 @@ private class TranslationItemViewHolder(inflater: LayoutInflater, parent: ViewGr
     }
 
     override fun bind(settings: Settings, item: TranslationItem, payloads: List<Any>) {
-        with(textView) {
+        with(viewBinding.root) {
             setPrimaryTextSize(settings)
             text = item.translationInfo.name
             setCompoundDrawablesWithIntrinsicBounds(0, 0, item.rightDrawable, 0)

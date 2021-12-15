@@ -25,6 +25,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.databinding.ItemHighlightBinding
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
@@ -71,9 +72,7 @@ class HighlightItem(
 }
 
 private class HighlightItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<HighlightItem>(inflater.inflate(R.layout.item_highlight, parent, false)) {
-    private val text: TextView = itemView.findViewById(R.id.text)
-
+    : BaseViewHolder<HighlightItem, ItemHighlightBinding>(ItemHighlightBinding.inflate(inflater, parent, false)) {
     init {
         itemView.setOnClickListener {
             item?.let { item ->
@@ -91,7 +90,7 @@ private class HighlightItemViewHolder(inflater: LayoutInflater, parent: ViewGrou
     }
 
     override fun bind(settings: Settings, item: HighlightItem, payloads: List<Any>) {
-        with(text) {
+        with(viewBinding.text) {
             setPrimaryTextSize(settings)
             text = item.textForDisplay
         }

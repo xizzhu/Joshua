@@ -19,16 +19,15 @@ package me.xizzhu.android.joshua.ui.recyclerview
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import me.xizzhu.android.joshua.core.Settings
 
-abstract class BaseItem protected constructor(val viewType: Int,
-                                              viewHolderCreator: (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>) {
+abstract class BaseItem protected constructor(val viewType: Int, viewHolderCreator: (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem, *>) {
     companion object {
-        private val VIEW_HOLDER_CREATORS = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem>>()
+        private val VIEW_HOLDER_CREATORS = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem, *>>()
 
         fun getViewHolderCreator(viewType: Int) = VIEW_HOLDER_CREATORS
                 .getOrElse(viewType, { throw IllegalStateException("Unknown view type - $viewType") })
@@ -39,19 +38,19 @@ abstract class BaseItem protected constructor(val viewType: Int,
     }
 }
 
-abstract class BaseViewHolder<T : BaseItem>(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    var item: T? = null
+abstract class BaseViewHolder<BI : BaseItem, VB : ViewBinding>(protected val viewBinding: VB) : RecyclerView.ViewHolder(viewBinding.root) {
+    var item: BI? = null
         private set
 
-    fun bindData(settings: Settings, item: T, payloads: List<Any> = emptyList()) {
+    fun bindData(settings: Settings, item: BI, payloads: List<Any> = emptyList()) {
         this.item = item
         bind(settings, item, payloads)
     }
 
-    protected abstract fun bind(settings: Settings, item: T, payloads: List<Any>)
+    protected abstract fun bind(settings: Settings, item: BI, payloads: List<Any>)
 }
 
-private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<BaseItem>>() {
+private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder<BaseItem, *>>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val items: ArrayList<BaseItem> = ArrayList()
     private var settings: Settings? = null
@@ -77,14 +76,14 @@ private class CommonAdapter(context: Context) : RecyclerView.Adapter<BaseViewHol
 
     override fun getItemViewType(position: Int): Int = items[position].viewType
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem> =
-            BaseItem.getViewHolderCreator(viewType).invoke(inflater, parent) as BaseViewHolder<BaseItem>
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<BaseItem, *> =
+            BaseItem.getViewHolderCreator(viewType).invoke(inflater, parent) as BaseViewHolder<BaseItem, *>
 
-    override fun onBindViewHolder(holder: BaseViewHolder<BaseItem>, position: Int) {
+    override fun onBindViewHolder(holder: BaseViewHolder<BaseItem, *>, position: Int) {
         holder.bindData(settings!!, items[position])
     }
 
-    override fun onBindViewHolder(holder: BaseViewHolder<BaseItem>, position: Int, payloads: MutableList<Any>) {
+    override fun onBindViewHolder(holder: BaseViewHolder<BaseItem, *>, position: Int, payloads: MutableList<Any>) {
         holder.bindData(settings!!, items[position], payloads)
     }
 }

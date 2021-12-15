@@ -53,9 +53,7 @@ class StrongNumberItem(val strongNumber: StrongNumber)
 }
 
 private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<StrongNumberItem>(ItemStrongNumberBinding.inflate(inflater, parent, false).root) {
-    private val viewBinding: ItemStrongNumberBinding = ItemStrongNumberBinding.bind(itemView)
-
+    : BaseViewHolder<StrongNumberItem, ItemStrongNumberBinding>(ItemStrongNumberBinding.inflate(inflater, parent, false)) {
     init {
         itemView.setOnClickListener {
             item?.let { item ->

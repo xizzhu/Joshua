@@ -18,20 +18,18 @@ package me.xizzhu.android.joshua.ui.recyclerview
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.databinding.ItemTextBinding
 import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 
 data class TextItem(val title: CharSequence)
     : BaseItem(R.layout.item_text, { inflater, parent -> TextItemViewHolder(inflater, parent) })
 
 private class TextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<TextItem>(inflater.inflate(R.layout.item_text, parent, false)) {
-    private val title: TextView = itemView.findViewById(R.id.title)
-
+    : BaseViewHolder<TextItem, ItemTextBinding>(ItemTextBinding.inflate(inflater, parent, false)) {
     override fun bind(settings: Settings, item: TextItem, payloads: List<Any>) {
-        with(title) {
+        with(viewBinding.title) {
             setPrimaryTextSize(settings)
             text = item.title
         }

@@ -20,11 +20,12 @@ import android.content.Context
 import android.os.Build
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.LayoutInflater
 import android.widget.FrameLayout
-import android.widget.TextView
 import androidx.annotation.Px
 import androidx.annotation.RequiresApi
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.databinding.InnerSettingSectionHeaderBinding
 import me.xizzhu.android.joshua.ui.setText
 
 class SettingSectionHeader : FrameLayout {
@@ -45,21 +46,20 @@ class SettingSectionHeader : FrameLayout {
         init(context, attrs)
     }
 
-    private lateinit var title: TextView
+    private lateinit var viewBinding: InnerSettingSectionHeaderBinding
 
     private fun init(context: Context, attrs: AttributeSet?) {
-        inflate(context, R.layout.inner_setting_section_header, this)
-        title = findViewById(R.id.title)
+        viewBinding = InnerSettingSectionHeaderBinding.inflate(LayoutInflater.from(context), this)
 
         attrs?.let {
             context.obtainStyledAttributes(it, R.styleable.SettingSectionHeader).run {
-                title.setText(this, R.styleable.SettingSectionHeader_settingSectionHeaderTitle)
+                viewBinding.title.setText(this, R.styleable.SettingSectionHeader_settingSectionHeaderTitle)
                 recycle()
             }
         }
     }
 
     fun setTextSize(@Px textSize: Int) {
-        title.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize.toFloat())
+        viewBinding.title.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize.toFloat())
     }
 }

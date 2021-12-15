@@ -106,9 +106,9 @@ private fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
 }
 
 private class SearchVersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<SearchVersePreviewItem>(ItemSearchVersePreviewBinding.inflate(inflater, parent, false).root) {
-    private val viewBinding = ItemSearchVersePreviewBinding.bind(itemView).apply {
-        root.setOnClickListener { item?.let { callback().openVerse(it.verse.verseIndex) } }
+    : BaseViewHolder<SearchVersePreviewItem, ItemSearchVersePreviewBinding>(ItemSearchVersePreviewBinding.inflate(inflater, parent, false)) {
+    init {
+        viewBinding.root.setOnClickListener { item?.let { callback().openVerse(it.verse.verseIndex) } }
     }
 
     private fun callback(): SearchVersePreviewItem.Callback = (itemView.activity as? SearchVersePreviewItem.Callback)

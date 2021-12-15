@@ -19,11 +19,11 @@ package me.xizzhu.android.joshua.reading.detail
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.databinding.ItemVerseTextBinding
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
@@ -64,9 +64,7 @@ class VerseTextItem(
 }
 
 private class VerseTextItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<VerseTextItem>(inflater.inflate(R.layout.item_verse_text, parent, false)) {
-    private val text: TextView = itemView.findViewById(R.id.text)
-
+    : BaseViewHolder<VerseTextItem, ItemVerseTextBinding>(ItemVerseTextBinding.inflate(inflater, parent, false)) {
     init {
         itemView.setOnClickListener { item?.let { callback().onVerseTextClicked(it.verseText.translationShortName) } }
         itemView.setOnLongClickListener {
@@ -81,7 +79,7 @@ private class VerseTextItemViewHolder(inflater: LayoutInflater, parent: ViewGrou
             ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement VerseTextItem.Callback")
 
     override fun bind(settings: Settings, item: VerseTextItem, payloads: List<Any>) {
-        with(text) {
+        with(viewBinding.text) {
             setPrimaryTextSize(settings)
             text = item.textForDisplay
         }

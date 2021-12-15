@@ -19,24 +19,21 @@ package me.xizzhu.android.joshua.ui.recyclerview
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.databinding.ItemTitleBinding
 import me.xizzhu.android.joshua.ui.setSecondaryTextSize
 
 data class TitleItem(val title: CharSequence, val hideDivider: Boolean)
     : BaseItem(R.layout.item_title, { inflater, parent -> TitleItemViewHolder(inflater, parent) })
 
 private class TitleItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<TitleItem>(inflater.inflate(R.layout.item_title, parent, false)) {
-    private val title: TextView = itemView.findViewById(R.id.title)
-    private val divider: View = itemView.findViewById(R.id.divider)
-
+    : BaseViewHolder<TitleItem, ItemTitleBinding>(ItemTitleBinding.inflate(inflater, parent, false)) {
     override fun bind(settings: Settings, item: TitleItem, payloads: List<Any>) {
-        with(title) {
+        with(viewBinding.title) {
             setSecondaryTextSize(settings)
             text = item.title
         }
-        divider.visibility = if (item.hideDivider) View.GONE else View.VISIBLE
+        viewBinding.divider.visibility = if (item.hideDivider) View.GONE else View.VISIBLE
     }
 }

@@ -19,10 +19,10 @@ package me.xizzhu.android.joshua.strongnumber
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.databinding.ItemVerseStrongNumberBinding
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
@@ -59,9 +59,7 @@ class StrongNumberItem(val verseIndex: VerseIndex, private val bookShortName: St
 }
 
 private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<StrongNumberItem>(inflater.inflate(R.layout.item_verse_strong_number, parent, false)) {
-    private val text: TextView = itemView.findViewById(R.id.text)
-
+    : BaseViewHolder<StrongNumberItem, ItemVerseStrongNumberBinding>(ItemVerseStrongNumberBinding.inflate(inflater, parent, false)) {
     init {
         itemView.setOnClickListener {
             item?.let { item ->
@@ -79,7 +77,7 @@ private class StrongNumberItemViewHolder(inflater: LayoutInflater, parent: ViewG
     }
 
     override fun bind(settings: Settings, item: StrongNumberItem, payloads: List<Any>) {
-        with(text) {
+        with(viewBinding.text) {
             setPrimaryTextSize(settings)
             text = item.textForDisplay
         }
