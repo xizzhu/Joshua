@@ -67,7 +67,7 @@ class ReadingProgressActivity : BaseActivity<ActivityReadingProgressBinding, Rea
                         },
                         onFailure = {
                             viewBinding.loadingSpinner.visibility = View.GONE
-                            dialog(false, R.string.dialog_load_reading_progress_error, { _, _ -> loadReadingProgress() }, { _, _ -> finish() })
+                            dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_reading_progress, { _, _ -> loadReadingProgress() }, { _, _ -> finish() })
                         }
                 )
                 .launchIn(lifecycleScope)
@@ -89,7 +89,7 @@ class ReadingProgressActivity : BaseActivity<ActivityReadingProgressBinding, Rea
     override fun openVerse(verseToOpen: VerseIndex) {
         readingProgressViewModel.saveCurrentVerseIndex(verseToOpen)
                 .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
-                .onFailure { dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse(verseToOpen) }) }
+                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
                 .launchIn(lifecycleScope)
     }
 }

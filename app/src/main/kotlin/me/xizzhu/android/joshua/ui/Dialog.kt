@@ -54,35 +54,26 @@ class ProgressDialog(private val dialog: AlertDialog, private val progressBar: P
     }
 }
 
-fun Activity.dialog(@StringRes title: Int, items: Array<String>, selected: Int,
-                    onClicked: DialogInterface.OnClickListener) {
-    if (isDestroyed) return
-
-    MaterialAlertDialogBuilder(this)
-            .setCancelable(true)
-            .setSingleChoiceItems(items, selected, onClicked)
-            .setTitle(title)
-            .show()
-}
-
-fun Activity.dialog(cancelable: Boolean, @StringRes message: Int,
+fun Activity.dialog(cancelable: Boolean, @StringRes title: Int, @StringRes message: Int,
                     onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {
     if (isDestroyed) return
 
     MaterialAlertDialogBuilder(this)
             .setCancelable(cancelable)
+            .setTitle(title)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, onPositive)
             .setNegativeButton(android.R.string.cancel, onNegative)
             .show()
 }
 
-fun Activity.dialog(cancelable: Boolean, message: CharSequence,
+fun Activity.dialog(cancelable: Boolean, title: CharSequence, @StringRes message: Int,
                     onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {
     if (isDestroyed) return
 
     MaterialAlertDialogBuilder(this)
             .setCancelable(cancelable)
+            .setTitle(title)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, onPositive)
             .setNegativeButton(android.R.string.cancel, onNegative)
@@ -169,5 +160,15 @@ fun Activity.listDialog(
             .setCancelable(true)
             .setTitle(title)
             .setView(viewBinding.root)
+            .show()
+}
+
+fun Activity.listDialog(@StringRes title: Int, items: Array<String>, selected: Int, onClicked: DialogInterface.OnClickListener) {
+    if (isDestroyed) return
+
+    MaterialAlertDialogBuilder(this)
+            .setCancelable(true)
+            .setSingleChoiceItems(items, selected, onClicked)
+            .setTitle(title)
             .show()
 }

@@ -76,7 +76,7 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding, StrongNum
                         },
                         onFailure = {
                             viewBinding.loadingSpinner.visibility = View.GONE
-                            dialog(false, R.string.dialog_load_strong_number_list_error, { _, _ -> loadStrongNumber() }, { _, _ -> finish() })
+                            dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_strong_numbers, { _, _ -> loadStrongNumber() }, { _, _ -> finish() })
                         }
                 )
                 .launchIn(lifecycleScope)
@@ -93,7 +93,7 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding, StrongNum
     override fun openVerse(verseToOpen: VerseIndex) {
         strongNumberViewModel.saveCurrentVerseIndex(verseToOpen)
                 .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
-                .onFailure { dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse(verseToOpen) }) }
+                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
                 .launchIn(lifecycleScope)
     }
 

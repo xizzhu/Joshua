@@ -58,6 +58,7 @@ import me.xizzhu.android.joshua.reading.verse.toStringForSharing
 import me.xizzhu.android.joshua.strongnumber.StrongNumberActivity
 import me.xizzhu.android.joshua.ui.ProgressDialog
 import me.xizzhu.android.joshua.ui.dialog
+import me.xizzhu.android.joshua.ui.listDialog
 import me.xizzhu.android.joshua.ui.makeLessSensitive
 import me.xizzhu.android.joshua.ui.progressDialog
 import me.xizzhu.android.joshua.ui.toast
@@ -228,7 +229,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     private fun selectTranslation(translation: String) {
         readingViewModel.selectTranslation(translation)
-                .onFailure { dialog(true, R.string.dialog_update_translation_error, { _, _ -> selectTranslation(translation) }) }
+                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_translation, { _, _ -> selectTranslation(translation) }) }
                 .launchIn(lifecycleScope)
     }
 
@@ -237,13 +238,13 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
             navigator.navigate(this, screen, extras)
         } catch (e: Exception) {
             Log.e(tag, "Failed to open activity", e)
-            dialog(true, R.string.dialog_navigation_error, { _, _ -> startActivity(screen) })
+            dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_navigate, { _, _ -> startActivity(screen) })
         }
     }
 
     private fun selectChapter(bookIndex: Int, chapterIndex: Int) {
         readingViewModel.selectCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
-                .onFailure { dialog(true, R.string.dialog_chapter_selection_error, { _, _ -> selectChapter(bookIndex, chapterIndex) }) }
+                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_chapter, { _, _ -> selectChapter(bookIndex, chapterIndex) }) }
                 .launchIn(lifecycleScope)
     }
 
@@ -252,7 +253,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                 .onSuccess { verses -> versePagerAdapter.setVerses(bookIndex, chapterIndex, verses.items) }
                 .onFailure { e ->
                     Log.e(tag, "Failed to load verses", e)
-                    dialog(true, R.string.dialog_verse_load_error, { _, _ -> loadVerses(bookIndex, chapterIndex) })
+                    dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_verses, { _, _ -> loadVerses(bookIndex, chapterIndex) })
                 }
                 .launchIn(lifecycleScope)
     }
@@ -266,7 +267,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
             // just in case the user clicks too fast
             return
         }
-        downloadStrongNumberDialog = progressDialog(R.string.dialog_downloading, 100) { downloadStrongNumberJob?.cancel() }
+        downloadStrongNumberDialog = progressDialog(R.string.dialog_title_downloading, 100) { downloadStrongNumberJob?.cancel() }
 
         lifecycleScope.launchWhenStarted {
             readingViewModel.downloadStrongNumber()
@@ -278,7 +279,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                                     }
                                     else -> {
                                         downloadStrongNumberDialog?.run {
-                                            setTitle(R.string.dialog_installing)
+                                            setTitle(R.string.dialog_title_installing)
                                             setIsIndeterminate(true)
                                         }
                                     }
@@ -294,7 +295,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                                 }
                             },
                             onFailure = {
-                                dialog(true, R.string.dialog_download_error, { _, _ -> downloadStrongNumber() })
+                                dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_download, { _, _ -> downloadStrongNumber() })
                             }
                     )
                     .onCompletion {
@@ -380,7 +381,10 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
         lifecycleScope.launch {
             if (readingViewModel.hasDownloadedTranslation()) return@launch
 
-            dialog(false, R.string.dialog_no_translation_downloaded, { _, _ -> startActivity(Navigator.SCREEN_TRANSLATIONS) }, { _, _ -> finish() })
+            dialog(
+                    false, R.string.dialog_title_no_translation_downloaded, R.string.dialog_message_download_translation_confirmation,
+                    { _, _ -> startActivity(Navigator.SCREEN_TRANSLATIONS) }, { _, _ -> finish() }
+            )
         }
     }
 
@@ -443,7 +447,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                         },
                         onFailure = { e ->
                             Log.e(tag, "Failed to load verses", e)
-                            dialog(true, R.string.dialog_load_verse_detail_error, { _, _ -> showVerseDetail(verseIndex, content) })
+                            dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_verse_detail, { _, _ -> showVerseDetail(verseIndex, content) })
                         }
                 )
                 .launchIn(lifecycleScope)
@@ -468,7 +472,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
         lifecycleScope.launch {
             val defaultHighlightColor = readingViewModel.settings().first().defaultHighlightColor
             if (Highlight.COLOR_NONE == defaultHighlightColor) {
-                dialog(R.string.text_pick_highlight_color,
+                listDialog(R.string.text_pick_highlight_color,
                         resources.getStringArray(R.array.text_colors),
                         max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor))) { dialog, which ->
                     saveHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])

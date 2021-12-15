@@ -83,7 +83,7 @@ class TranslationsActivity : BaseActivity<ActivityTranslationsBinding, Translati
                         onFailure = {
                             Log.e(tag, "Error while loading translation list", it)
                             viewBinding.swipeRefresher.isRefreshing = false
-                            dialog(false, R.string.dialog_load_translation_list_error,
+                            dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_translation_list,
                                     { _, _ -> loadTranslationList() }, { _, _ -> finish() })
                         }
                 )
@@ -108,13 +108,13 @@ class TranslationsActivity : BaseActivity<ActivityTranslationsBinding, Translati
     override fun selectTranslation(translationToSelect: TranslationInfo) {
         translationsViewModel.selectTranslation(translationToSelect)
                 .onSuccess { navigator.goBack(this) }
-                .onFailure { dialog(true, R.string.dialog_update_translation_error, { _, _ -> selectTranslation(translationToSelect) }) }
+                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_translation, { _, _ -> selectTranslation(translationToSelect) }) }
                 .launchIn(lifecycleScope)
     }
 
     override fun downloadTranslation(translationToDownload: TranslationInfo) {
         dialog(
-                true, getString(R.string.dialog_download_translation_confirmation, translationToDownload.name),
+                true, translationToDownload.name, R.string.dialog_message_download_translation_confirmation,
                 { _, _ -> doDownloadTranslation(translationToDownload) }
         )
     }
@@ -124,7 +124,7 @@ class TranslationsActivity : BaseActivity<ActivityTranslationsBinding, Translati
             // just in case the user clicks too fast
             return
         }
-        downloadTranslationDialog = progressDialog(R.string.dialog_downloading, 100) { downloadTranslationJob?.cancel() }
+        downloadTranslationDialog = progressDialog(R.string.dialog_title_downloading, 100) { downloadTranslationJob?.cancel() }
 
         downloadTranslationJob = lifecycleScope.launchWhenStarted {
             translationsViewModel.downloadTranslation(translationToDownload)
@@ -136,7 +136,7 @@ class TranslationsActivity : BaseActivity<ActivityTranslationsBinding, Translati
                                     }
                                     else -> {
                                         downloadTranslationDialog?.run {
-                                            setTitle(R.string.dialog_installing)
+                                            setTitle(R.string.dialog_title_installing)
                                             setIsIndeterminate(true)
                                         }
                                     }
@@ -146,7 +146,7 @@ class TranslationsActivity : BaseActivity<ActivityTranslationsBinding, Translati
                                 toast(R.string.toast_downloaded)
                             },
                             onFailure = {
-                                dialog(true, R.string.dialog_download_error, { _, _ -> doDownloadTranslation(translationToDownload) })
+                                dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_download, { _, _ -> doDownloadTranslation(translationToDownload) })
                             }
                     )
                     .onCompletion {
@@ -160,7 +160,7 @@ class TranslationsActivity : BaseActivity<ActivityTranslationsBinding, Translati
 
     override fun removeTranslation(translationToRemove: TranslationInfo) {
         dialog(
-                true, getString(R.string.dialog_delete_translation_confirmation, translationToRemove.name),
+                true, translationToRemove.name, R.string.dialog_message_delete_translation_confirmation,
                 { _, _ -> doRemoveTranslation(translationToRemove) }
         )
     }
@@ -170,14 +170,14 @@ class TranslationsActivity : BaseActivity<ActivityTranslationsBinding, Translati
             // just in case the user clicks too fast
             return
         }
-        removeTranslationDialog = indeterminateProgressDialog(R.string.dialog_deleting)
+        removeTranslationDialog = indeterminateProgressDialog(R.string.dialog_title_deleting)
 
         removeTranslationJob = translationsViewModel.removeTranslation(translationToRemove)
                 .onSuccess {
                     toast(R.string.toast_deleted)
                 }
                 .onFailure {
-                    dialog(true, R.string.dialog_delete_error, { _, _ -> doRemoveTranslation(translationToRemove) })
+                    dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_delete, { _, _ -> doRemoveTranslation(translationToRemove) })
                 }
                 .onCompletion {
                     removeTranslationDialog?.dismiss()

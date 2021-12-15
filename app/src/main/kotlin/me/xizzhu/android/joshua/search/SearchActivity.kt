@@ -89,7 +89,7 @@ class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), S
                         onFailure = {
                             with(viewBinding) {
                                 loadingSpinner.visibility = View.GONE
-                                dialog(false, R.string.dialog_search_error,
+                                dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_search,
                                         { _, _ -> searchViewModel.retrySearch() }, { _, _ -> finish() })
                             }
                         }
@@ -136,7 +136,7 @@ class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), S
     override fun openVerse(verseToOpen: VerseIndex) {
         searchViewModel.saveCurrentVerseIndex(verseToOpen)
                 .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
-                .onFailure { dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse(verseToOpen) }) }
+                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
                 .launchIn(lifecycleScope)
     }
 

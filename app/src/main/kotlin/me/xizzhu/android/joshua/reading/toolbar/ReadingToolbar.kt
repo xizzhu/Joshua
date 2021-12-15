@@ -106,7 +106,7 @@ class ReadingToolbar : MaterialToolbar {
                     addAll(downloadedTranslations)
 
                     // amends "More" to the end of the list
-                    add(context.getString(R.string.menu_more_translation))
+                    add(context.getString(R.string.action_more_translation))
                 }
         )
 

@@ -83,7 +83,7 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
                         onFailure = {
                             viewBinding.loadingSpinner.visibility = View.GONE
                             dialog(
-                                    false, R.string.dialog_load_annotated_verses_error,
+                                    false, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_annotated_verses,
                                     { _, _ -> annotatedVersesViewModel.loadAnnotatedVerses() }, { _, _ -> finish() }
                             )
                         }
@@ -100,7 +100,7 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
 
     private fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         annotatedVersesViewModel.saveSortOrder(sortOrder)
-                .onFailure { dialog(true, R.string.dialog_save_sort_order_error, { _, _ -> saveSortOrder(sortOrder) }) }
+                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_save_sort_order, { _, _ -> saveSortOrder(sortOrder) }) }
                 .launchIn(lifecycleScope)
     }
 
@@ -111,7 +111,7 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
     override fun openVerse(verseToOpen: VerseIndex) {
         annotatedVersesViewModel.saveCurrentVerseIndex(verseToOpen)
                 .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING, extrasForOpeningVerse()) }
-                .onFailure { dialog(true, R.string.dialog_verse_selection_error, { _, _ -> openVerse(verseToOpen) }) }
+                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
                 .launchIn(lifecycleScope)
     }
 

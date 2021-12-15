@@ -34,8 +34,8 @@ import me.xizzhu.android.joshua.infra.onEach
 import me.xizzhu.android.joshua.infra.BaseActivity
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.indeterminateProgressDialog
+import me.xizzhu.android.joshua.ui.listDialog
 import me.xizzhu.android.joshua.ui.seekBarDialog
 import me.xizzhu.android.joshua.ui.toast
 import me.xizzhu.android.logger.Log
@@ -144,7 +144,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
         }
         nightMode.setOnClickListener {
             val nightMode = settingsViewModel.currentSettingsViewData()?.nightMode ?: return@setOnClickListener
-            dialog(R.string.settings_title_pick_night_mode, resources.getStringArray(R.array.text_night_modes), nightMode.ordinal) { dialog, which ->
+            listDialog(R.string.settings_title_pick_night_mode, resources.getStringArray(R.array.text_night_modes), nightMode.ordinal) { dialog, which ->
                 settingsViewModel.saveNightMode(SettingsViewData.NightMode.values()[which])
                         .onFailure { toast(R.string.toast_unknown_error) }
                         .launchIn(lifecycleScope)
@@ -162,7 +162,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
         }
         defaultHighlightColor.setOnClickListener {
             val defaultHighlightColor = settingsViewModel.currentSettingsViewData()?.defaultHighlightColor ?: return@setOnClickListener
-            dialog(R.string.text_pick_highlight_color, resources.getStringArray(R.array.text_colors), defaultHighlightColor.ordinal) { dialog, which ->
+            listDialog(R.string.text_pick_highlight_color, resources.getStringArray(R.array.text_colors), defaultHighlightColor.ordinal) { dialog, which ->
                 settingsViewModel.saveDefaultHighlightColor(SettingsViewData.HighlightColor.values()[which])
                         .onFailure { toast(R.string.toast_unknown_error) }
                         .launchIn(lifecycleScope)
@@ -206,7 +206,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
         op.onEach(
                 onLoading = {
                     dismissIndeterminateProgressDialog()
-                    indeterminateProgressDialog = indeterminateProgressDialog(R.string.dialog_wait)
+                    indeterminateProgressDialog = indeterminateProgressDialog(R.string.dialog_title_wait)
                 },
                 onSuccess = {
                     dismissIndeterminateProgressDialog()
