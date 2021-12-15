@@ -10,7 +10,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/continuous_reading_days_value"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -19,7 +18,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/continuous_reading_days_title"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/continuous_reading_days_value"
@@ -27,7 +25,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/chapters_read_value"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/continuous_reading_days_title"
@@ -38,7 +35,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/chapters_read_title"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/chapters_read_value"
@@ -46,7 +42,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_books_value"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/chapters_read_title"
@@ -57,7 +52,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_books_title"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/finished_books_value"
@@ -65,7 +59,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_old_testament_value"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/finished_books_title"
@@ -75,7 +68,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_old_testament_title"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/finished_old_testament_value"
@@ -84,7 +76,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_new_testament_value"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/finished_old_testament_title"
@@ -94,7 +85,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_new_testament_title"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/finished_new_testament_value"

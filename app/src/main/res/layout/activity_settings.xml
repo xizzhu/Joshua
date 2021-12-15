@@ -29,7 +29,6 @@
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/keep_screen_on"
-                style="@style/Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="@dimen/item_height"
@@ -51,7 +50,6 @@
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/simple_reading_mode"
-                style="@style/Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="@dimen/item_height"
@@ -61,7 +59,6 @@
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/hide_search_button"
-                style="@style/Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="@dimen/item_height"
@@ -71,7 +68,6 @@
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/consolidated_sharing"
-                style="@style/Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="@dimen/item_height"

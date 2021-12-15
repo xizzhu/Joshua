@@ -5,7 +5,6 @@
     android:orientation="horizontal">
 
     <com.google.android.material.textview.MaterialTextView
-        style="@style/Text.Body"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?android:attr/selectableItemBackground"
@@ -13,7 +12,6 @@
         android:textSize="@dimen/text_body" />
 
     <com.google.android.material.textview.MaterialTextView
-        style="@style/Text.Body"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?android:attr/selectableItemBackground"
@@ -21,7 +19,6 @@
         android:textSize="@dimen/text_body" />
 
     <com.google.android.material.textview.MaterialTextView
-        style="@style/Text.Body"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?android:attr/selectableItemBackground"
@@ -29,7 +26,6 @@
         android:textSize="@dimen/text_body" />
 
     <com.google.android.material.textview.MaterialTextView
-        style="@style/Text.Body"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?android:attr/selectableItemBackground"
@@ -37,7 +33,6 @@
         android:textSize="@dimen/text_body" />
 
     <com.google.android.material.textview.MaterialTextView
-        style="@style/Text.Body"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?android:attr/selectableItemBackground"

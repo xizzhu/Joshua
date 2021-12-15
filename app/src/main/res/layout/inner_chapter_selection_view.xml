@@ -4,13 +4,13 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/chapter_selection_old_testament"
-        style="@style/Text.Body.Light"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/background_chapter_selection"
         android:gravity="center"
         android:padding="@dimen/padding"
         android:text="@string/text_chapter_selection_old_testament"
+        android:textColor="@android:color/white"
         android:textSize="@dimen/text_body"
         app:layout_constraintEnd_toStartOf="@id/chapter_selection_new_testament"
         app:layout_constraintStart_toStartOf="parent"
@@ -18,13 +18,13 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/chapter_selection_new_testament"
-        style="@style/Text.Body.Light"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/background_chapter_selection"
         android:gravity="center"
         android:padding="@dimen/padding"
         android:text="@string/text_chapter_selection_new_testament"
+        android:textColor="@android:color/white"
         android:textSize="@dimen/text_body"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/chapter_selection_old_testament"

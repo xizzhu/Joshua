@@ -24,18 +24,4 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1px</item>
     </style>
-
-    <style name="Text" />
-
-    <style name="Text.Body">
-        <item name="android:fontFamily">@string/font_family_regular</item>
-    </style>
-
-    <style name="Text.Body.Light">
-        <item name="android:textColor">@color/text_light_primary</item>
-    </style>
-
-    <style name="Text.Caption">
-        <item name="android:fontFamily">@string/font_family_medium</item>
-    </style>
 </resources>

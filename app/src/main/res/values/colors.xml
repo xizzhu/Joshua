@@ -7,16 +7,8 @@
     <color name="verse_pressed">@color/light_gray</color>
     <color name="verse_selected">@color/light_gray</color>
 
-    <color name="primary_dark">#00008b</color>
-
     <color name="light_gray">#cccccc</color>
     <color name="dark_gray">#888888</color>
     <color name="dark_cyan">#33b5e5</color>
     <color name="dark_lime">#99cc00</color>
-
-    <color name="text_dark_primary">#de000000</color>
-    <color name="text_dark_secondary">#8a000000</color>
-
-    <color name="text_light_primary">#ffffffff</color>
-    <color name="text_light_secondary">#b3ffffff</color>
 </resources>

@@ -12,7 +12,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/verse"
-        style="@style/Text.Body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
@@ -20,7 +19,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/text"
-        style="@style/Text.Body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>

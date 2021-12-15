@@ -33,7 +33,6 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/book_name"
-        style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/padding"
