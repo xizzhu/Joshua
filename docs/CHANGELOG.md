@@ -9,8 +9,10 @@ CHANGELOG
 - Bug fixes:
   - Properly set Kotlin JVM target to Java 11
 - Update dependencies:
-  - Gradle to 7.3.1
+  - Gradle to 7.3.2
+  - Android Gradle plugin to 7.0.4
   - Android build tool to 32.0.0, compile and target SDK level to 32
+  - Kotlin to 1.6.10
   - AndroidX constraint layout to 2.1.2
   - Firebase BOM to 29.0.2, Crashlytics Gradle plugin to 2.8.1
   - Hilt to 2.40.5

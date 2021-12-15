@@ -33,7 +33,7 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "7.0.3"
+        const val classpath = "7.0.4"
         const val buildTools = "32.0.0"
         const val compile = 32
         const val min = 19
@@ -44,7 +44,7 @@ object Versions {
 
     object Kotlin {
         val jvmTarget = java.toString()
-        const val core = "1.6.0"
+        const val core = "1.6.10"
         const val coroutines = "1.5.2"
     }
 
