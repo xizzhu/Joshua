@@ -42,19 +42,10 @@ class SearchToolbar : MaterialToolbar {
     private fun searchView(): SearchView = menu.findItem(R.id.action_search).actionView as SearchView
 
     fun initialize(
-            includeOldTestament: Boolean, onIncludeOldTestamentChanged: (Boolean) -> Unit,
-            includeNewTestament: Boolean, onIncludeNewTestamentChanged: (Boolean) -> Unit,
-            includeBookmarks: Boolean, onIncludeBookmarksChanged: (Boolean) -> Unit,
-            includeHighlights: Boolean, onIncludeHighlightsChanged: (Boolean) -> Unit,
-            includeNotes: Boolean, onIncludeNotesChanged: (Boolean) -> Unit,
+            onIncludeOldTestamentChanged: (Boolean) -> Unit, onIncludeNewTestamentChanged: (Boolean) -> Unit,
+            onIncludeBookmarksChanged: (Boolean) -> Unit, onIncludeHighlightsChanged: (Boolean) -> Unit, onIncludeNotesChanged: (Boolean) -> Unit,
             onQueryTextListener: SearchView.OnQueryTextListener, clearHistory: () -> Unit
     ) {
-        menu.findItem(R.id.action_search_include_old_testament).isChecked = includeOldTestament
-        menu.findItem(R.id.action_search_include_new_testament).isChecked = includeNewTestament
-        menu.findItem(R.id.action_search_include_bookmarks).isChecked = includeBookmarks
-        menu.findItem(R.id.action_search_include_highlights).isChecked = includeHighlights
-        menu.findItem(R.id.action_search_include_notes).isChecked = includeNotes
-
         searchView().setOnQueryTextListener(onQueryTextListener)
 
         setOnMenuItemClickListener { menuItem ->
@@ -91,6 +82,17 @@ class SearchToolbar : MaterialToolbar {
                 else -> false
             }
         }
+    }
+
+    fun setSearchConfiguration(
+            includeOldTestament: Boolean, includeNewTestament: Boolean,
+            includeBookmarks: Boolean, includeHighlights: Boolean, includeNotes: Boolean
+    ) {
+        menu.findItem(R.id.action_search_include_old_testament).isChecked = includeOldTestament
+        menu.findItem(R.id.action_search_include_new_testament).isChecked = includeNewTestament
+        menu.findItem(R.id.action_search_include_bookmarks).isChecked = includeBookmarks
+        menu.findItem(R.id.action_search_include_highlights).isChecked = includeHighlights
+        menu.findItem(R.id.action_search_include_notes).isChecked = includeNotes
     }
 
     fun setSearchableInfo(searchable: SearchableInfo) {

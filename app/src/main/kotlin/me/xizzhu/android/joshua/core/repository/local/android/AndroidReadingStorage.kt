@@ -20,7 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.VerseQuery
+import me.xizzhu.android.joshua.core.VerseSearchQuery
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.local.android.db.MetadataDao
@@ -90,5 +90,5 @@ class AndroidReadingStorage(private val androidDatabase: AndroidDatabase) : Loca
         androidDatabase.translationDao.read(translationShortName, verseIndexes)
     }
 
-    override suspend fun search(query: VerseQuery): List<Verse> = withContext(Dispatchers.IO) { androidDatabase.translationDao.search(query) }
+    override suspend fun search(query: VerseSearchQuery): List<Verse> = withContext(Dispatchers.IO) { androidDatabase.translationDao.search(query) }
 }

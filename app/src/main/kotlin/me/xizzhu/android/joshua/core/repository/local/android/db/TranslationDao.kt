@@ -23,7 +23,7 @@ import me.xizzhu.android.ask.db.*
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.VerseQuery
+import me.xizzhu.android.joshua.core.VerseSearchQuery
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
 
@@ -121,7 +121,7 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun search(query: VerseQuery): List<Verse> = db.withTransaction {
+    fun search(query: VerseSearchQuery): List<Verse> = db.withTransaction {
         if (query.keyword.isBlank()
                 || (!query.includeOldTestament && !query.includeNewTestament)
                 || !hasTableAndLogIfNoTable(query.translation)) {

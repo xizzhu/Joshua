@@ -63,8 +63,6 @@ data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<
     }
 }
 
-data class VerseQuery(val translation: String, val keyword: String, val includeOldTestament: Boolean, val includeNewTestament: Boolean)
-
 class BibleReadingManager(
         private val bibleReadingRepository: BibleReadingRepository,
         translationRepository: TranslationRepository,
@@ -140,6 +138,4 @@ class BibleReadingManager(
 
     suspend fun readVerses(translationShortName: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse> =
             bibleReadingRepository.readVerses(translationShortName, verseIndexes)
-
-    suspend fun search(query: VerseQuery): List<Verse> = bibleReadingRepository.search(query)
 }

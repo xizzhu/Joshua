@@ -18,7 +18,7 @@ package me.xizzhu.android.joshua.core.repository.local
 
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.core.VerseQuery
+import me.xizzhu.android.joshua.core.VerseSearchQuery
 
 interface LocalReadingStorage {
     suspend fun readCurrentVerseIndex(): VerseIndex
@@ -44,5 +44,5 @@ interface LocalReadingStorage {
 
     suspend fun readVerses(translationShortName: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse>
 
-    suspend fun search(query: VerseQuery): List<Verse>
+    suspend fun search(query: VerseSearchQuery): List<Verse>
 }

@@ -60,8 +60,6 @@ class VerseAnnotationManager<T : VerseAnnotation>(private val verseAnnotationRep
 
     suspend fun read(verseIndex: VerseIndex): T = verseAnnotationRepository.read(verseIndex)
 
-    suspend fun search(query: String): List<T> = verseAnnotationRepository.search(query)
-
     suspend fun save(verseAnnotation: T) {
         verseAnnotationRepository.save(verseAnnotation)
     }

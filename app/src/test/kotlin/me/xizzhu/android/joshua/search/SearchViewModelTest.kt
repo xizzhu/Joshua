@@ -36,9 +36,7 @@ import kotlin.test.*
 @RunWith(RobolectricTestRunner::class)
 class SearchViewModelTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
-    private lateinit var bookmarkManager: VerseAnnotationManager<Bookmark>
-    private lateinit var highlightManager: VerseAnnotationManager<Highlight>
-    private lateinit var noteManager: VerseAnnotationManager<Note>
+    private lateinit var searchManager: SearchManager
     private lateinit var settingsManager: SettingsManager
     private lateinit var application: Application
 
@@ -53,16 +51,10 @@ class SearchViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
         coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, any()) } returns emptyMap()
-        coEvery { bibleReadingManager.search(any()) } returns emptyList()
 
-        bookmarkManager = mockk()
-        coEvery { bookmarkManager.read(Constants.SORT_BY_BOOK) } returns emptyList()
-
-        highlightManager = mockk()
-        coEvery { highlightManager.read(Constants.SORT_BY_BOOK) } returns emptyList()
-
-        noteManager = mockk()
-        coEvery { noteManager.search(any()) } returns emptyList()
+        searchManager = mockk()
+        every { searchManager.configuration() } returns flowOf(SearchConfiguration(true, true, true, true, true))
+        coEvery { searchManager.search(any()) } returns SearchResult(emptyList(), emptyList(), emptyList(), emptyList())
 
         settingsManager = mockk()
 
@@ -70,9 +62,9 @@ class SearchViewModelTest : BaseUnitTest() {
         every { application.getString(R.string.title_bookmarks) } returns "Bookmarks"
         every { application.getString(R.string.title_highlights) } returns "Highlights"
         every { application.getString(R.string.title_notes) } returns "Notes"
-        every { application.getString(R.string.toast_verses_searched, any()) } answers { "${(it.invocation.args[1] as Array<Any?>)[0]} result(s) found." }
+        every { application.getString(R.string.toast_search_result, any()) } answers { "${(it.invocation.args[1] as Array<Any?>)[0]} result(s) found." }
 
-        searchViewModel = SearchViewModel(bibleReadingManager, bookmarkManager, highlightManager, noteManager, settingsManager, application)
+        searchViewModel = SearchViewModel(bibleReadingManager, searchManager, settingsManager, application)
     }
 
     @Test
@@ -90,7 +82,6 @@ class SearchViewModelTest : BaseUnitTest() {
 
     @Test
     fun `test search() with empty result`() = testDispatcher.runBlockingTest {
-        coEvery { bibleReadingManager.search(any()) } returns emptyList()
         searchViewModel.search("query", false)
         delay(1000L)
 
@@ -107,8 +98,8 @@ class SearchViewModelTest : BaseUnitTest() {
 
     @Test
     fun `test calling search() multiple times`() = testDispatcher.runBlockingTest {
-        coEvery { bibleReadingManager.search(VerseQuery(MockContents.kjvShortName, "not used", true, true)) } returns listOf(MockContents.kjvVerses[1])
-        coEvery { bibleReadingManager.search(VerseQuery(MockContents.kjvShortName, "query", true, true)) } returns listOf(MockContents.kjvVerses[0])
+        coEvery { searchManager.search("not used") } returns SearchResult(listOf(MockContents.kjvVerses[1]), emptyList(), emptyList(), emptyList())
+        coEvery { searchManager.search("query") } returns SearchResult(listOf(MockContents.kjvVerses[0]), emptyList(), emptyList(), emptyList())
 
         searchViewModel.search("invalid", true)
         delay(1000L)
@@ -138,8 +129,12 @@ class SearchViewModelTest : BaseUnitTest() {
 
     @Test
     fun `test search() with verses only`() = testDispatcher.runBlockingTest {
-        coEvery { bibleReadingManager.search(VerseQuery(MockContents.kjvShortName, "query", true, true)) } returns
-                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2], MockContents.kjvExtraVerses[0], MockContents.kjvExtraVerses[1])
+        coEvery { searchManager.search("query") } returns SearchResult(
+                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2], MockContents.kjvExtraVerses[0], MockContents.kjvExtraVerses[1]),
+                emptyList(),
+                emptyList(),
+                emptyList()
+        )
 
         searchViewModel.search("query", false)
         delay(1000L)
@@ -174,10 +169,11 @@ class SearchViewModelTest : BaseUnitTest() {
 
     @Test
     fun `test search() with verses and bookmarks`() = testDispatcher.runBlockingTest {
-        coEvery { bibleReadingManager.search(VerseQuery(MockContents.kjvShortName, "query", true, true)) } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2])
-        coEvery { bookmarkManager.read(Constants.SORT_BY_BOOK) } returns listOf(
-                Bookmark(VerseIndex(0, 0, 0), 12345L),
-                Bookmark(VerseIndex(0, 0, 1), 12345L)
+        coEvery { searchManager.search("query") } returns SearchResult(
+                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
+                listOf(Pair(Bookmark(VerseIndex(0, 0, 0), 12345L), MockContents.kjvVerses[0])),
+                emptyList(),
+                emptyList()
         )
 
         searchViewModel.search("query", false)
@@ -208,42 +204,12 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses excluding bookmarks`() = testDispatcher.runBlockingTest {
-        coEvery { bibleReadingManager.search(VerseQuery(MockContents.kjvShortName, "query", true, true)) } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2])
-        coEvery { bookmarkManager.read(Constants.SORT_BY_BOOK) } returns listOf(
-                Bookmark(VerseIndex(0, 0, 0), 12345L),
-                Bookmark(VerseIndex(0, 0, 1), 12345L)
-        )
-
-        searchViewModel.includeBookmarks = false
-        searchViewModel.search("query", false)
-        delay(1000L)
-
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-
-        assertEquals(3, actual.data.items.size)
-        assertEquals("Genesis", (actual.data.items[0] as TitleItem).title.toString())
-        assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals(
-                "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[2] as SearchVerseItem).textForDisplay.toString()
-        )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("2 result(s) found.", actual.data.toast)
-    }
-
-    @Test
     fun `test search() with verses and highlights`() = testDispatcher.runBlockingTest {
-        coEvery { bibleReadingManager.search(VerseQuery(MockContents.kjvShortName, "query", true, true)) } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2])
-        coEvery { highlightManager.read(Constants.SORT_BY_BOOK) } returns listOf(
-                Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 12345L),
-                Highlight(VerseIndex(0, 0, 1), Highlight.COLOR_BLUE, 12345L),
+        coEvery { searchManager.search("query") } returns SearchResult(
+                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
+                emptyList(),
+                listOf(Pair(Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 12345L), MockContents.kjvVerses[0])),
+                emptyList()
         )
 
         searchViewModel.search("query", false)
@@ -274,50 +240,12 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses excluding highlights`() = testDispatcher.runBlockingTest {
-        coEvery { bibleReadingManager.search(VerseQuery(MockContents.kjvShortName, "query", true, true)) } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2])
-        coEvery { highlightManager.read(Constants.SORT_BY_BOOK) } returns listOf(
-                Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 12345L),
-                Highlight(VerseIndex(0, 0, 1), Highlight.COLOR_BLUE, 12345L),
-        )
-
-        searchViewModel.includeHighlights = false
-        searchViewModel.search("query", false)
-        delay(1000L)
-
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-
-        assertEquals(3, actual.data.items.size)
-        assertEquals("Genesis", (actual.data.items[0] as TitleItem).title.toString())
-        assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals(
-                "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[2] as SearchVerseItem).textForDisplay.toString()
-        )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("2 result(s) found.", actual.data.toast)
-    }
-
-    @Test
     fun `test search() with verses and notes`() = testDispatcher.runBlockingTest {
-        coEvery {
-            bibleReadingManager.readVerses(
-                    MockContents.kjvShortName,
-                    listOf(VerseIndex(0, 0, 9), VerseIndex(1, 2, 3))
-            )
-        } returns mapOf(Pair(VerseIndex(0, 0, 9), MockContents.kjvVerses[9]))
-        coEvery { bibleReadingManager.search(VerseQuery(MockContents.kjvShortName, "query", true, true)) } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2])
-        coEvery { noteManager.search("query") } returns listOf(
-                Note(VerseIndex(0, 0, 9), "just a note", 12345L),
-                // no verse is available for this note, should be ignored
-                // https://github.com/xizzhu/Joshua/issues/153
-                Note(VerseIndex(1, 2, 3), "should be ignored", 54321L)
+        coEvery { searchManager.search("query") } returns SearchResult(
+                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
+                emptyList(),
+                emptyList(),
+                listOf(Pair(Note(VerseIndex(0, 0, 9), "just a note", 12345L), MockContents.kjvVerses[9]))
         )
 
         searchViewModel.search("query", false)
@@ -349,51 +277,13 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses excluding notes`() = testDispatcher.runBlockingTest {
-        coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 9))) } returns mapOf(
-                Pair(VerseIndex(0, 0, 9), MockContents.kjvVerses[9])
-        )
-        coEvery { bibleReadingManager.search(VerseQuery(MockContents.kjvShortName, "query", true, true)) } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2])
-        coEvery { noteManager.search("query") } returns listOf(Note(VerseIndex(0, 0, 9), "just a note", 12345L))
-
-        searchViewModel.includeNotes = false
-        searchViewModel.search("query", false)
-        delay(1000L)
-
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-
-        assertEquals(3, actual.data.items.size)
-        assertEquals("Genesis", (actual.data.items[0] as TitleItem).title.toString())
-        assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals(
-                "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[2] as SearchVerseItem).textForDisplay.toString()
-        )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("2 result(s) found.", actual.data.toast)
-    }
-
-    @Test
     fun `test search() with verses, bookmarks, highlights, and notes`() = testDispatcher.runBlockingTest {
-        coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 9))) } returns mapOf(
-                Pair(VerseIndex(0, 0, 9), MockContents.kjvVerses[9])
+        coEvery { searchManager.search("query") } returns SearchResult(
+                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
+                listOf(Pair(Bookmark(VerseIndex(0, 0, 0), 12345L), MockContents.kjvVerses[0])),
+                listOf(Pair(Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 12345L), MockContents.kjvVerses[0])),
+                listOf(Pair(Note(VerseIndex(0, 0, 9), "just a note", 12345L), MockContents.kjvVerses[9]))
         )
-        coEvery { bibleReadingManager.search(VerseQuery(MockContents.kjvShortName, "query", true, true)) } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2])
-        coEvery { bookmarkManager.read(Constants.SORT_BY_BOOK) } returns listOf(
-                Bookmark(VerseIndex(0, 0, 0), 12345L),
-                Bookmark(VerseIndex(0, 0, 1), 12345L)
-        )
-        coEvery { highlightManager.read(Constants.SORT_BY_BOOK) } returns listOf(
-                Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 12345L),
-                Highlight(VerseIndex(0, 0, 1), Highlight.COLOR_BLUE, 12345L),
-        )
-        coEvery { noteManager.search("query") } returns listOf(Note(VerseIndex(0, 0, 9), "just a note", 12345L))
 
         searchViewModel.search("query", false)
         delay(1000L)

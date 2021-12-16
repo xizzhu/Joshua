@@ -87,6 +87,15 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideSearchManager(
+            bibleReadingRepository: BibleReadingRepository,
+            bookmarkRepository: VerseAnnotationRepository<Bookmark>,
+            highlightRepository: VerseAnnotationRepository<Highlight>,
+            noteRepository: VerseAnnotationRepository<Note>
+    ): SearchManager = SearchManager(bibleReadingRepository, bookmarkRepository, highlightRepository, noteRepository)
+
+    @Provides
+    @Singleton
     fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager =
             SettingsManager(settingsRepository)
 
