@@ -129,23 +129,16 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
         }
 
         select(query.translation) {
-            var condition: Condition = noOp()
-            if (!query.includeOldTestament || !query.includeNewTestament) {
-                if (query.includeOldTestament) {
-                    // only searches Old Testament
-                    condition = COLUMN_BOOK_INDEX less Bible.OLD_TESTAMENT_COUNT
-                }
-                if (query.includeNewTestament) {
-                    // only searches New Testament
-                    condition = COLUMN_BOOK_INDEX greaterEq Bible.OLD_TESTAMENT_COUNT
-                }
-            }
-            query.keyword.trim().replace("\\s+", " ").split(" ").forEach { keyword ->
-                (COLUMN_TEXT like "%%$keyword%%").run {
-                    condition = if (condition == Condition.NoOp) this else condition and this
-                }
-            }
-            condition
+            (if (query.includeOldTestament && !query.includeNewTestament) {
+                // Old Testament only
+                COLUMN_BOOK_INDEX less Bible.OLD_TESTAMENT_COUNT
+            } else if (!query.includeOldTestament && query.includeNewTestament) {
+                // New Testament only
+                COLUMN_BOOK_INDEX greaterEq Bible.OLD_TESTAMENT_COUNT
+            } else {
+                // The whole Bible
+                noOp()
+            }).withQuery(COLUMN_TEXT, query.keyword)
         }.orderBy(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX).toList { row ->
             Verse(
                     VerseIndex(row.getInt(COLUMN_BOOK_INDEX), row.getInt(COLUMN_CHAPTER_INDEX), row.getInt(COLUMN_VERSE_INDEX)),

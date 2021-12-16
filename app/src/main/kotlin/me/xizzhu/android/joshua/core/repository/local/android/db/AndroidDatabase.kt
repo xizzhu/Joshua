@@ -20,6 +20,9 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.appcompat.app.AppCompatDelegate
+import me.xizzhu.android.ask.db.Condition
+import me.xizzhu.android.ask.db.ConditionBuilder.and
+import me.xizzhu.android.ask.db.ConditionBuilder.like
 import me.xizzhu.android.ask.db.delete
 import me.xizzhu.android.ask.db.firstOrDefault
 import me.xizzhu.android.ask.db.getString
@@ -27,6 +30,7 @@ import me.xizzhu.android.ask.db.insert
 import me.xizzhu.android.ask.db.select
 import me.xizzhu.android.ask.db.transaction
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.toKeywords
 
 class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
@@ -106,4 +110,13 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             translationInfoDao.removeAll()
         }
     }
+}
+
+fun Condition.withQuery(column: String, query: String): Condition {
+    var condition: Condition = this
+    query.toKeywords().forEach { keyword ->
+        val like = column like "%%$keyword%%"
+        condition = if (condition == Condition.NoOp) like else condition and like
+    }
+    return condition
 }

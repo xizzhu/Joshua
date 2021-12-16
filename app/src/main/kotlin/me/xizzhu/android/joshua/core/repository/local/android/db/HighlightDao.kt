@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import android.database.sqlite.SQLiteOpenHelper
-import androidx.annotation.WorkerThread
 import me.xizzhu.android.ask.db.*
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -29,8 +28,7 @@ class HighlightDao(sqliteHelper: SQLiteOpenHelper) : VerseAnnotationDao<Highligh
         private const val COLUMN_COLOR = "color"
     }
 
-    @WorkerThread
-    override fun searchVerseAnnotations(query: String): Query {
+    override fun buildQueryToSearchVerseAnnotations(query: String): Query {
         throw UnsupportedOperationException("Search not supported for highlights")
     }
 

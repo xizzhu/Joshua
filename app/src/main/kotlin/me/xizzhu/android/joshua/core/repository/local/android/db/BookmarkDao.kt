@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import android.database.sqlite.SQLiteOpenHelper
-import androidx.annotation.WorkerThread
 import me.xizzhu.android.ask.db.Query
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -28,8 +27,7 @@ class BookmarkDao(sqliteHelper: SQLiteOpenHelper) : VerseAnnotationDao<Bookmark>
         private const val TABLE_BOOKMARK = "bookmark"
     }
 
-    @WorkerThread
-    override fun searchVerseAnnotations(query: String): Query {
+    override fun buildQueryToSearchVerseAnnotations(query: String): Query {
         throw UnsupportedOperationException("Search not supported for bookmarks")
     }
 
