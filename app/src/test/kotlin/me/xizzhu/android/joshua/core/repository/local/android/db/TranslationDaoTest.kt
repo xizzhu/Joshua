@@ -18,6 +18,7 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.VerseQuery
 import me.xizzhu.android.joshua.core.repository.local.android.BaseSqliteTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.toMap
@@ -188,7 +189,7 @@ class TranslationDaoTest : BaseSqliteTest() {
 
     @Test
     fun testSearchNonExistTranslation() {
-        assertTrue(androidDatabase.translationDao.search("not_exist", "keyword").isEmpty())
+        assertTrue(androidDatabase.translationDao.search(VerseQuery("not_exist", "keyword", true, true)).isEmpty())
     }
 
     @Test
@@ -196,14 +197,18 @@ class TranslationDaoTest : BaseSqliteTest() {
         saveKjv()
 
         assertEquals(MockContents.kjvVerses,
-                androidDatabase.translationDao.search(MockContents.kjvShortName, "God"))
+                androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "God", true, true)))
         assertEquals(MockContents.kjvVerses,
-                androidDatabase.translationDao.search(MockContents.kjvShortName, "god"))
+                androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "God", true, false)))
         assertEquals(MockContents.kjvVerses,
-                androidDatabase.translationDao.search(MockContents.kjvShortName, "GOD"))
-        assertTrue(androidDatabase.translationDao.search(MockContents.kjvShortName, "not_exist").isEmpty())
-        assertTrue(androidDatabase.translationDao.search(MockContents.kjvShortName, "").isEmpty())
-        assertTrue(androidDatabase.translationDao.search(MockContents.kjvShortName, "    ").isEmpty())
+                androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "god", true, true)))
+        assertEquals(MockContents.kjvVerses,
+                androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "GOD", true, true)))
+        assertTrue(androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "God", false, true)).isEmpty())
+        assertTrue(androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "God", false, false)).isEmpty())
+        assertTrue(androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "not_exist", true, true)).isEmpty())
+        assertTrue(androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "", true, true)).isEmpty())
+        assertTrue(androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "    ", true, true)).isEmpty())
     }
 
     @Test
@@ -211,9 +216,9 @@ class TranslationDaoTest : BaseSqliteTest() {
         saveKjv()
 
         assertEquals(listOf(MockContents.kjvVerses[0]),
-                androidDatabase.translationDao.search(MockContents.kjvShortName, "God created"))
+                androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "God created", true, true)))
         assertEquals(listOf(MockContents.kjvVerses[0]),
-                androidDatabase.translationDao.search(MockContents.kjvShortName, "beginning created"))
+                androidDatabase.translationDao.search(VerseQuery(MockContents.kjvShortName, "beginning created", true, true)))
     }
 
     @Test

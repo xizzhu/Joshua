@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.VerseQuery
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.logger.Log
 
@@ -123,8 +124,7 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
     suspend fun readVerses(translationShortName: String, verseIndexes: List<VerseIndex>): Map<VerseIndex, Verse> =
             localReadingStorage.readVerses(translationShortName, verseIndexes)
 
-    suspend fun search(translationShortName: String, query: String): List<Verse> =
-            localReadingStorage.search(translationShortName, query)
+    suspend fun search(query: VerseQuery): List<Verse> = localReadingStorage.search(query)
 }
 
 private class LruStringCache(maxSize: Int) : LruCache<String, List<String>>(maxSize) {

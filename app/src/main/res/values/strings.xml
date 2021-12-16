@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Bible</string>
+    <string name="text_bible">Bible</string>
+    <string name="text_old_testament">Old Testament</string>
+    <string name="text_new_testament">New Testament</string>
+    <string name="text_old_testament_abbr">OT</string>
+    <string name="text_new_testament_abbr">NT</string>
+
+    <string name="app_name">@string/text_bible</string>
 
     <string name="title_bookmarks">Bookmarks</string>
     <string name="title_highlights">Highlights</string>
@@ -29,6 +35,8 @@
     <string name="action_highlights">Highlights</string>
     <string name="action_notes">Notes</string>
     <string name="action_search">Search</string>
+    <string name="action_search_include_old_testament">@string/text_old_testament</string>
+    <string name="action_search_include_new_testament">@string/text_new_testament</string>
     <string name="action_search_include_bookmarks">Bookmarks</string>
     <string name="action_search_include_highlights">Highlights</string>
     <string name="action_search_include_notes">Notes</string>
@@ -64,6 +72,7 @@
      -->
     <string name="text_date">%1$s %2$d, %3$d</string>
     <string name="text_date_without_year">%1$s %2$d</string>
+
     <string name="text_pick_highlight_color">Select highlight color</string>
     <string name="text_highlight_color_none">None</string>
     <string name="text_highlight_color_yellow">Yellow</string>
@@ -72,17 +81,16 @@
     <string name="text_highlight_color_green">Green</string>
     <string name="text_highlight_color_blue">Blue</string>
 
-    <string name="text_chapter_selection_old_testament">OT</string>
-    <string name="text_chapter_selection_new_testament">NT</string>
+    <string name="text_chapter_selection_old_testament">@string/text_old_testament_abbr</string>
+    <string name="text_chapter_selection_new_testament">@string/text_new_testament_abbr</string>
 
     <string name="text_restore_from">Restore from</string>
     <string name="text_share_with">Share with</string>
 
-    <string name="text_no_strong_number">Strong\'s numbers not downloaded yet.\nClick to download now.\n\n(Experimental Feature)</string>
-
     <string name="text_verse_comparison">Verses</string>
     <string name="text_note">Note</string>
     <string name="text_strong_number">Strong\'s numbers</string>
+    <string name="text_no_strong_number">Strong\'s numbers not downloaded yet.\nClick to download now.\n\n(Experimental Feature)</string>
 
     <string name="text_no_bookmarks">No bookmarks yet.</string>
     <string name="text_no_highlights">No highlights yet.</string>
@@ -92,8 +100,8 @@
     <string name="text_continuous_reading_count">%1$d day(s)</string>
     <string name="text_chapters_read">Chapters Read</string>
     <string name="text_finished_books">Books Finished</string>
-    <string name="text_finished_old_testament">Old Testament</string>
-    <string name="text_finished_new_testament">New Testament</string>
+    <string name="text_finished_old_testament">@string/text_old_testament</string>
+    <string name="text_finished_new_testament">@string/text_new_testament</string>
 
     <string name="settings_header_display">Display</string>
     <string name="settings_title_font_size">Font size</string>
@@ -131,21 +139,21 @@
         <item>Nov</item>
         <item>Dec</item>
     </string-array>
-    <string-array name="text_colors">
-        <item>None</item>
-        <item>Yellow</item>
-        <item>Pink</item>
-        <item>Purple</item>
-        <item>Green</item>
-        <item>Blue</item>
+    <string-array name="text_highlight_colors">
+        <item>@string/text_highlight_color_none</item>
+        <item>@string/text_highlight_color_yellow</item>
+        <item>@string/text_highlight_color_pink</item>
+        <item>@string/text_highlight_color_purple</item>
+        <item>@string/text_highlight_color_green</item>
+        <item>@string/text_highlight_color_blue</item>
     </string-array>
     <string-array name="text_sort_order">
         <item>By date</item>
         <item>By book</item>
     </string-array>
     <string-array name="text_night_modes">
-        <item>On</item>
-        <item>Off</item>
-        <item>Follow system</item>
+        <item>@string/settings_text_night_mode_on</item>
+        <item>@string/settings_text_night_mode_off</item>
+        <item>@string/settings_text_night_mode_system</item>
     </string-array>
 </resources>

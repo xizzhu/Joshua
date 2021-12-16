@@ -99,6 +99,10 @@ class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), S
 
     private fun initializeListeners() {
         viewBinding.toolbar.initialize(
+                includeOldTestament = searchViewModel.includeOldTestament,
+                onIncludeOldTestamentChanged = { searchViewModel.includeOldTestament = it },
+                includeNewTestament = searchViewModel.includeNewTestament,
+                onIncludeNewTestamentChanged = { searchViewModel.includeNewTestament = it },
                 includeBookmarks = searchViewModel.includeBookmarks,
                 onIncludeBookmarksChanged = { searchViewModel.includeBookmarks = it },
                 includeHighlights = searchViewModel.includeHighlights,

@@ -473,7 +473,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
             val defaultHighlightColor = readingViewModel.settings().first().defaultHighlightColor
             if (Highlight.COLOR_NONE == defaultHighlightColor) {
                 listDialog(R.string.text_pick_highlight_color,
-                        resources.getStringArray(R.array.text_colors),
+                        resources.getStringArray(R.array.text_highlight_colors),
                         max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor))) { dialog, which ->
                     saveHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
 

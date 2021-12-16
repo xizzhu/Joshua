@@ -41,10 +41,16 @@ class SearchToolbar : MaterialToolbar {
 
     private fun searchView(): SearchView = menu.findItem(R.id.action_search).actionView as SearchView
 
-    fun initialize(includeBookmarks: Boolean, onIncludeBookmarksChanged: (Boolean) -> Unit,
-                   includeHighlights: Boolean, onIncludeHighlightsChanged: (Boolean) -> Unit,
-                   includeNotes: Boolean, onIncludeNotesChanged: (Boolean) -> Unit,
-                   onQueryTextListener: SearchView.OnQueryTextListener, clearHistory: () -> Unit) {
+    fun initialize(
+            includeOldTestament: Boolean, onIncludeOldTestamentChanged: (Boolean) -> Unit,
+            includeNewTestament: Boolean, onIncludeNewTestamentChanged: (Boolean) -> Unit,
+            includeBookmarks: Boolean, onIncludeBookmarksChanged: (Boolean) -> Unit,
+            includeHighlights: Boolean, onIncludeHighlightsChanged: (Boolean) -> Unit,
+            includeNotes: Boolean, onIncludeNotesChanged: (Boolean) -> Unit,
+            onQueryTextListener: SearchView.OnQueryTextListener, clearHistory: () -> Unit
+    ) {
+        menu.findItem(R.id.action_search_include_old_testament).isChecked = includeOldTestament
+        menu.findItem(R.id.action_search_include_new_testament).isChecked = includeNewTestament
         menu.findItem(R.id.action_search_include_bookmarks).isChecked = includeBookmarks
         menu.findItem(R.id.action_search_include_highlights).isChecked = includeHighlights
         menu.findItem(R.id.action_search_include_notes).isChecked = includeNotes
@@ -53,6 +59,16 @@ class SearchToolbar : MaterialToolbar {
 
         setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
+                R.id.action_search_include_old_testament -> {
+                    menuItem.isChecked = !menuItem.isChecked
+                    onIncludeOldTestamentChanged(menuItem.isChecked)
+                    true
+                }
+                R.id.action_search_include_new_testament -> {
+                    menuItem.isChecked = !menuItem.isChecked
+                    onIncludeNewTestamentChanged(menuItem.isChecked)
+                    true
+                }
                 R.id.action_search_include_bookmarks -> {
                     menuItem.isChecked = !menuItem.isChecked
                     onIncludeBookmarksChanged(menuItem.isChecked)

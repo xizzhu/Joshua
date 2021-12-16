@@ -42,6 +42,7 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.VerseQuery
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.viewData
@@ -66,6 +67,8 @@ class SearchViewModel @Inject constructor(
 ) : BaseViewModel(settingsManager, application) {
     private class SearchRequest(val query: String, val instanceSearch: Boolean)
 
+    var includeOldTestament: Boolean = true
+    var includeNewTestament: Boolean = true
     var includeBookmarks: Boolean = true
     var includeHighlights: Boolean = true
     var includeNotes: Boolean = true
@@ -107,7 +110,7 @@ class SearchViewModel @Inject constructor(
                 }
 
                 val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-                val verses = bibleReadingManager.search(currentTranslation, query)
+                val verses = bibleReadingManager.search(VerseQuery(currentTranslation, query, includeOldTestament, includeNewTestament))
                 val bookmarks: List<Pair<Bookmark, Verse>>
                 val highlights: List<Pair<Highlight, Verse>>
                 if (includeBookmarks || includeHighlights) {

@@ -162,7 +162,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding, SettingsViewModel
         }
         defaultHighlightColor.setOnClickListener {
             val defaultHighlightColor = settingsViewModel.currentSettingsViewData()?.defaultHighlightColor ?: return@setOnClickListener
-            listDialog(R.string.text_pick_highlight_color, resources.getStringArray(R.array.text_colors), defaultHighlightColor.ordinal) { dialog, which ->
+            listDialog(R.string.text_pick_highlight_color, resources.getStringArray(R.array.text_highlight_colors), defaultHighlightColor.ordinal) { dialog, which ->
                 settingsViewModel.saveDefaultHighlightColor(SettingsViewData.HighlightColor.values()[which])
                         .onFailure { toast(R.string.toast_unknown_error) }
                         .launchIn(lifecycleScope)
