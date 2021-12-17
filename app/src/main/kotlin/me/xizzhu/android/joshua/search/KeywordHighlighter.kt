@@ -16,21 +16,17 @@
 
 package me.xizzhu.android.joshua.search
 
-import android.annotation.SuppressLint
 import android.text.SpannableStringBuilder
+import me.xizzhu.android.joshua.core.toKeywords
 import me.xizzhu.android.joshua.ui.createKeywordSpans
 import me.xizzhu.android.joshua.ui.setSpans
 import java.util.*
 
-// We don't expect users to change locale that frequently.
-@SuppressLint("ConstantLocale")
-private val DEFAULT_LOCALE = Locale.getDefault()
-
 fun SpannableStringBuilder.highlightKeyword(query: String, start: Int): SpannableStringBuilder {
     if (query.isBlank()) return this
 
-    val lowercase = toString().lowercase(DEFAULT_LOCALE)
-    for (keyword in query.trim().lowercase(DEFAULT_LOCALE).replace("\\s+", " ").split(" ")) {
+    val lowercase = toString().lowercase(Locale.getDefault())
+    query.toKeywords().forEach { keyword ->
         var startIndex = start
         var keywordStart: Int
         while (true) {

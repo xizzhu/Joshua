@@ -34,13 +34,13 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
-import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.SearchConfiguration
+import me.xizzhu.android.joshua.core.SearchManager
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onFailure
@@ -51,6 +51,8 @@ import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 
+class SearchConfigurationViewData(val searchConfig: SearchConfiguration)
+
 class SearchResultViewData(val items: List<BaseItem>, val query: String, val instanceSearch: Boolean, val toast: String)
 
 class PreviewViewData(val settings: Settings, val title: String, val items: List<BaseItem>, val currentPosition: Int)
@@ -58,28 +60,54 @@ class PreviewViewData(val settings: Settings, val title: String, val items: List
 @HiltViewModel
 class SearchViewModel @Inject constructor(
         private val bibleReadingManager: BibleReadingManager,
-        private val bookmarkManager: VerseAnnotationManager<Bookmark>,
-        private val highlightManager: VerseAnnotationManager<Highlight>,
-        private val noteManager: VerseAnnotationManager<Note>,
+        private val searchManager: SearchManager,
         settingsManager: SettingsManager,
         application: Application
 ) : BaseViewModel(settingsManager, application) {
     private class SearchRequest(val query: String, val instanceSearch: Boolean)
 
-    var includeBookmarks: Boolean = true
-    var includeHighlights: Boolean = true
-    var includeNotes: Boolean = true
-
+    private val searchConfig: MutableStateFlow<ViewData<SearchConfigurationViewData>> = MutableStateFlow(ViewData.Loading())
     private val searchRequest: MutableStateFlow<SearchRequest?> = MutableStateFlow(null)
     private val searchResult: MutableStateFlow<ViewData<SearchResultViewData>?> = MutableStateFlow(null)
 
     init {
+        searchManager.configuration()
+                .onEach {
+                    searchConfig.value = ViewData.Success(SearchConfigurationViewData(it))
+                    retrySearch()
+                }
+                .launchIn(viewModelScope)
+
         searchRequest.filterNotNull()
                 .debounce(250L)
                 .distinctUntilChangedBy { it.query }
                 .mapLatest { it }
                 .onEach { doSearch(it.query, it.instanceSearch) }
                 .launchIn(viewModelScope)
+    }
+
+    fun searchConfig(): Flow<ViewData<SearchConfigurationViewData>> = searchConfig
+
+    fun includeOldTestament(include: Boolean) {
+        currentSearchConfig()?.searchConfig?.copy(includeOldTestament = include)?.let { searchManager.saveConfiguration(it) }
+    }
+
+    private fun currentSearchConfig(): SearchConfigurationViewData? = (searchConfig.value as? ViewData.Success)?.data
+
+    fun includeNewTestament(include: Boolean) {
+        currentSearchConfig()?.searchConfig?.copy(includeNewTestament = include)?.let { searchManager.saveConfiguration(it) }
+    }
+
+    fun includeBookmarks(include: Boolean) {
+        currentSearchConfig()?.searchConfig?.copy(includeBookmarks = include)?.let { searchManager.saveConfiguration(it) }
+    }
+
+    fun includeHighlights(include: Boolean) {
+        currentSearchConfig()?.searchConfig?.copy(includeHighlights = include)?.let { searchManager.saveConfiguration(it) }
+    }
+
+    fun includeNotes(include: Boolean) {
+        currentSearchConfig()?.searchConfig?.copy(includeNotes = include)?.let { searchManager.saveConfiguration(it) }
     }
 
     fun searchResult(): Flow<ViewData<SearchResultViewData>> = searchResult.filterNotNull()
@@ -107,68 +135,25 @@ class SearchViewModel @Inject constructor(
                 }
 
                 val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-                val verses = bibleReadingManager.search(currentTranslation, query)
-                val bookmarks: List<Pair<Bookmark, Verse>>
-                val highlights: List<Pair<Highlight, Verse>>
-                if (includeBookmarks || includeHighlights) {
-                    val versesWithIndexes = verses.associateBy { it.verseIndex }
-                    bookmarks = if (includeBookmarks) {
-                        bookmarkManager.read(Constants.SORT_BY_BOOK).mapNotNull { bookmark ->
-                            versesWithIndexes[bookmark.verseIndex]?.let { verse -> Pair(bookmark, verse) }
-                        }
-                    } else {
-                        emptyList()
-                    }
-                    highlights = if (includeHighlights) {
-                        highlightManager.read(Constants.SORT_BY_BOOK).mapNotNull { highlight ->
-                            versesWithIndexes[highlight.verseIndex]?.let { verse -> Pair(highlight, verse) }
-                        }
-                    } else {
-                        emptyList()
-                    }
-                } else {
-                    bookmarks = emptyList()
-                    highlights = emptyList()
+                searchResult.value = searchManager.search(query).let { searchResult ->
+                    ViewData.Success(SearchResultViewData(
+                            items = buildSearchResultItems(
+                                    query = query,
+                                    verses = searchResult.verses,
+                                    bookmarks = searchResult.bookmarks,
+                                    highlights = searchResult.highlights,
+                                    notes = searchResult.notes,
+                                    bookNames = bibleReadingManager.readBookNames(currentTranslation),
+                                    bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
+                            ),
+                            query = query,
+                            instanceSearch = instanceSearch,
+                            toast = application.getString(R.string.toast_search_result,
+                                    searchResult.verses.size + searchResult.bookmarks.size + searchResult.highlights.size + searchResult.notes.size)
+                    ))
                 }
-
-                val notes = if (includeNotes) {
-                    noteManager.search(query)
-                            .takeIf { it.isNotEmpty() }
-                            ?.let { notes ->
-                                val versesWithNotes = bibleReadingManager.readVerses(currentTranslation, notes.map { it.verseIndex })
-                                arrayListOf<Pair<Note, Verse>>().apply {
-                                    ensureCapacity(notes.size)
-                                    notes.forEach { note ->
-                                        // TODO What to do if the notes is attached to a verse that is empty / not exist in this translation?
-                                        // https://github.com/xizzhu/Joshua/issues/153
-                                        versesWithNotes[note.verseIndex]?.let { add(Pair(note, it)) }
-                                    }
-                                }
-                            }
-                            ?: emptyList()
-                } else {
-                    emptyList()
-                }
-
-                val bookNames = bibleReadingManager.readBookNames(currentTranslation)
-                val bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
-
-                searchResult.value = ViewData.Success(SearchResultViewData(
-                        items = buildSearchResultItems(
-                                query = query,
-                                verses = verses,
-                                bookmarks = bookmarks,
-                                highlights = highlights,
-                                notes = notes,
-                                bookNames = bookNames,
-                                bookShortNames = bookShortNames
-                        ),
-                        query = query,
-                        instanceSearch = instanceSearch,
-                        toast = application.getString(R.string.toast_verses_searched, notes.size + bookmarks.size + highlights.size + verses.size)
-                ))
             } catch (e: Exception) {
-                Log.e(tag, "Error occurred which searching, query=$query instanceSearch=$instanceSearch, includeBookmarks=$includeBookmarks, includeHighlights=$includeHighlights, includeNotes=includeNotes", e)
+                Log.e(tag, "Error occurred which searching, query=$query instanceSearch=$instanceSearch, searchConfig=$searchConfig", e)
                 searchResult.value = ViewData.Failure(e)
             }
         }

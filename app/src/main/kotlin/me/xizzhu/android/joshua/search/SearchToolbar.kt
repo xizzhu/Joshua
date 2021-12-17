@@ -41,31 +41,33 @@ class SearchToolbar : MaterialToolbar {
 
     private fun searchView(): SearchView = menu.findItem(R.id.action_search).actionView as SearchView
 
-    fun initialize(includeBookmarks: Boolean, onIncludeBookmarksChanged: (Boolean) -> Unit,
-                   includeHighlights: Boolean, onIncludeHighlightsChanged: (Boolean) -> Unit,
-                   includeNotes: Boolean, onIncludeNotesChanged: (Boolean) -> Unit,
-                   onQueryTextListener: SearchView.OnQueryTextListener, clearHistory: () -> Unit) {
-        menu.findItem(R.id.action_search_include_bookmarks).isChecked = includeBookmarks
-        menu.findItem(R.id.action_search_include_highlights).isChecked = includeHighlights
-        menu.findItem(R.id.action_search_include_notes).isChecked = includeNotes
-
+    fun initialize(
+            onIncludeOldTestamentChanged: (Boolean) -> Unit, onIncludeNewTestamentChanged: (Boolean) -> Unit,
+            onIncludeBookmarksChanged: (Boolean) -> Unit, onIncludeHighlightsChanged: (Boolean) -> Unit, onIncludeNotesChanged: (Boolean) -> Unit,
+            onQueryTextListener: SearchView.OnQueryTextListener, clearHistory: () -> Unit
+    ) {
         searchView().setOnQueryTextListener(onQueryTextListener)
 
         setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
+                R.id.action_search_include_old_testament -> {
+                    onIncludeOldTestamentChanged(!menuItem.isChecked)
+                    true
+                }
+                R.id.action_search_include_new_testament -> {
+                    onIncludeNewTestamentChanged(!menuItem.isChecked)
+                    true
+                }
                 R.id.action_search_include_bookmarks -> {
-                    menuItem.isChecked = !menuItem.isChecked
-                    onIncludeBookmarksChanged(menuItem.isChecked)
+                    onIncludeBookmarksChanged(!menuItem.isChecked)
                     true
                 }
                 R.id.action_search_include_highlights -> {
-                    menuItem.isChecked = !menuItem.isChecked
-                    onIncludeHighlightsChanged(menuItem.isChecked)
+                    onIncludeHighlightsChanged(!menuItem.isChecked)
                     true
                 }
                 R.id.action_search_include_notes -> {
-                    menuItem.isChecked = !menuItem.isChecked
-                    onIncludeNotesChanged(menuItem.isChecked)
+                    onIncludeNotesChanged(!menuItem.isChecked)
                     true
                 }
                 R.id.action_clear_search_history -> {
@@ -75,6 +77,17 @@ class SearchToolbar : MaterialToolbar {
                 else -> false
             }
         }
+    }
+
+    fun setSearchConfiguration(
+            includeOldTestament: Boolean, includeNewTestament: Boolean,
+            includeBookmarks: Boolean, includeHighlights: Boolean, includeNotes: Boolean
+    ) {
+        menu.findItem(R.id.action_search_include_old_testament).isChecked = includeOldTestament
+        menu.findItem(R.id.action_search_include_new_testament).isChecked = includeNewTestament
+        menu.findItem(R.id.action_search_include_bookmarks).isChecked = includeBookmarks
+        menu.findItem(R.id.action_search_include_highlights).isChecked = includeHighlights
+        menu.findItem(R.id.action_search_include_notes).isChecked = includeNotes
     }
 
     fun setSearchableInfo(searchable: SearchableInfo) {

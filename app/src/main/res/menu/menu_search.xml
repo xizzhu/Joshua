@@ -9,6 +9,18 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/action_search_include_old_testament"
+        android:checkable="true"
+        android:title="@string/action_search_include_old_testament"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_search_include_new_testament"
+        android:checkable="true"
+        android:title="@string/action_search_include_new_testament"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_search_include_bookmarks"
         android:checkable="true"
         android:title="@string/action_search_include_bookmarks"

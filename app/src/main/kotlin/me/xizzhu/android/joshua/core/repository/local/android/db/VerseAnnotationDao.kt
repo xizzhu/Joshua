@@ -90,7 +90,7 @@ abstract class VerseAnnotationDao<T : VerseAnnotation>(sqliteHelper: SQLiteOpenH
     fun search(query: String): List<T> {
         if (query.isBlank()) return emptyList()
 
-        return searchVerseAnnotations(query)
+        return buildQueryToSearchVerseAnnotations(query)
                 .orderBy(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX).toList { row ->
                     row.toVerseAnnotation(
                             VerseIndex(row.getInt(COLUMN_BOOK_INDEX), row.getInt(COLUMN_CHAPTER_INDEX), row.getInt(COLUMN_VERSE_INDEX)),
@@ -99,8 +99,7 @@ abstract class VerseAnnotationDao<T : VerseAnnotation>(sqliteHelper: SQLiteOpenH
                 }
     }
 
-    @WorkerThread
-    protected abstract fun searchVerseAnnotations(query: String): Query
+    protected abstract fun buildQueryToSearchVerseAnnotations(query: String): Query
 
     @WorkerThread
     fun save(verseAnnotation: T) {

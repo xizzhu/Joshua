@@ -20,8 +20,10 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.annotation.WorkerThread
 import me.xizzhu.android.ask.db.*
+import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.VerseSearchQuery
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
 
@@ -119,21 +121,28 @@ class TranslationDao(sqliteHelper: SQLiteOpenHelper) {
     }
 
     @WorkerThread
-    fun search(translationShortName: String, query: String): List<Verse> = db.withTransaction {
-        if (query.isBlank() || !hasTableAndLogIfNoTable(translationShortName)) return@withTransaction emptyList()
+    fun search(query: VerseSearchQuery): List<Verse> = db.withTransaction {
+        if (query.keyword.isBlank()
+                || (!query.includeOldTestament && !query.includeNewTestament)
+                || !hasTableAndLogIfNoTable(query.translation)) {
+            return@withTransaction emptyList()
+        }
 
-        select(translationShortName) {
-            var condition: Condition = noOp()
-            query.trim().replace("\\s+", " ").split(" ").forEach { keyword ->
-                (COLUMN_TEXT like "%%$keyword%%").run {
-                    condition = if (condition == Condition.NoOp) this else condition and this
-                }
-            }
-            condition
+        select(query.translation) {
+            (if (query.includeOldTestament && !query.includeNewTestament) {
+                // Old Testament only
+                COLUMN_BOOK_INDEX less Bible.OLD_TESTAMENT_COUNT
+            } else if (!query.includeOldTestament && query.includeNewTestament) {
+                // New Testament only
+                COLUMN_BOOK_INDEX greaterEq Bible.OLD_TESTAMENT_COUNT
+            } else {
+                // The whole Bible
+                noOp()
+            }).withQuery(COLUMN_TEXT, query.keyword)
         }.orderBy(COLUMN_BOOK_INDEX, COLUMN_CHAPTER_INDEX, COLUMN_VERSE_INDEX).toList { row ->
             Verse(
                     VerseIndex(row.getInt(COLUMN_BOOK_INDEX), row.getInt(COLUMN_CHAPTER_INDEX), row.getInt(COLUMN_VERSE_INDEX)),
-                    Verse.Text(translationShortName, row.getString(COLUMN_TEXT)), emptyList()
+                    Verse.Text(query.translation, row.getString(COLUMN_TEXT)), emptyList()
             )
         }
     }

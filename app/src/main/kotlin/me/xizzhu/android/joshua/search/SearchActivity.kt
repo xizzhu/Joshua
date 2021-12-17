@@ -54,12 +54,27 @@ class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), S
 
         searchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(this)
         observeSettings()
+        observeSearchConfiguration()
         observeSearchResults()
         initializeListeners()
     }
 
     private fun observeSettings() {
         searchViewModel.settings().onEach { viewBinding.searchResult.setSettings(it) }.launchIn(lifecycleScope)
+    }
+
+    private fun observeSearchConfiguration() {
+        searchViewModel.searchConfig()
+                .onSuccess { searchConfiguration ->
+                    viewBinding.toolbar.setSearchConfiguration(
+                            includeOldTestament = searchConfiguration.searchConfig.includeOldTestament,
+                            includeNewTestament = searchConfiguration.searchConfig.includeNewTestament,
+                            includeBookmarks = searchConfiguration.searchConfig.includeBookmarks,
+                            includeHighlights = searchConfiguration.searchConfig.includeHighlights,
+                            includeNotes = searchConfiguration.searchConfig.includeNotes,
+                    )
+                }
+                .launchIn(lifecycleScope)
     }
 
     private fun observeSearchResults() {
@@ -99,12 +114,11 @@ class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), S
 
     private fun initializeListeners() {
         viewBinding.toolbar.initialize(
-                includeBookmarks = searchViewModel.includeBookmarks,
-                onIncludeBookmarksChanged = { searchViewModel.includeBookmarks = it },
-                includeHighlights = searchViewModel.includeHighlights,
-                onIncludeHighlightsChanged = { searchViewModel.includeHighlights = it },
-                includeNotes = searchViewModel.includeNotes,
-                onIncludeNotesChanged = { searchViewModel.includeNotes = it },
+                onIncludeOldTestamentChanged = { searchViewModel.includeOldTestament(it) },
+                onIncludeNewTestamentChanged = { searchViewModel.includeNewTestament(it) },
+                onIncludeBookmarksChanged = { searchViewModel.includeBookmarks(it) },
+                onIncludeHighlightsChanged = { searchViewModel.includeHighlights(it) },
+                onIncludeNotesChanged = { searchViewModel.includeNotes(it) },
                 onQueryTextListener = object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String): Boolean {
                         searchRecentSuggestions.saveRecentQuery(query, null)
