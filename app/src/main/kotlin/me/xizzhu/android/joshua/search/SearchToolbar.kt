@@ -51,28 +51,23 @@ class SearchToolbar : MaterialToolbar {
         setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_search_include_old_testament -> {
-                    menuItem.isChecked = !menuItem.isChecked
-                    onIncludeOldTestamentChanged(menuItem.isChecked)
+                    onIncludeOldTestamentChanged(!menuItem.isChecked)
                     true
                 }
                 R.id.action_search_include_new_testament -> {
-                    menuItem.isChecked = !menuItem.isChecked
-                    onIncludeNewTestamentChanged(menuItem.isChecked)
+                    onIncludeNewTestamentChanged(!menuItem.isChecked)
                     true
                 }
                 R.id.action_search_include_bookmarks -> {
-                    menuItem.isChecked = !menuItem.isChecked
-                    onIncludeBookmarksChanged(menuItem.isChecked)
+                    onIncludeBookmarksChanged(!menuItem.isChecked)
                     true
                 }
                 R.id.action_search_include_highlights -> {
-                    menuItem.isChecked = !menuItem.isChecked
-                    onIncludeHighlightsChanged(menuItem.isChecked)
+                    onIncludeHighlightsChanged(!menuItem.isChecked)
                     true
                 }
                 R.id.action_search_include_notes -> {
-                    menuItem.isChecked = !menuItem.isChecked
-                    onIncludeNotesChanged(menuItem.isChecked)
+                    onIncludeNotesChanged(!menuItem.isChecked)
                     true
                 }
                 R.id.action_clear_search_history -> {
