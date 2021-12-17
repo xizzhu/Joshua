@@ -22,7 +22,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.BaseViewModel
@@ -68,7 +68,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with empty query`() = testDispatcher.runBlockingTest {
+    fun `test search() with empty query`() = runTest {
         searchViewModel.search("", true)
         delay(1000L)
 
@@ -81,7 +81,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with empty result`() = testDispatcher.runBlockingTest {
+    fun `test search() with empty result`() = runTest {
         searchViewModel.search("query", false)
         delay(1000L)
 
@@ -97,7 +97,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test calling search() multiple times`() = testDispatcher.runBlockingTest {
+    fun `test calling search() multiple times`() = runTest {
         coEvery { searchManager.search("not used") } returns SearchResult(listOf(MockContents.kjvVerses[1]), emptyList(), emptyList(), emptyList())
         coEvery { searchManager.search("query") } returns SearchResult(listOf(MockContents.kjvVerses[0]), emptyList(), emptyList(), emptyList())
 
@@ -128,7 +128,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses only`() = testDispatcher.runBlockingTest {
+    fun `test search() with verses only`() = runTest {
         coEvery { searchManager.search("query") } returns SearchResult(
                 listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2], MockContents.kjvExtraVerses[0], MockContents.kjvExtraVerses[1]),
                 emptyList(),
@@ -168,7 +168,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses and bookmarks`() = testDispatcher.runBlockingTest {
+    fun `test search() with verses and bookmarks`() = runTest {
         coEvery { searchManager.search("query") } returns SearchResult(
                 listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
                 listOf(Pair(Bookmark(VerseIndex(0, 0, 0), 12345L), MockContents.kjvVerses[0])),
@@ -204,7 +204,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses and highlights`() = testDispatcher.runBlockingTest {
+    fun `test search() with verses and highlights`() = runTest {
         coEvery { searchManager.search("query") } returns SearchResult(
                 listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
                 emptyList(),
@@ -240,7 +240,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses and notes`() = testDispatcher.runBlockingTest {
+    fun `test search() with verses and notes`() = runTest {
         coEvery { searchManager.search("query") } returns SearchResult(
                 listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
                 emptyList(),
@@ -277,7 +277,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses, bookmarks, highlights, and notes`() = testDispatcher.runBlockingTest {
+    fun `test search() with verses, bookmarks, highlights, and notes`() = runTest {
         coEvery { searchManager.search("query") } returns SearchResult(
                 listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
                 listOf(Pair(Bookmark(VerseIndex(0, 0, 0), 12345L), MockContents.kjvVerses[0])),

@@ -24,10 +24,9 @@ import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarkItem
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -88,7 +87,7 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test loadAnnotatedVerses() with empty result`() = testDispatcher.runBlockingTest {
+    fun `test loadAnnotatedVerses() with empty result`() = runTest {
         every { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
         coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
@@ -96,21 +95,17 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
         every { verseAnnotationManager.sortOrder() } returns flowOf(Constants.SORT_BY_BOOK)
         coEvery { verseAnnotationManager.read(Constants.SORT_BY_BOOK) } returns emptyList()
 
-        val job = async { annotatedVersesViewModel.annotatedVerses().take(2).toList() }
+        val job = async { annotatedVersesViewModel.annotatedVerses().first { it is BaseViewModel.ViewData.Success } }
         annotatedVersesViewModel.loadAnnotatedVerses()
 
         val actual = job.await()
-        assertEquals(2, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
-
-        val success = actual[1]
-        assertTrue(success is BaseViewModel.ViewData.Success)
-        assertEquals(1, success.data.items.size)
-        assertEquals("NO ANNOTATED VERSES", (success.data.items[0] as TextItem).title.toString())
+        assertTrue(actual is BaseViewModel.ViewData.Success)
+        assertEquals(1, actual.data.items.size)
+        assertEquals("NO ANNOTATED VERSES", (actual.data.items[0] as TextItem).title.toString())
     }
 
     @Test
-    fun `test loadAnnotatedVerses() sort by book`() = testDispatcher.runBlockingTest {
+    fun `test loadAnnotatedVerses() sort by book`() = runTest {
         every { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
         coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
@@ -138,26 +133,22 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
                 TestAnnotatedVerse(VerseIndex(1, 22, 18), 12345L)
         )
 
-        val job = async { annotatedVersesViewModel.annotatedVerses().take(2).toList() }
+        val job = async { annotatedVersesViewModel.annotatedVerses().first { it is BaseViewModel.ViewData.Success } }
         annotatedVersesViewModel.loadAnnotatedVerses()
 
         val actual = job.await()
-        assertEquals(2, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
-
-        val success = actual[1]
-        assertTrue(success is BaseViewModel.ViewData.Success)
-        assertEquals(6, success.data.items.size)
-        assertEquals("Genesis", (success.data.items[0] as TitleItem).title.toString())
-        assertEquals(VerseIndex(0, 0, 0), (success.data.items[1] as BookmarkItem).verseIndex)
-        assertEquals(VerseIndex(0, 0, 1), (success.data.items[2] as BookmarkItem).verseIndex)
-        assertEquals(VerseIndex(0, 9, 9), (success.data.items[3] as BookmarkItem).verseIndex)
-        assertEquals("Exodus", (success.data.items[4] as TitleItem).title.toString())
-        assertEquals(VerseIndex(1, 22, 18), (success.data.items[5] as BookmarkItem).verseIndex)
+        assertTrue(actual is BaseViewModel.ViewData.Success)
+        assertEquals(6, actual.data.items.size)
+        assertEquals("Genesis", (actual.data.items[0] as TitleItem).title.toString())
+        assertEquals(VerseIndex(0, 0, 0), (actual.data.items[1] as BookmarkItem).verseIndex)
+        assertEquals(VerseIndex(0, 0, 1), (actual.data.items[2] as BookmarkItem).verseIndex)
+        assertEquals(VerseIndex(0, 9, 9), (actual.data.items[3] as BookmarkItem).verseIndex)
+        assertEquals("Exodus", (actual.data.items[4] as TitleItem).title.toString())
+        assertEquals(VerseIndex(1, 22, 18), (actual.data.items[5] as BookmarkItem).verseIndex)
     }
 
     @Test
-    fun `test loadAnnotatedVerses() sort by date`() = testDispatcher.runBlockingTest {
+    fun `test loadAnnotatedVerses() sort by date`() = runTest {
         annotatedVersesViewModel = spyk(annotatedVersesViewModel)
         every { annotatedVersesViewModel.formatDate(any(), any()) } answers { (it.invocation.args[1] as Long).toString() }
         every { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
@@ -187,21 +178,17 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
                 TestAnnotatedVerse(VerseIndex(1, 22, 18), 1L)
         )
 
-        val job = async { annotatedVersesViewModel.annotatedVerses().take(2).toList() }
+        val job = async { annotatedVersesViewModel.annotatedVerses().first { it is BaseViewModel.ViewData.Success } }
         annotatedVersesViewModel.loadAnnotatedVerses()
 
         val actual = job.await()
-        assertEquals(2, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
-
-        val success = actual[1]
-        assertTrue(success is BaseViewModel.ViewData.Success)
-        assertEquals(6, success.data.items.size)
-        assertEquals("31104000004", (success.data.items[0] as TitleItem).title.toString())
-        assertEquals(VerseIndex(0, 0, 0), (success.data.items[1] as BookmarkItem).verseIndex)
-        assertEquals("3", (success.data.items[2] as TitleItem).title.toString())
-        assertEquals(VerseIndex(0, 0, 1), (success.data.items[3] as BookmarkItem).verseIndex)
-        assertEquals(VerseIndex(0, 9, 9), (success.data.items[4] as BookmarkItem).verseIndex)
-        assertEquals(VerseIndex(1, 22, 18), (success.data.items[5] as BookmarkItem).verseIndex)
+        assertTrue(actual is BaseViewModel.ViewData.Success)
+        assertEquals(6, actual.data.items.size)
+        assertEquals("31104000004", (actual.data.items[0] as TitleItem).title.toString())
+        assertEquals(VerseIndex(0, 0, 0), (actual.data.items[1] as BookmarkItem).verseIndex)
+        assertEquals("3", (actual.data.items[2] as TitleItem).title.toString())
+        assertEquals(VerseIndex(0, 0, 1), (actual.data.items[3] as BookmarkItem).verseIndex)
+        assertEquals(VerseIndex(0, 9, 9), (actual.data.items[4] as BookmarkItem).verseIndex)
+        assertEquals(VerseIndex(1, 22, 18), (actual.data.items[5] as BookmarkItem).verseIndex)
     }
 }

@@ -45,7 +45,7 @@ object Versions {
     object Kotlin {
         val jvmTarget = java.toString()
         const val core = "1.6.10"
-        const val coroutines = "1.5.2"
+        const val coroutines = "1.6.0-RC3"
     }
 
     object AndroidX {

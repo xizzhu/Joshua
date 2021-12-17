@@ -16,7 +16,7 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
@@ -37,19 +37,19 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     }
 
     @Test
-    fun testReadDefaultCurrentVerseIndex() = runBlocking {
+    fun testReadDefaultCurrentVerseIndex() = runTest {
         assertEquals(VerseIndex(0, 0, 0), androidReadingStorage.readCurrentVerseIndex())
     }
 
     @Test
-    fun testSaveThenReadCurrentVerseIndex() = runBlocking {
+    fun testSaveThenReadCurrentVerseIndex() = runTest {
         val expected = VerseIndex(1, 2, 3)
         androidReadingStorage.saveCurrentVerseIndex(expected)
         assertEquals(expected, androidReadingStorage.readCurrentVerseIndex())
     }
 
     @Test
-    fun testSaveOverrideThenReadCurrentVerseIndex() = runBlocking {
+    fun testSaveOverrideThenReadCurrentVerseIndex() = runTest {
         val expected = VerseIndex(1, 2, 3)
         androidReadingStorage.saveCurrentVerseIndex(VerseIndex(9, 8, 7))
         androidReadingStorage.saveCurrentVerseIndex(expected)
@@ -57,19 +57,19 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     }
 
     @Test
-    fun testReadDefaultCurrentTranslation() = runBlocking {
+    fun testReadDefaultCurrentTranslation() = runTest {
         assertEquals("", androidReadingStorage.readCurrentTranslation())
     }
 
     @Test
-    fun testSaveThenReadCurrentTranslation() = runBlocking {
+    fun testSaveThenReadCurrentTranslation() = runTest {
         val expected = MockContents.kjvShortName
         androidReadingStorage.saveCurrentTranslation(expected)
         assertEquals(expected, androidReadingStorage.readCurrentTranslation())
     }
 
     @Test
-    fun testSaveOverrideThenReadCurrentTranslation() = runBlocking {
+    fun testSaveOverrideThenReadCurrentTranslation() = runTest {
         val expected = MockContents.kjvShortName
         androidReadingStorage.saveCurrentTranslation("random")
         androidReadingStorage.saveCurrentTranslation(expected)
@@ -77,19 +77,19 @@ class AndroidReadingStorageTest : BaseSqliteTest() {
     }
 
     @Test
-    fun testReadDefaultParallelTranslations() = runBlocking {
+    fun testReadDefaultParallelTranslations() = runTest {
         assertTrue(androidReadingStorage.readParallelTranslations().isEmpty())
     }
 
     @Test
-    fun testSaveThenReadParallelTranslations() = runBlocking {
+    fun testSaveThenReadParallelTranslations() = runTest {
         val expected = listOf(MockContents.kjvShortName, MockContents.cuvShortName)
         androidReadingStorage.saveParallelTranslations(expected)
         assertEquals(expected, androidReadingStorage.readParallelTranslations())
     }
 
     @Test
-    fun testSaveOverrideThenReadParallelTranslations() = runBlocking {
+    fun testSaveOverrideThenReadParallelTranslations() = runTest {
         val expected = listOf(MockContents.kjvShortName, MockContents.cuvShortName)
         androidReadingStorage.saveParallelTranslations(listOf("random"))
         androidReadingStorage.saveParallelTranslations(expected)

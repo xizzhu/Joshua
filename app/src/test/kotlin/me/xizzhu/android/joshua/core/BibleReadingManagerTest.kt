@@ -22,7 +22,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -44,7 +44,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test updateDownloadedTranslations() with no translations downloaded`() = runBlocking {
+    fun `test updateDownloadedTranslations() with no translations downloaded`() = runTest {
         coEvery { bibleReadingRepository.saveCurrentTranslation("") } returns Unit
         coEvery { bibleReadingRepository.clearParallelTranslation() } returns Unit
 
@@ -57,7 +57,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test updateDownloadedTranslations() for first downloaded translation`() = runBlocking {
+    fun `test updateDownloadedTranslations() for first downloaded translation`() = runTest {
         coEvery { bibleReadingRepository.saveCurrentTranslation(MockContents.cuvShortName) } returns Unit
         every { bibleReadingRepository.currentTranslation } returns flowOf("")
 
@@ -71,7 +71,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test updateDownloadedTranslations() with translations already downloaded`() = runBlocking {
+    fun `test updateDownloadedTranslations() with translations already downloaded`() = runTest {
         every { bibleReadingRepository.currentTranslation } returns flowOf(MockContents.kjvShortName)
 
         val bibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, testDispatcher)
@@ -83,7 +83,7 @@ class BibleReadingManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test updateDownloadedTranslations() with parallel translations`() = runBlocking {
+    fun `test updateDownloadedTranslations() with parallel translations`() = runTest {
         every { bibleReadingRepository.currentTranslation } returns flowOf(MockContents.kjvShortName)
         every { bibleReadingRepository.parallelTranslations } returns flowOf(listOf(MockContents.cuvShortName))
 

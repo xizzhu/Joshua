@@ -23,7 +23,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Highlight
@@ -83,7 +83,7 @@ class ReadingViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test loadVerseDetail`() = testDispatcher.runBlockingTest {
+    fun `test loadVerseDetail`() = runTest {
         val verseIndex = VerseIndex(0, 0, 0)
         coEvery { bookmarkManager.read(verseIndex) } returns Bookmark(verseIndex, 12345L)
         coEvery { highlightManager.read(verseIndex) } returns Highlight(verseIndex, Highlight.COLOR_PURPLE, 12345L)
@@ -137,7 +137,7 @@ class ReadingViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test loadVerseDetail with empty verses`() = testDispatcher.runBlockingTest {
+    fun `test loadVerseDetail with empty verses`() = runTest {
         val verseIndex = VerseIndex(0, 0, 0)
         coEvery { bookmarkManager.read(verseIndex) } returns Bookmark(verseIndex, 0L)
         coEvery { highlightManager.read(verseIndex) } returns Highlight(verseIndex, Highlight.COLOR_PURPLE, 0L)

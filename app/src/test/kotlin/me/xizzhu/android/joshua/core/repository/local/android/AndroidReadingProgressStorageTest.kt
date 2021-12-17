@@ -17,7 +17,7 @@
 package me.xizzhu.android.joshua.core.repository.local.android
 
 import android.text.format.DateUtils
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.ReadingProgress
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -36,134 +36,118 @@ class AndroidReadingProgressStorageTest : BaseSqliteTest() {
     }
 
     @Test
-    fun testEmptyReadingProgress() {
-        runBlocking {
-            val bookIndex = 1
-            val chapterIndex = 2
-            val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 0, 0L, 0L)
-            val actual = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
-            assertEquals(expected, actual)
+    fun testEmptyReadingProgress() = runTest {
+        val bookIndex = 1
+        val chapterIndex = 2
+        val expected = ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 0, 0L, 0L)
+        val actual = androidDatabase.readingProgressDao.read(bookIndex, chapterIndex)
+        assertEquals(expected, actual)
 
-            assertEquals(ReadingProgress(1, 0L, emptyList()),
-                    androidReadingProgressStorage.read())
-        }
+        assertEquals(ReadingProgress(1, 0L, emptyList()),
+                androidReadingProgressStorage.read())
     }
 
     @Test
-    fun testTrackReadingProgress() {
-        runBlocking {
-            val bookIndex = 1
-            val chapterIndex = 2
-            val timeSpentInMills = 3L
-            val timestamp = 2L * DateUtils.DAY_IN_MILLIS
-            androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
+    fun testTrackReadingProgress() = runTest {
+        val bookIndex = 1
+        val chapterIndex = 2
+        val timeSpentInMills = 3L
+        val timestamp = 2L * DateUtils.DAY_IN_MILLIS
+        androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
 
-            val expected = ReadingProgress(1, timestamp,
-                    listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 1, timeSpentInMills, timestamp)))
-            val actual = androidReadingProgressStorage.read()
-            assertEquals(expected, actual)
-        }
+        val expected = ReadingProgress(1, timestamp,
+                listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 1, timeSpentInMills, timestamp)))
+        val actual = androidReadingProgressStorage.read()
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun testTrackMultipleReadingProgress() {
-        runBlocking {
-            val expected = ReadingProgress(1, 7L,
-                    listOf(ReadingProgress.ChapterReadingStatus(3, 4, 1, 654L, 7L),
-                            ReadingProgress.ChapterReadingStatus(3, 5, 1, 987L, 2L)))
+    fun testTrackMultipleReadingProgress() = runTest {
+        val expected = ReadingProgress(1, 7L,
+                listOf(ReadingProgress.ChapterReadingStatus(3, 4, 1, 654L, 7L),
+                        ReadingProgress.ChapterReadingStatus(3, 5, 1, 987L, 2L)))
 
-            for (chapterReadingStatus in expected.chapterReadingStatus) {
-                androidReadingProgressStorage.trackReadingProgress(
-                        chapterReadingStatus.bookIndex, chapterReadingStatus.chapterIndex,
-                        chapterReadingStatus.timeSpentInMillis, chapterReadingStatus.lastReadingTimestamp)
-            }
-
-            val actual = androidReadingProgressStorage.read()
-            assertEquals(expected, actual)
+        for (chapterReadingStatus in expected.chapterReadingStatus) {
+            androidReadingProgressStorage.trackReadingProgress(
+                    chapterReadingStatus.bookIndex, chapterReadingStatus.chapterIndex,
+                    chapterReadingStatus.timeSpentInMillis, chapterReadingStatus.lastReadingTimestamp)
         }
+
+        val actual = androidReadingProgressStorage.read()
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun testTrackReadingProgressEarlierTimestamp() {
-        runBlocking {
-            val bookIndex = 1
-            val chapterIndex = 2
-            val timeSpentInMills = 3L
-            val timestamp = 2L * DateUtils.DAY_IN_MILLIS
-            val earlierTimestamp = timestamp - 6L * DateUtils.HOUR_IN_MILLIS
-            androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
-            androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, earlierTimestamp)
+    fun testTrackReadingProgressEarlierTimestamp() = runTest {
+        val bookIndex = 1
+        val chapterIndex = 2
+        val timeSpentInMills = 3L
+        val timestamp = 2L * DateUtils.DAY_IN_MILLIS
+        val earlierTimestamp = timestamp - 6L * DateUtils.HOUR_IN_MILLIS
+        androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
+        androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, earlierTimestamp)
 
-            val expected = ReadingProgress(1, timestamp,
-                    listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 1, timeSpentInMills, timestamp)))
-            val actual = androidReadingProgressStorage.read()
-            assertEquals(expected, actual)
-        }
+        val expected = ReadingProgress(1, timestamp,
+                listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 1, timeSpentInMills, timestamp)))
+        val actual = androidReadingProgressStorage.read()
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun testTrackReadingProgressSameDay() {
-        runBlocking {
-            val bookIndex = 1
-            val chapterIndex = 2
-            val timeSpentInMills = 3L
-            val timestamp = 2L * DateUtils.DAY_IN_MILLIS
-            val updatedTimestamp = timestamp + 6L * DateUtils.HOUR_IN_MILLIS
-            androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
-            androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, updatedTimestamp)
+    fun testTrackReadingProgressSameDay() = runTest {
+        val bookIndex = 1
+        val chapterIndex = 2
+        val timeSpentInMills = 3L
+        val timestamp = 2L * DateUtils.DAY_IN_MILLIS
+        val updatedTimestamp = timestamp + 6L * DateUtils.HOUR_IN_MILLIS
+        androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
+        androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, updatedTimestamp)
 
-            val expected = ReadingProgress(1, updatedTimestamp,
-                    listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 2, 2L * timeSpentInMills, updatedTimestamp)))
-            val actual = androidReadingProgressStorage.read()
-            assertEquals(expected, actual)
-        }
+        val expected = ReadingProgress(1, updatedTimestamp,
+                listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 2, 2L * timeSpentInMills, updatedTimestamp)))
+        val actual = androidReadingProgressStorage.read()
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun testTrackReadingProgressNextDay() {
-        runBlocking {
-            val bookIndex = 1
-            val chapterIndex = 2
-            val timeSpentInMills = 3L
-            val timestamp = 2L * DateUtils.DAY_IN_MILLIS + 6L * DateUtils.HOUR_IN_MILLIS
-            val updatedTimestamp = timestamp + DateUtils.DAY_IN_MILLIS
-            androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
-            androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, updatedTimestamp)
+    fun testTrackReadingProgressNextDay() = runTest {
+        val bookIndex = 1
+        val chapterIndex = 2
+        val timeSpentInMills = 3L
+        val timestamp = 2L * DateUtils.DAY_IN_MILLIS + 6L * DateUtils.HOUR_IN_MILLIS
+        val updatedTimestamp = timestamp + DateUtils.DAY_IN_MILLIS
+        androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
+        androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, updatedTimestamp)
 
-            val expected = ReadingProgress(2, updatedTimestamp,
-                    listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 2, 2L * timeSpentInMills, updatedTimestamp)))
-            val actual = androidReadingProgressStorage.read()
-            assertEquals(expected, actual)
-        }
+        val expected = ReadingProgress(2, updatedTimestamp,
+                listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 2, 2L * timeSpentInMills, updatedTimestamp)))
+        val actual = androidReadingProgressStorage.read()
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun testTrackReadingProgressMoreThanOneDay() {
-        runBlocking {
-            val bookIndex = 1
-            val chapterIndex = 2
-            val timeSpentInMills = 3L
-            val timestamp = 2L * DateUtils.DAY_IN_MILLIS + 6L * DateUtils.HOUR_IN_MILLIS
-            val updatedTimestamp = timestamp + 5L * DateUtils.DAY_IN_MILLIS
-            androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
-            androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, updatedTimestamp)
+    fun testTrackReadingProgressMoreThanOneDay() = runTest {
+        val bookIndex = 1
+        val chapterIndex = 2
+        val timeSpentInMills = 3L
+        val timestamp = 2L * DateUtils.DAY_IN_MILLIS + 6L * DateUtils.HOUR_IN_MILLIS
+        val updatedTimestamp = timestamp + 5L * DateUtils.DAY_IN_MILLIS
+        androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, timestamp)
+        androidReadingProgressStorage.trackReadingProgress(bookIndex, chapterIndex, timeSpentInMills, updatedTimestamp)
 
-            val expected = ReadingProgress(1, updatedTimestamp,
-                    listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 2, 2L * timeSpentInMills, updatedTimestamp)))
-            val actual = androidReadingProgressStorage.read()
-            assertEquals(expected, actual)
-        }
+        val expected = ReadingProgress(1, updatedTimestamp,
+                listOf(ReadingProgress.ChapterReadingStatus(bookIndex, chapterIndex, 2, 2L * timeSpentInMills, updatedTimestamp)))
+        val actual = androidReadingProgressStorage.read()
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun testSaveThenRead() {
-        runBlocking {
-            val readingProgress = ReadingProgress(1, 2L, listOf(
-                    ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
-                    ReadingProgress.ChapterReadingStatus(8, 9, 10, 11L, 12L)
-            ))
-            androidReadingProgressStorage.save(readingProgress)
-            assertEquals(readingProgress, androidReadingProgressStorage.read())
-        }
+    fun testSaveThenRead() = runTest {
+        val readingProgress = ReadingProgress(1, 2L, listOf(
+                ReadingProgress.ChapterReadingStatus(3, 4, 5, 6L, 7L),
+                ReadingProgress.ChapterReadingStatus(8, 9, 10, 11L, 12L)
+        ))
+        androidReadingProgressStorage.save(readingProgress)
+        assertEquals(readingProgress, androidReadingProgressStorage.read())
     }
 }

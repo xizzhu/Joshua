@@ -21,7 +21,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.ReadingProgress
 import me.xizzhu.android.joshua.core.ReadingProgressManager
@@ -56,20 +56,17 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test loadReadingProgress with exception`() = testDispatcher.runBlockingTest {
+    fun `test loadReadingProgress with exception`() = runTest {
         coEvery { readingProgressManager.read() } throws RuntimeException("random exception")
 
-        val job = async { readingProgressViewModel.readingProgress().take(2).toList() }
+        val job = async { readingProgressViewModel.readingProgress().first { it is BaseViewModel.ViewData.Failure } }
         readingProgressViewModel.loadReadingProgress()
 
-        val actual = job.await()
-        assertEquals(2, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
-        assertTrue(actual[1] is BaseViewModel.ViewData.Failure)
+        job.await()
     }
 
     @Test
-    fun `test loadReadingProgress`() = testDispatcher.runBlockingTest {
+    fun `test loadReadingProgress`() = runTest {
         coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
         coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
         coEvery { readingProgressManager.read() } returns ReadingProgress(
@@ -83,22 +80,18 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
                 )
         )
 
-        val job = async { readingProgressViewModel.readingProgress().take(2).toList() }
+        val job = async { readingProgressViewModel.readingProgress().first { it is BaseViewModel.ViewData.Success } }
         readingProgressViewModel.loadReadingProgress()
 
         val actual = job.await()
-        assertEquals(2, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
-
-        val success = actual[1]
-        assertTrue(success is BaseViewModel.ViewData.Success)
-        assertEquals(67, success.data.items.size)
-        assertEquals(2, (success.data.items[0] as ReadingProgressSummaryItem).continuousReadingDays)
-        assertEquals(4, (success.data.items[0] as ReadingProgressSummaryItem).chaptersRead)
-        assertEquals(1, (success.data.items[0] as ReadingProgressSummaryItem).finishedBooks)
-        assertEquals(0, (success.data.items[0] as ReadingProgressSummaryItem).finishedOldTestament)
-        assertEquals(1, (success.data.items[0] as ReadingProgressSummaryItem).finishedNewTestament)
-        success.data.items.subList(1, success.data.items.size).forEachIndexed { book, item ->
+        assertTrue(actual is BaseViewModel.ViewData.Success)
+        assertEquals(67, actual.data.items.size)
+        assertEquals(2, (actual.data.items[0] as ReadingProgressSummaryItem).continuousReadingDays)
+        assertEquals(4, (actual.data.items[0] as ReadingProgressSummaryItem).chaptersRead)
+        assertEquals(1, (actual.data.items[0] as ReadingProgressSummaryItem).finishedBooks)
+        assertEquals(0, (actual.data.items[0] as ReadingProgressSummaryItem).finishedOldTestament)
+        assertEquals(1, (actual.data.items[0] as ReadingProgressSummaryItem).finishedNewTestament)
+        actual.data.items.subList(1, actual.data.items.size).forEachIndexed { book, item ->
             assertTrue(item is ReadingProgressDetailItem)
             when (book) {
                 0 -> {

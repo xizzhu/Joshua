@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.remote.android
 
 import androidx.test.core.app.ApplicationProvider
-import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -41,7 +40,7 @@ class HttpTranslationServiceTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test toRemoteTranslations()`() = testDispatcher.runBlockingTest {
+    fun `test toRemoteTranslations()`() {
         val inputStream = ByteArrayInputStream("""
         {
         	"translations": [{

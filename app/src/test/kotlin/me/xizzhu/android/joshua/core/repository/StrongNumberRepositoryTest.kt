@@ -20,8 +20,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.repository.local.LocalStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberIndexes
@@ -48,7 +47,7 @@ class StrongNumberRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test download()`() = runBlocking {
+    fun `test download()`() = runTest {
         coEvery { localStrongNumberStorage.save(any(), any(), any()) } returns Unit
         coEvery { remoteStrongNumberStorage.fetchIndexes(any()) } returns RemoteStrongNumberIndexes(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex)
         coEvery { remoteStrongNumberStorage.fetchWords(any()) } returns RemoteStrongNumberWords(MockContents.strongNumberWords)

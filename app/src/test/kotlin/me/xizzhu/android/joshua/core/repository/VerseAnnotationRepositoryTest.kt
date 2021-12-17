@@ -20,7 +20,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.repository.local.LocalVerseAnnotationStorage
@@ -40,7 +40,7 @@ class VerseAnnotationRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test sortOrder from constructor`() = runBlocking {
+    fun `test sortOrder from constructor`() = runTest {
         coEvery { localVerseAnnotationStorage.readSortOrder() } returns Constants.SORT_BY_BOOK
 
         val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testDispatcher)
@@ -48,7 +48,7 @@ class VerseAnnotationRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test sortOrder from constructor with exception`() = runBlocking {
+    fun `test sortOrder from constructor with exception`() = runTest {
         coEvery { localVerseAnnotationStorage.readSortOrder() } throws RuntimeException("Random exception")
 
         val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testDispatcher)
@@ -56,7 +56,7 @@ class VerseAnnotationRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test saveSortOrder()`() = runBlocking {
+    fun `test saveSortOrder()`() = runTest {
         coEvery { localVerseAnnotationStorage.readSortOrder() } returns Constants.DEFAULT_SORT_ORDER
         coEvery { localVerseAnnotationStorage.saveSortOrder(Constants.SORT_BY_BOOK) } returns Unit
 

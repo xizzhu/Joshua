@@ -16,7 +16,7 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.toMap
@@ -38,109 +38,91 @@ class AndroidTranslationStorageTest : BaseSqliteTest() {
         androidTranslationStorage = AndroidTranslationStorage(androidDatabase)
     }
 
-    @org.junit.Test
-    fun testReadEmpty() {
-        runBlocking {
-            assertTrue(androidTranslationStorage.readTranslations().isEmpty())
-            assertEquals(0L, androidTranslationStorage.readTranslationListRefreshTimestamp())
-        }
+    @Test
+    fun testReadEmpty() = runTest {
+        assertTrue(androidTranslationStorage.readTranslations().isEmpty())
+        assertEquals(0L, androidTranslationStorage.readTranslationListRefreshTimestamp())
     }
 
     @Test
-    fun testTranslationListRefreshTimestamp() {
-        runBlocking {
-            androidTranslationStorage.saveTranslationListRefreshTimestamp(12345678L)
-            assertEquals(12345678L, androidTranslationStorage.readTranslationListRefreshTimestamp())
-        }
+    fun testTranslationListRefreshTimestamp() = runTest {
+        androidTranslationStorage.saveTranslationListRefreshTimestamp(12345678L)
+        assertEquals(12345678L, androidTranslationStorage.readTranslationListRefreshTimestamp())
     }
 
     @Test
-    fun testSaveThenRead() {
-        runBlocking {
-            androidTranslationStorage.replaceTranslations(listOf(MockContents.kjvTranslationInfo))
+    fun testSaveThenRead() = runTest {
+        androidTranslationStorage.replaceTranslations(listOf(MockContents.kjvTranslationInfo))
 
-            val actual = androidTranslationStorage.readTranslations()
-            assertEquals(1, actual.size)
-            assertEquals(MockContents.kjvTranslationInfo, actual[0])
-        }
+        val actual = androidTranslationStorage.readTranslations()
+        assertEquals(1, actual.size)
+        assertEquals(MockContents.kjvTranslationInfo, actual[0])
     }
 
     @Test
-    fun testSaveOverrideThenRead() {
-        runBlocking {
-            androidTranslationStorage.replaceTranslations(listOf(MockContents.kjvDownloadedTranslationInfo))
-            androidTranslationStorage.replaceTranslations(listOf(MockContents.kjvTranslationInfo))
+    fun testSaveOverrideThenRead() = runTest {
+        androidTranslationStorage.replaceTranslations(listOf(MockContents.kjvDownloadedTranslationInfo))
+        androidTranslationStorage.replaceTranslations(listOf(MockContents.kjvTranslationInfo))
 
-            val actual = androidTranslationStorage.readTranslations()
-            assertEquals(1, actual.size)
-            assertEquals(MockContents.kjvTranslationInfo, actual[0])
-        }
+        val actual = androidTranslationStorage.readTranslations()
+        assertEquals(1, actual.size)
+        assertEquals(MockContents.kjvTranslationInfo, actual[0])
     }
 
     @Test
-    fun testSaveTranslationThenRead() {
-        runBlocking {
-            androidTranslationStorage.saveTranslation(MockContents.kjvDownloadedTranslationInfo,
-                    MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
+    fun testSaveTranslationThenRead() = runTest {
+        androidTranslationStorage.saveTranslation(MockContents.kjvDownloadedTranslationInfo,
+                MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
 
-            val actual = androidTranslationStorage.readTranslations()
-            assertEquals(1, actual.size)
-            assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
-        }
+        val actual = androidTranslationStorage.readTranslations()
+        assertEquals(1, actual.size)
+        assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
     }
 
     @Test
-    fun testSaveTranslationMultipleTimesThenRead() {
-        runBlocking {
-            androidTranslationStorage.saveTranslation(MockContents.kjvDownloadedTranslationInfo,
-                    MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
-            androidTranslationStorage.saveTranslation(MockContents.kjvDownloadedTranslationInfo,
-                    MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
+    fun testSaveTranslationMultipleTimesThenRead() = runTest {
+        androidTranslationStorage.saveTranslation(MockContents.kjvDownloadedTranslationInfo,
+                MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
+        androidTranslationStorage.saveTranslation(MockContents.kjvDownloadedTranslationInfo,
+                MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
 
-            val actual = androidTranslationStorage.readTranslations()
-            assertEquals(1, actual.size)
-            assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
-        }
+        val actual = androidTranslationStorage.readTranslations()
+        assertEquals(1, actual.size)
+        assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
     }
 
     @Test
-    fun testSaveTranslationWithDownloadedFalseThenRead() {
-        runBlocking {
-            androidTranslationStorage.saveTranslation(MockContents.kjvTranslationInfo,
-                    MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
+    fun testSaveTranslationWithDownloadedFalseThenRead() = runTest {
+        androidTranslationStorage.saveTranslation(MockContents.kjvTranslationInfo,
+                MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
 
-            val actual = androidTranslationStorage.readTranslations()
-            assertEquals(1, actual.size)
-            assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
-        }
+        val actual = androidTranslationStorage.readTranslations()
+        assertEquals(1, actual.size)
+        assertEquals(MockContents.kjvDownloadedTranslationInfo, actual[0])
     }
 
     @Test
-    fun testRemoveNonExistTranslation() {
-        runBlocking {
-            assertFalse(androidDatabase.readableDatabase.hasTable("non_exist"))
-            androidTranslationStorage.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, true))
-            assertFalse(androidDatabase.readableDatabase.hasTable("non_exist"))
-        }
+    fun testRemoveNonExistTranslation() = runTest {
+        assertFalse(androidDatabase.readableDatabase.hasTable("non_exist"))
+        androidTranslationStorage.removeTranslation(TranslationInfo("non_exist", "name", "language", 12345L, true))
+        assertFalse(androidDatabase.readableDatabase.hasTable("non_exist"))
     }
 
     @Test
-    fun testRemoveTranslation() {
-        runBlocking {
-            androidTranslationStorage.saveTranslation(MockContents.kjvTranslationInfo,
-                    MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
-            assertTrue(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
-            assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(MockContents.kjvShortName))
-            assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(
-                    MockContents.kjvShortName, MockContents.kjvVerses[0].verseIndex.bookIndex,
-                    MockContents.kjvVerses[0].verseIndex.chapterIndex))
+    fun testRemoveTranslation() = runTest {
+        androidTranslationStorage.saveTranslation(MockContents.kjvTranslationInfo,
+                MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap())
+        assertTrue(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
+        assertEquals(MockContents.kjvBookNames, androidDatabase.bookNamesDao.read(MockContents.kjvShortName))
+        assertEquals(MockContents.kjvVerses, androidDatabase.translationDao.read(
+                MockContents.kjvShortName, MockContents.kjvVerses[0].verseIndex.bookIndex,
+                MockContents.kjvVerses[0].verseIndex.chapterIndex))
 
-            androidTranslationStorage.removeTranslation(MockContents.kjvTranslationInfo)
-            assertFalse(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
-            assertTrue(androidDatabase.bookNamesDao.read(MockContents.kjvShortName).isEmpty())
-            assertTrue(androidDatabase.translationDao.read(MockContents.kjvShortName,
-                    MockContents.kjvVerses[0].verseIndex.bookIndex,
-                    MockContents.kjvVerses[0].verseIndex.chapterIndex).isEmpty())
-        }
+        androidTranslationStorage.removeTranslation(MockContents.kjvTranslationInfo)
+        assertFalse(androidDatabase.readableDatabase.hasTable(MockContents.kjvShortName))
+        assertTrue(androidDatabase.bookNamesDao.read(MockContents.kjvShortName).isEmpty())
+        assertTrue(androidDatabase.translationDao.read(MockContents.kjvShortName,
+                MockContents.kjvVerses[0].verseIndex.bookIndex,
+                MockContents.kjvVerses[0].verseIndex.chapterIndex).isEmpty())
     }
 }

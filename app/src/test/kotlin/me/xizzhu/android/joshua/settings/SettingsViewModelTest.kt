@@ -24,7 +24,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.BackupManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -70,14 +70,14 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test backup with null uri`(): Unit = runBlocking {
+    fun `test backup with null uri`(): Unit = runTest {
         val actual = settingsViewModel.backup(null).toList()
         assertEquals(1, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Failure)
     }
 
     @Test
-    fun `test backup with error`(): Unit = runBlocking {
+    fun `test backup with error`(): Unit = runTest {
         val ex = RuntimeException("Random")
         every { application.contentResolver } throws ex
 
@@ -88,7 +88,7 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test backup with error from interactor`(): Unit = runBlocking {
+    fun `test backup with error from interactor`(): Unit = runTest {
         val ex = RuntimeException("Random")
         coEvery { backupManager.backup(outputStream) } throws ex
 
@@ -99,7 +99,7 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test backup`(): Unit = runBlocking {
+    fun `test backup`(): Unit = runTest {
         val actual = settingsViewModel.backup(uri).toList()
         assertEquals(2, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
@@ -107,14 +107,14 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test restore with null uri`(): Unit = runBlocking {
+    fun `test restore with null uri`(): Unit = runTest {
         val actual = settingsViewModel.restore(null).toList()
         assertEquals(1, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Failure)
     }
 
     @Test
-    fun `test restore with error`(): Unit = runBlocking {
+    fun `test restore with error`(): Unit = runTest {
         val ex = RuntimeException("Random")
         every { application.contentResolver } throws ex
 
@@ -125,7 +125,7 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test restore with error from interactor`(): Unit = runBlocking {
+    fun `test restore with error from interactor`(): Unit = runTest {
         val ex = RuntimeException("Random")
         coEvery { backupManager.restore(inputStream) } throws ex
 
@@ -136,7 +136,7 @@ class SettingsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test restore`(): Unit = runBlocking {
+    fun `test restore`(): Unit = runTest {
         val actual = settingsViewModel.restore(uri).toList()
         assertEquals(2, actual.size)
         assertTrue(actual[0] is BaseViewModel.ViewData.Loading)

@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -69,7 +69,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test loadTranslation at init`() = runBlocking {
+    fun `test loadTranslation at init`() = runTest {
         val actual = translationsViewModel.translations().first()
         assertTrue(actual is BaseViewModel.ViewData.Success)
         assertEquals(5, actual.data.items.size)
@@ -81,7 +81,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test refreshTranslations without available and downloaded`() = runBlocking {
+    fun `test refreshTranslations without available and downloaded`() = runTest {
         coEvery { translationManager.availableTranslations() } returns flowOf(emptyList())
         coEvery { translationManager.downloadedTranslations() } returns flowOf(emptyList())
 
@@ -90,7 +90,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test refreshTranslations without available`() = runBlocking {
+    fun `test refreshTranslations without available`() = runTest {
         coEvery { translationManager.availableTranslations() } returns flowOf(emptyList())
 
         translationsViewModel.refreshTranslations(true)
@@ -103,7 +103,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test refreshTranslations without downloaded`() = runBlocking {
+    fun `test refreshTranslations without downloaded`() = runTest {
         coEvery { translationManager.downloadedTranslations() } returns flowOf(emptyList())
 
         translationsViewModel.refreshTranslations(true)
@@ -117,7 +117,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test refreshTranslations`() = runBlocking {
+    fun `test refreshTranslations`() = runTest {
         coEvery { translationManager.availableTranslations() } returns flowOf(listOf(MockContents.kjvTranslationInfo, MockContents.msgTranslationInfo))
         coEvery { translationManager.downloadedTranslations() } returns flowOf(listOf(MockContents.bbeDownloadedTranslationInfo, MockContents.cuvDownloadedTranslationInfo))
 
@@ -137,7 +137,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test downloadTranslation with error`() = runBlocking {
+    fun `test downloadTranslation with error`() = runTest {
         val error = RuntimeException("Random exception")
         coEvery { translationManager.downloadTranslation(MockContents.kjvTranslationInfo) } returns flow {
             emit(1)
@@ -156,7 +156,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test downloadTranslation`() = runBlocking {
+    fun `test downloadTranslation`() = runTest {
         coEvery { translationManager.downloadTranslation(MockContents.kjvTranslationInfo) } returns flow {
             emit(1)
             emit(50)
@@ -175,7 +175,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test removeTranslation with error`() = runBlocking {
+    fun `test removeTranslation with error`() = runTest {
         val error = RuntimeException("Random exception")
         coEvery { translationManager.removeTranslation(MockContents.kjvTranslationInfo) } throws error
         every { translationsViewModel.refreshTranslations(any()) } returns Unit
@@ -189,7 +189,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test removeTranslation`() = runBlocking {
+    fun `test removeTranslation`() = runTest {
         coEvery { translationManager.removeTranslation(MockContents.kjvTranslationInfo) } returns Unit
         every { translationsViewModel.refreshTranslations(any()) } returns Unit
 

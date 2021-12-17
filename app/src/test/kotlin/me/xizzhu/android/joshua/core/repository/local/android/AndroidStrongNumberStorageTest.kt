@@ -16,7 +16,7 @@
 
 package me.xizzhu.android.joshua.core.repository.local.android
 
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -36,34 +36,30 @@ class AndroidStrongNumberStorageTest : BaseSqliteTest() {
     }
 
     @Test
-    fun testEmptyStrongNumber() {
-        runBlocking {
-            (0 until Bible.BOOK_COUNT).forEach { bookIndex ->
-                (0 until Bible.getChapterCount(bookIndex)).forEach { chapterIndex ->
-                    assertTrue(androidStrongNumberStorage.readStrongNumber(VerseIndex(bookIndex, chapterIndex, 0)).isEmpty())
-                }
+    fun testEmptyStrongNumber() = runTest {
+        (0 until Bible.BOOK_COUNT).forEach { bookIndex ->
+            (0 until Bible.getChapterCount(bookIndex)).forEach { chapterIndex ->
+                assertTrue(androidStrongNumberStorage.readStrongNumber(VerseIndex(bookIndex, chapterIndex, 0)).isEmpty())
             }
+        }
 
-            MockContents.strongNumberWords.keys.forEach {
-                assertFalse(androidStrongNumberStorage.readStrongNumber(it).isValid())
-            }
+        MockContents.strongNumberWords.keys.forEach {
+            assertFalse(androidStrongNumberStorage.readStrongNumber(it).isValid())
         }
     }
 
     @Test
-    fun testSaveThenRead() {
-        runBlocking {
-            androidStrongNumberStorage.save(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex, MockContents.strongNumberWords)
+    fun testSaveThenRead() = runTest {
+        androidStrongNumberStorage.save(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex, MockContents.strongNumberWords)
 
-            MockContents.strongNumberIndex.keys.forEach { verseIndex ->
-                assertEquals(MockContents.strongNumber[verseIndex], androidStrongNumberStorage.readStrongNumber(verseIndex))
-            }
-            MockContents.strongNumberReverseIndex.forEach { (sn, verseIndexes) ->
-                assertEquals(verseIndexes, androidDatabase.strongNumberReverseIndexDao.read(sn))
-            }
-            MockContents.strongNumberWords.keys.forEach {
-                assertEquals(StrongNumber(it, MockContents.strongNumberWords.getValue(it)), androidStrongNumberStorage.readStrongNumber(it))
-            }
+        MockContents.strongNumberIndex.keys.forEach { verseIndex ->
+            assertEquals(MockContents.strongNumber[verseIndex], androidStrongNumberStorage.readStrongNumber(verseIndex))
+        }
+        MockContents.strongNumberReverseIndex.forEach { (sn, verseIndexes) ->
+            assertEquals(verseIndexes, androidDatabase.strongNumberReverseIndexDao.read(sn))
+        }
+        MockContents.strongNumberWords.keys.forEach {
+            assertEquals(StrongNumber(it, MockContents.strongNumberWords.getValue(it)), androidStrongNumberStorage.readStrongNumber(it))
         }
     }
 }

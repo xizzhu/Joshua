@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.core.repository.remote.android
 
 import androidx.test.core.app.ApplicationProvider
-import kotlinx.coroutines.test.runBlockingTest
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseIndex
@@ -41,7 +40,7 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test toRemoteStrongNumberIndexes()`() = testDispatcher.runBlockingTest {
+    fun `test toRemoteStrongNumberIndexes()`() {
         val actual = strongNumberService.toRemoteStrongNumberIndexes(javaClass.classLoader.getResourceAsStream("sn_indexes.zip"))
         (0 until Bible.BOOK_COUNT).forEach { bookIndex ->
             (0 until Bible.getChapterCount(bookIndex)).forEach { chapterIndex ->
@@ -52,7 +51,7 @@ class HttpStrongNumberServiceTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test toRemoteStrongNumberWords()`() = testDispatcher.runBlockingTest {
+    fun `test toRemoteStrongNumberWords()`() {
         val actual = strongNumberService.toRemoteStrongNumberWords(javaClass.classLoader.getResourceAsStream("sn_en.zip"))
         assertEquals(Constants.STRONG_NUMBER_HEBREW_COUNT + Constants.STRONG_NUMBER_GREEK_COUNT, actual.words.size)
     }

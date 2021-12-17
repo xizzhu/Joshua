@@ -20,7 +20,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.repository.local.LocalSettingsStorage
@@ -46,7 +46,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test observe settings within constructor`() = runBlocking {
+    fun `test observe settings within constructor`() = runTest {
         val settings = Settings(false, Settings.NIGHT_MODE_FOLLOW_SYSTEM, 2.0F, false, false, true, Highlight.COLOR_PINK)
         coEvery { localSettingsStorage.readSettings() } returns settings
 
@@ -56,7 +56,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test observe settings within constructor with exception`() = runBlocking {
+    fun `test observe settings within constructor with exception`() = runTest {
         coEvery { localSettingsStorage.readSettings() } throws RuntimeException("Random exception")
         settingsRepository = SettingsRepository(localSettingsStorage)
 
@@ -64,21 +64,21 @@ class SettingsRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test saveSettings()`() = runBlocking {
+    fun `test saveSettings()`() = runTest {
         val settings = Settings(false, Settings.NIGHT_MODE_ON, 1.5F, true, true, true, Highlight.COLOR_BLUE)
         settingsRepository.saveSettings(settings)
         assertEquals(settings, settingsRepository.settings.first())
     }
 
     @Test
-    fun `test saveSettings() does nothing if setting remains unchanged`() = runBlocking {
+    fun `test saveSettings() does nothing if setting remains unchanged`() = runTest {
         settingsRepository.saveSettings(Settings.DEFAULT)
         settingsRepository.saveSettings(Settings.DEFAULT)
         coVerify(exactly = 0) { localSettingsStorage.saveSettings((any())) }
     }
 
     @Test
-    fun `test saveSettings() for font size scale`() = runBlocking {
+    fun `test saveSettings() for font size scale`() = runTest {
         saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(fontSizeScale = 1.5F))
     }
 
@@ -88,32 +88,32 @@ class SettingsRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test saveSettings() for keeping screen on`() = runBlocking {
+    fun `test saveSettings() for keeping screen on`() = runTest {
         saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(keepScreenOn = false))
     }
 
     @Test
-    fun `test saveSettings() for night mode on`() = runBlocking {
+    fun `test saveSettings() for night mode on`() = runTest {
         saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(nightMode = Settings.NIGHT_MODE_ON))
     }
 
     @Test
-    fun `test saveSettings() for for simple reading mode on`() = runBlocking {
+    fun `test saveSettings() for for simple reading mode on`() = runTest {
         saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(simpleReadingModeOn = true))
     }
 
     @Test
-    fun `test saveSettings() for hiding search button`() = runBlocking {
+    fun `test saveSettings() for hiding search button`() = runTest {
         saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(hideSearchButton = true))
     }
 
     @Test
-    fun `test saveSettings() for for consolidating verses for sharing`() = runBlocking {
+    fun `test saveSettings() for for consolidating verses for sharing`() = runTest {
         saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(consolidateVersesForSharing = true))
     }
 
     @Test
-    fun `test saveSettings() for highlight color`() = runBlocking {
+    fun `test saveSettings() for highlight color`() = runTest {
         saveUpdatedSettingsAndVerifySaveSettingsIsCalled(Settings.DEFAULT.copy(defaultHighlightColor = Highlight.COLOR_PURPLE))
     }
 }

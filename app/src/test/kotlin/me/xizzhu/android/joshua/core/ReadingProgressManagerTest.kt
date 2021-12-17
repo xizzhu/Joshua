@@ -23,7 +23,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -47,7 +47,7 @@ class ReadingProgressManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test trackReadingProgress() with nothing to be recorded`() = runBlocking {
+    fun `test trackReadingProgress() with nothing to be recorded`() = runTest {
         every { bibleReadingRepository.currentVerseIndex } returns emptyFlow()
         every { bibleReadingRepository.currentTranslation } returns emptyFlow()
 
@@ -58,7 +58,7 @@ class ReadingProgressManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test trackReadingProgress()`() = runBlocking {
+    fun `test trackReadingProgress()`() = runTest {
         every { bibleReadingRepository.currentVerseIndex } returns flowOf(VerseIndex(1, 2, 3))
         every { bibleReadingRepository.currentTranslation } returns flowOf(MockContents.kjvShortName)
 
@@ -79,7 +79,7 @@ class ReadingProgressManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test trackReadingProgress() with too little time spent`() = runBlocking {
+    fun `test trackReadingProgress() with too little time spent`() = runTest {
         every { bibleReadingRepository.currentVerseIndex } returns flowOf(VerseIndex(1, 2, 3))
         every { bibleReadingRepository.currentTranslation } returns flowOf(MockContents.kjvShortName)
 
@@ -93,7 +93,7 @@ class ReadingProgressManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test trackReadingProgress() without current translation`() = runBlocking {
+    fun `test trackReadingProgress() without current translation`() = runTest {
         every { bibleReadingRepository.currentVerseIndex } returns flowOf(VerseIndex(1, 2, 3))
         every { bibleReadingRepository.currentTranslation } returns emptyFlow()
 
@@ -107,7 +107,7 @@ class ReadingProgressManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test calling startTracking() multiple times`() = runBlocking {
+    fun `test calling startTracking() multiple times`() = runTest {
         every { bibleReadingRepository.currentVerseIndex } returns flowOf(VerseIndex.INVALID)
         every { bibleReadingRepository.currentTranslation } returns flowOf(MockContents.kjvShortName)
 

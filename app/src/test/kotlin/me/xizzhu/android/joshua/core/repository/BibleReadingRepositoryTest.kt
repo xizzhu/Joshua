@@ -20,7 +20,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -41,7 +41,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test currentVerseIndex from constructor`() = runBlocking {
+    fun `test currentVerseIndex from constructor`() = runTest {
         coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
         coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
         coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
@@ -51,7 +51,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test currentVerseIndex from constructor with exception`() = runBlocking {
+    fun `test currentVerseIndex from constructor with exception`() = runTest {
         coEvery { localReadingStorage.readCurrentVerseIndex() } throws RuntimeException("Random exception")
         coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
         coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
@@ -61,7 +61,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test saveCurrentVerseIndex()`() = runBlocking {
+    fun `test saveCurrentVerseIndex()`() = runTest {
         coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
         coEvery { localReadingStorage.saveCurrentVerseIndex(any()) } returns Unit
         coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
@@ -73,7 +73,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test currentTranslation from constructor`() = runBlocking {
+    fun `test currentTranslation from constructor`() = runTest {
         coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
         coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
         coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
@@ -83,7 +83,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test currentTranslation from constructor with exception`() = runBlocking {
+    fun `test currentTranslation from constructor with exception`() = runTest {
         coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
         coEvery { localReadingStorage.readCurrentTranslation() } throws RuntimeException("Random exception")
         coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
@@ -93,7 +93,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test saveCurrentTranslation()`() = runBlocking {
+    fun `test saveCurrentTranslation()`() = runTest {
         coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
         coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
         coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
@@ -105,7 +105,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test parallelTranslations from constructor`() = runBlocking {
+    fun `test parallelTranslations from constructor`() = runTest {
         coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
         coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
         coEvery { localReadingStorage.readParallelTranslations() } returns listOf(MockContents.cuvShortName)
@@ -115,7 +115,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test parallelTranslations from constructor with exception`() = runBlocking {
+    fun `test parallelTranslations from constructor with exception`() = runTest {
         coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
         coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
         coEvery { localReadingStorage.readParallelTranslations() } throws RuntimeException("Random exception")
@@ -125,7 +125,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test requestParallelTranslation() and removeParallelTranslation()`() = runBlocking {
+    fun `test requestParallelTranslation() and removeParallelTranslation()`() = runTest {
         coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
         coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
         coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
@@ -160,7 +160,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test clearParallelTranslation()`() = runBlocking {
+    fun `test clearParallelTranslation()`() = runTest {
         coEvery { localReadingStorage.readCurrentVerseIndex() } returns VerseIndex(1, 2, 3)
         coEvery { localReadingStorage.readCurrentTranslation() } returns MockContents.kjvShortName
         coEvery { localReadingStorage.readParallelTranslations() } returns emptyList()
@@ -176,7 +176,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test readBookNames()`() = runBlocking {
+    fun `test readBookNames()`() = runTest {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         // no cache yet, read from LocalReadingStorage
@@ -189,7 +189,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test readBookShortNames()`() = runBlocking {
+    fun `test readBookShortNames()`() = runTest {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         // no cache yet, read from LocalReadingStorage
@@ -202,7 +202,7 @@ class BibleReadingRepositoryTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test readVerses()`() = runBlocking {
+    fun `test readVerses()`() = runTest {
         val bibleReadingRepository = BibleReadingRepository(localReadingStorage, testDispatcher)
 
         // no cache yet, read from LocalReadingStorage

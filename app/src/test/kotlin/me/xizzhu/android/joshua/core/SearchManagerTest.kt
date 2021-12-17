@@ -20,7 +20,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -56,7 +56,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses from New Testament only`(): Unit = runBlocking {
+    fun `test search() with verses from New Testament only`(): Unit = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -73,7 +73,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses and bookmarks`(): Unit = runBlocking {
+    fun `test search() with verses and bookmarks`(): Unit = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -92,7 +92,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses excluding bookmarks`(): Unit = runBlocking {
+    fun `test search() with verses excluding bookmarks`(): Unit = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -112,7 +112,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses and highlights`(): Unit = runBlocking {
+    fun `test search() with verses and highlights`(): Unit = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -131,7 +131,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses excluding highlights`(): Unit = runBlocking {
+    fun `test search() with verses excluding highlights`(): Unit = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -151,7 +151,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses and notes`(): Unit = runBlocking {
+    fun `test search() with verses and notes`(): Unit = runTest {
         coEvery {
             bibleReadingRepository.readVerses(
                     MockContents.kjvShortName,
@@ -176,7 +176,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses excluding notes`(): Unit = runBlocking {
+    fun `test search() with verses excluding notes`(): Unit = runTest {
         coEvery {
             bibleReadingRepository.readVerses(
                     MockContents.kjvShortName,
@@ -202,7 +202,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses, bookmarks, highlights, and notes`(): Unit = runBlocking {
+    fun `test search() with verses, bookmarks, highlights, and notes`(): Unit = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))

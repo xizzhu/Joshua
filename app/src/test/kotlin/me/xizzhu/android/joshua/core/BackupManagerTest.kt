@@ -20,7 +20,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -59,13 +59,13 @@ class BackupManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test prepareForBackup()`() = runBlocking {
+    fun `test prepareForBackup()`() = runTest {
         every { serializer.serialize(any()) } returns "random value"
         assertEquals("random value", backupManager.prepareForBackup())
     }
 
     @Test(expected = RuntimeException::class)
-    fun `test prepareForBackup() with exception`(): Unit = runBlocking {
+    fun `test prepareForBackup() with exception`(): Unit = runTest {
         every { serializer.serialize(any()) } throws RuntimeException("Random exception")
 
         backupManager.prepareForBackup()
@@ -73,7 +73,7 @@ class BackupManagerTest : BaseUnitTest() {
     }
 
     @Test(expected = RuntimeException::class)
-    fun `test prepareForBackup() with failure in async operations`(): Unit = runBlocking {
+    fun `test prepareForBackup() with failure in async operations`(): Unit = runTest {
         coEvery { bookmarkRepository.read(Constants.SORT_BY_BOOK) } throws RuntimeException("Random exception")
 
         backupManager.prepareForBackup()
@@ -81,7 +81,7 @@ class BackupManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test restore() with minimum content`() = runBlocking {
+    fun `test restore() with minimum content`() = runTest {
         every { serializer.deserialize("") } returns BackupManager.Data(emptyList(), emptyList(), emptyList(), ReadingProgress(1, 2L, emptyList()))
         coEvery { readingProgressRepository.save(ReadingProgress(1, 2L, emptyList())) } returns Unit
 
@@ -95,7 +95,7 @@ class BackupManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test restore() with bookmarks`() = runBlocking {
+    fun `test restore() with bookmarks`() = runTest {
         coEvery { bookmarkRepository.read(Constants.SORT_BY_BOOK) } returns listOf(
                 Bookmark(VerseIndex(0, 1, 2), 3L),
                 Bookmark(VerseIndex(4, 5, 6), 7L)
@@ -125,7 +125,7 @@ class BackupManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test restore() with highlights`() = runBlocking {
+    fun `test restore() with highlights`() = runTest {
         coEvery { highlightRepository.read(Constants.SORT_BY_BOOK) } returns listOf(
                 Highlight(VerseIndex(0, 1, 2), Highlight.COLOR_YELLOW, 3L),
                 Highlight(VerseIndex(4, 5, 6), Highlight.COLOR_BLUE, 7L)
@@ -155,7 +155,7 @@ class BackupManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test restore() with notes`() = runBlocking {
+    fun `test restore() with notes`() = runTest {
         coEvery { noteRepository.read(Constants.SORT_BY_BOOK) } returns listOf(
                 Note(VerseIndex(0, 1, 2), "random note", 3L),
                 Note(VerseIndex(4, 5, 6), "random note 2", 7L)
@@ -185,7 +185,7 @@ class BackupManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test restore() with reading progress`() = runBlocking {
+    fun `test restore() with reading progress`() = runTest {
         coEvery { readingProgressRepository.read() } returns ReadingProgress(
                 continuousReadingDays = 0,
                 lastReadingTimestamp = 0L,
@@ -227,7 +227,7 @@ class BackupManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test restore()`() = runBlocking {
+    fun `test restore()`() = runTest {
         coEvery { bookmarkRepository.read(Constants.SORT_BY_BOOK) } returns listOf(
                 Bookmark(VerseIndex(0, 1, 2), 3L),
                 Bookmark(VerseIndex(4, 5, 6), 7L)
