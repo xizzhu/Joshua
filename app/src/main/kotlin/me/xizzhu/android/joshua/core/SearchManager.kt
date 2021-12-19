@@ -120,4 +120,23 @@ class SearchManager(
                     ?: emptyList()
 }
 
-fun String.toKeywords(): List<String> = trim().lowercase(Locale.getDefault()).replace("\\s+", " ").split(" ")
+fun String.toKeywords(): List<String> {
+    if (isEmpty()) return emptyList()
+
+    val results = arrayListOf<String>()
+    val sb = StringBuilder()
+    lowercase(Locale.getDefault()).forEach { c ->
+        if (c.isWhitespace()) {
+            if (sb.isNotEmpty()) {
+                results.add(sb.toString())
+                sb.clear()
+            }
+        } else {
+            sb.append(c)
+        }
+    }
+    if (sb.isNotEmpty()) {
+        results.add(sb.toString())
+    }
+    return results
+}
