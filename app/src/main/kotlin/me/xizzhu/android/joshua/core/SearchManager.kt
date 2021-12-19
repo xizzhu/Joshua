@@ -120,4 +120,40 @@ class SearchManager(
                     ?: emptyList()
 }
 
-fun String.toKeywords(): List<String> = trim().lowercase(Locale.getDefault()).replace("\\s+", " ").split(" ")
+fun String.toKeywords(): List<String> {
+    if (isEmpty()) return emptyList()
+
+    val results = arrayListOf<String>()
+    val sb = StringBuilder()
+    var doubleQuoteStarted = false
+    lowercase(Locale.getDefault()).forEach { c ->
+        if (c.isDoubleQuote()) {
+            results.addAndClear(sb)
+            doubleQuoteStarted = !doubleQuoteStarted
+            return@forEach
+        }
+
+        if (c.isWhitespace() && !doubleQuoteStarted) {
+            results.addAndClear(sb)
+            return@forEach
+        }
+
+        sb.append(c)
+    }
+    if (sb.isNotEmpty()) {
+        results.add(sb.toString())
+    }
+    return results
+}
+
+private fun ArrayList<String>.addAndClear(sb: StringBuilder) {
+    if (sb.isNotEmpty()) {
+        add(sb.toString())
+        sb.clear()
+    }
+}
+
+private fun Char.isDoubleQuote(): Boolean =
+        this == Typography.quote
+                || this == Typography.leftDoubleQuote || this == Typography.rightDoubleQuote
+                || this == Typography.lowDoubleQuote || this == Typography.lowSingleQuote

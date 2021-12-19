@@ -56,7 +56,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses from New Testament only`(): Unit = runTest {
+    fun `test search() with verses from New Testament only`() = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -73,7 +73,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses and bookmarks`(): Unit = runTest {
+    fun `test search() with verses and bookmarks`() = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -92,7 +92,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses excluding bookmarks`(): Unit = runTest {
+    fun `test search() with verses excluding bookmarks`() = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -112,7 +112,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses and highlights`(): Unit = runTest {
+    fun `test search() with verses and highlights`() = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -131,7 +131,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses excluding highlights`(): Unit = runTest {
+    fun `test search() with verses excluding highlights`() = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -151,7 +151,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses and notes`(): Unit = runTest {
+    fun `test search() with verses and notes`() = runTest {
         coEvery {
             bibleReadingRepository.readVerses(
                     MockContents.kjvShortName,
@@ -176,7 +176,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses excluding notes`(): Unit = runTest {
+    fun `test search() with verses excluding notes`() = runTest {
         coEvery {
             bibleReadingRepository.readVerses(
                     MockContents.kjvShortName,
@@ -202,7 +202,7 @@ class SearchManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test search() with verses, bookmarks, highlights, and notes`(): Unit = runTest {
+    fun `test search() with verses, bookmarks, highlights, and notes`() = runTest {
         coEvery {
             bibleReadingRepository.readVerses(MockContents.kjvShortName, listOf(VerseIndex(0, 0, 0), VerseIndex(0, 0, 1)))
         } returns mapOf(Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]))
@@ -230,5 +230,27 @@ class SearchManagerTest : BaseUnitTest() {
         assertEquals(listOf(Pair(Bookmark(VerseIndex(0, 0, 0), 12345L), MockContents.kjvVerses[0])), actual.bookmarks)
         assertEquals(listOf(Pair(Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 12345L), MockContents.kjvVerses[0])), actual.highlights)
         assertEquals(listOf(Pair(Note(VerseIndex(0, 0, 9), "just a note", 12345L), MockContents.kjvVerses[9])), actual.notes)
+    }
+
+    @Test
+    fun `test toKeywords()`() {
+        assertTrue("".toKeywords().isEmpty())
+        assertTrue("    ".toKeywords().isEmpty())
+        assertTrue("　 　".toKeywords().isEmpty())
+
+        assertEquals(listOf("query"), "query".toKeywords())
+        assertEquals(listOf("query"), "QueRy".toKeywords())
+        assertEquals(listOf("query"), "  query 　\t\t  ".toKeywords())
+        assertEquals(listOf("query"), "\tQUERY　\t  ".toKeywords())
+
+        assertEquals(listOf("multiple", "keywords"), "multiple keywords".toKeywords())
+        assertEquals(listOf("multiple", "keywords"), "Multiple  　\t\t   　   Keywords\t\t".toKeywords())
+        assertEquals(listOf("multiple", "keywords"), "    \t　　 MULTIPLE   keywords　　　  ".toKeywords())
+        assertEquals(listOf("multiple", "keywords"), "   　　　  　 multiple　　 　\t　　   keywords 　　 　　  ".toKeywords())
+
+        assertEquals(listOf("with double quotes"), "\"with double quotes\"".toKeywords())
+        assertEquals(listOf("outside", "with double quotes"), "outside     \"with double quotes\"   \t\t\t   ".toKeywords())
+        assertEquals(listOf("before", "with double quotes", "after"), "before     \"with double quotes\"   \tafter\t\t   ".toKeywords())
+        assertEquals(listOf("before", "with double quotes", "after"), "before\"with double quotes\"   \tafter\t\t   ".toKeywords())
     }
 }
