@@ -4,7 +4,9 @@ CHANGELOG
 #### Next release
 - New features:
   - Support using system's day / night mode (#206)
-  - Support searching from only Old Testament or New Testament (#152)
+  - Improve search functionality (#152)
+    - Support searching from only Old Testament or New Testament
+    - Use quotation mark for exact match
 - Changes:
   - Refactor to use Material3 theme
 - Bug fixes:

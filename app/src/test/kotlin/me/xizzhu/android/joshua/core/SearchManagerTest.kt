@@ -247,5 +247,10 @@ class SearchManagerTest : BaseUnitTest() {
         assertEquals(listOf("multiple", "keywords"), "Multiple  　\t\t   　   Keywords\t\t".toKeywords())
         assertEquals(listOf("multiple", "keywords"), "    \t　　 MULTIPLE   keywords　　　  ".toKeywords())
         assertEquals(listOf("multiple", "keywords"), "   　　　  　 multiple　　 　\t　　   keywords 　　 　　  ".toKeywords())
+
+        assertEquals(listOf("with double quotes"), "\"with double quotes\"".toKeywords())
+        assertEquals(listOf("outside", "with double quotes"), "outside     \"with double quotes\"   \t\t\t   ".toKeywords())
+        assertEquals(listOf("before", "with double quotes", "after"), "before     \"with double quotes\"   \tafter\t\t   ".toKeywords())
+        assertEquals(listOf("before", "with double quotes", "after"), "before\"with double quotes\"   \tafter\t\t   ".toKeywords())
     }
 }

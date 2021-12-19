@@ -125,18 +125,35 @@ fun String.toKeywords(): List<String> {
 
     val results = arrayListOf<String>()
     val sb = StringBuilder()
+    var doubleQuoteStarted = false
     lowercase(Locale.getDefault()).forEach { c ->
-        if (c.isWhitespace()) {
-            if (sb.isNotEmpty()) {
-                results.add(sb.toString())
-                sb.clear()
-            }
-        } else {
-            sb.append(c)
+        if (c.isDoubleQuote()) {
+            results.addAndClear(sb)
+            doubleQuoteStarted = !doubleQuoteStarted
+            return@forEach
         }
+
+        if (c.isWhitespace() && !doubleQuoteStarted) {
+            results.addAndClear(sb)
+            return@forEach
+        }
+
+        sb.append(c)
     }
     if (sb.isNotEmpty()) {
         results.add(sb.toString())
     }
     return results
 }
+
+private fun ArrayList<String>.addAndClear(sb: StringBuilder) {
+    if (sb.isNotEmpty()) {
+        add(sb.toString())
+        sb.clear()
+    }
+}
+
+private fun Char.isDoubleQuote(): Boolean =
+        this == Typography.quote
+                || this == Typography.leftDoubleQuote || this == Typography.rightDoubleQuote
+                || this == Typography.lowDoubleQuote || this == Typography.lowSingleQuote
