@@ -45,7 +45,7 @@ object Versions {
     object Kotlin {
         val jvmTarget = java.toString()
         const val core = "1.6.10"
-        const val coroutines = "1.6.0-RC3"
+        const val coroutines = "1.6.0"
     }
 
     object AndroidX {
@@ -72,7 +72,7 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.10"
-        const val bom = "29.0.2"
+        const val bom = "29.0.3"
 
         object Crashlytics {
             const val classpath = "2.8.1"
