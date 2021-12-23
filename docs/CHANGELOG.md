@@ -9,6 +9,7 @@ CHANGELOG
     - Use quotation mark for exact match
 - Changes:
   - Refactor to use Material3 theme
+  - Use Kover for code coverage
 - Bug fixes:
   - Properly set Kotlin JVM target to Java 11
 - Update dependencies:

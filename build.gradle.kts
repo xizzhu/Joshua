@@ -22,11 +22,14 @@ buildscript {
     dependencies {
         classpath(Dependencies.Sdk.classpath)
         classpath(Dependencies.Kotlin.classpath)
+        classpath(Dependencies.Kotlin.Kover.classpath)
         classpath(Dependencies.Firebase.classpath)
         classpath(Dependencies.Firebase.Crashlytics.classpath)
         classpath(Dependencies.Hilt.classpath)
     }
 }
+
+
 
 allprojects {
     repositories {

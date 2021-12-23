@@ -6,7 +6,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
+    - uses: actions/setup-java@v2
       with:
-        java-version: 11
-    - run: ./gradlew testDebugUnitTest
+        distribution: 'zulu'
+        java-version: '11'
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - run: ./gradlew koverXmlReport
+    - uses: codecov/codecov-action@v2
+      with:
+        files: ./app/build/reports/kover/report.xml 
