@@ -13,27 +13,24 @@
           "package_name": "me.xizzhu.android.joshua.debug"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "288530219043-dt8fivm6bnuvie4ohajeud1j6ut88vq7.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
       "api_key": [
         {
-          "current_key": "AIzaSyA5lEHfrvFebyGTdGzF5KCwumh-0eJps6w"
+          "current_key": ""
         }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "288530219043-dt8fivm6bnuvie4ohajeud1j6ut88vq7.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+      ]
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:288530219043:android:3e58c3657d07aea6",
+        "android_client_info": {
+          "package_name": "me.xizzhu.android.joshua"
         }
-      }
+      },
+      "api_key": [
+        {
+          "current_key": ""
+        }
+      ]
     }
   ],
   "configuration_version": "1"
