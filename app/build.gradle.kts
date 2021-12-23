@@ -18,11 +18,14 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
+    id("com.google.firebase.crashlytics")
+    id("com.google.gms.google-services")
     id("dagger.hilt.android.plugin")
     kotlin("android")
     kotlin("kapt")
 }
-apply("$rootDir/scripts/coverage.gradle.kts")
+
+apply(plugin = "kover")
 
 android {
     compileOptions {
@@ -96,6 +99,20 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+
+        unitTests.all { test ->
+            test.maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+
+            test.extensions.configure(kotlinx.kover.api.KoverTaskExtension::class) {
+                isEnabled = true
+                includes = listOf("me\\.xizzhu\\.android\\.joshua\\..+")
+                excludes = listOf(
+                        "me\\.xizzhu\\.android\\.joshua\\.BuildConfig",
+                        "me\\.xizzhu\\.android\\.joshua\\.databinding\\..+",
+                        "me\\.xizzhu\\.android\\.joshua\\..+_.+",
+                )
+            }
+        }
     }
 
     packagingOptions {
@@ -108,10 +125,6 @@ android {
     }
 }
 
-tasks.withType(Test::class) {
-    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
-}
-
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
         jvmTarget = Versions.Kotlin.jvmTarget
@@ -119,7 +132,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 }
 
 dependencies {
-    implementation(Dependencies.Kotlin.coroutinesAndroid)
+    implementation(Dependencies.Kotlin.coroutines)
 
     debugImplementation(Dependencies.AndroidX.multidex)
     implementation(Dependencies.AndroidX.activity)
@@ -152,9 +165,4 @@ dependencies {
     testImplementation(Dependencies.AndroidX.Test.core)
     testImplementation(Dependencies.mockk)
     testImplementation(Dependencies.robolectric)
-}
-
-apply {
-    plugin("com.google.gms.google-services")
-    plugin("com.google.firebase.crashlytics")
 }

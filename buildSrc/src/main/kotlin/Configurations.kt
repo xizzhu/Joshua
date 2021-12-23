@@ -46,6 +46,7 @@ object Versions {
         val jvmTarget = java.toString()
         const val core = "1.6.10"
         const val coroutines = "1.6.0"
+        const val kover = "0.4.4"
     }
 
     object AndroidX {
@@ -95,9 +96,13 @@ object Dependencies {
 
     object Kotlin {
         const val classpath = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.Kotlin.core}"
-        const val coroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.Kotlin.coroutines}"
+        const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.Kotlin.coroutines}"
         const val test = "org.jetbrains.kotlin:kotlin-test-junit:${Versions.Kotlin.core}"
         const val coroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.Kotlin.coroutines}"
+
+        object Kover {
+            const val classpath = "org.jetbrains.kotlinx:kover:${Versions.Kotlin.kover}"
+        }
     }
 
     object AndroidX {
