@@ -18,6 +18,8 @@ package me.xizzhu.android.joshua.utils
 
 import android.os.SystemClock
 
+// TODO: Remove this when mocking native methods are supported by Mockk. See https://github.com/mockk/mockk/issues/98
+
 fun currentTimeMillis(): Long = System.currentTimeMillis()
 
 fun elapsedRealtime(): Long = SystemClock.elapsedRealtime()
