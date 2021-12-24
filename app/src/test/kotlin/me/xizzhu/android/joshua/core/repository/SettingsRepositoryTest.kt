@@ -42,7 +42,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
         coEvery { localSettingsStorage.readSettings() } returns Settings.DEFAULT
         coEvery { localSettingsStorage.saveSettings(any()) } returns Unit
 
-        settingsRepository = SettingsRepository(localSettingsStorage, testDispatcher)
+        settingsRepository = SettingsRepository(localSettingsStorage, testScope)
     }
 
     @Test
@@ -50,7 +50,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
         val settings = Settings(false, Settings.NIGHT_MODE_FOLLOW_SYSTEM, 2.0F, false, false, true, Highlight.COLOR_PINK)
         coEvery { localSettingsStorage.readSettings() } returns settings
 
-        settingsRepository = SettingsRepository(localSettingsStorage)
+        settingsRepository = SettingsRepository(localSettingsStorage, testScope)
 
         assertEquals(settings, settingsRepository.settings.first())
     }
@@ -58,7 +58,7 @@ class SettingsRepositoryTest : BaseUnitTest() {
     @Test
     fun `test observe settings within constructor with exception`() = runTest {
         coEvery { localSettingsStorage.readSettings() } throws RuntimeException("Random exception")
-        settingsRepository = SettingsRepository(localSettingsStorage)
+        settingsRepository = SettingsRepository(localSettingsStorage, testScope)
 
         assertEquals(Settings.DEFAULT, settingsRepository.settings.first())
     }

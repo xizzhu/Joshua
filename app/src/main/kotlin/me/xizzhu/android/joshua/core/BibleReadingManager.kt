@@ -17,11 +17,8 @@
 package me.xizzhu.android.joshua.core
 
 import androidx.annotation.VisibleForTesting
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
@@ -64,16 +61,14 @@ data class Verse(val verseIndex: VerseIndex, val text: Text, val parallel: List<
 }
 
 class BibleReadingManager(
-        private val bibleReadingRepository: BibleReadingRepository,
-        translationRepository: TranslationRepository,
-        initDispatcher: CoroutineDispatcher = Dispatchers.IO
+        private val bibleReadingRepository: BibleReadingRepository, translationRepository: TranslationRepository, appScope: CoroutineScope
 ) {
     companion object {
         private val TAG = BibleReadingManager::class.java.simpleName
     }
 
     init {
-        GlobalScope.launch(initDispatcher) { translationRepository.downloadedTranslations.collect(::updateDownloadedTranslations) }
+        appScope.launch { translationRepository.downloadedTranslations.collect(::updateDownloadedTranslations) }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

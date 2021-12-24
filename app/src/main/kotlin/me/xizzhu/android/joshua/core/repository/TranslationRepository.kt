@@ -17,9 +17,7 @@
 package me.xizzhu.android.joshua.core.repository
 
 import androidx.annotation.VisibleForTesting
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.consumeEach
@@ -32,9 +30,11 @@ import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
 import me.xizzhu.android.joshua.utils.currentTimeMillis
 import me.xizzhu.android.logger.Log
 
-class TranslationRepository(private val localTranslationStorage: LocalTranslationStorage,
-                            private val remoteTranslationService: RemoteTranslationService,
-                            initDispatcher: CoroutineDispatcher = Dispatchers.IO) {
+class TranslationRepository(
+        private val localTranslationStorage: LocalTranslationStorage,
+        private val remoteTranslationService: RemoteTranslationService,
+        appScope: CoroutineScope
+) {
     companion object {
         private val TAG: String = TranslationRepository::class.java.simpleName
 
@@ -49,7 +49,7 @@ class TranslationRepository(private val localTranslationStorage: LocalTranslatio
     val downloadedTranslations: Flow<List<TranslationInfo>> = _downloadedTranslations.filterNotNull()
 
     init {
-        GlobalScope.launch(initDispatcher) {
+        appScope.launch {
             try {
                 updateTranslations(readTranslationsFromLocal())
             } catch (e: Exception) {

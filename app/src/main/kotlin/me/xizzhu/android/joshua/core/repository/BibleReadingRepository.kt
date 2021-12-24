@@ -17,9 +17,7 @@
 package me.xizzhu.android.joshua.core.repository
 
 import androidx.collection.LruCache
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -30,8 +28,7 @@ import me.xizzhu.android.joshua.core.VerseSearchQuery
 import me.xizzhu.android.joshua.core.repository.local.LocalReadingStorage
 import me.xizzhu.android.logger.Log
 
-class BibleReadingRepository(private val localReadingStorage: LocalReadingStorage,
-                             initDispatcher: CoroutineDispatcher = Dispatchers.IO) {
+class BibleReadingRepository(private val localReadingStorage: LocalReadingStorage, appScope: CoroutineScope) {
     companion object {
         private val TAG = BibleReadingRepository::class.java.simpleName
     }
@@ -48,7 +45,7 @@ class BibleReadingRepository(private val localReadingStorage: LocalReadingStorag
     val parallelTranslations: Flow<List<String>> = _parallelTranslations.filterNotNull()
 
     init {
-        GlobalScope.launch(initDispatcher) {
+        appScope.launch {
             try {
                 _currentVerseIndex.value = localReadingStorage.readCurrentVerseIndex()
             } catch (e: Exception) {

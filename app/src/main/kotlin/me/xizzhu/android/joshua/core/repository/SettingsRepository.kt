@@ -16,17 +16,14 @@
 
 package me.xizzhu.android.joshua.core.repository
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.repository.local.LocalSettingsStorage
 import me.xizzhu.android.logger.Log
 
-class SettingsRepository(private val localSettingsStorage: LocalSettingsStorage,
-                         initDispatcher: CoroutineDispatcher = Dispatchers.IO) {
+class SettingsRepository(private val localSettingsStorage: LocalSettingsStorage, appScope: CoroutineScope) {
     companion object {
         private val TAG = SettingsRepository::class.java.simpleName
     }
@@ -35,7 +32,7 @@ class SettingsRepository(private val localSettingsStorage: LocalSettingsStorage,
     val settings: Flow<Settings> = _settings.filterNotNull()
 
     init {
-        GlobalScope.launch(initDispatcher) {
+        appScope.launch {
             try {
                 _settings.value = localSettingsStorage.readSettings()
             } catch (e: Exception) {

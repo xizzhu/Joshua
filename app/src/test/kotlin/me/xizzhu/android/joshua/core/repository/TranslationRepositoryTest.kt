@@ -56,7 +56,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
         coEvery { localTranslationStorage.readTranslations() } returns listOf(
                 MockContents.kjvDownloadedTranslationInfo, MockContents.cuvTranslationInfo
         )
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testScope)
 
         assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations.first())
         assertEquals(listOf(MockContents.cuvTranslationInfo), translationRepository.availableTranslations.first())
@@ -65,7 +65,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
     @Test
     fun `test loading translations by constructor with exception`() = runTest {
         coEvery { localTranslationStorage.readTranslations() } throws RuntimeException("Random exception")
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testScope)
 
         assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
         assertTrue(translationRepository.availableTranslations.first().isEmpty())
@@ -73,7 +73,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test updateTranslations()`() = runTest {
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testScope)
 
         assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
         assertTrue(translationRepository.availableTranslations.first().isEmpty())
@@ -89,7 +89,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test reload() with force refresh`() = runTest {
-        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher))
+        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testScope))
         coEvery { translationRepository.readTranslationsFromBackend() } returns listOf(MockContents.kjvTranslationInfo)
 
         translationRepository.reload(true)
@@ -102,7 +102,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test reload() with force refresh with empty translations list`(): Unit = runTest {
-        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher))
+        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testScope))
         coEvery { translationRepository.readTranslationsFromBackend() } returns emptyList()
 
         translationRepository.reload(true)
@@ -112,7 +112,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test reload() with too old translations list`() = runTest {
-        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher))
+        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testScope))
         coEvery { translationRepository.translationListTooOld() } returns true
         coEvery { translationRepository.readTranslationsFromBackend() } returns listOf(MockContents.kjvTranslationInfo)
 
@@ -128,7 +128,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
     fun `test reload() with empty translations list and error from backend`() = runTest {
         coEvery { localTranslationStorage.readTranslations() } returns listOf(MockContents.kjvDownloadedTranslationInfo)
 
-        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher))
+        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testScope))
         coEvery { translationRepository.translationListTooOld() } returns true
         coEvery { translationRepository.readTranslationsFromBackend() } throws RuntimeException("Random exception")
 
@@ -146,7 +146,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
     fun `test reload() with refresh local translations list`() = runTest {
         coEvery { localTranslationStorage.readTranslations() } returns listOf(MockContents.kjvTranslationInfo)
 
-        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher))
+        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testScope))
         coEvery { translationRepository.translationListTooOld() } returns false
 
         translationRepository.reload(false)
@@ -159,7 +159,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
 
     @Test
     fun `test reload() with refresh but empty translations list`() = runTest {
-        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher))
+        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testScope))
         coEvery { translationRepository.translationListTooOld() } returns false
         coEvery { translationRepository.readTranslationsFromBackend() } returns listOf(MockContents.kjvTranslationInfo)
 
@@ -177,7 +177,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
     fun `test translationListTooOld()`() = runTest {
         coEvery { localTranslationStorage.readTranslationListRefreshTimestamp() } returns 0L
 
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testScope)
 
         currentTimeMillis = 0L
         assertFalse(translationRepository.translationListTooOld())
@@ -202,7 +202,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
                 RemoteTranslationInfo.fromTranslationInfo(MockContents.cuvTranslationInfo)
         )
 
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testScope)
         assertEquals(
                 listOf(MockContents.kjvDownloadedTranslationInfo, MockContents.cuvTranslationInfo),
                 translationRepository.readTranslationsFromBackend()
@@ -221,7 +221,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
         coEvery { localTranslationStorage.replaceTranslations(emptyList()) } returns Unit
         coEvery { remoteTranslationService.fetchTranslations() } returns emptyList()
 
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testScope)
         assertTrue(translationRepository.readTranslationsFromBackend().isEmpty())
         coVerify(exactly = 1) {
             localTranslationStorage.replaceTranslations(emptyList())
@@ -243,7 +243,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
                 RemoteTranslationInfo.fromTranslationInfo(MockContents.cuvTranslationInfo)
         )
 
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testScope)
         assertEquals(
                 listOf(MockContents.kjvDownloadedTranslationInfo, MockContents.cuvTranslationInfo),
                 translationRepository.readTranslationsFromBackend()
@@ -258,7 +258,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
     fun `test downloadTranslation()`() = runTest {
         coEvery { localTranslationStorage.readTranslations() } returns listOf(MockContents.cuvTranslationInfo, MockContents.kjvTranslationInfo)
 
-        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher))
+        val translationRepository = spyk(TranslationRepository(localTranslationStorage, remoteTranslationService, testScope))
         coEvery { translationRepository.downloadTranslation(any(), MockContents.kjvTranslationInfo) } returns Unit
 
         assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
@@ -291,7 +291,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
                 MockContents.kjvBookNames, MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap()
         )
 
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testScope)
 
         launch {
             translationRepository.downloadTranslation(channel, MockContents.kjvTranslationInfo)
@@ -313,7 +313,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
     fun `test removeTranslation() that does not exist`() = runTest {
         coEvery { localTranslationStorage.removeTranslation(any()) } returns Unit
         coEvery { remoteTranslationService.removeTranslationCache(any()) } returns Unit
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testScope)
 
         assertTrue(translationRepository.downloadedTranslations.first().isEmpty())
         assertTrue(translationRepository.availableTranslations.first().isEmpty())
@@ -329,7 +329,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
         coEvery { localTranslationStorage.removeTranslation(MockContents.kjvDownloadedTranslationInfo) } returns Unit
         coEvery { remoteTranslationService.removeTranslationCache(any()) } returns Unit
 
-        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testDispatcher)
+        val translationRepository = TranslationRepository(localTranslationStorage, remoteTranslationService, testScope)
         assertEquals(listOf(MockContents.cuvTranslationInfo), translationRepository.availableTranslations.first())
         assertEquals(listOf(MockContents.kjvDownloadedTranslationInfo), translationRepository.downloadedTranslations.first())
 

@@ -43,7 +43,7 @@ class VerseAnnotationRepositoryTest : BaseUnitTest() {
     fun `test sortOrder from constructor`() = runTest {
         coEvery { localVerseAnnotationStorage.readSortOrder() } returns Constants.SORT_BY_BOOK
 
-        val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testDispatcher)
+        val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testScope)
         assertEquals(Constants.SORT_BY_BOOK, verseAnnotationRepository.sortOrder.first())
     }
 
@@ -51,7 +51,7 @@ class VerseAnnotationRepositoryTest : BaseUnitTest() {
     fun `test sortOrder from constructor with exception`() = runTest {
         coEvery { localVerseAnnotationStorage.readSortOrder() } throws RuntimeException("Random exception")
 
-        val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testDispatcher)
+        val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testScope)
         assertEquals(Constants.DEFAULT_SORT_ORDER, verseAnnotationRepository.sortOrder.first())
     }
 
@@ -60,7 +60,7 @@ class VerseAnnotationRepositoryTest : BaseUnitTest() {
         coEvery { localVerseAnnotationStorage.readSortOrder() } returns Constants.DEFAULT_SORT_ORDER
         coEvery { localVerseAnnotationStorage.saveSortOrder(Constants.SORT_BY_BOOK) } returns Unit
 
-        val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testDispatcher)
+        val verseAnnotationRepository = VerseAnnotationRepository<Bookmark>(localVerseAnnotationStorage, testScope)
         assertEquals(Constants.DEFAULT_SORT_ORDER, verseAnnotationRepository.sortOrder.first())
 
         verseAnnotationRepository.saveSortOrder(Constants.SORT_BY_BOOK)

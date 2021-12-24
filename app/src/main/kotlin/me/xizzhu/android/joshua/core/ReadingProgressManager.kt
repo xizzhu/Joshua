@@ -17,8 +17,8 @@
 package me.xizzhu.android.joshua.core
 
 import androidx.annotation.VisibleForTesting
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
@@ -46,8 +46,11 @@ data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimest
     }
 }
 
-class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRepository,
-                             private val readingProgressRepository: ReadingProgressRepository) {
+class ReadingProgressManager(
+        private val bibleReadingRepository: BibleReadingRepository,
+        private val readingProgressRepository: ReadingProgressRepository,
+        private val appScope: CoroutineScope
+) {
     companion object {
         private val TAG: String = ReadingProgressManager::class.java.simpleName
 
@@ -67,7 +70,7 @@ class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRep
 
         lastTimestamp = elapsedRealtime()
         currentVerseIndexObserver = bibleReadingRepository.currentVerseIndex
-        GlobalScope.launch(Dispatchers.Main) {
+        appScope.launch(Dispatchers.Main) {
             currentVerseIndexObserver?.filterIsValid()
                     ?.collect {
                         trackReadingProgress()
@@ -100,9 +103,9 @@ class ReadingProgressManager(private val bibleReadingRepository: BibleReadingRep
     }
 
     fun stopTracking() {
-        // uses GlobalScope to make sure this will be executed without being canceled
+        // uses appScope to make sure this will be executed without being canceled
         // uses Dispatchers.Main.immediate to make sure this will be executed immediately
-        GlobalScope.launch(Dispatchers.Main.immediate) {
+        appScope.launch(Dispatchers.Main.immediate) {
             trackReadingProgress()
             currentVerseIndex = VerseIndex.INVALID
             lastTimestamp = 0L

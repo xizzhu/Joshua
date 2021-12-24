@@ -16,9 +16,7 @@
 
 package me.xizzhu.android.joshua.core.repository
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -31,7 +29,7 @@ import me.xizzhu.android.logger.Log
 
 class VerseAnnotationRepository<T : VerseAnnotation>(
         private val localVerseAnnotationStorage: LocalVerseAnnotationStorage<T>,
-        initDispatcher: CoroutineDispatcher = Dispatchers.IO
+        appScope: CoroutineScope
 ) {
     companion object {
         private val TAG = VerseAnnotationRepository::class.java.simpleName
@@ -41,7 +39,7 @@ class VerseAnnotationRepository<T : VerseAnnotation>(
     val sortOrder: Flow<Int> = _sortOrder.filterNotNull()
 
     init {
-        GlobalScope.launch(initDispatcher) {
+        appScope.launch {
             try {
                 _sortOrder.value = localVerseAnnotationStorage.readSortOrder()
             } catch (e: Exception) {

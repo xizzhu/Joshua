@@ -60,9 +60,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideBibleReadingManager(bibleReadingRepository: BibleReadingRepository,
-                                   translationRepository: TranslationRepository): BibleReadingManager =
-            BibleReadingManager(bibleReadingRepository, translationRepository)
+    fun provideBibleReadingManager(
+            bibleReadingRepository: BibleReadingRepository,
+            translationRepository: TranslationRepository,
+            appScope: CoroutineScope
+    ): BibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, appScope)
 
     @Provides
     @Singleton
@@ -81,9 +83,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideReadingProgressManager(bibleReadingRepository: BibleReadingRepository,
-                                      readingProgressRepository: ReadingProgressRepository): ReadingProgressManager =
-            ReadingProgressManager(bibleReadingRepository, readingProgressRepository)
+    fun provideReadingProgressManager(
+            bibleReadingRepository: BibleReadingRepository,
+            readingProgressRepository: ReadingProgressRepository,
+            appScope: CoroutineScope
+    ): ReadingProgressManager = ReadingProgressManager(bibleReadingRepository, readingProgressRepository, appScope)
 
     @Provides
     @Singleton
@@ -119,23 +123,23 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideBibleReadingRepository(androidDatabase: AndroidDatabase): BibleReadingRepository =
-            BibleReadingRepository(AndroidReadingStorage(androidDatabase))
+    fun provideBibleReadingRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): BibleReadingRepository =
+            BibleReadingRepository(AndroidReadingStorage(androidDatabase), appScope)
 
     @Provides
     @Singleton
-    fun provideBookmarkRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Bookmark> =
-            VerseAnnotationRepository(AndroidBookmarkStorage(androidDatabase))
+    fun provideBookmarkRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): VerseAnnotationRepository<Bookmark> =
+            VerseAnnotationRepository(AndroidBookmarkStorage(androidDatabase), appScope)
 
     @Provides
     @Singleton
-    fun provideHighlightRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Highlight> =
-            VerseAnnotationRepository(AndroidHighlightStorage(androidDatabase))
+    fun provideHighlightRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): VerseAnnotationRepository<Highlight> =
+            VerseAnnotationRepository(AndroidHighlightStorage(androidDatabase), appScope)
 
     @Provides
     @Singleton
-    fun provideNoteRepository(androidDatabase: AndroidDatabase): VerseAnnotationRepository<Note> =
-            VerseAnnotationRepository(AndroidNoteStorage(androidDatabase))
+    fun provideNoteRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): VerseAnnotationRepository<Note> =
+            VerseAnnotationRepository(AndroidNoteStorage(androidDatabase), appScope)
 
     @Provides
     @Singleton
@@ -144,8 +148,8 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideSettingsRepository(androidDatabase: AndroidDatabase): SettingsRepository =
-            SettingsRepository(AndroidSettingsStorage(androidDatabase))
+    fun provideSettingsRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): SettingsRepository =
+            SettingsRepository(AndroidSettingsStorage(androidDatabase), appScope)
 
     @Provides
     @Singleton
@@ -154,6 +158,6 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideTranslationRepository(app: App, androidDatabase: AndroidDatabase): TranslationRepository =
-            TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService(app))
+    fun provideTranslationRepository(app: App, androidDatabase: AndroidDatabase, appScope: CoroutineScope): TranslationRepository =
+            TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService(app), appScope)
 }

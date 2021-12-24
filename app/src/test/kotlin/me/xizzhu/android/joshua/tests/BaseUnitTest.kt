@@ -17,7 +17,9 @@
 package me.xizzhu.android.joshua.tests
 
 import androidx.annotation.CallSuper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -26,7 +28,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 abstract class BaseUnitTest {
-    protected val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
+    protected val testScope = CoroutineScope(SupervisorJob() + testDispatcher)
 
     @CallSuper
     @BeforeTest

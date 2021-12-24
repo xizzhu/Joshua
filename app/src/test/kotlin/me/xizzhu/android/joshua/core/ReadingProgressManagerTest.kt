@@ -43,7 +43,7 @@ class ReadingProgressManagerTest : BaseUnitTest() {
 
         bibleReadingRepository = mockk()
         readingProgressRepository = mockk()
-        readingProgressManager = ReadingProgressManager(bibleReadingRepository, readingProgressRepository)
+        readingProgressManager = ReadingProgressManager(bibleReadingRepository, readingProgressRepository, testScope)
     }
 
     @Test
