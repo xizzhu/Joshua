@@ -95,21 +95,6 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             }
         }
     }
-
-    fun removeAll() {
-        writableDatabase.transaction {
-            bookmarkDao.removeAll()
-            bookNamesDao.removeAll()
-            highlightDao.removeAll()
-            metadataDao.removeAll()
-            noteDao.removeAll()
-            readingProgressDao.removeAll()
-            strongNumberIndexDao.removeAll()
-            strongNumberReverseIndexDao.removeAll()
-            strongNumberWordDao.removeAll()
-            translationInfoDao.removeAll()
-        }
-    }
 }
 
 fun Condition.withQuery(column: String, query: String): Condition {

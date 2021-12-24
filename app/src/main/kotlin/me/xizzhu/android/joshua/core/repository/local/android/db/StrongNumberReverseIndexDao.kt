@@ -60,9 +60,4 @@ class StrongNumberReverseIndexDao(sqliteHelper: SQLiteOpenHelper) {
             }
         }
     }
-
-    @WorkerThread
-    fun removeAll() {
-        db.deleteAll(TABLE_STRONG_NUMBER_REVERSE_INDEX)
-    }
 }
