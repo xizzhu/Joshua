@@ -18,14 +18,18 @@ package me.xizzhu.android.joshua.strongnumber
 
 import android.app.Application
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.StrongNumberManager
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -60,7 +64,13 @@ class StrongNumberViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test strongNumber`() = runTest {
+    fun `test loadStrongNumber() with empty sn`() = runTest {
+        strongNumberViewModel.loadStrongNumber("")
+        assertTrue(strongNumberViewModel.strongNumber().first() is BaseViewModel.ViewData.Failure)
+    }
+
+    @Test
+    fun `test loadStrongNumber()`() = runTest {
         val sn = "H7225"
         coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
         coEvery { strongNumberManager.readStrongNumber(sn) } returns StrongNumber(sn, MockContents.strongNumberWords.getValue(sn))
@@ -98,5 +108,32 @@ class StrongNumberViewModelTest : BaseUnitTest() {
                 "Ex. 23:19 The first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.",
                 (actual.data.items[5] as StrongNumberItem).textForDisplay.toString()
         )
+    }
+
+    @Test
+    fun `test loadVersesForPreview() with invalid verse index`() = runTest {
+        val actual = strongNumberViewModel.loadVersesForPreview(VerseIndex.INVALID).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertTrue(actual[1] is BaseViewModel.ViewData.Failure)
+    }
+
+    @Test
+    fun `test loadVersesForPreview()`() = runTest {
+        coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
+        coEvery {
+            bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0)
+        } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2])
+        coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
+        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
+
+        val actual = strongNumberViewModel.loadVersesForPreview(VerseIndex(0, 0, 1)).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+
+        assertEquals(Settings.DEFAULT, (actual[1] as BaseViewModel.ViewData.Success).data.settings)
+        assertEquals("Gen., 1", (actual[1] as BaseViewModel.ViewData.Success).data.title)
+        assertEquals(3, (actual[1] as BaseViewModel.ViewData.Success).data.items.size)
+        assertEquals(1, (actual[1] as BaseViewModel.ViewData.Success).data.currentPosition)
     }
 }

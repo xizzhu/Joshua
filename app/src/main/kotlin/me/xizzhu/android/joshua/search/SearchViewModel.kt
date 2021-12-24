@@ -213,6 +213,10 @@ class SearchViewModel @Inject constructor(
     }.onFailure { Log.e(tag, "Failed to save current verse", it) }
 
     fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> = viewData {
+        if (!verseIndex.isValid()) {
+            throw IllegalArgumentException("Verse index [$verseIndex] is invalid")
+        }
+
         val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
         val query = searchRequest.value?.query ?: ""
         val items = bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex)

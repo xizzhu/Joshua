@@ -4,4 +4,4 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:minHeight="@dimen/item_height"
-    android:textSize="@dimen/text_body" />
+    android:textSize="@dimen/text_primary" />

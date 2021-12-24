@@ -81,7 +81,7 @@ fun List<Verse>.toVersePreviewItems(): List<VersePreviewItem> {
 }
 
 // skips the empty verses
-private fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
+fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
     var nextVerse: Verse? = null
     while (hasNext()) {
         nextVerse = next()

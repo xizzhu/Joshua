@@ -5,8 +5,8 @@
     <dimen name="padding_big">32dp</dimen>
     <dimen name="padding_small">8dp</dimen>
 
-    <dimen name="text_body">18sp</dimen>
-    <dimen name="text_caption">16sp</dimen>
+    <dimen name="text_primary">18sp</dimen>
+    <dimen name="text_secondary">16sp</dimen>
 
     <dimen name="item_height">56dp</dimen>
 

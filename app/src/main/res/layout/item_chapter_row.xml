@@ -10,7 +10,7 @@
         android:background="@drawable/background_chapter"
         android:gravity="center"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/text_body" />
+        android:textSize="@dimen/text_primary" />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="@dimen/chapter_grid_width"
@@ -18,7 +18,7 @@
         android:background="@drawable/background_chapter"
         android:gravity="center"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/text_body" />
+        android:textSize="@dimen/text_primary" />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="@dimen/chapter_grid_width"
@@ -26,7 +26,7 @@
         android:background="@drawable/background_chapter"
         android:gravity="center"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/text_body" />
+        android:textSize="@dimen/text_primary" />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="@dimen/chapter_grid_width"
@@ -34,7 +34,7 @@
         android:background="@drawable/background_chapter"
         android:gravity="center"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/text_body" />
+        android:textSize="@dimen/text_primary" />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="@dimen/chapter_grid_width"
@@ -42,5 +42,5 @@
         android:background="@drawable/background_chapter"
         android:gravity="center"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/text_body" />
+        android:textSize="@dimen/text_primary" />
 </LinearLayout>

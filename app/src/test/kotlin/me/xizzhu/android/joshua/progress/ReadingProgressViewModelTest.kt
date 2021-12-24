@@ -76,6 +76,7 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
                         ReadingProgress.ChapterReadingStatus(0, 0, 1, 2L, 123L),
                         ReadingProgress.ChapterReadingStatus(0, 1, 1, 2L, 123L),
                         ReadingProgress.ChapterReadingStatus(1, 1, 1, 2L, 123L),
+                        ReadingProgress.ChapterReadingStatus(30, 0, 1, 2L, 123L),
                         ReadingProgress.ChapterReadingStatus(62, 0, 1, 2L, 123L),
                 )
         )
@@ -87,9 +88,9 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         assertTrue(actual is BaseViewModel.ViewData.Success)
         assertEquals(67, actual.data.items.size)
         assertEquals(2, (actual.data.items[0] as ReadingProgressSummaryItem).continuousReadingDays)
-        assertEquals(4, (actual.data.items[0] as ReadingProgressSummaryItem).chaptersRead)
-        assertEquals(1, (actual.data.items[0] as ReadingProgressSummaryItem).finishedBooks)
-        assertEquals(0, (actual.data.items[0] as ReadingProgressSummaryItem).finishedOldTestament)
+        assertEquals(5, (actual.data.items[0] as ReadingProgressSummaryItem).chaptersRead)
+        assertEquals(2, (actual.data.items[0] as ReadingProgressSummaryItem).finishedBooks)
+        assertEquals(1, (actual.data.items[0] as ReadingProgressSummaryItem).finishedOldTestament)
         assertEquals(1, (actual.data.items[0] as ReadingProgressSummaryItem).finishedNewTestament)
         actual.data.items.subList(1, actual.data.items.size).forEachIndexed { book, item ->
             assertTrue(item is ReadingProgressDetailItem)
@@ -100,6 +101,10 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
                 }
                 1 -> {
                     item.chaptersRead.forEachIndexed { chapter, read -> assertEquals(chapter == 1, read) }
+                    assertEquals(1, item.chaptersReadCount)
+                }
+                30 -> {
+                    item.chaptersRead.forEach { assertTrue(it) }
                     assertEquals(1, item.chaptersReadCount)
                 }
                 62 -> {
