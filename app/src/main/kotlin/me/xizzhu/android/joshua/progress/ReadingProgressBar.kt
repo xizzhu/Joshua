@@ -70,7 +70,7 @@ class ReadingProgressBar : View {
         textPaint.isAntiAlias = true
         textPaint.color = Color.BLACK
         textPaint.textAlign = Paint.Align.RIGHT
-        textPaint.textSize = resources.getDimension(R.dimen.text_body)
+        textPaint.textSize = resources.getDimension(R.dimen.text_primary)
         textPaint.typeface = Typeface.DEFAULT_BOLD
         textPadding = (1.5 * resources.getDimensionPixelSize(R.dimen.padding_small)).roundToInt()
     }

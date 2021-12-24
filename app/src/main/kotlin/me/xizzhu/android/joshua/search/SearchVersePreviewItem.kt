@@ -30,6 +30,7 @@ import me.xizzhu.android.joshua.ui.clearAll
 import me.xizzhu.android.joshua.ui.createTitleSpans
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
+import me.xizzhu.android.joshua.ui.recyclerview.nextNonEmpty
 import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 import me.xizzhu.android.joshua.ui.setSpans
 import me.xizzhu.android.joshua.ui.toCharSequence
@@ -84,25 +85,6 @@ fun List<Verse>.toSearchVersePreviewItems(query: String): List<SearchVersePrevie
     }
 
     return items
-}
-
-// skips the empty verses
-private fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
-    var nextVerse: Verse? = null
-    while (hasNext()) {
-        nextVerse = next()
-        if (nextVerse.text.text.isEmpty()) {
-            nextVerse = null
-        } else {
-            break
-        }
-    }
-
-    val followingEmptyVerseCount = nextVerse
-            ?.let { it.verseIndex.verseIndex - 1 - current.verseIndex.verseIndex }
-            ?: 0
-
-    return Pair(nextVerse, followingEmptyVerseCount)
 }
 
 private class SearchVersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)

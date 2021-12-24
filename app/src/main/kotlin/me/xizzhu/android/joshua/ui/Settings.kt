@@ -24,7 +24,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 
 fun Settings.getPrimaryTextSize(resources: Resources): Float =
-        getTextSize(resources, R.dimen.text_body) * fontSizeScale
+        getTextSize(resources, R.dimen.text_primary) * fontSizeScale
 
 private val textSizes = mutableMapOf<Int, Float>()
 
@@ -33,7 +33,7 @@ private fun getTextSize(resources: Resources, @DimenRes fontSize: Int): Float {
 }
 
 fun Settings.getSecondaryTextSize(resources: Resources): Float =
-        getTextSize(resources, R.dimen.text_caption) * fontSizeScale
+        getTextSize(resources, R.dimen.text_secondary) * fontSizeScale
 
 fun TextView.setPrimaryTextSize(settings: Settings) {
     setTextSize(TypedValue.COMPLEX_UNIT_PX, settings.getPrimaryTextSize(resources))

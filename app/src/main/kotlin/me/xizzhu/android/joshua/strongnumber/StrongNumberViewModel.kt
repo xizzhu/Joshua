@@ -59,37 +59,6 @@ class StrongNumberViewModel @Inject constructor(
 ) : BaseViewModel(settingsManager, application) {
     private val strongNumber: MutableStateFlow<ViewData<StrongNumberViewData>?> = MutableStateFlow(null)
 
-    private fun buildStrongNumberItems(
-            strongNumber: StrongNumber,
-            verses: List<Verse>,
-            bookNames: List<String>,
-            bookShortNames: List<String>): List<BaseItem> {
-        val items: ArrayList<BaseItem> = ArrayList()
-
-        items.add(TextItem(formatStrongNumber(strongNumber)))
-
-        var currentBookIndex = -1
-        verses.forEach { verse ->
-            if (verse.text.text.isEmpty()) return@forEach
-
-            val verseIndex = verse.verseIndex
-            val bookName = bookNames[verseIndex.bookIndex]
-            if (verseIndex.bookIndex != currentBookIndex) {
-                items.add(TitleItem(bookName, false))
-                currentBookIndex = verseIndex.bookIndex
-            }
-            items.add(StrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex], verse.text.text))
-        }
-
-        return items
-    }
-
-    private fun formatStrongNumber(strongNumber: StrongNumber): CharSequence =
-            SpannableStringBuilder().append(strongNumber.sn)
-                    .setSpans(createTitleSpans())
-                    .append(' ').append(strongNumber.meaning)
-                    .toCharSequence()
-
     fun strongNumber(): Flow<ViewData<StrongNumberViewData>> = strongNumber.filterNotNull()
 
     fun loadStrongNumber(sn: String) {
@@ -119,11 +88,44 @@ class StrongNumberViewModel @Inject constructor(
         }
     }
 
+    private fun buildStrongNumberItems(
+            strongNumber: StrongNumber,
+            verses: List<Verse>,
+            bookNames: List<String>,
+            bookShortNames: List<String>): List<BaseItem> {
+        val items: ArrayList<BaseItem> = ArrayList()
+
+        val title = SpannableStringBuilder().append(strongNumber.sn)
+                .setSpans(createTitleSpans())
+                .append(' ').append(strongNumber.meaning)
+                .toCharSequence()
+        items.add(TextItem(title))
+
+        var currentBookIndex = -1
+        verses.forEach { verse ->
+            if (verse.text.text.isEmpty()) return@forEach
+
+            val verseIndex = verse.verseIndex
+            val bookName = bookNames[verseIndex.bookIndex]
+            if (verseIndex.bookIndex != currentBookIndex) {
+                items.add(TitleItem(bookName, false))
+                currentBookIndex = verseIndex.bookIndex
+            }
+            items.add(StrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex], verse.text.text))
+        }
+
+        return items
+    }
+
     fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
         bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
     }.onFailure { Log.e(tag, "Failed to save current verse", it) }
 
     fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> = viewData {
+        if (!verseIndex.isValid()) {
+            throw IllegalArgumentException("Verse index [$verseIndex] is invalid")
+        }
+
         val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
         val items = bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex).toVersePreviewItems()
         PreviewViewData(

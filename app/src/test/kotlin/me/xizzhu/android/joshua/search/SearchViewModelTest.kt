@@ -322,4 +322,31 @@ class SearchViewModelTest : BaseUnitTest() {
         assertFalse(actual.data.instanceSearch)
         assertEquals("5 result(s) found.", actual.data.toast)
     }
+
+    @Test
+    fun `test loadVersesForPreview() with invalid verse index`() = runTest {
+        val actual = searchViewModel.loadVersesForPreview(VerseIndex.INVALID).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertTrue(actual[1] is BaseViewModel.ViewData.Failure)
+    }
+
+    @Test
+    fun `test loadVersesForPreview()`() = runTest {
+        coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
+        coEvery {
+            bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0)
+        } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2])
+        coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
+        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
+
+        val actual = searchViewModel.loadVersesForPreview(VerseIndex(0, 0, 1)).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+
+        assertEquals(Settings.DEFAULT, (actual[1] as BaseViewModel.ViewData.Success).data.settings)
+        assertEquals("Gen., 1", (actual[1] as BaseViewModel.ViewData.Success).data.title)
+        assertEquals(3, (actual[1] as BaseViewModel.ViewData.Success).data.items.size)
+        assertEquals(1, (actual[1] as BaseViewModel.ViewData.Success).data.currentPosition)
+    }
 }

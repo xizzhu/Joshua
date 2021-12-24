@@ -70,9 +70,4 @@ class TranslationInfoDao(sqliteHelper: SQLiteOpenHelper) {
             it[COLUMN_DOWNLOADED] = if (translation.downloaded) 1 else 0
         }
     }
-
-    @WorkerThread
-    fun removeAll() {
-        db.deleteAll(TABLE_TRANSLATION_INFO)
-    }
 }
