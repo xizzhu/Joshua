@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.annotated
 
 import android.app.Application
+import android.content.res.Resources
 import android.text.format.DateUtils
 import io.mockk.coEvery
 import io.mockk.every
@@ -41,6 +42,8 @@ import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
+import me.xizzhu.android.joshua.utils.currentTimeMillis
+import java.util.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -65,6 +68,7 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
     private lateinit var verseAnnotationManager: VerseAnnotationManager<TestAnnotatedVerse>
     private lateinit var settingsManager: SettingsManager
+    private lateinit var resources: Resources
     private lateinit var application: Application
     private lateinit var annotatedVersesViewModel: AnnotatedVersesViewModel<TestAnnotatedVerse>
 
@@ -80,10 +84,32 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
 
         settingsManager = mockk()
 
+        resources = mockk()
+        every { resources.getStringArray(R.array.text_months) } returns arrayOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
+
         application = mockk()
         every { application.getString(R.string.text_no_bookmarks) } returns "NO ANNOTATED VERSES"
+        every { application.resources } returns resources
 
         annotatedVersesViewModel = TestAnnotatedVersesViewModel(bibleReadingManager, verseAnnotationManager, settingsManager, application)
+    }
+
+    @Test
+    fun `test loadAnnotatedVerses() from constructor`() = runTest {
+        every { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
+        coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
+        coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
+        coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, emptyList()) } returns emptyMap()
+        every { verseAnnotationManager.sortOrder() } returns flowOf(Constants.SORT_BY_BOOK)
+        coEvery { verseAnnotationManager.read(Constants.SORT_BY_BOOK) } returns emptyList()
+
+        val job = async { annotatedVersesViewModel.annotatedVerses().first { it is BaseViewModel.ViewData.Success } }
+        annotatedVersesViewModel = TestAnnotatedVersesViewModel(bibleReadingManager, verseAnnotationManager, settingsManager, application)
+
+        val actual = job.await()
+        assertTrue(actual is BaseViewModel.ViewData.Success)
+        assertEquals(1, actual.data.items.size)
+        assertEquals("NO ANNOTATED VERSES", (actual.data.items[0] as TextItem).title.toString())
     }
 
     @Test

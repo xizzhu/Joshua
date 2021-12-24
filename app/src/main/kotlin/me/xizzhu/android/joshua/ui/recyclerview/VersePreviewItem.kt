@@ -33,7 +33,7 @@ import me.xizzhu.android.joshua.ui.setSpans
 import me.xizzhu.android.joshua.ui.toCharSequence
 import java.util.*
 
-class VersePreviewItem(val verse: Verse, private val followingEmptyVerseCount: Int)
+class VersePreviewItem(val verse: Verse, followingEmptyVerseCount: Int)
     : BaseItem(R.layout.item_verse_preview, { inflater, parent -> VersePreviewItemViewHolder(inflater, parent) }) {
     companion object {
         private val VERSE_INDEX_SPANS = createTitleSpans()
