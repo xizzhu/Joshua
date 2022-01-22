@@ -52,14 +52,14 @@ object Versions {
     object AndroidX {
         const val activity = "1.4.0"
         const val annotation = "1.3.0"
-        const val appCompat = "1.4.0"
+        const val appCompat = "1.4.1"
         const val core = "1.7.0"
         const val lifecycle = "2.4.0"
         const val multidex = "2.0.1"
 
         object View {
-            const val constraintLayout = "2.1.2"
-            const val coordinatorLayout = "1.1.0"
+            const val constraintLayout = "2.1.3"
+            const val coordinatorLayout = "1.2.0"
             const val drawerLayout = "1.1.1"
             const val recyclerView = "1.2.1"
             const val swipeRefreshLayout = "1.1.0"
@@ -73,7 +73,7 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.10"
-        const val bom = "29.0.3"
+        const val bom = "29.0.4"
 
         object Crashlytics {
             const val classpath = "2.8.1"
@@ -83,9 +83,9 @@ object Versions {
     const val ask = "0.5.2"
     const val hilt = "2.40.5"
     const val logger = "0.7.0"
-    const val materialComponent = "1.5.0-rc01"
+    const val materialComponent = "1.5.0"
 
-    const val mockk = "1.12.1"
+    const val mockk = "1.12.2"
     const val robolectric = "4.5"
 }
 

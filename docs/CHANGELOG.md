@@ -17,10 +17,11 @@ CHANGELOG
   - Android Gradle plugin to 7.0.4
   - Android build tool to 32.0.0, compile and target SDK level to 32
   - Kotlin to 1.6.10, Coroutines to 1.6.0
-  - AndroidX constraint layout to 2.1.2
-  - Firebase BOM to 29.0.3, Crashlytics Gradle plugin to 2.8.1
+  - AndroidX appcompat to 1.4.1, constraint layout to 2.1.3, coordinator layout to 1.2.0
+  - Firebase BOM to 29.0.4, Crashlytics Gradle plugin to 2.8.1
   - Hilt to 2.40.5
-  - Material Component to 1.5.0-rc01
+  - Material Component to 1.5.0
+  - Mockk to 1.12.2
 
 #### v0.19.1 (2021-12-10)
 - Bug fixes:
