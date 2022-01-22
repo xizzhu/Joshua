@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next release
+#### v0.20.0 (2022-01-22)
 - New features:
   - Support using system's day / night mode (#206)
   - Improve search functionality (#152)
