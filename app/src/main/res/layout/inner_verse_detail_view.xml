@@ -8,12 +8,10 @@
         android:layout_gravity="bottom"
         android:background="?android:attr/colorBackground">
 
-        <View
+        <com.google.android.material.divider.MaterialDivider
             android:id="@+id/top_divider"
-            style="@style/Divider.Horizontal"
-            android:background="@color/dark_gray"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -45,13 +43,11 @@
             app:layout_constraintTop_toBottomOf="@id/top_divider"
             app:tabMode="scrollable" />
 
-        <View
+        <com.google.android.material.divider.MaterialDivider
             android:id="@+id/middle_divider"
-            style="@style/Divider.Horizontal"
-            android:background="@color/dark_gray"
-            app:layout_constraintBottom_toBottomOf="@id/tab_layout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/tab_layout" />
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/view_pager"

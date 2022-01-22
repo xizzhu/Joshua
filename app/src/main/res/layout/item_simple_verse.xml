@@ -27,9 +27,9 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <View
+    <com.google.android.material.divider.MaterialDivider
         android:id="@+id/divider"
-        style="@style/Divider.Horizontal"
-        android:layout_gravity="bottom"
-        android:background="@color/dark_gray" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
 </FrameLayout>

@@ -5,6 +5,7 @@
         <item name="colorPrimary">@color/primary</item>
         <item name="colorSecondary">@color/secondary</item>
         <item name="colorOnPrimaryContainer">@android:color/white</item>
+        <item name="colorOutline">@color/dark_gray</item>
 
         <item name="windowActionModeOverlay">true</item>
 
@@ -16,12 +17,5 @@
         <item name="android:activityOpenExitAnimation">@anim/fade_out</item>
         <item name="android:activityCloseEnterAnimation">@anim/fade_in</item>
         <item name="android:activityCloseExitAnimation">@anim/slide_out_left_to_right</item>
-    </style>
-
-    <style name="Divider" />
-
-    <style name="Divider.Horizontal" parent="Divider">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">1px</item>
     </style>
 </resources>

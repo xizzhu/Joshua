@@ -7,11 +7,10 @@
     android:background="?android:attr/selectableItemBackground"
     android:paddingBottom="@dimen/padding_small">
 
-    <View
+    <com.google.android.material.divider.MaterialDivider
         android:id="@+id/divider"
-        style="@style/Divider.Horizontal"
-        android:background="@color/dark_gray"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent" />
 
     <me.xizzhu.android.joshua.progress.ReadingProgressBar
