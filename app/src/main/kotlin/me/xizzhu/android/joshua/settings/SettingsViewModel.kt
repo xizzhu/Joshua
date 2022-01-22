@@ -25,7 +25,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -83,7 +82,7 @@ data class SettingsViewData(
 class SettingsViewModel @Inject constructor(
         private val backupManager: BackupManager, settingsManager: SettingsManager, application: Application
 ) : BaseViewModel(settingsManager, application) {
-    private val settingsViewData: MutableStateFlow<ViewData<SettingsViewData>?> = MutableStateFlow(null)
+    private val settingsViewData: MutableStateFlow<ViewData<SettingsViewData>> = MutableStateFlow(ViewData.Loading())
 
     init {
         val version = try {
@@ -110,9 +109,9 @@ class SettingsViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    fun settingsViewData(): Flow<ViewData<SettingsViewData>> = settingsViewData.filterNotNull()
+    fun settingsViewData(): Flow<ViewData<SettingsViewData>> = settingsViewData
 
-    fun currentSettingsViewData(): SettingsViewData? = settingsViewData.value?.let { if (it is ViewData.Success) it.data else null }
+    fun currentSettingsViewData(): SettingsViewData? = settingsViewData.value.let { if (it is ViewData.Success) it.data else null }
 
     fun saveFontSizeScale(fontSizeScale: Float): Flow<ViewData<Unit>> = updateSettings { it.copy(fontSizeScale = fontSizeScale) }
 
