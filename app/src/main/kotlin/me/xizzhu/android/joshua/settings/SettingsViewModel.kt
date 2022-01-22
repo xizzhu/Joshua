@@ -39,6 +39,7 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.viewData
 import me.xizzhu.android.joshua.infra.onFailure
+import me.xizzhu.android.joshua.infra.onSuccess
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.logger.Log
 import java.io.IOException
@@ -113,39 +114,32 @@ class SettingsViewModel @Inject constructor(
 
     fun currentSettingsViewData(): SettingsViewData? = settingsViewData.value?.let { if (it is ViewData.Success) it.data else null }
 
-    fun saveFontSizeScale(fontSizeScale: Float): Flow<ViewData<Unit>> = updateSettings {
-        settingsManager.saveSettings(currentSettings().copy(fontSizeScale = fontSizeScale))
-    }
+    fun saveFontSizeScale(fontSizeScale: Float): Flow<ViewData<Unit>> = updateSettings { it.copy(fontSizeScale = fontSizeScale) }
 
-    private inline fun updateSettings(crossinline op: suspend () -> Unit): Flow<ViewData<Unit>> =
-            viewData(op).onFailure { Log.e(tag, "Failed to save settings", it) }
+    private inline fun updateSettings(crossinline op: (current: Settings) -> Settings): Flow<ViewData<Unit>> = viewData<Unit> {
+        val current = settings().first()
+        op(current).takeIf { it != current }?.let { settingsManager.saveSettings(it) }
+    }.onFailure { Log.e(tag, "Failed to save settings", it) }
 
-    private suspend fun currentSettings(): Settings = settings().first()
-
-    fun saveKeepScreenOn(keepScreenOn: Boolean): Flow<ViewData<Unit>> = updateSettings {
-        settingsManager.saveSettings(currentSettings().copy(keepScreenOn = keepScreenOn))
-    }
+    fun saveKeepScreenOn(keepScreenOn: Boolean): Flow<ViewData<Unit>> = updateSettings { it.copy(keepScreenOn = keepScreenOn) }
 
     fun saveNightMode(nightMode: SettingsViewData.NightMode): Flow<ViewData<Unit>> = updateSettings {
-        settingsManager.saveSettings(currentSettings().copy(nightMode = nightMode.nightMode))
-        AppCompatDelegate.setDefaultNightMode(nightMode.systemValue) // This will restart the activity, so do it AFTER the settings are saved.
+        it.copy(nightMode = nightMode.nightMode)
+    }.onSuccess {
+        // This will restart the activity, so do it AFTER the settings are successfully saved.
+        AppCompatDelegate.setDefaultNightMode(nightMode.systemValue)
     }
 
-    fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean): Flow<ViewData<Unit>> = updateSettings {
-        settingsManager.saveSettings(currentSettings().copy(simpleReadingModeOn = simpleReadingModeOn))
-    }
+    fun saveSimpleReadingModeOn(simpleReadingModeOn: Boolean): Flow<ViewData<Unit>> =
+            updateSettings { it.copy(simpleReadingModeOn = simpleReadingModeOn) }
 
-    fun saveHideSearchButton(hideSearchButton: Boolean): Flow<ViewData<Unit>> = updateSettings {
-        settingsManager.saveSettings(currentSettings().copy(hideSearchButton = hideSearchButton))
-    }
+    fun saveHideSearchButton(hideSearchButton: Boolean): Flow<ViewData<Unit>> = updateSettings { it.copy(hideSearchButton = hideSearchButton) }
 
-    fun saveConsolidateVersesForSharing(consolidateVerses: Boolean): Flow<ViewData<Unit>> = updateSettings {
-        settingsManager.saveSettings(currentSettings().copy(consolidateVersesForSharing = consolidateVerses))
-    }
+    fun saveConsolidateVersesForSharing(consolidateVerses: Boolean): Flow<ViewData<Unit>> =
+            updateSettings { it.copy(consolidateVersesForSharing = consolidateVerses) }
 
-    fun saveDefaultHighlightColor(highlightColor: SettingsViewData.HighlightColor): Flow<ViewData<Unit>> = updateSettings {
-        settingsManager.saveSettings(currentSettings().copy(defaultHighlightColor = highlightColor.color))
-    }
+    fun saveDefaultHighlightColor(highlightColor: SettingsViewData.HighlightColor): Flow<ViewData<Unit>> =
+            updateSettings { it.copy(defaultHighlightColor = highlightColor.color) }
 
     fun backup(uri: Uri?): Flow<ViewData<Int>> = flow {
         if (uri == null) {
