@@ -170,7 +170,8 @@ abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
         }
     }
 
-    protected abstract fun buildBaseItem(
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    internal abstract fun buildBaseItem(
             annotatedVerse: V, bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int
     ): BaseItem
 

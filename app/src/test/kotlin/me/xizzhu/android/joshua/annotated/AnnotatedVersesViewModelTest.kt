@@ -27,11 +27,13 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarkItem
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
@@ -216,5 +218,21 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
         assertEquals(VerseIndex(0, 0, 1), (actual.data.items[3] as BookmarkItem).verseIndex)
         assertEquals(VerseIndex(0, 9, 9), (actual.data.items[4] as BookmarkItem).verseIndex)
         assertEquals(VerseIndex(1, 22, 18), (actual.data.items[5] as BookmarkItem).verseIndex)
+    }
+
+    @Test
+    fun `test loadVersesForPreview`() = runTest {
+        every { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
+        coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0) } returns MockContents.kjvVerses
+        coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
+        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
+
+        val actual = annotatedVersesViewModel.loadVersesForPreview(VerseIndex(0, 0, 1)).toList()
+        assertEquals(2, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        assertEquals(Settings.DEFAULT, (actual[1] as BaseViewModel.ViewData.Success).data.settings)
+        assertEquals("Gen., 1", (actual[1] as BaseViewModel.ViewData.Success).data.title)
+        assertEquals(MockContents.kjvVerses.size, (actual[1] as BaseViewModel.ViewData.Success).data.items.size)
+        assertEquals(1, (actual[1] as BaseViewModel.ViewData.Success).data.currentPosition)
     }
 }
