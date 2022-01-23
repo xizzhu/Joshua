@@ -33,9 +33,11 @@ data class Settings(val keepScreenOn: Boolean, @NightMode val nightMode: Int, va
         @Retention(AnnotationRetention.SOURCE)
         annotation class NightMode
 
-        val DEFAULT = Settings(keepScreenOn = true, nightMode = NIGHT_MODE_OFF, fontSizeScale = 1.0F,
+        val DEFAULT = Settings(
+                keepScreenOn = true, nightMode = NIGHT_MODE_OFF, fontSizeScale = 1.0F,
                 simpleReadingModeOn = false, hideSearchButton = false, consolidateVersesForSharing = false,
-                defaultHighlightColor = Highlight.COLOR_NONE)
+                defaultHighlightColor = Highlight.COLOR_NONE
+        )
     }
 }
 

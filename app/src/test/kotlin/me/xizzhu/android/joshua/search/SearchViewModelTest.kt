@@ -20,6 +20,7 @@ import android.app.Application
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runTest
@@ -65,6 +66,76 @@ class SearchViewModelTest : BaseUnitTest() {
         every { application.getString(R.string.toast_search_result, any()) } answers { "${(it.invocation.args[1] as Array<Any?>)[0]} result(s) found." }
 
         searchViewModel = SearchViewModel(bibleReadingManager, searchManager, settingsManager, application)
+    }
+
+    @Test
+    fun `test includeOldTestament`() = runTest {
+        every {
+            searchManager.saveConfiguration(SearchConfiguration(
+                    includeOldTestament = false, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+            ))
+        } returns Unit
+
+        searchViewModel.includeOldTestament(false)
+        searchViewModel.includeOldTestament(true)
+
+        verify(exactly = 1) { searchManager.saveConfiguration(any()) }
+    }
+
+    @Test
+    fun `test includeNewTestament`() = runTest {
+        every {
+            searchManager.saveConfiguration(SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = false, includeBookmarks = true, includeHighlights = true, includeNotes = true
+            ))
+        } returns Unit
+
+        searchViewModel.includeNewTestament(false)
+        searchViewModel.includeNewTestament(true)
+
+        verify(exactly = 1) { searchManager.saveConfiguration(any()) }
+    }
+
+    @Test
+    fun `test includeBookmarks`() = runTest {
+        every {
+            searchManager.saveConfiguration(SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = false, includeHighlights = true, includeNotes = true
+            ))
+        } returns Unit
+
+        searchViewModel.includeBookmarks(false)
+        searchViewModel.includeBookmarks(true)
+
+        verify(exactly = 1) { searchManager.saveConfiguration(any()) }
+    }
+
+    @Test
+    fun `test includeHighlights`() = runTest {
+        every {
+            searchManager.saveConfiguration(SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = false, includeNotes = true
+            ))
+        } returns Unit
+
+        searchViewModel.includeHighlights(false)
+        searchViewModel.includeHighlights(true)
+
+        verify(exactly = 1) { searchManager.saveConfiguration(any()) }
+    }
+
+    @Test
+    fun `test includeNotes`() = runTest {
+        every {
+            searchManager.saveConfiguration(SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = false
+            ))
+        } returns Unit
+
+        searchViewModel.includeNotes(false)
+        searchViewModel.includeNotes(true)
+
+        verify(exactly = 1) { searchManager.saveConfiguration(any()) }
     }
 
     @Test

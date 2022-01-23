@@ -89,25 +89,29 @@ class SearchViewModel @Inject constructor(
     fun searchConfig(): Flow<ViewData<SearchConfigurationViewData>> = searchConfig
 
     fun includeOldTestament(include: Boolean) {
-        currentSearchConfig()?.searchConfig?.copy(includeOldTestament = include)?.let { searchManager.saveConfiguration(it) }
+        updateSearchConfig { it.copy(includeOldTestament = include) }
     }
 
-    private fun currentSearchConfig(): SearchConfigurationViewData? = (searchConfig.value as? ViewData.Success)?.data
+    private inline fun updateSearchConfig(op: (SearchConfiguration) -> SearchConfiguration) {
+        (searchConfig.value as? ViewData.Success)?.data?.searchConfig?.let { current ->
+            op(current).takeIf { it != current }?.let { searchManager.saveConfiguration(it) }
+        }
+    }
 
     fun includeNewTestament(include: Boolean) {
-        currentSearchConfig()?.searchConfig?.copy(includeNewTestament = include)?.let { searchManager.saveConfiguration(it) }
+        updateSearchConfig { it.copy(includeNewTestament = include) }
     }
 
     fun includeBookmarks(include: Boolean) {
-        currentSearchConfig()?.searchConfig?.copy(includeBookmarks = include)?.let { searchManager.saveConfiguration(it) }
+        updateSearchConfig { it.copy(includeBookmarks = include) }
     }
 
     fun includeHighlights(include: Boolean) {
-        currentSearchConfig()?.searchConfig?.copy(includeHighlights = include)?.let { searchManager.saveConfiguration(it) }
+        updateSearchConfig { it.copy(includeHighlights = include) }
     }
 
     fun includeNotes(include: Boolean) {
-        currentSearchConfig()?.searchConfig?.copy(includeNotes = include)?.let { searchManager.saveConfiguration(it) }
+        updateSearchConfig { it.copy(includeNotes = include) }
     }
 
     fun searchResult(): Flow<ViewData<SearchResultViewData>> = searchResult.filterNotNull()
@@ -117,8 +121,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun retrySearch() {
-        val searchRequest = searchRequest.value ?: return
-        doSearch(searchRequest.query, searchRequest.instanceSearch)
+        searchRequest.value?.let { request -> doSearch(request.query, request.instanceSearch) }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

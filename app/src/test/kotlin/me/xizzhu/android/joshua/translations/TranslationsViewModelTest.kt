@@ -158,17 +158,21 @@ class TranslationsViewModelTest : BaseUnitTest() {
     @Test
     fun `test downloadTranslation`() = runTest {
         coEvery { translationManager.downloadTranslation(MockContents.kjvTranslationInfo) } returns flow {
-            emit(1)
+            emit(-1)
+            emit(0)
             emit(50)
+            emit(99)
             emit(100)
         }
         every { translationsViewModel.refreshTranslations(any()) } returns Unit
 
         val actual = translationsViewModel.downloadTranslation(MockContents.kjvTranslationInfo).toList()
-        assertEquals(3, actual.size)
-        assertEquals(BaseViewModel.ViewData.Loading(1), actual[0])
-        assertEquals(BaseViewModel.ViewData.Loading(50), actual[1])
-        assertEquals(BaseViewModel.ViewData.Success(100), actual[2])
+        assertEquals(5, actual.size)
+        assertTrue(actual[0] is BaseViewModel.ViewData.Failure)
+        assertEquals(BaseViewModel.ViewData.Loading(0), actual[1])
+        assertEquals(BaseViewModel.ViewData.Loading(50), actual[2])
+        assertEquals(BaseViewModel.ViewData.Loading(99), actual[3])
+        assertEquals(BaseViewModel.ViewData.Success(100), actual[4])
 
         verify(exactly = 1) { translationsViewModel.refreshTranslations(false) }
         verify(exactly = 0) { translationsViewModel.refreshTranslations(true) }
