@@ -21,6 +21,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Spinner
+import androidx.annotation.VisibleForTesting
 import com.google.android.material.appbar.MaterialToolbar
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -100,7 +101,8 @@ class ReadingToolbar : MaterialToolbar {
         }
     }
 
-    private fun spinner(): Spinner = menu.findItem(R.id.action_translations).actionView as Spinner
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun spinner(): Spinner = menu.findItem(R.id.action_translations).actionView as Spinner
 
     fun setData(currentTranslation: String, parallelTranslations: List<String>, downloadedTranslations: List<String>) {
         spinnerAdapter().setData(
@@ -122,5 +124,6 @@ class ReadingToolbar : MaterialToolbar {
                 }
     }
 
-    private fun spinnerAdapter(): TranslationSpinnerAdapter = spinner().adapter as TranslationSpinnerAdapter
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun spinnerAdapter(): TranslationSpinnerAdapter = spinner().adapter as TranslationSpinnerAdapter
 }
