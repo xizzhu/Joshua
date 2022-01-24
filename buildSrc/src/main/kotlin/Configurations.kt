@@ -35,9 +35,9 @@ object Versions {
     object Sdk {
         const val classpath = "7.0.4"
         const val buildTools = "32.0.0"
-        const val compile = 32
+        const val compile = 31
         const val min = 19
-        const val target = 32
+        const val target = 31
     }
 
     val java = JavaVersion.VERSION_11
@@ -86,7 +86,7 @@ object Versions {
     const val materialComponent = "1.5.0"
 
     const val mockk = "1.12.2"
-    const val robolectric = "4.5"
+    const val robolectric = "4.7.3"
 }
 
 object Dependencies {
