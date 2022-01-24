@@ -23,9 +23,11 @@ import androidx.annotation.CallSuper
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.tests.BaseUnitTest
+import org.robolectric.annotation.SQLiteMode
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
+@SQLiteMode(SQLiteMode.Mode.NATIVE)
 abstract class BaseSqliteTest : BaseUnitTest() {
     protected lateinit var androidDatabase: AndroidDatabase
 

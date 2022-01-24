@@ -1,6 +1,11 @@
 CHANGELOG
 ---------
 
+#### Next release
+- Update dependencies:
+  - Android compile and target SDK level downgraded to 31
+  - Robolectric to 4.7.3
+
 #### v0.20.0 (2022-01-22)
 - New features:
   - Support using system's day / night mode (#206)
