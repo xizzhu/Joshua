@@ -33,7 +33,7 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "7.0.4"
+        const val classpath = "7.1.0"
         const val buildTools = "32.0.0"
         const val compile = 31
         const val min = 19
@@ -147,6 +147,7 @@ object Dependencies {
         const val classpath = "com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}"
         const val android = "com.google.dagger:hilt-android:${Versions.hilt}"
         const val compiler = "com.google.dagger:hilt-android-compiler:${Versions.hilt}"
+        const val test = "com.google.dagger:hilt-android-testing:${Versions.hilt}"
     }
 
     const val ask = "com.github.xizzhu:ask:${Versions.ask}"

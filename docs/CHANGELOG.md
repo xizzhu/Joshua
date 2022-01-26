@@ -3,6 +3,7 @@ CHANGELOG
 
 #### Next release
 - Update dependencies:
+  - Android Gradle Plugin to 7.1.0
   - Android compile and target SDK level downgraded to 31
   - Robolectric to 4.7.3
 

@@ -164,6 +164,7 @@ dependencies {
     testImplementation(Dependencies.Kotlin.test)
     testImplementation(Dependencies.Kotlin.coroutinesTest)
     testImplementation(Dependencies.AndroidX.Test.core)
+    testImplementation(Dependencies.Hilt.test)
     testImplementation(Dependencies.mockk)
     testImplementation(Dependencies.robolectric)
 }
