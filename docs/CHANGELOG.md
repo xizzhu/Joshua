@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next release
+#### v0.20.1 (2022-02-01)
 - Bug fixes:
   - Should call AppCompatDelegate.setDefaultNightMode() on main thread
 - Update dependencies:
