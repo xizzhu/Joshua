@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next release
+- Bug fixes:
+  - Should call AppCompatDelegate.setDefaultNightMode() on main thread
 - Update dependencies:
   - Android Gradle Plugin to 7.1.0
   - Android compile and target SDK level downgraded to 31

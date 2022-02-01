@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua
 import androidx.appcompat.app.AppCompatDelegate
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Settings
@@ -36,7 +37,7 @@ class App : BaseApp() {
     override fun onCreate() {
         super.onCreate()
 
-        appScope.launch {
+        appScope.launch(Dispatchers.Main) {
             val systemNightMode = when (settingsManager.settings().first().nightMode) {
                 Settings.NIGHT_MODE_ON -> AppCompatDelegate.MODE_NIGHT_YES
                 Settings.NIGHT_MODE_OFF -> AppCompatDelegate.MODE_NIGHT_NO
