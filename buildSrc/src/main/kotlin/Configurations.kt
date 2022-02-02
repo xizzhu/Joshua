@@ -46,7 +46,7 @@ object Versions {
         val jvmTarget = java.toString()
         const val core = "1.6.10"
         const val coroutines = "1.6.0"
-        const val kover = "0.4.4"
+        const val kover = "0.5.0"
     }
 
     object AndroidX {
