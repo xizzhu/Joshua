@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -12,82 +13,88 @@
         android:id="@+id/continuous_reading_days_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="10 days" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/continuous_reading_days_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/continuous_reading_days_value"
-        android:text="@string/text_continuous_reading" />
+        android:text="@string/text_continuous_reading"
+        app:layout_constraintBaseline_toBaselineOf="@id/continuous_reading_days_value"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/chapters_read_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/continuous_reading_days_title"
-        android:layout_alignParentEnd="true"
         android:layout_marginTop="@dimen/padding_small"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/continuous_reading_days_title"
         tools:text="123" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/chapters_read_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/chapters_read_value"
-        android:text="@string/text_chapters_read" />
+        android:text="@string/text_chapters_read"
+        app:layout_constraintBaseline_toBaselineOf="@id/chapters_read_value"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_books_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/chapters_read_title"
-        android:layout_alignParentEnd="true"
         android:layout_marginTop="@dimen/padding_small"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chapters_read_value"
         tools:text="45" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_books_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/finished_books_value"
-        android:text="@string/text_finished_books" />
+        android:text="@string/text_finished_books"
+        app:layout_constraintBaseline_toBaselineOf="@id/finished_books_value"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_old_testament_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/finished_books_title"
-        android:layout_alignParentEnd="true"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/finished_books_value"
         tools:text="12" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_old_testament_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/finished_old_testament_value"
         android:layout_marginStart="@dimen/padding_small"
-        android:text="@string/text_finished_old_testament" />
+        android:text="@string/text_finished_old_testament"
+        app:layout_constraintBaseline_toBaselineOf="@id/finished_old_testament_value"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_new_testament_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/finished_old_testament_title"
-        android:layout_alignParentEnd="true"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/finished_old_testament_value"
         tools:text="3" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/finished_new_testament_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/finished_new_testament_value"
         android:layout_marginStart="@dimen/padding_small"
-        android:text="@string/text_finished_new_testament" />
-</RelativeLayout>
+        android:text="@string/text_finished_new_testament"
+        app:layout_constraintBaseline_toBaselineOf="@id/finished_new_testament_value"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
