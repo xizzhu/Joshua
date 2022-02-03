@@ -106,11 +106,11 @@ android {
 
             test.extensions.configure(kotlinx.kover.api.KoverTaskExtension::class) {
                 isDisabled = test.name != "testDebugUnitTest"
-                includes = listOf("me\\.xizzhu\\.android\\.joshua\\..+")
+                includes = listOf("me.xizzhu.android.joshua.*")
                 excludes = listOf(
-                        "me\\.xizzhu\\.android\\.joshua\\.BuildConfig",
-                        "me\\.xizzhu\\.android\\.joshua\\.databinding\\..+",
-                        "me\\.xizzhu\\.android\\.joshua\\..+_.+",
+                        "me.xizzhu.android.joshua.BuildConfig",
+                        "me.xizzhu.android.joshua.databinding.*",
+                        "me.xizzhu.android.joshua.*_*",
                 )
             }
         }
