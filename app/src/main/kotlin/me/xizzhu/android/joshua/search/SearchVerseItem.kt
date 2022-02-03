@@ -34,7 +34,6 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 import me.xizzhu.android.joshua.ui.toCharSequence
 import me.xizzhu.android.joshua.ui.setSpans
-import java.util.*
 
 class SearchVerseItem(val verseIndex: VerseIndex, private val bookShortName: String,
                       private val text: String, private val query: String,

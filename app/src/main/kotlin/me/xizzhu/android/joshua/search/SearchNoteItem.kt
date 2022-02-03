@@ -26,7 +26,6 @@ import me.xizzhu.android.joshua.databinding.ItemSearchNoteBinding
 import me.xizzhu.android.joshua.ui.*
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
-import java.util.*
 
 class SearchNoteItem(val verseIndex: VerseIndex, private val bookShortName: String,
                      private val verseText: String, private val note: String, private val query: String)

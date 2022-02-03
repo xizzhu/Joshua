@@ -105,12 +105,12 @@ android {
             test.maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 
             test.extensions.configure(kotlinx.kover.api.KoverTaskExtension::class) {
-                isEnabled = test.name == "testDebugUnitTest"
-                includes = listOf("me\\.xizzhu\\.android\\.joshua\\..+")
+                isDisabled = test.name != "testDebugUnitTest"
+                includes = listOf("me.xizzhu.android.joshua.*")
                 excludes = listOf(
-                        "me\\.xizzhu\\.android\\.joshua\\.BuildConfig",
-                        "me\\.xizzhu\\.android\\.joshua\\.databinding\\..+",
-                        "me\\.xizzhu\\.android\\.joshua\\..+_.+",
+                        "me.xizzhu.android.joshua.BuildConfig",
+                        "me.xizzhu.android.joshua.databinding.*",
+                        "me.xizzhu.android.joshua.*_*",
                 )
             }
         }

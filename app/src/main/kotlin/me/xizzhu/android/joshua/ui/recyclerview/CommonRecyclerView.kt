@@ -30,7 +30,7 @@ abstract class BaseItem protected constructor(val viewType: Int, viewHolderCreat
         private val VIEW_HOLDER_CREATORS = mutableMapOf<Int, (LayoutInflater, ViewGroup) -> BaseViewHolder<out BaseItem, *>>()
 
         fun getViewHolderCreator(viewType: Int) = VIEW_HOLDER_CREATORS
-                .getOrElse(viewType, { throw IllegalStateException("Unknown view type - $viewType") })
+                .getOrElse(viewType) { throw IllegalStateException("Unknown view type - $viewType") }
     }
 
     init {

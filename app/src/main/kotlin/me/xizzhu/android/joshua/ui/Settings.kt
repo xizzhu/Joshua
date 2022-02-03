@@ -28,9 +28,7 @@ fun Settings.getPrimaryTextSize(resources: Resources): Float =
 
 private val textSizes = mutableMapOf<Int, Float>()
 
-private fun getTextSize(resources: Resources, @DimenRes fontSize: Int): Float {
-    return textSizes.getOrPut(fontSize, { resources.getDimension(fontSize) })
-}
+private fun getTextSize(resources: Resources, @DimenRes fontSize: Int): Float = textSizes.getOrPut(fontSize) { resources.getDimension(fontSize) }
 
 fun Settings.getSecondaryTextSize(resources: Resources): Float =
         getTextSize(resources, R.dimen.text_secondary) * fontSizeScale

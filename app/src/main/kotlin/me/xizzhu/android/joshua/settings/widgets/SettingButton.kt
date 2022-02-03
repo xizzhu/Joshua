@@ -22,7 +22,6 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
@@ -72,11 +71,6 @@ class SettingButton : FrameLayout {
 
     fun setDescription(@StringRes desc: Int) {
         viewBinding.description.setText(desc)
-    }
-
-    fun setTextColor(@ColorInt titleColor: Int, @ColorInt descriptionColor: Int) {
-        viewBinding.title.setTextColor(titleColor)
-        viewBinding.description.setTextColor(descriptionColor)
     }
 
     fun setTextSize(@Px titleSize: Int, @Px descriptionSize: Int) {

@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+#### Next release
+- Update dependencies:
+  - Kover to 0.5.0
+
 #### v0.20.1 (2022-02-01)
 - Bug fixes:
   - Should call AppCompatDelegate.setDefaultNightMode() on main thread
@@ -303,12 +307,12 @@ CHANGELOG
 #### v0.12.1 (2019-11-11)
 - Should dismiss dialog when translation presenter is stopped
 - Updated dependencies:
-  - Grardle to 6.0
+  - Gradle to 6.0
 
 #### v0.12.0 (2019-11-08)
 - Major refactoring to use clean architecture
 - Updated dependencies:
-  - Grardle to 5.6.4
+  - Gradle to 5.6.4
   - Android Gradle Plugin to 3.5.2
   - Dagger to 2.25.2
   - Firebase Analytics and Core to 17.2.1
@@ -330,7 +334,7 @@ CHANGELOG
 - Fixed scrolling position in case of following empty verses
 - Fixed issue when loading verse detail with following empty verses (#108)
 - Updated dependencies:
-  - Grardle to 5.6.1
+  - Gradle to 5.6.1
   - Firebase Core and Analytics to 17.2.0
 
 #### v0.10.0 (2019-08-26)
@@ -353,7 +357,7 @@ CHANGELOG
 - Should not fail when a parallel translation is not available
 - Should hide keyboard when verse detail is closed
 - Updated dependencies:
-  - Grardle to 5.6
+  - Gradle to 5.6
 
 #### v0.9.0 (2019-08-10)
 - Improved UI for reading
@@ -430,7 +434,7 @@ CHANGELOG
 #### v0.4.0 (2019-05-22)
 - Added "complex" reading mode to show bookmark & note with verse
 - Added link to rate app on Play Store
-- Notified user if translation lisst is empty
+- Notified user if translation list is empty
 - Fixed padding for search result
 - Fixed crash when failed to load translation list
 - Removed Builder of Settings
@@ -466,7 +470,7 @@ CHANGELOG
 
 #### v0.1.1 (2019-04-28)
 - Fixes
-  - Fixed crash when closing fectching translation stream
+  - Fixed crash when closing fetching translation stream
 - Updated dependencies
   - Kotlin to 1.3.31
   - Kotlin Coroutine to 1.2.1
