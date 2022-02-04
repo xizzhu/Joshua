@@ -17,6 +17,7 @@
 package me.xizzhu.android.joshua.core.repository.remote.android
 
 import android.util.JsonReader
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.runner.RunWith
@@ -543,7 +544,8 @@ class JsonParserTest : BaseUnitTest() {
                             4 to "from being burdensome",
                             5 to "Abba"
                     ),
-                    it.readStrongNumberWords())
+                    it.readStrongNumberWords()
+            )
         }
     }
 
@@ -565,12 +567,51 @@ class JsonParserTest : BaseUnitTest() {
                             4 to "from being burdensome",
                             5 to "Abba"
                     ),
-                    it.readStrongNumberWords())
+                    it.readStrongNumberWords()
+            )
         }
     }
 
     @Test(expected = RuntimeException::class)
     fun testReadStrongNumberWordsMissingWords() {
         JsonReader(StringReader("{}")).use { it.readStrongNumberWords() }
+    }
+
+    @Test
+    fun testReadCrossReferences() {
+        JsonReader(StringReader("""
+            {
+              "0": [
+                "18:133:2",
+                "18:101:24",
+                "61:0:0"
+              ],
+              "1": [
+                "17:25:6"
+              ],
+              "abc": [
+                "1:2:3"
+              ],
+              "3": [
+                "20:1:12",
+                "0:0:24",
+                "0:0:9"
+              ]
+            }
+        """.trimIndent())).use {
+            assertEquals(
+                    mapOf(
+                            0 to listOf(VerseIndex(18, 133, 2), VerseIndex(18, 101, 24), VerseIndex(61, 0, 0)),
+                            1 to listOf(VerseIndex(17, 25, 6)),
+                            3 to listOf(VerseIndex(20, 1, 12), VerseIndex(0, 0, 24), VerseIndex(0, 0, 9))
+                    ),
+                    it.readCrossReferences()
+            )
+        }
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun testReadCrossReferencesMissingReferences() {
+        JsonReader(StringReader("{}")).use { it.readCrossReferences() }
     }
 }

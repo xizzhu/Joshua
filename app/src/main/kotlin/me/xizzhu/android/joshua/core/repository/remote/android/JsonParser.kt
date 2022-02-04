@@ -19,6 +19,7 @@ package me.xizzhu.android.joshua.core.repository.remote.android
 import android.util.JsonReader
 import androidx.annotation.VisibleForTesting
 import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.logger.Log
 
@@ -177,4 +178,25 @@ internal fun JsonReader.readStrongNumberWords(): Map<Int, String> {
 
     if (words.isEmpty()) throw RuntimeException("Illegal format in Strong number words JSON")
     return words
+}
+
+internal fun JsonReader.readCrossReferences(): Map<Int, List<VerseIndex>> {
+    val verses = hashMapOf<Int, List<VerseIndex>>()
+    beginObject()
+    while (hasNext()) {
+        try {
+            verses[nextName().toInt()] = readStringsArray().map {
+                it.split(":").let { fields ->
+                    VerseIndex(fields[0].toInt(), fields[1].toInt(), fields[2].toInt())
+                }
+            }
+        } catch (e: Exception) {
+            skipValue()
+            Log.w(TAG, "Unsupported JSON format", RuntimeException("Unsupported format in cross reference chapter JSON"))
+        }
+    }
+    endObject()
+
+    if (verses.isEmpty()) throw RuntimeException("Illegal format in Strong number chapter JSON")
+    return verses
 }
