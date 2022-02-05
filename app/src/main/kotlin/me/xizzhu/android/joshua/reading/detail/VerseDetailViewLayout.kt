@@ -39,9 +39,10 @@ class VerseDetailViewLayout : FrameLayout {
     companion object {
         const val VERSE_DETAIL_VERSES = 0
         const val VERSE_DETAIL_NOTE = 1
-        const val VERSE_DETAIL_STRONG_NUMBER = 2
+        const val VERSE_DETAIL_CROSS_REFERENCES = 2
+        const val VERSE_DETAIL_STRONG_NUMBER = 3
 
-        @IntDef(VERSE_DETAIL_VERSES, VERSE_DETAIL_NOTE, VERSE_DETAIL_STRONG_NUMBER)
+        @IntDef(VERSE_DETAIL_VERSES, VERSE_DETAIL_NOTE, VERSE_DETAIL_CROSS_REFERENCES, VERSE_DETAIL_STRONG_NUMBER)
         @Retention(AnnotationRetention.SOURCE)
         annotation class VerseDetail
 
@@ -80,9 +81,13 @@ class VerseDetailViewLayout : FrameLayout {
         }
 
     fun initialize(
-            onClicked: () -> Boolean, updateBookmark: (VerseIndex, Boolean) -> Unit,
-            updateHighlight: (VerseIndex, Int) -> Unit, updateNote: (VerseIndex, String) -> Unit,
-            requestStrongNumber: () -> Unit, hide: Boolean
+            onClicked: () -> Boolean,
+            updateBookmark: (VerseIndex, Boolean) -> Unit,
+            updateHighlight: (VerseIndex, Int) -> Unit,
+            updateNote: (VerseIndex, String) -> Unit,
+            requestCrossReferences: () -> Unit,
+            requestStrongNumber: () -> Unit,
+            hide: Boolean
     ) {
         setOnClickListener { onClicked() }
         viewBinding.bookmark.setOnClickListener {
@@ -93,6 +98,7 @@ class VerseDetailViewLayout : FrameLayout {
         }
         adapter.initialize(
                 updateNote = updateNote,
+                requestCrossReferences = requestCrossReferences,
                 requestStrongNumber = requestStrongNumber
         )
 
@@ -127,6 +133,7 @@ class VerseDetailViewLayout : FrameLayout {
         viewBinding.viewPager.currentItem = when (verseDetail) {
             VERSE_DETAIL_VERSES -> VerseDetailPagerAdapter.PAGE_VERSES
             VERSE_DETAIL_NOTE -> VerseDetailPagerAdapter.PAGE_NOTE
+            VERSE_DETAIL_CROSS_REFERENCES -> VerseDetailPagerAdapter.PAGE_CROSS_REFERENCES
             VERSE_DETAIL_STRONG_NUMBER -> VerseDetailPagerAdapter.PAGE_STRONG_NUMBER
             else -> 0
         }

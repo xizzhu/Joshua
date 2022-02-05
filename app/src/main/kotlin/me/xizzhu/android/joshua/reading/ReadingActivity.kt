@@ -211,6 +211,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                 updateBookmark = ::onBookmarkClicked,
                 updateHighlight = ::onHighlightClicked,
                 updateNote = ::saveNote,
+                requestCrossReferences = ::downloadCrossReferences,
                 requestStrongNumber = ::downloadStrongNumber,
                 hide = !openNoteWhenCreated
         )
@@ -260,6 +261,10 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     private fun updateCurrentVerse(verseIndex: VerseIndex) {
         readingViewModel.selectCurrentVerseIndex(verseIndex).launchIn(lifecycleScope)
+    }
+
+    private fun downloadCrossReferences() {
+        // TODO
     }
 
     private fun downloadStrongNumber() {

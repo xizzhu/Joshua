@@ -59,7 +59,7 @@ class VersesViewData(val items: List<BaseItem>)
 class VerseDetailViewData(
         val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
         var bookmarked: Boolean, @Highlight.Companion.AvailableColor var highlightColor: Int, var note: String,
-        var strongNumberItems: List<StrongNumberItem>
+        val crossReferencedItems: List<VerseTextItem>, var strongNumberItems: List<StrongNumberItem>
 )
 
 class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int, val data: Any? = null) {
@@ -177,6 +177,7 @@ class ReadingViewModel @Inject constructor(
             val bookmarked = async { bookmarkManager.read(verseIndex).isValid() }
             val highlightColor = async { highlightManager.read(verseIndex).takeIf { it.isValid() }?.color ?: Highlight.COLOR_NONE }
             val note = async { noteManager.read(verseIndex).takeIf { it.isValid() }?.note ?: "" }
+            val crossReferences = async { emptyList<VerseTextItem>() }
             val strongNumbers = async { strongNumberManager.readStrongNumber(verseIndex) }
 
             // build the verse
@@ -247,6 +248,7 @@ class ReadingViewModel @Inject constructor(
                     bookmarked = bookmarked.await(),
                     highlightColor = highlightColor.await(),
                     note = note.await(),
+                    crossReferencedItems = crossReferences.await(), // TODO
                     strongNumberItems = strongNumbers.await().map { StrongNumberItem(it) }
             )
         }
