@@ -162,14 +162,15 @@ class TranslationRepository(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     suspend fun downloadTranslation(downloadProgressChannel: SendChannel<Int>, translationInfo: TranslationInfo) {
         Log.i(TAG, "Start downloading translation - ${translationInfo.shortName}")
-        val translation = remoteTranslationService.fetchTranslation(
-                downloadProgressChannel, RemoteTranslationInfo.fromTranslationInfo(translationInfo))
+        val toDownload = RemoteTranslationInfo.fromTranslationInfo(translationInfo)
+        val translation = remoteTranslationService.fetchTranslation(downloadProgressChannel, toDownload)
         Log.i(TAG, "Translation downloaded")
 
         localTranslationStorage.saveTranslation(
                 translation.translationInfo.toTranslationInfo(true),
                 translation.bookNames, translation.bookShortNames, translation.verses
         )
+        remoteTranslationService.removeTranslationCache(toDownload)
         Log.i(TAG, "Translation saved to database")
         downloadProgressChannel.trySend(100)
     }

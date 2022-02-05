@@ -60,6 +60,8 @@ class StrongNumberRepository(private val localStrongNumberStorage: LocalStrongNu
         wordsDownloadProgress.close()
 
         localStrongNumberStorage.save(remoteIndexes.indexes, remoteIndexes.reverseIndexes, remoteWords.words)
+        remoteStrongNumberStorage.removeIndexesCache()
+        remoteStrongNumberStorage.removeWordsCache()
         Log.i(TAG, "Strong number saved to database")
         trySend(100)
     }
