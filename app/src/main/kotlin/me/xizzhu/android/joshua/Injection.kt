@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.core.repository.*
 import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
+import me.xizzhu.android.joshua.core.repository.remote.android.HttpCrossReferencesService
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpStrongNumberService
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpTranslationService
 import me.xizzhu.android.joshua.core.serializer.android.BackupJsonSerializer
@@ -70,6 +71,11 @@ object AppModule {
     @Singleton
     fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): VerseAnnotationManager<Bookmark> =
             VerseAnnotationManager(bookmarkRepository)
+
+    @Provides
+    @Singleton
+    fun provideCrossReferencesManager(crossReferencesRepository: CrossReferencesRepository): CrossReferencesManager =
+            CrossReferencesManager(crossReferencesRepository)
 
     @Provides
     @Singleton
@@ -130,6 +136,11 @@ object RepositoryModule {
     @Singleton
     fun provideBookmarkRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): VerseAnnotationRepository<Bookmark> =
             VerseAnnotationRepository(AndroidBookmarkStorage(androidDatabase), appScope)
+
+    @Provides
+    @Singleton
+    fun provideCrossReferencesRepository(app: App, androidDatabase: AndroidDatabase): CrossReferencesRepository =
+            CrossReferencesRepository(AndroidCrossReferencesStorage(androidDatabase), HttpCrossReferencesService(app))
 
     @Provides
     @Singleton

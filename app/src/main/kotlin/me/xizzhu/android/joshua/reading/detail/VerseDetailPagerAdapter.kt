@@ -184,7 +184,7 @@ private class CrossReferencesPage(inflater: LayoutInflater, container: ViewGroup
         }
     }
 
-    private fun bindCrossReferencesView(crossReferencedItems: List<VerseTextItem>, settings: Settings) {
+    private fun bindCrossReferencesView(crossReferencedItems: List<CrossReferenceItem>, settings: Settings) {
         with(viewBinding) {
             noCrossReferences.visibility = View.GONE
 

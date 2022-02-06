@@ -45,6 +45,7 @@ import me.xizzhu.android.joshua.infra.BaseActivity
 import me.xizzhu.android.joshua.infra.onEach
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.onSuccess
+import me.xizzhu.android.joshua.reading.detail.CrossReferenceItem
 import me.xizzhu.android.joshua.reading.detail.StrongNumberItem
 import me.xizzhu.android.joshua.reading.detail.VerseDetailViewLayout
 import me.xizzhu.android.joshua.reading.detail.VerseTextItem
@@ -69,7 +70,7 @@ import kotlin.math.max
 
 @AndroidEntryPoint
 class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>(), SimpleVerseItem.Callback, VerseItem.Callback,
-        VerseTextItem.Callback, StrongNumberItem.Callback {
+        VerseTextItem.Callback, CrossReferenceItem.Callback, StrongNumberItem.Callback {
     companion object {
         private const val KEY_OPEN_NOTE = "me.xizzhu.android.joshua.KEY_OPEN_NOTE"
 
@@ -77,6 +78,9 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
     }
 
     private val readingViewModel: ReadingViewModel by viewModels()
+
+    private var downloadCrossReferencesJob: Job? = null
+    private var downloadCrossReferencesDialog: ProgressDialog? = null
 
     private var downloadStrongNumberJob: Job? = null
     private var downloadStrongNumberDialog: ProgressDialog? = null
@@ -264,7 +268,48 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
     }
 
     private fun downloadCrossReferences() {
-        // TODO
+        if (downloadCrossReferencesJob != null || downloadCrossReferencesDialog != null) {
+            // just in case the user clicks too fast
+            return
+        }
+        downloadCrossReferencesDialog = progressDialog(R.string.dialog_title_downloading, 100) { downloadCrossReferencesJob?.cancel() }
+
+        lifecycleScope.launchWhenStarted {
+            readingViewModel.downloadCrossReferences()
+                    .onEach(
+                            onLoading = { progress ->
+                                when (progress) {
+                                    in 0 until 99 -> {
+                                        downloadCrossReferencesDialog?.setProgress(progress!!)
+                                    }
+                                    else -> {
+                                        downloadCrossReferencesDialog?.run {
+                                            setTitle(R.string.dialog_title_installing)
+                                            setIsIndeterminate(true)
+                                        }
+                                    }
+                                }
+                            },
+                            onSuccess = {
+                                toast(R.string.toast_downloaded)
+
+                                viewBinding.verseDetailView.verseDetail?.let { verseDetail ->
+                                    readingViewModel.crossReferences(verseDetail.verseIndex)
+                                            .onSuccess { viewBinding.verseDetailView.setCrossReferences(it) }
+                                            .launchIn(lifecycleScope)
+                                }
+                            },
+                            onFailure = {
+                                dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_download, { _, _ -> downloadCrossReferences() })
+                            }
+                    )
+                    .onCompletion {
+                        downloadCrossReferencesDialog?.dismiss()
+                        downloadCrossReferencesDialog = null
+                        downloadCrossReferencesJob = null
+                    }
+                    .collect()
+        }
     }
 
     private fun downloadStrongNumber() {
@@ -526,6 +571,14 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                 toast(R.string.toast_unknown_error)
             }
         }
+    }
+
+    override fun onCrossReferenceVerseClicked(verseIndex: VerseIndex) {
+        updateCurrentVerse(verseIndex)
+    }
+
+    override fun onCrossReferenceVerseLongClicked(verse: Verse) {
+        // TODO show preview
     }
 
     override fun openStrongNumber(strongNumber: String) {

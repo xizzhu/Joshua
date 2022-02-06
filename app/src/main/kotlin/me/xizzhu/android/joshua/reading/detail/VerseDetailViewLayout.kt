@@ -123,6 +123,11 @@ class VerseDetailViewLayout : FrameLayout {
         adapter.verseDetail?.note = note
     }
 
+    fun setCrossReferences(crossReferences: List<CrossReferenceItem>) {
+        adapter.verseDetail?.crossReferencedItems = crossReferences
+        adapter.notifyItemChanged(VerseDetailPagerAdapter.PAGE_CROSS_REFERENCES)
+    }
+
     fun setStrongNumbers(strongNumbers: List<StrongNumberItem>) {
         adapter.verseDetail?.strongNumberItems = strongNumbers
         adapter.notifyItemChanged(VerseDetailPagerAdapter.PAGE_STRONG_NUMBER)
