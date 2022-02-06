@@ -37,11 +37,12 @@ import me.xizzhu.android.joshua.core.toKeywords
 class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         const val DATABASE_NAME = "DATABASE_JOSHUA"
-        const val DATABASE_VERSION = 5
+        const val DATABASE_VERSION = 6
     }
 
     val bookmarkDao = BookmarkDao(this)
     val bookNamesDao = BookNamesDao(this)
+    val crossReferencesDao = CrossReferencesDao(this)
     val highlightDao = HighlightDao(this)
     val metadataDao = MetadataDao(this)
     val noteDao = NoteDao(this)
@@ -56,6 +57,7 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         db.transaction {
             bookmarkDao.createTable(db)
             bookNamesDao.createTable(db)
+            crossReferencesDao.createTable(db)
             highlightDao.createTable(db)
             metadataDao.createTable(db)
             noteDao.createTable(db)
@@ -97,6 +99,9 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
                 it["key"] = "nightMode"
                 it["value"] = if (nightModeOn) Settings.NIGHT_MODE_ON.toString() else Settings.NIGHT_MODE_OFF.toString()
             }
+        }
+        if (oldVersion <= 5) {
+            crossReferencesDao.createTable(db)
         }
     }
 }
