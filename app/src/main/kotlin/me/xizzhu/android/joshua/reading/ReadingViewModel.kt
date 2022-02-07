@@ -35,6 +35,9 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.viewData
+import me.xizzhu.android.joshua.preview.PreviewViewData
+import me.xizzhu.android.joshua.preview.loadPreview
+import me.xizzhu.android.joshua.preview.toVersePreviewItems
 import me.xizzhu.android.joshua.reading.detail.CrossReferenceItem
 import me.xizzhu.android.joshua.reading.detail.StrongNumberItem
 import me.xizzhu.android.joshua.reading.detail.VerseTextItem
@@ -267,6 +270,10 @@ class ReadingViewModel @Inject constructor(
                         bookName = bibleReadingManager.readBookNames(verse.text.translationShortName)[verseIndex.bookIndex]
                 )
             }.sortedBy { item -> item.verseIndex.bookIndex * 100000 + item.verseIndex.chapterIndex * 1000 + item.verseIndex.verseIndex }
+
+    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> =
+            loadPreview(bibleReadingManager, settingsManager, verseIndex, ::toVersePreviewItems)
+                    .onFailure { Log.e(tag, "Failed to load verses for preview", it) }
 
     fun verseUpdates(): Flow<VerseUpdate> = verseUpdates
 

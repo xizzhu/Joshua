@@ -577,8 +577,11 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
         updateCurrentVerse(verseIndex)
     }
 
-    override fun onCrossReferenceVerseLongClicked(verse: Verse) {
-        // TODO show preview
+    override fun onCrossReferenceVerseLongClicked(verseIndex: VerseIndex) {
+        readingViewModel.loadVersesForPreview(verseIndex)
+                .onSuccess { preview -> listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) }
+                .onFailure { updateCurrentVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
+                .launchIn(lifecycleScope)
     }
 
     override fun openStrongNumber(strongNumber: String) {

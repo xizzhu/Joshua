@@ -39,7 +39,7 @@ class CrossReferenceItem(
     interface Callback {
         fun onCrossReferenceVerseClicked(verseIndex: VerseIndex)
 
-        fun onCrossReferenceVerseLongClicked(verse: Verse)
+        fun onCrossReferenceVerseLongClicked(verseIndex: VerseIndex)
     }
 
     val textForDisplay: CharSequence by lazy {
@@ -65,7 +65,7 @@ private class CrossReferenceItemViewHolder(inflater: LayoutInflater, parent: Vie
         itemView.setOnClickListener { item?.let { callback().onCrossReferenceVerseClicked(it.verseIndex) } }
         itemView.setOnLongClickListener {
             return@setOnLongClickListener item?.let { item ->
-                callback().onCrossReferenceVerseLongClicked(Verse(item.verseIndex, item.verseText, emptyList()))
+                callback().onCrossReferenceVerseLongClicked(item.verseIndex)
                 true
             } ?: false
         }
