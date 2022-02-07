@@ -2,6 +2,8 @@ CHANGELOG
 ---------
 
 #### Next release
+- Bug fixes:
+  - Should call AppCompatDelegate.setDefaultNightMode() on main thread
 - Update dependencies:
   - Kover to 0.5.0
 

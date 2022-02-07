@@ -19,6 +19,8 @@ package me.xizzhu.android.joshua.core.repository.local.android.db
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatDelegate
 import me.xizzhu.android.ask.db.Condition
 import me.xizzhu.android.ask.db.ConditionBuilder.and
@@ -86,7 +88,9 @@ class AndroidDatabase(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         if (oldVersion <= 4) {
             val nightModeOn = db.select("metadata", "value") { "key" eq "nightModeOn" }
                     .firstOrDefault("false") { it.getString("value") }.toBoolean()
-            AppCompatDelegate.setDefaultNightMode(if (nightModeOn) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
+            Handler(Looper.getMainLooper()).post {
+                AppCompatDelegate.setDefaultNightMode(if (nightModeOn) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
+            }
             db.delete("metadata") { "key" eq "nightModeOn" }
 
             db.insert("metadata", SQLiteDatabase.CONFLICT_REPLACE) {
