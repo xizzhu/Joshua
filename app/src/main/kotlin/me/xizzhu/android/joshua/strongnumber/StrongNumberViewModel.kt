@@ -23,10 +23,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.StrongNumberManager
@@ -35,11 +33,13 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.viewData
 import me.xizzhu.android.joshua.infra.onFailure
+import me.xizzhu.android.joshua.preview.PreviewViewData
+import me.xizzhu.android.joshua.preview.loadPreview
+import me.xizzhu.android.joshua.preview.toVersePreviewItems
 import me.xizzhu.android.joshua.ui.createTitleSpans
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import me.xizzhu.android.joshua.ui.recyclerview.toVersePreviewItems
 import me.xizzhu.android.joshua.ui.setSpans
 import me.xizzhu.android.joshua.ui.toCharSequence
 import me.xizzhu.android.joshua.utils.firstNotEmpty
@@ -47,8 +47,6 @@ import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 
 class StrongNumberViewData(val items: List<BaseItem>)
-
-class PreviewViewData(val settings: Settings, val title: String, val items: List<BaseItem>, val currentPosition: Int)
 
 @HiltViewModel
 class StrongNumberViewModel @Inject constructor(
@@ -121,18 +119,7 @@ class StrongNumberViewModel @Inject constructor(
         bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
     }.onFailure { Log.e(tag, "Failed to save current verse", it) }
 
-    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> = viewData {
-        if (!verseIndex.isValid()) {
-            throw IllegalArgumentException("Verse index [$verseIndex] is invalid")
-        }
-
-        val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-        val items = bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex).toVersePreviewItems()
-        PreviewViewData(
-                settings = settings().first(),
-                title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",
-                items = items,
-                currentPosition = verseIndex.verseIndex
-        )
-    }.onFailure { Log.e(tag, "Failed to load verses for preview", it) }
+    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> =
+            loadPreview(bibleReadingManager, settingsManager, verseIndex, ::toVersePreviewItems)
+                    .onFailure { Log.e(tag, "Failed to load verses for preview", it) }
 }

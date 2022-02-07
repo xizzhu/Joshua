@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.ui.recyclerview
+package me.xizzhu.android.joshua.preview
 
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
@@ -28,10 +28,11 @@ import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
 import me.xizzhu.android.joshua.ui.createTitleSpans
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 import me.xizzhu.android.joshua.ui.setSpans
 import me.xizzhu.android.joshua.ui.toCharSequence
-import java.util.*
 
 class VersePreviewItem(val verse: Verse, followingEmptyVerseCount: Int)
     : BaseItem(R.layout.item_verse_preview, { inflater, parent -> VersePreviewItemViewHolder(inflater, parent) }) {
@@ -60,43 +61,6 @@ class VersePreviewItem(val verse: Verse, followingEmptyVerseCount: Int)
 
         return@lazy SPANNABLE_STRING_BUILDER.toCharSequence()
     }
-}
-
-fun List<Verse>.toVersePreviewItems(): List<VersePreviewItem> {
-    val items = ArrayList<VersePreviewItem>(size)
-
-    val verseIterator = iterator()
-    var verse: Verse? = null
-    while (verse != null || verseIterator.hasNext()) {
-        verse = verse ?: verseIterator.next()
-
-        val (nextVerse, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
-
-        items.add(VersePreviewItem(verse, followingEmptyVerseCount))
-
-        verse = nextVerse
-    }
-
-    return items
-}
-
-// skips the empty verses
-fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
-    var nextVerse: Verse? = null
-    while (hasNext()) {
-        nextVerse = next()
-        if (nextVerse.text.text.isEmpty()) {
-            nextVerse = null
-        } else {
-            break
-        }
-    }
-
-    val followingEmptyVerseCount = nextVerse
-            ?.let { it.verseIndex.verseIndex - 1 - current.verseIndex.verseIndex }
-            ?: 0
-
-    return Pair(nextVerse, followingEmptyVerseCount)
 }
 
 private class VersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
