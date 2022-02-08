@@ -186,6 +186,12 @@ object MockContents {
                     StrongNumber("G11", strongNumberWords.getValue("G11"))
             )
     )
+
+    val crossReferences = mapOf(
+            VerseIndex(0, 0, 0) to listOf(VerseIndex(18, 133, 2), VerseIndex(18, 101, 24), VerseIndex(61, 0, 0)),
+            VerseIndex(0, 0, 1) to listOf(VerseIndex(17, 25, 6)),
+            VerseIndex(0, 0, 3) to listOf(VerseIndex(20, 1, 12), VerseIndex(0, 0, 24), VerseIndex(0, 0, 9))
+    )
 }
 
 fun List<Verse>.toMap(): Map<Pair<Int, Int>, List<String>> {

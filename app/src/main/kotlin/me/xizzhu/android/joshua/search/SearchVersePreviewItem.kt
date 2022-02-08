@@ -30,11 +30,9 @@ import me.xizzhu.android.joshua.ui.clearAll
 import me.xizzhu.android.joshua.ui.createTitleSpans
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
-import me.xizzhu.android.joshua.ui.recyclerview.nextNonEmpty
 import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 import me.xizzhu.android.joshua.ui.setSpans
 import me.xizzhu.android.joshua.ui.toCharSequence
-import java.util.*
 
 class SearchVersePreviewItem(
         val verse: Verse, private val query: String, private val followingEmptyVerseCount: Int
@@ -67,24 +65,6 @@ class SearchVersePreviewItem(
 
         return@lazy SPANNABLE_STRING_BUILDER.toCharSequence()
     }
-}
-
-fun List<Verse>.toSearchVersePreviewItems(query: String): List<SearchVersePreviewItem> {
-    val items = ArrayList<SearchVersePreviewItem>(size)
-
-    val verseIterator = iterator()
-    var verse: Verse? = null
-    while (verse != null || verseIterator.hasNext()) {
-        verse = verse ?: verseIterator.next()
-
-        val (nextVerse, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
-
-        items.add(SearchVersePreviewItem(verse, query, followingEmptyVerseCount))
-
-        verse = nextVerse
-    }
-
-    return items
 }
 
 private class SearchVersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)

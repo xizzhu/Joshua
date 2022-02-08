@@ -282,6 +282,7 @@ class TranslationRepositoryTest : BaseUnitTest() {
                     MockContents.kjvBookShortNames, MockContents.kjvVerses.toMap()
             )
         } returns Unit
+        coEvery { remoteTranslationService.removeTranslationCache(any()) } returns Unit
 
         val channel = Channel<Int>()
         coEvery {

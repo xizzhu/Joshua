@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -38,13 +37,15 @@ import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Note
 import me.xizzhu.android.joshua.core.SearchConfiguration
 import me.xizzhu.android.joshua.core.SearchManager
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.viewData
+import me.xizzhu.android.joshua.preview.PreviewViewData
+import me.xizzhu.android.joshua.preview.loadPreview
+import me.xizzhu.android.joshua.preview.nextNonEmpty
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.firstNotEmpty
@@ -55,8 +56,6 @@ class SearchConfigurationViewData(val searchConfig: SearchConfiguration)
 
 class SearchResultViewData(val items: List<BaseItem>, val query: String, val instanceSearch: Boolean, val toast: String)
 
-class PreviewViewData(val settings: Settings, val title: String, val items: List<BaseItem>, val currentPosition: Int)
-
 @HiltViewModel
 class SearchViewModel @Inject constructor(
         private val bibleReadingManager: BibleReadingManager,
@@ -64,10 +63,13 @@ class SearchViewModel @Inject constructor(
         settingsManager: SettingsManager,
         application: Application
 ) : BaseViewModel(settingsManager, application) {
-    private class SearchRequest(val query: String, val instanceSearch: Boolean)
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal class SearchRequest(val query: String, val instanceSearch: Boolean)
 
     private val searchConfig: MutableStateFlow<ViewData<SearchConfigurationViewData>> = MutableStateFlow(ViewData.Loading())
-    private val searchRequest: MutableStateFlow<SearchRequest?> = MutableStateFlow(null)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal val searchRequest: MutableStateFlow<SearchRequest?> = MutableStateFlow(null)
     private val searchResult: MutableStateFlow<ViewData<SearchResultViewData>?> = MutableStateFlow(null)
 
     init {
@@ -215,20 +217,27 @@ class SearchViewModel @Inject constructor(
         bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
     }.onFailure { Log.e(tag, "Failed to save current verse", it) }
 
-    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> = viewData {
-        if (!verseIndex.isValid()) {
-            throw IllegalArgumentException("Verse index [$verseIndex] is invalid")
+    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> =
+            loadPreview(bibleReadingManager, settingsManager, verseIndex, ::toSearchVersePreviewItems)
+                    .onFailure { Log.e(tag, "Failed to load verses for preview", it) }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun toSearchVersePreviewItems(verses: List<Verse>): List<SearchVersePreviewItem> {
+        val items = ArrayList<SearchVersePreviewItem>(verses.size)
+
+        val query = searchRequest.value?.query ?: ""
+        val verseIterator = verses.iterator()
+        var verse: Verse? = null
+        while (verse != null || verseIterator.hasNext()) {
+            verse = verse ?: verseIterator.next()
+
+            val (nextVerse, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
+
+            items.add(SearchVersePreviewItem(verse, query, followingEmptyVerseCount))
+
+            verse = nextVerse
         }
 
-        val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-        val query = searchRequest.value?.query ?: ""
-        val items = bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex)
-                .toSearchVersePreviewItems(query)
-        PreviewViewData(
-                settings = settings().first(),
-                title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",
-                items = items,
-                currentPosition = verseIndex.verseIndex
-        )
-    }.onFailure { Log.e(tag, "Failed to load verses for preview", it) }
+        return items
+    }
 }

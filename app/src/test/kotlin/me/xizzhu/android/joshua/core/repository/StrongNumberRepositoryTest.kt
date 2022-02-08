@@ -49,6 +49,8 @@ class StrongNumberRepositoryTest : BaseUnitTest() {
     @Test
     fun `test download()`() = runTest {
         coEvery { localStrongNumberStorage.save(any(), any(), any()) } returns Unit
+        coEvery { remoteStrongNumberStorage.removeWordsCache() } returns Unit
+        coEvery { remoteStrongNumberStorage.removeIndexesCache() } returns Unit
         coEvery { remoteStrongNumberStorage.fetchIndexes(any()) } returns RemoteStrongNumberIndexes(MockContents.strongNumberIndex, MockContents.strongNumberReverseIndex)
         coEvery { remoteStrongNumberStorage.fetchWords(any()) } returns RemoteStrongNumberWords(MockContents.strongNumberWords)
 

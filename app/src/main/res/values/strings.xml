@@ -89,6 +89,8 @@
 
     <string name="text_verse_comparison">Verses</string>
     <string name="text_note">Note</string>
+    <string name="text_cross_references">Cross references</string>
+    <string name="text_no_cross_references">Cross references not downloaded yet.\nClick to download now.</string>
     <string name="text_strong_number">Strong\'s numbers</string>
     <string name="text_no_strong_number">Strong\'s numbers not downloaded yet.\nClick to download now.\n\n(Experimental Feature)</string>
 

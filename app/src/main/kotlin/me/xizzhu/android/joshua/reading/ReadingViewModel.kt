@@ -35,6 +35,10 @@ import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.viewData
+import me.xizzhu.android.joshua.preview.PreviewViewData
+import me.xizzhu.android.joshua.preview.loadPreview
+import me.xizzhu.android.joshua.preview.toVersePreviewItems
+import me.xizzhu.android.joshua.reading.detail.CrossReferenceItem
 import me.xizzhu.android.joshua.reading.detail.StrongNumberItem
 import me.xizzhu.android.joshua.reading.detail.VerseTextItem
 import me.xizzhu.android.joshua.reading.verse.toSimpleVerseItems
@@ -59,7 +63,7 @@ class VersesViewData(val items: List<BaseItem>)
 class VerseDetailViewData(
         val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
         var bookmarked: Boolean, @Highlight.Companion.AvailableColor var highlightColor: Int, var note: String,
-        var strongNumberItems: List<StrongNumberItem>
+        var crossReferencedItems: List<CrossReferenceItem>, var strongNumberItems: List<StrongNumberItem>
 )
 
 class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int, val data: Any? = null) {
@@ -87,6 +91,7 @@ class ReadingViewModel @Inject constructor(
         private val bookmarkManager: VerseAnnotationManager<Bookmark>,
         private val highlightManager: VerseAnnotationManager<Highlight>,
         private val noteManager: VerseAnnotationManager<Note>,
+        private val crossReferencesManager: CrossReferencesManager,
         private val strongNumberManager: StrongNumberManager,
         settingsManager: SettingsManager,
         application: Application
@@ -177,7 +182,8 @@ class ReadingViewModel @Inject constructor(
             val bookmarked = async { bookmarkManager.read(verseIndex).isValid() }
             val highlightColor = async { highlightManager.read(verseIndex).takeIf { it.isValid() }?.color ?: Highlight.COLOR_NONE }
             val note = async { noteManager.read(verseIndex).takeIf { it.isValid() }?.note ?: "" }
-            val strongNumbers = async { strongNumberManager.readStrongNumber(verseIndex) }
+            val crossReferences = async { readCrossReferences(verseIndex) }
+            val strongNumbers = async { strongNumberManager.readStrongNumber(verseIndex).map { StrongNumberItem(it) } }
 
             // build the verse
             val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
@@ -247,10 +253,27 @@ class ReadingViewModel @Inject constructor(
                     bookmarked = bookmarked.await(),
                     highlightColor = highlightColor.await(),
                     note = note.await(),
-                    strongNumberItems = strongNumbers.await().map { StrongNumberItem(it) }
+                    crossReferencedItems = crossReferences.await(),
+                    strongNumberItems = strongNumbers.await()
             )
         }
     }
+
+    private suspend fun readCrossReferences(verseIndex: VerseIndex): List<CrossReferenceItem> =
+            bibleReadingManager.readVerses(
+                    translationShortName = bibleReadingManager.currentTranslation().firstNotEmpty(),
+                    verseIndexes = crossReferencesManager.readCrossReferences(verseIndex).referenced
+            ).map { (verseIndex, verse) ->
+                CrossReferenceItem(
+                        verseIndex = verseIndex,
+                        verseText = verse.text,
+                        bookName = bibleReadingManager.readBookNames(verse.text.translationShortName)[verseIndex.bookIndex]
+                )
+            }.sortedBy { item -> item.verseIndex.bookIndex * 100000 + item.verseIndex.chapterIndex * 1000 + item.verseIndex.verseIndex }
+
+    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> =
+            loadPreview(bibleReadingManager, settingsManager, verseIndex, ::toVersePreviewItems)
+                    .onFailure { Log.e(tag, "Failed to load verses for preview", it) }
 
     fun verseUpdates(): Flow<VerseUpdate> = verseUpdates
 
@@ -287,6 +310,22 @@ class ReadingViewModel @Inject constructor(
             verseUpdates.emit(VerseUpdate(verseIndex, VerseUpdate.NOTE_ADDED))
         }
     }
+
+    fun downloadCrossReferences(): Flow<ViewData<Int>> =
+            crossReferencesManager.download()
+                    .map { progress ->
+                        when (progress) {
+                            -1 -> ViewData.Failure(CancellationException("Cross references downloading cancelled by user"))
+                            in 0 until 100 -> ViewData.Loading(progress)
+                            else -> ViewData.Success(100)
+                        }
+                    }
+                    .catch { e ->
+                        Log.e(tag, "Failed to download cross references", e)
+                        emit(ViewData.Failure(e))
+                    }
+
+    fun crossReferences(verseIndex: VerseIndex): Flow<ViewData<List<CrossReferenceItem>>> = viewData { readCrossReferences(verseIndex) }
 
     fun downloadStrongNumber(): Flow<ViewData<Int>> =
             strongNumberManager.download()

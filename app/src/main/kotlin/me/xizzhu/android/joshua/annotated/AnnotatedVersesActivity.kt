@@ -35,10 +35,10 @@ import me.xizzhu.android.joshua.infra.BaseActivity
 import me.xizzhu.android.joshua.infra.onEach
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.onSuccess
+import me.xizzhu.android.joshua.preview.VersePreviewItem
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.listDialog
-import me.xizzhu.android.joshua.ui.recyclerview.VersePreviewItem
 import javax.inject.Inject
 
 abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVersesViewModel<V>>(
