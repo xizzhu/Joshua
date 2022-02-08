@@ -4,6 +4,8 @@ CHANGELOG
 #### Next release
 - New features:
   - Support cross references (#21)
+- Update dependencies:
+  - Android Gradle Plugin to 7.1.1
 
 #### v0.20.2 (2022-02-07)
 - Bug fixes:
