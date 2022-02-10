@@ -16,10 +16,17 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+import android.content.Context
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.style.DynamicDrawableSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.DrawableRes
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
@@ -31,13 +38,14 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
 class SimpleVerseItem(
-        val verse: Verse, private val totalVerseCount: Int, private val followingEmptyVerseCount: Int,
+        private val context: Context, val verse: Verse, private val totalVerseCount: Int, private val followingEmptyVerseCount: Int,
         var hasBookmark: Boolean, @Highlight.Companion.AvailableColor var highlightColor: Int, var hasNote: Boolean,
         var selected: Boolean
 ) : BaseItem(R.layout.item_simple_verse, { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }) {
     companion object {
         private val STRING_BUILDER = StringBuilder()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
+        private val ICON_COLOR_FILTER = PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
     }
 
     interface Callback {
@@ -80,10 +88,25 @@ class SimpleVerseItem(
         get() {
             if (field.isEmpty()) {
                 SPANNABLE_STRING_BUILDER.format(verse, followingEmptyVerseCount, true, highlightColor)
+                if (hasBookmark) {
+                    SPANNABLE_STRING_BUILDER.appendDrawable(R.drawable.ic_bookmark)
+                }
+                if (hasNote) {
+                    SPANNABLE_STRING_BUILDER.appendDrawable(R.drawable.ic_note)
+                }
                 field = SPANNABLE_STRING_BUILDER.toCharSequence()
             }
             return field
         }
+
+    private fun SpannableStringBuilder.appendDrawable(@DrawableRes drawableId: Int): SpannableStringBuilder {
+        createDrawableSpan(context, drawableId, DynamicDrawableSpan.ALIGN_BASELINE, ICON_COLOR_FILTER, 0.67F)
+                ?.let { drawableSpan ->
+                    append(' ')
+                    setSpan(drawableSpan, length - 1, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                }
+        return this
+    }
 }
 
 private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
@@ -131,6 +154,26 @@ private class SimpleVerseItemViewHolder(inflater: LayoutInflater, parent: ViewGr
                         item.selected = false
                         viewBinding.root.isSelected = false
                         viewBinding.text.isSelected = false
+                    }
+                    VerseUpdate.NOTE_ADDED -> {
+                        item.hasNote = true
+                        item.textForDisplay = ""
+                        viewBinding.text.text = item.textForDisplay
+                    }
+                    VerseUpdate.NOTE_REMOVED -> {
+                        item.hasNote = false
+                        item.textForDisplay = ""
+                        viewBinding.text.text = item.textForDisplay
+                    }
+                    VerseUpdate.BOOKMARK_ADDED -> {
+                        item.hasBookmark = true
+                        item.textForDisplay = ""
+                        viewBinding.text.text = item.textForDisplay
+                    }
+                    VerseUpdate.BOOKMARK_REMOVED -> {
+                        item.hasBookmark = false
+                        item.textForDisplay = ""
+                        viewBinding.text.text = item.textForDisplay
                     }
                     VerseUpdate.HIGHLIGHT_UPDATED -> {
                         item.highlightColor = update.data as Int

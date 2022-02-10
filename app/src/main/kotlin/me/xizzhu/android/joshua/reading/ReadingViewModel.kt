@@ -177,7 +177,7 @@ class ReadingViewModel @Inject constructor(
             }
 
             VersesViewData(
-                    items = verses.toVerseItems(bookmarks.await(), highlights.await(), notes.await(), simpleReadingModeOn)
+                    items = verses.toVerseItems(application, bookmarks.await(), highlights.await(), notes.await(), simpleReadingModeOn)
             )
         }
     }

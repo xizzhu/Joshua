@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+import android.content.Context
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Note
@@ -23,7 +24,7 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
 fun List<Verse>.toVerseItems(
-        bookmarks: List<Bookmark>, highlights: List<Highlight>, notes: List<Note>, simpleReadingModeOn: Boolean
+        context: Context, bookmarks: List<Bookmark>, highlights: List<Highlight>, notes: List<Note>, simpleReadingModeOn: Boolean
 ): List<BaseItem> {
     val items = ArrayList<BaseItem>(size)
 
@@ -75,6 +76,7 @@ fun List<Verse>.toVerseItems(
 
         if (simpleReadingModeOn) {
             items.add(SimpleVerseItem(
+                    context = context,
                     verse = verse.transform(parallel),
                     totalVerseCount = size,
                     followingEmptyVerseCount = followingEmptyVerseCount,

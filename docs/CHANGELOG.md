@@ -5,6 +5,7 @@ CHANGELOG
 - New features:
   - Support cross references (#21)
   - Add orange and red highlight colors
+  - Show bookmark and note icons for simple reading mode (#194)
 - Changes:
   - Do not search if the query is less than 2 characters
 - Update dependencies:

@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+import io.mockk.mockk
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -28,7 +29,7 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun `test toVerseItems with simple reading mode`() {
         val verses = MockContents.kjvVerses
-        val actual = verses.toVerseItems(emptyList(), emptyList(), emptyList(), true)
+        val actual = verses.toVerseItems(mockk(), emptyList(), emptyList(), emptyList(), true)
         assertEquals(verses.size, actual.size)
         actual.forEachIndexed { index, verseItem ->
             assertTrue(verseItem is SimpleVerseItem)
@@ -40,7 +41,7 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun `test toVerseItems with simple reading mode and following empty verse`() {
         val verses = MockContents.msgVerses
-        val actual = verses.toVerseItems(emptyList(), emptyList(), emptyList(), true)
+        val actual = verses.toVerseItems(mockk(), emptyList(), emptyList(), emptyList(), true)
         assertTrue(verses.size > actual.size)
 
         var index = 0
@@ -61,7 +62,7 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun `test toVerseItems with simple reading mode, following empty verse, and parallel`() {
         val verses = MockContents.msgVersesWithKjvParallel
-        val actual = verses.toVerseItems(emptyList(), emptyList(), emptyList(), true)
+        val actual = verses.toVerseItems(mockk(), emptyList(), emptyList(), emptyList(), true)
         assertEquals(1, actual.size)
         assertEquals(
                 Verse(
@@ -75,6 +76,7 @@ class VerseTransformerTest : BaseUnitTest() {
     fun `test toVerseItems with simple reading mode, bookmarks, highlights, and notes`() {
         val verses = MockContents.kjvVerses
         val simpleVerseItems = verses.toVerseItems(
+                mockk(),
                 listOf(
                         Bookmark(VerseIndex(0, 0, 0), 0L),
                         Bookmark(VerseIndex(0, 0, 5), 0L),
@@ -109,7 +111,7 @@ class VerseTransformerTest : BaseUnitTest() {
     @Test
     fun `test toVerseItems`() {
         val verses = MockContents.kjvVerses
-        val verseItems = verses.toVerseItems(emptyList(), emptyList(), emptyList(), false)
+        val verseItems = verses.toVerseItems(mockk(), emptyList(), emptyList(), emptyList(), false)
         assertEquals(verses.size, verseItems.size)
         verseItems.forEachIndexed { index, verseItem ->
             assertTrue(verseItem is VerseItem)
@@ -124,6 +126,7 @@ class VerseTransformerTest : BaseUnitTest() {
     fun `test toVerseItems with bookmarks, highlights, and notes`() {
         val verses = MockContents.kjvVerses
         val verseItems = verses.toVerseItems(
+                mockk(),
                 listOf(
                         Bookmark(VerseIndex(0, 0, 0), 0L),
                         Bookmark(VerseIndex(0, 0, 5), 0L),
