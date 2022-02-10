@@ -128,8 +128,8 @@ class SearchViewModel @Inject constructor(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun doSearch(query: String, instanceSearch: Boolean) {
-        if (query.isEmpty()) {
-            searchResult.value = ViewData.Success(SearchResultViewData(emptyList(), "", instanceSearch, ""))
+        if (query.length < 2) {
+            searchResult.value = ViewData.Success(SearchResultViewData(emptyList(), query, instanceSearch, ""))
             return
         }
 

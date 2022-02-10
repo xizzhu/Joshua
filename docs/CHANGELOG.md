@@ -5,6 +5,8 @@ CHANGELOG
 - New features:
   - Support cross references (#21)
   - Add orange and red highlight colors
+- Changes:
+  - Do not search if the query is less than 2 characters
 - Update dependencies:
   - Android Gradle Plugin to 7.1.1
 

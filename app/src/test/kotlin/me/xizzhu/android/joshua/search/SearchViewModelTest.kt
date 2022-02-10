@@ -152,6 +152,19 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
+    fun `test search() with one-character query`() = runTest {
+        searchViewModel.search("1", true)
+        delay(1000L)
+
+        val actual = searchViewModel.searchResult().first()
+        assertTrue(actual is BaseViewModel.ViewData.Success)
+        assertTrue(actual.data.items.isEmpty())
+        assertEquals("1", actual.data.query)
+        assertTrue(actual.data.instanceSearch)
+        assertTrue(actual.data.toast.isEmpty())
+    }
+
+    @Test
     fun `test search() with empty result`() = runTest {
         searchViewModel.search("query", false)
         delay(1000L)
