@@ -67,7 +67,9 @@ data class SettingsViewData(
         NONE(Highlight.COLOR_NONE, R.string.text_highlight_color_none),
         YELLOW(Highlight.COLOR_YELLOW, R.string.text_highlight_color_yellow),
         PINK(Highlight.COLOR_PINK, R.string.text_highlight_color_pink),
+        ORANGE(Highlight.COLOR_ORANGE, R.string.text_highlight_color_orange),
         PURPLE(Highlight.COLOR_PURPLE, R.string.text_highlight_color_purple),
+        RED(Highlight.COLOR_RED, R.string.text_highlight_color_red),
         GREEN(Highlight.COLOR_GREEN, R.string.text_highlight_color_green),
         BLUE(Highlight.COLOR_BLUE, R.string.text_highlight_color_blue);
 

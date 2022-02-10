@@ -32,12 +32,14 @@ data class Highlight(override val verseIndex: VerseIndex, @ColorInt val color: I
         const val COLOR_NONE = 0
         const val COLOR_YELLOW = 0xFFFFFF00.toInt()
         const val COLOR_PINK = 0xFFFFC0CB.toInt()
+        const val COLOR_ORANGE = 0xFFFF8C00.toInt()
         const val COLOR_PURPLE = 0xFFFF00FF.toInt()
+        const val COLOR_RED = 0xFFDE0100.toInt()
         const val COLOR_GREEN = 0xFF00FF00.toInt()
         const val COLOR_BLUE = 0xFF0000FF.toInt()
-        val AVAILABLE_COLORS = arrayOf(COLOR_NONE, COLOR_YELLOW, COLOR_PINK, COLOR_PURPLE, COLOR_GREEN, COLOR_BLUE)
+        val AVAILABLE_COLORS = arrayOf(COLOR_NONE, COLOR_YELLOW, COLOR_PINK, COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_GREEN, COLOR_BLUE)
 
-        @IntDef(COLOR_NONE, COLOR_YELLOW, COLOR_PINK, COLOR_PURPLE, COLOR_GREEN, COLOR_BLUE)
+        @IntDef(COLOR_NONE, COLOR_YELLOW, COLOR_PINK, COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_GREEN, COLOR_BLUE)
         @Retention(AnnotationRetention.SOURCE)
         annotation class AvailableColor
     }

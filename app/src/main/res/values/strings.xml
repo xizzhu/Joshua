@@ -77,7 +77,9 @@
     <string name="text_highlight_color_none">None</string>
     <string name="text_highlight_color_yellow">Yellow</string>
     <string name="text_highlight_color_pink">Pink</string>
+    <string name="text_highlight_color_orange">Orange</string>
     <string name="text_highlight_color_purple">Purple</string>
+    <string name="text_highlight_color_red">Red</string>
     <string name="text_highlight_color_green">Green</string>
     <string name="text_highlight_color_blue">Blue</string>
 
@@ -145,7 +147,9 @@
         <item>@string/text_highlight_color_none</item>
         <item>@string/text_highlight_color_yellow</item>
         <item>@string/text_highlight_color_pink</item>
+        <item>@string/text_highlight_color_orange</item>
         <item>@string/text_highlight_color_purple</item>
+        <item>@string/text_highlight_color_red</item>
         <item>@string/text_highlight_color_green</item>
         <item>@string/text_highlight_color_blue</item>
     </string-array>

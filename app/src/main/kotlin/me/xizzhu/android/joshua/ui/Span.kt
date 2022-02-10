@@ -33,10 +33,8 @@ fun createTitleSpans(): Array<CharacterStyle> = arrayOf(RelativeSizeSpan(0.85F),
 
 fun createHighlightSpans(@ColorInt highlightColor: Int): Array<CharacterStyle> =
         if (highlightColor != Highlight.COLOR_NONE) {
-            arrayOf(
-                    BackgroundColorSpan(highlightColor),
-                    ForegroundColorSpan(if (highlightColor == Highlight.COLOR_BLUE) Color.WHITE else Color.BLACK)
-            )
+            val foregroundColor = if (highlightColor == Highlight.COLOR_BLUE || highlightColor == Highlight.COLOR_RED) Color.WHITE else Color.BLACK
+            arrayOf(BackgroundColorSpan(highlightColor), ForegroundColorSpan(foregroundColor))
         } else {
             emptyArray()
         }

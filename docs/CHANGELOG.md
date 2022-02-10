@@ -4,6 +4,7 @@ CHANGELOG
 #### Next release
 - New features:
   - Support cross references (#21)
+  - Add orange and red highlight colors
 - Update dependencies:
   - Android Gradle Plugin to 7.1.1
 
