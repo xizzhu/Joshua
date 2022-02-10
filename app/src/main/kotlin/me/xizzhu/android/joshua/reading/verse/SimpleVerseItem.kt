@@ -20,8 +20,8 @@ import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.ColorInt
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.databinding.ItemSimpleVerseBinding
@@ -32,7 +32,8 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 
 class SimpleVerseItem(
         val verse: Verse, private val totalVerseCount: Int, private val followingEmptyVerseCount: Int,
-        @ColorInt var highlightColor: Int, var selected: Boolean = false
+        var hasBookmark: Boolean, @Highlight.Companion.AvailableColor var highlightColor: Int, var hasNote: Boolean,
+        var selected: Boolean
 ) : BaseItem(R.layout.item_simple_verse, { inflater, parent -> SimpleVerseItemViewHolder(inflater, parent) }) {
     companion object {
         private val STRING_BUILDER = StringBuilder()
@@ -78,7 +79,8 @@ class SimpleVerseItem(
     var textForDisplay: CharSequence = ""
         get() {
             if (field.isEmpty()) {
-                field = SPANNABLE_STRING_BUILDER.format(verse, followingEmptyVerseCount, true, highlightColor)
+                SPANNABLE_STRING_BUILDER.format(verse, followingEmptyVerseCount, true, highlightColor)
+                field = SPANNABLE_STRING_BUILDER.toCharSequence()
             }
             return field
         }

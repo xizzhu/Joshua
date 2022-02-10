@@ -32,37 +32,37 @@ import kotlin.test.assertTrue
 class SimpleVerseItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_simple_verse, SimpleVerseItem(Verse.INVALID, 0, 0, Highlight.COLOR_NONE).viewType)
+        assertEquals(R.layout.item_simple_verse, SimpleVerseItem(Verse.INVALID, 0, 0, false, Highlight.COLOR_NONE, false, false).viewType)
     }
 
     @Test
     fun testIndexForDisplay() {
-        assertEquals("1", SimpleVerseItem(MockContents.kjvVerses[0], 9, 0, Highlight.COLOR_NONE).indexForDisplay)
+        assertEquals("1", SimpleVerseItem(MockContents.kjvVerses[0], 9, 0, false, Highlight.COLOR_NONE, false, false).indexForDisplay)
 
-        assertEquals(" 1", SimpleVerseItem(MockContents.kjvVerses[0], 10, 0, Highlight.COLOR_NONE).indexForDisplay)
-        assertEquals("10", SimpleVerseItem(MockContents.kjvVerses[9], 10, 0, Highlight.COLOR_NONE).indexForDisplay)
-        assertEquals("99", SimpleVerseItem(Verse(VerseIndex(1, 2, 98), Verse.Text("", ""), emptyList()), 99, 0, Highlight.COLOR_NONE).indexForDisplay)
+        assertEquals(" 1", SimpleVerseItem(MockContents.kjvVerses[0], 10, 0, false, Highlight.COLOR_NONE, false, false).indexForDisplay)
+        assertEquals("10", SimpleVerseItem(MockContents.kjvVerses[9], 10, 0, false, Highlight.COLOR_NONE, false, false).indexForDisplay)
+        assertEquals("99", SimpleVerseItem(Verse(VerseIndex(1, 2, 98), Verse.Text("", ""), emptyList()), 99, 0, false, Highlight.COLOR_NONE, false, false).indexForDisplay)
 
-        assertEquals("  1", SimpleVerseItem(MockContents.kjvVerses[0], 100, 0, Highlight.COLOR_NONE).indexForDisplay)
-        assertEquals(" 10", SimpleVerseItem(MockContents.kjvVerses[9], 100, 0, Highlight.COLOR_NONE).indexForDisplay)
-        assertEquals("100", SimpleVerseItem(Verse(VerseIndex(1, 2, 99), Verse.Text("", ""), emptyList()), 100, 0, Highlight.COLOR_NONE).indexForDisplay)
+        assertEquals("  1", SimpleVerseItem(MockContents.kjvVerses[0], 100, 0, false, Highlight.COLOR_NONE, false, false).indexForDisplay)
+        assertEquals(" 10", SimpleVerseItem(MockContents.kjvVerses[9], 100, 0, false, Highlight.COLOR_NONE, false, false).indexForDisplay)
+        assertEquals("100", SimpleVerseItem(Verse(VerseIndex(1, 2, 99), Verse.Text("", ""), emptyList()), 100, 0, false, Highlight.COLOR_NONE, false, false).indexForDisplay)
     }
 
     @Test
     fun testIndexForDisplayWithEmptyFollowingVerses() {
-        assertEquals("1-2", SimpleVerseItem(MockContents.msgVerses[0], MockContents.msgVerses.size, 1, Highlight.COLOR_NONE).indexForDisplay)
+        assertEquals("1-2", SimpleVerseItem(MockContents.msgVerses[0], MockContents.msgVerses.size, 1, false, Highlight.COLOR_NONE, false, false).indexForDisplay)
     }
 
     @Test
     fun testIndexForDisplayWithParallel() {
-        assertTrue(SimpleVerseItem(MockContents.msgVersesWithKjvParallel[0], MockContents.msgVerses.size, 1, Highlight.COLOR_NONE).indexForDisplay.isEmpty())
+        assertTrue(SimpleVerseItem(MockContents.msgVersesWithKjvParallel[0], MockContents.msgVerses.size, 1, false, Highlight.COLOR_NONE, false, false).indexForDisplay.isEmpty())
     }
 
     @Test
     fun testTextForDisplay() {
         assertEquals(
                 MockContents.kjvVerses[0].text.text,
-                SimpleVerseItem(MockContents.kjvVerses[0], MockContents.kjvVerses.size, 0, Highlight.COLOR_NONE).textForDisplay.toString()
+                SimpleVerseItem(MockContents.kjvVerses[0], MockContents.kjvVerses.size, 0, false, Highlight.COLOR_NONE, false, false).textForDisplay.toString()
         )
     }
 
@@ -70,7 +70,7 @@ class SimpleVerseItemTest : BaseUnitTest() {
     fun testTextForDisplayWithParallelTranslations() {
         assertEquals(
                 "${MockContents.kjvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].text.text}\n\n${MockContents.cuvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].parallel[0].text}",
-                SimpleVerseItem(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvVerses.size, 0, Highlight.COLOR_NONE).textForDisplay.toString()
+                SimpleVerseItem(MockContents.kjvVersesWithCuvParallel[0], MockContents.kjvVerses.size, 0, false, Highlight.COLOR_NONE, false, false).textForDisplay.toString()
         )
     }
 }

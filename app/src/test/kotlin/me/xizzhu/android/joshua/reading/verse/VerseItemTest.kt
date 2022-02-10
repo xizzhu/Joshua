@@ -29,14 +29,14 @@ import kotlin.test.assertEquals
 class VerseItemTest : BaseUnitTest() {
     @Test
     fun testItemViewType() {
-        assertEquals(R.layout.item_verse, VerseItem(Verse.INVALID, 0, false, 0, false).viewType)
+        assertEquals(R.layout.item_verse, VerseItem(Verse.INVALID, 0, false, 0, false, false).viewType)
     }
 
     @Test
     fun testTextForDisplay() {
         assertEquals(
                 "1:1 ${MockContents.kjvVerses[0].text.text}",
-                VerseItem(MockContents.kjvVerses[0], 0, false, 0, false).textForDisplay.toString()
+                VerseItem(MockContents.kjvVerses[0], 0, false, 0, false, false).textForDisplay.toString()
         )
     }
 
@@ -44,7 +44,7 @@ class VerseItemTest : BaseUnitTest() {
     fun testTextForDisplayWithParallelTranslations() {
         assertEquals(
                 "${MockContents.kjvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].text.text}\n\n${MockContents.cuvShortName} 1:1\n${MockContents.kjvVersesWithCuvParallel[0].parallel[0].text}",
-                VerseItem(MockContents.kjvVersesWithCuvParallel[0], 0, false, 0, false).textForDisplay.toString()
+                VerseItem(MockContents.kjvVersesWithCuvParallel[0], 0, false, 0, false, false).textForDisplay.toString()
         )
     }
 }

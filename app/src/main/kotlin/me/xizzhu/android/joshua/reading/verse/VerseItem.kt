@@ -36,7 +36,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseViewHolder
 class VerseItem(
         val verse: Verse, private val followingEmptyVerseCount: Int,
         var hasBookmark: Boolean, @Highlight.Companion.AvailableColor var highlightColor: Int, var hasNote: Boolean,
-        var selected: Boolean = false
+        var selected: Boolean
 ) : BaseItem(R.layout.item_verse, { inflater, parent -> VerseItemViewHolder(inflater, parent) }) {
     companion object {
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
