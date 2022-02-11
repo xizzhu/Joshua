@@ -16,20 +16,31 @@
 
 package me.xizzhu.android.joshua.ui
 
+import android.content.Context
 import android.graphics.Color
 import android.text.style.BackgroundColorSpan
 import android.text.style.CharacterStyle
 import android.text.style.ForegroundColorSpan
+import io.mockk.every
+import io.mockk.mockk
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class SpanTest : BaseUnitTest() {
+    @Test
+    fun `test createDrawableSpan with non-existing drawable`() {
+        val context = mockk<Context>().apply { every { getDrawable(any()) } returns null }
+        assertNull(createDrawableSpan(context, R.drawable.ic_bookmark))
+    }
+
     @Test
     fun `test createHighlightSpans`() {
         assertTrue(createHighlightSpans(Highlight.COLOR_NONE).isEmpty())

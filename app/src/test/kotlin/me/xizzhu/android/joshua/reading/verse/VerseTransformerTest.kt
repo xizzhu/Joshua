@@ -199,6 +199,14 @@ class VerseTransformerTest : BaseUnitTest() {
         )
 
         assertEquals(
+                "${MockContents.kjvBookNames[0]} 1:1 ${MockContents.kjvVerses[0].text.text}\n" +
+                        "${MockContents.kjvBookNames[0]} 1:2 ${MockContents.kjvVerses[1].text.text}\n" +
+                        "${MockContents.kjvBookNames[0]} 1:10 ${MockContents.kjvVerses[9].text.text}",
+                listOf(MockContents.kjvVerses[9], MockContents.kjvVerses[1], MockContents.kjvVerses[0])
+                        .toStringForSharing(MockContents.kjvBookNames[0], false)
+        )
+
+        assertEquals(
                 "${MockContents.kjvBookNames[0]} 1:1-2\n" +
                         "${MockContents.kjvVerses[0].text.text} ${MockContents.kjvVerses[1].text.text}\n\n" +
                         "${MockContents.kjvBookNames[0]} 1:10\n" +
