@@ -54,7 +54,7 @@ object Versions {
         const val annotation = "1.3.0"
         const val appCompat = "1.4.1"
         const val core = "1.7.0"
-        const val lifecycle = "2.4.0"
+        const val lifecycle = "2.4.1"
         const val multidex = "2.0.1"
 
         object View {
@@ -73,7 +73,7 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.10"
-        const val bom = "29.0.4"
+        const val bom = "29.1.0"
 
         object Crashlytics {
             const val classpath = "2.8.1"
