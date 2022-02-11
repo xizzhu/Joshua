@@ -131,7 +131,9 @@ class ReadingViewModelTest : BaseUnitTest() {
         every { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
         every { bibleReadingManager.parallelTranslations() } returns flowOf(emptyList())
         coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0) } returns MockContents.kjvVerses
+        coEvery { bookmarkManager.read(0, 0) } returns emptyList()
         coEvery { highlightManager.read(0, 0) } returns emptyList()
+        coEvery { noteManager.read(0, 0) } returns emptyList()
         every { settingsManager.settings() } returns flowOf(Settings.DEFAULT.copy(simpleReadingModeOn = true))
 
         with(readingViewModel.loadVerses(0, 0).toList()) {

@@ -16,20 +16,40 @@
 
 package me.xizzhu.android.joshua.ui
 
+import android.content.Context
 import android.graphics.Color
+import android.graphics.ColorFilter
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.BackgroundColorSpan
 import android.text.style.CharacterStyle
+import android.text.style.DynamicDrawableSpan
 import android.text.style.ForegroundColorSpan
+import android.text.style.ImageSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import androidx.annotation.ColorInt
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
 import me.xizzhu.android.joshua.core.Highlight
+import kotlin.math.roundToInt
 
 fun createTitleStyleSpan() = StyleSpan(Typeface.BOLD)
 fun createTitleSpans(): Array<CharacterStyle> = arrayOf(RelativeSizeSpan(0.85F), createTitleStyleSpan())
+
+fun createDrawableSpan(
+        context: Context,
+        @DrawableRes drawableId: Int,
+        verticalAlignment: Int = DynamicDrawableSpan.ALIGN_BOTTOM,
+        colorFilter: ColorFilter? = null,
+        scale: Float = 1.0F
+): ImageSpan? {
+    val drawable = ContextCompat.getDrawable(context, drawableId) ?: return null
+    drawable.setBounds(0, 0, (drawable.intrinsicWidth * scale).roundToInt(), (drawable.intrinsicHeight * scale).roundToInt())
+    colorFilter?.let { drawable.colorFilter = it }
+    return ImageSpan(drawable, verticalAlignment)
+}
 
 fun createHighlightSpans(@ColorInt highlightColor: Int): Array<CharacterStyle> =
         if (highlightColor != Highlight.COLOR_NONE) {

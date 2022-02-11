@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
+import io.mockk.mockk
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -26,24 +27,26 @@ import kotlin.test.assertTrue
 
 class VerseTransformerTest : BaseUnitTest() {
     @Test
-    fun testToSimpleVerseItems() {
+    fun `test toVerseItems with simple reading mode`() {
         val verses = MockContents.kjvVerses
-        val actual = verses.toSimpleVerseItems(emptyList())
+        val actual = verses.toVerseItems(mockk(), emptyList(), emptyList(), emptyList(), true)
         assertEquals(verses.size, actual.size)
         actual.forEachIndexed { index, verseItem ->
+            assertTrue(verseItem is SimpleVerseItem)
             assertEquals(verses[index], verseItem.verse)
             assertEquals(Highlight.COLOR_NONE, verseItem.highlightColor)
         }
     }
 
     @Test
-    fun testToSimpleVerseItemsWithFollowingEmptyVerse() {
+    fun `test toVerseItems with simple reading mode and following empty verse`() {
         val verses = MockContents.msgVerses
-        val actual = verses.toSimpleVerseItems(emptyList())
+        val actual = verses.toVerseItems(mockk(), emptyList(), emptyList(), emptyList(), true)
         assertTrue(verses.size > actual.size)
 
         var index = 0
         actual.forEach { verseItem ->
+            assertTrue(verseItem is SimpleVerseItem)
             while (index < verses.size) {
                 if (verses[index] == verseItem.verse) {
                     break
@@ -57,56 +60,23 @@ class VerseTransformerTest : BaseUnitTest() {
     }
 
     @Test
-    fun testToSimpleVerseItemsWithFollowingEmptyVerseAndParallel() {
+    fun `test toVerseItems with simple reading mode, following empty verse, and parallel`() {
         val verses = MockContents.msgVersesWithKjvParallel
-        val actual = verses.toSimpleVerseItems(emptyList())
+        val actual = verses.toVerseItems(mockk(), emptyList(), emptyList(), emptyList(), true)
         assertEquals(1, actual.size)
         assertEquals(
                 Verse(
                         VerseIndex(0, 0, 0), verses[0].text,
                         listOf(Verse.Text(MockContents.kjvShortName, "${MockContents.msgVersesWithKjvParallel[0].parallel[0].text} ${MockContents.msgVersesWithKjvParallel[1].parallel[0].text}"))
                 ),
-                actual[0].verse)
+                (actual[0] as SimpleVerseItem).verse)
     }
 
     @Test
-    fun testToSimpleVerseItemsWithHighlights() {
+    fun `test toVerseItems with simple reading mode, bookmarks, highlights, and notes`() {
         val verses = MockContents.kjvVerses
-        val simpleVerseItems = verses.toSimpleVerseItems(
-                listOf(
-                        Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 1L),
-                        Highlight(VerseIndex(0, 0, 6), Highlight.COLOR_BLUE, 2L),
-                        Highlight(VerseIndex(0, 0, 10), Highlight.COLOR_PURPLE, 3L)
-                )
-        )
-        assertEquals(verses.size, simpleVerseItems.size)
-        simpleVerseItems.forEachIndexed { index, verseItem ->
-            assertEquals(verses[index], verseItem.verse)
-            assertEquals(when (index) {
-                0 -> Highlight.COLOR_PINK
-                6 -> Highlight.COLOR_BLUE
-                else -> Highlight.COLOR_NONE
-            }, verseItem.highlightColor)
-        }
-    }
-
-    @Test
-    fun testToVerseItems() {
-        val verses = MockContents.kjvVerses
-        val verseItems = verses.toVerseItems(emptyList(), emptyList(), emptyList())
-        assertEquals(verses.size, verseItems.size)
-        verseItems.forEachIndexed { index, verseItem ->
-            assertEquals(verses[index], verseItem.verse)
-            assertFalse(verseItem.hasBookmark)
-            assertEquals(Highlight.COLOR_NONE, verseItem.highlightColor)
-            assertFalse(verseItem.hasNote)
-        }
-    }
-
-    @Test
-    fun testToVerseItemsWithBookmarksHighlightsNotes() {
-        val verses = MockContents.kjvVerses
-        val verseItems = verses.toVerseItems(
+        val simpleVerseItems = verses.toVerseItems(
+                mockk(),
                 listOf(
                         Bookmark(VerseIndex(0, 0, 0), 0L),
                         Bookmark(VerseIndex(0, 0, 5), 0L),
@@ -121,10 +91,62 @@ class VerseTransformerTest : BaseUnitTest() {
                         Note(VerseIndex(0, 0, 0), "", 0L),
                         Note(VerseIndex(0, 0, 7), "", 0L),
                         Note(VerseIndex(0, 0, 10), "", 0L)
-                )
+                ),
+                true
+        )
+        assertEquals(verses.size, simpleVerseItems.size)
+        simpleVerseItems.forEachIndexed { index, verseItem ->
+            assertTrue(verseItem is SimpleVerseItem)
+            assertEquals(verses[index], verseItem.verse)
+            assertTrue(if (index == 0 || index == 5) verseItem.hasBookmark else !verseItem.hasBookmark)
+            assertEquals(when (index) {
+                0 -> Highlight.COLOR_PINK
+                6 -> Highlight.COLOR_BLUE
+                else -> Highlight.COLOR_NONE
+            }, verseItem.highlightColor)
+            assertTrue(if (index == 0 || index == 7) verseItem.hasNote else !verseItem.hasNote)
+        }
+    }
+
+    @Test
+    fun `test toVerseItems`() {
+        val verses = MockContents.kjvVerses
+        val verseItems = verses.toVerseItems(mockk(), emptyList(), emptyList(), emptyList(), false)
+        assertEquals(verses.size, verseItems.size)
+        verseItems.forEachIndexed { index, verseItem ->
+            assertTrue(verseItem is VerseItem)
+            assertEquals(verses[index], verseItem.verse)
+            assertFalse(verseItem.hasBookmark)
+            assertEquals(Highlight.COLOR_NONE, verseItem.highlightColor)
+            assertFalse(verseItem.hasNote)
+        }
+    }
+
+    @Test
+    fun `test toVerseItems with bookmarks, highlights, and notes`() {
+        val verses = MockContents.kjvVerses
+        val verseItems = verses.toVerseItems(
+                mockk(),
+                listOf(
+                        Bookmark(VerseIndex(0, 0, 0), 0L),
+                        Bookmark(VerseIndex(0, 0, 5), 0L),
+                        Bookmark(VerseIndex(0, 0, 10), 0L)
+                ),
+                listOf(
+                        Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 1L),
+                        Highlight(VerseIndex(0, 0, 6), Highlight.COLOR_BLUE, 2L),
+                        Highlight(VerseIndex(0, 0, 10), Highlight.COLOR_PURPLE, 3L)
+                ),
+                listOf(
+                        Note(VerseIndex(0, 0, 0), "", 0L),
+                        Note(VerseIndex(0, 0, 7), "", 0L),
+                        Note(VerseIndex(0, 0, 10), "", 0L)
+                ),
+                false
         )
         assertEquals(verses.size, verseItems.size)
         verseItems.forEachIndexed { index, verseItem ->
+            assertTrue(verseItem is VerseItem)
             assertEquals(verses[index], verseItem.verse)
             assertTrue(if (index == 0 || index == 5) verseItem.hasBookmark else !verseItem.hasBookmark)
             assertEquals(when (index) {
@@ -173,6 +195,14 @@ class VerseTransformerTest : BaseUnitTest() {
                         "${MockContents.kjvBookNames[0]} 1:2 ${MockContents.kjvVerses[1].text.text}\n" +
                         "${MockContents.kjvBookNames[0]} 1:10 ${MockContents.kjvVerses[9].text.text}",
                 listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[9])
+                        .toStringForSharing(MockContents.kjvBookNames[0], false)
+        )
+
+        assertEquals(
+                "${MockContents.kjvBookNames[0]} 1:1 ${MockContents.kjvVerses[0].text.text}\n" +
+                        "${MockContents.kjvBookNames[0]} 1:2 ${MockContents.kjvVerses[1].text.text}\n" +
+                        "${MockContents.kjvBookNames[0]} 1:10 ${MockContents.kjvVerses[9].text.text}",
+                listOf(MockContents.kjvVerses[9], MockContents.kjvVerses[1], MockContents.kjvVerses[0])
                         .toStringForSharing(MockContents.kjvBookNames[0], false)
         )
 

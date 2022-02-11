@@ -31,7 +31,18 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.CrossReferencesManager
+import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.ReadingProgressManager
+import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.StrongNumberManager
+import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.viewData
@@ -41,7 +52,6 @@ import me.xizzhu.android.joshua.preview.toVersePreviewItems
 import me.xizzhu.android.joshua.reading.detail.CrossReferenceItem
 import me.xizzhu.android.joshua.reading.detail.StrongNumberItem
 import me.xizzhu.android.joshua.reading.detail.VerseTextItem
-import me.xizzhu.android.joshua.reading.verse.toSimpleVerseItems
 import me.xizzhu.android.joshua.reading.verse.toVerseItems
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -155,8 +165,8 @@ class ReadingViewModel @Inject constructor(
             val highlights = async { highlightManager.read(bookIndex, chapterIndex) }
 
             val simpleReadingModeOn = settings().first().simpleReadingModeOn
-            val bookmarks = if (simpleReadingModeOn) null else async { bookmarkManager.read(bookIndex, chapterIndex) }
-            val notes = if (simpleReadingModeOn) null else async { noteManager.read(bookIndex, chapterIndex) }
+            val bookmarks = async { bookmarkManager.read(bookIndex, chapterIndex) }
+            val notes = async { noteManager.read(bookIndex, chapterIndex) }
 
             val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
             val parallelTranslations = bibleReadingManager.parallelTranslations().first()
@@ -165,14 +175,9 @@ class ReadingViewModel @Inject constructor(
             } else {
                 bibleReadingManager.readVerses(currentTranslation, parallelTranslations, bookIndex, chapterIndex)
             }
-            val items = if (simpleReadingModeOn) {
-                verses.toSimpleVerseItems(highlights.await())
-            } else {
-                verses.toVerseItems(bookmarks!!.await(), highlights.await(), notes!!.await())
-            }
 
             VersesViewData(
-                    items = items
+                    items = verses.toVerseItems(application, bookmarks.await(), highlights.await(), notes.await(), simpleReadingModeOn)
             )
         }
     }

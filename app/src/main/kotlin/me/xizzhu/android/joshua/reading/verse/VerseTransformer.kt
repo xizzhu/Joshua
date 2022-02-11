@@ -16,85 +16,17 @@
 
 package me.xizzhu.android.joshua.reading.verse
 
-import me.xizzhu.android.joshua.core.*
+import android.content.Context
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.Verse
+import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 
-fun List<Verse>.toSimpleVerseItems(highlights: List<Highlight>): List<SimpleVerseItem> {
-    val items = ArrayList<SimpleVerseItem>(size)
-
-    val verseIterator = iterator()
-    var verse: Verse? = null
-    val highlightIterator = highlights.iterator()
-    var highlight: Highlight? = null
-    while (verse != null || verseIterator.hasNext()) {
-        verse = verse ?: verseIterator.next()
-
-        val (nextVerse, parallel, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
-
-        val verseIndex = verse.verseIndex.verseIndex
-        if (highlight == null || highlight.verseIndex.verseIndex < verseIndex) {
-            while (highlightIterator.hasNext()) {
-                highlight = highlightIterator.next()
-                if (highlight.verseIndex.verseIndex >= verseIndex) {
-                    break
-                }
-            }
-        }
-        val highlightColor = highlight
-                ?.let { if (it.verseIndex.verseIndex == verseIndex) it.color else Highlight.COLOR_NONE }
-                ?: Highlight.COLOR_NONE
-
-        items.add(SimpleVerseItem(verse.transform(parallel), size, followingEmptyVerseCount, highlightColor))
-
-        verse = nextVerse
-    }
-
-    return items
-}
-
-// skips the empty verses, and concatenates the parallels
-private fun Iterator<Verse>.nextNonEmpty(current: Verse): Triple<Verse?, Array<StringBuilder>, Int> {
-    val parallel = Array(current.parallel.size) { StringBuilder() }.append(current.parallel)
-
-    var nextVerse: Verse? = null
-    while (hasNext()) {
-        nextVerse = next()
-        if (nextVerse.text.text.isEmpty()) {
-            parallel.append(nextVerse.parallel)
-            nextVerse = null
-        } else {
-            break
-        }
-    }
-
-    val followingEmptyVerseCount = nextVerse
-            ?.let { it.verseIndex.verseIndex - 1 - current.verseIndex.verseIndex }
-            ?: 0
-
-    return Triple(nextVerse, parallel, followingEmptyVerseCount)
-}
-
-private fun Array<StringBuilder>.append(texts: List<Verse.Text>): Array<StringBuilder> {
-    texts.forEachIndexed { index, text ->
-        with(get(index)) {
-            if (isNotEmpty()) append(' ')
-            append(text.text)
-        }
-    }
-    return this
-}
-
-private fun Verse.transform(concatenatedParallel: Array<StringBuilder>): Verse {
-    if (parallel.isEmpty() || concatenatedParallel.isEmpty()) return this
-
-    val parallelTexts = ArrayList<Verse.Text>(concatenatedParallel.size)
-    parallel.forEachIndexed { index, text ->
-        parallelTexts.add(Verse.Text(text.translationShortName, concatenatedParallel[index].toString()))
-    }
-    return copy(parallel = parallelTexts)
-}
-
-fun List<Verse>.toVerseItems(bookmarks: List<Bookmark>, highlights: List<Highlight>, notes: List<Note>): List<VerseItem> {
-    val items = ArrayList<VerseItem>(size)
+fun List<Verse>.toVerseItems(
+        context: Context, bookmarks: List<Bookmark>, highlights: List<Highlight>, notes: List<Note>, simpleReadingModeOn: Boolean
+): List<BaseItem> {
+    val items = ArrayList<BaseItem>(size)
 
     val verseIterator = iterator()
     var verse: Verse? = null
@@ -142,18 +74,74 @@ fun List<Verse>.toVerseItems(bookmarks: List<Bookmark>, highlights: List<Highlig
         }
         val hasNote = note?.let { it.verseIndex.verseIndex == verseIndex } ?: false
 
-        items.add(VerseItem(
-                verse = verse.transform(parallel),
-                followingEmptyVerseCount = followingEmptyVerseCount,
-                hasBookmark = hasBookmark,
-                highlightColor = highlightColor,
-                hasNote = hasNote
-        ))
+        if (simpleReadingModeOn) {
+            items.add(SimpleVerseItem(
+                    context = context,
+                    verse = verse.transform(parallel),
+                    totalVerseCount = size,
+                    followingEmptyVerseCount = followingEmptyVerseCount,
+                    hasBookmark = hasBookmark,
+                    highlightColor = highlightColor,
+                    hasNote = hasNote,
+                    selected = false
+            ))
+        } else {
+            items.add(VerseItem(
+                    verse = verse.transform(parallel),
+                    followingEmptyVerseCount = followingEmptyVerseCount,
+                    hasBookmark = hasBookmark,
+                    highlightColor = highlightColor,
+                    hasNote = hasNote,
+                    selected = false
+            ))
+        }
 
         verse = nextVerse
     }
 
     return items
+}
+
+// skips the empty verses, and concatenates the parallels
+private fun Iterator<Verse>.nextNonEmpty(current: Verse): Triple<Verse?, Array<StringBuilder>, Int> {
+    val parallel = Array(current.parallel.size) { StringBuilder() }.append(current.parallel)
+
+    var nextVerse: Verse? = null
+    while (hasNext()) {
+        nextVerse = next()
+        if (nextVerse.text.text.isEmpty()) {
+            parallel.append(nextVerse.parallel)
+            nextVerse = null
+        } else {
+            break
+        }
+    }
+
+    val followingEmptyVerseCount = nextVerse
+            ?.let { it.verseIndex.verseIndex - 1 - current.verseIndex.verseIndex }
+            ?: 0
+
+    return Triple(nextVerse, parallel, followingEmptyVerseCount)
+}
+
+private fun Array<StringBuilder>.append(texts: List<Verse.Text>): Array<StringBuilder> {
+    texts.forEachIndexed { index, text ->
+        with(get(index)) {
+            if (isNotEmpty()) append(' ')
+            append(text.text)
+        }
+    }
+    return this
+}
+
+private fun Verse.transform(concatenatedParallel: Array<StringBuilder>): Verse {
+    if (parallel.isEmpty() || concatenatedParallel.isEmpty()) return this
+
+    val parallelTexts = ArrayList<Verse.Text>(concatenatedParallel.size)
+    parallel.forEachIndexed { index, text ->
+        parallelTexts.add(Verse.Text(text.translationShortName, concatenatedParallel[index].toString()))
+    }
+    return copy(parallel = parallelTexts)
 }
 
 fun Collection<Verse>.toStringForSharing(bookName: String, consolidateVerses: Boolean): String {
