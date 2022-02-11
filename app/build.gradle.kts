@@ -85,10 +85,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
-
-            // Temporarily use proguard-android.txt instead of proguard-android-optimize.txt as a workaround of an R8 issue:
-            // https://issuetracker.google.com/issues/174167294
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
