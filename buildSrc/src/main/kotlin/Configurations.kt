@@ -33,7 +33,7 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "7.1.1"
+        const val classpath = "7.1.2"
         const val buildTools = "32.0.0"
         const val compile = 31
         const val min = 19
@@ -81,7 +81,7 @@ object Versions {
     }
 
     const val ask = "0.5.2"
-    const val hilt = "2.40.5"
+    const val hilt = "2.41"
     const val logger = "0.7.0"
     const val materialComponent = "1.5.0"
 
