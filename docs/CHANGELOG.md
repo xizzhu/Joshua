@@ -10,9 +10,10 @@ CHANGELOG
   - Do not search if the query is less than 2 characters
 - Update dependencies:
   - Gradle to 7.4
-  - Android Gradle Plugin to 7.1.1
+  - Android Gradle Plugin to 7.1.2
   - AndroidX Lifecycle to 2.4.1
   - Firebase BOM to 29.1.0
+  - Hilt to 2.41
 
 #### v0.20.2 (2022-02-07)
 - Bug fixes:
