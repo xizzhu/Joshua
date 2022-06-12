@@ -33,32 +33,32 @@ object Versions {
     }
 
     object Sdk {
-        const val classpath = "7.1.2"
-        const val buildTools = "32.0.0"
-        const val compile = 31
+        const val classpath = "7.2.1"
+        const val buildTools = "33.0.0"
+        const val compile = 32
         const val min = 19
-        const val target = 31
+        const val target = 32
     }
 
     val java = JavaVersion.VERSION_11
 
     object Kotlin {
         val jvmTarget = java.toString()
-        const val core = "1.6.10"
-        const val coroutines = "1.6.0"
-        const val kover = "0.5.0"
+        const val core = "1.7.0"
+        const val coroutines = "1.6.2"
+        const val kover = "0.5.1"
     }
 
     object AndroidX {
         const val activity = "1.4.0"
         const val annotation = "1.3.0"
-        const val appCompat = "1.4.1"
-        const val core = "1.7.0"
+        const val appCompat = "1.4.2"
+        const val core = "1.8.0"
         const val lifecycle = "2.4.1"
         const val multidex = "2.0.1"
 
         object View {
-            const val constraintLayout = "2.1.3"
+            const val constraintLayout = "2.1.4"
             const val coordinatorLayout = "1.2.0"
             const val drawerLayout = "1.1.1"
             const val recyclerView = "1.2.1"
@@ -73,20 +73,20 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.10"
-        const val bom = "29.1.0"
+        const val bom = "30.1.4"
 
         object Crashlytics {
-            const val classpath = "2.8.1"
+            const val classpath = "2.9.0"
         }
     }
 
     const val ask = "0.5.2"
-    const val hilt = "2.41"
+    const val hilt = "2.42"
     const val logger = "0.7.0"
-    const val materialComponent = "1.5.0"
+    const val materialComponent = "1.6.1"
 
-    const val mockk = "1.12.2"
-    const val robolectric = "4.7.3"
+    const val mockk = "1.12.4"
+    const val robolectric = "4.8.1"
 }
 
 object Dependencies {
