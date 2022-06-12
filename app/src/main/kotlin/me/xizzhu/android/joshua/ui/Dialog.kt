@@ -148,7 +148,8 @@ fun Activity.listDialog(
         title: CharSequence,
         settings: Settings,
         items: List<BaseItem>,
-        selected: Int
+        selected: Int,
+        onDismiss: DialogInterface.OnDismissListener? = null
 ): AlertDialog? {
     if (isDestroyed) return null
 
@@ -160,6 +161,7 @@ fun Activity.listDialog(
             .setCancelable(true)
             .setTitle(title)
             .setView(viewBinding.root)
+            .setOnDismissListener(onDismiss)
             .show()
 }
 

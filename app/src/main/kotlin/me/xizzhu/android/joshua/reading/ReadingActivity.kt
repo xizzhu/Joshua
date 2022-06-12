@@ -23,6 +23,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ActionMode
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
@@ -45,6 +46,7 @@ import me.xizzhu.android.joshua.infra.BaseActivity
 import me.xizzhu.android.joshua.infra.onEach
 import me.xizzhu.android.joshua.infra.onFailure
 import me.xizzhu.android.joshua.infra.onSuccess
+import me.xizzhu.android.joshua.preview.VersePreviewItem
 import me.xizzhu.android.joshua.reading.detail.CrossReferenceItem
 import me.xizzhu.android.joshua.reading.detail.StrongNumberItem
 import me.xizzhu.android.joshua.reading.detail.VerseDetailViewLayout
@@ -70,7 +72,7 @@ import kotlin.math.max
 
 @AndroidEntryPoint
 class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>(), SimpleVerseItem.Callback, VerseItem.Callback,
-        VerseTextItem.Callback, CrossReferenceItem.Callback, StrongNumberItem.Callback {
+        VerseTextItem.Callback, CrossReferenceItem.Callback, StrongNumberItem.Callback, VersePreviewItem.Callback {
     companion object {
         private const val KEY_OPEN_NOTE = "me.xizzhu.android.joshua.KEY_OPEN_NOTE"
 
@@ -81,6 +83,8 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     private var downloadCrossReferencesJob: Job? = null
     private var downloadCrossReferencesDialog: ProgressDialog? = null
+
+    private var crossReferencePreviewDialog: AlertDialog? = null
 
     private var downloadStrongNumberJob: Job? = null
     private var downloadStrongNumberDialog: ProgressDialog? = null
@@ -579,12 +583,25 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     override fun onCrossReferenceVerseLongClicked(verseIndex: VerseIndex) {
         readingViewModel.loadVersesForPreview(verseIndex)
-                .onSuccess { preview -> listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) }
+                .onSuccess { preview ->
+                    crossReferencePreviewDialog?.dismiss()
+                    crossReferencePreviewDialog = listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) { crossReferencePreviewDialog = null }
+                }
                 .onFailure { updateCurrentVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
                 .launchIn(lifecycleScope)
     }
 
     override fun openStrongNumber(strongNumber: String) {
         startActivity(Navigator.SCREEN_STRONG_NUMBER, StrongNumberActivity.bundle(strongNumber))
+    }
+
+    override fun openVerse(verseToOpen: VerseIndex) {
+        readingViewModel.selectCurrentVerseIndex(verseToOpen)
+            .onSuccess {
+                crossReferencePreviewDialog?.dismiss()
+                crossReferencePreviewDialog = null
+            }
+            .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
+            .launchIn(lifecycleScope)
     }
 }

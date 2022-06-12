@@ -1,7 +1,7 @@
 CHANGELOG
 ---------
 
-#### Next release
+#### v0.21.0
 - New features:
   - Support cross references (#21)
   - Add orange and red highlight colors
