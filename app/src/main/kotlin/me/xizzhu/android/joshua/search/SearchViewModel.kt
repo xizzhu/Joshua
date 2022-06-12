@@ -20,31 +20,13 @@ import android.app.Application
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Bible
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.Bookmark
-import me.xizzhu.android.joshua.core.Highlight
-import me.xizzhu.android.joshua.core.Note
-import me.xizzhu.android.joshua.core.SearchConfiguration
-import me.xizzhu.android.joshua.core.SearchManager
-import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.BaseViewModel
-import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.infra.viewData
+import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.BaseViewModelV2
 import me.xizzhu.android.joshua.preview.PreviewViewData
-import me.xizzhu.android.joshua.preview.loadPreview
+import me.xizzhu.android.joshua.preview.loadPreviewV2
 import me.xizzhu.android.joshua.preview.nextNonEmpty
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -52,51 +34,79 @@ import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 
-class SearchConfigurationViewData(val searchConfig: SearchConfiguration)
-
-class SearchResultViewData(val items: List<BaseItem>, val query: String, val instanceSearch: Boolean, val toast: String)
-
 @HiltViewModel
 class SearchViewModel @Inject constructor(
         private val bibleReadingManager: BibleReadingManager,
         private val searchManager: SearchManager,
         settingsManager: SettingsManager,
         application: Application
-) : BaseViewModel(settingsManager, application) {
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal class SearchRequest(val query: String, val instanceSearch: Boolean)
+) : BaseViewModelV2<SearchViewModel.ViewAction, SearchViewModel.ViewState>(
+        settingsManager = settingsManager,
+        application = application,
+        initialViewState = ViewState(
+                settings = null,
+                searchConfig = null,
+                loading = false,
+                searchQuery = "",
+                instantSearch = false,
+                searchResults = emptyList(),
+        )
+) {
+    sealed class ViewAction {
+        class ShowToast(val message: String) : ViewAction()
+        object ShowSearchFailedError : ViewAction()
+    }
 
-    private val searchConfig: MutableStateFlow<ViewData<SearchConfigurationViewData>> = MutableStateFlow(ViewData.Loading())
+    data class ViewState(
+            val settings: Settings?,
+            val searchConfig: SearchConfiguration?,
+            val loading: Boolean,
+            val searchQuery: String,
+            val instantSearch: Boolean,
+            val searchResults: List<BaseItem>,
+    )
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal class SearchRequest(val query: String, val instantSearch: Boolean)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal val searchRequest: MutableStateFlow<SearchRequest?> = MutableStateFlow(null)
-    private val searchResult: MutableStateFlow<ViewData<SearchResultViewData>?> = MutableStateFlow(null)
 
     init {
+        settings().onEach { settings -> emitViewState { it.copy(settings = settings) } }.launchIn(viewModelScope)
+
         searchManager.configuration()
-                .onEach {
-                    searchConfig.value = ViewData.Success(SearchConfigurationViewData(it))
+                .onEach { searchConfig ->
+                    emitViewState { currentViewState -> currentViewState.copy(searchConfig = searchConfig) }
                     retrySearch()
                 }
                 .launchIn(viewModelScope)
 
         searchRequest.filterNotNull()
                 .debounce(250L)
-                .distinctUntilChangedBy { it.query }
+                .distinctUntilChangedBy { request ->
+                    if (request.instantSearch || request.query.length >= 2) {
+                        request.query
+                    } else {
+                        "${request.query}:${request.instantSearch}"
+                    }
+                }
                 .mapLatest { it }
-                .onEach { doSearch(it.query, it.instanceSearch) }
+                .onEach { doSearch(it.query, it.instantSearch) }
                 .launchIn(viewModelScope)
     }
-
-    fun searchConfig(): Flow<ViewData<SearchConfigurationViewData>> = searchConfig
 
     fun includeOldTestament(include: Boolean) {
         updateSearchConfig { it.copy(includeOldTestament = include) }
     }
 
-    private inline fun updateSearchConfig(op: (SearchConfiguration) -> SearchConfiguration) {
-        (searchConfig.value as? ViewData.Success)?.data?.searchConfig?.let { current ->
-            op(current).takeIf { it != current }?.let { searchManager.saveConfiguration(it) }
+    private inline fun updateSearchConfig(crossinline op: (SearchConfiguration) -> SearchConfiguration) {
+        emitViewState { currentViewState ->
+            currentViewState.searchConfig?.let { currentSearchConfig ->
+                op(currentSearchConfig).takeIf { it != currentSearchConfig }
+                        ?.also { searchManager.saveConfiguration(it) }
+                        ?.let { currentViewState.copy(searchConfig = it) }
+            }
         }
     }
 
@@ -116,50 +126,53 @@ class SearchViewModel @Inject constructor(
         updateSearchConfig { it.copy(includeNotes = include) }
     }
 
-    fun searchResult(): Flow<ViewData<SearchResultViewData>> = searchResult.filterNotNull()
-
-    fun search(query: String, instanceSearch: Boolean) {
-        searchRequest.value = SearchRequest(query, instanceSearch)
+    fun search(query: String, instantSearch: Boolean) {
+        searchRequest.value = SearchRequest(query, instantSearch)
     }
 
     fun retrySearch() {
-        searchRequest.value?.let { request -> doSearch(request.query, request.instanceSearch) }
+        searchRequest.value?.let { request -> doSearch(request.query, request.instantSearch) }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal fun doSearch(query: String, instanceSearch: Boolean) {
-        if (query.length < 2) {
-            searchResult.value = ViewData.Success(SearchResultViewData(emptyList(), query, instanceSearch, ""))
+    internal fun doSearch(query: String, instantSearch: Boolean) {
+        if (instantSearch && query.length < 2) {
+            emitViewState { currentViewState ->
+                currentViewState.copy(searchQuery = query, instantSearch = instantSearch, searchResults = emptyList())
+            }
             return
         }
 
         viewModelScope.launch {
             try {
-                if (!instanceSearch) {
-                    searchResult.value = ViewData.Loading()
+                if (!instantSearch) {
+                    emitViewState { currentViewState ->
+                        currentViewState.copy(loading = true, searchQuery = query, instantSearch = instantSearch, searchResults = emptyList())
+                    }
                 }
 
                 val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-                searchResult.value = searchManager.search(query).let { searchResult ->
-                    ViewData.Success(SearchResultViewData(
-                            items = buildSearchResultItems(
-                                    query = query,
-                                    verses = searchResult.verses,
-                                    bookmarks = searchResult.bookmarks,
-                                    highlights = searchResult.highlights,
-                                    notes = searchResult.notes,
-                                    bookNames = bibleReadingManager.readBookNames(currentTranslation),
-                                    bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
-                            ),
-                            query = query,
-                            instanceSearch = instanceSearch,
-                            toast = application.getString(R.string.toast_search_result,
-                                    searchResult.verses.size + searchResult.bookmarks.size + searchResult.highlights.size + searchResult.notes.size)
-                    ))
+                val searchResult = searchManager.search(query)
+                val searchResultItems = buildSearchResultItems(
+                        query = query,
+                        verses = searchResult.verses,
+                        bookmarks = searchResult.bookmarks,
+                        highlights = searchResult.highlights,
+                        notes = searchResult.notes,
+                        bookNames = bibleReadingManager.readBookNames(currentTranslation),
+                        bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
+                )
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = false, searchQuery = query, instantSearch = instantSearch, searchResults = searchResultItems)
+                }
+                if (!instantSearch) {
+                    val searchResultCount = searchResult.verses.size + searchResult.bookmarks.size + searchResult.highlights.size + searchResult.notes.size
+                    emitViewAction(ViewAction.ShowToast(application.getString(R.string.toast_search_result, searchResultCount)))
                 }
             } catch (e: Exception) {
-                Log.e(tag, "Error occurred which searching, query=$query instanceSearch=$instanceSearch, searchConfig=$searchConfig", e)
-                searchResult.value = ViewData.Failure(e)
+                Log.e(tag, "Error occurred which searching, query=$query instantSearch=$instantSearch, searchConfig=${viewState().firstOrNull()?.searchConfig}", e)
+
+                emitViewAction(ViewAction.ShowSearchFailedError)
             }
         }
     }
@@ -213,12 +226,12 @@ class SearchViewModel @Inject constructor(
         return items
     }
 
-    fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
+    suspend fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Result<Unit> = kotlin.runCatching {
         bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
     }.onFailure { Log.e(tag, "Failed to save current verse", it) }
 
-    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> =
-            loadPreview(bibleReadingManager, settingsManager, verseIndex, ::toSearchVersePreviewItems)
+    suspend fun loadVersesForPreview(verseIndex: VerseIndex): Result<PreviewViewData> =
+            loadPreviewV2(bibleReadingManager, settingsManager, verseIndex, ::toSearchVersePreviewItems)
                     .onFailure { Log.e(tag, "Failed to load verses for preview", it) }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

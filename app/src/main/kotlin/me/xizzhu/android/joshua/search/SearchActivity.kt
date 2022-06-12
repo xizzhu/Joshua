@@ -33,18 +33,11 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.databinding.ActivitySearchBinding
-import me.xizzhu.android.joshua.infra.BaseActivity
-import me.xizzhu.android.joshua.infra.onEach
-import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.infra.onSuccess
-import me.xizzhu.android.joshua.ui.dialog
-import me.xizzhu.android.joshua.ui.fadeIn
-import me.xizzhu.android.joshua.ui.hideKeyboard
-import me.xizzhu.android.joshua.ui.listDialog
-import me.xizzhu.android.joshua.ui.toast
+import me.xizzhu.android.joshua.infra.*
+import me.xizzhu.android.joshua.ui.*
 
 @AndroidEntryPoint
-class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback, SearchVersePreviewItem.Callback {
+class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback, SearchVersePreviewItem.Callback {
     private val searchViewModel: SearchViewModel by viewModels()
 
     private lateinit var searchRecentSuggestions: SearchRecentSuggestions
@@ -53,63 +46,46 @@ class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), S
         super.onCreate(savedInstanceState)
 
         searchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(this)
-        observeSettings()
-        observeSearchConfiguration()
-        observeSearchResults()
+        searchViewModel.viewAction().onEach(::onViewAction).launchIn(lifecycleScope)
+        searchViewModel.viewState().onEach(::onViewState).launchIn(lifecycleScope)
         initializeListeners()
     }
 
-    private fun observeSettings() {
-        searchViewModel.settings().onEach { viewBinding.searchResult.setSettings(it) }.launchIn(lifecycleScope)
+    private fun onViewAction(viewAction: SearchViewModel.ViewAction) = when (viewAction) {
+        is SearchViewModel.ViewAction.ShowToast -> toast(viewAction.message)
+        SearchViewModel.ViewAction.ShowSearchFailedError -> {
+            with(viewBinding) {
+                loadingSpinner.visibility = View.GONE
+                dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_search,
+                        { _, _ -> searchViewModel.retrySearch() }, { _, _ -> finish() })
+            }
+        }
     }
 
-    private fun observeSearchConfiguration() {
-        searchViewModel.searchConfig()
-                .onSuccess { searchConfiguration ->
-                    viewBinding.toolbar.setSearchConfiguration(
-                            includeOldTestament = searchConfiguration.searchConfig.includeOldTestament,
-                            includeNewTestament = searchConfiguration.searchConfig.includeNewTestament,
-                            includeBookmarks = searchConfiguration.searchConfig.includeBookmarks,
-                            includeHighlights = searchConfiguration.searchConfig.includeHighlights,
-                            includeNotes = searchConfiguration.searchConfig.includeNotes,
-                    )
-                }
-                .launchIn(lifecycleScope)
-    }
-
-    private fun observeSearchResults() {
-        searchViewModel.searchResult()
-                .onEach(
-                        onLoading = {
-                            with(viewBinding) {
-                                loadingSpinner.fadeIn()
-                                searchResult.visibility = View.GONE
-                            }
-                        },
-                        onSuccess = { viewData ->
-                            with(viewBinding) {
-                                searchResult.setItems(viewData.items)
-                                searchResult.scrollToPosition(0)
-
-                                if (viewData.instanceSearch) {
-                                    searchResult.visibility = View.VISIBLE
-                                } else {
-                                    searchResult.fadeIn()
-                                    toast(viewData.toast)
-                                }
-
-                                loadingSpinner.visibility = View.GONE
-                            }
-                        },
-                        onFailure = {
-                            with(viewBinding) {
-                                loadingSpinner.visibility = View.GONE
-                                dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_search,
-                                        { _, _ -> searchViewModel.retrySearch() }, { _, _ -> finish() })
-                            }
-                        }
-                )
-                .launchIn(lifecycleScope)
+    private fun onViewState(viewState: SearchViewModel.ViewState) = with(viewBinding) {
+        viewState.settings?.let { searchResult.setSettings(it) }
+        viewState.searchConfig?.let { searchConfig ->
+            toolbar.setSearchConfiguration(
+                    includeOldTestament = searchConfig.includeOldTestament,
+                    includeNewTestament = searchConfig.includeNewTestament,
+                    includeBookmarks = searchConfig.includeBookmarks,
+                    includeHighlights = searchConfig.includeHighlights,
+                    includeNotes = searchConfig.includeNotes,
+            )
+        }
+        if (viewState.loading) {
+            loadingSpinner.fadeIn()
+            searchResult.visibility = View.GONE
+        } else {
+            loadingSpinner.visibility = View.GONE
+            if (viewState.instantSearch) {
+                searchResult.visibility = View.VISIBLE
+            } else {
+                searchResult.fadeIn()
+            }
+        }
+        searchResult.setItems(viewState.searchResults)
+        searchResult.scrollToPosition(0)
     }
 
     private fun initializeListeners() {
@@ -148,16 +124,18 @@ class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), S
     override fun viewModel(): SearchViewModel = searchViewModel
 
     override fun openVerse(verseToOpen: VerseIndex) {
-        searchViewModel.saveCurrentVerseIndex(verseToOpen)
-                .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
-                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
-                .launchIn(lifecycleScope)
+        lifecycleScope.launch {
+            searchViewModel.saveCurrentVerseIndex(verseToOpen)
+                    .onSuccess { navigator.navigate(this@SearchActivity, Navigator.SCREEN_READING) }
+                    .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
+        }
     }
 
     override fun showPreview(verseIndex: VerseIndex) {
-        searchViewModel.loadVersesForPreview(verseIndex)
+        lifecycleScope.launch {
+            searchViewModel.loadVersesForPreview(verseIndex)
                 .onSuccess { preview -> listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) }
-                .onFailure { openVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
-                .launchIn(lifecycleScope)
+                    .onFailure { openVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
+        }
     }
 }

@@ -31,6 +31,25 @@ import java.util.ArrayList
 
 class PreviewViewData(val settings: Settings, val title: String, val items: List<BaseItem>, val currentPosition: Int)
 
+suspend fun loadPreviewV2(
+        bibleReadingManager: BibleReadingManager,
+        settingsManager: SettingsManager,
+        verseIndex: VerseIndex,
+        converter: List<Verse>.() -> List<BaseItem>
+): Result<PreviewViewData> = runCatching {
+    if (!verseIndex.isValid()) {
+        throw IllegalArgumentException("Verse index [$verseIndex] is invalid")
+    }
+
+    val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+    PreviewViewData(
+            settings = settingsManager.settings().first(),
+            title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",
+            items = converter(bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex)),
+            currentPosition = verseIndex.verseIndex
+    )
+}
+
 fun loadPreview(
         bibleReadingManager: BibleReadingManager,
         settingsManager: SettingsManager,
