@@ -134,6 +134,25 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
+    fun `test search() with error`() = runTest {
+        coEvery { searchManager.search("query") } throws RuntimeException("random exception")
+
+        val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
+
+        searchViewModel.search("query", false)
+        delay(1000L)
+
+        val viewActions = viewActionAsync.await()
+        assertEquals(1, viewActions.size)
+        assertTrue(viewActions[0] is SearchViewModel.ViewAction.ShowSearchFailedError)
+
+        val actual = searchViewModel.viewState().first()
+        assertEquals("query", actual.searchQuery)
+        assertFalse(actual.instantSearch)
+        assertTrue(actual.searchResults.isEmpty())
+    }
+
+    @Test
     fun `test search() with empty query`() = runTest {
         val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
 

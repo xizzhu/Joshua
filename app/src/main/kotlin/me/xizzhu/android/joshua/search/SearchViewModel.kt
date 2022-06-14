@@ -134,8 +134,7 @@ class SearchViewModel @Inject constructor(
         searchRequest.value?.let { request -> doSearch(request.query, request.instantSearch) }
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal fun doSearch(query: String, instantSearch: Boolean) {
+    private fun doSearch(query: String, instantSearch: Boolean) {
         if (instantSearch && query.length < 2) {
             emitViewState { currentViewState ->
                 currentViewState.copy(searchQuery = query, instantSearch = instantSearch, searchResults = emptyList())
