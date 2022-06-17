@@ -36,13 +36,13 @@ suspend fun loadPreviewV2(
         settingsManager: SettingsManager,
         verseIndex: VerseIndex,
         converter: List<Verse>.() -> List<BaseItem>
-): Result<PreviewViewData> = runCatching {
+): PreviewViewData {
     if (!verseIndex.isValid()) {
         throw IllegalArgumentException("Verse index [$verseIndex] is invalid")
     }
 
     val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-    PreviewViewData(
+    return PreviewViewData(
             settings = settingsManager.settings().first(),
             title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",
             items = converter(bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex)),

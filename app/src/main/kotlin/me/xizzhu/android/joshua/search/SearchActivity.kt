@@ -52,13 +52,23 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel>(),
     }
 
     private fun onViewAction(viewAction: SearchViewModel.ViewAction) = when (viewAction) {
+        SearchViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING)
+        is SearchViewModel.ViewAction.ShowOpenPreviewFailedError -> {
+            dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_verses,
+                    { _, _ -> showPreview(viewAction.verseIndex) })
+        }
+        is SearchViewModel.ViewAction.ShowOpenVerseFailedError -> {
+            dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse,
+                    { _, _ -> openVerse(viewAction.verseToOpen) })
+        }
+        is SearchViewModel.ViewAction.ShowPreview -> {
+            listDialog(viewAction.previewViewData.title, viewAction.previewViewData.settings, viewAction.previewViewData.items, viewAction.previewViewData.currentPosition)
+            Unit
+        }
         is SearchViewModel.ViewAction.ShowToast -> toast(viewAction.message)
         SearchViewModel.ViewAction.ShowSearchFailedError -> {
-            with(viewBinding) {
-                loadingSpinner.visibility = View.GONE
-                dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_search,
-                        { _, _ -> searchViewModel.retrySearch() }, { _, _ -> finish() })
-            }
+            dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_search,
+                    { _, _ -> searchViewModel.retrySearch() }, { _, _ -> finish() })
         }
     }
 
@@ -124,18 +134,10 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel>(),
     override fun viewModel(): SearchViewModel = searchViewModel
 
     override fun openVerse(verseToOpen: VerseIndex) {
-        lifecycleScope.launch {
-            searchViewModel.saveCurrentVerseIndex(verseToOpen)
-                    .onSuccess { navigator.navigate(this@SearchActivity, Navigator.SCREEN_READING) }
-                    .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
-        }
+        searchViewModel.openVerse(verseToOpen)
     }
 
     override fun showPreview(verseIndex: VerseIndex) {
-        lifecycleScope.launch {
-            searchViewModel.loadVersesForPreview(verseIndex)
-                .onSuccess { preview -> listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) }
-                    .onFailure { openVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
-        }
+        searchViewModel.showPreview(verseIndex)
     }
 }

@@ -53,6 +53,10 @@ class SearchViewModel @Inject constructor(
         )
 ) {
     sealed class ViewAction {
+        object OpenReadingScreen : ViewAction()
+        class ShowOpenPreviewFailedError(val verseIndex: VerseIndex) : ViewAction()
+        class ShowOpenVerseFailedError(val verseToOpen: VerseIndex) : ViewAction()
+        class ShowPreview(val previewViewData: PreviewViewData) : ViewAction()
         class ShowToast(val message: String) : ViewAction()
         object ShowSearchFailedError : ViewAction()
     }
@@ -170,8 +174,10 @@ class SearchViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Error occurred which searching, query=$query instantSearch=$instantSearch, searchConfig=${viewState().firstOrNull()?.searchConfig}", e)
-
                 emitViewAction(ViewAction.ShowSearchFailedError)
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = false, searchResults = emptyList())
+                }
             }
         }
     }
@@ -225,13 +231,28 @@ class SearchViewModel @Inject constructor(
         return items
     }
 
-    suspend fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Result<Unit> = kotlin.runCatching {
-        bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
-    }.onFailure { Log.e(tag, "Failed to save current verse", it) }
+    fun openVerse(verseToOpen: VerseIndex) {
+        viewModelScope.launch {
+            try {
+                bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save current verse", e)
+            }
+        }
+    }
 
-    suspend fun loadVersesForPreview(verseIndex: VerseIndex): Result<PreviewViewData> =
-            loadPreviewV2(bibleReadingManager, settingsManager, verseIndex, ::toSearchVersePreviewItems)
-                    .onFailure { Log.e(tag, "Failed to load verses for preview", it) }
+    fun showPreview(verseIndex: VerseIndex) {
+        viewModelScope.launch {
+            try {
+                emitViewAction(ViewAction.ShowPreview(
+                        previewViewData = loadPreviewV2(bibleReadingManager, settingsManager, verseIndex, ::toSearchVersePreviewItems)
+                ))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to load verses for preview", e)
+                emitViewAction(ViewAction.ShowOpenPreviewFailedError(verseIndex))
+            }
+        }
+    }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun toSearchVersePreviewItems(verses: List<Verse>): List<SearchVersePreviewItem> {

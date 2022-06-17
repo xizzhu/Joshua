@@ -21,6 +21,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -483,9 +484,13 @@ class SearchViewModelTest : BaseUnitTest() {
         )
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun `test loadVersesForPreview() with invalid verse index`() = runTest {
-        searchViewModel.loadVersesForPreview(VerseIndex.INVALID).getOrThrow()
+        val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+
+        searchViewModel.showPreview(VerseIndex.INVALID)
+
+        assertTrue(viewActionAsync.await() is SearchViewModel.ViewAction.ShowOpenPreviewFailedError)
     }
 
     @Test
@@ -497,11 +502,16 @@ class SearchViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
         every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
 
-        val actual = searchViewModel.loadVersesForPreview(VerseIndex(0, 0, 1)).getOrThrow()
-        assertEquals(Settings.DEFAULT, actual.settings)
-        assertEquals("Gen., 1", actual.title)
-        assertEquals(3, actual.items.size)
-        assertEquals(1, actual.currentPosition)
+        val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+
+        searchViewModel.showPreview(VerseIndex(0, 0, 1))
+
+        val actual = viewActionAsync.await()
+        assertTrue(actual is SearchViewModel.ViewAction.ShowPreview)
+        assertEquals(Settings.DEFAULT, actual.previewViewData.settings)
+        assertEquals("Gen., 1", actual.previewViewData.title)
+        assertEquals(3, actual.previewViewData.items.size)
+        assertEquals(1, actual.previewViewData.currentPosition)
     }
 
 
