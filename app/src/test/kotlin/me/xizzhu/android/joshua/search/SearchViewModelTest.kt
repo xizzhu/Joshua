@@ -528,6 +528,7 @@ class SearchViewModelTest : BaseUnitTest() {
         every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
 
         val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+        delay(100)
 
         searchViewModel.showPreview(VerseIndex(0, 0, 1))
 

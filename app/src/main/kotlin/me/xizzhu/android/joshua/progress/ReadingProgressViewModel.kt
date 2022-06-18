@@ -79,7 +79,7 @@ class ReadingProgressViewModel @Inject constructor(
                 Log.e(tag, "Error occurred while loading reading progress", e)
                 emitViewAction(ViewAction.ShowLoadReadingProgressFailedError)
                 emitViewState { currentViewState ->
-                    currentViewState.copy(loading = true, readingProgressItems = emptyList())
+                    currentViewState.copy(loading = false, readingProgressItems = emptyList())
                 }
             }
         }

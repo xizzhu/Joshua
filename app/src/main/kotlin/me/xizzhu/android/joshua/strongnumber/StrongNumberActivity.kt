@@ -27,17 +27,14 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.databinding.ActivityStrongNumberBinding
-import me.xizzhu.android.joshua.infra.BaseActivity
-import me.xizzhu.android.joshua.infra.onEach
-import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.infra.onSuccess
+import me.xizzhu.android.joshua.infra.*
 import me.xizzhu.android.joshua.preview.VersePreviewItem
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.listDialog
 
 @AndroidEntryPoint
-class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding, StrongNumberViewModel>(), StrongNumberItem.Callback, VersePreviewItem.Callback {
+class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongNumberViewModel>(), StrongNumberItem.Callback, VersePreviewItem.Callback {
     companion object {
         private const val KEY_STRONG_NUMBER = "me.xizzhu.android.joshua.KEY_STRONG_NUMBER"
 
@@ -49,37 +46,42 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding, StrongNum
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        observeSettings()
-        observeStrongNumber()
+        strongNumberViewModel.viewAction().onEach(::onViewAction).launchIn(lifecycleScope)
+        strongNumberViewModel.viewState().onEach(::onViewState).launchIn(lifecycleScope)
         loadStrongNumber()
     }
 
-    private fun observeSettings() {
-        strongNumberViewModel.settings().onEach { viewBinding.strongNumberList.setSettings(it) }.launchIn(lifecycleScope)
+    private fun onViewAction(viewAction: StrongNumberViewModel.ViewAction) = when (viewAction) {
+        StrongNumberViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING)
+        StrongNumberViewModel.ViewAction.ShowLoadStrongNumberFailedError -> {
+            dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_strong_numbers,
+                    { _, _ -> loadStrongNumber() }, { _, _ -> finish() })
+        }
+        is StrongNumberViewModel.ViewAction.ShowOpenPreviewFailedError -> {
+            dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_verses,
+                    { _, _ -> showPreview(viewAction.verseIndex) })
+        }
+        is StrongNumberViewModel.ViewAction.ShowOpenVerseFailedError -> {
+            dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(viewAction.verseToOpen) })
+        }
+        is StrongNumberViewModel.ViewAction.ShowPreview -> {
+            listDialog(viewAction.previewViewData.title, viewAction.previewViewData.settings, viewAction.previewViewData.items, viewAction.previewViewData.currentPosition)
+            Unit
+        }
     }
 
-    private fun observeStrongNumber() {
-        strongNumberViewModel.strongNumber()
-                .onEach(
-                        onLoading = {
-                            with(viewBinding) {
-                                loadingSpinner.fadeIn()
-                                strongNumberList.visibility = View.GONE
-                            }
-                        },
-                        onSuccess = {
-                            with(viewBinding) {
-                                strongNumberList.setItems(it.items)
-                                strongNumberList.fadeIn()
-                                loadingSpinner.visibility = View.GONE
-                            }
-                        },
-                        onFailure = {
-                            viewBinding.loadingSpinner.visibility = View.GONE
-                            dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_strong_numbers, { _, _ -> loadStrongNumber() }, { _, _ -> finish() })
-                        }
-                )
-                .launchIn(lifecycleScope)
+    private fun onViewState(viewState: StrongNumberViewModel.ViewState) = with(viewBinding) {
+        viewState.settings?.let { strongNumberList.setSettings(it) }
+
+        if (viewState.loading) {
+            loadingSpinner.fadeIn()
+            strongNumberList.visibility = View.GONE
+        } else {
+            loadingSpinner.visibility = View.GONE
+            strongNumberList.fadeIn()
+        }
+
+        strongNumberList.setItems(viewState.strongNumberItems)
     }
 
     private fun loadStrongNumber() {
@@ -91,16 +93,10 @@ class StrongNumberActivity : BaseActivity<ActivityStrongNumberBinding, StrongNum
     override fun viewModel(): StrongNumberViewModel = strongNumberViewModel
 
     override fun openVerse(verseToOpen: VerseIndex) {
-        strongNumberViewModel.saveCurrentVerseIndex(verseToOpen)
-                .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
-                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
-                .launchIn(lifecycleScope)
+        strongNumberViewModel.openVerse(verseToOpen)
     }
 
     override fun showPreview(verseIndex: VerseIndex) {
-        strongNumberViewModel.loadVersesForPreview(verseIndex)
-                .onSuccess { preview -> listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) }
-                .onFailure { openVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
-                .launchIn(lifecycleScope)
+        strongNumberViewModel.showPreview(verseIndex)
     }
 }

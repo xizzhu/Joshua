@@ -64,6 +64,11 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         readingProgressViewModel.loadReadingProgress()
 
         assertTrue(viewActionAsync.await() is ReadingProgressViewModel.ViewAction.ShowLoadReadingProgressFailedError)
+        with(readingProgressViewModel.viewState().first()) {
+            assertEquals(Settings.DEFAULT, settings)
+            assertFalse(loading)
+            assertTrue(readingProgressItems.isEmpty())
+        }
     }
 
     @Test
