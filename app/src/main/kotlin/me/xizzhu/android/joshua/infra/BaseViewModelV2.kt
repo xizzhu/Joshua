@@ -22,6 +22,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
@@ -45,7 +46,7 @@ abstract class BaseViewModelV2<ViewAction, ViewState>(
     fun viewState(): Flow<ViewState> = viewState
 
     fun emitViewState(block: (currentViewState: ViewState) -> ViewState?) {
-        block(viewState.value)?.let { viewState.value = it }
+        viewState.update { block(it) ?: it }
     }
 
     fun settings(): Flow<Settings> = settingsManager.settings()
