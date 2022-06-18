@@ -22,6 +22,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.*
@@ -81,19 +82,31 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
                 )
         )
 
-        val viewStateAsync = async(Dispatchers.Default) { readingProgressViewModel.viewState().drop(1).first() }
+        val viewStateAsync = async(Dispatchers.Default) {
+            readingProgressViewModel.viewState()
+                    .drop(1) // drop the initial state
+                    .take(2)
+                    .toList()
+        }
+        delay(100) // makes sure the async is up and running
+
         readingProgressViewModel.loadReadingProgress()
 
-        val actual = viewStateAsync.await()
-        assertEquals(Settings.DEFAULT, actual.settings)
-        assertFalse(actual.loading)
-        assertEquals(67, actual.readingProgressItems.size)
-        assertEquals(2, (actual.readingProgressItems[0] as ReadingProgressSummaryItem).continuousReadingDays)
-        assertEquals(5, (actual.readingProgressItems[0] as ReadingProgressSummaryItem).chaptersRead)
-        assertEquals(2, (actual.readingProgressItems[0] as ReadingProgressSummaryItem).finishedBooks)
-        assertEquals(1, (actual.readingProgressItems[0] as ReadingProgressSummaryItem).finishedOldTestament)
-        assertEquals(1, (actual.readingProgressItems[0] as ReadingProgressSummaryItem).finishedNewTestament)
-        actual.readingProgressItems.subList(1, actual.readingProgressItems.size).forEachIndexed { book, item ->
+        val viewStates = viewStateAsync.await()
+
+        assertTrue(viewStates[0].loading)
+        assertEquals(Settings.DEFAULT, viewStates[0].settings)
+        assertTrue(viewStates[0].readingProgressItems.isEmpty())
+
+        assertEquals(Settings.DEFAULT, viewStates[1].settings)
+        assertFalse(viewStates[1].loading)
+        assertEquals(67, viewStates[1].readingProgressItems.size)
+        assertEquals(2, (viewStates[1].readingProgressItems[0] as ReadingProgressSummaryItem).continuousReadingDays)
+        assertEquals(5, (viewStates[1].readingProgressItems[0] as ReadingProgressSummaryItem).chaptersRead)
+        assertEquals(2, (viewStates[1].readingProgressItems[0] as ReadingProgressSummaryItem).finishedBooks)
+        assertEquals(1, (viewStates[1].readingProgressItems[0] as ReadingProgressSummaryItem).finishedOldTestament)
+        assertEquals(1, (viewStates[1].readingProgressItems[0] as ReadingProgressSummaryItem).finishedNewTestament)
+        viewStates[1].readingProgressItems.subList(1, viewStates[1].readingProgressItems.size).forEachIndexed { book, item ->
             assertTrue(item is ReadingProgressDetailItem)
             when (book) {
                 0 -> {
