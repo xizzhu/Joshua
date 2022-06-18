@@ -235,8 +235,10 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
+                emitViewAction(ViewAction.OpenReadingScreen)
             } catch (e: Exception) {
                 Log.e(tag, "Failed to save current verse", e)
+                emitViewAction(ViewAction.ShowOpenVerseFailedError(verseToOpen))
             }
         }
     }

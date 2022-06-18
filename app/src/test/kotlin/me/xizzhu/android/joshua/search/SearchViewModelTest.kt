@@ -485,7 +485,32 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test loadVersesForPreview() with invalid verse index`() = runTest {
+    fun `test openVerse() with exception`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } throws RuntimeException("random exception")
+
+        val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+
+        searchViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        with(viewActionAsync.await()) {
+            assertTrue(this is SearchViewModel.ViewAction.ShowOpenVerseFailedError)
+            assertEquals(VerseIndex(0, 0, 0), verseToOpen)
+        }
+    }
+
+    @Test
+    fun `test openVerse()`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } returns Unit
+
+        val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+
+        searchViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        assertTrue(viewActionAsync.await() is SearchViewModel.ViewAction.OpenReadingScreen)
+    }
+
+    @Test
+    fun `test showPreview() with invalid verse index`() = runTest {
         val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
 
         searchViewModel.showPreview(VerseIndex.INVALID)
@@ -494,7 +519,7 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test loadVersesForPreview()`() = runTest {
+    fun `test showPreview()`() = runTest {
         coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
         coEvery {
             bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0)

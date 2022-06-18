@@ -132,4 +132,29 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
             }
         }
     }
+
+    @Test
+    fun `test openVerse() with exception`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } throws RuntimeException("random exception")
+
+        val viewActionAsync = async(Dispatchers.Default) { readingProgressViewModel.viewAction().first() }
+
+        readingProgressViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        with(viewActionAsync.await()) {
+            assertTrue(this is ReadingProgressViewModel.ViewAction.ShowOpenVerseFailedError)
+            assertEquals(VerseIndex(0, 0, 0), verseToOpen)
+        }
+    }
+
+    @Test
+    fun `test openVerse()`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } returns Unit
+
+        val viewActionAsync = async(Dispatchers.Default) { readingProgressViewModel.viewAction().first() }
+
+        readingProgressViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        assertTrue(viewActionAsync.await() is ReadingProgressViewModel.ViewAction.OpenReadingScreen)
+    }
 }
