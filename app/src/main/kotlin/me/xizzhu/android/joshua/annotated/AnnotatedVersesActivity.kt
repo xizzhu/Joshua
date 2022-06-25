@@ -31,10 +31,7 @@ import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.databinding.ActivityAnnotatedBinding
-import me.xizzhu.android.joshua.infra.BaseActivity
-import me.xizzhu.android.joshua.infra.onEach
-import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.infra.onSuccess
+import me.xizzhu.android.joshua.infra.*
 import me.xizzhu.android.joshua.preview.VersePreviewItem
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
@@ -43,52 +40,54 @@ import javax.inject.Inject
 
 abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVersesViewModel<V>>(
         @StringRes private val toolbarText: Int
-) : BaseActivity<ActivityAnnotatedBinding, VM>(), BookmarkItem.Callback, HighlightItem.Callback, NoteItem.Callback, VersePreviewItem.Callback {
+) : BaseActivityV2<ActivityAnnotatedBinding, VM>(), BookmarkItem.Callback, HighlightItem.Callback, NoteItem.Callback, VersePreviewItem.Callback {
     @Inject
     lateinit var annotatedVersesViewModel: VM
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        observeSettings()
-        observeSortOrder()
-        observeAnnotatedVerses()
+        annotatedVersesViewModel.viewAction().onEach(::onViewAction).launchIn(lifecycleScope)
+        annotatedVersesViewModel.viewState().onEach(::onViewState).launchIn(lifecycleScope)
         initializeToolbar()
     }
 
-    private fun observeSettings() {
-        annotatedVersesViewModel.settings().onEach { viewBinding.verseList.setSettings(it) }.launchIn(lifecycleScope)
+    private fun onViewAction(viewAction: AnnotatedVersesViewModel.ViewAction) = when (viewAction) {
+        AnnotatedVersesViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING, extrasForOpeningVerse())
+        AnnotatedVersesViewModel.ViewAction.ShowLoadAnnotatedVersesFailedError -> {
+            dialog(
+                    false, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_annotated_verses,
+                    { _, _ -> annotatedVersesViewModel.loadAnnotatedVerses() }, { _, _ -> finish() }
+            )
+        }
+        is AnnotatedVersesViewModel.ViewAction.ShowOpenPreviewFailedError -> {
+            dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_verses, { _, _ -> showPreview(viewAction.verseIndex) })
+        }
+        is AnnotatedVersesViewModel.ViewAction.ShowOpenVerseFailedError -> {
+            dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(viewAction.verseToOpen) })
+        }
+        is AnnotatedVersesViewModel.ViewAction.ShowPreview -> {
+            listDialog(viewAction.previewViewData.title, viewAction.previewViewData.settings, viewAction.previewViewData.items, viewAction.previewViewData.currentPosition)
+            Unit
+        }
+        is AnnotatedVersesViewModel.ViewAction.ShowSaveSortOrderFailedError -> {
+            dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_save_sort_order, { _, _ -> saveSortOrder(viewAction.sortOrderToSave) })
+        }
     }
 
-    private fun observeSortOrder() {
-        annotatedVersesViewModel.sortOrder().onEach { viewBinding.toolbar.setSortOrder(it) }.launchIn(lifecycleScope)
-    }
+    private fun onViewState(viewState: AnnotatedVersesViewModel.ViewState) = with(viewBinding) {
+        viewState.settings?.let { verseList.setSettings(it) }
 
-    private fun observeAnnotatedVerses() {
-        annotatedVersesViewModel.annotatedVerses()
-                .onEach(
-                        onLoading = {
-                            with(viewBinding) {
-                                loadingSpinner.fadeIn()
-                                verseList.visibility = View.GONE
-                            }
-                        },
-                        onSuccess = {
-                            with(viewBinding) {
-                                verseList.setItems(it.items)
-                                verseList.fadeIn()
-                                loadingSpinner.visibility = View.GONE
-                            }
-                        },
-                        onFailure = {
-                            viewBinding.loadingSpinner.visibility = View.GONE
-                            dialog(
-                                    false, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_annotated_verses,
-                                    { _, _ -> annotatedVersesViewModel.loadAnnotatedVerses() }, { _, _ -> finish() }
-                            )
-                        }
-                )
-                .launchIn(lifecycleScope)
+        if (viewState.loading) {
+            loadingSpinner.fadeIn()
+            verseList.visibility = View.GONE
+        } else {
+            loadingSpinner.visibility = View.GONE
+            verseList.fadeIn()
+        }
+
+        verseList.setItems(viewState.annotatedVerseItems)
+        toolbar.setSortOrder(viewState.sortOrder)
     }
 
     private fun initializeToolbar() {
@@ -100,8 +99,6 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
 
     private fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         annotatedVersesViewModel.saveSortOrder(sortOrder)
-                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_save_sort_order, { _, _ -> saveSortOrder(sortOrder) }) }
-                .launchIn(lifecycleScope)
     }
 
     override fun inflateViewBinding(): ActivityAnnotatedBinding = ActivityAnnotatedBinding.inflate(layoutInflater)
@@ -109,17 +106,11 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
     override fun viewModel(): VM = annotatedVersesViewModel
 
     override fun openVerse(verseToOpen: VerseIndex) {
-        annotatedVersesViewModel.saveCurrentVerseIndex(verseToOpen)
-                .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING, extrasForOpeningVerse()) }
-                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
-                .launchIn(lifecycleScope)
+        annotatedVersesViewModel.openVerse(verseToOpen)
     }
 
     override fun showPreview(verseIndex: VerseIndex) {
-        annotatedVersesViewModel.loadVersesForPreview(verseIndex)
-                .onSuccess { preview -> listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) }
-                .onFailure { openVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
-                .launchIn(lifecycleScope)
+        annotatedVersesViewModel.showPreview(verseIndex)
     }
 
     protected open fun extrasForOpeningVerse(): Bundle? = null

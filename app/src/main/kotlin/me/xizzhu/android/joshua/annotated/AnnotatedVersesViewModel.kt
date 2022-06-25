@@ -20,27 +20,13 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.core.Verse
-import me.xizzhu.android.joshua.core.VerseAnnotation
-import me.xizzhu.android.joshua.core.VerseAnnotationManager
-import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.BaseViewModel
-import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.infra.viewData
+import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.infra.BaseViewModelV2
 import me.xizzhu.android.joshua.preview.PreviewViewData
-import me.xizzhu.android.joshua.preview.loadPreview
+import me.xizzhu.android.joshua.preview.loadPreviewV2
 import me.xizzhu.android.joshua.preview.toVersePreviewItems
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
@@ -51,66 +37,110 @@ import me.xizzhu.android.logger.Log
 import java.util.Calendar
 import kotlin.collections.ArrayList
 
-class AnnotatedVersesViewData(val items: List<BaseItem>)
-
 abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
         private val bibleReadingManager: BibleReadingManager,
         private val verseAnnotationManager: VerseAnnotationManager<V>,
         @StringRes private val noItemText: Int,
         settingsManager: SettingsManager,
         application: Application
-) : BaseViewModel(settingsManager, application) {
-    private val annotatedVerses: MutableStateFlow<ViewData<AnnotatedVersesViewData>?> = MutableStateFlow(null)
+) : BaseViewModelV2<AnnotatedVersesViewModel.ViewAction, AnnotatedVersesViewModel.ViewState>(
+        settingsManager = settingsManager,
+        application = application,
+        initialViewState = ViewState(
+                settings = null,
+                loading = false,
+                sortOrder = Constants.DEFAULT_SORT_ORDER,
+                annotatedVerseItems = emptyList(),
+        ),
+) {
+    sealed class ViewAction {
+        object OpenReadingScreen : ViewAction()
+        object ShowLoadAnnotatedVersesFailedError : ViewAction()
+        class ShowOpenPreviewFailedError(val verseIndex: VerseIndex) : ViewAction()
+        class ShowOpenVerseFailedError(val verseToOpen: VerseIndex) : ViewAction()
+        class ShowPreview(val previewViewData: PreviewViewData) : ViewAction()
+        class ShowSaveSortOrderFailedError(@Constants.SortOrder val sortOrderToSave: Int) : ViewAction()
+    }
+
+    data class ViewState(
+            val settings: Settings?,
+            val loading: Boolean,
+            @Constants.SortOrder val sortOrder: Int,
+            val annotatedVerseItems: List<BaseItem>,
+    )
 
     init {
+        settings().onEach { settings -> emitViewState { it.copy(settings = settings) } }.launchIn(viewModelScope)
+
         combine(
                 bibleReadingManager.currentTranslation().filter { it.isNotEmpty() },
                 verseAnnotationManager.sortOrder()
         ) { currentTranslation, sortOrder ->
             try {
-                annotatedVerses.value = ViewData.Loading()
-                annotatedVerses.value = ViewData.Success(loadAnnotatedVerses(currentTranslation, sortOrder))
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = true, sortOrder = sortOrder, annotatedVerseItems = emptyList())
+                }
+
+                val items = loadAnnotatedVerses(currentTranslation, sortOrder)
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = false, annotatedVerseItems = items)
+                }
             } catch (e: Exception) {
                 Log.e(tag, "Error occurred while loading annotated verses", e)
-                annotatedVerses.value = ViewData.Failure(e)
+                emitViewAction(ViewAction.ShowLoadAnnotatedVersesFailedError)
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = false, annotatedVerseItems = emptyList())
+                }
             }
-            loadAnnotatedVerses(currentTranslation, sortOrder)
         }.launchIn(viewModelScope)
     }
 
-    fun sortOrder(): Flow<Int> = verseAnnotationManager.sortOrder()
-
-    fun saveSortOrder(@Constants.SortOrder sortOrder: Int): Flow<ViewData<Unit>> = viewData {
-        verseAnnotationManager.saveSortOrder(sortOrder)
-    }.onFailure { Log.e(tag, "Failed to save sort order", it) }
-
-    fun annotatedVerses(): Flow<ViewData<AnnotatedVersesViewData>> = annotatedVerses.filterNotNull()
-
-    fun loadAnnotatedVerses() {
+    fun saveSortOrder(@Constants.SortOrder sortOrder: Int) {
         viewModelScope.launch {
             try {
-                annotatedVerses.value = ViewData.Loading()
-                annotatedVerses.value = ViewData.Success(loadAnnotatedVerses(
-                        currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty(),
-                        sortOrder = verseAnnotationManager.sortOrder().first()
-                ))
+                verseAnnotationManager.saveSortOrder(sortOrder)
+                emitViewState { currentViewState ->
+                    currentViewState.copy(sortOrder = sortOrder)
+                }
             } catch (e: Exception) {
-                Log.e(tag, "Error occurred while loading annotated verses", e)
-                annotatedVerses.value = ViewData.Failure(e)
+                Log.e(tag, "Failed to save sort order", e)
+                emitViewAction(ViewAction.ShowSaveSortOrderFailedError(sortOrder))
             }
         }
     }
 
-    private suspend fun loadAnnotatedVerses(currentTranslation: String, @Constants.SortOrder sortOrder: Int): AnnotatedVersesViewData {
+    fun loadAnnotatedVerses() {
+        viewModelScope.launch {
+            try {
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = true, annotatedVerseItems = emptyList())
+                }
+
+                val items = loadAnnotatedVerses(
+                        currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty(),
+                        sortOrder = verseAnnotationManager.sortOrder().first()
+                )
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = false, annotatedVerseItems = items)
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Error occurred while loading annotated verses", e)
+                emitViewAction(ViewAction.ShowLoadAnnotatedVersesFailedError)
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = false, annotatedVerseItems = emptyList())
+                }
+            }
+        }
+    }
+
+    private suspend fun loadAnnotatedVerses(currentTranslation: String, @Constants.SortOrder sortOrder: Int): List<BaseItem> {
         val annotations = verseAnnotationManager.read(sortOrder)
         val verses = bibleReadingManager.readVerses(currentTranslation, annotations.map { it.verseIndex })
-        return AnnotatedVersesViewData(
-                items = buildAnnotatedVersesItems(
-                        sortOrder = sortOrder,
-                        verses = annotations.mapNotNull { annotation -> verses[annotation.verseIndex]?.let { Pair(annotation, it) } },
-                        bookNames = bibleReadingManager.readBookNames(currentTranslation),
-                        bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
-                )
+        return buildAnnotatedVersesItems(
+                sortOrder = sortOrder,
+                verses = annotations.mapNotNull { annotation -> verses[annotation.verseIndex]?.let { Pair(annotation, it) } },
+                bookNames = bibleReadingManager.readBookNames(currentTranslation),
+                bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
         )
     }
 
@@ -192,11 +222,28 @@ abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
         return items
     }
 
-    fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
-        bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
-    }.onFailure { Log.e(tag, "Failed to save current verse", it) }
+    fun openVerse(verseToOpen: VerseIndex) {
+        viewModelScope.launch {
+            try {
+                bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
+                emitViewAction(ViewAction.OpenReadingScreen)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save current verse", e)
+                emitViewAction(ViewAction.ShowOpenVerseFailedError(verseToOpen))
+            }
+        }
+    }
 
-    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> =
-            loadPreview(bibleReadingManager, settingsManager, verseIndex, ::toVersePreviewItems)
-                    .onFailure { Log.e(tag, "Failed to load verses for preview", it) }
+    fun showPreview(verseIndex: VerseIndex) {
+        viewModelScope.launch {
+            try {
+                emitViewAction(ViewAction.ShowPreview(
+                        previewViewData = loadPreviewV2(bibleReadingManager, settingsManager, verseIndex, ::toVersePreviewItems)
+                ))
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to load verses for preview", e)
+                emitViewAction(ViewAction.ShowOpenPreviewFailedError(verseIndex))
+            }
+        }
+    }
 }

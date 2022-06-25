@@ -60,6 +60,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.saveCurrentTranslation(MockContents.kjvShortName) } throws RuntimeException("random exception")
 
         val viewActionAsync = async(Dispatchers.Default) { translationsViewModel.viewAction().first() }
+        delay(100)
 
         translationsViewModel.selectTranslation(MockContents.kjvDownloadedTranslationInfo)
 
@@ -74,6 +75,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.saveCurrentTranslation(MockContents.kjvShortName) } returns Unit
 
         val viewActionAsync = async(Dispatchers.Default) { translationsViewModel.viewAction().first() }
+        delay(100)
 
         translationsViewModel.selectTranslation(MockContents.kjvDownloadedTranslationInfo)
 
@@ -115,6 +117,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
         every { translationManager.downloadedTranslations() } returns flowOf(emptyList())
 
         val viewActionAsync = async(Dispatchers.Default) { translationsViewModel.viewAction().first() }
+        delay(100)
 
         translationsViewModel.refreshTranslations(true)
 
@@ -204,6 +207,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
         every { translationManager.downloadTranslation(MockContents.kjvTranslationInfo) } returns flow { throw RuntimeException("random exception") }
 
         val viewActionAsync = async(Dispatchers.Default) { translationsViewModel.viewAction().first() }
+        delay(100)
 
         translationsViewModel.downloadTranslation(MockContents.kjvTranslationInfo)
 
@@ -241,6 +245,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
                     .take(6)
                     .toList()
         }
+        delay(100)
 
         translationsViewModel.downloadTranslation(MockContents.kjvTranslationInfo)
 
@@ -343,6 +348,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
         coEvery { translationManager.removeTranslation(MockContents.kjvTranslationInfo) } throws RuntimeException("Random exception")
 
         val viewActionAsync = async(Dispatchers.Default) { translationsViewModel.viewAction().first() }
+        delay(100)
 
         translationsViewModel.removeTranslation(MockContents.kjvDownloadedTranslationInfo)
 
@@ -366,6 +372,7 @@ class TranslationsViewModelTest : BaseUnitTest() {
         every { translationsViewModel.refreshTranslations(false) } returns Unit
 
         val viewActionAsync = async(Dispatchers.Default) { translationsViewModel.viewAction().first() }
+        delay(100)
 
         translationsViewModel.removeTranslation(MockContents.kjvTranslationInfo)
 

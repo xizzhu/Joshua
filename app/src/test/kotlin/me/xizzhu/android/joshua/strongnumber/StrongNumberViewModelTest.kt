@@ -135,6 +135,7 @@ class StrongNumberViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } throws RuntimeException("random exception")
 
         val viewActionAsync = async(Dispatchers.Default) { strongNumberViewModel.viewAction().first() }
+        delay(100)
 
         strongNumberViewModel.openVerse(VerseIndex(0, 0, 0))
 
@@ -149,6 +150,7 @@ class StrongNumberViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } returns Unit
 
         val viewActionAsync = async(Dispatchers.Default) { strongNumberViewModel.viewAction().first() }
+        delay(100)
 
         strongNumberViewModel.openVerse(VerseIndex(0, 0, 0))
 
@@ -158,6 +160,7 @@ class StrongNumberViewModelTest : BaseUnitTest() {
     @Test
     fun `test showPreview() with invalid verse index`() = runTest {
         val viewActionAsync = async(Dispatchers.Default) { strongNumberViewModel.viewAction().first() }
+        delay(100)
 
         strongNumberViewModel.showPreview(VerseIndex.INVALID)
 

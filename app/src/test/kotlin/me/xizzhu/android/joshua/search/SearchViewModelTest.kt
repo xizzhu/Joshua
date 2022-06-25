@@ -489,6 +489,7 @@ class SearchViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } throws RuntimeException("random exception")
 
         val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+        delay(100)
 
         searchViewModel.openVerse(VerseIndex(0, 0, 0))
 
@@ -503,6 +504,7 @@ class SearchViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } returns Unit
 
         val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+        delay(100)
 
         searchViewModel.openVerse(VerseIndex(0, 0, 0))
 
@@ -512,6 +514,7 @@ class SearchViewModelTest : BaseUnitTest() {
     @Test
     fun `test showPreview() with invalid verse index`() = runTest {
         val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+        delay(100)
 
         searchViewModel.showPreview(VerseIndex.INVALID)
 

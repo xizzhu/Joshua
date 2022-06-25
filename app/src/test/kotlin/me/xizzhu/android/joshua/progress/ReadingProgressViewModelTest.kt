@@ -60,6 +60,7 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         coEvery { readingProgressManager.read() } throws RuntimeException("random exception")
 
         val viewActionAsync = async(Dispatchers.Default) { readingProgressViewModel.viewAction().first() }
+        delay(100)
 
         readingProgressViewModel.loadReadingProgress()
 
@@ -143,6 +144,7 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } throws RuntimeException("random exception")
 
         val viewActionAsync = async(Dispatchers.Default) { readingProgressViewModel.viewAction().first() }
+        delay(100)
 
         readingProgressViewModel.openVerse(VerseIndex(0, 0, 0))
 
@@ -157,6 +159,7 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } returns Unit
 
         val viewActionAsync = async(Dispatchers.Default) { readingProgressViewModel.viewAction().first() }
+        delay(100)
 
         readingProgressViewModel.openVerse(VerseIndex(0, 0, 0))
 
