@@ -54,17 +54,24 @@ class ProgressDialog(private val dialog: AlertDialog, private val progressBar: P
     }
 }
 
-fun Activity.dialog(cancelable: Boolean, @StringRes title: Int, @StringRes message: Int,
-                    onPositive: DialogInterface.OnClickListener, onNegative: DialogInterface.OnClickListener? = null) {
+fun Activity.dialog(
+    cancelable: Boolean,
+    @StringRes title: Int,
+    @StringRes message: Int,
+    onPositive: DialogInterface.OnClickListener,
+    onNegative: DialogInterface.OnClickListener? = null,
+    onDismiss: DialogInterface.OnDismissListener? = null
+) {
     if (isDestroyed) return
 
     MaterialAlertDialogBuilder(this)
-            .setCancelable(cancelable)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(android.R.string.ok, onPositive)
-            .setNegativeButton(android.R.string.cancel, onNegative)
-            .show()
+        .setCancelable(cancelable)
+        .setTitle(title)
+        .setMessage(message)
+        .setPositiveButton(android.R.string.ok, onPositive)
+        .setNegativeButton(android.R.string.cancel, onNegative)
+        .setOnDismissListener(onDismiss)
+        .show()
 }
 
 fun Activity.dialog(cancelable: Boolean, title: CharSequence, @StringRes message: Int,
@@ -72,48 +79,48 @@ fun Activity.dialog(cancelable: Boolean, title: CharSequence, @StringRes message
     if (isDestroyed) return
 
     MaterialAlertDialogBuilder(this)
-            .setCancelable(cancelable)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(android.R.string.ok, onPositive)
-            .setNegativeButton(android.R.string.cancel, onNegative)
-            .show()
+        .setCancelable(cancelable)
+        .setTitle(title)
+        .setMessage(message)
+        .setPositiveButton(android.R.string.ok, onPositive)
+        .setNegativeButton(android.R.string.cancel, onNegative)
+        .show()
 }
 
 fun Activity.progressDialog(@StringRes title: Int, maxProgress: Int, onCancel: () -> Unit): ProgressDialog? {
     if (isDestroyed) return null
 
     val progressBar = (View.inflate(this, R.layout.widget_progress_bar, null) as ProgressBar)
-            .apply { max = maxProgress }
+        .apply { max = maxProgress }
     return ProgressDialog(
-            MaterialAlertDialogBuilder(this)
-                    .setTitle(title)
-                    .setView(progressBar)
-                    .setCancelable(true)
-                    .setOnCancelListener { onCancel() }
-                    .setNegativeButton(android.R.string.cancel) { _, _ -> onCancel() }
-                    .show(),
-            progressBar)
+        MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setView(progressBar)
+            .setCancelable(true)
+            .setOnCancelListener { onCancel() }
+            .setNegativeButton(android.R.string.cancel) { _, _ -> onCancel() }
+            .show(),
+        progressBar)
 }
 
 fun Activity.indeterminateProgressDialog(@StringRes title: Int): AlertDialog? {
     if (isDestroyed) return null
 
     return MaterialAlertDialogBuilder(this)
-            .setCancelable(false)
-            .setTitle(title)
-            .setView(View.inflate(this, R.layout.widget_indeterminate_progress_bar, null))
-            .show()
+        .setCancelable(false)
+        .setTitle(title)
+        .setView(View.inflate(this, R.layout.widget_indeterminate_progress_bar, null))
+        .show()
 }
 
 fun Activity.seekBarDialog(
-        @StringRes title: Int,
-        initialValue: Float,
-        minValue: Float,
-        maxValue: Float,
-        onValueChanged: (Float) -> Unit,
-        onPositive: ((Float) -> Unit)? = null,
-        onNegative: (() -> Unit)? = null
+    @StringRes title: Int,
+    initialValue: Float,
+    minValue: Float,
+    maxValue: Float,
+    onValueChanged: (Float) -> Unit,
+    onPositive: ((Float) -> Unit)? = null,
+    onNegative: (() -> Unit)? = null
 ): AlertDialog? {
     if (isDestroyed) return null
 
@@ -129,12 +136,12 @@ fun Activity.seekBarDialog(
         override fun onStopTrackingTouch(seekBar: SeekBar) {}
     })
     return MaterialAlertDialogBuilder(this)
-            .setCancelable(false)
-            .setTitle(title)
-            .setView(viewBinding.root)
-            .setPositiveButton(android.R.string.ok, onPositive?.let { { _, _ -> it(viewBinding.seekBar.calculateValue(minValue, maxValue)) } })
-            .setNegativeButton(android.R.string.cancel, onNegative?.let { { _, _ -> it() } })
-            .show()
+        .setCancelable(false)
+        .setTitle(title)
+        .setView(viewBinding.root)
+        .setPositiveButton(android.R.string.ok, onPositive?.let { { _, _ -> it(viewBinding.seekBar.calculateValue(minValue, maxValue)) } })
+        .setNegativeButton(android.R.string.cancel, onNegative?.let { { _, _ -> it() } })
+        .show()
 }
 
 private fun SeekBar.setProgress(value: Float, minValue: Float, maxValue: Float) {
@@ -142,14 +149,14 @@ private fun SeekBar.setProgress(value: Float, minValue: Float, maxValue: Float) 
 }
 
 private fun SeekBar.calculateValue(minValue: Float, maxValue: Float): Float =
-        minValue + (maxValue - minValue) * progress.toFloat() / max.toFloat()
+    minValue + (maxValue - minValue) * progress.toFloat() / max.toFloat()
 
 fun Activity.listDialog(
-        title: CharSequence,
-        settings: Settings,
-        items: List<BaseItem>,
-        selected: Int,
-        onDismiss: DialogInterface.OnDismissListener? = null
+    title: CharSequence,
+    settings: Settings,
+    items: List<BaseItem>,
+    selected: Int,
+    onDismiss: DialogInterface.OnDismissListener? = null
 ): AlertDialog? {
     if (isDestroyed) return null
 
@@ -158,19 +165,19 @@ fun Activity.listDialog(
     viewBinding.recyclerView.setItems(items)
     viewBinding.recyclerView.scrollToPosition(selected)
     return MaterialAlertDialogBuilder(this)
-            .setCancelable(true)
-            .setTitle(title)
-            .setView(viewBinding.root)
-            .setOnDismissListener(onDismiss)
-            .show()
+        .setCancelable(true)
+        .setTitle(title)
+        .setView(viewBinding.root)
+        .setOnDismissListener(onDismiss)
+        .show()
 }
 
 fun Activity.listDialog(@StringRes title: Int, items: Array<String>, selected: Int, onClicked: DialogInterface.OnClickListener) {
     if (isDestroyed) return
 
     MaterialAlertDialogBuilder(this)
-            .setCancelable(true)
-            .setSingleChoiceItems(items, selected, onClicked)
-            .setTitle(title)
-            .show()
+        .setCancelable(true)
+        .setSingleChoiceItems(items, selected, onClicked)
+        .setTitle(title)
+        .show()
 }

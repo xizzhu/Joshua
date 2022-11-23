@@ -17,12 +17,14 @@
 package me.xizzhu.android.joshua.tests
 
 import androidx.annotation.CallSuper
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import me.xizzhu.android.joshua.core.CoroutineDispatcherProvider
 import java.util.*
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -30,6 +32,16 @@ import kotlin.test.BeforeTest
 abstract class BaseUnitTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     protected val testScope = CoroutineScope(SupervisorJob() + testDispatcher)
+    protected val testCoroutineDispatcherProvider = object : CoroutineDispatcherProvider {
+        override val main: CoroutineDispatcher
+            get() = testDispatcher
+        override val default: CoroutineDispatcher
+            get() = testDispatcher
+        override val io: CoroutineDispatcher
+            get() = testDispatcher
+        override val unconfined: CoroutineDispatcher
+            get() = testDispatcher
+    }
 
     @CallSuper
     @BeforeTest

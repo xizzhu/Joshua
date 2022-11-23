@@ -16,25 +16,24 @@
 
 package me.xizzhu.android.joshua.strongnumber
 
-import android.app.Application
 import android.text.SpannableStringBuilder
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.CoroutineDispatcherProvider
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.StrongNumberManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.BaseViewModel
-import me.xizzhu.android.joshua.infra.viewData
-import me.xizzhu.android.joshua.infra.onFailure
+import me.xizzhu.android.joshua.infra.BaseViewModelV2
 import me.xizzhu.android.joshua.preview.PreviewViewData
-import me.xizzhu.android.joshua.preview.loadPreview
+import me.xizzhu.android.joshua.preview.loadPreviewV2
 import me.xizzhu.android.joshua.preview.toVersePreviewItems
 import me.xizzhu.android.joshua.ui.createTitleSpans
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
@@ -46,57 +45,81 @@ import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 
-class StrongNumberViewData(val items: List<BaseItem>)
-
 @HiltViewModel
 class StrongNumberViewModel @Inject constructor(
-        private val bibleReadingManager: BibleReadingManager,
-        private val strongNumberManager: StrongNumberManager,
-        settingsManager: SettingsManager,
-        application: Application
-) : BaseViewModel(settingsManager, application) {
-    private val strongNumber: MutableStateFlow<ViewData<StrongNumberViewData>?> = MutableStateFlow(null)
+    private val bibleReadingManager: BibleReadingManager,
+    private val strongNumberManager: StrongNumberManager,
+    private val settingsManager: SettingsManager,
+    private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
+    private val savedStateHandle: SavedStateHandle
+) : BaseViewModelV2<StrongNumberViewModel.ViewAction, StrongNumberViewModel.ViewState>(
+    initialViewState = ViewState(
+        settings = null,
+        loading = false,
+        items = emptyList(),
+        preview = null,
+        error = null,
+    )
+) {
+    sealed class ViewAction {
+        object OpenReadingScreen : ViewAction()
+    }
 
-    fun strongNumber(): Flow<ViewData<StrongNumberViewData>> = strongNumber.filterNotNull()
+    data class ViewState(
+        val settings: Settings?,
+        val loading: Boolean,
+        val items: List<BaseItem>,
+        val preview: PreviewViewData?,
+        val error: Error?,
+    ) {
+        sealed class Error {
+            data class PreviewLoadingError(val verseToPreview: VerseIndex) : Error()
+            object StrongNumberLoadingError : Error()
+            data class VerseOpeningError(val verseToOpen: VerseIndex) : Error()
+        }
+    }
 
-    fun loadStrongNumber(sn: String) {
+    init {
+        settingsManager.settings().onEach { settings -> updateViewState { it.copy(settings = settings) } }.launchIn(viewModelScope)
+        loadStrongNumber()
+    }
+
+    fun loadStrongNumber() {
+        val sn = StrongNumberActivity.strongNumber(savedStateHandle)
         if (sn.isEmpty()) {
-            strongNumber.value = ViewData.Failure(IllegalStateException("Requested Strong number is empty"))
+            updateViewState { it.copy(loading = false, items = emptyList(), error = ViewState.Error.StrongNumberLoadingError) }
             return
         }
 
-        viewModelScope.launch {
-            try {
-                strongNumber.value = ViewData.Loading()
+        viewModelScope.launch(coroutineDispatcherProvider.default) {
+            runCatching {
+                updateViewState { it.copy(loading = true, error = null) }
 
                 val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-                strongNumber.value = ViewData.Success(StrongNumberViewData(
-                        items = buildStrongNumberItems(
-                                strongNumber = strongNumberManager.readStrongNumber(sn),
-                                verses = bibleReadingManager.readVerses(currentTranslation, strongNumberManager.readVerseIndexes(sn)).values
-                                        .sortedBy { with(it.verseIndex) { bookIndex * 100000 + chapterIndex * 1000 + verseIndex } },
-                                bookNames = bibleReadingManager.readBookNames(currentTranslation),
-                                bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
-                        )
-                ))
-            } catch (e: Exception) {
+                val items = buildStrongNumberItems(
+                    strongNumber = strongNumberManager.readStrongNumber(sn),
+                    verses = bibleReadingManager.readVerses(currentTranslation, strongNumberManager.readVerseIndexes(sn)).values
+                        .sortedBy { with(it.verseIndex) { bookIndex * 100000 + chapterIndex * 1000 + verseIndex } },
+                    bookNames = bibleReadingManager.readBookNames(currentTranslation),
+                    bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
+                )
+                updateViewState { it.copy(loading = false, items = items) }
+            }.onFailure { e ->
                 Log.e(tag, "Error occurred which loading Strong's Numbers", e)
-                strongNumber.value = ViewData.Failure(e)
+                updateViewState { it.copy(loading = false, error = ViewState.Error.StrongNumberLoadingError) }
             }
         }
     }
 
     private fun buildStrongNumberItems(
-            strongNumber: StrongNumber,
-            verses: List<Verse>,
-            bookNames: List<String>,
-            bookShortNames: List<String>): List<BaseItem> {
+        strongNumber: StrongNumber,
+        verses: List<Verse>,
+        bookNames: List<String>,
+        bookShortNames: List<String>
+    ): List<BaseItem> {
         val items: ArrayList<BaseItem> = ArrayList()
 
-        val title = SpannableStringBuilder().append(strongNumber.sn)
-                .setSpans(createTitleSpans())
-                .append(' ').append(strongNumber.meaning)
-                .toCharSequence()
+        val title = SpannableStringBuilder().append(strongNumber.sn).setSpans(createTitleSpans()).append(' ').append(strongNumber.meaning).toCharSequence()
         items.add(TextItem(title))
 
         var currentBookIndex = -1
@@ -115,11 +138,31 @@ class StrongNumberViewModel @Inject constructor(
         return items
     }
 
-    fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
-        bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
-    }.onFailure { Log.e(tag, "Failed to save current verse", it) }
+    fun openVerse(verseToOpen: VerseIndex) {
+        viewModelScope.launch {
+            runCatching {
+                bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
+                emitViewAction(ViewAction.OpenReadingScreen)
+            }.onFailure { e ->
+                Log.e(tag, "Failed to save current verse", e)
+                updateViewState { it.copy(error = ViewState.Error.VerseOpeningError(verseToOpen)) }
+            }
+        }
+    }
 
-    fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> =
-            loadPreview(bibleReadingManager, settingsManager, verseIndex, ::toVersePreviewItems)
-                    .onFailure { Log.e(tag, "Failed to load verses for preview", it) }
+    fun loadPreview(verseToPreview: VerseIndex) {
+        viewModelScope.launch {
+            runCatching {
+                val preview = loadPreviewV2(bibleReadingManager, settingsManager, verseToPreview, ::toVersePreviewItems)
+                updateViewState { it.copy(preview = preview) }
+            }.onFailure { e ->
+                Log.e(tag, "Failed to load verses for preview", e)
+                updateViewState { it.copy(error = ViewState.Error.PreviewLoadingError(verseToPreview)) }
+            }
+        }
+    }
+
+    fun markErrorAsShown(error: ViewState.Error) {
+        updateViewState { current -> if (current.error == error) current.copy(error = null) else null }
+    }
 }
