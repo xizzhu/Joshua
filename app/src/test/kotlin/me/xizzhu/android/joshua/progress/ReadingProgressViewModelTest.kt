@@ -18,15 +18,14 @@ package me.xizzhu.android.joshua.progress
 
 import android.app.Application
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runTest
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.ReadingProgress
-import me.xizzhu.android.joshua.core.ReadingProgressManager
-import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.infra.BaseViewModel
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import kotlin.test.BeforeTest
@@ -50,6 +49,7 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         readingProgressManager = mockk()
         bibleReadingManager = mockk()
         settingsManager = mockk()
+        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
         application = mockk()
 
         readingProgressViewModel = ReadingProgressViewModel(bibleReadingManager, readingProgressManager, settingsManager, application)
@@ -59,10 +59,17 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
     fun `test loadReadingProgress with exception`() = runTest {
         coEvery { readingProgressManager.read() } throws RuntimeException("random exception")
 
-        val job = async { readingProgressViewModel.readingProgress().first { it is BaseViewModel.ViewData.Failure } }
+        val viewActionAsync = async(Dispatchers.Default) { readingProgressViewModel.viewAction().first() }
+        delay(100)
+
         readingProgressViewModel.loadReadingProgress()
 
-        job.await()
+        assertTrue(viewActionAsync.await() is ReadingProgressViewModel.ViewAction.ShowLoadReadingProgressFailedError)
+        with(readingProgressViewModel.viewState().first()) {
+            assertEquals(Settings.DEFAULT, settings)
+            assertFalse(loading)
+            assertTrue(readingProgressItems.isEmpty())
+        }
     }
 
     @Test
@@ -81,18 +88,31 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
                 )
         )
 
-        val job = async { readingProgressViewModel.readingProgress().first { it is BaseViewModel.ViewData.Success } }
+        val viewStateAsync = async(Dispatchers.Default) {
+            readingProgressViewModel.viewState()
+                    .drop(1) // drop the initial state
+                    .take(2)
+                    .toList()
+        }
+        delay(100) // makes sure the async is up and running
+
         readingProgressViewModel.loadReadingProgress()
 
-        val actual = job.await()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertEquals(67, actual.data.items.size)
-        assertEquals(2, (actual.data.items[0] as ReadingProgressSummaryItem).continuousReadingDays)
-        assertEquals(5, (actual.data.items[0] as ReadingProgressSummaryItem).chaptersRead)
-        assertEquals(2, (actual.data.items[0] as ReadingProgressSummaryItem).finishedBooks)
-        assertEquals(1, (actual.data.items[0] as ReadingProgressSummaryItem).finishedOldTestament)
-        assertEquals(1, (actual.data.items[0] as ReadingProgressSummaryItem).finishedNewTestament)
-        actual.data.items.subList(1, actual.data.items.size).forEachIndexed { book, item ->
+        val viewStates = viewStateAsync.await()
+
+        assertTrue(viewStates[0].loading)
+        assertEquals(Settings.DEFAULT, viewStates[0].settings)
+        assertTrue(viewStates[0].readingProgressItems.isEmpty())
+
+        assertEquals(Settings.DEFAULT, viewStates[1].settings)
+        assertFalse(viewStates[1].loading)
+        assertEquals(67, viewStates[1].readingProgressItems.size)
+        assertEquals(2, (viewStates[1].readingProgressItems[0] as ReadingProgressSummaryItem).continuousReadingDays)
+        assertEquals(5, (viewStates[1].readingProgressItems[0] as ReadingProgressSummaryItem).chaptersRead)
+        assertEquals(2, (viewStates[1].readingProgressItems[0] as ReadingProgressSummaryItem).finishedBooks)
+        assertEquals(1, (viewStates[1].readingProgressItems[0] as ReadingProgressSummaryItem).finishedOldTestament)
+        assertEquals(1, (viewStates[1].readingProgressItems[0] as ReadingProgressSummaryItem).finishedNewTestament)
+        viewStates[1].readingProgressItems.subList(1, viewStates[1].readingProgressItems.size).forEachIndexed { book, item ->
             assertTrue(item is ReadingProgressDetailItem)
             when (book) {
                 0 -> {
@@ -117,5 +137,32 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
                 }
             }
         }
+    }
+
+    @Test
+    fun `test openVerse() with exception`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } throws RuntimeException("random exception")
+
+        val viewActionAsync = async(Dispatchers.Default) { readingProgressViewModel.viewAction().first() }
+        delay(100)
+
+        readingProgressViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        with(viewActionAsync.await()) {
+            assertTrue(this is ReadingProgressViewModel.ViewAction.ShowOpenVerseFailedError)
+            assertEquals(VerseIndex(0, 0, 0), verseToOpen)
+        }
+    }
+
+    @Test
+    fun `test openVerse()`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } returns Unit
+
+        val viewActionAsync = async(Dispatchers.Default) { readingProgressViewModel.viewAction().first() }
+        delay(100)
+
+        readingProgressViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        assertTrue(viewActionAsync.await() is ReadingProgressViewModel.ViewAction.OpenReadingScreen)
     }
 }

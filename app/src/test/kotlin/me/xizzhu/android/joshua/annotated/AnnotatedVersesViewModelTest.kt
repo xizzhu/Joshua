@@ -23,11 +23,12 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.bookmarks.BookmarkItem
@@ -38,16 +39,14 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import me.xizzhu.android.joshua.utils.currentTimeMillis
+import java.util.*
+import kotlin.test.*
 
 class AnnotatedVersesViewModelTest : BaseUnitTest() {
     private class TestAnnotatedVerse(verseIndex: VerseIndex, timestamp: Long) : VerseAnnotation(verseIndex, timestamp)
@@ -83,6 +82,7 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
         every { verseAnnotationManager.sortOrder() } returns emptyFlow()
 
         settingsManager = mockk()
+        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
 
         resources = mockk()
         every { resources.getStringArray(R.array.text_months) } returns arrayOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
@@ -95,21 +95,56 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test loadAnnotatedVerses() from constructor`() = runTest {
+    fun `test loadAnnotatedVerses() from constructor with exception`() = runTest {
         every { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
+        every { verseAnnotationManager.sortOrder() } returns flowOf(Constants.SORT_BY_BOOK)
+        coEvery { verseAnnotationManager.read(Constants.SORT_BY_BOOK) } throws RuntimeException("random exception")
+
+        annotatedVersesViewModel = TestAnnotatedVersesViewModel(bibleReadingManager, verseAnnotationManager, settingsManager, application)
+        delay(100)
+
+        with(annotatedVersesViewModel.viewState().first()) {
+            assertEquals(Settings.DEFAULT, settings)
+            assertFalse(loading)
+            assertEquals(Constants.SORT_BY_BOOK, sortOrder)
+            assertTrue(annotatedVerseItems.isEmpty())
+        }
+    }
+
+    @Test
+    fun `test loadAnnotatedVerses() from constructor`() = runTest {
+        every { bibleReadingManager.currentTranslation() } returns flowOf("", MockContents.kjvShortName, "")
         coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
         coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, emptyList()) } returns emptyMap()
         every { verseAnnotationManager.sortOrder() } returns flowOf(Constants.SORT_BY_BOOK)
         coEvery { verseAnnotationManager.read(Constants.SORT_BY_BOOK) } returns emptyList()
 
-        val job = async { annotatedVersesViewModel.annotatedVerses().first { it is BaseViewModel.ViewData.Success } }
         annotatedVersesViewModel = TestAnnotatedVersesViewModel(bibleReadingManager, verseAnnotationManager, settingsManager, application)
+        delay(100)
 
-        val actual = job.await()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertEquals(1, actual.data.items.size)
-        assertEquals("NO ANNOTATED VERSES", (actual.data.items[0] as TextItem).title.toString())
+        with(annotatedVersesViewModel.viewState().first()) {
+            assertEquals(Settings.DEFAULT, settings)
+            assertFalse(loading)
+            assertEquals(Constants.SORT_BY_BOOK, sortOrder)
+            assertEquals(1, annotatedVerseItems.size)
+            assertEquals("NO ANNOTATED VERSES", (annotatedVerseItems[0] as TextItem).title.toString())
+        }
+    }
+
+    @Test
+    fun `test loadAnnotatedVerses() with exception`() = runTest {
+        every { bibleReadingManager.currentTranslation() } throws RuntimeException("random excption")
+
+        annotatedVersesViewModel.loadAnnotatedVerses()
+        delay(100)
+
+        with(annotatedVersesViewModel.viewState().first()) {
+            assertEquals(Settings.DEFAULT, settings)
+            assertFalse(loading)
+            assertEquals(Constants.SORT_BY_DATE, sortOrder)
+            assertTrue(annotatedVerseItems.isEmpty())
+        }
     }
 
     @Test
@@ -118,16 +153,19 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
         coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, emptyList()) } returns emptyMap()
-        every { verseAnnotationManager.sortOrder() } returns flowOf(Constants.SORT_BY_BOOK)
-        coEvery { verseAnnotationManager.read(Constants.SORT_BY_BOOK) } returns emptyList()
+        every { verseAnnotationManager.sortOrder() } returns flowOf(Constants.SORT_BY_DATE)
+        coEvery { verseAnnotationManager.read(Constants.SORT_BY_DATE) } returns emptyList()
 
-        val job = async { annotatedVersesViewModel.annotatedVerses().first { it is BaseViewModel.ViewData.Success } }
         annotatedVersesViewModel.loadAnnotatedVerses()
+        delay(100)
 
-        val actual = job.await()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertEquals(1, actual.data.items.size)
-        assertEquals("NO ANNOTATED VERSES", (actual.data.items[0] as TextItem).title.toString())
+        with(annotatedVersesViewModel.viewState().first()) {
+            assertEquals(Settings.DEFAULT, settings)
+            assertFalse(loading)
+            assertEquals(Constants.SORT_BY_DATE, sortOrder)
+            assertEquals(1, annotatedVerseItems.size)
+            assertEquals("NO ANNOTATED VERSES", (annotatedVerseItems[0] as TextItem).title.toString())
+        }
     }
 
     @Test
@@ -159,18 +197,20 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
                 TestAnnotatedVerse(VerseIndex(1, 22, 18), 12345L)
         )
 
-        val job = async { annotatedVersesViewModel.annotatedVerses().first { it is BaseViewModel.ViewData.Success } }
         annotatedVersesViewModel.loadAnnotatedVerses()
+        delay(100)
 
-        val actual = job.await()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertEquals(6, actual.data.items.size)
-        assertEquals("Genesis", (actual.data.items[0] as TitleItem).title.toString())
-        assertEquals(VerseIndex(0, 0, 0), (actual.data.items[1] as BookmarkItem).verseIndex)
-        assertEquals(VerseIndex(0, 0, 1), (actual.data.items[2] as BookmarkItem).verseIndex)
-        assertEquals(VerseIndex(0, 9, 9), (actual.data.items[3] as BookmarkItem).verseIndex)
-        assertEquals("Exodus", (actual.data.items[4] as TitleItem).title.toString())
-        assertEquals(VerseIndex(1, 22, 18), (actual.data.items[5] as BookmarkItem).verseIndex)
+        with(annotatedVersesViewModel.viewState().first()) {
+            assertEquals(Settings.DEFAULT, settings)
+            assertFalse(loading)
+            assertEquals(6, annotatedVerseItems.size)
+            assertEquals("Genesis", (annotatedVerseItems[0] as TitleItem).title.toString())
+            assertEquals(VerseIndex(0, 0, 0), (annotatedVerseItems[1] as BookmarkItem).verseIndex)
+            assertEquals(VerseIndex(0, 0, 1), (annotatedVerseItems[2] as BookmarkItem).verseIndex)
+            assertEquals(VerseIndex(0, 9, 9), (annotatedVerseItems[3] as BookmarkItem).verseIndex)
+            assertEquals("Exodus", (annotatedVerseItems[4] as TitleItem).title.toString())
+            assertEquals(VerseIndex(1, 22, 18), (annotatedVerseItems[5] as BookmarkItem).verseIndex)
+        }
     }
 
     @Test
@@ -186,51 +226,152 @@ class AnnotatedVersesViewModelTest : BaseUnitTest() {
                     listOf(
                             VerseIndex(0, 0, 0),
                             VerseIndex(0, 0, 1),
+                            VerseIndex(0, 0, 2),
                             VerseIndex(0, 9, 9),
                             VerseIndex(1, 22, 18)
                     )
             )
         } returns mapOf(
-                Pair(VerseIndex(0, 0, 0), MockContents.kjvVerses[0]),
-                Pair(VerseIndex(0, 0, 1), MockContents.kjvVerses[1]),
-                Pair(VerseIndex(0, 9, 9), MockContents.kjvExtraVerses[0]),
-                Pair(VerseIndex(1, 22, 18), MockContents.kjvExtraVerses[1])
+                VerseIndex(0, 0, 0) to MockContents.kjvVerses[0],
+                VerseIndex(0, 0, 1) to MockContents.kjvVerses[1],
+                VerseIndex(0, 9, 9) to MockContents.kjvExtraVerses[0],
+                VerseIndex(1, 22, 18) to MockContents.kjvExtraVerses[1]
         )
         every { verseAnnotationManager.sortOrder() } returns flowOf(Constants.SORT_BY_DATE)
         coEvery { verseAnnotationManager.read(Constants.SORT_BY_DATE) } returns listOf(
-                TestAnnotatedVerse(VerseIndex(0, 0, 0), 4L + DateUtils.DAY_IN_MILLIS * 360),
-                TestAnnotatedVerse(VerseIndex(0, 0, 1), 3L),
+                TestAnnotatedVerse(VerseIndex(0, 0, 0), 5L + DateUtils.DAY_IN_MILLIS * 360),
+                TestAnnotatedVerse(VerseIndex(0, 0, 1), 4L),
+                TestAnnotatedVerse(VerseIndex(0, 0, 2), 3L), // This verse is "not available" when reading from bibleReadingManager.readVerses
                 TestAnnotatedVerse(VerseIndex(0, 9, 9), 2L),
                 TestAnnotatedVerse(VerseIndex(1, 22, 18), 1L)
         )
 
-        val job = async { annotatedVersesViewModel.annotatedVerses().first { it is BaseViewModel.ViewData.Success } }
         annotatedVersesViewModel.loadAnnotatedVerses()
+        delay(100)
 
-        val actual = job.await()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertEquals(6, actual.data.items.size)
-        assertEquals("31104000004", (actual.data.items[0] as TitleItem).title.toString())
-        assertEquals(VerseIndex(0, 0, 0), (actual.data.items[1] as BookmarkItem).verseIndex)
-        assertEquals("3", (actual.data.items[2] as TitleItem).title.toString())
-        assertEquals(VerseIndex(0, 0, 1), (actual.data.items[3] as BookmarkItem).verseIndex)
-        assertEquals(VerseIndex(0, 9, 9), (actual.data.items[4] as BookmarkItem).verseIndex)
-        assertEquals(VerseIndex(1, 22, 18), (actual.data.items[5] as BookmarkItem).verseIndex)
+        with(annotatedVersesViewModel.viewState().first()) {
+            assertEquals(Settings.DEFAULT, settings)
+            assertFalse(loading)
+            assertEquals(6, annotatedVerseItems.size)
+            assertEquals("31104000005", (annotatedVerseItems[0] as TitleItem).title.toString())
+            assertEquals(VerseIndex(0, 0, 0), (annotatedVerseItems[1] as BookmarkItem).verseIndex)
+            assertEquals("4", (annotatedVerseItems[2] as TitleItem).title.toString())
+            assertEquals(VerseIndex(0, 0, 1), (annotatedVerseItems[3] as BookmarkItem).verseIndex)
+            assertEquals(VerseIndex(0, 9, 9), (annotatedVerseItems[4] as BookmarkItem).verseIndex)
+            assertEquals(VerseIndex(1, 22, 18), (annotatedVerseItems[5] as BookmarkItem).verseIndex)
+        }
     }
 
     @Test
-    fun `test loadVersesForPreview`() = runTest {
-        every { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
-        coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0) } returns MockContents.kjvVerses
+    fun `test formatDate()`() {
+        every { application.getString(R.string.text_date_without_year, *anyVararg()) } answers {
+            (it.invocation.args[1] as Array<Any>).joinToString(separator = "-")
+        }
+        every { application.getString(R.string.text_date, *anyVararg()) } answers {
+            (it.invocation.args[1] as Array<Any>).joinToString(separator = ".")
+        }
+
+        currentTimeMillis = Calendar.getInstance().apply {
+            set(Calendar.YEAR, 2022)
+            set(Calendar.MONTH, Calendar.FEBRUARY)
+            set(Calendar.DATE, 10)
+        }.timeInMillis
+
+        val sameYear = Calendar.getInstance().apply {
+            set(Calendar.YEAR, 2022)
+            set(Calendar.MONTH, Calendar.JANUARY)
+            set(Calendar.DATE, 30)
+        }.timeInMillis
+        assertEquals("1-30", annotatedVersesViewModel.formatDate(Calendar.getInstance(), sameYear))
+
+        val differentYear = Calendar.getInstance().apply {
+            set(Calendar.YEAR, 2021)
+            set(Calendar.MONTH, Calendar.FEBRUARY)
+            set(Calendar.DATE, 10)
+        }.timeInMillis
+        assertEquals("2.10.2021", annotatedVersesViewModel.formatDate(Calendar.getInstance(), differentYear))
+    }
+
+    @Test
+    fun `test saveSortOrder() with exception`() = runTest {
+        coEvery { verseAnnotationManager.saveSortOrder(Constants.SORT_BY_BOOK) } throws RuntimeException("random exception")
+
+        val viewActionAsync = async(Dispatchers.Default) { annotatedVersesViewModel.viewAction().first() }
+        delay(100)
+
+        annotatedVersesViewModel.saveSortOrder(Constants.SORT_BY_BOOK)
+
+        with(viewActionAsync.await()) {
+            assertTrue(this is AnnotatedVersesViewModel.ViewAction.ShowSaveSortOrderFailedError)
+            assertEquals(Constants.SORT_BY_BOOK, sortOrderToSave)
+        }
+    }
+
+    @Test
+    fun `test saveSortOrder()`() = runTest {
+        coEvery { verseAnnotationManager.saveSortOrder(Constants.SORT_BY_BOOK) } returns Unit
+
+        annotatedVersesViewModel.saveSortOrder(Constants.SORT_BY_BOOK)
+
+        assertEquals(Constants.SORT_BY_BOOK, annotatedVersesViewModel.viewState().first().sortOrder)
+    }
+
+    @Test
+    fun `test openVerse() with exception`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } throws RuntimeException("random exception")
+
+        val viewActionAsync = async(Dispatchers.Default) { annotatedVersesViewModel.viewAction().first() }
+        delay(100)
+
+        annotatedVersesViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        with(viewActionAsync.await()) {
+            assertTrue(this is AnnotatedVersesViewModel.ViewAction.ShowOpenVerseFailedError)
+            assertEquals(VerseIndex(0, 0, 0), verseToOpen)
+        }
+    }
+
+    @Test
+    fun `test openVerse()`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } returns Unit
+
+        val viewActionAsync = async(Dispatchers.Default) { annotatedVersesViewModel.viewAction().first() }
+        delay(100)
+
+        annotatedVersesViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        assertTrue(viewActionAsync.await() is AnnotatedVersesViewModel.ViewAction.OpenReadingScreen)
+    }
+
+    @Test
+    fun `test showPreview() with invalid verse index`() = runTest {
+        val viewActionAsync = async(Dispatchers.Default) { annotatedVersesViewModel.viewAction().first() }
+        delay(100)
+
+        annotatedVersesViewModel.showPreview(VerseIndex.INVALID)
+
+        assertTrue(viewActionAsync.await() is AnnotatedVersesViewModel.ViewAction.ShowOpenPreviewFailedError)
+    }
+
+    @Test
+    fun `test showPreview()`() = runTest {
+        coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
+        coEvery {
+            bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0)
+        } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2])
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
         every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
 
-        val actual = annotatedVersesViewModel.loadVersesForPreview(VerseIndex(0, 0, 1)).toList()
-        assertEquals(2, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
-        assertEquals(Settings.DEFAULT, (actual[1] as BaseViewModel.ViewData.Success).data.settings)
-        assertEquals("Gen., 1", (actual[1] as BaseViewModel.ViewData.Success).data.title)
-        assertEquals(MockContents.kjvVerses.size, (actual[1] as BaseViewModel.ViewData.Success).data.items.size)
-        assertEquals(1, (actual[1] as BaseViewModel.ViewData.Success).data.currentPosition)
+        val viewActionAsync = async(Dispatchers.Default) { annotatedVersesViewModel.viewAction().first() }
+        delay(100)
+
+        annotatedVersesViewModel.showPreview(VerseIndex(0, 0, 1))
+
+        val actual = viewActionAsync.await()
+        assertTrue(actual is AnnotatedVersesViewModel.ViewAction.ShowPreview)
+        assertEquals(Settings.DEFAULT, actual.previewViewData.settings)
+        assertEquals("Gen., 1", actual.previewViewData.title)
+        assertEquals(3, actual.previewViewData.items.size)
+        assertEquals(1, actual.previewViewData.currentPosition)
     }
 }

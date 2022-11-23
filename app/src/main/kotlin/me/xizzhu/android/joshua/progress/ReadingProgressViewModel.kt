@@ -19,20 +19,14 @@ package me.xizzhu.android.joshua.progress
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.BaseViewModel
-import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.infra.viewData
+import me.xizzhu.android.joshua.infra.BaseViewModelV2
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
-
-class ReadingProgressViewData(val items: List<BaseItem>)
 
 @HiltViewModel
 class ReadingProgressViewModel @Inject constructor(
@@ -40,25 +34,53 @@ class ReadingProgressViewModel @Inject constructor(
         private val readingProgressManager: ReadingProgressManager,
         settingsManager: SettingsManager,
         application: Application
-) : BaseViewModel(settingsManager, application) {
-    private val readingProgress: MutableStateFlow<ViewData<ReadingProgressViewData>?> = MutableStateFlow(null)
+) : BaseViewModelV2<ReadingProgressViewModel.ViewAction, ReadingProgressViewModel.ViewState>(
+        settingsManager = settingsManager,
+        application = application,
+        initialViewState = ViewState(
+                settings = null,
+                loading = false,
+                readingProgressItems = emptyList()
+        )
+) {
+    sealed class ViewAction {
+        object OpenReadingScreen : ViewAction()
+        object ShowLoadReadingProgressFailedError : ViewAction()
+        class ShowOpenVerseFailedError(val verseToOpen: VerseIndex) : ViewAction()
+    }
+
+    data class ViewState(
+            val settings: Settings?,
+            val loading: Boolean,
+            val readingProgressItems: List<BaseItem>,
+    )
+
     private val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 
-    fun readingProgress(): Flow<ViewData<ReadingProgressViewData>> = readingProgress.filterNotNull()
+    init {
+        settings().onEach { settings -> emitViewState { it.copy(settings = settings) } }.launchIn(viewModelScope)
+    }
 
     fun loadReadingProgress() {
         viewModelScope.launch {
             try {
-                readingProgress.value = ViewData.Loading()
-                readingProgress.value = ViewData.Success(ReadingProgressViewData(
-                        items = buildReadingProgressItems(
-                                readingProgress = readingProgressManager.read(),
-                                bookNames = bibleReadingManager.readBookNames(bibleReadingManager.currentTranslation().firstNotEmpty())
-                        )
-                ))
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = true, readingProgressItems = emptyList())
+                }
+
+                val readingProgressItems = buildReadingProgressItems(
+                        readingProgress = readingProgressManager.read(),
+                        bookNames = bibleReadingManager.readBookNames(bibleReadingManager.currentTranslation().firstNotEmpty())
+                )
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = false, readingProgressItems = readingProgressItems)
+                }
             } catch (e: Exception) {
                 Log.e(tag, "Error occurred while loading reading progress", e)
-                readingProgress.value = ViewData.Failure(e)
+                emitViewAction(ViewAction.ShowLoadReadingProgressFailedError)
+                emitViewState { currentViewState ->
+                    currentViewState.copy(loading = false, readingProgressItems = emptyList())
+                }
             }
         }
     }
@@ -110,7 +132,15 @@ class ReadingProgressViewModel @Inject constructor(
         this.expanded[bookIndex] = expanded
     }
 
-    fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
-        bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
-    }.onFailure { Log.e(tag, "Failed to save current verse", it) }
+    fun openVerse(verseToOpen: VerseIndex) {
+        viewModelScope.launch {
+            try {
+                bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
+                emitViewAction(ViewAction.OpenReadingScreen)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to save current verse", e)
+                emitViewAction(ViewAction.ShowOpenVerseFailedError(verseToOpen))
+            }
+        }
+    }
 }

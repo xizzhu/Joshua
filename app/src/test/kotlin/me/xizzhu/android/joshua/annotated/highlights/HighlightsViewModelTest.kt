@@ -20,12 +20,8 @@ import android.app.Application
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.emptyFlow
-import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.Highlight
-import me.xizzhu.android.joshua.core.SettingsManager
-import me.xizzhu.android.joshua.core.VerseAnnotationManager
-import me.xizzhu.android.joshua.core.VerseIndex
+import kotlinx.coroutines.flow.flowOf
+import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
@@ -52,6 +48,7 @@ class HighlightsViewModelTest : BaseUnitTest() {
         highlightsManager = mockk()
         every { highlightsManager.sortOrder() } returns emptyFlow()
         settingsManager = mockk()
+        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
         application = mockk()
         highlightsViewModel = HighlightsViewModel(bibleReadingManager, highlightsManager, settingsManager, application)
     }

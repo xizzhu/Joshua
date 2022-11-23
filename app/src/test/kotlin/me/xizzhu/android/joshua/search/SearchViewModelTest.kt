@@ -21,12 +21,13 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -55,9 +56,11 @@ class SearchViewModelTest : BaseUnitTest() {
 
         searchManager = mockk()
         every { searchManager.configuration() } returns flowOf(SearchConfiguration(true, true, true, true, true))
+        every { searchManager.saveConfiguration(any()) } returns Unit
         coEvery { searchManager.search(any()) } returns SearchResult(emptyList(), emptyList(), emptyList(), emptyList())
 
         settingsManager = mockk()
+        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
 
         application = mockk()
         every { application.getString(R.string.title_bookmarks) } returns "Bookmarks"
@@ -70,145 +73,199 @@ class SearchViewModelTest : BaseUnitTest() {
 
     @Test
     fun `test includeOldTestament`() = runTest {
-        every {
-            searchManager.saveConfiguration(SearchConfiguration(
-                    includeOldTestament = false, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
-            ))
-        } returns Unit
-
+        searchViewModel.includeOldTestament(false)
         searchViewModel.includeOldTestament(false)
         searchViewModel.includeOldTestament(true)
+        searchViewModel.includeOldTestament(true)
 
-        verify(exactly = 1) { searchManager.saveConfiguration(any()) }
+        verify(exactly = 2) { searchManager.saveConfiguration(any()) }
     }
 
     @Test
     fun `test includeNewTestament`() = runTest {
-        every {
-            searchManager.saveConfiguration(SearchConfiguration(
-                    includeOldTestament = true, includeNewTestament = false, includeBookmarks = true, includeHighlights = true, includeNotes = true
-            ))
-        } returns Unit
-
+        searchViewModel.includeNewTestament(false)
         searchViewModel.includeNewTestament(false)
         searchViewModel.includeNewTestament(true)
+        searchViewModel.includeNewTestament(true)
 
-        verify(exactly = 1) { searchManager.saveConfiguration(any()) }
+        verify(exactly = 2) { searchManager.saveConfiguration(any()) }
     }
 
     @Test
     fun `test includeBookmarks`() = runTest {
-        every {
-            searchManager.saveConfiguration(SearchConfiguration(
-                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = false, includeHighlights = true, includeNotes = true
-            ))
-        } returns Unit
-
+        searchViewModel.includeBookmarks(false)
         searchViewModel.includeBookmarks(false)
         searchViewModel.includeBookmarks(true)
+        searchViewModel.includeBookmarks(true)
 
-        verify(exactly = 1) { searchManager.saveConfiguration(any()) }
+        verify(exactly = 2) { searchManager.saveConfiguration(any()) }
     }
 
     @Test
     fun `test includeHighlights`() = runTest {
-        every {
-            searchManager.saveConfiguration(SearchConfiguration(
-                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = false, includeNotes = true
-            ))
-        } returns Unit
-
+        searchViewModel.includeHighlights(false)
         searchViewModel.includeHighlights(false)
         searchViewModel.includeHighlights(true)
+        searchViewModel.includeHighlights(true)
 
-        verify(exactly = 1) { searchManager.saveConfiguration(any()) }
+        verify(exactly = 2) { searchManager.saveConfiguration(any()) }
     }
 
     @Test
     fun `test includeNotes`() = runTest {
-        every {
-            searchManager.saveConfiguration(SearchConfiguration(
-                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = false
-            ))
-        } returns Unit
-
+        searchViewModel.includeNotes(false)
         searchViewModel.includeNotes(false)
         searchViewModel.includeNotes(true)
+        searchViewModel.includeNotes(true)
 
-        verify(exactly = 1) { searchManager.saveConfiguration(any()) }
+        verify(exactly = 2) { searchManager.saveConfiguration(any()) }
+    }
+
+    @Test
+    fun `test instant search() with empty query`() = runTest {
+        searchViewModel.search("", true)
+        delay(1000L)
+
+        val actual = searchViewModel.viewState().first()
+        assertTrue(actual.searchQuery.isEmpty())
+        assertTrue(actual.instantSearch)
+        assertTrue(actual.searchResults.isEmpty())
+
+        verify(exactly = 0) { bibleReadingManager.currentTranslation() }
+    }
+
+    @Test
+    fun `test search() with error`() = runTest {
+        coEvery { searchManager.search("query") } throws RuntimeException("random exception")
+
+        val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
+
+        searchViewModel.search("query", false)
+        delay(1000L)
+
+        val viewActions = viewActionAsync.await()
+        assertEquals(1, viewActions.size)
+        assertTrue(viewActions[0] is SearchViewModel.ViewAction.ShowSearchFailedError)
+
+        val actual = searchViewModel.viewState().first()
+        assertEquals("query", actual.searchQuery)
+        assertFalse(actual.instantSearch)
+        assertTrue(actual.searchResults.isEmpty())
     }
 
     @Test
     fun `test search() with empty query`() = runTest {
-        searchViewModel.search("", true)
+        val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
+
+        searchViewModel.search("", false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertTrue(actual.data.items.isEmpty())
-        assertTrue(actual.data.query.isEmpty())
-        assertTrue(actual.data.instanceSearch)
-        assertTrue(actual.data.toast.isEmpty())
+        val viewActions = viewActionAsync.await()
+        assertEquals(1, viewActions.size)
+        assertTrue(viewActions[0] is SearchViewModel.ViewAction.ShowToast)
+        assertEquals("0 result(s) found.", (viewActions[0] as SearchViewModel.ViewAction.ShowToast).message)
+
+        val actual = searchViewModel.viewState().first()
+        assertTrue(actual.searchQuery.isEmpty())
+        assertFalse(actual.instantSearch)
+        assertTrue(actual.searchResults.isEmpty())
+    }
+
+    @Test
+    fun `test instant search() with one-character query`() = runTest {
+        searchViewModel.search("1", true)
+        delay(1000L)
+
+        val actual = searchViewModel.viewState().first()
+        assertEquals("1", actual.searchQuery)
+        assertTrue(actual.instantSearch)
+        assertTrue(actual.searchResults.isEmpty())
+
+        verify(exactly = 0) { bibleReadingManager.currentTranslation() }
     }
 
     @Test
     fun `test search() with one-character query`() = runTest {
+        val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
+
+        // query too short, instant search should not be executed
         searchViewModel.search("1", true)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertTrue(actual.data.items.isEmpty())
-        assertEquals("1", actual.data.query)
-        assertTrue(actual.data.instanceSearch)
-        assertTrue(actual.data.toast.isEmpty())
+        with(searchViewModel.viewState().first()) {
+            assertEquals("1", searchQuery)
+            assertTrue(instantSearch)
+            assertTrue(searchResults.isEmpty())
+        }
+        verify(exactly = 0) { bibleReadingManager.currentTranslation() }
+
+        // short query with non-instant query should always be executed
+        searchViewModel.search("1", false)
+        delay(1000L)
+
+        with(viewActionAsync.await()) {
+            assertEquals(1, size)
+            assertTrue(this[0] is SearchViewModel.ViewAction.ShowToast)
+            assertEquals("0 result(s) found.", (this[0] as SearchViewModel.ViewAction.ShowToast).message)
+        }
+
+        with(searchViewModel.viewState().first()) {
+            assertEquals("1", searchQuery)
+            assertFalse(instantSearch)
+            assertTrue(searchResults.isEmpty())
+        }
     }
 
     @Test
     fun `test search() with empty result`() = runTest {
+        val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
+
         searchViewModel.search("query", false)
         delay(1000L)
 
-        searchViewModel.searchResult().first().assertSuccessEmpty("query", false)
-    }
+        val viewActions = viewActionAsync.await()
+        assertEquals(1, viewActions.size)
+        assertTrue(viewActions[0] is SearchViewModel.ViewAction.ShowToast)
+        assertEquals("0 result(s) found.", (viewActions[0] as SearchViewModel.ViewAction.ShowToast).message)
 
-    private fun BaseViewModel.ViewData<SearchResultViewData>.assertSuccessEmpty(query: String, instanceSearch: Boolean) {
-        assertTrue(this is BaseViewModel.ViewData.Success)
-        assertTrue(data.items.isEmpty())
-        assertEquals(query, data.query)
-        assertEquals(instanceSearch, data.instanceSearch)
-        assertEquals("0 result(s) found.", data.toast)
+        val actual = searchViewModel.viewState().first()
+        assertEquals("query", actual.searchQuery)
+        assertFalse(actual.instantSearch)
+        assertTrue(actual.searchResults.isEmpty())
     }
 
     @Test
     fun `test calling search() multiple times`() = runTest {
-        coEvery { searchManager.search("not used") } returns SearchResult(listOf(MockContents.kjvVerses[1]), emptyList(), emptyList(), emptyList())
         coEvery { searchManager.search("query") } returns SearchResult(listOf(MockContents.kjvVerses[0]), emptyList(), emptyList(), emptyList())
 
         searchViewModel.search("invalid", true)
         delay(1000L)
-        searchViewModel.searchResult().first().assertSuccessEmpty("invalid", true)
+        val viewState1 = searchViewModel.viewState().first()
+        assertEquals("invalid", viewState1.searchQuery)
+        assertTrue(viewState1.instantSearch)
+        assertTrue(viewState1.searchResults.isEmpty())
 
-        searchViewModel.search("not used", false)
-        delay(100L) // delay is not long enough, so the search should NOT be executed
-        searchViewModel.searchResult().first().assertSuccessEmpty("invalid", true)
+        // delay is not long enough, so the instant search should NOT be executed
+        searchViewModel.search("not used", true)
+        delay(100L)
+        val viewState2 = searchViewModel.viewState().first()
+        assertEquals("invalid", viewState2.searchQuery)
+        assertTrue(viewState2.instantSearch)
+        assertTrue(viewState2.searchResults.isEmpty())
 
         searchViewModel.search("query", false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
+        val viewState3 = searchViewModel.viewState().first()
+        assertEquals("query", viewState3.searchQuery)
+        assertFalse(viewState3.instantSearch)
 
-        assertEquals(2, actual.data.items.size)
-        assertEquals("Genesis", (actual.data.items[0] as TitleItem).title.toString())
+        assertEquals(2, viewState3.searchResults.size)
+        assertEquals("Genesis", (viewState3.searchResults[0] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
+                (viewState3.searchResults[1] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("1 result(s) found.", actual.data.toast)
     }
 
     @Test
@@ -220,35 +277,39 @@ class SearchViewModelTest : BaseUnitTest() {
                 emptyList()
         )
 
+        val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
+
         searchViewModel.search("query", false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
+        val viewActions = viewActionAsync.await()
+        assertEquals(1, viewActions.size)
+        assertTrue(viewActions[0] is SearchViewModel.ViewAction.ShowToast)
+        assertEquals("4 result(s) found.", (viewActions[0] as SearchViewModel.ViewAction.ShowToast).message)
 
-        assertEquals(6, actual.data.items.size)
-        assertEquals("Genesis", (actual.data.items[0] as TitleItem).title.toString())
+        val actual = searchViewModel.viewState().first()
+        assertEquals("query", actual.searchQuery)
+        assertFalse(actual.instantSearch)
+
+        assertEquals(6, actual.searchResults.size)
+        assertEquals("Genesis", (actual.searchResults[0] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[1] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
                 "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[2] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[2] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
                 "Gen. 10:10\nAnd the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar.",
-                (actual.data.items[3] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[3] as SearchVerseItem).textForDisplay.toString()
         )
-        assertEquals("Exodus", (actual.data.items[4] as TitleItem).title.toString())
+        assertEquals("Exodus", (actual.searchResults[4] as TitleItem).title.toString())
         assertEquals(
                 "Ex. 23:19\nThe first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.",
-                (actual.data.items[5] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[5] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("4 result(s) found.", actual.data.toast)
     }
 
     @Test
@@ -260,31 +321,35 @@ class SearchViewModelTest : BaseUnitTest() {
                 emptyList()
         )
 
+        val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
+
         searchViewModel.search("query", false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
+        val viewActions = viewActionAsync.await()
+        assertEquals(1, viewActions.size)
+        assertTrue(viewActions[0] is SearchViewModel.ViewAction.ShowToast)
+        assertEquals("3 result(s) found.", (viewActions[0] as SearchViewModel.ViewAction.ShowToast).message)
 
-        assertEquals(5, actual.data.items.size)
-        assertEquals("Bookmarks", (actual.data.items[0] as TitleItem).title.toString())
+        val actual = searchViewModel.viewState().first()
+        assertEquals("query", actual.searchQuery)
+        assertFalse(actual.instantSearch)
+
+        assertEquals(5, actual.searchResults.size)
+        assertEquals("Bookmarks", (actual.searchResults[0] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[1] as SearchVerseItem).textForDisplay.toString()
         )
-        assertEquals("Genesis", (actual.data.items[2] as TitleItem).title.toString())
+        assertEquals("Genesis", (actual.searchResults[2] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[3] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[3] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
                 "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[4] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[4] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("3 result(s) found.", actual.data.toast)
     }
 
     @Test
@@ -296,31 +361,35 @@ class SearchViewModelTest : BaseUnitTest() {
                 emptyList()
         )
 
+        val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
+
         searchViewModel.search("query", false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
+        val viewActions = viewActionAsync.await()
+        assertEquals(1, viewActions.size)
+        assertTrue(viewActions[0] is SearchViewModel.ViewAction.ShowToast)
+        assertEquals("3 result(s) found.", (viewActions[0] as SearchViewModel.ViewAction.ShowToast).message)
 
-        assertEquals(5, actual.data.items.size)
-        assertEquals("Highlights", (actual.data.items[0] as TitleItem).title.toString())
+        val actual = searchViewModel.viewState().first()
+        assertEquals("query", actual.searchQuery)
+        assertFalse(actual.instantSearch)
+
+        assertEquals(5, actual.searchResults.size)
+        assertEquals("Highlights", (actual.searchResults[0] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[1] as SearchVerseItem).textForDisplay.toString()
         )
-        assertEquals("Genesis", (actual.data.items[2] as TitleItem).title.toString())
+        assertEquals("Genesis", (actual.searchResults[2] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[3] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[3] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
                 "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[4] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[4] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("3 result(s) found.", actual.data.toast)
     }
 
     @Test
@@ -332,32 +401,36 @@ class SearchViewModelTest : BaseUnitTest() {
                 listOf(Pair(Note(VerseIndex(0, 0, 9), "just a note", 12345L), MockContents.kjvVerses[9]))
         )
 
+        val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
+
         searchViewModel.search("query", false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
+        val viewActions = viewActionAsync.await()
+        assertEquals(1, viewActions.size)
+        assertTrue(viewActions[0] is SearchViewModel.ViewAction.ShowToast)
+        assertEquals("3 result(s) found.", (viewActions[0] as SearchViewModel.ViewAction.ShowToast).message)
 
-        assertEquals(5, actual.data.items.size)
-        assertEquals("Notes", (actual.data.items[0] as TitleItem).title.toString())
+        val actual = searchViewModel.viewState().first()
+        assertEquals("query", actual.searchQuery)
+        assertFalse(actual.instantSearch)
+
+        assertEquals(5, actual.searchResults.size)
+        assertEquals("Notes", (actual.searchResults[0] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
-                (actual.data.items[1] as SearchNoteItem).verseForDisplay.toString()
+                (actual.searchResults[1] as SearchNoteItem).verseForDisplay.toString()
         )
-        assertEquals("just a note", (actual.data.items[1] as SearchNoteItem).noteForDisplay.toString())
-        assertEquals("Genesis", (actual.data.items[2] as TitleItem).title.toString())
+        assertEquals("just a note", (actual.searchResults[1] as SearchNoteItem).noteForDisplay.toString())
+        assertEquals("Genesis", (actual.searchResults[2] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[3] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[3] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
                 "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[4] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[4] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("3 result(s) found.", actual.data.toast)
     }
 
     @Test
@@ -369,54 +442,87 @@ class SearchViewModelTest : BaseUnitTest() {
                 listOf(Pair(Note(VerseIndex(0, 0, 9), "just a note", 12345L), MockContents.kjvVerses[9]))
         )
 
+        val viewActionAsync = async { searchViewModel.viewAction().take(1).toList() }
+
         searchViewModel.search("query", false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
+        val actual = searchViewModel.viewState().first()
+        assertEquals("query", actual.searchQuery)
+        assertFalse(actual.instantSearch)
 
-        assertEquals(9, actual.data.items.size)
-        assertEquals("Notes", (actual.data.items[0] as TitleItem).title.toString())
+        val viewActions = viewActionAsync.await()
+        assertEquals(1, viewActions.size)
+        assertTrue(viewActions[0] is SearchViewModel.ViewAction.ShowToast)
+        assertEquals("5 result(s) found.", (viewActions[0] as SearchViewModel.ViewAction.ShowToast).message)
+
+        assertEquals(9, actual.searchResults.size)
+        assertEquals("Notes", (actual.searchResults[0] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
-                (actual.data.items[1] as SearchNoteItem).verseForDisplay.toString()
+                (actual.searchResults[1] as SearchNoteItem).verseForDisplay.toString()
         )
-        assertEquals("just a note", (actual.data.items[1] as SearchNoteItem).noteForDisplay.toString())
-        assertEquals("Bookmarks", (actual.data.items[2] as TitleItem).title.toString())
+        assertEquals("just a note", (actual.searchResults[1] as SearchNoteItem).noteForDisplay.toString())
+        assertEquals("Bookmarks", (actual.searchResults[2] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[3] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[3] as SearchVerseItem).textForDisplay.toString()
         )
-        assertEquals("Highlights", (actual.data.items[4] as TitleItem).title.toString())
+        assertEquals("Highlights", (actual.searchResults[4] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[5] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[5] as SearchVerseItem).textForDisplay.toString()
         )
-        assertEquals("Genesis", (actual.data.items[6] as TitleItem).title.toString())
+        assertEquals("Genesis", (actual.searchResults[6] as TitleItem).title.toString())
         assertEquals(
                 "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[7] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[7] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
                 "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[8] as SearchVerseItem).textForDisplay.toString()
+                (actual.searchResults[8] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("5 result(s) found.", actual.data.toast)
     }
 
     @Test
-    fun `test loadVersesForPreview() with invalid verse index`() = runTest {
-        val actual = searchViewModel.loadVersesForPreview(VerseIndex.INVALID).toList()
-        assertEquals(2, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
-        assertTrue(actual[1] is BaseViewModel.ViewData.Failure)
+    fun `test openVerse() with exception`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } throws RuntimeException("random exception")
+
+        val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+        delay(100)
+
+        searchViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        with(viewActionAsync.await()) {
+            assertTrue(this is SearchViewModel.ViewAction.ShowOpenVerseFailedError)
+            assertEquals(VerseIndex(0, 0, 0), verseToOpen)
+        }
     }
 
     @Test
-    fun `test loadVersesForPreview()`() = runTest {
+    fun `test openVerse()`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } returns Unit
+
+        val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+        delay(100)
+
+        searchViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        assertTrue(viewActionAsync.await() is SearchViewModel.ViewAction.OpenReadingScreen)
+    }
+
+    @Test
+    fun `test showPreview() with invalid verse index`() = runTest {
+        val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+        delay(100)
+
+        searchViewModel.showPreview(VerseIndex.INVALID)
+
+        assertTrue(viewActionAsync.await() is SearchViewModel.ViewAction.ShowOpenPreviewFailedError)
+    }
+
+    @Test
+    fun `test showPreview()`() = runTest {
         coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
         coEvery {
             bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0)
@@ -424,14 +530,17 @@ class SearchViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
         every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
 
-        val actual = searchViewModel.loadVersesForPreview(VerseIndex(0, 0, 1)).toList()
-        assertEquals(2, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        val viewActionAsync = async(Dispatchers.Default) { searchViewModel.viewAction().first() }
+        delay(100)
 
-        assertEquals(Settings.DEFAULT, (actual[1] as BaseViewModel.ViewData.Success).data.settings)
-        assertEquals("Gen., 1", (actual[1] as BaseViewModel.ViewData.Success).data.title)
-        assertEquals(3, (actual[1] as BaseViewModel.ViewData.Success).data.items.size)
-        assertEquals(1, (actual[1] as BaseViewModel.ViewData.Success).data.currentPosition)
+        searchViewModel.showPreview(VerseIndex(0, 0, 1))
+
+        val actual = viewActionAsync.await()
+        assertTrue(actual is SearchViewModel.ViewAction.ShowPreview)
+        assertEquals(Settings.DEFAULT, actual.previewViewData.settings)
+        assertEquals("Gen., 1", actual.previewViewData.title)
+        assertEquals(3, actual.previewViewData.items.size)
+        assertEquals(1, actual.previewViewData.currentPosition)
     }
 
 
