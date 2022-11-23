@@ -57,7 +57,7 @@ class ContextTest : BaseUnitTest() {
                 add(resolveInfo)
             }
         }
-        every { packageManager.queryIntentActivities(any(), any()) } returns resolveInfoList
+        every { packageManager.queryIntentActivities(any(), any<Int>()) } returns resolveInfoList
     }
 
     @Test
