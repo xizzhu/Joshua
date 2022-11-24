@@ -29,7 +29,7 @@ import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 import java.util.ArrayList
 
-class PreviewViewData(val settings: Settings, val title: String, val items: List<BaseItem>, val currentPosition: Int)
+data class PreviewViewData(val settings: Settings, val title: String, val items: List<BaseItem>, val currentPosition: Int)
 
 fun loadPreview(
         bibleReadingManager: BibleReadingManager,
@@ -37,16 +37,25 @@ fun loadPreview(
         verseIndex: VerseIndex,
         converter: List<Verse>.() -> List<BaseItem>
 ): Flow<BaseViewModel.ViewData<PreviewViewData>> = viewData {
+    loadPreviewV2(bibleReadingManager, settingsManager, verseIndex, converter)
+}
+
+suspend fun loadPreviewV2(
+    bibleReadingManager: BibleReadingManager,
+    settingsManager: SettingsManager,
+    verseIndex: VerseIndex,
+    converter: List<Verse>.() -> List<BaseItem>
+): PreviewViewData {
     if (!verseIndex.isValid()) {
         throw IllegalArgumentException("Verse index [$verseIndex] is invalid")
     }
 
     val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-    PreviewViewData(
-            settings = settingsManager.settings().first(),
-            title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",
-            items = converter(bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex)),
-            currentPosition = verseIndex.verseIndex
+    return PreviewViewData(
+        settings = settingsManager.settings().first(),
+        title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",
+        items = converter(bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex)),
+        currentPosition = verseIndex.verseIndex
     )
 }
 

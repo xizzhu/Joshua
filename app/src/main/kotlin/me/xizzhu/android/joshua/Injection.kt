@@ -45,6 +45,10 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideCoroutineDispatcherProvider(): CoroutineDispatcherProvider = DefaultCoroutineDispatcherProvider()
+
+    @Provides
+    @Singleton
     fun provideAppScope(): CoroutineScope = appScope
 
     @Provides
@@ -57,67 +61,67 @@ object AppModule {
                              highlightRepository: VerseAnnotationRepository<Highlight>,
                              noteRepository: VerseAnnotationRepository<Note>,
                              readingProgressRepository: ReadingProgressRepository): BackupManager =
-            BackupManager(BackupJsonSerializer(), bookmarkRepository, highlightRepository, noteRepository, readingProgressRepository)
+        BackupManager(BackupJsonSerializer(), bookmarkRepository, highlightRepository, noteRepository, readingProgressRepository)
 
     @Provides
     @Singleton
     fun provideBibleReadingManager(
-            bibleReadingRepository: BibleReadingRepository,
-            translationRepository: TranslationRepository,
-            appScope: CoroutineScope
+        bibleReadingRepository: BibleReadingRepository,
+        translationRepository: TranslationRepository,
+        appScope: CoroutineScope
     ): BibleReadingManager = BibleReadingManager(bibleReadingRepository, translationRepository, appScope)
 
     @Provides
     @Singleton
     fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): VerseAnnotationManager<Bookmark> =
-            VerseAnnotationManager(bookmarkRepository)
+        VerseAnnotationManager(bookmarkRepository)
 
     @Provides
     @Singleton
     fun provideCrossReferencesManager(crossReferencesRepository: CrossReferencesRepository): CrossReferencesManager =
-            CrossReferencesManager(crossReferencesRepository)
+        CrossReferencesManager(crossReferencesRepository)
 
     @Provides
     @Singleton
     fun provideHighlightManager(highlightRepository: VerseAnnotationRepository<Highlight>): VerseAnnotationManager<Highlight> =
-            VerseAnnotationManager(highlightRepository)
+        VerseAnnotationManager(highlightRepository)
 
     @Provides
     @Singleton
     fun provideNoteManager(noteRepository: VerseAnnotationRepository<Note>): VerseAnnotationManager<Note> =
-            VerseAnnotationManager(noteRepository)
+        VerseAnnotationManager(noteRepository)
 
     @Provides
     @Singleton
     fun provideReadingProgressManager(
-            bibleReadingRepository: BibleReadingRepository,
-            readingProgressRepository: ReadingProgressRepository,
-            appScope: CoroutineScope
+        bibleReadingRepository: BibleReadingRepository,
+        readingProgressRepository: ReadingProgressRepository,
+        appScope: CoroutineScope
     ): ReadingProgressManager = ReadingProgressManager(bibleReadingRepository, readingProgressRepository, appScope)
 
     @Provides
     @Singleton
     fun provideSearchManager(
-            bibleReadingRepository: BibleReadingRepository,
-            bookmarkRepository: VerseAnnotationRepository<Bookmark>,
-            highlightRepository: VerseAnnotationRepository<Highlight>,
-            noteRepository: VerseAnnotationRepository<Note>
+        bibleReadingRepository: BibleReadingRepository,
+        bookmarkRepository: VerseAnnotationRepository<Bookmark>,
+        highlightRepository: VerseAnnotationRepository<Highlight>,
+        noteRepository: VerseAnnotationRepository<Note>
     ): SearchManager = SearchManager(bibleReadingRepository, bookmarkRepository, highlightRepository, noteRepository)
 
     @Provides
     @Singleton
     fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager =
-            SettingsManager(settingsRepository)
+        SettingsManager(settingsRepository)
 
     @Provides
     @Singleton
     fun provideStrongNumberManager(strongNumberRepository: StrongNumberRepository): StrongNumberManager =
-            StrongNumberManager(strongNumberRepository)
+        StrongNumberManager(strongNumberRepository)
 
     @Provides
     @Singleton
     fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
-            TranslationManager(translationRepository)
+        TranslationManager(translationRepository)
 }
 
 @Module
@@ -130,45 +134,45 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideBibleReadingRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): BibleReadingRepository =
-            BibleReadingRepository(AndroidReadingStorage(androidDatabase), appScope)
+        BibleReadingRepository(AndroidReadingStorage(androidDatabase), appScope)
 
     @Provides
     @Singleton
     fun provideBookmarkRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): VerseAnnotationRepository<Bookmark> =
-            VerseAnnotationRepository(AndroidBookmarkStorage(androidDatabase), appScope)
+        VerseAnnotationRepository(AndroidBookmarkStorage(androidDatabase), appScope)
 
     @Provides
     @Singleton
     fun provideCrossReferencesRepository(app: App, androidDatabase: AndroidDatabase): CrossReferencesRepository =
-            CrossReferencesRepository(AndroidCrossReferencesStorage(androidDatabase), HttpCrossReferencesService(app))
+        CrossReferencesRepository(AndroidCrossReferencesStorage(androidDatabase), HttpCrossReferencesService(app))
 
     @Provides
     @Singleton
     fun provideHighlightRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): VerseAnnotationRepository<Highlight> =
-            VerseAnnotationRepository(AndroidHighlightStorage(androidDatabase), appScope)
+        VerseAnnotationRepository(AndroidHighlightStorage(androidDatabase), appScope)
 
     @Provides
     @Singleton
     fun provideNoteRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): VerseAnnotationRepository<Note> =
-            VerseAnnotationRepository(AndroidNoteStorage(androidDatabase), appScope)
+        VerseAnnotationRepository(AndroidNoteStorage(androidDatabase), appScope)
 
     @Provides
     @Singleton
     fun provideReadingProgressRepository(androidDatabase: AndroidDatabase): ReadingProgressRepository =
-            ReadingProgressRepository(AndroidReadingProgressStorage(androidDatabase))
+        ReadingProgressRepository(AndroidReadingProgressStorage(androidDatabase))
 
     @Provides
     @Singleton
     fun provideSettingsRepository(androidDatabase: AndroidDatabase, appScope: CoroutineScope): SettingsRepository =
-            SettingsRepository(AndroidSettingsStorage(androidDatabase), appScope)
+        SettingsRepository(AndroidSettingsStorage(androidDatabase), appScope)
 
     @Provides
     @Singleton
     fun provideStrongNumberRepository(app: App, androidDatabase: AndroidDatabase): StrongNumberRepository =
-            StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase), HttpStrongNumberService(app))
+        StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase), HttpStrongNumberService(app))
 
     @Provides
     @Singleton
     fun provideTranslationRepository(app: App, androidDatabase: AndroidDatabase, appScope: CoroutineScope): TranslationRepository =
-            TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService(app), appScope)
+        TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService(app), appScope)
 }
