@@ -21,15 +21,9 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withContext
-import me.xizzhu.android.joshua.core.Bible
-import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.repository.remote.RemoteCrossReferences
 import me.xizzhu.android.joshua.core.repository.remote.RemoteCrossReferencesStorage
-import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberStorage
-import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberIndexes
-import me.xizzhu.android.joshua.core.repository.remote.RemoteStrongNumberWords
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream

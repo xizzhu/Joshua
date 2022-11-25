@@ -45,7 +45,6 @@ import me.xizzhu.android.joshua.tests.TestTimeProvider
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.ui.recyclerview.TextItem
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
-import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

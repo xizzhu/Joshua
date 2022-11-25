@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.reading.detail
 
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.StrongNumber
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -26,7 +25,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class CrossReferenceItemTest : BaseUnitTest() {
