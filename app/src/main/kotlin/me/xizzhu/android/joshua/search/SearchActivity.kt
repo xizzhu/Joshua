@@ -20,23 +20,18 @@ import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
 import android.provider.SearchRecentSuggestions
-import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.databinding.ActivitySearchBinding
-import me.xizzhu.android.joshua.infra.BaseActivity
-import me.xizzhu.android.joshua.infra.onEach
-import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.infra.onSuccess
+import me.xizzhu.android.joshua.infra.BaseActivityV2
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.hideKeyboard
@@ -44,120 +39,137 @@ import me.xizzhu.android.joshua.ui.listDialog
 import me.xizzhu.android.joshua.ui.toast
 
 @AndroidEntryPoint
-class SearchActivity : BaseActivity<ActivitySearchBinding, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback, SearchVersePreviewItem.Callback {
-    private val searchViewModel: SearchViewModel by viewModels()
-
+class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.ViewAction, SearchViewModel.ViewState, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback, SearchVersePreviewItem.Callback {
     private lateinit var searchRecentSuggestions: SearchRecentSuggestions
+
+    override val viewModel: SearchViewModel by viewModels()
+
+    override fun inflateViewBinding(): ActivitySearchBinding = ActivitySearchBinding.inflate(layoutInflater)
+
+    override fun onViewActionEmitted(viewAction: SearchViewModel.ViewAction) = when (viewAction) {
+        SearchViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING)
+    }
+
+    override fun onViewStateUpdated(viewState: SearchViewModel.ViewState) = with(viewBinding) {
+        viewState.settings?.let { searchResult.setSettings(it) }
+
+        if (viewState.loading) {
+            loadingSpinner.fadeIn()
+            searchResult.isVisible = false
+        } else {
+            if (viewState.instantSearch) {
+                searchResult.isVisible = true
+            } else {
+                searchResult.fadeIn()
+            }
+
+            loadingSpinner.isVisible = false
+        }
+
+        viewState.searchConfig?.let { searchConfig ->
+            toolbar.setSearchConfiguration(
+                includeOldTestament = searchConfig.includeOldTestament,
+                includeNewTestament = searchConfig.includeNewTestament,
+                includeBookmarks = searchConfig.includeBookmarks,
+                includeHighlights = searchConfig.includeHighlights,
+                includeNotes = searchConfig.includeNotes,
+            )
+        }
+
+        searchResult.setItems(viewState.items)
+        searchResult.scrollToPosition(0)
+
+        viewState.preview?.let { preview ->
+            listDialog(
+                title = preview.title,
+                settings = preview.settings,
+                items = preview.items,
+                selected = preview.currentPosition,
+                onDismiss = { viewModel.markPreviewAsClosed() }
+            )
+        }
+
+        viewState.toast?.let {
+            toast(it)
+            viewModel.markToastAsShown()
+        }
+
+        when (val error = viewState.error) {
+            is SearchViewModel.ViewState.Error.PreviewLoadingError -> {
+                viewModel.markErrorAsShown(error)
+
+                // Very unlikely to fail, so just falls back to open the verse.
+                openVerse(error.verseToPreview)
+            }
+            is SearchViewModel.ViewState.Error.SearchConfigUpdatingError -> {
+                toast(R.string.toast_unknown_error)
+                viewModel.markErrorAsShown(error)
+            }
+            is SearchViewModel.ViewState.Error.VerseOpeningError -> {
+                dialog(
+                    cancelable = true,
+                    title = R.string.dialog_title_error,
+                    message = R.string.dialog_message_failed_to_select_verse,
+                    onPositive = { _, _ -> openVerse(error.verseToOpen) },
+                    onDismiss = { viewModel.markErrorAsShown(error) }
+                )
+            }
+            is SearchViewModel.ViewState.Error.VerseSearchingError -> {
+                dialog(
+                    cancelable = false,
+                    title = R.string.dialog_title_error,
+                    message = R.string.dialog_message_failed_to_search,
+                    onPositive = { _, _ -> viewModel.retrySearch() },
+                    onNegative = { _, _ -> finish() },
+                    onDismiss = { viewModel.markErrorAsShown(error) }
+                )
+            }
+            null -> {
+                // Do nothing
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         searchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(this)
-        observeSettings()
-        observeSearchConfiguration()
-        observeSearchResults()
-        initializeListeners()
-    }
 
-    private fun observeSettings() {
-        searchViewModel.settings().onEach { viewBinding.searchResult.setSettings(it) }.launchIn(lifecycleScope)
-    }
-
-    private fun observeSearchConfiguration() {
-        searchViewModel.searchConfig()
-                .onSuccess { searchConfiguration ->
-                    viewBinding.toolbar.setSearchConfiguration(
-                            includeOldTestament = searchConfiguration.searchConfig.includeOldTestament,
-                            includeNewTestament = searchConfiguration.searchConfig.includeNewTestament,
-                            includeBookmarks = searchConfiguration.searchConfig.includeBookmarks,
-                            includeHighlights = searchConfiguration.searchConfig.includeHighlights,
-                            includeNotes = searchConfiguration.searchConfig.includeNotes,
-                    )
-                }
-                .launchIn(lifecycleScope)
-    }
-
-    private fun observeSearchResults() {
-        searchViewModel.searchResult()
-                .onEach(
-                        onLoading = {
-                            with(viewBinding) {
-                                loadingSpinner.fadeIn()
-                                searchResult.visibility = View.GONE
-                            }
-                        },
-                        onSuccess = { viewData ->
-                            with(viewBinding) {
-                                searchResult.setItems(viewData.items)
-                                searchResult.scrollToPosition(0)
-
-                                if (viewData.instanceSearch) {
-                                    searchResult.visibility = View.VISIBLE
-                                } else {
-                                    searchResult.fadeIn()
-                                    toast(viewData.toast)
-                                }
-
-                                loadingSpinner.visibility = View.GONE
-                            }
-                        },
-                        onFailure = {
-                            with(viewBinding) {
-                                loadingSpinner.visibility = View.GONE
-                                dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_search,
-                                        { _, _ -> searchViewModel.retrySearch() }, { _, _ -> finish() })
-                            }
-                        }
-                )
-                .launchIn(lifecycleScope)
-    }
-
-    private fun initializeListeners() {
         viewBinding.toolbar.initialize(
-                onIncludeOldTestamentChanged = { searchViewModel.includeOldTestament(it) },
-                onIncludeNewTestamentChanged = { searchViewModel.includeNewTestament(it) },
-                onIncludeBookmarksChanged = { searchViewModel.includeBookmarks(it) },
-                onIncludeHighlightsChanged = { searchViewModel.includeHighlights(it) },
-                onIncludeNotesChanged = { searchViewModel.includeNotes(it) },
-                onQueryTextListener = object : SearchView.OnQueryTextListener {
-                    override fun onQueryTextSubmit(query: String): Boolean {
-                        searchRecentSuggestions.saveRecentQuery(query, null)
-                        searchViewModel.search(query, false)
-                        viewBinding.toolbar.hideKeyboard()
+            onIncludeOldTestamentChanged = { viewModel.includeOldTestament(it) },
+            onIncludeNewTestamentChanged = { viewModel.includeNewTestament(it) },
+            onIncludeBookmarksChanged = { viewModel.includeBookmarks(it) },
+            onIncludeHighlightsChanged = { viewModel.includeHighlights(it) },
+            onIncludeNotesChanged = { viewModel.includeNotes(it) },
+            onQueryTextListener = object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    searchRecentSuggestions.saveRecentQuery(query, null)
+                    viewModel.search(query, false)
+                    viewBinding.toolbar.hideKeyboard()
 
-                        // so that the system can close the search suggestion
-                        return false
-                    }
+                    // so that the system can close the search suggestion
+                    return false
+                }
 
-                    override fun onQueryTextChange(newText: String): Boolean {
-                        searchViewModel.search(newText, true)
-                        return true
-                    }
-                },
-                clearHistory = { lifecycleScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() } }
+                override fun onQueryTextChange(newText: String): Boolean {
+                    viewModel.search(newText, true)
+                    return true
+                }
+            },
+            clearHistory = { lifecycleScope.launch(Dispatchers.IO) { searchRecentSuggestions.clearHistory() } }
         )
 
         // It's possible that the system has no SearchManager available, and on some devices getSearchableInfo() could return null.
         // See https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/45465ea5dc4f7722c6ce6b8889196249?time=last-seven-days&type=all
         (applicationContext.getSystemService(Context.SEARCH_SERVICE) as? SearchManager)
-                ?.getSearchableInfo(componentName)?.let { viewBinding.toolbar.setSearchableInfo(it) }
+            ?.getSearchableInfo(componentName)?.let { viewBinding.toolbar.setSearchableInfo(it) }
     }
 
-    override fun inflateViewBinding(): ActivitySearchBinding = ActivitySearchBinding.inflate(layoutInflater)
-
-    override fun viewModel(): SearchViewModel = searchViewModel
-
     override fun openVerse(verseToOpen: VerseIndex) {
-        searchViewModel.saveCurrentVerseIndex(verseToOpen)
-                .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
-                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
-                .launchIn(lifecycleScope)
+        viewModel.openVerse(verseToOpen)
     }
 
     override fun showPreview(verseIndex: VerseIndex) {
-        searchViewModel.loadVersesForPreview(verseIndex)
-                .onSuccess { preview -> listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) }
-                .onFailure { openVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
-                .launchIn(lifecycleScope)
+        viewModel.loadPreview(verseIndex)
     }
 }
