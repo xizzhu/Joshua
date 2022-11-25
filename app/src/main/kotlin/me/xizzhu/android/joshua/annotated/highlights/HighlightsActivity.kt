@@ -17,28 +17,43 @@
 package me.xizzhu.android.joshua.annotated.highlights
 
 import android.app.Application
+import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesActivity
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
+import me.xizzhu.android.joshua.core.provider.TimeProvider
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import javax.inject.Inject
 
 @HiltViewModel
 class HighlightsViewModel @Inject constructor(
-        bibleReadingManager: BibleReadingManager,
-        highlightsManager: VerseAnnotationManager<Highlight>,
-        settingsManager: SettingsManager,
-        application: Application
-) : AnnotatedVersesViewModel<Highlight>(bibleReadingManager, highlightsManager, R.string.text_no_highlights, settingsManager, application) {
+    bibleReadingManager: BibleReadingManager,
+    highlightsManager: VerseAnnotationManager<Highlight>,
+    settingsManager: SettingsManager,
+    coroutineDispatcherProvider: CoroutineDispatcherProvider,
+    timeProvider: TimeProvider,
+    application: Application
+) : AnnotatedVersesViewModel<Highlight>(
+    bibleReadingManager = bibleReadingManager,
+    verseAnnotationManager = highlightsManager,
+    noItemText = R.string.text_no_highlights,
+    settingsManager = settingsManager,
+    coroutineDispatcherProvider = coroutineDispatcherProvider,
+    timeProvider = timeProvider,
+    application = application
+) {
     override fun buildBaseItem(annotatedVerse: Highlight, bookName: String, bookShortName: String, verseText: String, sortOrder: Int): BaseItem =
-            HighlightItem(annotatedVerse.verseIndex, bookName, bookShortName, verseText, annotatedVerse.color, sortOrder)
+        HighlightItem(annotatedVerse.verseIndex, bookName, bookShortName, verseText, annotatedVerse.color, sortOrder)
 }
 
 @AndroidEntryPoint
-class HighlightsActivity : AnnotatedVersesActivity<Highlight, HighlightsViewModel>(R.string.title_highlights)
+class HighlightsActivity : AnnotatedVersesActivity<Highlight, HighlightsViewModel>(R.string.title_highlights) {
+    override val viewModel: HighlightsViewModel by viewModels()
+}

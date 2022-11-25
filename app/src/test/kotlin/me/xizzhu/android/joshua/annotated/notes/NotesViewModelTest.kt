@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.tests.TestTimeProvider
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -47,23 +48,21 @@ class NotesViewModelTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        bibleReadingManager = mockk()
-        every { bibleReadingManager.currentTranslation() } returns emptyFlow()
-        notesManager = mockk()
-        every { notesManager.sortOrder() } returns emptyFlow()
-        settingsManager = mockk()
+        bibleReadingManager = mockk<BibleReadingManager>().apply { every { currentTranslation() } returns emptyFlow() }
+        notesManager = mockk<VerseAnnotationManager<Note>>().apply { every { sortOrder() } returns emptyFlow() }
+        settingsManager = mockk<SettingsManager>().apply { every { settings() } returns emptyFlow() }
         application = mockk()
-        notesViewModel = NotesViewModel(bibleReadingManager, notesManager, settingsManager, application)
+        notesViewModel = NotesViewModel(bibleReadingManager, notesManager, settingsManager, testCoroutineDispatcherProvider, TestTimeProvider(), application)
     }
 
     @Test
     fun `test buildBaseItem`() {
         val actual = notesViewModel.buildBaseItem(
-                annotatedVerse = Note(VerseIndex(0, 0, 0), "a note", 1L),
-                bookName = MockContents.kjvBookNames[0],
-                bookShortName = MockContents.kjvBookShortNames[0],
-                verseText = MockContents.kjvVerses[0].text.text,
-                sortOrder = Constants.SORT_BY_BOOK
+            annotatedVerse = Note(VerseIndex(0, 0, 0), "a note", 1L),
+            bookName = MockContents.kjvBookNames[0],
+            bookShortName = MockContents.kjvBookShortNames[0],
+            verseText = MockContents.kjvVerses[0].text.text,
+            sortOrder = Constants.SORT_BY_BOOK
         )
         assertTrue(actual is NoteItem)
         assertEquals(VerseIndex(0, 0, 0), actual.verseIndex)

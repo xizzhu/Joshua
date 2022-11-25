@@ -25,6 +25,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import me.xizzhu.android.joshua.core.*
+import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
+import me.xizzhu.android.joshua.core.provider.DefaultCoroutineDispatcherProvider
+import me.xizzhu.android.joshua.core.provider.DefaultTimeProvider
+import me.xizzhu.android.joshua.core.provider.TimeProvider
 import me.xizzhu.android.joshua.core.repository.*
 import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
@@ -42,10 +46,6 @@ object AppModule {
     @Provides
     @Singleton
     fun provideApp(application: Application): App = application as App
-
-    @Provides
-    @Singleton
-    fun provideCoroutineDispatcherProvider(): CoroutineDispatcherProvider = DefaultCoroutineDispatcherProvider()
 
     @Provides
     @Singleton
@@ -122,6 +122,18 @@ object AppModule {
     @Singleton
     fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
         TranslationManager(translationRepository)
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object ProviderModule {
+    @Provides
+    @Singleton
+    fun provideCoroutineDispatcherProvider(): CoroutineDispatcherProvider = DefaultCoroutineDispatcherProvider()
+
+    @Provides
+    @Singleton
+    fun provideTimeProvider(): TimeProvider = DefaultTimeProvider()
 }
 
 @Module

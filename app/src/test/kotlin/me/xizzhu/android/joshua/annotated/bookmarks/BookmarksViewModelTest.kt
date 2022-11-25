@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.tests.TestTimeProvider
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -47,23 +48,21 @@ class BookmarksViewModelTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        bibleReadingManager = mockk()
-        every { bibleReadingManager.currentTranslation() } returns emptyFlow()
-        bookmarksManager = mockk()
-        every { bookmarksManager.sortOrder() } returns emptyFlow()
-        settingsManager = mockk()
+        bibleReadingManager = mockk<BibleReadingManager>().apply { every { currentTranslation() } returns emptyFlow() }
+        bookmarksManager = mockk<VerseAnnotationManager<Bookmark>>().apply { every { sortOrder() } returns emptyFlow() }
+        settingsManager = mockk<SettingsManager>().apply { every { settings() } returns emptyFlow() }
         application = mockk()
-        bookmarksViewModel = BookmarksViewModel(bibleReadingManager, bookmarksManager, settingsManager, application)
+        bookmarksViewModel = BookmarksViewModel(bibleReadingManager, bookmarksManager, settingsManager, testCoroutineDispatcherProvider, TestTimeProvider(), application)
     }
 
     @Test
     fun `test buildBaseItem`() {
         val actual = bookmarksViewModel.buildBaseItem(
-                annotatedVerse = Bookmark(VerseIndex(0, 0, 0), 1L),
-                bookName = MockContents.kjvBookNames[0],
-                bookShortName = MockContents.kjvBookShortNames[0],
-                verseText = MockContents.kjvVerses[0].text.text,
-                sortOrder = Constants.SORT_BY_BOOK
+            annotatedVerse = Bookmark(VerseIndex(0, 0, 0), 1L),
+            bookName = MockContents.kjvBookNames[0],
+            bookShortName = MockContents.kjvBookShortNames[0],
+            verseText = MockContents.kjvVerses[0].text.text,
+            sortOrder = Constants.SORT_BY_BOOK
         )
         assertTrue(actual is BookmarkItem)
         assertEquals(VerseIndex(0, 0, 0), actual.verseIndex)

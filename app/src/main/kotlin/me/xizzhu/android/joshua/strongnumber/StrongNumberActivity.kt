@@ -41,16 +41,12 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
         fun strongNumber(savedStateHandle: SavedStateHandle): String = savedStateHandle.get<String>(KEY_STRONG_NUMBER).orEmpty()
     }
 
-    private val strongNumberViewModel: StrongNumberViewModel by viewModels()
+    override val viewModel: StrongNumberViewModel by viewModels()
 
     override fun inflateViewBinding(): ActivityStrongNumberBinding = ActivityStrongNumberBinding.inflate(layoutInflater)
 
-    override fun viewModel(): StrongNumberViewModel = strongNumberViewModel
-
-    override fun onViewActionEmitted(viewAction: StrongNumberViewModel.ViewAction) {
-        when (viewAction) {
-            is StrongNumberViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING)
-        }
+    override fun onViewActionEmitted(viewAction: StrongNumberViewModel.ViewAction) = when (viewAction) {
+        is StrongNumberViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING)
     }
 
     override fun onViewStateUpdated(viewState: StrongNumberViewModel.ViewState) = with(viewBinding) {
@@ -67,12 +63,18 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
         strongNumberList.setItems(viewState.items)
 
         viewState.preview?.let { preview ->
-            listDialog(preview.title, preview.settings, preview.items, preview.currentPosition)
+            listDialog(
+                title = preview.title,
+                settings = preview.settings,
+                items = preview.items,
+                selected = preview.currentPosition,
+                onDismiss = { viewModel.markPreviewAsClosed() }
+            )
         }
 
         when (val error = viewState.error) {
             is StrongNumberViewModel.ViewState.Error.PreviewLoadingError -> {
-                strongNumberViewModel.markErrorAsShown(error)
+                viewModel.markErrorAsShown(error)
 
                 // Very unlikely to fail, so just falls back to open the verse.
                 openVerse(error.verseToPreview)
@@ -82,9 +84,9 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
                     cancelable = false,
                     title = R.string.dialog_title_error,
                     message = R.string.dialog_message_failed_to_load_strong_numbers,
-                    onPositive = { _, _ -> strongNumberViewModel.loadStrongNumber() },
+                    onPositive = { _, _ -> viewModel.loadStrongNumber() },
                     onNegative = { _, _ -> finish() },
-                    onDismiss = { strongNumberViewModel.markErrorAsShown(error) }
+                    onDismiss = { viewModel.markErrorAsShown(error) }
                 )
             }
             is StrongNumberViewModel.ViewState.Error.VerseOpeningError -> {
@@ -93,7 +95,7 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
                     title = R.string.dialog_title_error,
                     message = R.string.dialog_message_failed_to_select_verse,
                     onPositive = { _, _ -> openVerse(error.verseToOpen) },
-                    onDismiss = { strongNumberViewModel.markErrorAsShown(error) }
+                    onDismiss = { viewModel.markErrorAsShown(error) }
                 )
             }
             null -> {
@@ -103,10 +105,10 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
     }
 
     override fun openVerse(verseToOpen: VerseIndex) {
-        strongNumberViewModel.openVerse(verseToOpen)
+        viewModel.openVerse(verseToOpen)
     }
 
     override fun showPreview(verseIndex: VerseIndex) {
-        strongNumberViewModel.loadPreview(verseIndex)
+        viewModel.loadPreview(verseIndex)
     }
 }

@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.BibleReadingManager
-import me.xizzhu.android.joshua.core.CoroutineDispatcherProvider
+import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.StrongNumber
@@ -139,7 +139,7 @@ class StrongNumberViewModel @Inject constructor(
     }
 
     fun openVerse(verseToOpen: VerseIndex) {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineDispatcherProvider.default) {
             runCatching {
                 bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
                 emitViewAction(ViewAction.OpenReadingScreen)
@@ -151,7 +151,7 @@ class StrongNumberViewModel @Inject constructor(
     }
 
     fun loadPreview(verseToPreview: VerseIndex) {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineDispatcherProvider.default) {
             runCatching {
                 val preview = loadPreviewV2(bibleReadingManager, settingsManager, verseToPreview, ::toVersePreviewItems)
                 updateViewState { it.copy(preview = preview) }
@@ -160,6 +160,10 @@ class StrongNumberViewModel @Inject constructor(
                 updateViewState { it.copy(error = ViewState.Error.PreviewLoadingError(verseToPreview)) }
             }
         }
+    }
+
+    fun markPreviewAsClosed() {
+        updateViewState { it.copy(preview = null) }
     }
 
     fun markErrorAsShown(error: ViewState.Error) {
