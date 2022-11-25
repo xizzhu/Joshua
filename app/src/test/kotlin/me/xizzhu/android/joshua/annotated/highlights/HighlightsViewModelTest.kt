@@ -28,6 +28,7 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.tests.TestTimeProvider
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -47,23 +48,21 @@ class HighlightsViewModelTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        bibleReadingManager = mockk()
-        every { bibleReadingManager.currentTranslation() } returns emptyFlow()
-        highlightsManager = mockk()
-        every { highlightsManager.sortOrder() } returns emptyFlow()
-        settingsManager = mockk()
+        bibleReadingManager = mockk<BibleReadingManager>().apply { every { currentTranslation() } returns emptyFlow() }
+        highlightsManager = mockk<VerseAnnotationManager<Highlight>>().apply { every { sortOrder() } returns emptyFlow() }
+        settingsManager = mockk<SettingsManager>().apply { every { settings() } returns emptyFlow() }
         application = mockk()
-        highlightsViewModel = HighlightsViewModel(bibleReadingManager, highlightsManager, settingsManager, application)
+        highlightsViewModel = HighlightsViewModel(bibleReadingManager, highlightsManager, settingsManager, testCoroutineDispatcherProvider, TestTimeProvider(), application)
     }
 
     @Test
     fun `test buildBaseItem`() {
         val actual = highlightsViewModel.buildBaseItem(
-                annotatedVerse = Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_BLUE, 1L),
-                bookName = MockContents.kjvBookNames[0],
-                bookShortName = MockContents.kjvBookShortNames[0],
-                verseText = MockContents.kjvVerses[0].text.text,
-                sortOrder = Constants.SORT_BY_BOOK
+            annotatedVerse = Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_BLUE, 1L),
+            bookName = MockContents.kjvBookNames[0],
+            bookShortName = MockContents.kjvBookShortNames[0],
+            verseText = MockContents.kjvVerses[0].text.text,
+            sortOrder = Constants.SORT_BY_BOOK
         )
         assertTrue(actual is HighlightItem)
         assertEquals(VerseIndex(0, 0, 0), actual.verseIndex)

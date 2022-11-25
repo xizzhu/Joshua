@@ -33,11 +33,11 @@ abstract class BaseActivityV2<VB : ViewBinding, ViewAction, ViewState, VM : Base
     @Inject
     protected lateinit var navigator: Navigator
 
+    protected abstract val viewModel: VM
+
     protected lateinit var viewBinding: VB
 
     protected abstract fun inflateViewBinding(): VB
-
-    protected abstract fun viewModel(): VM
 
     protected abstract fun onViewActionEmitted(viewAction: ViewAction)
 
@@ -51,8 +51,8 @@ abstract class BaseActivityV2<VB : ViewBinding, ViewAction, ViewState, VM : Base
         viewBinding = inflateViewBinding()
         setContentView(viewBinding.root)
 
-        viewModel().viewAction().onEach(::onViewActionEmitted).launchIn(lifecycleScope)
-        viewModel().viewState().onEach(::onViewStateUpdated).launchIn(lifecycleScope)
+        viewModel.viewAction().onEach(::onViewActionEmitted).launchIn(lifecycleScope)
+        viewModel.viewState().onEach(::onViewStateUpdated).launchIn(lifecycleScope)
     }
 
     @CallSuper

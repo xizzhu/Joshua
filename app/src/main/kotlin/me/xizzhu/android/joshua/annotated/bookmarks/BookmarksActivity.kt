@@ -17,25 +17,43 @@
 package me.xizzhu.android.joshua.annotated.bookmarks
 
 import android.app.Application
+import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesActivity
 import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
+import me.xizzhu.android.joshua.core.provider.TimeProvider
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import javax.inject.Inject
 
-class BookmarksViewModel(
-        bibleReadingManager: BibleReadingManager,
-        bookmarksManager: VerseAnnotationManager<Bookmark>,
-        settingsManager: SettingsManager,
-        application: Application
-) : AnnotatedVersesViewModel<Bookmark>(bibleReadingManager, bookmarksManager, R.string.text_no_bookmarks, settingsManager, application) {
+@HiltViewModel
+class BookmarksViewModel @Inject constructor(
+    bibleReadingManager: BibleReadingManager,
+    bookmarksManager: VerseAnnotationManager<Bookmark>,
+    settingsManager: SettingsManager,
+    coroutineDispatcherProvider: CoroutineDispatcherProvider,
+    timeProvider: TimeProvider,
+    application: Application
+) : AnnotatedVersesViewModel<Bookmark>(
+    bibleReadingManager = bibleReadingManager,
+    verseAnnotationManager = bookmarksManager,
+    noItemText = R.string.text_no_bookmarks,
+    settingsManager = settingsManager,
+    coroutineDispatcherProvider = coroutineDispatcherProvider,
+    timeProvider = timeProvider,
+    application = application
+) {
     override fun buildBaseItem(annotatedVerse: Bookmark, bookName: String, bookShortName: String, verseText: String, sortOrder: Int): BaseItem =
-            BookmarkItem(annotatedVerse.verseIndex, bookName, bookShortName, verseText, sortOrder)
+        BookmarkItem(annotatedVerse.verseIndex, bookName, bookShortName, verseText, sortOrder)
 }
 
 @AndroidEntryPoint
-class BookmarksActivity : AnnotatedVersesActivity<Bookmark, BookmarksViewModel>(R.string.title_bookmarks)
+class BookmarksActivity : AnnotatedVersesActivity<Bookmark, BookmarksViewModel>(R.string.title_bookmarks) {
+    override val viewModel: BookmarksViewModel by viewModels()
+}

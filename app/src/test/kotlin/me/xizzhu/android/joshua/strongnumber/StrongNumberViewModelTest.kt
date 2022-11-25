@@ -249,5 +249,17 @@ class StrongNumberViewModelTest : BaseUnitTest() {
         assertEquals(3, actual.preview?.items?.size)
         assertEquals(1, actual.preview?.currentPosition)
         assertNull(actual.error)
+
+        strongNumberViewModel.markPreviewAsClosed()
+        assertEquals(
+            StrongNumberViewModel.ViewState(
+                settings = null,
+                loading = false,
+                items = emptyList(),
+                preview = null,
+                error = null
+            ),
+            strongNumberViewModel.viewState().first()
+        )
     }
 }
