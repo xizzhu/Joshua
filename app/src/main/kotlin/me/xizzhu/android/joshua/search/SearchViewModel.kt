@@ -65,6 +65,7 @@ class SearchViewModel @Inject constructor(
         searchConfig = null,
         instantSearch = false,
         items = emptyList(),
+        scrollItemsToPosition = -1,
         preview = null,
         toast = null,
         error = null,
@@ -80,6 +81,7 @@ class SearchViewModel @Inject constructor(
         val searchConfig: SearchConfiguration?,
         val instantSearch: Boolean,
         val items: List<BaseItem>,
+        val scrollItemsToPosition: Int,
         val preview: PreviewViewData?,
         val toast: String?,
         val error: Error?,
@@ -188,6 +190,7 @@ class SearchViewModel @Inject constructor(
                         loading = false,
                         instantSearch = instantSearch,
                         items = items,
+                        scrollItemsToPosition = 0,
                         toast = toast,
                     )
                 }
@@ -288,6 +291,10 @@ class SearchViewModel @Inject constructor(
         }
 
         return items
+    }
+
+    fun markItemsAsScrolled() {
+        updateViewState { it.copy(scrollItemsToPosition = -1) }
     }
 
     fun markPreviewAsClosed() {

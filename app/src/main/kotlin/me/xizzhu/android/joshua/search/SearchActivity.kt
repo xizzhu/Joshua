@@ -77,7 +77,10 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
         }
 
         searchResult.setItems(viewState.items)
-        searchResult.scrollToPosition(0)
+        if (viewState.scrollItemsToPosition >= 0) {
+            searchResult.scrollToPosition(viewState.scrollItemsToPosition)
+            viewModel.markItemsAsScrolled()
+        }
 
         viewState.preview?.let { preview ->
             listDialog(

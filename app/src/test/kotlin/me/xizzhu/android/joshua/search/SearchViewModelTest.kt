@@ -88,6 +88,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = null
@@ -110,6 +111,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = SearchViewModel.ViewState.Error.SearchConfigUpdatingError
@@ -127,6 +129,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = SearchViewModel.ViewState.Error.SearchConfigUpdatingError
@@ -144,6 +147,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = null
@@ -172,6 +176,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = null
@@ -201,6 +206,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = null
@@ -230,6 +236,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = null
@@ -259,6 +266,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = null
@@ -288,6 +296,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = null
@@ -311,6 +320,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = null
@@ -335,6 +345,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = SearchViewModel.ViewState.Error.VerseSearchingError
@@ -357,6 +368,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = 0,
                 preview = null,
                 toast = "0 result(s) found.",
                 error = null
@@ -374,6 +386,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = 0,
                 preview = null,
                 toast = null,
                 error = null
@@ -398,6 +411,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = true,
                 items = emptyList(),
+                scrollItemsToPosition = 0,
                 preview = null,
                 toast = null,
                 error = null
@@ -416,6 +430,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = true,
                 items = emptyList(),
+                scrollItemsToPosition = 0,
                 preview = null,
                 toast = null,
                 error = null
@@ -676,6 +691,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = SearchViewModel.ViewState.Error.VerseOpeningError(VerseIndex(0, 0, 0))
@@ -701,6 +717,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = null
@@ -723,6 +740,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = SearchViewModel.ViewState.Error.PreviewLoadingError(VerseIndex.INVALID)
@@ -783,6 +801,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 instantSearch = false,
                 items = emptyList(),
+                scrollItemsToPosition = -1,
                 preview = null,
                 toast = null,
                 error = null
