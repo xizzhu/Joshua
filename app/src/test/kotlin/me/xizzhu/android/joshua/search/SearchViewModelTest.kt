@@ -21,12 +21,13 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
@@ -47,376 +48,691 @@ class SearchViewModelTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        bibleReadingManager = mockk()
-        coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
-        coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
-        coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
-        coEvery { bibleReadingManager.readVerses(MockContents.kjvShortName, any()) } returns emptyMap()
+        bibleReadingManager = mockk<BibleReadingManager>().apply {
+            every { currentTranslation() } returns flowOf(MockContents.kjvShortName)
+            coEvery { readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
+            coEvery { readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
+            coEvery { readVerses(MockContents.kjvShortName, any()) } returns emptyMap()
+        }
+        searchManager = mockk<SearchManager>().apply {
+            every { configuration() } returns flowOf(SearchConfiguration(
+                includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+            ))
+            coEvery { search(any()) } returns SearchResult(emptyList(), emptyList(), emptyList(), emptyList())
+        }
+        settingsManager = mockk<SettingsManager>().apply {
+            every { settings() } returns emptyFlow()
+        }
+        application = mockk<Application>().apply {
+            every { getString(R.string.title_bookmarks) } returns "Bookmarks"
+            every { getString(R.string.title_highlights) } returns "Highlights"
+            every { getString(R.string.title_notes) } returns "Notes"
+            every { getString(R.string.toast_search_result, any()) } answers { "${(it.invocation.args[1] as Array<Any?>)[0]} result(s) found." }
+        }
 
-        searchManager = mockk()
-        every { searchManager.configuration() } returns flowOf(SearchConfiguration(true, true, true, true, true))
-        coEvery { searchManager.search(any()) } returns SearchResult(emptyList(), emptyList(), emptyList(), emptyList())
-
-        settingsManager = mockk()
-
-        application = mockk()
-        every { application.getString(R.string.title_bookmarks) } returns "Bookmarks"
-        every { application.getString(R.string.title_highlights) } returns "Highlights"
-        every { application.getString(R.string.title_notes) } returns "Notes"
-        every { application.getString(R.string.toast_search_result, any()) } answers { "${(it.invocation.args[1] as Array<Any?>)[0]} result(s) found." }
-
-        searchViewModel = SearchViewModel(bibleReadingManager, searchManager, settingsManager, application)
+        searchViewModel = SearchViewModel(bibleReadingManager, searchManager, settingsManager, testCoroutineDispatcherProvider, application)
     }
 
     @Test
-    fun `test includeOldTestament`() = runTest {
+    fun `test observing settings`() = runTest {
+        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
+
+        searchViewModel = SearchViewModel(bibleReadingManager, searchManager, settingsManager, testCoroutineDispatcherProvider, application)
+
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = Settings.DEFAULT,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
+    }
+
+    @Test
+    fun `test includeOldTestament(), with exception`() = runTest {
+        coEvery { searchManager.configuration() } throws RuntimeException("random exception")
+
+        searchViewModel.includeOldTestament(false)
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = SearchViewModel.ViewState.Error.SearchConfigUpdatingError
+            ),
+            searchViewModel.viewState().first()
+        )
+
+        searchViewModel.markErrorAsShown(SearchViewModel.ViewState.Error.VerseSearchingError)
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = SearchViewModel.ViewState.Error.SearchConfigUpdatingError
+            ),
+            searchViewModel.viewState().first()
+        )
+
+        searchViewModel.markErrorAsShown(SearchViewModel.ViewState.Error.SearchConfigUpdatingError)
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
+    }
+
+    @Test
+    fun `test includeOldTestament()`() = runTest {
         every {
             searchManager.saveConfiguration(SearchConfiguration(
-                    includeOldTestament = false, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                includeOldTestament = false, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
             ))
         } returns Unit
 
         searchViewModel.includeOldTestament(false)
         searchViewModel.includeOldTestament(true)
 
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
         verify(exactly = 1) { searchManager.saveConfiguration(any()) }
     }
 
     @Test
-    fun `test includeNewTestament`() = runTest {
+    fun `test includeNewTestament()`() = runTest {
         every {
             searchManager.saveConfiguration(SearchConfiguration(
-                    includeOldTestament = true, includeNewTestament = false, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                includeOldTestament = true, includeNewTestament = false, includeBookmarks = true, includeHighlights = true, includeNotes = true
             ))
         } returns Unit
 
         searchViewModel.includeNewTestament(false)
         searchViewModel.includeNewTestament(true)
 
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
         verify(exactly = 1) { searchManager.saveConfiguration(any()) }
     }
 
     @Test
-    fun `test includeBookmarks`() = runTest {
+    fun `test includeBookmarks()`() = runTest {
         every {
             searchManager.saveConfiguration(SearchConfiguration(
-                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = false, includeHighlights = true, includeNotes = true
+                includeOldTestament = true, includeNewTestament = true, includeBookmarks = false, includeHighlights = true, includeNotes = true
             ))
         } returns Unit
 
         searchViewModel.includeBookmarks(false)
         searchViewModel.includeBookmarks(true)
 
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
         verify(exactly = 1) { searchManager.saveConfiguration(any()) }
     }
 
     @Test
-    fun `test includeHighlights`() = runTest {
+    fun `test includeHighlights()`() = runTest {
         every {
             searchManager.saveConfiguration(SearchConfiguration(
-                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = false, includeNotes = true
+                includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = false, includeNotes = true
             ))
         } returns Unit
 
         searchViewModel.includeHighlights(false)
         searchViewModel.includeHighlights(true)
 
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
         verify(exactly = 1) { searchManager.saveConfiguration(any()) }
     }
 
     @Test
-    fun `test includeNotes`() = runTest {
+    fun `test includeNotes()`() = runTest {
         every {
             searchManager.saveConfiguration(SearchConfiguration(
-                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = false
+                includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = false
             ))
         } returns Unit
 
         searchViewModel.includeNotes(false)
         searchViewModel.includeNotes(true)
 
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
         verify(exactly = 1) { searchManager.saveConfiguration(any()) }
     }
 
     @Test
-    fun `test search() with empty query`() = runTest {
+    fun `test search(), with empty query`() = runTest {
         searchViewModel.search("", true)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertTrue(actual.data.items.isEmpty())
-        assertTrue(actual.data.query.isEmpty())
-        assertTrue(actual.data.instanceSearch)
-        assertTrue(actual.data.toast.isEmpty())
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
     }
 
     @Test
-    fun `test search() with one-character query`() = runTest {
-        searchViewModel.search("1", true)
+    fun `test search(), with exception`() = runTest {
+        every { bibleReadingManager.currentTranslation() } throws RuntimeException("random error")
+
+        searchViewModel.search("query", instanceSearch = false)
+        searchViewModel.retrySearch()
+
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = SearchViewModel.ViewState.Error.VerseSearchingError
+            ),
+            searchViewModel.viewState().first()
+        )
+    }
+
+    @Test
+    fun `test search(), with empty result`() = runTest {
+        searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertTrue(actual.data.items.isEmpty())
-        assertEquals("1", actual.data.query)
-        assertTrue(actual.data.instanceSearch)
-        assertTrue(actual.data.toast.isEmpty())
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = "0 result(s) found.",
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
+
+        searchViewModel.markToastAsShown()
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
     }
 
     @Test
-    fun `test search() with empty result`() = runTest {
-        searchViewModel.search("query", false)
-        delay(1000L)
-
-        searchViewModel.searchResult().first().assertSuccessEmpty("query", false)
-    }
-
-    private fun BaseViewModel.ViewData<SearchResultViewData>.assertSuccessEmpty(query: String, instanceSearch: Boolean) {
-        assertTrue(this is BaseViewModel.ViewData.Success)
-        assertTrue(data.items.isEmpty())
-        assertEquals(query, data.query)
-        assertEquals(instanceSearch, data.instanceSearch)
-        assertEquals("0 result(s) found.", data.toast)
-    }
-
-    @Test
-    fun `test calling search() multiple times`() = runTest {
+    fun `test search(), called multiple times`() = runTest {
         coEvery { searchManager.search("not used") } returns SearchResult(listOf(MockContents.kjvVerses[1]), emptyList(), emptyList(), emptyList())
         coEvery { searchManager.search("query") } returns SearchResult(listOf(MockContents.kjvVerses[0]), emptyList(), emptyList(), emptyList())
 
-        searchViewModel.search("invalid", true)
+        searchViewModel.search("invalid", instanceSearch = true)
         delay(1000L)
-        searchViewModel.searchResult().first().assertSuccessEmpty("invalid", true)
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = true,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
 
         searchViewModel.search("not used", false)
         delay(100L) // delay is not long enough, so the search should NOT be executed
-        searchViewModel.searchResult().first().assertSuccessEmpty("invalid", true)
-
-        searchViewModel.search("query", false)
-        delay(1000L)
-
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-
-        assertEquals(2, actual.data.items.size)
-        assertEquals("Genesis", (actual.data.items[0] as TitleItem).title.toString())
         assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = true,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
         )
 
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("1 result(s) found.", actual.data.toast)
+        searchViewModel.search("query", instanceSearch = false)
+        delay(1000L)
+
+        val actual = searchViewModel.viewState().first()
+        assertNull(actual.settings)
+        assertFalse(actual.loading)
+        assertEquals(
+            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+            actual.searchConfig
+        )
+        assertFalse(actual.instantSearch)
+        assertEquals(2, actual.items.size)
+        assertEquals("Genesis", (actual.items[0] as TitleItem).title.toString())
+        assertEquals(
+            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
+            (actual.items[1] as SearchVerseItem).textForDisplay.toString()
+        )
+        assertNull(actual.preview)
+        assertEquals("1 result(s) found.", actual.toast)
+        assertNull(actual.error)
     }
 
     @Test
-    fun `test search() with verses only`() = runTest {
+    fun `test search(), with verses only`() = runTest {
         coEvery { searchManager.search("query") } returns SearchResult(
-                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2], MockContents.kjvExtraVerses[0], MockContents.kjvExtraVerses[1]),
-                emptyList(),
-                emptyList(),
-                emptyList()
+            listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2], MockContents.kjvExtraVerses[0], MockContents.kjvExtraVerses[1]),
+            emptyList(),
+            emptyList(),
+            emptyList()
         )
 
-        searchViewModel.search("query", false)
+        searchViewModel.search("query", instanceSearch = true)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-
-        assertEquals(6, actual.data.items.size)
-        assertEquals("Genesis", (actual.data.items[0] as TitleItem).title.toString())
+        val actual = searchViewModel.viewState().first()
+        assertNull(actual.settings)
+        assertFalse(actual.loading)
         assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
+            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+            actual.searchConfig
+        )
+        assertTrue(actual.instantSearch)
+        assertEquals(6, actual.items.size)
+        assertEquals("Genesis", (actual.items[0] as TitleItem).title.toString())
+        assertEquals(
+            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
+            (actual.items[1] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
-                "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[2] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
+            (actual.items[2] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
-                "Gen. 10:10\nAnd the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar.",
-                (actual.data.items[3] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 10:10\nAnd the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar.",
+            (actual.items[3] as SearchVerseItem).textForDisplay.toString()
         )
-        assertEquals("Exodus", (actual.data.items[4] as TitleItem).title.toString())
+        assertEquals("Exodus", (actual.items[4] as TitleItem).title.toString())
         assertEquals(
-                "Ex. 23:19\nThe first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.",
-                (actual.data.items[5] as SearchVerseItem).textForDisplay.toString()
+            "Ex. 23:19\nThe first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.",
+            (actual.items[5] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("4 result(s) found.", actual.data.toast)
+        assertNull(actual.preview)
+        assertNull(actual.toast)
+        assertNull(actual.error)
     }
 
     @Test
-    fun `test search() with verses and bookmarks`() = runTest {
+    fun `test search(), with verses and bookmarks`() = runTest {
         coEvery { searchManager.search("query") } returns SearchResult(
-                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
-                listOf(Pair(Bookmark(VerseIndex(0, 0, 0), 12345L), MockContents.kjvVerses[0])),
-                emptyList(),
-                emptyList()
+            listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
+            listOf(Pair(Bookmark(VerseIndex(0, 0, 0), 12345L), MockContents.kjvVerses[0])),
+            emptyList(),
+            emptyList()
         )
 
-        searchViewModel.search("query", false)
+        searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-
-        assertEquals(5, actual.data.items.size)
-        assertEquals("Bookmarks", (actual.data.items[0] as TitleItem).title.toString())
+        val actual = searchViewModel.viewState().first()
+        assertNull(actual.settings)
+        assertFalse(actual.loading)
         assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
+            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+            actual.searchConfig
         )
-        assertEquals("Genesis", (actual.data.items[2] as TitleItem).title.toString())
+        assertFalse(actual.instantSearch)
+        assertEquals(5, actual.items.size)
+        assertEquals("Bookmarks", (actual.items[0] as TitleItem).title.toString())
         assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[3] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
+            (actual.items[1] as SearchVerseItem).textForDisplay.toString()
+        )
+        assertEquals("Genesis", (actual.items[2] as TitleItem).title.toString())
+        assertEquals(
+            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
+            (actual.items[3] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
-                "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[4] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
+            (actual.items[4] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("3 result(s) found.", actual.data.toast)
+        assertNull(actual.preview)
+        assertEquals("3 result(s) found.", actual.toast)
+        assertNull(actual.error)
     }
 
     @Test
-    fun `test search() with verses and highlights`() = runTest {
+    fun `test search(), with verses and highlights`() = runTest {
         coEvery { searchManager.search("query") } returns SearchResult(
-                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
-                emptyList(),
-                listOf(Pair(Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 12345L), MockContents.kjvVerses[0])),
-                emptyList()
+            listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
+            emptyList(),
+            listOf(Pair(Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 12345L), MockContents.kjvVerses[0])),
+            emptyList()
         )
 
-        searchViewModel.search("query", false)
+        searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-
-        assertEquals(5, actual.data.items.size)
-        assertEquals("Highlights", (actual.data.items[0] as TitleItem).title.toString())
+        val actual = searchViewModel.viewState().first()
+        assertNull(actual.settings)
+        assertFalse(actual.loading)
         assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[1] as SearchVerseItem).textForDisplay.toString()
+            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+            actual.searchConfig
         )
-        assertEquals("Genesis", (actual.data.items[2] as TitleItem).title.toString())
+        assertFalse(actual.instantSearch)
+        assertEquals(5, actual.items.size)
+        assertEquals("Highlights", (actual.items[0] as TitleItem).title.toString())
         assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[3] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
+            (actual.items[1] as SearchVerseItem).textForDisplay.toString()
+        )
+        assertEquals("Genesis", (actual.items[2] as TitleItem).title.toString())
+        assertEquals(
+            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
+            (actual.items[3] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
-                "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[4] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
+            (actual.items[4] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("3 result(s) found.", actual.data.toast)
+        assertNull(actual.preview)
+        assertEquals("3 result(s) found.", actual.toast)
+        assertNull(actual.error)
     }
 
     @Test
-    fun `test search() with verses and notes`() = runTest {
+    fun `test search(), with verses and notes`() = runTest {
         coEvery { searchManager.search("query") } returns SearchResult(
-                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
-                emptyList(),
-                emptyList(),
-                listOf(Pair(Note(VerseIndex(0, 0, 9), "just a note", 12345L), MockContents.kjvVerses[9]))
+            listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
+            emptyList(),
+            emptyList(),
+            listOf(Pair(Note(VerseIndex(0, 0, 9), "just a note", 12345L), MockContents.kjvVerses[9]))
         )
 
-        searchViewModel.search("query", false)
+        searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-
-        assertEquals(5, actual.data.items.size)
-        assertEquals("Notes", (actual.data.items[0] as TitleItem).title.toString())
+        val actual = searchViewModel.viewState().first()
+        assertNull(actual.settings)
+        assertFalse(actual.loading)
         assertEquals(
-                "Gen. 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
-                (actual.data.items[1] as SearchNoteItem).verseForDisplay.toString()
+            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+            actual.searchConfig
         )
-        assertEquals("just a note", (actual.data.items[1] as SearchNoteItem).noteForDisplay.toString())
-        assertEquals("Genesis", (actual.data.items[2] as TitleItem).title.toString())
+        assertFalse(actual.instantSearch)
+        assertEquals(5, actual.items.size)
+        assertEquals("Notes", (actual.items[0] as TitleItem).title.toString())
         assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[3] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
+            (actual.items[1] as SearchNoteItem).verseForDisplay.toString()
+        )
+        assertEquals("just a note", (actual.items[1] as SearchNoteItem).noteForDisplay.toString())
+        assertEquals("Genesis", (actual.items[2] as TitleItem).title.toString())
+        assertEquals(
+            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
+            (actual.items[3] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
-                "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[4] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
+            (actual.items[4] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("3 result(s) found.", actual.data.toast)
+        assertNull(actual.preview)
+        assertEquals("3 result(s) found.", actual.toast)
+        assertNull(actual.error)
     }
 
     @Test
-    fun `test search() with verses, bookmarks, highlights, and notes`() = runTest {
+    fun `test search(), with verses, bookmarks, highlights, and notes`() = runTest {
         coEvery { searchManager.search("query") } returns SearchResult(
-                listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
-                listOf(Pair(Bookmark(VerseIndex(0, 0, 0), 12345L), MockContents.kjvVerses[0])),
-                listOf(Pair(Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 12345L), MockContents.kjvVerses[0])),
-                listOf(Pair(Note(VerseIndex(0, 0, 9), "just a note", 12345L), MockContents.kjvVerses[9]))
+            listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[2]),
+            listOf(Pair(Bookmark(VerseIndex(0, 0, 0), 12345L), MockContents.kjvVerses[0])),
+            listOf(Pair(Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_PINK, 12345L), MockContents.kjvVerses[0])),
+            listOf(Pair(Note(VerseIndex(0, 0, 9), "just a note", 12345L), MockContents.kjvVerses[9]))
         )
 
-        searchViewModel.search("query", false)
+        searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
-        val actual = searchViewModel.searchResult().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-
-        assertEquals(9, actual.data.items.size)
-        assertEquals("Notes", (actual.data.items[0] as TitleItem).title.toString())
+        val actual = searchViewModel.viewState().first()
+        assertNull(actual.settings)
+        assertFalse(actual.loading)
         assertEquals(
-                "Gen. 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
-                (actual.data.items[1] as SearchNoteItem).verseForDisplay.toString()
+            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+            actual.searchConfig
         )
-        assertEquals("just a note", (actual.data.items[1] as SearchNoteItem).noteForDisplay.toString())
-        assertEquals("Bookmarks", (actual.data.items[2] as TitleItem).title.toString())
+        assertFalse(actual.instantSearch)
+        assertEquals(9, actual.items.size)
+        assertEquals("Notes", (actual.items[0] as TitleItem).title.toString())
         assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[3] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
+            (actual.items[1] as SearchNoteItem).verseForDisplay.toString()
         )
-        assertEquals("Highlights", (actual.data.items[4] as TitleItem).title.toString())
+        assertEquals("just a note", (actual.items[1] as SearchNoteItem).noteForDisplay.toString())
+        assertEquals("Bookmarks", (actual.items[2] as TitleItem).title.toString())
         assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[5] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
+            (actual.items[3] as SearchVerseItem).textForDisplay.toString()
         )
-        assertEquals("Genesis", (actual.data.items[6] as TitleItem).title.toString())
+        assertEquals("Highlights", (actual.items[4] as TitleItem).title.toString())
         assertEquals(
-                "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-                (actual.data.items[7] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
+            (actual.items[5] as SearchVerseItem).textForDisplay.toString()
+        )
+        assertEquals("Genesis", (actual.items[6] as TitleItem).title.toString())
+        assertEquals(
+            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
+            (actual.items[7] as SearchVerseItem).textForDisplay.toString()
         )
         assertEquals(
-                "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-                (actual.data.items[8] as SearchVerseItem).textForDisplay.toString()
+            "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
+            (actual.items[8] as SearchVerseItem).textForDisplay.toString()
         )
-
-        assertEquals("query", actual.data.query)
-        assertFalse(actual.data.instanceSearch)
-        assertEquals("5 result(s) found.", actual.data.toast)
+        assertNull(actual.preview)
+        assertEquals("5 result(s) found.", actual.toast)
+        assertNull(actual.error)
     }
 
     @Test
-    fun `test loadVersesForPreview() with invalid verse index`() = runTest {
-        val actual = searchViewModel.loadVersesForPreview(VerseIndex.INVALID).toList()
-        assertEquals(2, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
-        assertTrue(actual[1] is BaseViewModel.ViewData.Failure)
+    fun `test openVerse() with exception`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } throws RuntimeException("random exception")
+
+        searchViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = SearchViewModel.ViewState.Error.VerseOpeningError(VerseIndex(0, 0, 0))
+            ),
+            searchViewModel.viewState().first()
+        )
     }
 
     @Test
-    fun `test loadVersesForPreview()`() = runTest {
+    fun `test openVerse()`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } returns Unit
+
+        val viewAction = async(Dispatchers.Unconfined) { searchViewModel.viewAction().first() }
+
+        searchViewModel.openVerse(VerseIndex(0, 0, 0))
+
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
+        )
+        assertEquals(SearchViewModel.ViewAction.OpenReadingScreen, viewAction.await())
+    }
+
+    @Test
+    fun `test loadPreview() with invalid verse index`() = runTest {
+        searchViewModel.loadPreview(VerseIndex.INVALID)
+
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = SearchViewModel.ViewState.Error.PreviewLoadingError(VerseIndex.INVALID)
+            ),
+            searchViewModel.viewState().first()
+        )
+    }
+
+    @Test
+    fun `test loadPreview()`() = runTest {
         coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.kjvShortName)
         coEvery {
             bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0)
@@ -424,49 +740,54 @@ class SearchViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
         every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
 
-        val actual = searchViewModel.loadVersesForPreview(VerseIndex(0, 0, 1)).toList()
-        assertEquals(2, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
+        searchViewModel.loadPreview(VerseIndex(0, 0, 1))
 
-        assertEquals(Settings.DEFAULT, (actual[1] as BaseViewModel.ViewData.Success).data.settings)
-        assertEquals("Gen., 1", (actual[1] as BaseViewModel.ViewData.Success).data.title)
-        assertEquals(3, (actual[1] as BaseViewModel.ViewData.Success).data.items.size)
-        assertEquals(1, (actual[1] as BaseViewModel.ViewData.Success).data.currentPosition)
-    }
-
-
-    @Test
-    fun `test toSearchVersePreviewItems() with single verse`() {
-        searchViewModel.searchRequest.value = SearchViewModel.SearchRequest("God", true)
-        val actual = with(searchViewModel) { toSearchVersePreviewItems(listOf(MockContents.kjvVerses[0])) }
-        assertEquals(1, actual.size)
-        assertEquals("1:1 In the beginning God created the heaven and the earth.", actual[0].textForDisplay.toString())
-    }
-
-    @Test
-    fun `test toSearchVersePreviewItems() with multiple verses`() {
-        searchViewModel.searchRequest.value = SearchViewModel.SearchRequest("God", true)
-        val actual = with(searchViewModel) { toSearchVersePreviewItems(listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1])) }
-        assertEquals(2, actual.size)
-        assertEquals("1:1 In the beginning God created the heaven and the earth.", actual[0].textForDisplay.toString())
+        val actual = searchViewModel.viewState().first()
+        assertNull(actual.settings)
+        assertFalse(actual.loading)
         assertEquals(
-                "1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.",
-                actual[1].textForDisplay.toString()
+            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+            actual.searchConfig
         )
-    }
-
-    @Test
-    fun `test toSearchVersePreviewItems() with multiple verses but not consecutive`() {
-        searchViewModel.searchRequest.value = SearchViewModel.SearchRequest("God", true)
-        val actual = with(searchViewModel) { toSearchVersePreviewItems(listOf(MockContents.msgVerses[0], MockContents.msgVerses[1], MockContents.msgVerses[2])) }
-        assertEquals(2, actual.size)
+        assertFalse(actual.instantSearch)
+        assertTrue(actual.items.isEmpty())
+        assertEquals(Settings.DEFAULT, actual.preview?.settings)
+        assertEquals("Gen., 1", actual.preview?.title)
+        assertEquals(3, actual.preview?.items?.size)
+        assertEquals(MockContents.kjvVerses[0], (actual.preview?.items?.get(0) as SearchVersePreviewItem).verse)
         assertEquals(
-                "1:1-2 First this: God created the Heavens and Earth—all you see, all you don't see. Earth was a soup of nothingness, a bottomless emptiness, an inky blackness. God's Spirit brooded like a bird above the watery abyss.",
-                actual[0].textForDisplay.toString()
+            "1:1 In the beginning God created the heaven and the earth.",
+            (actual.preview?.items?.get(0) as SearchVersePreviewItem).textForDisplay.toString()
         )
+        assertEquals(MockContents.kjvVerses[1], (actual.preview?.items?.get(1) as SearchVersePreviewItem).verse)
         assertEquals(
-                "1:3 God spoke: \"Light!\"\nAnd light appeared.\nGod saw that light was good\nand separated light from dark.\nGod named the light Day,\nhe named the dark Night.\nIt was evening, it was morning—\nDay One.",
-                actual[1].textForDisplay.toString()
+            "1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.",
+            (actual.preview?.items?.get(1) as SearchVersePreviewItem).textForDisplay.toString()
+        )
+        assertEquals(MockContents.kjvVerses[2], (actual.preview?.items?.get(2) as SearchVersePreviewItem).verse)
+        assertEquals(
+            "1:3 And God said, Let there be light: and there was light.",
+            (actual.preview?.items?.get(2) as SearchVersePreviewItem).textForDisplay.toString()
+        )
+        assertEquals(1, actual.preview?.currentPosition)
+        assertNull(actual.toast)
+        assertNull(actual.error)
+
+        searchViewModel.markPreviewAsClosed()
+        assertEquals(
+            SearchViewModel.ViewState(
+                settings = null,
+                loading = false,
+                searchConfig = SearchConfiguration(
+                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
+                ),
+                instantSearch = false,
+                items = emptyList(),
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
         )
     }
 }
