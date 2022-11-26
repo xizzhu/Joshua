@@ -149,7 +149,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun search(query: String, instanceSearch: Boolean) {
-        searchRequest.value = SearchRequest(query, instanceSearch)
+        searchRequest.value = SearchRequest(query.trim(), instanceSearch)
     }
 
     fun retrySearch() {
