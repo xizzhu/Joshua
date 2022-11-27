@@ -43,7 +43,11 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
 
     override val viewModel: StrongNumberViewModel by viewModels()
 
-    override fun inflateViewBinding(): ActivityStrongNumberBinding = ActivityStrongNumberBinding.inflate(layoutInflater)
+    override val viewBinding: ActivityStrongNumberBinding by lazy { ActivityStrongNumberBinding.inflate(layoutInflater) }
+
+    override fun initializeView() {
+        // TODO
+    }
 
     override fun onViewActionEmitted(viewAction: StrongNumberViewModel.ViewAction) = when (viewAction) {
         is StrongNumberViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING)

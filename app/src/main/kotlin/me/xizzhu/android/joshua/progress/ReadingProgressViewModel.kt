@@ -16,56 +16,74 @@
 
 package me.xizzhu.android.joshua.progress
 
-import android.app.Application
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import me.xizzhu.android.joshua.core.*
-import me.xizzhu.android.joshua.infra.BaseViewModel
-import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.infra.viewData
-import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
+import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.ReadingProgress
+import me.xizzhu.android.joshua.core.ReadingProgressManager
+import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
+import me.xizzhu.android.joshua.infra.BaseViewModelV2
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
 
-class ReadingProgressViewData(val items: List<BaseItem>)
-
 @HiltViewModel
 class ReadingProgressViewModel @Inject constructor(
-        private val bibleReadingManager: BibleReadingManager,
-        private val readingProgressManager: ReadingProgressManager,
-        settingsManager: SettingsManager,
-        application: Application
-) : BaseViewModel(settingsManager, application) {
-    private val readingProgress: MutableStateFlow<ViewData<ReadingProgressViewData>?> = MutableStateFlow(null)
+    private val bibleReadingManager: BibleReadingManager,
+    private val readingProgressManager: ReadingProgressManager,
+    private val settingsManager: SettingsManager,
+    private val coroutineDispatcherProvider: CoroutineDispatcherProvider
+) : BaseViewModelV2<ReadingProgressViewModel.ViewAction, ReadingProgressViewModel.ViewState>(
+    initialViewState = ViewState(
+        loading = false,
+        items = emptyList(),
+        error = null,
+    )
+) {
+    sealed class ViewAction {
+        object OpenReadingScreen : ViewAction()
+    }
+
+    data class ViewState(
+        val loading: Boolean,
+        val items: List<ReadingProgressItem>,
+        val error: Error?,
+    ) {
+        sealed class Error {
+            object ReadingProgressLoadingError : Error()
+            data class VerseOpeningError(val verseToOpen: VerseIndex) : Error()
+        }
+    }
+
     private val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 
-    fun readingProgress(): Flow<ViewData<ReadingProgressViewData>> = readingProgress.filterNotNull()
-
     fun loadReadingProgress() {
-        viewModelScope.launch {
-            try {
-                readingProgress.value = ViewData.Loading()
-                readingProgress.value = ViewData.Success(ReadingProgressViewData(
-                        items = buildReadingProgressItems(
-                                readingProgress = readingProgressManager.read(),
-                                bookNames = bibleReadingManager.readBookNames(bibleReadingManager.currentTranslation().firstNotEmpty())
-                        )
-                ))
-            } catch (e: Exception) {
+        viewModelScope.launch(coroutineDispatcherProvider.default) {
+            runCatching {
+                updateViewState { it.copy(loading = true, items = emptyList()) }
+
+                val items = buildReadingProgressItems(
+                    settings = settingsManager.settings().first(),
+                    readingProgress = readingProgressManager.read(),
+                    bookNames = bibleReadingManager.readBookNames(bibleReadingManager.currentTranslation().firstNotEmpty()),
+                )
+                updateViewState { it.copy(loading = false, items = items) }
+            }.onFailure { e ->
                 Log.e(tag, "Error occurred while loading reading progress", e)
-                readingProgress.value = ViewData.Failure(e)
+                updateViewState { it.copy(loading = false, error = ViewState.Error.ReadingProgressLoadingError) }
             }
         }
     }
 
-    private fun buildReadingProgressItems(readingProgress: ReadingProgress, bookNames: List<String>): List<BaseItem> {
-        val items = ArrayList<BaseItem>(1 + Bible.BOOK_COUNT)
-        items.add(ReadingProgressSummaryItem(0, 0, 0, 0, 0))
+    private fun buildReadingProgressItems(settings: Settings, readingProgress: ReadingProgress, bookNames: List<String>): List<ReadingProgressItem> {
+        val items = ArrayList<ReadingProgressItem>(1 + Bible.BOOK_COUNT)
+        items.add(ReadingProgressItem.Summary(settings, 0, 0, 0, 0, 0))
 
         var totalChaptersRead = 0
         val chaptersReadPerBook = Array(Bible.BOOK_COUNT) { i ->
@@ -94,23 +112,47 @@ class ReadingProgressViewModel @Inject constructor(
                     ++finishedNewTestament
                 }
             }
-            items.add(ReadingProgressDetailItem(
-                    bookNames[bookIndex], bookIndex, chaptersRead, chaptersReadCount, ::onBookClicked, expanded[bookIndex]
+            items.add(ReadingProgressItem.Book(
+                settings = settings,
+                bookName = bookNames[bookIndex],
+                bookIndex = bookIndex,
+                chaptersRead = chaptersRead,
+                chaptersReadCount = chaptersReadCount,
+                expanded = expanded[bookIndex]
             ))
         }
 
-        items[0] = ReadingProgressSummaryItem(
-                readingProgress.continuousReadingDays, totalChaptersRead, finishedBooks, finishedOldTestament, finishedNewTestament
+        items[0] = ReadingProgressItem.Summary(
+            settings, readingProgress.continuousReadingDays, totalChaptersRead, finishedBooks, finishedOldTestament, finishedNewTestament
         )
 
         return items
     }
 
-    private fun onBookClicked(bookIndex: Int, expanded: Boolean) {
-        this.expanded[bookIndex] = expanded
+    fun expandOrCollapseBook(bookIndex: Int) {
+        updateViewState { current ->
+            (current.items.getOrNull(bookIndex + 1) as? ReadingProgressItem.Book)?.let { bookItem ->
+                val expanded = bookItem.expanded.not()
+                this.expanded[bookIndex] = expanded
+                val newBookItem = bookItem.copy(expanded = expanded)
+                current.copy(items = ArrayList(current.items).apply { set(bookIndex + 1, newBookItem) })
+            }
+        }
     }
 
-    fun saveCurrentVerseIndex(verseToOpen: VerseIndex): Flow<ViewData<Unit>> = viewData {
-        bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
-    }.onFailure { Log.e(tag, "Failed to save current verse", it) }
+    fun openVerse(verseToOpen: VerseIndex) {
+        viewModelScope.launch(coroutineDispatcherProvider.default) {
+            runCatching {
+                bibleReadingManager.saveCurrentVerseIndex(verseToOpen)
+                emitViewAction(ViewAction.OpenReadingScreen)
+            }.onFailure { e ->
+                Log.e(tag, "Failed to save current verse", e)
+                updateViewState { it.copy(error = ViewState.Error.VerseOpeningError(verseToOpen)) }
+            }
+        }
+    }
+
+    fun markErrorAsShown(error: ViewState.Error) {
+        updateViewState { current -> if (current.error == error) current.copy(error = null) else null }
+    }
 }

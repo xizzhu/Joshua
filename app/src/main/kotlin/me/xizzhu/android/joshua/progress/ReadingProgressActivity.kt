@@ -16,80 +16,92 @@
 
 package me.xizzhu.android.joshua.progress
 
-import android.os.Bundle
-import android.view.View
 import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.asExecutor
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.databinding.ActivityReadingProgressBinding
-import me.xizzhu.android.joshua.infra.BaseActivity
-import me.xizzhu.android.joshua.infra.onEach
-import me.xizzhu.android.joshua.infra.onFailure
-import me.xizzhu.android.joshua.infra.onSuccess
+import me.xizzhu.android.joshua.infra.BaseActivityV2
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class ReadingProgressActivity : BaseActivity<ActivityReadingProgressBinding, ReadingProgressViewModel>(), ReadingProgressDetailItem.Callback {
-    private val readingProgressViewModel: ReadingProgressViewModel by viewModels()
+class ReadingProgressActivity : BaseActivityV2<ActivityReadingProgressBinding, ReadingProgressViewModel.ViewAction, ReadingProgressViewModel.ViewState, ReadingProgressViewModel>() {
+    @Inject
+    lateinit var coroutineDispatcherProvider: CoroutineDispatcherProvider
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private lateinit var readingProgressAdapter: ReadingProgressAdapter
 
-        observeSettings()
-        observeReadingProgress()
+    override val viewModel: ReadingProgressViewModel by viewModels()
+
+    override val viewBinding: ActivityReadingProgressBinding by lazy { ActivityReadingProgressBinding.inflate(layoutInflater) }
+
+    override fun initializeView() {
+        readingProgressAdapter = ReadingProgressAdapter(
+            inflater = layoutInflater,
+            executor = coroutineDispatcherProvider.default.asExecutor()
+        ) { viewEvent ->
+            when (viewEvent) {
+                is ReadingProgressAdapter.ViewEvent.ExpandOrCollapseBook -> viewModel.expandOrCollapseBook(viewEvent.bookIndex)
+                is ReadingProgressAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
+            }
+        }
+
+        with(viewBinding.readingProgressList) {
+            adapter = readingProgressAdapter
+            layoutManager = LinearLayoutManager(this@ReadingProgressActivity, RecyclerView.VERTICAL, false)
+        }
     }
 
-    private fun observeSettings() {
-        readingProgressViewModel.settings().onEach { viewBinding.readingProgressList.setSettings(it) }.launchIn(lifecycleScope)
+    override fun onViewActionEmitted(viewAction: ReadingProgressViewModel.ViewAction) = when (viewAction) {
+        ReadingProgressViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING)
     }
 
-    private fun observeReadingProgress() {
-        readingProgressViewModel.readingProgress()
-                .onEach(
-                        onLoading = {
-                            with(viewBinding) {
-                                loadingSpinner.fadeIn()
-                                readingProgressList.visibility = View.GONE
-                            }
-                        },
-                        onSuccess = {
-                            with(viewBinding) {
-                                readingProgressList.setItems(it.items)
-                                readingProgressList.fadeIn()
-                                loadingSpinner.visibility = View.GONE
-                            }
-                        },
-                        onFailure = {
-                            viewBinding.loadingSpinner.visibility = View.GONE
-                            dialog(false, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_reading_progress, { _, _ -> loadReadingProgress() }, { _, _ -> finish() })
-                        }
+    override fun onViewStateUpdated(viewState: ReadingProgressViewModel.ViewState) = with(viewBinding) {
+        if (viewState.loading) {
+            loadingSpinner.fadeIn()
+            readingProgressList.isVisible = false
+        } else {
+            loadingSpinner.isVisible = false
+            readingProgressList.fadeIn()
+        }
+
+        readingProgressAdapter.submitList(viewState.items)
+
+        when (val error = viewState.error) {
+            is ReadingProgressViewModel.ViewState.Error.ReadingProgressLoadingError -> {
+                dialog(
+                    cancelable = false,
+                    title = R.string.dialog_title_error,
+                    message = R.string.dialog_message_failed_to_load_reading_progress,
+                    onPositive = { _, _ -> viewModel.loadReadingProgress() },
+                    onNegative = { _, _ -> finish() },
+                    onDismiss = { viewModel.markErrorAsShown(error) }
                 )
-                .launchIn(lifecycleScope)
+            }
+            is ReadingProgressViewModel.ViewState.Error.VerseOpeningError -> {
+                dialog(
+                    cancelable = true,
+                    title = R.string.dialog_title_error,
+                    message = R.string.dialog_message_failed_to_select_verse,
+                    onPositive = { _, _ -> viewModel.openVerse(error.verseToOpen) },
+                    onDismiss = { viewModel.markErrorAsShown(error) }
+                )
+            }
+            null -> {
+                // Do nothing
+            }
+        }
     }
 
     override fun onStart() {
         super.onStart()
-        loadReadingProgress()
-    }
-
-    private fun loadReadingProgress() {
-        readingProgressViewModel.loadReadingProgress()
-    }
-
-    override fun inflateViewBinding(): ActivityReadingProgressBinding = ActivityReadingProgressBinding.inflate(layoutInflater)
-
-    override fun viewModel(): ReadingProgressViewModel = readingProgressViewModel
-
-    override fun openVerse(verseToOpen: VerseIndex) {
-        readingProgressViewModel.saveCurrentVerseIndex(verseToOpen)
-                .onSuccess { navigator.navigate(this, Navigator.SCREEN_READING) }
-                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_verse, { _, _ -> openVerse(verseToOpen) }) }
-                .launchIn(lifecycleScope)
+        viewModel.loadReadingProgress()
     }
 }
