@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.progress
+package me.xizzhu.android.joshua.tests
 
-import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.tests.BaseUnitTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import java.util.concurrent.Executor
 
-class ReadingProgressItemTest : BaseUnitTest() {
-    @Test
-    fun testItemViewType() {
-        assertEquals(R.layout.item_reading_progress_header, ReadingProgressSummaryItem(0, 0, 0, 0, 0).viewType)
-        assertEquals(R.layout.item_reading_progress, ReadingProgressDetailItem("", 0, emptyList(), 0, { _, _ -> }, false).viewType)
+class TestExecutor : Executor {
+    override fun execute(command: Runnable?) {
+        command?.run()
     }
 }

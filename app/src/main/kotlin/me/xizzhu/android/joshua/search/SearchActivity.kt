@@ -46,6 +46,10 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
 
     override val viewBinding: ActivitySearchBinding by lazy { ActivitySearchBinding.inflate(layoutInflater) }
 
+    override fun initializeView() {
+        // TODO
+    }
+
     override fun onViewActionEmitted(viewAction: SearchViewModel.ViewAction) = when (viewAction) {
         SearchViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING)
     }

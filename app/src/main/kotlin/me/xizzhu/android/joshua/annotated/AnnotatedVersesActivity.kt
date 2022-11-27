@@ -39,6 +39,10 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
 ) : BaseActivityV2<ActivityAnnotatedBinding, AnnotatedVersesViewModel.ViewAction, AnnotatedVersesViewModel.ViewState, VM>(), BookmarkItem.Callback, HighlightItem.Callback, NoteItem.Callback, VersePreviewItem.Callback {
     override val viewBinding: ActivityAnnotatedBinding by lazy { ActivityAnnotatedBinding.inflate(layoutInflater) }
 
+    override fun initializeView() {
+        // TODO
+    }
+
     override fun onViewActionEmitted(viewAction: AnnotatedVersesViewModel.ViewAction) = when (viewAction) {
         AnnotatedVersesViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING, extrasForOpeningVerse())
     }

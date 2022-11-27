@@ -18,8 +18,7 @@ package me.xizzhu.android.joshua.progress
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.core.BibleReadingManager
@@ -30,7 +29,6 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.infra.BaseViewModelV2
-import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
@@ -39,11 +37,10 @@ import javax.inject.Inject
 class ReadingProgressViewModel @Inject constructor(
     private val bibleReadingManager: BibleReadingManager,
     private val readingProgressManager: ReadingProgressManager,
-    settingsManager: SettingsManager,
+    private val settingsManager: SettingsManager,
     private val coroutineDispatcherProvider: CoroutineDispatcherProvider
 ) : BaseViewModelV2<ReadingProgressViewModel.ViewAction, ReadingProgressViewModel.ViewState>(
     initialViewState = ViewState(
-        settings = null,
         loading = false,
         items = emptyList(),
         error = null,
@@ -54,9 +51,8 @@ class ReadingProgressViewModel @Inject constructor(
     }
 
     data class ViewState(
-        val settings: Settings?,
         val loading: Boolean,
-        val items: List<BaseItem>,
+        val items: List<ReadingProgressItem>,
         val error: Error?,
     ) {
         sealed class Error {
@@ -67,16 +63,13 @@ class ReadingProgressViewModel @Inject constructor(
 
     private val expanded: Array<Boolean> = Array(Bible.BOOK_COUNT) { it == 0 }
 
-    init {
-        settingsManager.settings().onEach { settings -> updateViewState { it.copy(settings = settings) } }.launchIn(viewModelScope)
-    }
-
     fun loadReadingProgress() {
         viewModelScope.launch(coroutineDispatcherProvider.default) {
             runCatching {
                 updateViewState { it.copy(loading = true, items = emptyList()) }
 
                 val items = buildReadingProgressItems(
+                    settings = settingsManager.settings().first(),
                     readingProgress = readingProgressManager.read(),
                     bookNames = bibleReadingManager.readBookNames(bibleReadingManager.currentTranslation().firstNotEmpty()),
                 )
@@ -88,9 +81,9 @@ class ReadingProgressViewModel @Inject constructor(
         }
     }
 
-    private fun buildReadingProgressItems(readingProgress: ReadingProgress, bookNames: List<String>): List<BaseItem> {
-        val items = ArrayList<BaseItem>(1 + Bible.BOOK_COUNT)
-        items.add(ReadingProgressSummaryItem(0, 0, 0, 0, 0))
+    private fun buildReadingProgressItems(settings: Settings, readingProgress: ReadingProgress, bookNames: List<String>): List<ReadingProgressItem> {
+        val items = ArrayList<ReadingProgressItem>(1 + Bible.BOOK_COUNT)
+        items.add(ReadingProgressItem.Summary(settings, 0, 0, 0, 0, 0))
 
         var totalChaptersRead = 0
         val chaptersReadPerBook = Array(Bible.BOOK_COUNT) { i ->
@@ -119,20 +112,32 @@ class ReadingProgressViewModel @Inject constructor(
                     ++finishedNewTestament
                 }
             }
-            items.add(ReadingProgressDetailItem(
-                bookNames[bookIndex], bookIndex, chaptersRead, chaptersReadCount, ::onBookClicked, expanded[bookIndex]
+            items.add(ReadingProgressItem.Book(
+                settings = settings,
+                bookName = bookNames[bookIndex],
+                bookIndex = bookIndex,
+                chaptersRead = chaptersRead,
+                chaptersReadCount = chaptersReadCount,
+                expanded = expanded[bookIndex]
             ))
         }
 
-        items[0] = ReadingProgressSummaryItem(
-            readingProgress.continuousReadingDays, totalChaptersRead, finishedBooks, finishedOldTestament, finishedNewTestament
+        items[0] = ReadingProgressItem.Summary(
+            settings, readingProgress.continuousReadingDays, totalChaptersRead, finishedBooks, finishedOldTestament, finishedNewTestament
         )
 
         return items
     }
 
-    private fun onBookClicked(bookIndex: Int, expanded: Boolean) {
-        this.expanded[bookIndex] = expanded
+    fun expandOrCollapseBook(bookIndex: Int) {
+        updateViewState { current ->
+            (current.items.getOrNull(bookIndex + 1) as? ReadingProgressItem.Book)?.let { bookItem ->
+                val expanded = bookItem.expanded.not()
+                this.expanded[bookIndex] = expanded
+                val newBookItem = bookItem.copy(expanded = expanded)
+                current.copy(items = ArrayList(current.items).apply { set(bookIndex + 1, newBookItem) })
+            }
+        }
     }
 
     fun openVerse(verseToOpen: VerseIndex) {

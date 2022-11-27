@@ -37,6 +37,8 @@ abstract class BaseActivityV2<VB : ViewBinding, ViewAction, ViewState, VM : Base
 
     protected abstract val viewBinding: VB
 
+    protected abstract fun initializeView()
+
     protected abstract fun onViewActionEmitted(viewAction: ViewAction)
 
     protected abstract fun onViewStateUpdated(viewState: ViewState)
@@ -47,6 +49,7 @@ abstract class BaseActivityV2<VB : ViewBinding, ViewAction, ViewState, VM : Base
         Log.i(tag, "onCreate()")
 
         setContentView(viewBinding.root)
+        initializeView()
 
         viewModel.viewAction().onEach(::onViewActionEmitted).launchIn(lifecycleScope)
         viewModel.viewState().onEach(::onViewStateUpdated).launchIn(lifecycleScope)

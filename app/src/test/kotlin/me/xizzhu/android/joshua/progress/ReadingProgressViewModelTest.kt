@@ -63,7 +63,6 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         readingProgressViewModel.loadReadingProgress()
         assertEquals(
             ReadingProgressViewModel.ViewState(
-                settings = Settings.DEFAULT,
                 loading = false,
                 items = emptyList(),
                 error = ReadingProgressViewModel.ViewState.Error.ReadingProgressLoadingError
@@ -74,7 +73,6 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         readingProgressViewModel.markErrorAsShown(ReadingProgressViewModel.ViewState.Error.VerseOpeningError(VerseIndex(0, 0, 0)))
         assertEquals(
             ReadingProgressViewModel.ViewState(
-                settings = Settings.DEFAULT,
                 loading = false,
                 items = emptyList(),
                 error = ReadingProgressViewModel.ViewState.Error.ReadingProgressLoadingError
@@ -85,7 +83,6 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         readingProgressViewModel.markErrorAsShown(ReadingProgressViewModel.ViewState.Error.ReadingProgressLoadingError)
         assertEquals(
             ReadingProgressViewModel.ViewState(
-                settings = Settings.DEFAULT,
                 loading = false,
                 items = emptyList(),
                 error = null
@@ -114,16 +111,24 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
         readingProgressViewModel.loadReadingProgress()
 
         val actual = readingProgressViewModel.viewState().first()
-        assertEquals(Settings.DEFAULT, actual.settings)
         assertFalse(actual.loading)
         assertEquals(67, actual.items.size)
-        assertEquals(2, (actual.items[0] as ReadingProgressSummaryItem).continuousReadingDays)
-        assertEquals(5, (actual.items[0] as ReadingProgressSummaryItem).chaptersRead)
-        assertEquals(2, (actual.items[0] as ReadingProgressSummaryItem).finishedBooks)
-        assertEquals(1, (actual.items[0] as ReadingProgressSummaryItem).finishedOldTestament)
-        assertEquals(1, (actual.items[0] as ReadingProgressSummaryItem).finishedNewTestament)
+        assertEquals(
+            ReadingProgressItem.Summary(
+                settings = Settings.DEFAULT,
+                continuousReadingDays = 2,
+                chaptersRead = 5,
+                finishedBooks = 2,
+                finishedOldTestament = 1,
+                finishedNewTestament = 1
+            ),
+            actual.items[0]
+        )
         actual.items.subList(1, actual.items.size).forEachIndexed { book, item ->
-            assertTrue(item is ReadingProgressDetailItem)
+            assertTrue(item is ReadingProgressItem.Book)
+            assertEquals(Settings.DEFAULT, item.settings)
+            assertEquals(book, item.bookIndex)
+            assertEquals(book == 0, item.expanded)
             when (book) {
                 0 -> {
                     item.chaptersRead.forEachIndexed { chapter, read -> assertEquals(chapter == 0 || chapter == 1, read) }
@@ -148,17 +153,46 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
             }
         }
         assertNull(actual.error)
+
+        readingProgressViewModel.expandOrCollapseBook(bookIndex = 1)
+        with(readingProgressViewModel.viewState().first().items.subList(1, actual.items.size)) {
+            forEachIndexed { book, item ->
+                assertTrue(item is ReadingProgressItem.Book)
+                assertEquals(book == 0 || book == 1, item.expanded)
+            }
+        }
+
+        readingProgressViewModel.expandOrCollapseBook(bookIndex = 1)
+        with(readingProgressViewModel.viewState().first().items.subList(1, actual.items.size)) {
+            forEachIndexed { book, item ->
+                assertTrue(item is ReadingProgressItem.Book)
+                assertEquals(book == 0, item.expanded)
+            }
+        }
     }
 
     @Test
-    fun `test openVerse() with exception`() = runTest {
+    fun `test expandOrCollapseBook(), with no items`() = runTest {
+        readingProgressViewModel.expandOrCollapseBook(bookIndex = 0)
+
+        assertEquals(
+            ReadingProgressViewModel.ViewState(
+                loading = false,
+                items = emptyList(),
+                error = null
+            ),
+            readingProgressViewModel.viewState().first()
+        )
+    }
+
+    @Test
+    fun `test openVerse(), with exception`() = runTest {
         coEvery { bibleReadingManager.saveCurrentVerseIndex(VerseIndex(0, 0, 0)) } throws RuntimeException("random exception")
 
         readingProgressViewModel.openVerse(VerseIndex(0, 0, 0))
 
         assertEquals(
             ReadingProgressViewModel.ViewState(
-                settings = Settings.DEFAULT,
                 loading = false,
                 items = emptyList(),
                 error = ReadingProgressViewModel.ViewState.Error.VerseOpeningError(VerseIndex(0, 0, 0))
@@ -178,7 +212,6 @@ class ReadingProgressViewModelTest : BaseUnitTest() {
 
         assertEquals(
             ReadingProgressViewModel.ViewState(
-                settings = Settings.DEFAULT,
                 loading = false,
                 items = emptyList(),
                 error = null
