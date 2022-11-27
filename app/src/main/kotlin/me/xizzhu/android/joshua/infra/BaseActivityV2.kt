@@ -35,9 +35,7 @@ abstract class BaseActivityV2<VB : ViewBinding, ViewAction, ViewState, VM : Base
 
     protected abstract val viewModel: VM
 
-    protected lateinit var viewBinding: VB
-
-    protected abstract fun inflateViewBinding(): VB
+    protected abstract val viewBinding: VB
 
     protected abstract fun onViewActionEmitted(viewAction: ViewAction)
 
@@ -48,7 +46,6 @@ abstract class BaseActivityV2<VB : ViewBinding, ViewAction, ViewState, VM : Base
         super.onCreate(savedInstanceState)
         Log.i(tag, "onCreate()")
 
-        viewBinding = inflateViewBinding()
         setContentView(viewBinding.root)
 
         viewModel.viewAction().onEach(::onViewActionEmitted).launchIn(lifecycleScope)

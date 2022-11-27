@@ -37,7 +37,7 @@ import me.xizzhu.android.joshua.ui.listDialog
 abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVersesViewModel<V>>(
     @StringRes private val toolbarText: Int
 ) : BaseActivityV2<ActivityAnnotatedBinding, AnnotatedVersesViewModel.ViewAction, AnnotatedVersesViewModel.ViewState, VM>(), BookmarkItem.Callback, HighlightItem.Callback, NoteItem.Callback, VersePreviewItem.Callback {
-    override fun inflateViewBinding(): ActivityAnnotatedBinding = ActivityAnnotatedBinding.inflate(layoutInflater)
+    override val viewBinding: ActivityAnnotatedBinding by lazy { ActivityAnnotatedBinding.inflate(layoutInflater) }
 
     override fun onViewActionEmitted(viewAction: AnnotatedVersesViewModel.ViewAction) = when (viewAction) {
         AnnotatedVersesViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING, extrasForOpeningVerse())
