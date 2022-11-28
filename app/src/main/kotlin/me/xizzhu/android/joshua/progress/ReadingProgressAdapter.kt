@@ -33,8 +33,8 @@ import androidx.viewbinding.ViewBinding
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.databinding.ItemReadingProgressBinding
-import me.xizzhu.android.joshua.databinding.ItemReadingProgressHeaderBinding
+import me.xizzhu.android.joshua.databinding.ItemReadingProgressBookBinding
+import me.xizzhu.android.joshua.databinding.ItemReadingProgressSummaryBinding
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
 import me.xizzhu.android.joshua.ui.recyclerview.VerticalRecyclerViewAdapter
@@ -83,7 +83,7 @@ sealed class ReadingProgressItem(viewType: Int) : VerticalRecyclerViewItem(viewT
         val finishedNewTestament: Int
     ) : ReadingProgressItem(VIEW_TYPE) {
         companion object {
-            const val VIEW_TYPE = R.layout.item_reading_progress_header
+            const val VIEW_TYPE = R.layout.item_reading_progress_summary
         }
     }
 
@@ -96,39 +96,42 @@ sealed class ReadingProgressItem(viewType: Int) : VerticalRecyclerViewItem(viewT
         val expanded: Boolean
     ) : ReadingProgressItem(VIEW_TYPE) {
         companion object {
-            const val VIEW_TYPE = R.layout.item_reading_progress
+            const val VIEW_TYPE = R.layout.item_reading_progress_book
         }
     }
 }
 
 sealed class ReadingProgressViewHolder<Item : ReadingProgressItem, VB : ViewBinding>(viewBinding: VB)
     : VerticalRecyclerViewHolder<Item, VB>(viewBinding) {
-    class Summary(inflater: LayoutInflater, parent: ViewGroup) : ReadingProgressViewHolder<ReadingProgressItem.Summary, ItemReadingProgressHeaderBinding>(
-        ItemReadingProgressHeaderBinding.inflate(inflater, parent, false)
+    class Summary(inflater: LayoutInflater, parent: ViewGroup) : ReadingProgressViewHolder<ReadingProgressItem.Summary, ItemReadingProgressSummaryBinding>(
+        ItemReadingProgressSummaryBinding.inflate(inflater, parent, false)
     ) {
         override fun bind(item: ReadingProgressItem.Summary, payloads: List<Any>) = with(viewBinding) {
             continuousReadingDaysTitle.setPrimaryTextSize(item.settings)
             continuousReadingDaysValue.setPrimaryTextSize(item.settings)
+            continuousReadingDaysValue.text = continuousReadingDaysValue.resources.getString(R.string.text_continuous_reading_count, item.continuousReadingDays)
+
             chaptersReadTitle.setPrimaryTextSize(item.settings)
             chaptersReadValue.setPrimaryTextSize(item.settings)
+            chaptersReadValue.text = item.chaptersRead.toString()
+
             finishedBooksTitle.setPrimaryTextSize(item.settings)
             finishedBooksValue.setPrimaryTextSize(item.settings)
+            finishedBooksValue.text = item.finishedBooks.toString()
+
             finishedOldTestamentTitle.setPrimaryTextSize(item.settings)
             finishedOldTestamentValue.setPrimaryTextSize(item.settings)
+            finishedOldTestamentValue.text = item.finishedOldTestament.toString()
+
             finishedNewTestamentTitle.setPrimaryTextSize(item.settings)
             finishedNewTestamentValue.setPrimaryTextSize(item.settings)
-
-            continuousReadingDaysValue.text = continuousReadingDaysValue.resources.getString(R.string.text_continuous_reading_count, item.continuousReadingDays)
-            chaptersReadValue.text = item.chaptersRead.toString()
-            finishedBooksValue.text = item.finishedBooks.toString()
-            finishedOldTestamentValue.text = item.finishedOldTestament.toString()
             finishedNewTestamentValue.text = item.finishedNewTestament.toString()
         }
     }
 
     class Book(private val inflater: LayoutInflater, parent: ViewGroup, onViewEvent: (ReadingProgressAdapter.ViewEvent) -> Unit)
-        : ReadingProgressViewHolder<ReadingProgressItem.Book, ItemReadingProgressBinding>(
-        ItemReadingProgressBinding.inflate(inflater, parent, false)
+        : ReadingProgressViewHolder<ReadingProgressItem.Book, ItemReadingProgressBookBinding>(
+        ItemReadingProgressBookBinding.inflate(inflater, parent, false)
     ) {
         companion object {
             private const val ROW_CHILD_COUNT = 5

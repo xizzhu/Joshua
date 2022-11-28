@@ -29,8 +29,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class ReadingProgressAdapterTest : BaseUnitTest() {
@@ -56,8 +54,8 @@ class ReadingProgressAdapterTest : BaseUnitTest() {
                 ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false)
             )
         ) {
-            assertEquals(R.layout.item_reading_progress_header, adapter.getItemViewType(0))
-            assertEquals(R.layout.item_reading_progress, adapter.getItemViewType(1))
+            assertEquals(R.layout.item_reading_progress_summary, adapter.getItemViewType(0))
+            assertEquals(R.layout.item_reading_progress_book, adapter.getItemViewType(1))
         }
     }
 
@@ -70,59 +68,5 @@ class ReadingProgressAdapterTest : BaseUnitTest() {
     fun `test onCreateViewHolder()`() {
         adapter.onCreateViewHolder(FrameLayout(context), ReadingProgressItem.Summary.VIEW_TYPE) as ReadingProgressViewHolder.Summary
         adapter.onCreateViewHolder(FrameLayout(context), ReadingProgressItem.Book.VIEW_TYPE) as ReadingProgressViewHolder.Book
-    }
-
-    @Test
-    fun `test ReadingProgressItem_DiffCallback`() {
-        val diffCallback = ReadingProgressItem.DiffCallback()
-
-        assertTrue(diffCallback.areItemsTheSame(
-            ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0),
-            ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0)
-        ))
-        assertTrue(diffCallback.areContentsTheSame(
-            ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0),
-            ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0)
-        ))
-        assertTrue(diffCallback.areItemsTheSame(
-            ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0),
-            ReadingProgressItem.Summary(Settings.DEFAULT, 1, 0, 0, 0, 0)
-        ))
-        assertFalse(diffCallback.areContentsTheSame(
-            ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0),
-            ReadingProgressItem.Summary(Settings.DEFAULT, 1, 0, 0, 0, 0)
-        ))
-
-        assertTrue(diffCallback.areItemsTheSame(
-            ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false),
-            ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false)
-        ))
-        assertTrue(diffCallback.areContentsTheSame(
-            ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false),
-            ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false)
-        ))
-        assertTrue(diffCallback.areItemsTheSame(
-            ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false),
-            ReadingProgressItem.Book(Settings.DEFAULT, "bookName", 0, emptyList(), 0, false)
-        ))
-        assertFalse(diffCallback.areContentsTheSame(
-            ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false),
-            ReadingProgressItem.Book(Settings.DEFAULT, "", 1, emptyList(), 0, false)
-        ))
-
-        assertFalse(diffCallback.areItemsTheSame(
-            ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0),
-            ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false)
-        ))
-        assertFalse(diffCallback.areContentsTheSame(
-            ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0),
-            ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false)
-        ))
-    }
-
-    @Test
-    fun `test ReadingProgressItem viewType`() {
-        assertEquals(R.layout.item_reading_progress_header, ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0).viewType)
-        assertEquals(R.layout.item_reading_progress, ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false).viewType)
     }
 }
