@@ -20,6 +20,7 @@ import android.text.SpannableStringBuilder
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -36,9 +37,6 @@ import me.xizzhu.android.joshua.preview.PreviewViewData
 import me.xizzhu.android.joshua.preview.loadPreviewV2
 import me.xizzhu.android.joshua.preview.toVersePreviewItems
 import me.xizzhu.android.joshua.ui.createTitleSpans
-import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.ui.recyclerview.TextItem
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.ui.setSpans
 import me.xizzhu.android.joshua.ui.toCharSequence
 import me.xizzhu.android.joshua.utils.firstNotEmpty
@@ -54,7 +52,6 @@ class StrongNumberViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : BaseViewModelV2<StrongNumberViewModel.ViewAction, StrongNumberViewModel.ViewState>(
     initialViewState = ViewState(
-        settings = null,
         loading = false,
         items = emptyList(),
         preview = null,
@@ -66,9 +63,8 @@ class StrongNumberViewModel @Inject constructor(
     }
 
     data class ViewState(
-        val settings: Settings?,
         val loading: Boolean,
-        val items: List<BaseItem>,
+        val items: List<StrongNumberItem>,
         val preview: PreviewViewData?,
         val error: Error?,
     ) {
@@ -80,8 +76,7 @@ class StrongNumberViewModel @Inject constructor(
     }
 
     init {
-        settingsManager.settings().onEach { settings -> updateViewState { it.copy(settings = settings) } }.launchIn(viewModelScope)
-        loadStrongNumber()
+        settingsManager.settings().onEach { loadStrongNumber() }.launchIn(viewModelScope)
     }
 
     fun loadStrongNumber() {
@@ -97,6 +92,7 @@ class StrongNumberViewModel @Inject constructor(
 
                 val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
                 val items = buildStrongNumberItems(
+                    settings = settingsManager.settings().first(),
                     strongNumber = strongNumberManager.readStrongNumber(sn),
                     verses = bibleReadingManager.readVerses(currentTranslation, strongNumberManager.readVerseIndexes(sn)).values
                         .sortedBy { with(it.verseIndex) { bookIndex * 100000 + chapterIndex * 1000 + verseIndex } },
@@ -112,15 +108,18 @@ class StrongNumberViewModel @Inject constructor(
     }
 
     private fun buildStrongNumberItems(
+        settings: Settings,
         strongNumber: StrongNumber,
         verses: List<Verse>,
         bookNames: List<String>,
         bookShortNames: List<String>
-    ): List<BaseItem> {
-        val items: ArrayList<BaseItem> = ArrayList()
+    ): List<StrongNumberItem> {
+        val items = ArrayList<StrongNumberItem>()
 
-        val title = SpannableStringBuilder().append(strongNumber.sn).setSpans(createTitleSpans()).append(' ').append(strongNumber.meaning).toCharSequence()
-        items.add(TextItem(title))
+        items.add(StrongNumberItem.StrongNumber(
+            settings = settings,
+            text = SpannableStringBuilder().append(strongNumber.sn).setSpans(createTitleSpans()).append(' ').append(strongNumber.meaning).toCharSequence()
+        ))
 
         var currentBookIndex = -1
         verses.forEach { verse ->
@@ -129,10 +128,10 @@ class StrongNumberViewModel @Inject constructor(
             val verseIndex = verse.verseIndex
             val bookName = bookNames[verseIndex.bookIndex]
             if (verseIndex.bookIndex != currentBookIndex) {
-                items.add(TitleItem(bookName, false))
+                items.add(StrongNumberItem.BookName(settings, bookName))
                 currentBookIndex = verseIndex.bookIndex
             }
-            items.add(StrongNumberItem(verseIndex, bookShortNames[verseIndex.bookIndex], verse.text.text))
+            items.add(StrongNumberItem.Verse(settings, verseIndex, bookShortNames[verseIndex.bookIndex], verse.text.text))
         }
 
         return items

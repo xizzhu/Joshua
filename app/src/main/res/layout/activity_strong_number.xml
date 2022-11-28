@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
+    <me.xizzhu.android.joshua.ui.recyclerview.VerticalRecyclerView
         android:id="@+id/strong_number_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

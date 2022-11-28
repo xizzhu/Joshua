@@ -28,10 +28,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.children
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
@@ -40,6 +37,9 @@ import me.xizzhu.android.joshua.databinding.ItemReadingProgressBinding
 import me.xizzhu.android.joshua.databinding.ItemReadingProgressHeaderBinding
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
+import me.xizzhu.android.joshua.ui.recyclerview.VerticalRecyclerViewAdapter
+import me.xizzhu.android.joshua.ui.recyclerview.VerticalRecyclerViewHolder
+import me.xizzhu.android.joshua.ui.recyclerview.VerticalRecyclerViewItem
 import me.xizzhu.android.joshua.ui.setPrimaryTextSize
 import me.xizzhu.android.joshua.ui.setSpans
 import me.xizzhu.android.joshua.ui.toCharSequence
@@ -49,15 +49,11 @@ class ReadingProgressAdapter(
     private val inflater: LayoutInflater,
     executor: Executor,
     private val onViewEvent: (ViewEvent) -> Unit,
-) : ListAdapter<ReadingProgressItem, ReadingProgressViewHolder<ReadingProgressItem, *>>(
-    AsyncDifferConfig.Builder(ReadingProgressItem.DiffCallback()).setBackgroundThreadExecutor(executor).build()
-) {
+) : VerticalRecyclerViewAdapter<ReadingProgressItem, ReadingProgressViewHolder<ReadingProgressItem, *>>(ReadingProgressItem.DiffCallback(), executor) {
     sealed class ViewEvent {
         data class ExpandOrCollapseBook(val bookIndex: Int) : ViewEvent()
         data class OpenVerse(val verseToOpen: VerseIndex) : ViewEvent()
     }
-
-    override fun getItemViewType(position: Int): Int = getItem(position).viewType
 
     @Suppress("UNCHECKED_CAST")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReadingProgressViewHolder<ReadingProgressItem, *> = when (viewType) {
@@ -65,19 +61,15 @@ class ReadingProgressAdapter(
         ReadingProgressItem.Book.VIEW_TYPE -> ReadingProgressViewHolder.Book(inflater, parent, onViewEvent)
         else -> throw IllegalStateException("Unknown view type - $viewType")
     } as ReadingProgressViewHolder<ReadingProgressItem, *>
-
-    override fun onBindViewHolder(holder: ReadingProgressViewHolder<ReadingProgressItem, *>, position: Int) {
-        holder.bindData(getItem(position))
-    }
-
-    override fun onBindViewHolder(holder: ReadingProgressViewHolder<ReadingProgressItem, *>, position: Int, payloads: MutableList<Any>) {
-        holder.bindData(getItem(position), payloads)
-    }
 }
 
-sealed class ReadingProgressItem(val viewType: Int) {
+sealed class ReadingProgressItem(viewType: Int) : VerticalRecyclerViewItem(viewType) {
     class DiffCallback : DiffUtil.ItemCallback<ReadingProgressItem>() {
-        override fun areItemsTheSame(oldItem: ReadingProgressItem, newItem: ReadingProgressItem): Boolean = oldItem::class == newItem::class
+        override fun areItemsTheSame(oldItem: ReadingProgressItem, newItem: ReadingProgressItem): Boolean = when {
+            oldItem is Summary && newItem is Summary -> true
+            oldItem is Book && newItem is Book -> oldItem.bookIndex == newItem.bookIndex
+            else -> false
+        }
 
         override fun areContentsTheSame(oldItem: ReadingProgressItem, newItem: ReadingProgressItem): Boolean = oldItem == newItem
     }
@@ -109,19 +101,9 @@ sealed class ReadingProgressItem(val viewType: Int) {
     }
 }
 
-sealed class ReadingProgressViewHolder<Item : ReadingProgressItem, VB : ViewBinding>(protected val viewBinding: VB)
-    : RecyclerView.ViewHolder(viewBinding.root) {
-    protected var item: Item? = null
-
-    fun bindData(item: Item, payloads: List<Any> = emptyList()) {
-        this.item = item
-        bind(item, payloads)
-    }
-
-    protected abstract fun bind(item: Item, payloads: List<Any>)
-
-    class Summary(inflater: LayoutInflater, parent: ViewGroup)
-        : ReadingProgressViewHolder<ReadingProgressItem.Summary, ItemReadingProgressHeaderBinding>(
+sealed class ReadingProgressViewHolder<Item : ReadingProgressItem, VB : ViewBinding>(viewBinding: VB)
+    : VerticalRecyclerViewHolder<Item, VB>(viewBinding) {
+    class Summary(inflater: LayoutInflater, parent: ViewGroup) : ReadingProgressViewHolder<ReadingProgressItem.Summary, ItemReadingProgressHeaderBinding>(
         ItemReadingProgressHeaderBinding.inflate(inflater, parent, false)
     ) {
         override fun bind(item: ReadingProgressItem.Summary, payloads: List<Any>) = with(viewBinding) {

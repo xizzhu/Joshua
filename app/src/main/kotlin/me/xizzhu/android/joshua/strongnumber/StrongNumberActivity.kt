@@ -21,18 +21,19 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.asExecutor
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.databinding.ActivityStrongNumberBinding
 import me.xizzhu.android.joshua.infra.BaseActivityV2
-import me.xizzhu.android.joshua.preview.VersePreviewItem
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.listDialog
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongNumberViewModel.ViewAction, StrongNumberViewModel.ViewState, StrongNumberViewModel>(), StrongNumberItem.Callback, VersePreviewItem.Callback {
+class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongNumberViewModel.ViewAction, StrongNumberViewModel.ViewState, StrongNumberViewModel>() {
     companion object {
         private const val KEY_STRONG_NUMBER = "me.xizzhu.android.joshua.KEY_STRONG_NUMBER"
 
@@ -41,12 +42,26 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
         fun strongNumber(savedStateHandle: SavedStateHandle): String = savedStateHandle.get<String>(KEY_STRONG_NUMBER).orEmpty()
     }
 
+    @Inject
+    lateinit var coroutineDispatcherProvider: CoroutineDispatcherProvider
+
+    private lateinit var adapter: StrongNumberAdapter
+
     override val viewModel: StrongNumberViewModel by viewModels()
 
     override val viewBinding: ActivityStrongNumberBinding by lazy { ActivityStrongNumberBinding.inflate(layoutInflater) }
 
     override fun initializeView() {
-        // TODO
+        adapter = StrongNumberAdapter(
+            inflater = layoutInflater,
+            executor = coroutineDispatcherProvider.default.asExecutor()
+        ) { viewEvent ->
+            when (viewEvent) {
+                is StrongNumberAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
+                is StrongNumberAdapter.ViewEvent.ShowPreview -> viewModel.loadPreview(viewEvent.verseToPreview)
+            }
+        }
+        viewBinding.strongNumberList.adapter = adapter
     }
 
     override fun onViewActionEmitted(viewAction: StrongNumberViewModel.ViewAction) = when (viewAction) {
@@ -54,8 +69,6 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
     }
 
     override fun onViewStateUpdated(viewState: StrongNumberViewModel.ViewState) = with(viewBinding) {
-        viewState.settings?.let { strongNumberList.setSettings(it) }
-
         if (viewState.loading) {
             loadingSpinner.fadeIn()
             strongNumberList.isVisible = false
@@ -64,7 +77,7 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
             strongNumberList.fadeIn()
         }
 
-        strongNumberList.setItems(viewState.items)
+        adapter.submitList(viewState.items)
 
         viewState.preview?.let { preview ->
             listDialog(
@@ -81,7 +94,7 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
                 viewModel.markErrorAsShown(error)
 
                 // Very unlikely to fail, so just falls back to open the verse.
-                openVerse(error.verseToPreview)
+                viewModel.openVerse(error.verseToPreview)
             }
             is StrongNumberViewModel.ViewState.Error.StrongNumberLoadingError -> {
                 dialog(
@@ -98,7 +111,7 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
                     cancelable = true,
                     title = R.string.dialog_title_error,
                     message = R.string.dialog_message_failed_to_select_verse,
-                    onPositive = { _, _ -> openVerse(error.verseToOpen) },
+                    onPositive = { _, _ -> viewModel.openVerse(error.verseToOpen) },
                     onDismiss = { viewModel.markErrorAsShown(error) }
                 )
             }
@@ -106,13 +119,5 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
                 // Do nothing
             }
         }
-    }
-
-    override fun openVerse(verseToOpen: VerseIndex) {
-        viewModel.openVerse(verseToOpen)
-    }
-
-    override fun showPreview(verseIndex: VerseIndex) {
-        viewModel.loadPreview(verseIndex)
     }
 }

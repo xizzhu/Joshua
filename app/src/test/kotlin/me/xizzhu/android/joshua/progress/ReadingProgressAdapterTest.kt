@@ -75,6 +75,7 @@ class ReadingProgressAdapterTest : BaseUnitTest() {
     @Test
     fun `test ReadingProgressItem_DiffCallback`() {
         val diffCallback = ReadingProgressItem.DiffCallback()
+
         assertTrue(diffCallback.areItemsTheSame(
             ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0),
             ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0)
@@ -102,7 +103,7 @@ class ReadingProgressAdapterTest : BaseUnitTest() {
         ))
         assertTrue(diffCallback.areItemsTheSame(
             ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false),
-            ReadingProgressItem.Book(Settings.DEFAULT, "", 1, emptyList(), 0, false)
+            ReadingProgressItem.Book(Settings.DEFAULT, "bookName", 0, emptyList(), 0, false)
         ))
         assertFalse(diffCallback.areContentsTheSame(
             ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false),

@@ -18,8 +18,6 @@ package me.xizzhu.android.joshua.progress
 
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.asExecutor
 import me.xizzhu.android.joshua.Navigator
@@ -36,14 +34,14 @@ class ReadingProgressActivity : BaseActivityV2<ActivityReadingProgressBinding, R
     @Inject
     lateinit var coroutineDispatcherProvider: CoroutineDispatcherProvider
 
-    private lateinit var readingProgressAdapter: ReadingProgressAdapter
+    private lateinit var adapter: ReadingProgressAdapter
 
     override val viewModel: ReadingProgressViewModel by viewModels()
 
     override val viewBinding: ActivityReadingProgressBinding by lazy { ActivityReadingProgressBinding.inflate(layoutInflater) }
 
     override fun initializeView() {
-        readingProgressAdapter = ReadingProgressAdapter(
+        adapter = ReadingProgressAdapter(
             inflater = layoutInflater,
             executor = coroutineDispatcherProvider.default.asExecutor()
         ) { viewEvent ->
@@ -52,11 +50,7 @@ class ReadingProgressActivity : BaseActivityV2<ActivityReadingProgressBinding, R
                 is ReadingProgressAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
             }
         }
-
-        with(viewBinding.readingProgressList) {
-            adapter = readingProgressAdapter
-            layoutManager = LinearLayoutManager(this@ReadingProgressActivity, RecyclerView.VERTICAL, false)
-        }
+        viewBinding.readingProgressList.adapter = adapter
     }
 
     override fun onViewActionEmitted(viewAction: ReadingProgressViewModel.ViewAction) = when (viewAction) {
@@ -72,7 +66,7 @@ class ReadingProgressActivity : BaseActivityV2<ActivityReadingProgressBinding, R
             readingProgressList.fadeIn()
         }
 
-        readingProgressAdapter.submitList(viewState.items)
+        adapter.submitList(viewState.items)
 
         when (val error = viewState.error) {
             is ReadingProgressViewModel.ViewState.Error.ReadingProgressLoadingError -> {
