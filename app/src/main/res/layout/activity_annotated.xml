@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <me.xizzhu.android.joshua.ui.recyclerview.CommonRecyclerView
+    <me.xizzhu.android.joshua.ui.recyclerview.VerticalRecyclerView
         android:id="@+id/verse_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <me.xizzhu.android.joshua.annotated.AnnotatedVersesToolbar
+        <me.xizzhu.android.joshua.annotated.AnnotatedVerseToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"

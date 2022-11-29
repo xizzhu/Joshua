@@ -14,33 +14,42 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.progress
+package me.xizzhu.android.joshua.strongnumber
 
 import android.content.Context
+import android.graphics.Typeface
+import android.text.SpannableStringBuilder
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.core.text.getSpans
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
+import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.TestExecutor
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
-class ReadingProgressAdapterTest : BaseUnitTest() {
+class StrongNumberAdapterTest : BaseUnitTest() {
     private lateinit var context: Context
-    private lateinit var adapter: ReadingProgressAdapter
+    private lateinit var adapter: StrongNumberAdapter
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
         context = ApplicationProvider.getApplicationContext<Context>().apply { setTheme(R.style.AppTheme) }
-        adapter = ReadingProgressAdapter(
+        adapter = StrongNumberAdapter(
             inflater = LayoutInflater.from(context),
             executor = TestExecutor()
         ) {}
@@ -50,12 +59,15 @@ class ReadingProgressAdapterTest : BaseUnitTest() {
     fun `test getItemViewType()`() {
         adapter.submitList(
             listOf(
-                ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0),
-                ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false)
+                StrongNumberItem.StrongNumber(Settings.DEFAULT, ""),
+                StrongNumberItem.BookName(Settings.DEFAULT, ""),
+                StrongNumberItem.Verse(Settings.DEFAULT, VerseIndex.INVALID, "", "")
+
             )
         ) {
-            assertEquals(R.layout.item_reading_progress_summary, adapter.getItemViewType(0))
-            assertEquals(R.layout.item_reading_progress_book, adapter.getItemViewType(1))
+            assertEquals(R.layout.item_text, adapter.getItemViewType(0))
+            assertEquals(R.layout.item_title, adapter.getItemViewType(1))
+            assertEquals(R.layout.item_strong_number_verse, adapter.getItemViewType(2))
         }
     }
 
@@ -66,7 +78,8 @@ class ReadingProgressAdapterTest : BaseUnitTest() {
 
     @Test
     fun `test onCreateViewHolder()`() {
-        adapter.onCreateViewHolder(FrameLayout(context), ReadingProgressItem.Summary.VIEW_TYPE) as ReadingProgressViewHolder.Summary
-        adapter.onCreateViewHolder(FrameLayout(context), ReadingProgressItem.Book.VIEW_TYPE) as ReadingProgressViewHolder.Book
+        adapter.onCreateViewHolder(FrameLayout(context), StrongNumberItem.StrongNumber.VIEW_TYPE) as StrongNumberViewHolder.StrongNumber
+        adapter.onCreateViewHolder(FrameLayout(context), StrongNumberItem.BookName.VIEW_TYPE) as StrongNumberViewHolder.BookName
+        adapter.onCreateViewHolder(FrameLayout(context), StrongNumberItem.Verse.VIEW_TYPE) as StrongNumberViewHolder.Verse
     }
 }

@@ -20,23 +20,21 @@ import android.app.Application
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.emptyFlow
+import me.xizzhu.android.joshua.annotated.AnnotatedVerseItem
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Bookmark
 import me.xizzhu.android.joshua.core.Constants
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.TestTimeProvider
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-@RunWith(RobolectricTestRunner::class)
 class BookmarksViewModelTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
     private lateinit var bookmarksManager: VerseAnnotationManager<Bookmark>
@@ -56,16 +54,24 @@ class BookmarksViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test buildBaseItem`() {
-        val actual = bookmarksViewModel.buildBaseItem(
-            annotatedVerse = Bookmark(VerseIndex(0, 0, 0), 1L),
-            bookName = MockContents.kjvBookNames[0],
-            bookShortName = MockContents.kjvBookShortNames[0],
-            verseText = MockContents.kjvVerses[0].text.text,
-            sortOrder = Constants.SORT_BY_BOOK
+    fun `test buildAnnotatedVerseItem()`() {
+        assertEquals(
+            AnnotatedVerseItem.Bookmark(
+                Settings.DEFAULT,
+                MockContents.kjvVerses[0].verseIndex,
+                MockContents.kjvBookNames[0],
+                MockContents.kjvBookShortNames[0],
+                MockContents.kjvVerses[0].text.text,
+                Constants.SORT_BY_BOOK
+            ),
+            bookmarksViewModel.buildAnnotatedVerseItem(
+                settings = Settings.DEFAULT,
+                verseAnnotation = Bookmark(VerseIndex(0, 0, 0), 1L),
+                bookName = MockContents.kjvBookNames[0],
+                bookShortName = MockContents.kjvBookShortNames[0],
+                verseText = MockContents.kjvVerses[0].text.text,
+                sortOrder = Constants.SORT_BY_BOOK
+            )
         )
-        assertTrue(actual is BookmarkItem)
-        assertEquals(VerseIndex(0, 0, 0), actual.verseIndex)
-        assertEquals("Gen. 1:1 In the beginning God created the heaven and the earth.", actual.textForDisplay.toString())
     }
 }

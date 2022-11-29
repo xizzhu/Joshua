@@ -27,7 +27,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.databinding.SpinnerDropDownBinding
 
-class AnnotatedVersesToolbar : MaterialToolbar {
+class AnnotatedVerseToolbar : MaterialToolbar {
     var sortOrderUpdated: ((Int) -> Unit)? = null
     private val sortOrderSpinnerItemSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {

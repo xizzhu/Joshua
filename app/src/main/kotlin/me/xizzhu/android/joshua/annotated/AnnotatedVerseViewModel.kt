@@ -25,13 +25,12 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Constants
-import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseAnnotation
@@ -42,15 +41,12 @@ import me.xizzhu.android.joshua.infra.BaseViewModelV2
 import me.xizzhu.android.joshua.preview.PreviewViewData
 import me.xizzhu.android.joshua.preview.loadPreviewV2
 import me.xizzhu.android.joshua.preview.toVersePreviewItems
-import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.ui.recyclerview.TextItem
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 import java.util.Calendar
 import kotlin.collections.ArrayList
 
-abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
+abstract class AnnotatedVerseViewModel<V : VerseAnnotation>(
     private val bibleReadingManager: BibleReadingManager,
     private val verseAnnotationManager: VerseAnnotationManager<V>,
     @StringRes private val noItemText: Int,
@@ -58,9 +54,8 @@ abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
     private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
     private val timeProvider: TimeProvider,
     private val application: Application
-) : BaseViewModelV2<AnnotatedVersesViewModel.ViewAction, AnnotatedVersesViewModel.ViewState>(
+) : BaseViewModelV2<AnnotatedVerseViewModel.ViewAction, AnnotatedVerseViewModel.ViewState>(
     initialViewState = ViewState(
-        settings = null,
         loading = false,
         sortOrder = Constants.DEFAULT_SORT_ORDER,
         items = emptyList(),
@@ -73,10 +68,9 @@ abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
     }
 
     data class ViewState(
-        val settings: Settings?,
         val loading: Boolean,
         @Constants.SortOrder val sortOrder: Int,
-        val items: List<BaseItem>,
+        val items: List<AnnotatedVerseItem>,
         val preview: PreviewViewData?,
         val error: Error?,
     ) {
@@ -89,16 +83,15 @@ abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
     }
 
     init {
-        settingsManager.settings().onEach { settings -> updateViewState { it.copy(settings = settings) } }.launchIn(viewModelScope)
-
         combine(
+            settingsManager.settings(),
             bibleReadingManager.currentTranslation().filter { it.isNotEmpty() },
             verseAnnotationManager.sortOrder()
-        ) { currentTranslation, sortOrder ->
+        ) { settings, currentTranslation, sortOrder ->
             runCatching {
                 updateViewState { it.copy(loading = true, sortOrder = sortOrder, items = emptyList()) }
 
-                val items = loadAnnotatedVerses(currentTranslation, sortOrder)
+                val items = loadAnnotatedVerses(settings, currentTranslation, sortOrder)
                 updateViewState { it.copy(loading = false, items = items) }
             }.onFailure { e ->
                 Log.e(tag, "Error occurred while loading annotated verses", e)
@@ -114,6 +107,7 @@ abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
 
                 val sortOrder = verseAnnotationManager.sortOrder().first()
                 val items = loadAnnotatedVerses(
+                    settings = settingsManager.settings().first(),
                     currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty(),
                     sortOrder = sortOrder
                 )
@@ -125,49 +119,52 @@ abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
         }
     }
 
-    private suspend fun loadAnnotatedVerses(currentTranslation: String, @Constants.SortOrder sortOrder: Int): List<BaseItem> {
+    private suspend fun loadAnnotatedVerses(settings: Settings, currentTranslation: String, @Constants.SortOrder sortOrder: Int): List<AnnotatedVerseItem> {
         val annotations = verseAnnotationManager.read(sortOrder)
         val verses = bibleReadingManager.readVerses(currentTranslation, annotations.map { it.verseIndex })
-        return buildAnnotatedVersesItems(
-            sortOrder = sortOrder,
-            verses = annotations.mapNotNull { annotation -> verses[annotation.verseIndex]?.let { Pair(annotation, it) } },
-            bookNames = bibleReadingManager.readBookNames(currentTranslation),
-            bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
-        )
-    }
+        val verseWithAnnotations = annotations.mapNotNull { annotation -> verses[annotation.verseIndex]?.let { Pair(annotation, it) } }
+        if (verseWithAnnotations.isEmpty()) {
+            return listOf(AnnotatedVerseItem.Header(settings = settings, text = application.getString(noItemText)))
+        }
 
-    private fun buildAnnotatedVersesItems(
-        @Constants.SortOrder sortOrder: Int, verses: List<Pair<V, Verse>>, bookNames: List<String>, bookShortNames: List<String>
-    ): List<BaseItem> = if (verses.isEmpty()) {
-        listOf(TextItem(application.getString(noItemText)))
-    } else {
-        when (sortOrder) {
-            Constants.SORT_BY_DATE -> buildItemsByDate(verses, bookNames, bookShortNames)
-            Constants.SORT_BY_BOOK -> buildItemsByBook(verses, bookNames, bookShortNames)
+        val bookNames = bibleReadingManager.readBookNames(currentTranslation)
+        val bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
+        return when (sortOrder) {
+            Constants.SORT_BY_DATE -> buildItemsByDate(settings, verseWithAnnotations, bookNames, bookShortNames)
+            Constants.SORT_BY_BOOK -> buildItemsByBook(settings, verseWithAnnotations, bookNames, bookShortNames)
             else -> throw IllegalArgumentException("Unsupported sort order - $sortOrder")
         }
     }
 
-    private fun buildItemsByDate(verses: List<Pair<V, Verse>>, bookNames: List<String>, bookShortNames: List<String>): List<BaseItem> {
+    private fun buildItemsByDate(
+        settings: Settings,
+        verses: List<Pair<V, Verse>>,
+        bookNames: List<String>,
+        bookShortNames: List<String>
+    ): List<AnnotatedVerseItem> {
         val calendar = timeProvider.calendar
         var previousYear = -1
         var previousDayOfYear = -1
 
-        val items: ArrayList<BaseItem> = ArrayList()
+        val items: ArrayList<AnnotatedVerseItem> = ArrayList()
         verses.forEach { (verseAnnotation, verse) ->
             calendar.timeInMillis = verseAnnotation.timestamp
             val currentYear = calendar.get(Calendar.YEAR)
             val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
             if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
-                items.add(TitleItem(formatDate(calendar, verseAnnotation.timestamp), false))
+                items.add(AnnotatedVerseItem.Header(settings, formatDate(calendar, verseAnnotation.timestamp)))
 
                 previousYear = currentYear
                 previousDayOfYear = currentDayOfYear
             }
 
-            items.add(buildBaseItem(
-                verseAnnotation, bookNames[verseAnnotation.verseIndex.bookIndex],
-                bookShortNames[verseAnnotation.verseIndex.bookIndex], verse.text.text, Constants.SORT_BY_DATE
+            items.add(buildAnnotatedVerseItem(
+                settings = settings,
+                verseAnnotation = verseAnnotation,
+                bookName = bookNames[verseAnnotation.verseIndex.bookIndex],
+                bookShortName = bookShortNames[verseAnnotation.verseIndex.bookIndex],
+                verseText = verse.text.text,
+                sortOrder = Constants.SORT_BY_DATE
             ))
         }
         return items
@@ -191,23 +188,37 @@ abstract class AnnotatedVersesViewModel<V : VerseAnnotation>(
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    internal abstract fun buildBaseItem(
-        annotatedVerse: V, bookName: String, bookShortName: String, verseText: String, @Constants.SortOrder sortOrder: Int
-    ): BaseItem
+    internal abstract fun buildAnnotatedVerseItem(
+        settings: Settings,
+        verseAnnotation: V,
+        bookName: String,
+        bookShortName: String,
+        verseText: String,
+        @Constants.SortOrder sortOrder: Int
+    ): AnnotatedVerseItem
 
-    private fun buildItemsByBook(verses: List<Pair<V, Verse>>, bookNames: List<String>, bookShortNames: List<String>): List<BaseItem> {
-        val items: ArrayList<BaseItem> = ArrayList()
+    private fun buildItemsByBook(
+        settings: Settings,
+        verses: List<Pair<V, Verse>>,
+        bookNames: List<String>,
+        bookShortNames: List<String>
+    ): List<AnnotatedVerseItem> {
+        val items: ArrayList<AnnotatedVerseItem> = ArrayList()
         var currentBookIndex = -1
         verses.forEach { (verseAnnotation, verse) ->
             val bookName = bookNames[verseAnnotation.verseIndex.bookIndex]
             if (verseAnnotation.verseIndex.bookIndex != currentBookIndex) {
-                items.add(TitleItem(bookName, false))
+                items.add(AnnotatedVerseItem.Header(settings, bookName))
                 currentBookIndex = verseAnnotation.verseIndex.bookIndex
             }
 
-            items.add(buildBaseItem(
-                verseAnnotation, bookNames[verseAnnotation.verseIndex.bookIndex],
-                bookShortNames[verseAnnotation.verseIndex.bookIndex], verse.text.text, Constants.SORT_BY_BOOK
+            items.add(buildAnnotatedVerseItem(
+                settings = settings,
+                verseAnnotation = verseAnnotation,
+                bookName = bookNames[verseAnnotation.verseIndex.bookIndex],
+                bookShortName = bookShortNames[verseAnnotation.verseIndex.bookIndex],
+                verseText = verse.text.text,
+                sortOrder = Constants.SORT_BY_BOOK
             ))
         }
         return items

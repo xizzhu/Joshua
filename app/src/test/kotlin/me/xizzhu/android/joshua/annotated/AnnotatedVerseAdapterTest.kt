@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.progress
+package me.xizzhu.android.joshua.annotated
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
+import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.TestExecutor
 import org.junit.runner.RunWith
@@ -31,16 +33,16 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
-class ReadingProgressAdapterTest : BaseUnitTest() {
+class AnnotatedVerseAdapterTest : BaseUnitTest() {
     private lateinit var context: Context
-    private lateinit var adapter: ReadingProgressAdapter
+    private lateinit var adapter: AnnotatedVerseAdapter
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
         context = ApplicationProvider.getApplicationContext<Context>().apply { setTheme(R.style.AppTheme) }
-        adapter = ReadingProgressAdapter(
+        adapter = AnnotatedVerseAdapter(
             inflater = LayoutInflater.from(context),
             executor = TestExecutor()
         ) {}
@@ -50,12 +52,16 @@ class ReadingProgressAdapterTest : BaseUnitTest() {
     fun `test getItemViewType()`() {
         adapter.submitList(
             listOf(
-                ReadingProgressItem.Summary(Settings.DEFAULT, 0, 0, 0, 0, 0),
-                ReadingProgressItem.Book(Settings.DEFAULT, "", 0, emptyList(), 0, false)
+                AnnotatedVerseItem.Header(Settings.DEFAULT, ""),
+                AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex.INVALID, "", "", "", Constants.DEFAULT_SORT_ORDER),
+                AnnotatedVerseItem.Highlight(Settings.DEFAULT, VerseIndex.INVALID, "", "", "", 0, Constants.DEFAULT_SORT_ORDER),
+                AnnotatedVerseItem.Note(Settings.DEFAULT, VerseIndex.INVALID, "", "", "")
             )
         ) {
-            assertEquals(R.layout.item_reading_progress_summary, adapter.getItemViewType(0))
-            assertEquals(R.layout.item_reading_progress_book, adapter.getItemViewType(1))
+            assertEquals(R.layout.item_title, adapter.getItemViewType(0))
+            assertEquals(R.layout.item_annotated_verse_bookmark, adapter.getItemViewType(1))
+            assertEquals(R.layout.item_annotated_verse_highlight, adapter.getItemViewType(2))
+            assertEquals(R.layout.item_annotated_verse_note, adapter.getItemViewType(3))
         }
     }
 
@@ -66,7 +72,9 @@ class ReadingProgressAdapterTest : BaseUnitTest() {
 
     @Test
     fun `test onCreateViewHolder()`() {
-        adapter.onCreateViewHolder(FrameLayout(context), ReadingProgressItem.Summary.VIEW_TYPE) as ReadingProgressViewHolder.Summary
-        adapter.onCreateViewHolder(FrameLayout(context), ReadingProgressItem.Book.VIEW_TYPE) as ReadingProgressViewHolder.Book
+        adapter.onCreateViewHolder(FrameLayout(context), AnnotatedVerseItem.Header.VIEW_TYPE) as AnnotatedVerseViewHolder.Header
+        adapter.onCreateViewHolder(FrameLayout(context), AnnotatedVerseItem.Bookmark.VIEW_TYPE) as AnnotatedVerseViewHolder.Bookmark
+        adapter.onCreateViewHolder(FrameLayout(context), AnnotatedVerseItem.Highlight.VIEW_TYPE) as AnnotatedVerseViewHolder.Highlight
+        adapter.onCreateViewHolder(FrameLayout(context), AnnotatedVerseItem.Note.VIEW_TYPE) as AnnotatedVerseViewHolder.Note
     }
 }

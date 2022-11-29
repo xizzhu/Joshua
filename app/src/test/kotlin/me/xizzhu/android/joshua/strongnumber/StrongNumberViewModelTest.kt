@@ -22,7 +22,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -34,8 +33,6 @@ import me.xizzhu.android.joshua.core.StrongNumberManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.TextItem
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -60,7 +57,7 @@ class StrongNumberViewModelTest : BaseUnitTest() {
 
         bibleReadingManager = mockk()
         strongNumberManager = mockk()
-        settingsManager = mockk<SettingsManager>().apply { every { settings() } returns emptyFlow() }
+        settingsManager = mockk<SettingsManager>().apply { every { settings() } returns flowOf(Settings.DEFAULT) }
         savedStateHandle = mockk<SavedStateHandle>().apply { every { get<String>("me.xizzhu.android.joshua.KEY_STRONG_NUMBER") } returns "" }
 
         strongNumberViewModel = StrongNumberViewModel(bibleReadingManager, strongNumberManager, settingsManager, testCoroutineDispatcherProvider, savedStateHandle)
@@ -70,7 +67,6 @@ class StrongNumberViewModelTest : BaseUnitTest() {
     fun `test loadStrongNumber(), called in constructor, with empty sn`() = runTest {
         assertEquals(
             StrongNumberViewModel.ViewState(
-                settings = null,
                 loading = false,
                 items = emptyList(),
                 preview = null,
@@ -82,7 +78,6 @@ class StrongNumberViewModelTest : BaseUnitTest() {
         strongNumberViewModel.markErrorAsShown(StrongNumberViewModel.ViewState.Error.VerseOpeningError(VerseIndex.INVALID))
         assertEquals(
             StrongNumberViewModel.ViewState(
-                settings = null,
                 loading = false,
                 items = emptyList(),
                 preview = null,
@@ -94,7 +89,6 @@ class StrongNumberViewModelTest : BaseUnitTest() {
         strongNumberViewModel.markErrorAsShown(StrongNumberViewModel.ViewState.Error.StrongNumberLoadingError)
         assertEquals(
             StrongNumberViewModel.ViewState(
-                settings = null,
                 loading = false,
                 items = emptyList(),
                 preview = null,
@@ -108,14 +102,12 @@ class StrongNumberViewModelTest : BaseUnitTest() {
     fun `test loadStrongNumber(), called in constructor, with exception`() = runTest {
         val sn = "H7225"
         coEvery { bibleReadingManager.currentTranslation() } throws RuntimeException("random exception")
-        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
         every { savedStateHandle.get<String>("me.xizzhu.android.joshua.KEY_STRONG_NUMBER") } returns sn
 
         strongNumberViewModel = StrongNumberViewModel(bibleReadingManager, strongNumberManager, settingsManager, testCoroutineDispatcherProvider, savedStateHandle)
 
         assertEquals(
             StrongNumberViewModel.ViewState(
-                settings = Settings.DEFAULT,
                 loading = false,
                 items = emptyList(),
                 preview = null,
@@ -141,32 +133,41 @@ class StrongNumberViewModelTest : BaseUnitTest() {
         coEvery { bibleReadingManager.readBookNames(MockContents.kjvShortName) } returns MockContents.kjvBookNames
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
 
-        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
         every { savedStateHandle.get<String>("me.xizzhu.android.joshua.KEY_STRONG_NUMBER") } returns sn
 
         strongNumberViewModel = StrongNumberViewModel(bibleReadingManager, strongNumberManager, settingsManager, testCoroutineDispatcherProvider, savedStateHandle)
 
         val actual = strongNumberViewModel.viewState().first()
-        assertEquals(Settings.DEFAULT, actual.settings)
         assertFalse(actual.loading)
-        assertEquals(6, actual.items.size)
+        assertEquals(Settings.DEFAULT, (actual.items[0] as StrongNumberItem.StrongNumber).settings)
         assertEquals(
             "H7225 beginning, chief(-est), first(-fruits, part, time), principal thing.",
-            (actual.items[0] as TextItem).title.toString()
-        )
-        assertEquals("Genesis", (actual.items[1] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:1 In the beginning God created the heaven and the earth.",
-            (actual.items[2] as StrongNumberItem).textForDisplay.toString()
+            (actual.items[0] as StrongNumberItem.StrongNumber).text.toString()
         )
         assertEquals(
-            "Gen. 10:10 And the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar.",
-            (actual.items[3] as StrongNumberItem).textForDisplay.toString()
-        )
-        assertEquals("Exodus", (actual.items[4] as TitleItem).title.toString())
-        assertEquals(
-            "Ex. 23:19 The first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.",
-            (actual.items[5] as StrongNumberItem).textForDisplay.toString()
+            listOf(
+                StrongNumberItem.BookName(Settings.DEFAULT, "Genesis"),
+                StrongNumberItem.Verse(
+                    settings = Settings.DEFAULT,
+                    verseIndex = VerseIndex(0, 0, 0),
+                    bookShortName = "Gen.",
+                    verseText = "In the beginning God created the heaven and the earth."
+                ),
+                StrongNumberItem.Verse(
+                    settings = Settings.DEFAULT,
+                    verseIndex = VerseIndex(0, 9, 9),
+                    bookShortName = "Gen.",
+                    verseText = "And the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar."
+                ),
+                StrongNumberItem.BookName(Settings.DEFAULT, "Exodus"),
+                StrongNumberItem.Verse(
+                    settings = Settings.DEFAULT,
+                    verseIndex = VerseIndex(1, 22, 18),
+                    bookShortName = "Ex.",
+                    verseText = "The first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk."
+                )
+            ),
+            actual.items.subList(1, actual.items.size)
         )
         assertNull(actual.preview)
         assertNull(actual.error)
@@ -180,7 +181,6 @@ class StrongNumberViewModelTest : BaseUnitTest() {
 
         assertEquals(
             StrongNumberViewModel.ViewState(
-                settings = null,
                 loading = false,
                 items = emptyList(),
                 preview = null,
@@ -201,7 +201,6 @@ class StrongNumberViewModelTest : BaseUnitTest() {
 
         assertEquals(
             StrongNumberViewModel.ViewState(
-                settings = null,
                 loading = false,
                 items = emptyList(),
                 preview = null,
@@ -218,7 +217,6 @@ class StrongNumberViewModelTest : BaseUnitTest() {
 
         assertEquals(
             StrongNumberViewModel.ViewState(
-                settings = null,
                 loading = false,
                 items = emptyList(),
                 preview = null,
@@ -235,13 +233,11 @@ class StrongNumberViewModelTest : BaseUnitTest() {
             bibleReadingManager.readVerses(MockContents.kjvShortName, 0, 0)
         } returns listOf(MockContents.kjvVerses[0], MockContents.kjvVerses[1], MockContents.kjvVerses[2])
         coEvery { bibleReadingManager.readBookShortNames(MockContents.kjvShortName) } returns MockContents.kjvBookShortNames
-        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
 
         strongNumberViewModel.markErrorAsShown(StrongNumberViewModel.ViewState.Error.StrongNumberLoadingError)
         strongNumberViewModel.loadPreview(VerseIndex(0, 0, 1))
 
         val actual = strongNumberViewModel.viewState().first()
-        assertNull(actual.settings)
         assertFalse(actual.loading)
         assertTrue(actual.items.isEmpty())
         assertEquals(Settings.DEFAULT, actual.preview?.settings)
@@ -253,7 +249,6 @@ class StrongNumberViewModelTest : BaseUnitTest() {
         strongNumberViewModel.markPreviewAsClosed()
         assertEquals(
             StrongNumberViewModel.ViewState(
-                settings = null,
                 loading = false,
                 items = emptyList(),
                 preview = null,
