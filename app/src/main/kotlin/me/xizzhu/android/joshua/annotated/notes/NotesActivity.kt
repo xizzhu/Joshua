@@ -22,16 +22,17 @@ import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesActivity
-import me.xizzhu.android.joshua.annotated.AnnotatedVersesViewModel
+import me.xizzhu.android.joshua.annotated.AnnotatedVerseItem
+import me.xizzhu.android.joshua.annotated.AnnotatedVerseActivity
+import me.xizzhu.android.joshua.annotated.AnnotatedVerseViewModel
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.core.provider.TimeProvider
 import me.xizzhu.android.joshua.reading.ReadingActivity
-import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,7 +43,7 @@ class NotesViewModel @Inject constructor(
     coroutineDispatcherProvider: CoroutineDispatcherProvider,
     timeProvider: TimeProvider,
     application: Application
-) : AnnotatedVersesViewModel<Note>(
+) : AnnotatedVerseViewModel<Note>(
     bibleReadingManager = bibleReadingManager,
     verseAnnotationManager = notesManager,
     noItemText = R.string.text_no_notes,
@@ -51,12 +52,24 @@ class NotesViewModel @Inject constructor(
     timeProvider = timeProvider,
     application = application
 ) {
-    override fun buildBaseItem(annotatedVerse: Note, bookName: String, bookShortName: String, verseText: String, sortOrder: Int): BaseItem =
-        NoteItem(annotatedVerse.verseIndex, bookShortName, verseText, annotatedVerse.note)
+    override fun buildAnnotatedVerseItem(
+        settings: Settings,
+        verseAnnotation: Note,
+        bookName: String,
+        bookShortName: String,
+        verseText: String,
+        sortOrder: Int
+    ): AnnotatedVerseItem = AnnotatedVerseItem.Note(
+        settings = settings,
+        verseIndex = verseAnnotation.verseIndex,
+        bookShortName = bookShortName,
+        verseText = verseText,
+        note = verseAnnotation.note
+    )
 }
 
 @AndroidEntryPoint
-class NotesActivity : AnnotatedVersesActivity<Note, NotesViewModel>(R.string.title_notes) {
+class NotesActivity : AnnotatedVerseActivity<Note, NotesViewModel>(R.string.title_notes) {
     override val viewModel: NotesViewModel by viewModels()
 
     override fun extrasForOpeningVerse(): Bundle = ReadingActivity.bundleForOpenNote()

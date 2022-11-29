@@ -140,8 +140,7 @@ sealed class StrongNumberViewHolder<Item : StrongNumberItem, VB : ViewBinding>(v
     }
 
     class Verse(inflater: LayoutInflater, parent: ViewGroup, onViewEvent: (StrongNumberAdapter.ViewEvent) -> Unit)
-        : StrongNumberViewHolder<StrongNumberItem.Verse, ItemStrongNumberVerseBinding>(
-        ItemStrongNumberVerseBinding.inflate(inflater, parent, false)
+        : StrongNumberViewHolder<StrongNumberItem.Verse, ItemStrongNumberVerseBinding>(ItemStrongNumberVerseBinding.inflate(inflater, parent, false)
     ) {
         init {
             itemView.setOnClickListener {

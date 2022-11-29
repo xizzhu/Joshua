@@ -19,37 +19,49 @@ package me.xizzhu.android.joshua.annotated
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.core.view.isVisible
+import kotlinx.coroutines.asExecutor
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.annotated.bookmarks.BookmarkItem
-import me.xizzhu.android.joshua.annotated.highlights.HighlightItem
-import me.xizzhu.android.joshua.annotated.notes.NoteItem
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.VerseAnnotation
 import me.xizzhu.android.joshua.core.VerseIndex
+import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.databinding.ActivityAnnotatedBinding
 import me.xizzhu.android.joshua.infra.BaseActivityV2
 import me.xizzhu.android.joshua.preview.VersePreviewItem
 import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.listDialog
+import javax.inject.Inject
 
-abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVersesViewModel<V>>(
+abstract class AnnotatedVerseActivity<V : VerseAnnotation, VM : AnnotatedVerseViewModel<V>>(
     @StringRes private val toolbarText: Int
-) : BaseActivityV2<ActivityAnnotatedBinding, AnnotatedVersesViewModel.ViewAction, AnnotatedVersesViewModel.ViewState, VM>(), BookmarkItem.Callback, HighlightItem.Callback, NoteItem.Callback, VersePreviewItem.Callback {
+) : BaseActivityV2<ActivityAnnotatedBinding, AnnotatedVerseViewModel.ViewAction, AnnotatedVerseViewModel.ViewState, VM>(), VersePreviewItem.Callback {
+    @Inject
+    lateinit var coroutineDispatcherProvider: CoroutineDispatcherProvider
+
+    private lateinit var adapter: AnnotatedVerseAdapter
+
     override val viewBinding: ActivityAnnotatedBinding by lazy { ActivityAnnotatedBinding.inflate(layoutInflater) }
 
     override fun initializeView() {
-        // TODO
+        adapter = AnnotatedVerseAdapter(
+            inflater = layoutInflater,
+            executor = coroutineDispatcherProvider.default.asExecutor()
+        ) { viewEvent ->
+            when (viewEvent) {
+                is AnnotatedVerseAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
+                is AnnotatedVerseAdapter.ViewEvent.ShowPreview -> viewModel.loadPreview(viewEvent.verseToPreview)
+            }
+        }
+        viewBinding.verseList.adapter = adapter
     }
 
-    override fun onViewActionEmitted(viewAction: AnnotatedVersesViewModel.ViewAction) = when (viewAction) {
-        AnnotatedVersesViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING, extrasForOpeningVerse())
+    override fun onViewActionEmitted(viewAction: AnnotatedVerseViewModel.ViewAction) = when (viewAction) {
+        AnnotatedVerseViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING, extrasForOpeningVerse())
     }
 
-    override fun onViewStateUpdated(viewState: AnnotatedVersesViewModel.ViewState) = with(viewBinding) {
-        viewState.settings?.let { verseList.setSettings(it) }
-
+    override fun onViewStateUpdated(viewState: AnnotatedVerseViewModel.ViewState) = with(viewBinding) {
         toolbar.setSortOrder(viewState.sortOrder)
 
         if (viewState.loading) {
@@ -60,7 +72,7 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
             verseList.fadeIn()
         }
 
-        verseList.setItems(viewState.items)
+        adapter.submitList(viewState.items)
 
         viewState.preview?.let { preview ->
             listDialog(
@@ -73,7 +85,7 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
         }
 
         when (val error = viewState.error) {
-            is AnnotatedVersesViewModel.ViewState.Error.AnnotatedVersesLoadingError -> {
+            is AnnotatedVerseViewModel.ViewState.Error.AnnotatedVersesLoadingError -> {
                 dialog(
                     cancelable = false,
                     title = R.string.dialog_title_error,
@@ -83,13 +95,13 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
                     onDismiss = { viewModel.markErrorAsShown(error) }
                 )
             }
-            is AnnotatedVersesViewModel.ViewState.Error.PreviewLoadingError -> {
+            is AnnotatedVerseViewModel.ViewState.Error.PreviewLoadingError -> {
                 viewModel.markErrorAsShown(error)
 
                 // Very unlikely to fail, so just falls back to open the verse.
                 openVerse(error.verseToPreview)
             }
-            is AnnotatedVersesViewModel.ViewState.Error.SortOrderSavingError -> {
+            is AnnotatedVerseViewModel.ViewState.Error.SortOrderSavingError -> {
                 dialog(
                     cancelable = true,
                     title = R.string.dialog_title_error,
@@ -98,7 +110,7 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
                     onDismiss = { viewModel.markErrorAsShown(error) }
                 )
             }
-            is AnnotatedVersesViewModel.ViewState.Error.VerseOpeningError -> {
+            is AnnotatedVerseViewModel.ViewState.Error.VerseOpeningError -> {
                 dialog(
                     cancelable = true,
                     title = R.string.dialog_title_error,
@@ -128,10 +140,6 @@ abstract class AnnotatedVersesActivity<V : VerseAnnotation, VM : AnnotatedVerses
 
     override fun openVerse(verseToOpen: VerseIndex) {
         viewModel.openVerse(verseToOpen)
-    }
-
-    override fun showPreview(verseIndex: VerseIndex) {
-        viewModel.loadPreview(verseIndex)
     }
 
     protected open fun extrasForOpeningVerse(): Bundle? = null

@@ -20,23 +20,21 @@ import android.app.Application
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.emptyFlow
+import me.xizzhu.android.joshua.annotated.AnnotatedVerseItem
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.TestTimeProvider
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-@RunWith(RobolectricTestRunner::class)
 class HighlightsViewModelTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
     private lateinit var highlightsManager: VerseAnnotationManager<Highlight>
@@ -56,16 +54,25 @@ class HighlightsViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test buildBaseItem`() {
-        val actual = highlightsViewModel.buildBaseItem(
-            annotatedVerse = Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_BLUE, 1L),
-            bookName = MockContents.kjvBookNames[0],
-            bookShortName = MockContents.kjvBookShortNames[0],
-            verseText = MockContents.kjvVerses[0].text.text,
-            sortOrder = Constants.SORT_BY_BOOK
+    fun `test buildAnnotatedVerseItem()`() {
+        assertEquals(
+            AnnotatedVerseItem.Highlight(
+                Settings.DEFAULT,
+                MockContents.kjvVerses[0].verseIndex,
+                MockContents.kjvBookNames[0],
+                MockContents.kjvBookShortNames[0],
+                MockContents.kjvVerses[0].text.text,
+                Highlight.COLOR_BLUE,
+                Constants.SORT_BY_BOOK
+            ),
+            highlightsViewModel.buildAnnotatedVerseItem(
+                settings = Settings.DEFAULT,
+                verseAnnotation = Highlight(VerseIndex(0, 0, 0), Highlight.COLOR_BLUE, 1L),
+                bookName = MockContents.kjvBookNames[0],
+                bookShortName = MockContents.kjvBookShortNames[0],
+                verseText = MockContents.kjvVerses[0].text.text,
+                sortOrder = Constants.SORT_BY_BOOK
+            )
         )
-        assertTrue(actual is HighlightItem)
-        assertEquals(VerseIndex(0, 0, 0), actual.verseIndex)
-        assertEquals("Gen. 1:1 In the beginning God created the heaven and the earth.", actual.textForDisplay.toString())
     }
 }
