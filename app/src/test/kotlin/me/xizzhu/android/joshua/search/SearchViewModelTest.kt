@@ -30,7 +30,6 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.*
@@ -61,7 +60,7 @@ class SearchViewModelTest : BaseUnitTest() {
             coEvery { search(any()) } returns SearchResult(emptyList(), emptyList(), emptyList(), emptyList())
         }
         settingsManager = mockk<SettingsManager>().apply {
-            every { settings() } returns emptyFlow()
+            every { settings() } returns flowOf(Settings.DEFAULT)
         }
         application = mockk<Application>().apply {
             every { getString(R.string.title_bookmarks) } returns "Bookmarks"
@@ -74,37 +73,12 @@ class SearchViewModelTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test observing settings`() = runTest {
-        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
-
-        searchViewModel = SearchViewModel(bibleReadingManager, searchManager, settingsManager, testCoroutineDispatcherProvider, application)
-
-        assertEquals(
-            SearchViewModel.ViewState(
-                settings = Settings.DEFAULT,
-                loading = false,
-                searchConfig = SearchConfiguration(
-                    includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
-                ),
-                instantSearch = false,
-                items = emptyList(),
-                scrollItemsToPosition = -1,
-                preview = null,
-                toast = null,
-                error = null
-            ),
-            searchViewModel.viewState().first()
-        )
-    }
-
-    @Test
     fun `test includeOldTestament(), with exception`() = runTest {
         coEvery { searchManager.configuration() } throws RuntimeException("random exception")
 
         searchViewModel.includeOldTestament(false)
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -122,7 +96,6 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.markErrorAsShown(SearchViewModel.ViewState.Error.VerseSearchingError)
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -140,7 +113,6 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.markErrorAsShown(SearchViewModel.ViewState.Error.SearchConfigUpdatingError)
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -169,7 +141,6 @@ class SearchViewModelTest : BaseUnitTest() {
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -199,7 +170,6 @@ class SearchViewModelTest : BaseUnitTest() {
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -229,7 +199,6 @@ class SearchViewModelTest : BaseUnitTest() {
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -259,7 +228,6 @@ class SearchViewModelTest : BaseUnitTest() {
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -289,7 +257,6 @@ class SearchViewModelTest : BaseUnitTest() {
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -313,7 +280,6 @@ class SearchViewModelTest : BaseUnitTest() {
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -332,13 +298,13 @@ class SearchViewModelTest : BaseUnitTest() {
     @Test
     fun `test search(), with exception`() = runTest {
         every { bibleReadingManager.currentTranslation() } throws RuntimeException("random error")
+        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
 
         searchViewModel.search("query", instanceSearch = false)
         searchViewModel.retrySearch()
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -356,12 +322,15 @@ class SearchViewModelTest : BaseUnitTest() {
 
     @Test
     fun `test search(), with empty result`() = runTest {
+        every { settingsManager.settings() } returns flowOf(Settings.DEFAULT)
+
+        searchViewModel = SearchViewModel(bibleReadingManager, searchManager, settingsManager, testCoroutineDispatcherProvider, application)
+
         searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -379,7 +348,6 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.markToastAsShown()
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -404,7 +372,6 @@ class SearchViewModelTest : BaseUnitTest() {
         delay(1000L)
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -423,7 +390,6 @@ class SearchViewModelTest : BaseUnitTest() {
         delay(100L) // delay is not long enough, so the search should NOT be executed
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -441,23 +407,54 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
-        val actual = searchViewModel.viewState().first()
-        assertNull(actual.settings)
-        assertFalse(actual.loading)
         assertEquals(
-            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
-            actual.searchConfig
+            SearchViewModel.ViewState(
+                loading = false,
+                searchConfig = SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+                instantSearch = false,
+                items = listOf(
+                    SearchItem.Header(Settings.DEFAULT, "Genesis"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    )
+                ),
+                scrollItemsToPosition = 0,
+                preview = null,
+                toast = "1 result(s) found.",
+                error = null
+            ),
+            searchViewModel.viewState().first()
         )
-        assertFalse(actual.instantSearch)
-        assertEquals(2, actual.items.size)
-        assertEquals("Genesis", (actual.items[0] as TitleItem).title.toString())
+
+        searchViewModel.markItemsAsScrolled()
         assertEquals(
-            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-            (actual.items[1] as SearchVerseItem).textForDisplay.toString()
+            SearchViewModel.ViewState(
+                loading = false,
+                searchConfig = SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+                instantSearch = false,
+                items = listOf(
+                    SearchItem.Header(Settings.DEFAULT, "Genesis"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    )
+                ),
+                scrollItemsToPosition = -1,
+                preview = null,
+                toast = "1 result(s) found.",
+                error = null
+            ),
+            searchViewModel.viewState().first()
         )
-        assertNull(actual.preview)
-        assertEquals("1 result(s) found.", actual.toast)
-        assertNull(actual.error)
     }
 
     @Test
@@ -472,36 +469,54 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.search("query", instanceSearch = true)
         delay(1000L)
 
-        val actual = searchViewModel.viewState().first()
-        assertNull(actual.settings)
-        assertFalse(actual.loading)
         assertEquals(
-            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
-            actual.searchConfig
+            SearchViewModel.ViewState(
+                loading = false,
+                searchConfig = SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+                instantSearch = true,
+                items = listOf(
+                    SearchItem.Header(Settings.DEFAULT, "Genesis"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 2),
+                        bookShortName = "Gen.",
+                        verseText = "And God said, Let there be light: and there was light.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 9, 9),
+                        bookShortName = "Gen.",
+                        verseText = "And the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                    SearchItem.Header(Settings.DEFAULT, "Exodus"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(1, 22, 18),
+                        bookShortName = "Ex.",
+                        verseText = "The first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                ),
+                scrollItemsToPosition = 0,
+                preview = null,
+                toast = null,
+                error = null
+            ),
+            searchViewModel.viewState().first()
         )
-        assertTrue(actual.instantSearch)
-        assertEquals(6, actual.items.size)
-        assertEquals("Genesis", (actual.items[0] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-            (actual.items[1] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals(
-            "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-            (actual.items[2] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals(
-            "Gen. 10:10\nAnd the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar.",
-            (actual.items[3] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals("Exodus", (actual.items[4] as TitleItem).title.toString())
-        assertEquals(
-            "Ex. 23:19\nThe first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.",
-            (actual.items[5] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertNull(actual.preview)
-        assertNull(actual.toast)
-        assertNull(actual.error)
     }
 
     @Test
@@ -516,32 +531,46 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
-        val actual = searchViewModel.viewState().first()
-        assertNull(actual.settings)
-        assertFalse(actual.loading)
         assertEquals(
-            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
-            actual.searchConfig
+            SearchViewModel.ViewState(
+                loading = false,
+                searchConfig = SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+                instantSearch = false,
+                items = listOf(
+                    SearchItem.Header(Settings.DEFAULT, "Bookmarks"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                    SearchItem.Header(Settings.DEFAULT, "Genesis"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 2),
+                        bookShortName = "Gen.",
+                        verseText = "And God said, Let there be light: and there was light.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                ),
+                scrollItemsToPosition = 0,
+                preview = null,
+                toast = "3 result(s) found.",
+                error = null
+            ),
+            searchViewModel.viewState().first()
         )
-        assertFalse(actual.instantSearch)
-        assertEquals(5, actual.items.size)
-        assertEquals("Bookmarks", (actual.items[0] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-            (actual.items[1] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals("Genesis", (actual.items[2] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-            (actual.items[3] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals(
-            "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-            (actual.items[4] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertNull(actual.preview)
-        assertEquals("3 result(s) found.", actual.toast)
-        assertNull(actual.error)
     }
 
     @Test
@@ -556,32 +585,46 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
-        val actual = searchViewModel.viewState().first()
-        assertNull(actual.settings)
-        assertFalse(actual.loading)
         assertEquals(
-            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
-            actual.searchConfig
+            SearchViewModel.ViewState(
+                loading = false,
+                searchConfig = SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+                instantSearch = false,
+                items = listOf(
+                    SearchItem.Header(Settings.DEFAULT, "Highlights"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_PINK
+                    ),
+                    SearchItem.Header(Settings.DEFAULT, "Genesis"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 2),
+                        bookShortName = "Gen.",
+                        verseText = "And God said, Let there be light: and there was light.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                ),
+                scrollItemsToPosition = 0,
+                preview = null,
+                toast = "3 result(s) found.",
+                error = null
+            ),
+            searchViewModel.viewState().first()
         )
-        assertFalse(actual.instantSearch)
-        assertEquals(5, actual.items.size)
-        assertEquals("Highlights", (actual.items[0] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-            (actual.items[1] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals("Genesis", (actual.items[2] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-            (actual.items[3] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals(
-            "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-            (actual.items[4] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertNull(actual.preview)
-        assertEquals("3 result(s) found.", actual.toast)
-        assertNull(actual.error)
     }
 
     @Test
@@ -596,33 +639,46 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
-        val actual = searchViewModel.viewState().first()
-        assertNull(actual.settings)
-        assertFalse(actual.loading)
         assertEquals(
-            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
-            actual.searchConfig
+            SearchViewModel.ViewState(
+                loading = false,
+                searchConfig = SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+                instantSearch = false,
+                items = listOf(
+                    SearchItem.Header(Settings.DEFAULT, "Notes"),
+                    SearchItem.Note(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 9),
+                        bookShortName = "Gen.",
+                        verseText = "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
+                        query = "query",
+                        note = "just a note"
+                    ),
+                    SearchItem.Header(Settings.DEFAULT, "Genesis"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 2),
+                        bookShortName = "Gen.",
+                        verseText = "And God said, Let there be light: and there was light.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                ),
+                scrollItemsToPosition = 0,
+                preview = null,
+                toast = "3 result(s) found.",
+                error = null
+            ),
+            searchViewModel.viewState().first()
         )
-        assertFalse(actual.instantSearch)
-        assertEquals(5, actual.items.size)
-        assertEquals("Notes", (actual.items[0] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
-            (actual.items[1] as SearchNoteItem).verseForDisplay.toString()
-        )
-        assertEquals("just a note", (actual.items[1] as SearchNoteItem).noteForDisplay.toString())
-        assertEquals("Genesis", (actual.items[2] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-            (actual.items[3] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals(
-            "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-            (actual.items[4] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertNull(actual.preview)
-        assertEquals("3 result(s) found.", actual.toast)
-        assertNull(actual.error)
     }
 
     @Test
@@ -637,43 +693,64 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.search("query", instanceSearch = false)
         delay(1000L)
 
-        val actual = searchViewModel.viewState().first()
-        assertNull(actual.settings)
-        assertFalse(actual.loading)
         assertEquals(
-            SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
-            actual.searchConfig
+            SearchViewModel.ViewState(
+                loading = false,
+                searchConfig = SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
+                instantSearch = false,
+                items = listOf(
+                    SearchItem.Header(Settings.DEFAULT, "Notes"),
+                    SearchItem.Note(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 9),
+                        bookShortName = "Gen.",
+                        verseText = "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
+                        query = "query",
+                        note = "just a note"
+                    ),
+                    SearchItem.Header(Settings.DEFAULT, "Bookmarks"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                    SearchItem.Header(Settings.DEFAULT, "Highlights"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_PINK
+                    ),
+                    SearchItem.Header(Settings.DEFAULT, "Genesis"),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 0),
+                        bookShortName = "Gen.",
+                        verseText = "In the beginning God created the heaven and the earth.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                    SearchItem.Verse(
+                        settings = Settings.DEFAULT,
+                        verseIndex = VerseIndex(0, 0, 2),
+                        bookShortName = "Gen.",
+                        verseText = "And God said, Let there be light: and there was light.",
+                        query = "query",
+                        highlightColor = Highlight.COLOR_NONE
+                    ),
+                ),
+                scrollItemsToPosition = 0,
+                preview = null,
+                toast = "5 result(s) found.",
+                error = null
+            ),
+            searchViewModel.viewState().first()
         )
-        assertFalse(actual.instantSearch)
-        assertEquals(9, actual.items.size)
-        assertEquals("Notes", (actual.items[0] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:10 And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good.",
-            (actual.items[1] as SearchNoteItem).verseForDisplay.toString()
-        )
-        assertEquals("just a note", (actual.items[1] as SearchNoteItem).noteForDisplay.toString())
-        assertEquals("Bookmarks", (actual.items[2] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-            (actual.items[3] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals("Highlights", (actual.items[4] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-            (actual.items[5] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals("Genesis", (actual.items[6] as TitleItem).title.toString())
-        assertEquals(
-            "Gen. 1:1\nIn the beginning God created the heaven and the earth.",
-            (actual.items[7] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertEquals(
-            "Gen. 1:3\nAnd God said, Let there be light: and there was light.",
-            (actual.items[8] as SearchVerseItem).textForDisplay.toString()
-        )
-        assertNull(actual.preview)
-        assertEquals("5 result(s) found.", actual.toast)
-        assertNull(actual.error)
     }
 
     @Test
@@ -684,7 +761,6 @@ class SearchViewModelTest : BaseUnitTest() {
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -710,7 +786,6 @@ class SearchViewModelTest : BaseUnitTest() {
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -733,7 +808,6 @@ class SearchViewModelTest : BaseUnitTest() {
 
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
@@ -761,7 +835,6 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.loadPreview(VerseIndex(0, 0, 1))
 
         val actual = searchViewModel.viewState().first()
-        assertNull(actual.settings)
         assertFalse(actual.loading)
         assertEquals(
             SearchConfiguration(includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true),
@@ -794,7 +867,6 @@ class SearchViewModelTest : BaseUnitTest() {
         searchViewModel.markPreviewAsClosed()
         assertEquals(
             SearchViewModel.ViewState(
-                settings = null,
                 loading = false,
                 searchConfig = SearchConfiguration(
                     includeOldTestament = true, includeNewTestament = true, includeBookmarks = true, includeHighlights = true, includeNotes = true
