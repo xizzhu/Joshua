@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.strongnumber
+package me.xizzhu.android.joshua.search
 
 import android.content.Context
-import android.graphics.Typeface
-import android.text.SpannableStringBuilder
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import androidx.core.text.getSpans
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.core.Highlight
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
@@ -36,20 +32,18 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
-class StrongNumberAdapterTest : BaseUnitTest() {
+class SearchAdapterTest : BaseUnitTest() {
     private lateinit var context: Context
-    private lateinit var adapter: StrongNumberAdapter
+    private lateinit var adapter: SearchAdapter
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
         context = ApplicationProvider.getApplicationContext<Context>().apply { setTheme(R.style.AppTheme) }
-        adapter = StrongNumberAdapter(
+        adapter = SearchAdapter(
             inflater = LayoutInflater.from(context),
             executor = TestExecutor()
         ) {}
@@ -59,14 +53,28 @@ class StrongNumberAdapterTest : BaseUnitTest() {
     fun `test getItemViewType()`() {
         adapter.submitList(
             listOf(
-                StrongNumberItem.StrongNumber(Settings.DEFAULT, ""),
-                StrongNumberItem.BookName(Settings.DEFAULT, ""),
-                StrongNumberItem.Verse(Settings.DEFAULT, VerseIndex.INVALID, "", "")
+                SearchItem.Header(Settings.DEFAULT, ""),
+                SearchItem.Note(
+                    settings = Settings.DEFAULT,
+                    verseIndex = VerseIndex(0, 0, 0),
+                    bookShortName = MockContents.kjvBookShortNames[0],
+                    verseText = MockContents.kjvVerses[0].text.text,
+                    query = "",
+                    note = ""
+                ),
+                SearchItem.Verse(
+                    settings = Settings.DEFAULT,
+                    verseIndex = VerseIndex(0, 0, 0),
+                    bookShortName = MockContents.kjvBookShortNames[0],
+                    verseText = MockContents.kjvVerses[0].text.text,
+                    query = "",
+                    highlightColor = Highlight.COLOR_NONE
+                ),
             )
         ) {
-            assertEquals(R.layout.item_text, adapter.getItemViewType(0))
-            assertEquals(R.layout.item_title, adapter.getItemViewType(1))
-            assertEquals(R.layout.item_strong_number_verse, adapter.getItemViewType(2))
+            assertEquals(R.layout.item_title, adapter.getItemViewType(0))
+            assertEquals(R.layout.item_search_note, adapter.getItemViewType(1))
+            assertEquals(R.layout.item_search_verse, adapter.getItemViewType(2))
         }
     }
 
@@ -77,8 +85,8 @@ class StrongNumberAdapterTest : BaseUnitTest() {
 
     @Test
     fun `test onCreateViewHolder()`() {
-        adapter.onCreateViewHolder(FrameLayout(context), StrongNumberItem.StrongNumber.VIEW_TYPE) as StrongNumberViewHolder.StrongNumber
-        adapter.onCreateViewHolder(FrameLayout(context), StrongNumberItem.BookName.VIEW_TYPE) as StrongNumberViewHolder.BookName
-        adapter.onCreateViewHolder(FrameLayout(context), StrongNumberItem.Verse.VIEW_TYPE) as StrongNumberViewHolder.Verse
+        adapter.onCreateViewHolder(FrameLayout(context), SearchItem.Header.VIEW_TYPE) as SearchViewHolder.Header
+        adapter.onCreateViewHolder(FrameLayout(context), SearchItem.Note.VIEW_TYPE) as SearchViewHolder.Note
+        adapter.onCreateViewHolder(FrameLayout(context), SearchItem.Verse.VIEW_TYPE) as SearchViewHolder.Verse
     }
 }

@@ -20,10 +20,12 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -45,8 +47,6 @@ import me.xizzhu.android.joshua.infra.BaseViewModelV2
 import me.xizzhu.android.joshua.preview.PreviewViewData
 import me.xizzhu.android.joshua.preview.loadPreviewV2
 import me.xizzhu.android.joshua.preview.nextNonEmpty
-import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
@@ -60,7 +60,6 @@ class SearchViewModel @Inject constructor(
     private val application: Application
 ) : BaseViewModelV2<SearchViewModel.ViewAction, SearchViewModel.ViewState>(
     initialViewState = ViewState(
-        settings = null,
         loading = false,
         searchConfig = null,
         instantSearch = false,
@@ -76,11 +75,10 @@ class SearchViewModel @Inject constructor(
     }
 
     data class ViewState(
-        val settings: Settings?,
         val loading: Boolean,
         val searchConfig: SearchConfiguration?,
         val instantSearch: Boolean,
-        val items: List<BaseItem>,
+        val items: List<SearchItem>,
         val scrollItemsToPosition: Int,
         val preview: PreviewViewData?,
         val toast: String?,
@@ -94,13 +92,11 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private class SearchRequest(val query: String, val instanceSearch: Boolean)
+    private class SearchRequest(val query: String, val instantSearch: Boolean)
 
     private val searchRequest: MutableStateFlow<SearchRequest?> = MutableStateFlow(null)
 
     init {
-        settingsManager.settings().onEach { settings -> updateViewState { it.copy(settings = settings) } }.launchIn(viewModelScope)
-
         searchManager.configuration()
             .onEach { searchConfig ->
                 updateViewState { it.copy(searchConfig = searchConfig) }
@@ -108,12 +104,15 @@ class SearchViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        searchRequest.filterNotNull()
-            .debounce(250L)
-            .distinctUntilChangedBy { it.query }
-            .mapLatest { it }
-            .onEach { doSearch(it.query, it.instanceSearch) }
-            .launchIn(viewModelScope)
+        combine(
+            settingsManager.settings(),
+            searchRequest.filterNotNull()
+                .debounce(250L)
+                .distinctUntilChangedBy { it.query }
+                .mapLatest { it }
+        ) { settings, searchRequest ->
+            doSearch(settings, searchRequest.query, searchRequest.instantSearch)
+        }.flowOn(coroutineDispatcherProvider.default).launchIn(viewModelScope)
     }
 
     fun includeOldTestament(include: Boolean) {
@@ -153,87 +152,118 @@ class SearchViewModel @Inject constructor(
     }
 
     fun retrySearch() {
-        searchRequest.value?.let { request -> doSearch(request.query, request.instanceSearch) }
+        viewModelScope.launch(coroutineDispatcherProvider.default) {
+            searchRequest.value?.let { request ->
+                doSearch(
+                    settings = settingsManager.settings().first(),
+                    query = request.query,
+                    instantSearch = request.instantSearch
+                )
+            }
+        }
     }
 
-    private fun doSearch(query: String, instantSearch: Boolean) {
+    private suspend fun doSearch(settings: Settings, query: String, instantSearch: Boolean) {
         if (query.isBlank()) {
             updateViewState { it.copy(items = emptyList()) }
             return
         }
 
-        viewModelScope.launch(coroutineDispatcherProvider.default) {
-            runCatching {
-                if (!instantSearch) {
-                    updateViewState { it.copy(loading = true, items = emptyList()) }
-                }
-
-                val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-                val searchResult = searchManager.search(query)
-                val items = buildSearchResultItems(
-                    query = query,
-                    verses = searchResult.verses,
-                    bookmarks = searchResult.bookmarks,
-                    highlights = searchResult.highlights,
-                    notes = searchResult.notes,
-                    bookNames = bibleReadingManager.readBookNames(currentTranslation),
-                    bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
-                )
-                val toast = if (instantSearch) {
-                    null
-                } else {
-                    application.getString(R.string.toast_search_result,
-                        searchResult.verses.size + searchResult.bookmarks.size + searchResult.highlights.size + searchResult.notes.size)
-                }
-                updateViewState { current ->
-                    current.copy(
-                        loading = false,
-                        instantSearch = instantSearch,
-                        items = items,
-                        scrollItemsToPosition = 0,
-                        toast = toast,
-                    )
-                }
-            }.onFailure { e ->
-                Log.e(tag, "Error occurred which searching, query=$query instantSearch=$instantSearch", e)
-                updateViewState { it.copy(loading = false, error = ViewState.Error.VerseSearchingError) }
+        runCatching {
+            if (!instantSearch) {
+                updateViewState { it.copy(loading = true, items = emptyList()) }
             }
+
+            val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+            val searchResult = searchManager.search(query)
+            val items = buildSearchResultItems(
+                settings = settings,
+                query = query,
+                verses = searchResult.verses,
+                bookmarks = searchResult.bookmarks,
+                highlights = searchResult.highlights,
+                notes = searchResult.notes,
+                bookNames = bibleReadingManager.readBookNames(currentTranslation),
+                bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
+            )
+            val toast = if (instantSearch) {
+                null
+            } else {
+                application.getString(R.string.toast_search_result,
+                    searchResult.verses.size + searchResult.bookmarks.size + searchResult.highlights.size + searchResult.notes.size)
+            }
+            updateViewState { current ->
+                current.copy(
+                    loading = false,
+                    instantSearch = instantSearch,
+                    items = items,
+                    scrollItemsToPosition = 0,
+                    toast = toast,
+                )
+            }
+        }.onFailure { e ->
+            Log.e(tag, "Error occurred which searching, query=$query instantSearch=$instantSearch", e)
+            updateViewState { it.copy(loading = false, error = ViewState.Error.VerseSearchingError) }
         }
     }
 
     private fun buildSearchResultItems(
-        query: String, verses: List<Verse>, bookmarks: List<Pair<Bookmark, Verse>>, highlights: List<Pair<Highlight, Verse>>,
-        notes: List<Pair<Note, Verse>>, bookNames: List<String>, bookShortNames: List<String>
-    ): List<BaseItem> {
-        val items = ArrayList<BaseItem>(
+        settings: Settings,
+        query: String,
+        verses: List<Verse>,
+        bookmarks: List<Pair<Bookmark, Verse>>,
+        highlights: List<Pair<Highlight, Verse>>,
+        notes: List<Pair<Note, Verse>>,
+        bookNames: List<String>,
+        bookShortNames: List<String>
+    ): List<SearchItem> {
+        val items = ArrayList<SearchItem>(
             (if (notes.isEmpty()) 0 else notes.size + 1)
                 + (if (bookmarks.isEmpty()) 0 else bookmarks.size + 1)
                 + (if (highlights.isEmpty()) 0 else highlights.size + 1)
-                + verses.size + Bible.BOOK_COUNT
+                + verses.size
+                + Bible.BOOK_COUNT
         )
 
         if (notes.isNotEmpty()) {
-            items.add(TitleItem(application.getString(R.string.title_notes), false))
+            items.add(SearchItem.Header(settings, application.getString(R.string.title_notes)))
             notes.forEach { note ->
-                items.add(SearchNoteItem(
-                    note.first.verseIndex, bookShortNames[note.first.verseIndex.bookIndex], note.second.text.text, note.first.note, query
+                items.add(SearchItem.Note(
+                    settings = settings,
+                    verseIndex = note.first.verseIndex,
+                    bookShortName = bookShortNames[note.first.verseIndex.bookIndex],
+                    verseText = note.second.text.text,
+                    query = query,
+                    note = note.first.note,
                 ))
             }
         }
 
         if (bookmarks.isNotEmpty()) {
-            items.add(TitleItem(application.getString(R.string.title_bookmarks), false))
+            items.add(SearchItem.Header(settings, application.getString(R.string.title_bookmarks)))
             bookmarks.forEach { bookmark ->
-                items.add(SearchVerseItem(bookmark.first.verseIndex, bookShortNames[bookmark.first.verseIndex.bookIndex],
-                    bookmark.second.text.text, query, Highlight.COLOR_NONE))
+                items.add(SearchItem.Verse(
+                    settings = settings,
+                    verseIndex = bookmark.first.verseIndex,
+                    bookShortName = bookShortNames[bookmark.first.verseIndex.bookIndex],
+                    verseText = bookmark.second.text.text,
+                    query = query,
+                    highlightColor = Highlight.COLOR_NONE
+                ))
             }
         }
 
         if (highlights.isNotEmpty()) {
-            items.add(TitleItem(application.getString(R.string.title_highlights), false))
+            items.add(SearchItem.Header(settings, application.getString(R.string.title_highlights)))
             highlights.forEach { highlight ->
-                items.add(SearchVerseItem(highlight.first.verseIndex, bookShortNames[highlight.first.verseIndex.bookIndex],
-                    highlight.second.text.text, query, highlight.first.color))
+                items.add(SearchItem.Verse(
+                    settings = settings,
+                    verseIndex = highlight.first.verseIndex,
+                    bookShortName = bookShortNames[highlight.first.verseIndex.bookIndex],
+                    verseText = highlight.second.text.text,
+                    query = query,
+                    highlightColor = highlight.first.color
+                ))
             }
         }
 
@@ -241,10 +271,17 @@ class SearchViewModel @Inject constructor(
         verses.forEach { verse ->
             val currentVerseBookIndex = verse.verseIndex.bookIndex
             if (lastVerseBookIndex != currentVerseBookIndex) {
-                items.add(TitleItem(bookNames[currentVerseBookIndex], false))
+                items.add(SearchItem.Header(settings, bookNames[currentVerseBookIndex]))
                 lastVerseBookIndex = currentVerseBookIndex
             }
-            items.add(SearchVerseItem(verse.verseIndex, bookShortNames[currentVerseBookIndex], verse.text.text, query, Highlight.COLOR_NONE))
+            items.add(SearchItem.Verse(
+                settings = settings,
+                verseIndex = verse.verseIndex,
+                bookShortName = bookShortNames[currentVerseBookIndex],
+                verseText = verse.text.text,
+                query = query,
+                highlightColor = Highlight.COLOR_NONE
+            ))
         }
 
         return items

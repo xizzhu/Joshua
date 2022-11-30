@@ -24,6 +24,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -39,11 +40,12 @@ import me.xizzhu.android.joshua.ui.toast
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.ViewAction, SearchViewModel.ViewState, SearchViewModel>(), SearchNoteItem.Callback, SearchVerseItem.Callback, SearchVersePreviewItem.Callback {
+class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.ViewAction, SearchViewModel.ViewState, SearchViewModel>(), SearchVersePreviewItem.Callback {
     @Inject
     lateinit var coroutineDispatcherProvider: CoroutineDispatcherProvider
 
     private lateinit var searchRecentSuggestions: SearchRecentSuggestions
+    private lateinit var adapter: SearchAdapter
 
     override val viewModel: SearchViewModel by viewModels()
 
@@ -80,6 +82,17 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
         // See https://console.firebase.google.com/u/0/project/joshua-production/crashlytics/app/android:me.xizzhu.android.joshua/issues/45465ea5dc4f7722c6ce6b8889196249?time=last-seven-days&type=all
         (applicationContext.getSystemService(Context.SEARCH_SERVICE) as? SearchManager)
             ?.getSearchableInfo(componentName)?.let { viewBinding.toolbar.setSearchableInfo(it) }
+
+        adapter = SearchAdapter(
+            inflater = layoutInflater,
+            executor = coroutineDispatcherProvider.default.asExecutor()
+        ) { viewEvent ->
+            when (viewEvent) {
+                is SearchAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
+                is SearchAdapter.ViewEvent.ShowPreview -> viewModel.loadPreview(viewEvent.verseToPreview)
+            }
+        }
+        viewBinding.searchResult.adapter = adapter
     }
 
     override fun onViewActionEmitted(viewAction: SearchViewModel.ViewAction) = when (viewAction) {
@@ -87,8 +100,6 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
     }
 
     override fun onViewStateUpdated(viewState: SearchViewModel.ViewState) = with(viewBinding) {
-        viewState.settings?.let { searchResult.setSettings(it) }
-
         if (viewState.loading) {
             loadingSpinner.fadeIn()
             searchResult.isVisible = false
@@ -112,7 +123,7 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
             )
         }
 
-        searchResult.setItems(viewState.items)
+        adapter.submitList(viewState.items)
         if (viewState.scrollItemsToPosition >= 0) {
             searchResult.scrollToPosition(viewState.scrollItemsToPosition)
             viewModel.markItemsAsScrolled()
@@ -171,9 +182,5 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
 
     override fun openVerse(verseToOpen: VerseIndex) {
         viewModel.openVerse(verseToOpen)
-    }
-
-    override fun showPreview(verseIndex: VerseIndex) {
-        viewModel.loadPreview(verseIndex)
     }
 }

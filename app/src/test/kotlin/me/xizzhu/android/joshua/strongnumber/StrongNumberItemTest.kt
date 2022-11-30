@@ -35,6 +35,7 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class StrongNumberItemTest : BaseUnitTest() {
+    @Test
     fun `test DiffCallback`() {
         val diffCallback = StrongNumberItem.DiffCallback()
 
