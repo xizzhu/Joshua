@@ -49,7 +49,7 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
 
     override val viewModel: SearchViewModel by viewModels()
 
-    override val viewBinding: ActivitySearchBinding by lazy { ActivitySearchBinding.inflate(layoutInflater) }
+    override val viewBinding: ActivitySearchBinding by lazy(LazyThreadSafetyMode.NONE) { ActivitySearchBinding.inflate(layoutInflater) }
 
     override fun initializeView() {
         searchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(this)

@@ -102,7 +102,7 @@ sealed class StrongNumberItem(viewType: Int) : VerticalRecyclerViewItem(viewType
             private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
         }
 
-        val textForDisplay: CharSequence by lazy {
+        val textForDisplay: CharSequence by lazy(LazyThreadSafetyMode.NONE) {
             // format:
             // <book short name> <chapter verseIndex>:<verse verseIndex> <verse text>
             return@lazy SPANNABLE_STRING_BUILDER.clearAll()

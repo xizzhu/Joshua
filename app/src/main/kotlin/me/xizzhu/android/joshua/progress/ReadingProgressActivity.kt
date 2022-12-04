@@ -38,7 +38,7 @@ class ReadingProgressActivity : BaseActivityV2<ActivityReadingProgressBinding, R
 
     override val viewModel: ReadingProgressViewModel by viewModels()
 
-    override val viewBinding: ActivityReadingProgressBinding by lazy { ActivityReadingProgressBinding.inflate(layoutInflater) }
+    override val viewBinding: ActivityReadingProgressBinding by lazy(LazyThreadSafetyMode.NONE) { ActivityReadingProgressBinding.inflate(layoutInflater) }
 
     override fun initializeView() {
         adapter = ReadingProgressAdapter(

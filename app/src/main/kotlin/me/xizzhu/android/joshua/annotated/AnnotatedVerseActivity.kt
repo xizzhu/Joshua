@@ -42,7 +42,7 @@ abstract class AnnotatedVerseActivity<V : VerseAnnotation, VM : AnnotatedVerseVi
 
     private lateinit var adapter: AnnotatedVerseAdapter
 
-    override val viewBinding: ActivityAnnotatedBinding by lazy { ActivityAnnotatedBinding.inflate(layoutInflater) }
+    override val viewBinding: ActivityAnnotatedBinding by lazy(LazyThreadSafetyMode.NONE) { ActivityAnnotatedBinding.inflate(layoutInflater) }
 
     override fun initializeView() {
         adapter = AnnotatedVerseAdapter(

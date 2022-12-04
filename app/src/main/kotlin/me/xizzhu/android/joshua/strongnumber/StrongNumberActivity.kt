@@ -49,7 +49,7 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
 
     override val viewModel: StrongNumberViewModel by viewModels()
 
-    override val viewBinding: ActivityStrongNumberBinding by lazy { ActivityStrongNumberBinding.inflate(layoutInflater) }
+    override val viewBinding: ActivityStrongNumberBinding by lazy(LazyThreadSafetyMode.NONE) { ActivityStrongNumberBinding.inflate(layoutInflater) }
 
     override fun initializeView() {
         adapter = StrongNumberAdapter(
