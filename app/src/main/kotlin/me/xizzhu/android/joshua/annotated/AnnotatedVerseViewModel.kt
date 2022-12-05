@@ -38,13 +38,12 @@ import me.xizzhu.android.joshua.core.VerseAnnotationManager
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.provider.TimeProvider
 import me.xizzhu.android.joshua.infra.BaseViewModelV2
-import me.xizzhu.android.joshua.preview.PreviewViewData
-import me.xizzhu.android.joshua.preview.loadPreviewV2
-import me.xizzhu.android.joshua.preview.toVersePreviewItems
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 import java.util.Calendar
 import kotlin.collections.ArrayList
+import me.xizzhu.android.joshua.preview.Preview
+import me.xizzhu.android.joshua.preview.buildPreviewVerseItems
 
 abstract class AnnotatedVerseViewModel<V : VerseAnnotation>(
     private val bibleReadingManager: BibleReadingManager,
@@ -71,7 +70,7 @@ abstract class AnnotatedVerseViewModel<V : VerseAnnotation>(
         val loading: Boolean,
         @Constants.SortOrder val sortOrder: Int,
         val items: List<AnnotatedVerseItem>,
-        val preview: PreviewViewData?,
+        val preview: Preview?,
         val error: Error?,
     ) {
         sealed class Error {
@@ -250,7 +249,15 @@ abstract class AnnotatedVerseViewModel<V : VerseAnnotation>(
     fun loadPreview(verseToPreview: VerseIndex) {
         viewModelScope.launch(coroutineDispatcherProvider.default) {
             runCatching {
-                val preview = loadPreviewV2(bibleReadingManager, settingsManager, verseToPreview, ::toVersePreviewItems)
+                val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+                val preview = Preview(
+                    title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseToPreview.bookIndex]}, ${verseToPreview.chapterIndex + 1}",
+                    items = buildPreviewVerseItems(
+                        settings = settingsManager.settings().first(),
+                        verses = bibleReadingManager.readVerses(currentTranslation, verseToPreview.bookIndex, verseToPreview.chapterIndex)
+                    ),
+                    currentPosition = verseToPreview.verseIndex
+                )
                 updateViewState { it.copy(preview = preview) }
             }.onFailure { e ->
                 Log.e(tag, "Failed to load verses for preview", e)

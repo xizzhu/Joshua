@@ -33,6 +33,7 @@ import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.listDialog
 import javax.inject.Inject
+import me.xizzhu.android.joshua.preview.PreviewAdapter
 
 abstract class AnnotatedVerseActivity<V : VerseAnnotation, VM : AnnotatedVerseViewModel<V>>(
     @StringRes private val toolbarText: Int
@@ -75,13 +76,21 @@ abstract class AnnotatedVerseActivity<V : VerseAnnotation, VM : AnnotatedVerseVi
         adapter.submitList(viewState.items)
 
         viewState.preview?.let { preview ->
+            val previewAdapter = PreviewAdapter(
+                inflater = layoutInflater,
+                executor = coroutineDispatcherProvider.default.asExecutor()
+            ) { viewEvent ->
+                when (viewEvent) {
+                    is PreviewAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
+                }
+            }
             listDialog(
                 title = preview.title,
-                settings = preview.settings,
-                items = preview.items,
-                selected = preview.currentPosition,
+                adapter = previewAdapter,
+                scrollToPosition = preview.currentPosition,
                 onDismiss = { viewModel.markPreviewAsClosed() }
             )
+            previewAdapter.submitList(preview.items)
         }
 
         when (val error = viewState.error) {

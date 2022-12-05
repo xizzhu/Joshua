@@ -35,7 +35,7 @@ import kotlin.test.assertTrue
 class VersePreviewItemTest : BaseUnitTest() {
     @Test
     fun `test viewType`() {
-        assertEquals(R.layout.item_verse_preview, VersePreviewItem(Verse.INVALID, 0).viewType)
+        assertEquals(R.layout.item_preview_verse, VersePreviewItem(Verse.INVALID, 0).viewType)
     }
 
     @Test

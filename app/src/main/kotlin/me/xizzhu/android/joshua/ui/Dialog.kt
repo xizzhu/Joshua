@@ -24,6 +24,7 @@ import android.widget.ProgressBar
 import android.widget.SeekBar
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
@@ -31,6 +32,7 @@ import me.xizzhu.android.joshua.databinding.WidgetRecyclerViewBinding
 import me.xizzhu.android.joshua.databinding.WidgetSeekBarBinding
 import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
 import kotlin.math.roundToInt
+import me.xizzhu.android.joshua.ui.recyclerview.VerticalRecyclerView
 
 class ProgressDialog(private val dialog: AlertDialog, private val progressBar: ProgressBar) {
     fun setTitle(@StringRes title: Int) {
@@ -150,6 +152,28 @@ private fun SeekBar.setProgress(value: Float, minValue: Float, maxValue: Float) 
 
 private fun SeekBar.calculateValue(minValue: Float, maxValue: Float): Float =
     minValue + (maxValue - minValue) * progress.toFloat() / max.toFloat()
+
+fun Activity.listDialog(
+    title: CharSequence,
+    adapter: RecyclerView.Adapter<*>,
+    scrollToPosition: Int,
+    onDismiss: DialogInterface.OnDismissListener? = null
+): AlertDialog? {
+    if (isDestroyed) return null
+
+    val recyclerView = VerticalRecyclerView(this).apply {
+        this.adapter = adapter
+        if (scrollToPosition != RecyclerView.NO_POSITION) {
+            scrollToPosition(scrollToPosition)
+        }
+    }
+    return MaterialAlertDialogBuilder(this)
+        .setCancelable(true)
+        .setTitle(title)
+        .setView(recyclerView)
+        .setOnDismissListener(onDismiss)
+        .show()
+}
 
 fun Activity.listDialog(
     title: CharSequence,

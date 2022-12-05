@@ -28,7 +28,6 @@ import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.databinding.ActivitySearchBinding
 import me.xizzhu.android.joshua.infra.BaseActivityV2
@@ -38,9 +37,10 @@ import me.xizzhu.android.joshua.ui.hideKeyboard
 import me.xizzhu.android.joshua.ui.listDialog
 import me.xizzhu.android.joshua.ui.toast
 import javax.inject.Inject
+import me.xizzhu.android.joshua.preview.PreviewAdapter
 
 @AndroidEntryPoint
-class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.ViewAction, SearchViewModel.ViewState, SearchViewModel>(), SearchVersePreviewItem.Callback {
+class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.ViewAction, SearchViewModel.ViewState, SearchViewModel>() {
     @Inject
     lateinit var coroutineDispatcherProvider: CoroutineDispatcherProvider
 
@@ -130,13 +130,21 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
         }
 
         viewState.preview?.let { preview ->
+            val previewAdapter = PreviewAdapter(
+                inflater = layoutInflater,
+                executor = coroutineDispatcherProvider.default.asExecutor()
+            ) { viewEvent ->
+                when (viewEvent) {
+                    is PreviewAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
+                }
+            }
             listDialog(
                 title = preview.title,
-                settings = preview.settings,
-                items = preview.items,
-                selected = preview.currentPosition,
+                adapter = previewAdapter,
+                scrollToPosition = preview.currentPosition,
                 onDismiss = { viewModel.markPreviewAsClosed() }
             )
+            previewAdapter.submitList(preview.items)
         }
 
         viewState.toast?.let {
@@ -149,7 +157,7 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
                 viewModel.markErrorAsShown(error)
 
                 // Very unlikely to fail, so just falls back to open the verse.
-                openVerse(error.verseToPreview)
+                viewModel.openVerse(error.verseToPreview)
             }
             is SearchViewModel.ViewState.Error.SearchConfigUpdatingError -> {
                 toast(R.string.toast_unknown_error)
@@ -160,7 +168,7 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
                     cancelable = true,
                     title = R.string.dialog_title_error,
                     message = R.string.dialog_message_failed_to_select_verse,
-                    onPositive = { _, _ -> openVerse(error.verseToOpen) },
+                    onPositive = { _, _ -> viewModel.openVerse(error.verseToOpen) },
                     onDismiss = { viewModel.markErrorAsShown(error) }
                 )
             }
@@ -178,9 +186,5 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
                 // Do nothing
             }
         }
-    }
-
-    override fun openVerse(verseToOpen: VerseIndex) {
-        viewModel.openVerse(verseToOpen)
     }
 }

@@ -31,6 +31,7 @@ import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.listDialog
 import javax.inject.Inject
+import me.xizzhu.android.joshua.preview.PreviewAdapter
 
 @AndroidEntryPoint
 class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongNumberViewModel.ViewAction, StrongNumberViewModel.ViewState, StrongNumberViewModel>() {
@@ -80,13 +81,21 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
         adapter.submitList(viewState.items)
 
         viewState.preview?.let { preview ->
+            val previewAdapter = PreviewAdapter(
+                inflater = layoutInflater,
+                executor = coroutineDispatcherProvider.default.asExecutor()
+            ) { viewEvent ->
+                when (viewEvent) {
+                    is PreviewAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
+                }
+            }
             listDialog(
                 title = preview.title,
-                settings = preview.settings,
-                items = preview.items,
-                selected = preview.currentPosition,
+                adapter = previewAdapter,
+                scrollToPosition = preview.currentPosition,
                 onDismiss = { viewModel.markPreviewAsClosed() }
             )
+            previewAdapter.submitList(preview.items)
         }
 
         when (val error = viewState.error) {

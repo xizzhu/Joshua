@@ -115,8 +115,7 @@ sealed class StrongNumberItem(viewType: Int) : VerticalRecyclerViewItem(viewType
     }
 }
 
-sealed class StrongNumberViewHolder<Item : StrongNumberItem, VB : ViewBinding>(viewBinding: VB)
-    : VerticalRecyclerViewHolder<Item, VB>(viewBinding) {
+sealed class StrongNumberViewHolder<Item : StrongNumberItem, VB : ViewBinding>(viewBinding: VB) : VerticalRecyclerViewHolder<Item, VB>(viewBinding) {
     class StrongNumber(inflater: LayoutInflater, parent: ViewGroup) : StrongNumberViewHolder<StrongNumberItem.StrongNumber, ItemTextBinding>(
         ItemTextBinding.inflate(inflater, parent, false)
     ) {

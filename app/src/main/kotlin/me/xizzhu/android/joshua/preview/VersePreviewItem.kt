@@ -23,7 +23,7 @@ import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.databinding.ItemVersePreviewBinding
+import me.xizzhu.android.joshua.databinding.ItemPreviewVerseBinding
 import me.xizzhu.android.joshua.ui.activity
 import me.xizzhu.android.joshua.ui.append
 import me.xizzhu.android.joshua.ui.clearAll
@@ -35,7 +35,7 @@ import me.xizzhu.android.joshua.ui.setSpans
 import me.xizzhu.android.joshua.ui.toCharSequence
 
 class VersePreviewItem(val verse: Verse, followingEmptyVerseCount: Int)
-    : BaseItem(R.layout.item_verse_preview, { inflater, parent -> VersePreviewItemViewHolder(inflater, parent) }) {
+    : BaseItem(R.layout.item_preview_verse, { inflater, parent -> VersePreviewItemViewHolder(inflater, parent) }) {
     companion object {
         private val VERSE_INDEX_SPANS = createTitleSpans()
         private val SPANNABLE_STRING_BUILDER = SpannableStringBuilder()
@@ -56,24 +56,24 @@ class VersePreviewItem(val verse: Verse, followingEmptyVerseCount: Int)
         }
 
         SPANNABLE_STRING_BUILDER.setSpans(VERSE_INDEX_SPANS)
-                .append(' ')
-                .append(verse.text.text)
+            .append(' ')
+            .append(verse.text.text)
 
         return@lazy SPANNABLE_STRING_BUILDER.toCharSequence()
     }
 }
 
 private class VersePreviewItemViewHolder(inflater: LayoutInflater, parent: ViewGroup)
-    : BaseViewHolder<VersePreviewItem, ItemVersePreviewBinding>(ItemVersePreviewBinding.inflate(inflater, parent, false)) {
+    : BaseViewHolder<VersePreviewItem, ItemPreviewVerseBinding>(ItemPreviewVerseBinding.inflate(inflater, parent, false)) {
     init {
         viewBinding.root.setOnClickListener { item?.let { callback().openVerse(it.verse.verseIndex) } }
     }
 
     private fun callback(): VersePreviewItem.Callback = (itemView.activity as? VersePreviewItem.Callback)
-            ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement VersePreviewItem.Callback")
+        ?: throw IllegalStateException("Attached activity [${itemView.activity.javaClass.name}] does not implement VersePreviewItem.Callback")
 
     override fun bind(settings: Settings, item: VersePreviewItem, payloads: List<Any>) {
-        viewBinding.versePreview.text = item.textForDisplay
-        viewBinding.versePreview.setPrimaryTextSize(settings)
+        viewBinding.verse.text = item.textForDisplay
+        viewBinding.verse.setPrimaryTextSize(settings)
     }
 }
