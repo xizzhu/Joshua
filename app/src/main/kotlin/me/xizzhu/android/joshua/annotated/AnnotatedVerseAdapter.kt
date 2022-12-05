@@ -105,7 +105,7 @@ sealed class AnnotatedVerseItem(viewType: Int) : VerticalRecyclerViewItem(viewTy
             const val VIEW_TYPE = R.layout.item_annotated_verse_bookmark
         }
 
-        val textForDisplay: CharSequence by lazy {
+        val textForDisplay: CharSequence by lazy(LazyThreadSafetyMode.NONE) {
             SPANNABLE_STRING_BUILDER.clearAll()
 
             if (sortOrder == Constants.SORT_BY_BOOK) {
@@ -142,7 +142,7 @@ sealed class AnnotatedVerseItem(viewType: Int) : VerticalRecyclerViewItem(viewTy
             const val VIEW_TYPE = R.layout.item_annotated_verse_highlight
         }
 
-        val textForDisplay: CharSequence by lazy {
+        val textForDisplay: CharSequence by lazy(LazyThreadSafetyMode.NONE) {
             SPANNABLE_STRING_BUILDER.clearAll()
 
             if (sortOrder == Constants.SORT_BY_BOOK) {
@@ -181,7 +181,7 @@ sealed class AnnotatedVerseItem(viewType: Int) : VerticalRecyclerViewItem(viewTy
             private val BOOK_NAME_STYLE_SPAN = createTitleStyleSpan()
         }
 
-        val textForDisplay: CharSequence by lazy {
+        val textForDisplay: CharSequence by lazy(LazyThreadSafetyMode.NONE) {
             // format:
             // <book short name> <chapter index>:<verse index> <verse text>
             return@lazy SPANNABLE_STRING_BUILDER.clearAll()

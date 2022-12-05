@@ -44,12 +44,11 @@ import me.xizzhu.android.joshua.core.Verse
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.infra.BaseViewModelV2
-import me.xizzhu.android.joshua.preview.PreviewViewData
-import me.xizzhu.android.joshua.preview.loadPreviewV2
-import me.xizzhu.android.joshua.preview.nextNonEmpty
 import me.xizzhu.android.joshua.utils.firstNotEmpty
 import me.xizzhu.android.logger.Log
 import javax.inject.Inject
+import me.xizzhu.android.joshua.preview.Preview
+import me.xizzhu.android.joshua.preview.buildPreviewVerseWithQueryItems
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -80,7 +79,7 @@ class SearchViewModel @Inject constructor(
         val instantSearch: Boolean,
         val items: List<SearchItem>,
         val scrollItemsToPosition: Int,
-        val preview: PreviewViewData?,
+        val preview: Preview?,
         val toast: String?,
         val error: Error?,
     ) {
@@ -302,32 +301,22 @@ class SearchViewModel @Inject constructor(
     fun loadPreview(verseToPreview: VerseIndex) {
         viewModelScope.launch(coroutineDispatcherProvider.default) {
             runCatching {
-                val preview = loadPreviewV2(bibleReadingManager, settingsManager, verseToPreview, ::toSearchVersePreviewItems)
+                val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
+                val preview = Preview(
+                    title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseToPreview.bookIndex]}, ${verseToPreview.chapterIndex + 1}",
+                    items = buildPreviewVerseWithQueryItems(
+                        settings = settingsManager.settings().first(),
+                        query = searchRequest.value?.query.orEmpty(),
+                        verses = bibleReadingManager.readVerses(currentTranslation, verseToPreview.bookIndex, verseToPreview.chapterIndex)
+                    ),
+                    currentPosition = verseToPreview.verseIndex
+                )
                 updateViewState { it.copy(preview = preview) }
             }.onFailure { e ->
                 Log.e(tag, "Failed to load verses for preview", e)
                 updateViewState { it.copy(error = ViewState.Error.PreviewLoadingError(verseToPreview)) }
             }
         }
-    }
-
-    private fun toSearchVersePreviewItems(verses: List<Verse>): List<SearchVersePreviewItem> {
-        val items = ArrayList<SearchVersePreviewItem>(verses.size)
-
-        val query = searchRequest.value?.query ?: ""
-        val verseIterator = verses.iterator()
-        var verse: Verse? = null
-        while (verse != null || verseIterator.hasNext()) {
-            verse = verse ?: verseIterator.next()
-
-            val (nextVerse, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
-
-            items.add(SearchVersePreviewItem(verse, query, followingEmptyVerseCount))
-
-            verse = nextVerse
-        }
-
-        return items
     }
 
     fun markItemsAsScrolled() {

@@ -102,7 +102,7 @@ sealed class SearchItem(viewType: Int) : VerticalRecyclerViewItem(viewType) {
             private val BOOK_NAME_SPAN = createTitleStyleSpan()
         }
 
-        val verseForDisplay: CharSequence by lazy {
+        val verseForDisplay: CharSequence by lazy(LazyThreadSafetyMode.NONE) {
             // format:
             // <book short name> <chapter index>:<verse index> <verse text>
             return@lazy SPANNABLE_STRING_BUILDER.clearAll()
@@ -113,7 +113,7 @@ sealed class SearchItem(viewType: Int) : VerticalRecyclerViewItem(viewType) {
                 .toCharSequence()
         }
 
-        val noteForDisplay: CharSequence by lazy {
+        val noteForDisplay: CharSequence by lazy(LazyThreadSafetyMode.NONE) {
             SPANNABLE_STRING_BUILDER.clearAll().append(note)
                 .highlightKeyword(query, 0) // highlights the keywords
 
@@ -135,7 +135,7 @@ sealed class SearchItem(viewType: Int) : VerticalRecyclerViewItem(viewType) {
             private val BOOK_NAME_SPAN = createTitleSpans()
         }
 
-        val textForDisplay: CharSequence by lazy {
+        val textForDisplay: CharSequence by lazy(LazyThreadSafetyMode.NONE) {
             // format:
             // <short book name> <chapter verseIndex>:<verse verseIndex>
             // <verse text>

@@ -32,26 +32,17 @@ import java.util.ArrayList
 data class PreviewViewData(val settings: Settings, val title: String, val items: List<BaseItem>, val currentPosition: Int)
 
 fun loadPreview(
-        bibleReadingManager: BibleReadingManager,
-        settingsManager: SettingsManager,
-        verseIndex: VerseIndex,
-        converter: List<Verse>.() -> List<BaseItem>
-): Flow<BaseViewModel.ViewData<PreviewViewData>> = viewData {
-    loadPreviewV2(bibleReadingManager, settingsManager, verseIndex, converter)
-}
-
-suspend fun loadPreviewV2(
     bibleReadingManager: BibleReadingManager,
     settingsManager: SettingsManager,
     verseIndex: VerseIndex,
     converter: List<Verse>.() -> List<BaseItem>
-): PreviewViewData {
+): Flow<BaseViewModel.ViewData<PreviewViewData>> = viewData {
     if (!verseIndex.isValid()) {
         throw IllegalArgumentException("Verse index [$verseIndex] is invalid")
     }
 
     val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
-    return PreviewViewData(
+    PreviewViewData(
         settings = settingsManager.settings().first(),
         title = "${bibleReadingManager.readBookShortNames(currentTranslation)[verseIndex.bookIndex]}, ${verseIndex.chapterIndex + 1}",
         items = converter(bibleReadingManager.readVerses(currentTranslation, verseIndex.bookIndex, verseIndex.chapterIndex)),
@@ -77,8 +68,57 @@ fun toVersePreviewItems(verses: List<Verse>): List<VersePreviewItem> {
     return items
 }
 
+data class Preview(val title: String, val items: List<PreviewItem>, val currentPosition: Int)
+
+fun buildPreviewVerseItems(settings: Settings, verses: List<Verse>): List<PreviewItem> {
+    val items = ArrayList<PreviewItem>(verses.size)
+
+    val verseIterator = verses.iterator()
+    var verse: Verse? = null
+    while (verse != null || verseIterator.hasNext()) {
+        verse = verse ?: verseIterator.next()
+
+        val (nextVerse, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
+
+        items.add(PreviewItem.Verse(
+            settings = settings,
+            verseIndex = verse.verseIndex,
+            verseText = verse.text.text,
+            followingEmptyVerseCount = followingEmptyVerseCount,
+        ))
+
+        verse = nextVerse
+    }
+
+    return items
+}
+
+fun buildPreviewVerseWithQueryItems(settings: Settings, query: String, verses: List<Verse>): List<PreviewItem> {
+    val items = ArrayList<PreviewItem>(verses.size)
+
+    val verseIterator = verses.iterator()
+    var verse: Verse? = null
+    while (verse != null || verseIterator.hasNext()) {
+        verse = verse ?: verseIterator.next()
+
+        val (nextVerse, followingEmptyVerseCount) = verseIterator.nextNonEmpty(verse)
+
+        items.add(PreviewItem.VerseWithQuery(
+            settings = settings,
+            verseIndex = verse.verseIndex,
+            verseText = verse.text.text,
+            query = query,
+            followingEmptyVerseCount = followingEmptyVerseCount,
+        ))
+
+        verse = nextVerse
+    }
+
+    return items
+}
+
 // skips the empty verses
-fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
+private fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
     var nextVerse: Verse? = null
     while (hasNext()) {
         nextVerse = next()
@@ -90,8 +130,8 @@ fun Iterator<Verse>.nextNonEmpty(current: Verse): Pair<Verse?, Int> {
     }
 
     val followingEmptyVerseCount = nextVerse
-            ?.let { it.verseIndex.verseIndex - 1 - current.verseIndex.verseIndex }
-            ?: 0
+        ?.let { it.verseIndex.verseIndex - 1 - current.verseIndex.verseIndex }
+        ?: 0
 
     return Pair(nextVerse, followingEmptyVerseCount)
 }

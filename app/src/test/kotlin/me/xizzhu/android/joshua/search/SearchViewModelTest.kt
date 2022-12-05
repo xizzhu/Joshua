@@ -33,6 +33,7 @@ import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.*
+import me.xizzhu.android.joshua.preview.PreviewItem
 
 @RunWith(RobolectricTestRunner::class)
 class SearchViewModelTest : BaseUnitTest() {
@@ -842,24 +843,17 @@ class SearchViewModelTest : BaseUnitTest() {
         )
         assertFalse(actual.instantSearch)
         assertTrue(actual.items.isEmpty())
-        assertEquals(Settings.DEFAULT, actual.preview?.settings)
         assertEquals("Gen., 1", actual.preview?.title)
         assertEquals(3, actual.preview?.items?.size)
-        assertEquals(MockContents.kjvVerses[0], (actual.preview?.items?.get(0) as SearchVersePreviewItem).verse)
         assertEquals(
             "1:1 In the beginning God created the heaven and the earth.",
-            (actual.preview?.items?.get(0) as SearchVersePreviewItem).textForDisplay.toString()
+            (actual.preview?.items?.get(0) as PreviewItem.VerseWithQuery).textForDisplay.toString()
         )
-        assertEquals(MockContents.kjvVerses[1], (actual.preview?.items?.get(1) as SearchVersePreviewItem).verse)
         assertEquals(
             "1:2 And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.",
-            (actual.preview?.items?.get(1) as SearchVersePreviewItem).textForDisplay.toString()
+            (actual.preview?.items?.get(1) as PreviewItem.VerseWithQuery).textForDisplay.toString()
         )
-        assertEquals(MockContents.kjvVerses[2], (actual.preview?.items?.get(2) as SearchVersePreviewItem).verse)
-        assertEquals(
-            "1:3 And God said, Let there be light: and there was light.",
-            (actual.preview?.items?.get(2) as SearchVersePreviewItem).textForDisplay.toString()
-        )
+        assertEquals("1:3 And God said, Let there be light: and there was light.", (actual.preview?.items?.get(2) as PreviewItem.VerseWithQuery).textForDisplay.toString())
         assertEquals(1, actual.preview?.currentPosition)
         assertNull(actual.toast)
         assertNull(actual.error)
