@@ -31,6 +31,8 @@ import me.xizzhu.android.joshua.ui.setBackground
 import me.xizzhu.android.joshua.ui.setText
 
 class SettingButton : FrameLayout {
+    private val viewBinding: InnerSettingButtonBinding = InnerSettingButtonBinding.inflate(LayoutInflater.from(context), this)
+
     constructor(context: Context) : super(context) {
         init(context, null)
     }
@@ -48,21 +50,16 @@ class SettingButton : FrameLayout {
         init(context, attrs)
     }
 
-    private lateinit var viewBinding: InnerSettingButtonBinding
-
     private fun init(context: Context, attrs: AttributeSet?) {
         setBackground(android.R.attr.selectableItemBackground)
         minimumHeight = context.resources.getDimensionPixelSize(R.dimen.item_height)
 
-        viewBinding = InnerSettingButtonBinding.inflate(LayoutInflater.from(context), this)
-
-        attrs?.let {
-            context.obtainStyledAttributes(it, R.styleable.SettingButton).run {
+        attrs?.let { context.obtainStyledAttributes(it, R.styleable.SettingButton) }
+            ?.run {
                 viewBinding.title.setText(this, R.styleable.SettingButton_settingButtonTitle)
                 viewBinding.description.setText(this, R.styleable.SettingButton_settingButtonDescription)
                 recycle()
             }
-        }
     }
 
     fun setDescription(desc: CharSequence) {
