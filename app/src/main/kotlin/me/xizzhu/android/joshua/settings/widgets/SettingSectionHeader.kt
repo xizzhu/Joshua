@@ -29,6 +29,8 @@ import me.xizzhu.android.joshua.databinding.InnerSettingSectionHeaderBinding
 import me.xizzhu.android.joshua.ui.setText
 
 class SettingSectionHeader : FrameLayout {
+    private val viewBinding: InnerSettingSectionHeaderBinding = InnerSettingSectionHeaderBinding.inflate(LayoutInflater.from(context), this)
+
     constructor(context: Context) : super(context) {
         init(context, null)
     }
@@ -46,17 +48,12 @@ class SettingSectionHeader : FrameLayout {
         init(context, attrs)
     }
 
-    private lateinit var viewBinding: InnerSettingSectionHeaderBinding
-
     private fun init(context: Context, attrs: AttributeSet?) {
-        viewBinding = InnerSettingSectionHeaderBinding.inflate(LayoutInflater.from(context), this)
-
-        attrs?.let {
-            context.obtainStyledAttributes(it, R.styleable.SettingSectionHeader).run {
+        attrs?.let { context.obtainStyledAttributes(it, R.styleable.SettingSectionHeader) }
+            ?.run {
                 viewBinding.title.setText(this, R.styleable.SettingSectionHeader_settingSectionHeaderTitle)
                 recycle()
             }
-        }
     }
 
     fun setTextSize(@Px textSize: Int) {
