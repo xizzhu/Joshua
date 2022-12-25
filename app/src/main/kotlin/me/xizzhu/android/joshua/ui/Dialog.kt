@@ -122,7 +122,8 @@ fun Activity.seekBarDialog(
     maxValue: Float,
     onValueChanged: (Float) -> Unit,
     onPositive: ((Float) -> Unit)? = null,
-    onNegative: (() -> Unit)? = null
+    onNegative: (() -> Unit)? = null,
+    onDismiss: (() -> Unit)? = null,
 ): AlertDialog? {
     if (isDestroyed) return null
 
@@ -143,6 +144,7 @@ fun Activity.seekBarDialog(
         .setView(viewBinding.root)
         .setPositiveButton(android.R.string.ok, onPositive?.let { { _, _ -> it(viewBinding.seekBar.calculateValue(minValue, maxValue)) } })
         .setNegativeButton(android.R.string.cancel, onNegative?.let { { _, _ -> it() } })
+        .setOnDismissListener { onDismiss?.invoke() }
         .show()
 }
 
@@ -196,11 +198,18 @@ fun Activity.listDialog(
         .show()
 }
 
-fun Activity.listDialog(@StringRes title: Int, items: Array<String>, selected: Int, onClicked: DialogInterface.OnClickListener) {
+fun Activity.listDialog(
+    @StringRes title: Int,
+    items: Array<String>,
+    selected: Int,
+    onClicked: DialogInterface.OnClickListener,
+    onDismiss: DialogInterface.OnDismissListener? = null,
+) {
     if (isDestroyed) return
 
     MaterialAlertDialogBuilder(this)
         .setCancelable(true)
+        .setOnDismissListener(onDismiss)
         .setSingleChoiceItems(items, selected, onClicked)
         .setTitle(title)
         .show()

@@ -22,10 +22,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.TypedArray
+import android.os.SystemClock
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.CompoundButton
 import android.widget.TextView
 import androidx.annotation.StyleableRes
 import androidx.viewpager2.widget.ViewPager2
@@ -62,12 +64,12 @@ fun View.fadeOut() {
 
     alpha = 1.0F
     animate().alpha(0.0F).setDuration(ANIMATION_DURATION)
-            .setListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    visibility = View.GONE
-                    alpha = 1.0F
-                }
-            })
+        .setListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                visibility = View.GONE
+                alpha = 1.0F
+            }
+        })
 }
 
 fun View.setBackground(resId: Int) {
@@ -79,7 +81,28 @@ fun View.setBackground(resId: Int) {
 fun View.hideKeyboard() {
     if (hasFocus()) {
         (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                .hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+            .hideSoftInputFromWindow(windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+    }
+}
+
+fun View.setOnSingleClickListener(listener: () -> Unit) {
+    setOnClickListener(object : View.OnClickListener {
+        private var lastClicked = 0L
+        override fun onClick(v: View) {
+            val now = SystemClock.elapsedRealtime()
+            if (now - lastClicked > 500L) {
+                lastClicked = now
+                listener()
+            }
+        }
+    })
+}
+
+fun CompoundButton.setOnCheckedChangeByUserListener(listener: (isChecked: Boolean) -> Unit) {
+    setOnCheckedChangeListener { button, isChecked ->
+        if (button.isPressed) {
+            listener(isChecked)
+        }
     }
 }
 
@@ -98,9 +121,9 @@ fun TextView.setText(a: TypedArray, @StyleableRes index: Int) {
 fun ViewPager2.makeLessSensitive() {
     try {
         val recyclerViewField = ViewPager2::class.java.getDeclaredField("mRecyclerView")
-                .apply { isAccessible = true }
+            .apply { isAccessible = true }
         val touchSlopField = RecyclerView::class.java.getDeclaredField("mTouchSlop")
-                .apply { isAccessible = true }
+            .apply { isAccessible = true }
 
         val recyclerView = recyclerViewField.get(this)
         val touchSlop = touchSlopField.get(recyclerView) as Int
