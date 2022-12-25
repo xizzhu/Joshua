@@ -180,12 +180,8 @@ class SettingsActivity : BaseActivityV2<ActivitySettingsBinding, SettingsViewMod
             title = R.string.settings_title_pick_night_mode,
             items = availableModes.map { getString(it.stringRes) }.toTypedArray(),
             selected = currentPosition,
-            onClicked = { dialog, which ->
-                viewModel.markNightModeSelectionAsDismissed()
-                viewModel.saveNightMode(availableModes[which].nightMode)
-                dialog.dismiss()
-            },
-            onDismiss = { viewModel.markNightModeSelectionAsDismissed() }
+            onSelected = { which -> viewModel.saveNightMode(availableModes[which].nightMode) },
+            onDismiss = viewModel::markNightModeSelectionAsDismissed
         )
     }
 
@@ -194,12 +190,8 @@ class SettingsActivity : BaseActivityV2<ActivitySettingsBinding, SettingsViewMod
             title = R.string.text_pick_highlight_color,
             items = availableColors.map { getString(it.stringRes) }.toTypedArray(),
             selected = currentPosition,
-            onClicked = { dialog, which ->
-                viewModel.markHighlightColorSelectionAsDismissed()
-                viewModel.saveDefaultHighlightColor(availableColors[which].color)
-                dialog.dismiss()
-            },
-            onDismiss = { viewModel.markHighlightColorSelectionAsDismissed() }
+            onSelected = { which -> viewModel.saveDefaultHighlightColor(availableColors[which].color) },
+            onDismiss = viewModel::markHighlightColorSelectionAsDismissed
         )
     }
 

@@ -88,7 +88,7 @@ abstract class AnnotatedVerseActivity<V : VerseAnnotation, VM : AnnotatedVerseVi
                 title = preview.title,
                 adapter = previewAdapter,
                 scrollToPosition = preview.currentPosition,
-                onDismiss = { viewModel.markPreviewAsClosed() }
+                onDismiss = viewModel::markPreviewAsClosed,
             )
             previewAdapter.submitList(preview.items)
         }

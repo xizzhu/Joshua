@@ -159,7 +159,7 @@ fun Activity.listDialog(
     title: CharSequence,
     adapter: RecyclerView.Adapter<*>,
     scrollToPosition: Int,
-    onDismiss: DialogInterface.OnDismissListener? = null
+    onDismiss: (() -> Unit)? = null,
 ): AlertDialog? {
     if (isDestroyed) return null
 
@@ -169,12 +169,12 @@ fun Activity.listDialog(
             scrollToPosition(scrollToPosition)
         }
     }
-    return MaterialAlertDialogBuilder(this)
+    val builder = MaterialAlertDialogBuilder(this)
         .setCancelable(true)
         .setTitle(title)
         .setView(recyclerView)
-        .setOnDismissListener(onDismiss)
-        .show()
+    onDismiss?.let { builder.setOnDismissListener { onDismiss() } }
+    return builder.show()
 }
 
 fun Activity.listDialog(
@@ -202,15 +202,18 @@ fun Activity.listDialog(
     @StringRes title: Int,
     items: Array<String>,
     selected: Int,
-    onClicked: DialogInterface.OnClickListener,
-    onDismiss: DialogInterface.OnDismissListener? = null,
+    onSelected: (which: Int) -> Unit,
+    onDismiss: (() -> Unit)? = null,
 ) {
     if (isDestroyed) return
 
-    MaterialAlertDialogBuilder(this)
+    val builder = MaterialAlertDialogBuilder(this)
         .setCancelable(true)
-        .setOnDismissListener(onDismiss)
-        .setSingleChoiceItems(items, selected, onClicked)
+        .setSingleChoiceItems(items, selected) { dialog, which ->
+            dialog.dismiss()
+            onSelected(which)
+        }
         .setTitle(title)
-        .show()
+    onDismiss?.let { builder.setOnDismissListener { onDismiss() } }
+    builder.show()
 }

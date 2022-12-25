@@ -530,10 +530,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                     title = R.string.text_pick_highlight_color,
                     items = resources.getStringArray(R.array.text_highlight_colors),
                     selected = max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
-                    onClicked = { dialog, which ->
-                        saveHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
-                        dialog.dismiss()
-                    }
+                    onSelected = { which -> saveHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which]) }
                 )
             } else {
                 saveHighlight(verseIndex, if (currentHighlightColor == Highlight.COLOR_NONE) defaultHighlightColor else Highlight.COLOR_NONE)
