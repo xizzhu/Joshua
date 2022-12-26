@@ -73,7 +73,7 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.10"
-        const val bom = "31.1.0"
+        const val bom = "31.1.1"
 
         object Crashlytics {
             const val classpath = "2.9.2"
@@ -85,8 +85,8 @@ object Versions {
     const val logger = "0.7.0"
     const val materialComponent = "1.7.0"
 
-    const val mockk = "1.13.2"
-    const val robolectric = "4.9"
+    const val mockk = "1.13.3"
+    const val robolectric = "4.9.1"
 }
 
 object Dependencies {
