@@ -20,7 +20,7 @@ plugins {
     id("com.android.application")
     id("com.google.firebase.crashlytics")
     id("com.google.gms.google-services")
-    id("dagger.hilt.android.plugin")
+    id(Dependencies.Hilt.plugin)
     kotlin("android")
     kotlin("kapt")
 }
@@ -110,6 +110,11 @@ android {
                 "win32-x86/attach_hotspot_windows.dll", "win32-x86-64/attach_hotspot_windows.dll"
         ))
     }
+}
+
+// allow references to generated code
+kapt {
+    correctErrorTypes = true
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

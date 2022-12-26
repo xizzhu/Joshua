@@ -144,7 +144,7 @@ object Dependencies {
     }
 
     object Hilt {
-        const val classpath = "com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}"
+        const val plugin = "com.google.dagger.hilt.android"
         const val android = "com.google.dagger:hilt-android:${Versions.hilt}"
         const val compiler = "com.google.dagger:hilt-android-compiler:${Versions.hilt}"
         const val test = "com.google.dagger:hilt-android-testing:${Versions.hilt}"

@@ -25,11 +25,12 @@ buildscript {
         classpath(Dependencies.Kotlin.Kover.classpath)
         classpath(Dependencies.Firebase.classpath)
         classpath(Dependencies.Firebase.Crashlytics.classpath)
-        classpath(Dependencies.Hilt.classpath)
     }
 }
 
-
+plugins {
+    id(Dependencies.Hilt.plugin) version Versions.hilt apply false
+}
 
 allprojects {
     repositories {
