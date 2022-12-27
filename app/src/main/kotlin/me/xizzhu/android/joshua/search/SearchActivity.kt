@@ -18,14 +18,11 @@ package me.xizzhu.android.joshua.search
 
 import android.app.SearchManager
 import android.content.Context
-import android.provider.SearchRecentSuggestions
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.asExecutor
-import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
@@ -45,7 +42,6 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
     @Inject
     lateinit var coroutineDispatcherProvider: CoroutineDispatcherProvider
 
-    private lateinit var searchRecentSuggestions: SearchRecentSuggestions
     private lateinit var adapter: SearchAdapter
 
     override val viewModel: SearchViewModel by viewModels()
@@ -53,8 +49,6 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
     override val viewBinding: ActivitySearchBinding by lazy(LazyThreadSafetyMode.NONE) { ActivitySearchBinding.inflate(layoutInflater) }
 
     override fun initializeView() {
-        searchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(this)
-
         viewBinding.toolbar.initialize(
             onIncludeOldTestamentChanged = viewModel::includeOldTestament,
             onIncludeNewTestamentChanged = viewModel::includeNewTestament,
@@ -63,7 +57,6 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
             onIncludeNotesChanged = viewModel::includeNotes,
             onQueryTextListener = object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean {
-                    searchRecentSuggestions.saveRecentQuery(query, null)
                     viewModel.search(query, false)
                     viewBinding.toolbar.hideKeyboard()
 
@@ -76,7 +69,7 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
                     return true
                 }
             },
-            clearHistory = { lifecycleScope.launch(coroutineDispatcherProvider.io) { searchRecentSuggestions.clearHistory() } }
+            clearHistory = viewModel::clearSearchHistory,
         )
 
         // It's possible that the system has no SearchManager available, and on some devices getSearchableInfo() could return null.

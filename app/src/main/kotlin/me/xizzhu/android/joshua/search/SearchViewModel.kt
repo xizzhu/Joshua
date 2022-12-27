@@ -94,6 +94,9 @@ class SearchViewModel @Inject constructor(
     private class SearchRequest(val query: String, val instantSearch: Boolean)
 
     private val searchRequest: MutableStateFlow<SearchRequest?> = MutableStateFlow(null)
+    private val searchSuggestions: RecentSearchProvider.SearchSuggestions by lazy(LazyThreadSafetyMode.NONE) {
+        RecentSearchProvider.SearchSuggestions(application, viewModelScope, coroutineDispatcherProvider)
+    }
 
     init {
         searchManager.configuration()
@@ -111,6 +114,10 @@ class SearchViewModel @Inject constructor(
                 .mapLatest { it }
         ) { settings, searchRequest ->
             doSearch(settings, searchRequest.query, searchRequest.instantSearch)
+
+            if (!searchRequest.instantSearch) {
+                searchSuggestions.saveRecentQuery(searchRequest.query)
+            }
         }.flowOn(coroutineDispatcherProvider.default).launchIn(viewModelScope)
     }
 
@@ -333,5 +340,9 @@ class SearchViewModel @Inject constructor(
 
     fun markErrorAsShown(error: ViewState.Error) {
         updateViewState { current -> if (current.error == error) current.copy(error = null) else null }
+    }
+
+    fun clearSearchHistory() {
+        searchSuggestions.clearHistory()
     }
 }
