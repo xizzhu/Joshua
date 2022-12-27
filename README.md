@@ -1,4 +1,4 @@
-[![Build Status](https://img.shields.io/github/workflow/status/xizzhu/Joshua/Android%20CI/master?color=blue)](https://github.com/xizzhu/Joshua/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/xizzhu/Joshua/android.yml?branch=master&color=blue)](https://github.com/xizzhu/Joshua/actions)
 [![Code Coverage](https://img.shields.io/codecov/c/github/xizzhu/Joshua/master?color=blue)](https://app.codecov.io/gh/xizzhu/Joshua)
 ![Languages](https://img.shields.io/badge/languages-Kotlin-blue.svg?longCache=true&style=flat)
 [![API](https://img.shields.io/badge/API-19%2B-blue.svg?style=flat)](https://www.android.com/versions/kit-kat-4-4/)
