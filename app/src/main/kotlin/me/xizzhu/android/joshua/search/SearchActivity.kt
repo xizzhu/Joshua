@@ -37,6 +37,7 @@ import me.xizzhu.android.joshua.ui.hideKeyboard
 import me.xizzhu.android.joshua.ui.listDialog
 import me.xizzhu.android.joshua.ui.toast
 import javax.inject.Inject
+import me.xizzhu.android.joshua.preview.Preview
 import me.xizzhu.android.joshua.preview.PreviewAdapter
 
 @AndroidEntryPoint
@@ -55,11 +56,11 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
         searchRecentSuggestions = RecentSearchProvider.createSearchRecentSuggestions(this)
 
         viewBinding.toolbar.initialize(
-            onIncludeOldTestamentChanged = { viewModel.includeOldTestament(it) },
-            onIncludeNewTestamentChanged = { viewModel.includeNewTestament(it) },
-            onIncludeBookmarksChanged = { viewModel.includeBookmarks(it) },
-            onIncludeHighlightsChanged = { viewModel.includeHighlights(it) },
-            onIncludeNotesChanged = { viewModel.includeNotes(it) },
+            onIncludeOldTestamentChanged = viewModel::includeOldTestament,
+            onIncludeNewTestamentChanged = viewModel::includeNewTestament,
+            onIncludeBookmarksChanged = viewModel::includeBookmarks,
+            onIncludeHighlightsChanged = viewModel::includeHighlights,
+            onIncludeNotesChanged = viewModel::includeNotes,
             onQueryTextListener = object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean {
                     searchRecentSuggestions.saveRecentQuery(query, null)
@@ -99,7 +100,7 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
         SearchViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING)
     }
 
-    override fun onViewStateUpdated(viewState: SearchViewModel.ViewState) = with(viewBinding) {
+    override fun onViewStateUpdated(viewState: SearchViewModel.ViewState): Unit = with(viewBinding) {
         if (viewState.loading) {
             loadingSpinner.fadeIn()
             searchResult.isVisible = false
@@ -129,62 +130,62 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
             viewModel.markItemsAsScrolled()
         }
 
-        viewState.preview?.let { preview ->
-            val previewAdapter = PreviewAdapter(
-                inflater = layoutInflater,
-                executor = coroutineDispatcherProvider.default.asExecutor()
-            ) { viewEvent ->
-                when (viewEvent) {
-                    is PreviewAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
-                }
-            }
-            listDialog(
-                title = preview.title,
-                adapter = previewAdapter,
-                scrollToPosition = preview.currentPosition,
-                onDismiss = viewModel::markPreviewAsClosed,
-            )
-            previewAdapter.submitList(preview.items)
-        }
-
-        viewState.toast?.let {
+        viewState.searchResultSummary?.let {
             toast(it)
-            viewModel.markToastAsShown()
+            viewModel.markSearchResultSummaryAsShown()
         }
 
-        when (val error = viewState.error) {
-            is SearchViewModel.ViewState.Error.PreviewLoadingError -> {
-                viewModel.markErrorAsShown(error)
+        viewState.preview?.handle()
+        viewState.error?.handle()
+    }
 
-                // Very unlikely to fail, so just falls back to open the verse.
-                viewModel.openVerse(error.verseToPreview)
+    private fun Preview.handle() {
+        val previewAdapter = PreviewAdapter(
+            inflater = layoutInflater,
+            executor = coroutineDispatcherProvider.default.asExecutor()
+        ) { viewEvent ->
+            when (viewEvent) {
+                is PreviewAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
             }
-            is SearchViewModel.ViewState.Error.SearchConfigUpdatingError -> {
-                toast(R.string.toast_unknown_error)
-                viewModel.markErrorAsShown(error)
-            }
-            is SearchViewModel.ViewState.Error.VerseOpeningError -> {
-                dialog(
-                    cancelable = true,
-                    title = R.string.dialog_title_error,
-                    message = R.string.dialog_message_failed_to_select_verse,
-                    onPositive = { _, _ -> viewModel.openVerse(error.verseToOpen) },
-                    onDismiss = { viewModel.markErrorAsShown(error) }
-                )
-            }
-            is SearchViewModel.ViewState.Error.VerseSearchingError -> {
-                dialog(
-                    cancelable = false,
-                    title = R.string.dialog_title_error,
-                    message = R.string.dialog_message_failed_to_search,
-                    onPositive = { _, _ -> viewModel.retrySearch() },
-                    onNegative = { _, _ -> finish() },
-                    onDismiss = { viewModel.markErrorAsShown(error) }
-                )
-            }
-            null -> {
-                // Do nothing
-            }
+        }
+        listDialog(
+            title = title,
+            adapter = previewAdapter,
+            scrollToPosition = currentPosition,
+            onDismiss = viewModel::markPreviewAsClosed,
+        )
+        previewAdapter.submitList(items)
+    }
+
+    private fun SearchViewModel.ViewState.Error.handle() = when (this) {
+        is SearchViewModel.ViewState.Error.PreviewLoadingError -> {
+            viewModel.markErrorAsShown(this)
+
+            // Very unlikely to fail, so just falls back to open the verse.
+            viewModel.openVerse(verseToPreview)
+        }
+        is SearchViewModel.ViewState.Error.SearchConfigUpdatingError -> {
+            toast(R.string.toast_unknown_error)
+            viewModel.markErrorAsShown(this)
+        }
+        is SearchViewModel.ViewState.Error.VerseOpeningError -> {
+            dialog(
+                cancelable = true,
+                title = R.string.dialog_title_error,
+                message = R.string.dialog_message_failed_to_select_verse,
+                onPositive = { _, _ -> viewModel.openVerse(verseToOpen) },
+                onDismiss = { viewModel.markErrorAsShown(this) }
+            )
+        }
+        is SearchViewModel.ViewState.Error.VerseSearchingError -> {
+            dialog(
+                cancelable = false,
+                title = R.string.dialog_title_error,
+                message = R.string.dialog_message_failed_to_search,
+                onPositive = { _, _ -> viewModel.retrySearch() },
+                onNegative = { _, _ -> finish() },
+                onDismiss = { viewModel.markErrorAsShown(this) }
+            )
         }
     }
 }

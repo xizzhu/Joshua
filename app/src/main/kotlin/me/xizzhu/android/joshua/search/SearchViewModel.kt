@@ -64,8 +64,8 @@ class SearchViewModel @Inject constructor(
         instantSearch = false,
         items = emptyList(),
         scrollItemsToPosition = -1,
+        searchResultSummary = null,
         preview = null,
-        toast = null,
         error = null,
     )
 ) {
@@ -79,8 +79,8 @@ class SearchViewModel @Inject constructor(
         val instantSearch: Boolean,
         val items: List<SearchItem>,
         val scrollItemsToPosition: Int,
+        val searchResultSummary: String?,
         val preview: Preview?,
-        val toast: String?,
         val error: Error?,
     ) {
         sealed class Error {
@@ -197,7 +197,7 @@ class SearchViewModel @Inject constructor(
                     instantSearch = instantSearch,
                     items = items,
                     scrollItemsToPosition = 0,
-                    toast = toast,
+                    searchResultSummary = toast,
                 )
             }
         }.onFailure { e ->
@@ -323,12 +323,12 @@ class SearchViewModel @Inject constructor(
         updateViewState { it.copy(scrollItemsToPosition = -1) }
     }
 
-    fun markPreviewAsClosed() {
-        updateViewState { it.copy(preview = null) }
+    fun markSearchResultSummaryAsShown() {
+        updateViewState { it.copy(searchResultSummary = null) }
     }
 
-    fun markToastAsShown() {
-        updateViewState { it.copy(toast = null) }
+    fun markPreviewAsClosed() {
+        updateViewState { it.copy(preview = null) }
     }
 
     fun markErrorAsShown(error: ViewState.Error) {
