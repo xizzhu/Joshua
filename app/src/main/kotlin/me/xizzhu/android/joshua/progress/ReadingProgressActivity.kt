@@ -57,7 +57,7 @@ class ReadingProgressActivity : BaseActivityV2<ActivityReadingProgressBinding, R
         ReadingProgressViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING)
     }
 
-    override fun onViewStateUpdated(viewState: ReadingProgressViewModel.ViewState) = with(viewBinding) {
+    override fun onViewStateUpdated(viewState: ReadingProgressViewModel.ViewState): Unit = with(viewBinding) {
         if (viewState.loading) {
             loadingSpinner.fadeIn()
             readingProgressList.isVisible = false
@@ -68,29 +68,28 @@ class ReadingProgressActivity : BaseActivityV2<ActivityReadingProgressBinding, R
 
         adapter.submitList(viewState.items)
 
-        when (val error = viewState.error) {
-            is ReadingProgressViewModel.ViewState.Error.ReadingProgressLoadingError -> {
-                dialog(
-                    cancelable = false,
-                    title = R.string.dialog_title_error,
-                    message = R.string.dialog_message_failed_to_load_reading_progress,
-                    onPositive = { _, _ -> viewModel.loadReadingProgress() },
-                    onNegative = { _, _ -> finish() },
-                    onDismiss = { viewModel.markErrorAsShown(error) }
-                )
-            }
-            is ReadingProgressViewModel.ViewState.Error.VerseOpeningError -> {
-                dialog(
-                    cancelable = true,
-                    title = R.string.dialog_title_error,
-                    message = R.string.dialog_message_failed_to_select_verse,
-                    onPositive = { _, _ -> viewModel.openVerse(error.verseToOpen) },
-                    onDismiss = { viewModel.markErrorAsShown(error) }
-                )
-            }
-            null -> {
-                // Do nothing
-            }
+        viewState.error?.handle()
+    }
+
+    private fun ReadingProgressViewModel.ViewState.Error.handle() = when (this) {
+        is ReadingProgressViewModel.ViewState.Error.ReadingProgressLoadingError -> {
+            dialog(
+                cancelable = false,
+                title = R.string.dialog_title_error,
+                message = R.string.dialog_message_failed_to_load_reading_progress,
+                onPositive = { _, _ -> viewModel.loadReadingProgress() },
+                onNegative = { _, _ -> finish() },
+                onDismiss = { viewModel.markErrorAsShown(this) }
+            )
+        }
+        is ReadingProgressViewModel.ViewState.Error.VerseOpeningError -> {
+            dialog(
+                cancelable = true,
+                title = R.string.dialog_title_error,
+                message = R.string.dialog_message_failed_to_select_verse,
+                onPositive = { _, _ -> viewModel.openVerse(verseToOpen) },
+                onDismiss = { viewModel.markErrorAsShown(this) }
+            )
         }
     }
 
