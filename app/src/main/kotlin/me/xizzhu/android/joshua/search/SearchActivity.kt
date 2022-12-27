@@ -142,7 +142,7 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
                 title = preview.title,
                 adapter = previewAdapter,
                 scrollToPosition = preview.currentPosition,
-                onDismiss = { viewModel.markPreviewAsClosed() }
+                onDismiss = viewModel::markPreviewAsClosed,
             )
             previewAdapter.submitList(preview.items)
         }

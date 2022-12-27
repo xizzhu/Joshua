@@ -28,10 +28,17 @@ import androidx.annotation.VisibleForTesting
 
 val Context.application: Application get() = applicationContext as Application
 
+val Context.appVersionName: String
+    get() = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        application.packageManager.getPackageInfo(application.packageName, 0).versionName
+    } else {
+        application.packageManager.getPackageInfo(application.packageName, PackageManager.PackageInfoFlags.of(0)).versionName
+    }
+
 // On older devices, this only works on the threads with loopers.
 fun Context.copyToClipBoard(label: CharSequence, text: CharSequence) {
     (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-            .setPrimaryClip(ClipData.newPlainText(label, text))
+        .setPrimaryClip(ClipData.newPlainText(label, text))
 }
 
 fun Activity.shareToSystem(title: String, text: String) {
@@ -63,9 +70,9 @@ fun PackageManager.chooserForSharing(packageToExclude: String, title: String, te
         if (packageToExclude != packageName) {
             val labeledIntent = LabeledIntent(packageName, resolveInfo.loadLabel(this), resolveInfo.iconResource)
             labeledIntent.setAction(Intent.ACTION_SEND).setPackage(packageName)
-                    .setComponent(ComponentName(packageName, resolveInfo.activityInfo.name))
-                    .setType("text/plain")
-                    .putExtra(Intent.EXTRA_TEXT, text)
+                .setComponent(ComponentName(packageName, resolveInfo.activityInfo.name))
+                .setType("text/plain")
+                .putExtra(Intent.EXTRA_TEXT, text)
             filteredIntents.add(labeledIntent)
         }
     }

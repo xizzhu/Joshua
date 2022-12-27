@@ -93,7 +93,7 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
                 title = preview.title,
                 adapter = previewAdapter,
                 scrollToPosition = preview.currentPosition,
-                onDismiss = { viewModel.markPreviewAsClosed() }
+                onDismiss = viewModel::markPreviewAsClosed,
             )
             previewAdapter.submitList(preview.items)
         }

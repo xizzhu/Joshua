@@ -526,13 +526,12 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
         lifecycleScope.launch {
             val defaultHighlightColor = readingViewModel.settings().first().defaultHighlightColor
             if (Highlight.COLOR_NONE == defaultHighlightColor) {
-                listDialog(R.string.text_pick_highlight_color,
-                        resources.getStringArray(R.array.text_highlight_colors),
-                        max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor))) { dialog, which ->
-                    saveHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which])
-
-                    dialog.dismiss()
-                }
+                listDialog(
+                    title = R.string.text_pick_highlight_color,
+                    items = resources.getStringArray(R.array.text_highlight_colors),
+                    selected = max(0, Highlight.AVAILABLE_COLORS.indexOf(currentHighlightColor)),
+                    onSelected = { which -> saveHighlight(verseIndex, Highlight.AVAILABLE_COLORS[which]) }
+                )
             } else {
                 saveHighlight(verseIndex, if (currentHighlightColor == Highlight.COLOR_NONE) defaultHighlightColor else Highlight.COLOR_NONE)
             }

@@ -122,7 +122,8 @@ fun Activity.seekBarDialog(
     maxValue: Float,
     onValueChanged: (Float) -> Unit,
     onPositive: ((Float) -> Unit)? = null,
-    onNegative: (() -> Unit)? = null
+    onNegative: (() -> Unit)? = null,
+    onDismiss: (() -> Unit)? = null,
 ): AlertDialog? {
     if (isDestroyed) return null
 
@@ -143,6 +144,7 @@ fun Activity.seekBarDialog(
         .setView(viewBinding.root)
         .setPositiveButton(android.R.string.ok, onPositive?.let { { _, _ -> it(viewBinding.seekBar.calculateValue(minValue, maxValue)) } })
         .setNegativeButton(android.R.string.cancel, onNegative?.let { { _, _ -> it() } })
+        .setOnDismissListener { onDismiss?.invoke() }
         .show()
 }
 
@@ -157,7 +159,7 @@ fun Activity.listDialog(
     title: CharSequence,
     adapter: RecyclerView.Adapter<*>,
     scrollToPosition: Int,
-    onDismiss: DialogInterface.OnDismissListener? = null
+    onDismiss: (() -> Unit)? = null,
 ): AlertDialog? {
     if (isDestroyed) return null
 
@@ -167,12 +169,12 @@ fun Activity.listDialog(
             scrollToPosition(scrollToPosition)
         }
     }
-    return MaterialAlertDialogBuilder(this)
+    val builder = MaterialAlertDialogBuilder(this)
         .setCancelable(true)
         .setTitle(title)
         .setView(recyclerView)
-        .setOnDismissListener(onDismiss)
-        .show()
+    onDismiss?.let { builder.setOnDismissListener { onDismiss() } }
+    return builder.show()
 }
 
 fun Activity.listDialog(
@@ -196,12 +198,22 @@ fun Activity.listDialog(
         .show()
 }
 
-fun Activity.listDialog(@StringRes title: Int, items: Array<String>, selected: Int, onClicked: DialogInterface.OnClickListener) {
+fun Activity.listDialog(
+    @StringRes title: Int,
+    items: Array<String>,
+    selected: Int,
+    onSelected: (which: Int) -> Unit,
+    onDismiss: (() -> Unit)? = null,
+) {
     if (isDestroyed) return
 
-    MaterialAlertDialogBuilder(this)
+    val builder = MaterialAlertDialogBuilder(this)
         .setCancelable(true)
-        .setSingleChoiceItems(items, selected, onClicked)
+        .setSingleChoiceItems(items, selected) { dialog, which ->
+            dialog.dismiss()
+            onSelected(which)
+        }
         .setTitle(title)
-        .show()
+    onDismiss?.let { builder.setOnDismissListener { onDismiss() } }
+    builder.show()
 }
