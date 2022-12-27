@@ -37,7 +37,7 @@ abstract class BaseViewModelV2<ViewAction, ViewState>(initialViewState: ViewStat
         viewModelScope.launch { viewAction.emit(action) }
     }
 
-    fun viewState(): StateFlow<ViewState> = viewState
+    fun viewState(): Flow<ViewState> = viewState
 
     protected fun updateViewState(block: (currentViewState: ViewState) -> ViewState?) {
         viewState.update { block(it) ?: it }

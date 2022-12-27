@@ -28,7 +28,7 @@ object Versions {
         const val code = 2002
         val name: String by lazy {
             "${code / 10000}.${(code % 10000) / 100}.${code % 100} " +
-                    "(${LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))})"
+                "(${LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))})"
         }
     }
 
@@ -97,6 +97,8 @@ object Dependencies {
     object Kotlin {
         const val classpath = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.Kotlin.core}"
         const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.Kotlin.coroutines}"
+        const val reflect = "org.jetbrains.kotlin:kotlin-reflect:${Versions.Kotlin.core}"
+
         const val test = "org.jetbrains.kotlin:kotlin-test-junit:${Versions.Kotlin.core}"
         const val coroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.Kotlin.coroutines}"
 
