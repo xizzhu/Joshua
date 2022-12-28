@@ -36,20 +36,20 @@ class AnnotatedVerseItemTest : BaseUnitTest() {
         val diffCallback = AnnotatedVerseItem.DiffCallback()
 
         assertTrue(diffCallback.areItemsTheSame(
-            AnnotatedVerseItem.Header(Settings.DEFAULT, ""),
-            AnnotatedVerseItem.Header(Settings.DEFAULT, "")
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "", false),
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "", false)
         ))
         assertTrue(diffCallback.areContentsTheSame(
-            AnnotatedVerseItem.Header(Settings.DEFAULT, ""),
-            AnnotatedVerseItem.Header(Settings.DEFAULT, "")
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "", false),
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "", false)
         ))
         assertFalse(diffCallback.areItemsTheSame(
-            AnnotatedVerseItem.Header(Settings.DEFAULT, ""),
-            AnnotatedVerseItem.Header(Settings.DEFAULT, "other")
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "", false),
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "other", false)
         ))
         assertFalse(diffCallback.areContentsTheSame(
-            AnnotatedVerseItem.Header(Settings.DEFAULT, ""),
-            AnnotatedVerseItem.Header(Settings.DEFAULT, "other")
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "", false),
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "other", false)
         ))
 
         assertTrue(diffCallback.areItemsTheSame(
@@ -116,15 +116,15 @@ class AnnotatedVerseItemTest : BaseUnitTest() {
         ))
 
         assertFalse(diffCallback.areItemsTheSame(
-            AnnotatedVerseItem.Header(Settings.DEFAULT, ""),
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "", false),
             AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex(0, 0, 0), "", "", "", Constants.DEFAULT_SORT_ORDER)
         ))
         assertFalse(diffCallback.areItemsTheSame(
-            AnnotatedVerseItem.Header(Settings.DEFAULT, ""),
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "", false),
             AnnotatedVerseItem.Highlight(Settings.DEFAULT, VerseIndex(0, 0, 0), "", "", "", 0, Constants.DEFAULT_SORT_ORDER)
         ))
         assertFalse(diffCallback.areItemsTheSame(
-            AnnotatedVerseItem.Header(Settings.DEFAULT, ""),
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "", false),
             AnnotatedVerseItem.Note(Settings.DEFAULT, VerseIndex(0, 0, 0), "", "", "")
         ))
         assertFalse(diffCallback.areItemsTheSame(
@@ -137,7 +137,7 @@ class AnnotatedVerseItemTest : BaseUnitTest() {
         ))
         assertFalse(diffCallback.areItemsTheSame(
             AnnotatedVerseItem.Note(Settings.DEFAULT, VerseIndex(0, 0, 0), "", "", ""),
-            AnnotatedVerseItem.Header(Settings.DEFAULT, "")
+            AnnotatedVerseItem.Header(Settings.DEFAULT, "", false)
         ))
     }
 

@@ -52,7 +52,7 @@ class AnnotatedVerseAdapterTest : BaseUnitTest() {
     fun `test getItemViewType()`() {
         adapter.submitList(
             listOf(
-                AnnotatedVerseItem.Header(Settings.DEFAULT, ""),
+                AnnotatedVerseItem.Header(Settings.DEFAULT, "", false),
                 AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex.INVALID, "", "", "", Constants.DEFAULT_SORT_ORDER),
                 AnnotatedVerseItem.Highlight(Settings.DEFAULT, VerseIndex.INVALID, "", "", "", 0, Constants.DEFAULT_SORT_ORDER),
                 AnnotatedVerseItem.Note(Settings.DEFAULT, VerseIndex.INVALID, "", "", "")

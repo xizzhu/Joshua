@@ -18,8 +18,10 @@ package me.xizzhu.android.joshua.annotated
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
@@ -57,9 +59,11 @@ class AnnotatedVerseViewHolderTest : BaseUnitTest() {
         viewHolder.bindData(
             item = AnnotatedVerseItem.Header(
                 settings = Settings.DEFAULT,
-                text = "random text"
+                text = "random text",
+                hideDivider = false,
             )
         )
+        assertTrue(viewHolder.itemView.findViewById<View>(R.id.divider).isVisible)
         assertEquals("random text", viewHolder.itemView.findViewById<TextView>(R.id.title).text.toString())
     }
 
