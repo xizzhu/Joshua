@@ -21,16 +21,65 @@ import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import me.xizzhu.android.joshua.core.Settings
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class TranslationItemTest : BaseUnitTest() {
     @Test
-    fun testItemViewType() {
-        assertEquals(R.layout.item_translation, TranslationItem(MockContents.kjvTranslationInfo, true).viewType)
+    fun `test DiffCallback`() {
+        val diffCallback = TranslationItem.DiffCallback()
+
+        assertTrue(diffCallback.areItemsTheSame(
+            TranslationItem.Header(Settings.DEFAULT, "", false),
+            TranslationItem.Header(Settings.DEFAULT, "", false)
+        ))
+        assertTrue(diffCallback.areItemsTheSame(
+            TranslationItem.Header(Settings.DEFAULT, "", false),
+            TranslationItem.Header(Settings.DEFAULT, "other", false)
+        ))
+        assertTrue(diffCallback.areContentsTheSame(
+            TranslationItem.Header(Settings.DEFAULT, "", false),
+            TranslationItem.Header(Settings.DEFAULT, "", false)
+        ))
+        assertFalse(diffCallback.areContentsTheSame(
+            TranslationItem.Header(Settings.DEFAULT, "", false),
+            TranslationItem.Header(Settings.DEFAULT, "other", false)
+        ))
+
+        assertTrue(diffCallback.areItemsTheSame(
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true),
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true)
+        ))
+        assertTrue(diffCallback.areItemsTheSame(
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true),
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, false)
+        ))
+        assertTrue(diffCallback.areContentsTheSame(
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true),
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true)
+        ))
+        assertFalse(diffCallback.areContentsTheSame(
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true),
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, false)
+        ))
+
+        assertFalse(diffCallback.areItemsTheSame(
+            TranslationItem.Header(Settings.DEFAULT, "", false),
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true)
+        ))
+        assertFalse(diffCallback.areItemsTheSame(
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true),
+            TranslationItem.Header(Settings.DEFAULT, "", false)
+        ))
     }
 
     @Test
-    fun testRightDrawable() {
-        assertEquals(0, TranslationItem(MockContents.kjvTranslationInfo, false).rightDrawable)
-        assertEquals(R.drawable.ic_check, TranslationItem(MockContents.kjvTranslationInfo, true).rightDrawable)
+    fun `test viewType()`() {
+        assertEquals(R.layout.item_title, TranslationItem.Header(Settings.DEFAULT, "", false).viewType)
+        assertEquals(R.layout.item_translation, TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true).viewType)
     }
 }

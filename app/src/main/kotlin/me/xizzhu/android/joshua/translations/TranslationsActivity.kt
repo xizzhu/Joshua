@@ -20,8 +20,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import kotlinx.coroutines.asExecutor
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.databinding.ActivityTranslationsBinding
 import me.xizzhu.android.joshua.infra.BaseActivityV2
 import me.xizzhu.android.joshua.ui.ProgressDialog
@@ -32,7 +34,12 @@ import me.xizzhu.android.joshua.ui.progressDialog
 import me.xizzhu.android.joshua.ui.toast
 
 @AndroidEntryPoint
-class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, TranslationsViewModel.ViewAction, TranslationsViewModel.ViewState, TranslationsViewModel>(), TranslationItem.Callback {
+class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, TranslationsViewModel.ViewAction, TranslationsViewModel.ViewState, TranslationsViewModel>() {
+    @Inject
+    lateinit var coroutineDispatcherProvider: CoroutineDispatcherProvider
+
+    private lateinit var adapter: TranslationAdapter
+
     private var downloadTranslationDialog: ProgressDialog? = null
     private var removeTranslationDialog: AlertDialog? = null
 
@@ -41,6 +48,32 @@ class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, Transla
     override val viewBinding: ActivityTranslationsBinding by lazy(LazyThreadSafetyMode.NONE) { ActivityTranslationsBinding.inflate(layoutInflater) }
 
     override fun initializeView() {
+        adapter = TranslationAdapter(
+            inflater = layoutInflater,
+            executor = coroutineDispatcherProvider.default.asExecutor()
+        ) { viewEvent ->
+            when (viewEvent) {
+                is TranslationAdapter.ViewEvent.DownloadTranslation -> {
+                    dialog(
+                        cancelable = true,
+                        title = viewEvent.translationToDownload.name,
+                        message = R.string.dialog_message_download_translation_confirmation,
+                        onPositive = { _, _ -> viewModel.downloadTranslation(viewEvent.translationToDownload) },
+                    )
+                }
+                is TranslationAdapter.ViewEvent.RemoveTranslation -> {
+                    dialog(
+                        cancelable = true,
+                        title = viewEvent.translationToRemove.name,
+                        message = R.string.dialog_message_delete_translation_confirmation,
+                        onPositive = { _, _ -> viewModel.removeTranslation(viewEvent.translationToRemove) },
+                    )
+                }
+                is TranslationAdapter.ViewEvent.SelectTranslation -> viewModel.selectTranslation(viewEvent.translationToSelect)
+            }
+        }
+        viewBinding.translationList.adapter = adapter
+
         with(viewBinding.swipeRefresher) {
             setColorSchemeResources(R.color.primary, R.color.secondary, R.color.dark_cyan, R.color.dark_lime)
             setOnRefreshListener { viewModel.loadTranslations(forceRefresh = true) }
@@ -60,8 +93,7 @@ class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, Transla
             translationList.fadeIn()
         }
 
-        viewState.settings?.let { translationList.setSettings(it) }
-        translationList.setItems(viewState.items)
+        adapter.submitList(viewState.items)
 
         viewState.translationDownloadingState.handle()
         viewState.translationRemovalState.handle()
@@ -161,31 +193,9 @@ class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, Transla
                 cancelable = true,
                 title = R.string.dialog_title_error,
                 message = R.string.dialog_message_failed_to_select_translation,
-                onPositive = { _, _ -> selectTranslation(translationToSelect) },
+                onPositive = { _, _ -> viewModel.selectTranslation(translationToSelect) },
                 onDismiss = { viewModel.markErrorAsShown(this) },
             )
         }
-    }
-
-    override fun selectTranslation(translationToSelect: TranslationInfo) {
-        viewModel.selectTranslation(translationToSelect)
-    }
-
-    override fun downloadTranslation(translationToDownload: TranslationInfo) {
-        dialog(
-            cancelable = true,
-            title = translationToDownload.name,
-            message = R.string.dialog_message_download_translation_confirmation,
-            onPositive = { _, _ -> viewModel.downloadTranslation(translationToDownload) },
-        )
-    }
-
-    override fun removeTranslation(translationToRemove: TranslationInfo) {
-        dialog(
-            cancelable = true,
-            title = translationToRemove.name,
-            message = R.string.dialog_message_delete_translation_confirmation,
-            onPositive = { _, _ -> viewModel.removeTranslation(translationToRemove) },
-        )
     }
 }

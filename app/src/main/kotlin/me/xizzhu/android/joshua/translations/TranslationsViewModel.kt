@@ -28,8 +28,6 @@ import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
-import me.xizzhu.android.joshua.ui.recyclerview.BaseItem
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.catch
@@ -51,7 +49,6 @@ class TranslationsViewModel @Inject constructor(
 ) : BaseViewModelV2<TranslationsViewModel.ViewAction, TranslationsViewModel.ViewState>(
     initialViewState = ViewState(
         loading = false,
-        settings = null,
         items = emptyList(),
         translationDownloadingState = ViewState.TranslationDownloadingState.Idle,
         translationRemovalState = ViewState.TranslationRemovalState.Idle,
@@ -64,8 +61,7 @@ class TranslationsViewModel @Inject constructor(
 
     data class ViewState(
         val loading: Boolean,
-        val settings: Settings?,
-        val items: List<BaseItem>,
+        val items: List<TranslationItem>,
         val translationDownloadingState: TranslationDownloadingState,
         val translationRemovalState: TranslationRemovalState,
         val error: Error?,
@@ -96,7 +92,6 @@ class TranslationsViewModel @Inject constructor(
     private var downloadTranslationJob: Job? = null
 
     init {
-        settingsManager.settings().onEach { settings -> updateViewState { it.copy(settings = settings) } }.launchIn(viewModelScope)
         loadTranslations(forceRefresh = false)
     }
 
@@ -114,27 +109,32 @@ class TranslationsViewModel @Inject constructor(
                 return@launch
             }
 
-            val items: ArrayList<BaseItem> = ArrayList()
+            val items: ArrayList<TranslationItem> = ArrayList()
+            val settings = settingsManager.settings().first()
             val currentTranslation = bibleReadingManager.currentTranslation().first()
-            items.addAll(downloadedTranslations.toItems(currentTranslation))
+            items.addAll(downloadedTranslations.toItems(settings, currentTranslation))
             if (availableTranslations.isNotEmpty()) {
-                items.add(TitleItem(application.getString(R.string.header_available_translations), false))
-                items.addAll(availableTranslations.toItems(currentTranslation))
+                items.add(TranslationItem.Header(settings, application.getString(R.string.header_available_translations), hideDivider = false))
+                items.addAll(availableTranslations.toItems(settings, currentTranslation))
             }
             updateViewState { it.copy(loading = false, items = items) }
         }
     }
 
-    private fun List<TranslationInfo>.toItems(currentTranslation: String): List<BaseItem> {
-        val items: ArrayList<BaseItem> = ArrayList()
+    private fun List<TranslationInfo>.toItems(settings: Settings, currentTranslation: String): List<TranslationItem> {
+        val items: ArrayList<TranslationItem> = ArrayList()
         var currentLanguage = ""
         for (translationInfo in this@toItems) {
             val language = translationInfo.language.split("_")[0]
             if (currentLanguage != language) {
-                items.add(TitleItem(Locale(language).displayLanguage, true))
+                items.add(TranslationItem.Header(settings, Locale(language).displayLanguage, hideDivider = true))
                 currentLanguage = language
             }
-            items.add(TranslationItem(translationInfo, translationInfo.downloaded && translationInfo.shortName == currentTranslation))
+            items.add(TranslationItem.Translation(
+                settings = settings,
+                translationInfo = translationInfo,
+                isCurrentTranslation = translationInfo.downloaded && translationInfo.shortName == currentTranslation
+            ))
         }
         return items
     }
