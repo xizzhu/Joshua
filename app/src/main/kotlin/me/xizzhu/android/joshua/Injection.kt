@@ -24,28 +24,57 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import me.xizzhu.android.joshua.core.*
 import me.xizzhu.android.joshua.core.provider.CoroutineDispatcherProvider
 import me.xizzhu.android.joshua.core.provider.DefaultCoroutineDispatcherProvider
 import me.xizzhu.android.joshua.core.provider.DefaultTimeProvider
 import me.xizzhu.android.joshua.core.provider.TimeProvider
-import me.xizzhu.android.joshua.core.repository.*
-import me.xizzhu.android.joshua.core.repository.local.android.*
 import me.xizzhu.android.joshua.core.repository.local.android.db.AndroidDatabase
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpCrossReferencesService
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpStrongNumberService
 import me.xizzhu.android.joshua.core.repository.remote.android.HttpTranslationService
 import me.xizzhu.android.joshua.core.serializer.android.BackupJsonSerializer
 import javax.inject.Singleton
+import me.xizzhu.android.joshua.core.BackupManager
+import me.xizzhu.android.joshua.core.BibleReadingManager
+import me.xizzhu.android.joshua.core.Bookmark
+import me.xizzhu.android.joshua.core.CrossReferencesManager
+import me.xizzhu.android.joshua.core.Highlight
+import me.xizzhu.android.joshua.core.Note
+import me.xizzhu.android.joshua.core.ReadingProgressManager
+import me.xizzhu.android.joshua.core.SearchManager
+import me.xizzhu.android.joshua.core.SettingsManager
+import me.xizzhu.android.joshua.core.StrongNumberManager
+import me.xizzhu.android.joshua.core.TranslationManager
+import me.xizzhu.android.joshua.core.VerseAnnotationManager
+import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
+import me.xizzhu.android.joshua.core.repository.CrossReferencesRepository
+import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
+import me.xizzhu.android.joshua.core.repository.SettingsRepository
+import me.xizzhu.android.joshua.core.repository.StrongNumberRepository
+import me.xizzhu.android.joshua.core.repository.TranslationRepository
+import me.xizzhu.android.joshua.core.repository.VerseAnnotationRepository
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidBookmarkStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidCrossReferencesStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidHighlightStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidNoteStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingProgressStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidReadingStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidSettingsStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidStrongNumberStorage
+import me.xizzhu.android.joshua.core.repository.local.android.AndroidTranslationStorage
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule {
-    private val appScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
+object NavigationModule {
     @Provides
     @Singleton
-    fun provideApp(application: Application): App = application as App
+    fun provideNavigator(): Navigator = Navigator()
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object ProviderModule {
+    private val appScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     @Provides
     @Singleton
@@ -53,15 +82,24 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideNavigator(): Navigator = Navigator()
+    fun provideCoroutineDispatcherProvider(): CoroutineDispatcherProvider = DefaultCoroutineDispatcherProvider()
 
     @Provides
     @Singleton
-    fun provideBackupManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>,
-                             highlightRepository: VerseAnnotationRepository<Highlight>,
-                             noteRepository: VerseAnnotationRepository<Note>,
-                             readingProgressRepository: ReadingProgressRepository): BackupManager =
-        BackupManager(BackupJsonSerializer(), bookmarkRepository, highlightRepository, noteRepository, readingProgressRepository)
+    fun provideTimeProvider(): TimeProvider = DefaultTimeProvider()
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object ManagerModule {
+    @Provides
+    @Singleton
+    fun provideBackupManager(
+        bookmarkRepository: VerseAnnotationRepository<Bookmark>,
+        highlightRepository: VerseAnnotationRepository<Highlight>,
+        noteRepository: VerseAnnotationRepository<Note>,
+        readingProgressRepository: ReadingProgressRepository
+    ): BackupManager = BackupManager(BackupJsonSerializer(), bookmarkRepository, highlightRepository, noteRepository, readingProgressRepository)
 
     @Provides
     @Singleton
@@ -73,23 +111,19 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): VerseAnnotationManager<Bookmark> =
-        VerseAnnotationManager(bookmarkRepository)
+    fun provideBookmarkManager(bookmarkRepository: VerseAnnotationRepository<Bookmark>): VerseAnnotationManager<Bookmark> = VerseAnnotationManager(bookmarkRepository)
 
     @Provides
     @Singleton
-    fun provideCrossReferencesManager(crossReferencesRepository: CrossReferencesRepository): CrossReferencesManager =
-        CrossReferencesManager(crossReferencesRepository)
+    fun provideCrossReferencesManager(crossReferencesRepository: CrossReferencesRepository): CrossReferencesManager = CrossReferencesManager(crossReferencesRepository)
 
     @Provides
     @Singleton
-    fun provideHighlightManager(highlightRepository: VerseAnnotationRepository<Highlight>): VerseAnnotationManager<Highlight> =
-        VerseAnnotationManager(highlightRepository)
+    fun provideHighlightManager(highlightRepository: VerseAnnotationRepository<Highlight>): VerseAnnotationManager<Highlight> = VerseAnnotationManager(highlightRepository)
 
     @Provides
     @Singleton
-    fun provideNoteManager(noteRepository: VerseAnnotationRepository<Note>): VerseAnnotationManager<Note> =
-        VerseAnnotationManager(noteRepository)
+    fun provideNoteManager(noteRepository: VerseAnnotationRepository<Note>): VerseAnnotationManager<Note> = VerseAnnotationManager(noteRepository)
 
     @Provides
     @Singleton
@@ -110,30 +144,15 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager =
-        SettingsManager(settingsRepository)
+    fun provideSettingsManager(settingsRepository: SettingsRepository): SettingsManager = SettingsManager(settingsRepository)
 
     @Provides
     @Singleton
-    fun provideStrongNumberManager(strongNumberRepository: StrongNumberRepository): StrongNumberManager =
-        StrongNumberManager(strongNumberRepository)
+    fun provideStrongNumberManager(strongNumberRepository: StrongNumberRepository): StrongNumberManager = StrongNumberManager(strongNumberRepository)
 
     @Provides
     @Singleton
-    fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager =
-        TranslationManager(translationRepository)
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-object ProviderModule {
-    @Provides
-    @Singleton
-    fun provideCoroutineDispatcherProvider(): CoroutineDispatcherProvider = DefaultCoroutineDispatcherProvider()
-
-    @Provides
-    @Singleton
-    fun provideTimeProvider(): TimeProvider = DefaultTimeProvider()
+    fun provideTranslationManager(translationRepository: TranslationRepository): TranslationManager = TranslationManager(translationRepository)
 }
 
 @Module
@@ -141,7 +160,7 @@ object ProviderModule {
 object RepositoryModule {
     @Provides
     @Singleton
-    fun provideAndroidDatabase(app: App): AndroidDatabase = AndroidDatabase(app)
+    fun provideAndroidDatabase(app: Application): AndroidDatabase = AndroidDatabase(app)
 
     @Provides
     @Singleton
@@ -155,7 +174,7 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideCrossReferencesRepository(app: App, androidDatabase: AndroidDatabase): CrossReferencesRepository =
+    fun provideCrossReferencesRepository(app: Application, androidDatabase: AndroidDatabase): CrossReferencesRepository =
         CrossReferencesRepository(AndroidCrossReferencesStorage(androidDatabase), HttpCrossReferencesService(app))
 
     @Provides
@@ -180,11 +199,11 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideStrongNumberRepository(app: App, androidDatabase: AndroidDatabase): StrongNumberRepository =
+    fun provideStrongNumberRepository(app: Application, androidDatabase: AndroidDatabase): StrongNumberRepository =
         StrongNumberRepository(AndroidStrongNumberStorage(androidDatabase), HttpStrongNumberService(app))
 
     @Provides
     @Singleton
-    fun provideTranslationRepository(app: App, androidDatabase: AndroidDatabase, appScope: CoroutineScope): TranslationRepository =
+    fun provideTranslationRepository(app: Application, androidDatabase: AndroidDatabase, appScope: CoroutineScope): TranslationRepository =
         TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService(app), appScope)
 }

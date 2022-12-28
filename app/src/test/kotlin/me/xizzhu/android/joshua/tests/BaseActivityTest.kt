@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath(Dependencies.Sdk.classpath)
-        classpath(Dependencies.Kotlin.classpath)
-        classpath(Dependencies.Kotlin.Kover.classpath)
-        classpath(Dependencies.Firebase.classpath)
-        classpath(Dependencies.Firebase.Crashlytics.classpath)
-    }
-}
+package me.xizzhu.android.joshua.tests
 
-plugins {
-    id(Dependencies.Hilt.plugin) version Versions.hilt apply false
-}
+import android.app.Activity
+import dagger.hilt.android.testing.HiltAndroidRule
+import org.junit.Rule
+import org.robolectric.Robolectric
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
+abstract class BaseActivityTest : BaseUnitTest() {
+    @get:Rule
+    var hiltRule = HiltAndroidRule(this)
 
-        maven("https://jitpack.io")
+    protected inline fun <T : Activity> withActivity(activityClass: Class<T>, block: (activity: T) -> Unit) {
+        Robolectric.buildActivity(activityClass).use { activityController ->
+            activityController.setup()
+            block(activityController.get())
+        }
     }
 }

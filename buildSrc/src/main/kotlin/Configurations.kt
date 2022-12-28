@@ -28,7 +28,7 @@ object Versions {
         const val code = 2002
         val name: String by lazy {
             "${code / 10000}.${(code % 10000) / 100}.${code % 100} " +
-                    "(${LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))})"
+                "(${LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))})"
         }
     }
 
@@ -73,7 +73,7 @@ object Versions {
 
     object Firebase {
         const val classpath = "4.3.10"
-        const val bom = "31.1.0"
+        const val bom = "31.1.1"
 
         object Crashlytics {
             const val classpath = "2.9.2"
@@ -85,8 +85,8 @@ object Versions {
     const val logger = "0.7.0"
     const val materialComponent = "1.7.0"
 
-    const val mockk = "1.13.2"
-    const val robolectric = "4.9"
+    const val mockk = "1.13.3"
+    const val robolectric = "4.9.1"
 }
 
 object Dependencies {
@@ -97,6 +97,8 @@ object Dependencies {
     object Kotlin {
         const val classpath = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.Kotlin.core}"
         const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.Kotlin.coroutines}"
+        const val reflect = "org.jetbrains.kotlin:kotlin-reflect:${Versions.Kotlin.core}"
+
         const val test = "org.jetbrains.kotlin:kotlin-test-junit:${Versions.Kotlin.core}"
         const val coroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.Kotlin.coroutines}"
 
@@ -144,7 +146,7 @@ object Dependencies {
     }
 
     object Hilt {
-        const val classpath = "com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}"
+        const val plugin = "com.google.dagger.hilt.android"
         const val android = "com.google.dagger:hilt-android:${Versions.hilt}"
         const val compiler = "com.google.dagger:hilt-android-compiler:${Versions.hilt}"
         const val test = "com.google.dagger:hilt-android-testing:${Versions.hilt}"

@@ -14,29 +14,14 @@
  * limitations under the License.
  */
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath(Dependencies.Sdk.classpath)
-        classpath(Dependencies.Kotlin.classpath)
-        classpath(Dependencies.Kotlin.Kover.classpath)
-        classpath(Dependencies.Firebase.classpath)
-        classpath(Dependencies.Firebase.Crashlytics.classpath)
-    }
-}
+package me.xizzhu.android.joshua.tests
 
-plugins {
-    id(Dependencies.Hilt.plugin) version Versions.hilt apply false
-}
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-
-        maven("https://jitpack.io")
-    }
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T : Any, V> T.getProperty(name: String): V {
+    val property = T::class.memberProperties.first { it.name == name }
+    property.isAccessible = true
+    return property.get(this) as V
 }
