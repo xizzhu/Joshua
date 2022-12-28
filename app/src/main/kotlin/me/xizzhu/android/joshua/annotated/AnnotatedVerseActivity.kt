@@ -30,6 +30,7 @@ import me.xizzhu.android.joshua.ui.dialog
 import me.xizzhu.android.joshua.ui.fadeIn
 import me.xizzhu.android.joshua.ui.listDialog
 import javax.inject.Inject
+import me.xizzhu.android.joshua.preview.Preview
 import me.xizzhu.android.joshua.preview.PreviewAdapter
 
 abstract class AnnotatedVerseActivity<V : VerseAnnotation, VM : AnnotatedVerseViewModel<V>>(
@@ -62,7 +63,7 @@ abstract class AnnotatedVerseActivity<V : VerseAnnotation, VM : AnnotatedVerseVi
         AnnotatedVerseViewModel.ViewAction.OpenReadingScreen -> navigator.navigate(this, Navigator.SCREEN_READING, extrasForOpeningVerse())
     }
 
-    override fun onViewStateUpdated(viewState: AnnotatedVerseViewModel.ViewState) = with(viewBinding) {
+    override fun onViewStateUpdated(viewState: AnnotatedVerseViewModel.ViewState): Unit = with(viewBinding) {
         toolbar.setSortOrder(viewState.sortOrder)
 
         if (viewState.loading) {
@@ -75,62 +76,62 @@ abstract class AnnotatedVerseActivity<V : VerseAnnotation, VM : AnnotatedVerseVi
 
         adapter.submitList(viewState.items)
 
-        viewState.preview?.let { preview ->
-            val previewAdapter = PreviewAdapter(
-                inflater = layoutInflater,
-                executor = coroutineDispatcherProvider.default.asExecutor()
-            ) { viewEvent ->
-                when (viewEvent) {
-                    is PreviewAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
-                }
+        viewState.preview?.handle()
+        viewState.error?.handle()
+    }
+
+    private fun Preview.handle() {
+        val previewAdapter = PreviewAdapter(
+            inflater = layoutInflater,
+            executor = coroutineDispatcherProvider.default.asExecutor()
+        ) { viewEvent ->
+            when (viewEvent) {
+                is PreviewAdapter.ViewEvent.OpenVerse -> viewModel.openVerse(viewEvent.verseToOpen)
             }
-            listDialog(
-                title = preview.title,
-                adapter = previewAdapter,
-                scrollToPosition = preview.currentPosition,
-                onDismiss = viewModel::markPreviewAsClosed,
-            )
-            previewAdapter.submitList(preview.items)
         }
+        listDialog(
+            title = title,
+            adapter = previewAdapter,
+            scrollToPosition = currentPosition,
+            onDismiss = viewModel::markPreviewAsClosed,
+        )
+        previewAdapter.submitList(items)
+    }
 
-        when (val error = viewState.error) {
-            is AnnotatedVerseViewModel.ViewState.Error.AnnotatedVersesLoadingError -> {
-                dialog(
-                    cancelable = false,
-                    title = R.string.dialog_title_error,
-                    message = R.string.dialog_message_failed_to_load_annotated_verses,
-                    onPositive = { _, _ -> viewModel.loadAnnotatedVerses() },
-                    onNegative = { _, _ -> finish() },
-                    onDismiss = { viewModel.markErrorAsShown(error) }
-                )
-            }
-            is AnnotatedVerseViewModel.ViewState.Error.PreviewLoadingError -> {
-                viewModel.markErrorAsShown(error)
+    private fun AnnotatedVerseViewModel.ViewState.Error.handle() = when (this) {
+        is AnnotatedVerseViewModel.ViewState.Error.AnnotatedVersesLoadingError -> {
+            dialog(
+                cancelable = false,
+                title = R.string.dialog_title_error,
+                message = R.string.dialog_message_failed_to_load_annotated_verses,
+                onPositive = { _, _ -> viewModel.loadAnnotatedVerses() },
+                onNegative = { _, _ -> finish() },
+                onDismiss = { viewModel.markErrorAsShown(this) }
+            )
+        }
+        is AnnotatedVerseViewModel.ViewState.Error.PreviewLoadingError -> {
+            viewModel.markErrorAsShown(this)
 
-                // Very unlikely to fail, so just falls back to open the verse.
-                viewModel.openVerse(error.verseToPreview)
-            }
-            is AnnotatedVerseViewModel.ViewState.Error.SortOrderSavingError -> {
-                dialog(
-                    cancelable = true,
-                    title = R.string.dialog_title_error,
-                    message = R.string.dialog_message_failed_to_save_sort_order,
-                    onPositive = { _, _ -> viewModel.saveSortOrder(error.sortOrder) },
-                    onDismiss = { viewModel.markErrorAsShown(error) }
-                )
-            }
-            is AnnotatedVerseViewModel.ViewState.Error.VerseOpeningError -> {
-                dialog(
-                    cancelable = true,
-                    title = R.string.dialog_title_error,
-                    message = R.string.dialog_message_failed_to_select_verse,
-                    onPositive = { _, _ -> viewModel.openVerse(error.verseToOpen) },
-                    onDismiss = { viewModel.markErrorAsShown(error) }
-                )
-            }
-            null -> {
-                // Do nothing
-            }
+            // Very unlikely to fail, so just falls back to open the verse.
+            viewModel.openVerse(verseToPreview)
+        }
+        is AnnotatedVerseViewModel.ViewState.Error.SortOrderSavingError -> {
+            dialog(
+                cancelable = true,
+                title = R.string.dialog_title_error,
+                message = R.string.dialog_message_failed_to_save_sort_order,
+                onPositive = { _, _ -> viewModel.saveSortOrder(sortOrder) },
+                onDismiss = { viewModel.markErrorAsShown(this) }
+            )
+        }
+        is AnnotatedVerseViewModel.ViewState.Error.VerseOpeningError -> {
+            dialog(
+                cancelable = true,
+                title = R.string.dialog_title_error,
+                message = R.string.dialog_message_failed_to_select_verse,
+                onPositive = { _, _ -> viewModel.openVerse(verseToOpen) },
+                onDismiss = { viewModel.markErrorAsShown(this) }
+            )
         }
     }
 
