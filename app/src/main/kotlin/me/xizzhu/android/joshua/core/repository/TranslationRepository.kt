@@ -31,9 +31,9 @@ import me.xizzhu.android.joshua.utils.currentTimeMillis
 import me.xizzhu.android.logger.Log
 
 class TranslationRepository(
-        private val localTranslationStorage: LocalTranslationStorage,
-        private val remoteTranslationService: RemoteTranslationService,
-        appScope: CoroutineScope
+    private val localTranslationStorage: LocalTranslationStorage,
+    private val remoteTranslationService: RemoteTranslationService,
+    appScope: CoroutineScope
 ) {
     companion object {
         private val TAG: String = TranslationRepository::class.java.simpleName
@@ -100,7 +100,7 @@ class TranslationRepository(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     suspend fun translationListTooOld(): Boolean =
-            currentTimeMillis() - localTranslationStorage.readTranslationListRefreshTimestamp() >= TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
+        currentTimeMillis() - localTranslationStorage.readTranslationListRefreshTimestamp() >= TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
@@ -136,6 +136,9 @@ class TranslationRepository(
 
     suspend fun readTranslationsFromLocal(): List<TranslationInfo> = localTranslationStorage.readTranslations()
 
+    /**
+     * Emitting 1-99 when downloading, 100 when installing, and 101 when finished..
+     */
     fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> = channelFlow {
         val downloadProgressChannel = Channel<Int>(Channel.CONFLATED)
         launch { downloadProgressChannel.consumeEach { trySend(it) } }
@@ -165,14 +168,15 @@ class TranslationRepository(
         val toDownload = RemoteTranslationInfo.fromTranslationInfo(translationInfo)
         val translation = remoteTranslationService.fetchTranslation(downloadProgressChannel, toDownload)
         Log.i(TAG, "Translation downloaded")
+        downloadProgressChannel.trySend(100)
 
         localTranslationStorage.saveTranslation(
-                translation.translationInfo.toTranslationInfo(true),
-                translation.bookNames, translation.bookShortNames, translation.verses
+            translation.translationInfo.toTranslationInfo(true),
+            translation.bookNames, translation.bookShortNames, translation.verses
         )
         remoteTranslationService.removeTranslationCache(toDownload)
         Log.i(TAG, "Translation saved to database")
-        downloadProgressChannel.trySend(100)
+        downloadProgressChannel.trySend(101)
     }
 
     suspend fun removeTranslation(translationInfo: TranslationInfo) {

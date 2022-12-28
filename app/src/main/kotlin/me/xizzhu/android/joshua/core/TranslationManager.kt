@@ -19,8 +19,7 @@ package me.xizzhu.android.joshua.core
 import kotlinx.coroutines.flow.Flow
 import me.xizzhu.android.joshua.core.repository.TranslationRepository
 
-data class TranslationInfo(val shortName: String, val name: String, val language: String,
-                           val size: Long, val downloaded: Boolean)
+data class TranslationInfo(val shortName: String, val name: String, val language: String, val size: Long, val downloaded: Boolean)
 
 class TranslationManager(private val translationRepository: TranslationRepository) {
     fun availableTranslations(): Flow<List<TranslationInfo>> = translationRepository.availableTranslations
@@ -31,8 +30,7 @@ class TranslationManager(private val translationRepository: TranslationRepositor
         translationRepository.reload(forceRefresh)
     }
 
-    fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> =
-            translationRepository.downloadTranslation(translationToDownload)
+    fun downloadTranslation(translationToDownload: TranslationInfo): Flow<Int> = translationRepository.downloadTranslation(translationToDownload)
 
     suspend fun removeTranslation(translationInfo: TranslationInfo) {
         translationRepository.removeTranslation(translationInfo)
