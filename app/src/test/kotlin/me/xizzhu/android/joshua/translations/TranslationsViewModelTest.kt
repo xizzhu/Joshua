@@ -18,27 +18,26 @@ package me.xizzhu.android.joshua.translations
 
 import android.app.Application
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.SettingsManager
 import me.xizzhu.android.joshua.core.TranslationManager
-import me.xizzhu.android.joshua.infra.BaseViewModel
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.ui.recyclerview.TitleItem
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import me.xizzhu.android.joshua.core.Settings
 
 class TranslationsViewModelTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
@@ -52,157 +51,317 @@ class TranslationsViewModelTest : BaseUnitTest() {
     override fun setup() {
         super.setup()
 
-        bibleReadingManager = mockk()
-        coEvery { bibleReadingManager.currentTranslation() } returns flowOf(MockContents.cuvShortName)
+        bibleReadingManager = mockk<BibleReadingManager>().apply {
+            every { currentTranslation() } returns flowOf(MockContents.cuvShortName)
+        }
 
-        translationManager = mockk()
-        coEvery { translationManager.availableTranslations() } returns flowOf(listOf(MockContents.kjvTranslationInfo))
-        coEvery { translationManager.downloadedTranslations() } returns flowOf(listOf(MockContents.cuvDownloadedTranslationInfo))
-        coEvery { translationManager.reload(any()) } returns Unit
+        translationManager = mockk<TranslationManager>().apply {
+            every { availableTranslations() } returns flowOf(listOf(MockContents.kjvTranslationInfo))
+            every { downloadedTranslations() } returns flowOf(listOf(MockContents.cuvDownloadedTranslationInfo))
+            coEvery { reload(any()) } returns Unit
+        }
 
-        settingsManager = mockk()
+        settingsManager = mockk<SettingsManager>().apply {
+            every { settings() } returns flowOf(Settings.DEFAULT)
+        }
 
         application = mockk()
         every { application.getString(R.string.header_available_translations) } returns "AVAILABLE TRANSLATIONS"
 
-        translationsViewModel = spyk(TranslationsViewModel(bibleReadingManager, translationManager, settingsManager, application))
+        translationsViewModel = TranslationsViewModel(bibleReadingManager, translationManager, settingsManager, application, testCoroutineDispatcherProvider)
     }
 
     @Test
-    fun `test loadTranslation at init`() = runTest {
-        val actual = translationsViewModel.translations().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertEquals(5, actual.data.items.size)
-        assertEquals("Chinese", (actual.data.items[0] as TitleItem).title.toString())
-        assertEquals(MockContents.cuvDownloadedTranslationInfo, (actual.data.items[1] as TranslationItem).translationInfo)
-        assertEquals("AVAILABLE TRANSLATIONS", (actual.data.items[2] as TitleItem).title.toString())
-        assertEquals("English", (actual.data.items[3] as TitleItem).title.toString())
-        assertEquals(MockContents.kjvTranslationInfo, (actual.data.items[4] as TranslationItem).translationInfo)
+    fun `test loadTranslations(), called in init`() = runTest {
+        assertEquals(createDefaultViewState(), translationsViewModel.viewState().first())
+        coVerify(exactly = 1) { translationManager.reload(false) }
+    }
+
+    private fun createDefaultViewState(): TranslationsViewModel.ViewState = TranslationsViewModel.ViewState(
+        loading = false,
+        items = listOf(
+            TranslationItem.Header(Settings.DEFAULT, "Chinese", hideDivider = true),
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.cuvDownloadedTranslationInfo, isCurrentTranslation = true),
+            TranslationItem.Header(Settings.DEFAULT, "AVAILABLE TRANSLATIONS", hideDivider = false),
+            TranslationItem.Header(Settings.DEFAULT, "English", hideDivider = true),
+            TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, isCurrentTranslation = false),
+        ),
+        translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Idle,
+        translationRemovalState = TranslationsViewModel.ViewState.TranslationRemovalState.Idle,
+        error = null,
+    )
+
+    @Test
+    fun `test loadTranslations(), without available and downloaded translations`() = runTest {
+        every { translationManager.availableTranslations() } returns flowOf(emptyList())
+        every { translationManager.downloadedTranslations() } returns flowOf(emptyList())
+
+        translationsViewModel.loadTranslations(true)
+        assertEquals(
+            TranslationsViewModel.ViewState(
+                loading = false,
+                items = emptyList(),
+                translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Idle,
+                translationRemovalState = TranslationsViewModel.ViewState.TranslationRemovalState.Idle,
+                error = TranslationsViewModel.ViewState.Error.NoTranslationsError,
+            ),
+            translationsViewModel.viewState().first()
+        )
+        coVerify(exactly = 1) { translationManager.reload(true) }
+
+        translationsViewModel.markErrorAsShown(TranslationsViewModel.ViewState.Error.TranslationNotInstalledError)
+        assertEquals(
+            TranslationsViewModel.ViewState(
+                loading = false,
+                items = emptyList(),
+                translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Idle,
+                translationRemovalState = TranslationsViewModel.ViewState.TranslationRemovalState.Idle,
+                error = TranslationsViewModel.ViewState.Error.NoTranslationsError,
+            ),
+            translationsViewModel.viewState().first()
+        )
+
+        translationsViewModel.markErrorAsShown(TranslationsViewModel.ViewState.Error.NoTranslationsError)
+        assertEquals(
+            TranslationsViewModel.ViewState(
+                loading = false,
+                items = emptyList(),
+                translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Idle,
+                translationRemovalState = TranslationsViewModel.ViewState.TranslationRemovalState.Idle,
+                error = null,
+            ),
+            translationsViewModel.viewState().first()
+        )
     }
 
     @Test
-    fun `test refreshTranslations without available and downloaded`() = runTest {
-        coEvery { translationManager.availableTranslations() } returns flowOf(emptyList())
-        coEvery { translationManager.downloadedTranslations() } returns flowOf(emptyList())
+    fun `test loadTranslations(), with downloaded but without available translations`() = runTest {
+        every { translationManager.availableTranslations() } returns flowOf(emptyList())
+        every { translationManager.downloadedTranslations() } returns flowOf(listOf(
+            MockContents.cuvDownloadedTranslationInfo, MockContents.bbeDownloadedTranslationInfo, MockContents.msgDownloadedTranslationInfo
+        ))
 
-        translationsViewModel.refreshTranslations(true)
-        assertTrue(translationsViewModel.translations().first() is BaseViewModel.ViewData.Failure)
+        translationsViewModel.loadTranslations(true)
+        assertEquals(
+            TranslationsViewModel.ViewState(
+                loading = false,
+                items = listOf(
+                    TranslationItem.Header(Settings.DEFAULT, "English", hideDivider = true),
+                    TranslationItem.Translation(Settings.DEFAULT, MockContents.bbeDownloadedTranslationInfo, isCurrentTranslation = false),
+                    TranslationItem.Translation(Settings.DEFAULT, MockContents.msgDownloadedTranslationInfo, isCurrentTranslation = false),
+                    TranslationItem.Header(Settings.DEFAULT, "Chinese", hideDivider = true),
+                    TranslationItem.Translation(Settings.DEFAULT, MockContents.cuvDownloadedTranslationInfo, isCurrentTranslation = true),
+                ),
+                translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Idle,
+                translationRemovalState = TranslationsViewModel.ViewState.TranslationRemovalState.Idle,
+                error = null,
+            ),
+            translationsViewModel.viewState().first()
+        )
+        coVerify(exactly = 1) { translationManager.reload(true) }
     }
 
     @Test
-    fun `test refreshTranslations without available`() = runTest {
-        coEvery { translationManager.availableTranslations() } returns flowOf(emptyList())
+    fun `test loadTranslations(), with available but without downloaded translations`() = runTest {
+        every { translationManager.availableTranslations() } returns flowOf(listOf(
+            MockContents.cuvTranslationInfo, MockContents.bbeTranslationInfo, MockContents.msgTranslationInfo
+        ))
+        every { translationManager.downloadedTranslations() } returns flowOf(emptyList())
 
-        translationsViewModel.refreshTranslations(true)
-
-        val actual = translationsViewModel.translations().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertEquals(2, actual.data.items.size)
-        assertEquals("Chinese", (actual.data.items[0] as TitleItem).title.toString())
-        assertEquals(MockContents.cuvDownloadedTranslationInfo, (actual.data.items[1] as TranslationItem).translationInfo)
+        translationsViewModel.loadTranslations(true)
+        assertEquals(
+            TranslationsViewModel.ViewState(
+                loading = false,
+                items = listOf(
+                    TranslationItem.Header(Settings.DEFAULT, "AVAILABLE TRANSLATIONS", hideDivider = false),
+                    TranslationItem.Header(Settings.DEFAULT, "English", hideDivider = true),
+                    TranslationItem.Translation(Settings.DEFAULT, MockContents.bbeTranslationInfo, isCurrentTranslation = false),
+                    TranslationItem.Translation(Settings.DEFAULT, MockContents.msgTranslationInfo, isCurrentTranslation = false),
+                    TranslationItem.Header(Settings.DEFAULT, "Chinese", hideDivider = true),
+                    TranslationItem.Translation(Settings.DEFAULT, MockContents.cuvTranslationInfo, isCurrentTranslation = false),
+                ),
+                translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Idle,
+                translationRemovalState = TranslationsViewModel.ViewState.TranslationRemovalState.Idle,
+                error = null,
+            ),
+            translationsViewModel.viewState().first()
+        )
+        coVerify(exactly = 1) { translationManager.reload(true) }
     }
 
     @Test
-    fun `test refreshTranslations without downloaded`() = runTest {
-        coEvery { translationManager.downloadedTranslations() } returns flowOf(emptyList())
+    fun `test selectTranslation(), with translation not downloaded yet`() = runTest {
+        translationsViewModel.selectTranslation(MockContents.kjvTranslationInfo)
+        assertEquals(
+            createDefaultViewState().copy(error = TranslationsViewModel.ViewState.Error.TranslationNotInstalledError),
+            translationsViewModel.viewState().first()
+        )
 
-        translationsViewModel.refreshTranslations(true)
-
-        val actual = translationsViewModel.translations().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertEquals(3, actual.data.items.size)
-        assertEquals("AVAILABLE TRANSLATIONS", (actual.data.items[0] as TitleItem).title.toString())
-        assertEquals("English", (actual.data.items[1] as TitleItem).title.toString())
-        assertEquals(MockContents.kjvTranslationInfo, (actual.data.items[2] as TranslationItem).translationInfo)
+        translationsViewModel.markErrorAsShown(TranslationsViewModel.ViewState.Error.TranslationNotInstalledError)
+        assertEquals(createDefaultViewState(), translationsViewModel.viewState().first())
     }
 
     @Test
-    fun `test refreshTranslations`() = runTest {
-        coEvery { translationManager.availableTranslations() } returns flowOf(listOf(MockContents.kjvTranslationInfo, MockContents.msgTranslationInfo))
-        coEvery { translationManager.downloadedTranslations() } returns flowOf(listOf(MockContents.bbeDownloadedTranslationInfo, MockContents.cuvDownloadedTranslationInfo))
+    fun `test selectTranslation(), with exception`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentTranslation("KJV") } throws RuntimeException("random exception")
 
-        translationsViewModel.refreshTranslations(true)
+        translationsViewModel.selectTranslation(MockContents.kjvDownloadedTranslationInfo)
+        assertEquals(
+            createDefaultViewState().copy(error = TranslationsViewModel.ViewState.Error.TranslationSelectionError(MockContents.kjvDownloadedTranslationInfo)),
+            translationsViewModel.viewState().first()
+        )
 
-        val actual = translationsViewModel.translations().first()
-        assertTrue(actual is BaseViewModel.ViewData.Success)
-        assertEquals(8, actual.data.items.size)
-        assertEquals("English", (actual.data.items[0] as TitleItem).title.toString())
-        assertEquals(MockContents.bbeDownloadedTranslationInfo, (actual.data.items[1] as TranslationItem).translationInfo)
-        assertEquals("Chinese", (actual.data.items[2] as TitleItem).title.toString())
-        assertEquals(MockContents.cuvDownloadedTranslationInfo, (actual.data.items[3] as TranslationItem).translationInfo)
-        assertEquals("AVAILABLE TRANSLATIONS", (actual.data.items[4] as TitleItem).title.toString())
-        assertEquals("English", (actual.data.items[5] as TitleItem).title.toString())
-        assertEquals(MockContents.kjvTranslationInfo, (actual.data.items[6] as TranslationItem).translationInfo)
-        assertEquals(MockContents.msgTranslationInfo, (actual.data.items[7] as TranslationItem).translationInfo)
+        translationsViewModel.markErrorAsShown(TranslationsViewModel.ViewState.Error.TranslationSelectionError(MockContents.kjvDownloadedTranslationInfo))
+        assertEquals(createDefaultViewState(), translationsViewModel.viewState().first())
     }
 
     @Test
-    fun `test downloadTranslation with error`() = runTest {
-        val error = RuntimeException("Random exception")
-        coEvery { translationManager.downloadTranslation(MockContents.kjvTranslationInfo) } returns flow {
+    fun `test selectTranslation()`() = runTest {
+        coEvery { bibleReadingManager.saveCurrentTranslation("KJV") } returns Unit
+
+        val viewAction = async(Dispatchers.Unconfined) { translationsViewModel.viewAction().first() }
+
+        translationsViewModel.selectTranslation(MockContents.kjvDownloadedTranslationInfo)
+
+        assertEquals(TranslationsViewModel.ViewAction.GoBack, viewAction.await())
+    }
+
+    @Test
+    fun `test downloadTranslation(), with translation already downloaded`() = runTest {
+        translationsViewModel.downloadTranslation(MockContents.kjvDownloadedTranslationInfo)
+        assertEquals(
+            createDefaultViewState().copy(error = TranslationsViewModel.ViewState.Error.TranslationAlreadyInstalledError),
+            translationsViewModel.viewState().first()
+        )
+
+        translationsViewModel.markErrorAsShown(TranslationsViewModel.ViewState.Error.TranslationAlreadyInstalledError)
+        assertEquals(createDefaultViewState(), translationsViewModel.viewState().first())
+    }
+
+    @Test
+    fun `test downloadTranslation(), with exception`() = runTest {
+        every { translationManager.downloadTranslation(MockContents.kjvTranslationInfo) } returns flowOf(-1)
+
+        translationsViewModel.downloadTranslation(MockContents.kjvTranslationInfo)
+        assertEquals(
+            createDefaultViewState().copy(
+                translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Completed(successful = false),
+                error = TranslationsViewModel.ViewState.Error.TranslationDownloadingError(MockContents.kjvTranslationInfo)
+            ),
+            translationsViewModel.viewState().first()
+        )
+
+        translationsViewModel.markTranslationDownloadingStateAsIdle()
+        translationsViewModel.markErrorAsShown(TranslationsViewModel.ViewState.Error.TranslationDownloadingError(MockContents.kjvTranslationInfo))
+        assertEquals(createDefaultViewState(), translationsViewModel.viewState().first())
+    }
+
+    @Test
+    fun `test downloadTranslation(), with cancellation`() = runTest {
+        every { translationManager.downloadTranslation(MockContents.kjvTranslationInfo) } returns flow {
+            while (true) delay(100L)
+        }
+
+        translationsViewModel.downloadTranslation(MockContents.kjvTranslationInfo)
+        assertEquals(
+            createDefaultViewState().copy(translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Downloading(progress = 0)),
+            translationsViewModel.viewState().first()
+        )
+
+        translationsViewModel.cancelDownloadingTranslation()
+        assertEquals(createDefaultViewState(), translationsViewModel.viewState().first())
+    }
+
+    @Test
+    fun `test downloadTranslation()`() = runTest {
+        every { translationManager.downloadTranslation(MockContents.kjvTranslationInfo) } returns flow {
+            delay(100L)
             emit(1)
-            emit(5)
-            throw error
-        }
-        every { translationsViewModel.refreshTranslations(any()) } returns Unit
 
-        val actual = translationsViewModel.downloadTranslation(MockContents.kjvTranslationInfo).toList()
-        assertEquals(3, actual.size)
-        assertEquals(BaseViewModel.ViewData.Loading(1), actual[0])
-        assertEquals(BaseViewModel.ViewData.Loading(5), actual[1])
-        assertEquals(BaseViewModel.ViewData.Failure(error), actual[2])
-
-        verify(exactly = 0) { translationsViewModel.refreshTranslations(any()) }
-    }
-
-    @Test
-    fun `test downloadTranslation`() = runTest {
-        coEvery { translationManager.downloadTranslation(MockContents.kjvTranslationInfo) } returns flow {
-            emit(-1)
-            emit(0)
-            emit(50)
+            delay(100L)
             emit(99)
+
+            delay(100L)
             emit(100)
+
+            delay(100L)
+            emit(101)
         }
-        every { translationsViewModel.refreshTranslations(any()) } returns Unit
 
-        val actual = translationsViewModel.downloadTranslation(MockContents.kjvTranslationInfo).toList()
-        assertEquals(5, actual.size)
-        assertTrue(actual[0] is BaseViewModel.ViewData.Failure)
-        assertEquals(BaseViewModel.ViewData.Loading(0), actual[1])
-        assertEquals(BaseViewModel.ViewData.Loading(50), actual[2])
-        assertEquals(BaseViewModel.ViewData.Loading(99), actual[3])
-        assertEquals(BaseViewModel.ViewData.Success(100), actual[4])
+        translationsViewModel.downloadTranslation(MockContents.kjvTranslationInfo)
+        assertEquals(
+            createDefaultViewState().copy(translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Downloading(progress = 0)),
+            translationsViewModel.viewState().first()
+        )
 
-        verify(exactly = 1) { translationsViewModel.refreshTranslations(false) }
-        verify(exactly = 0) { translationsViewModel.refreshTranslations(true) }
+        delay(150L)
+        assertEquals(
+            createDefaultViewState().copy(translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Downloading(progress = 1)),
+            translationsViewModel.viewState().first()
+        )
+
+        delay(100L)
+        assertEquals(
+            createDefaultViewState().copy(translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Downloading(progress = 99)),
+            translationsViewModel.viewState().first()
+        )
+
+        delay(100L)
+        assertEquals(
+            createDefaultViewState().copy(translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Installing),
+            translationsViewModel.viewState().first()
+        )
+
+        delay(100L)
+        assertEquals(
+            createDefaultViewState().copy(translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Completed(successful = true)),
+            translationsViewModel.viewState().first()
+        )
     }
 
     @Test
-    fun `test removeTranslation with error`() = runTest {
-        val error = RuntimeException("Random exception")
-        coEvery { translationManager.removeTranslation(MockContents.kjvTranslationInfo) } throws error
-        every { translationsViewModel.refreshTranslations(any()) } returns Unit
+    fun `test removeTranslation(), with translation not yet downloaded`() = runTest {
+        translationsViewModel.removeTranslation(MockContents.kjvTranslationInfo)
+        assertEquals(
+            createDefaultViewState().copy(error = TranslationsViewModel.ViewState.Error.TranslationNotInstalledError),
+            translationsViewModel.viewState().first()
+        )
 
-        val actual = translationsViewModel.removeTranslation(MockContents.kjvTranslationInfo).toList()
-        assertEquals(2, actual.size)
-        assertEquals(BaseViewModel.ViewData.Loading(), actual[0])
-        assertEquals(BaseViewModel.ViewData.Failure(error), actual[1])
-
-        verify(exactly = 0) { translationsViewModel.refreshTranslations(any()) }
+        translationsViewModel.markErrorAsShown(TranslationsViewModel.ViewState.Error.TranslationNotInstalledError)
+        assertEquals(createDefaultViewState(), translationsViewModel.viewState().first())
     }
 
     @Test
-    fun `test removeTranslation`() = runTest {
-        coEvery { translationManager.removeTranslation(MockContents.kjvTranslationInfo) } returns Unit
-        every { translationsViewModel.refreshTranslations(any()) } returns Unit
+    fun `test removeTranslation(), with exception`() = runTest {
+        coEvery { translationManager.removeTranslation(MockContents.kjvDownloadedTranslationInfo) } throws RuntimeException("random exception")
 
-        val actual = translationsViewModel.removeTranslation(MockContents.kjvTranslationInfo).toList()
-        assertEquals(2, actual.size)
-        assertEquals(BaseViewModel.ViewData.Loading(), actual[0])
-        assertEquals(BaseViewModel.ViewData.Success(Unit), actual[1])
+        translationsViewModel.removeTranslation(MockContents.kjvDownloadedTranslationInfo)
+        assertEquals(
+            createDefaultViewState().copy(
+                translationRemovalState = TranslationsViewModel.ViewState.TranslationRemovalState.Completed(successful = false),
+                error = TranslationsViewModel.ViewState.Error.TranslationRemovalError(MockContents.kjvDownloadedTranslationInfo)
+            ),
+            translationsViewModel.viewState().first()
+        )
 
-        verify(exactly = 1) { translationsViewModel.refreshTranslations(false) }
-        verify(exactly = 0) { translationsViewModel.refreshTranslations(true) }
+        translationsViewModel.markTranslationRemovalStateAsIdle()
+        translationsViewModel.markErrorAsShown(TranslationsViewModel.ViewState.Error.TranslationRemovalError(MockContents.kjvDownloadedTranslationInfo))
+        assertEquals(createDefaultViewState(), translationsViewModel.viewState().first())
+    }
+
+    @Test
+    fun `test removeTranslation()`() = runTest {
+        coEvery { translationManager.removeTranslation(MockContents.kjvDownloadedTranslationInfo) } returns Unit
+
+        translationsViewModel.removeTranslation(MockContents.kjvDownloadedTranslationInfo)
+        assertEquals(
+            createDefaultViewState().copy(
+                translationRemovalState = TranslationsViewModel.ViewState.TranslationRemovalState.Completed(successful = true)
+            ),
+            translationsViewModel.viewState().first()
+        )
+
+        translationsViewModel.markTranslationRemovalStateAsIdle()
+        assertEquals(createDefaultViewState(), translationsViewModel.viewState().first())
     }
 }

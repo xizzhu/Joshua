@@ -166,6 +166,11 @@ class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, Transla
                 onDismiss = { viewModel.markErrorAsShown(this) },
             )
         }
+        is TranslationsViewModel.ViewState.Error.TranslationAlreadyInstalledError,
+        is TranslationsViewModel.ViewState.Error.TranslationNotInstalledError -> {
+            toast(R.string.toast_unknown_error)
+            viewModel.markErrorAsShown(this)
+        }
         is TranslationsViewModel.ViewState.Error.TranslationDownloadingError -> {
             dialog(
                 cancelable = true,
@@ -174,10 +179,6 @@ class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, Transla
                 onPositive = { _, _ -> viewModel.downloadTranslation(translationToDownload) },
                 onDismiss = { viewModel.markErrorAsShown(this) },
             )
-        }
-        is TranslationsViewModel.ViewState.Error.TranslationNotInstalledError -> {
-            toast(R.string.toast_unknown_error)
-            viewModel.markErrorAsShown(this)
         }
         is TranslationsViewModel.ViewState.Error.TranslationRemovalError -> {
             dialog(

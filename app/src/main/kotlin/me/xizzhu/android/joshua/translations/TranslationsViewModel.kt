@@ -29,6 +29,7 @@ import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.core.TranslationManager
 import me.xizzhu.android.joshua.ui.TranslationInfoComparator
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -48,7 +49,7 @@ class TranslationsViewModel @Inject constructor(
     private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
 ) : BaseViewModelV2<TranslationsViewModel.ViewAction, TranslationsViewModel.ViewState>(
     initialViewState = ViewState(
-        loading = false,
+        loading = true,
         items = emptyList(),
         translationDownloadingState = ViewState.TranslationDownloadingState.Idle,
         translationRemovalState = ViewState.TranslationRemovalState.Idle,
@@ -81,6 +82,7 @@ class TranslationsViewModel @Inject constructor(
 
         sealed class Error {
             object NoTranslationsError : Error()
+            object TranslationAlreadyInstalledError : Error()
             data class TranslationDownloadingError(val translationToDownload: TranslationInfo) : Error()
             object TranslationNotInstalledError : Error()
             data class TranslationRemovalError(val translationToRemove: TranslationInfo) : Error()
@@ -124,7 +126,7 @@ class TranslationsViewModel @Inject constructor(
     private fun List<TranslationInfo>.toItems(settings: Settings, currentTranslation: String): List<TranslationItem> {
         val items: ArrayList<TranslationItem> = ArrayList()
         var currentLanguage = ""
-        for (translationInfo in this@toItems) {
+        forEach { translationInfo ->
             val language = translationInfo.language.split("_")[0]
             if (currentLanguage != language) {
                 items.add(TranslationItem.Header(settings, Locale(language).displayLanguage, hideDivider = true))
@@ -158,7 +160,7 @@ class TranslationsViewModel @Inject constructor(
 
     fun downloadTranslation(translationToDownload: TranslationInfo) {
         if (translationToDownload.downloaded) {
-            updateViewState { it.copy(error = ViewState.Error.TranslationDownloadingError(translationToDownload)) }
+            updateViewState { it.copy(error = ViewState.Error.TranslationAlreadyInstalledError) }
             return
         }
 
@@ -167,13 +169,13 @@ class TranslationsViewModel @Inject constructor(
         downloadTranslationJob = translationManager.downloadTranslation(translationToDownload)
             .onEach { progress ->
                 when (progress) {
-                    -1 -> updateViewState { it.copy(translationDownloadingState = ViewState.TranslationDownloadingState.Completed(successful = false)) }
-                    in 0 until 99 -> updateViewState { it.copy(translationDownloadingState = ViewState.TranslationDownloadingState.Downloading(progress = progress)) }
+                    in 0..99 -> updateViewState { it.copy(translationDownloadingState = ViewState.TranslationDownloadingState.Downloading(progress = progress)) }
                     100 -> updateViewState { it.copy(translationDownloadingState = ViewState.TranslationDownloadingState.Installing) }
                     101 -> {
                         loadTranslations(forceRefresh = false)
                         updateViewState { it.copy(translationDownloadingState = ViewState.TranslationDownloadingState.Completed(successful = true)) }
                     }
+                    else -> throw IllegalArgumentException("Unsupported downloading progress: $progress")
                 }
             }
             .catch { e ->
@@ -185,7 +187,13 @@ class TranslationsViewModel @Inject constructor(
                     )
                 }
             }
-            .onCompletion { downloadTranslationJob = null }
+            .onCompletion { e ->
+                if (e is CancellationException) {
+                    Log.d(tag, "Translation downloading cancelled")
+                    updateViewState { it.copy(translationDownloadingState = ViewState.TranslationDownloadingState.Idle) }
+                }
+                downloadTranslationJob = null
+            }
             .launchIn(viewModelScope)
     }
 
@@ -196,7 +204,7 @@ class TranslationsViewModel @Inject constructor(
 
     fun removeTranslation(translationToRemove: TranslationInfo) {
         if (!translationToRemove.downloaded) {
-            updateViewState { it.copy(error = ViewState.Error.TranslationRemovalError(translationToRemove)) }
+            updateViewState { it.copy(error = ViewState.Error.TranslationNotInstalledError) }
             return
         }
 
