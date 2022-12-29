@@ -25,7 +25,6 @@ import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
@@ -37,7 +36,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
-class TranslationViewHolderTest : BaseUnitTest() {
+class TranslationsViewHolderTest : BaseUnitTest() {
     private lateinit var context: Context
 
     @BeforeTest
@@ -49,7 +48,7 @@ class TranslationViewHolderTest : BaseUnitTest() {
 
     @Test
     fun `test Header`() {
-        val viewHolder = TranslationViewHolder.Header(
+        val viewHolder = TranslationsViewHolder.Header(
             inflater = LayoutInflater.from(context),
             parent = FrameLayout(context)
         )
@@ -57,7 +56,7 @@ class TranslationViewHolderTest : BaseUnitTest() {
 
         // hide divider
         viewHolder.bindData(
-            item = TranslationItem.Header(
+            item = TranslationsItem.Header(
                 settings = Settings.DEFAULT,
                 title = "my title",
                 hideDivider = true,
@@ -68,7 +67,7 @@ class TranslationViewHolderTest : BaseUnitTest() {
 
         // show divider
         viewHolder.bindData(
-            item = TranslationItem.Header(
+            item = TranslationsItem.Header(
                 settings = Settings.DEFAULT,
                 title = "another title",
                 hideDivider = false,
@@ -83,20 +82,20 @@ class TranslationViewHolderTest : BaseUnitTest() {
         var downloadTranslationCalled = 0
         var removeTranslationCalled = 0
         var selectTranslationCalled = 0
-        val viewHolder = TranslationViewHolder.Translation(
+        val viewHolder = TranslationsViewHolder.Translation(
             inflater = LayoutInflater.from(context),
             parent = FrameLayout(context)
         ) { viewEvent ->
             when (viewEvent) {
-                is TranslationAdapter.ViewEvent.DownloadTranslation -> {
+                is TranslationsAdapter.ViewEvent.DownloadTranslation -> {
                     assertEquals(MockContents.kjvTranslationInfo, viewEvent.translationToDownload)
                     downloadTranslationCalled++
                 }
-                is TranslationAdapter.ViewEvent.RemoveTranslation -> {
+                is TranslationsAdapter.ViewEvent.RemoveTranslation -> {
                     assertEquals(MockContents.kjvDownloadedTranslationInfo, viewEvent.translationToRemove)
                     removeTranslationCalled++
                 }
-                is TranslationAdapter.ViewEvent.SelectTranslation -> {
+                is TranslationsAdapter.ViewEvent.SelectTranslation -> {
                     assertEquals(MockContents.kjvDownloadedTranslationInfo, viewEvent.translationToSelect)
                     selectTranslationCalled++
                 }
@@ -112,7 +111,7 @@ class TranslationViewHolderTest : BaseUnitTest() {
 
         // available translation
         viewHolder.bindData(
-            item = TranslationItem.Translation(
+            item = TranslationsItem.Translation(
                 settings = Settings.DEFAULT,
                 translationInfo = MockContents.kjvTranslationInfo,
                 isCurrentTranslation = false,
@@ -132,7 +131,7 @@ class TranslationViewHolderTest : BaseUnitTest() {
 
         // downloaded, but not current translation
         viewHolder.bindData(
-            item = TranslationItem.Translation(
+            item = TranslationsItem.Translation(
                 settings = Settings.DEFAULT,
                 translationInfo = MockContents.kjvDownloadedTranslationInfo,
                 isCurrentTranslation = false,
@@ -152,7 +151,7 @@ class TranslationViewHolderTest : BaseUnitTest() {
 
         // downloaded, and current translation
         viewHolder.bindData(
-            item = TranslationItem.Translation(
+            item = TranslationsItem.Translation(
                 settings = Settings.DEFAULT,
                 translationInfo = MockContents.kjvDownloadedTranslationInfo,
                 isCurrentTranslation = true,

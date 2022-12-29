@@ -33,11 +33,11 @@ import java.util.concurrent.Executor
 import me.xizzhu.android.joshua.core.TranslationInfo
 import me.xizzhu.android.joshua.databinding.ItemTranslationBinding
 
-class TranslationAdapter(
+class TranslationsAdapter(
     private val inflater: LayoutInflater,
     executor: Executor,
     private val onViewEvent: (ViewEvent) -> Unit,
-) : VerticalRecyclerViewAdapter<TranslationItem, TranslationViewHolder<TranslationItem, *>>(TranslationItem.DiffCallback(), executor) {
+) : VerticalRecyclerViewAdapter<TranslationsItem, TranslationsViewHolder<TranslationsItem, *>>(TranslationsItem.DiffCallback(), executor) {
     sealed class ViewEvent {
         data class DownloadTranslation(val translationToDownload: TranslationInfo) : ViewEvent()
         data class RemoveTranslation(val translationToRemove: TranslationInfo) : ViewEvent()
@@ -45,29 +45,29 @@ class TranslationAdapter(
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TranslationViewHolder<TranslationItem, *> = when (viewType) {
-        TranslationItem.Header.VIEW_TYPE -> TranslationViewHolder.Header(inflater, parent)
-        TranslationItem.Translation.VIEW_TYPE -> TranslationViewHolder.Translation(inflater, parent, onViewEvent)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TranslationsViewHolder<TranslationsItem, *> = when (viewType) {
+        TranslationsItem.Header.VIEW_TYPE -> TranslationsViewHolder.Header(inflater, parent)
+        TranslationsItem.Translation.VIEW_TYPE -> TranslationsViewHolder.Translation(inflater, parent, onViewEvent)
         else -> throw IllegalStateException("Unknown view type - $viewType")
-    } as TranslationViewHolder<TranslationItem, *>
+    } as TranslationsViewHolder<TranslationsItem, *>
 }
 
-sealed class TranslationItem(viewType: Int) : VerticalRecyclerViewItem(viewType) {
-    class DiffCallback : DiffUtil.ItemCallback<TranslationItem>() {
-        override fun areItemsTheSame(oldItem: TranslationItem, newItem: TranslationItem): Boolean = when {
+sealed class TranslationsItem(viewType: Int) : VerticalRecyclerViewItem(viewType) {
+    class DiffCallback : DiffUtil.ItemCallback<TranslationsItem>() {
+        override fun areItemsTheSame(oldItem: TranslationsItem, newItem: TranslationsItem): Boolean = when {
             oldItem is Header && newItem is Header -> true
             oldItem is Translation && newItem is Translation -> oldItem.translationInfo.shortName == newItem.translationInfo.shortName
             else -> false
         }
 
-        override fun areContentsTheSame(oldItem: TranslationItem, newItem: TranslationItem): Boolean = oldItem == newItem
+        override fun areContentsTheSame(oldItem: TranslationsItem, newItem: TranslationsItem): Boolean = oldItem == newItem
     }
 
     data class Header(
         val settings: Settings,
         val title: String,
         val hideDivider: Boolean,
-    ) : TranslationItem(VIEW_TYPE) {
+    ) : TranslationsItem(VIEW_TYPE) {
         companion object {
             const val VIEW_TYPE = R.layout.item_title
         }
@@ -77,38 +77,38 @@ sealed class TranslationItem(viewType: Int) : VerticalRecyclerViewItem(viewType)
         val settings: Settings,
         val translationInfo: TranslationInfo,
         val isCurrentTranslation: Boolean,
-    ) : TranslationItem(VIEW_TYPE) {
+    ) : TranslationsItem(VIEW_TYPE) {
         companion object {
             const val VIEW_TYPE = R.layout.item_translation
         }
     }
 }
 
-sealed class TranslationViewHolder<Item : TranslationItem, VB : ViewBinding>(viewBinding: VB) : VerticalRecyclerViewHolder<Item, VB>(viewBinding) {
-    class Header(inflater: LayoutInflater, parent: ViewGroup) : TranslationViewHolder<TranslationItem.Header, ItemTitleBinding>(
+sealed class TranslationsViewHolder<Item : TranslationsItem, VB : ViewBinding>(viewBinding: VB) : VerticalRecyclerViewHolder<Item, VB>(viewBinding) {
+    class Header(inflater: LayoutInflater, parent: ViewGroup) : TranslationsViewHolder<TranslationsItem.Header, ItemTitleBinding>(
         ItemTitleBinding.inflate(inflater, parent, false)
     ) {
         init {
             viewBinding.divider.isVisible = true
         }
 
-        override fun bind(item: TranslationItem.Header, payloads: List<Any>) = with(viewBinding) {
+        override fun bind(item: TranslationsItem.Header, payloads: List<Any>) = with(viewBinding) {
             title.setSecondaryTextSize(item.settings)
             title.text = item.title
             divider.isVisible = !item.hideDivider
         }
     }
 
-    class Translation(inflater: LayoutInflater, parent: ViewGroup, onViewEvent: (TranslationAdapter.ViewEvent) -> Unit)
-        : TranslationViewHolder<TranslationItem.Translation, ItemTranslationBinding>(ItemTranslationBinding.inflate(inflater, parent, false)
+    class Translation(inflater: LayoutInflater, parent: ViewGroup, onViewEvent: (TranslationsAdapter.ViewEvent) -> Unit)
+        : TranslationsViewHolder<TranslationsItem.Translation, ItemTranslationBinding>(ItemTranslationBinding.inflate(inflater, parent, false)
     ) {
         init {
             itemView.setOnClickListener {
                 item?.let { item ->
                     if (item.translationInfo.downloaded) {
-                        onViewEvent(TranslationAdapter.ViewEvent.SelectTranslation(item.translationInfo))
+                        onViewEvent(TranslationsAdapter.ViewEvent.SelectTranslation(item.translationInfo))
                     } else {
-                        onViewEvent(TranslationAdapter.ViewEvent.DownloadTranslation(item.translationInfo))
+                        onViewEvent(TranslationsAdapter.ViewEvent.DownloadTranslation(item.translationInfo))
                     }
                 }
             }
@@ -116,17 +116,17 @@ sealed class TranslationViewHolder<Item : TranslationItem, VB : ViewBinding>(vie
                 item?.let { item ->
                     if (item.translationInfo.downloaded) {
                         if (!item.isCurrentTranslation) {
-                            onViewEvent(TranslationAdapter.ViewEvent.RemoveTranslation(item.translationInfo))
+                            onViewEvent(TranslationsAdapter.ViewEvent.RemoveTranslation(item.translationInfo))
                         }
                     } else {
-                        onViewEvent(TranslationAdapter.ViewEvent.DownloadTranslation(item.translationInfo))
+                        onViewEvent(TranslationsAdapter.ViewEvent.DownloadTranslation(item.translationInfo))
                     }
                 }
                 true
             }
         }
 
-        override fun bind(item: TranslationItem.Translation, payloads: List<Any>) = with(viewBinding.root) {
+        override fun bind(item: TranslationsItem.Translation, payloads: List<Any>) = with(viewBinding.root) {
             setPrimaryTextSize(item.settings)
             text = item.translationInfo.name
             setCompoundDrawablesWithIntrinsicBounds(0, 0, if (item.isCurrentTranslation) R.drawable.ic_check else 0, 0)

@@ -72,9 +72,9 @@ class TranslationsActivityTest : BaseActivityTest() {
     @Test
     fun `test adapter viewEvent, SelectTranslation`() {
         withActivity(TranslationsActivity::class.java) { activity ->
-            val adapter: TranslationAdapter = activity.getProperty("adapter")
-            val onViewEvent: (TranslationAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
-            onViewEvent(TranslationAdapter.ViewEvent.SelectTranslation(MockContents.kjvDownloadedTranslationInfo))
+            val adapter: TranslationsAdapter = activity.getProperty("adapter")
+            val onViewEvent: (TranslationsAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
+            onViewEvent(TranslationsAdapter.ViewEvent.SelectTranslation(MockContents.kjvDownloadedTranslationInfo))
 
             verify(exactly = 1) { viewModel.selectTranslation(MockContents.kjvDownloadedTranslationInfo) }
         }
@@ -113,7 +113,7 @@ class TranslationsActivityTest : BaseActivityTest() {
         every { viewModel.viewState() } returns flowOf(TranslationsViewModel.ViewState(
             loading = false,
             items = listOf(
-                TranslationItem.Header(Settings.DEFAULT, "title", false)
+                TranslationsItem.Header(Settings.DEFAULT, "title", false)
             ),
             translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Completed(successful = false),
             translationRemovalState = TranslationsViewModel.ViewState.TranslationRemovalState.Idle,
@@ -137,7 +137,7 @@ class TranslationsActivityTest : BaseActivityTest() {
         every { viewModel.viewState() } returns flowOf(TranslationsViewModel.ViewState(
             loading = false,
             items = listOf(
-                TranslationItem.Header(Settings.DEFAULT, "title", false)
+                TranslationsItem.Header(Settings.DEFAULT, "title", false)
             ),
             translationDownloadingState = TranslationsViewModel.ViewState.TranslationDownloadingState.Idle,
             translationRemovalState = TranslationsViewModel.ViewState.TranslationRemovalState.Completed(successful = false),

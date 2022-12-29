@@ -32,16 +32,16 @@ import kotlin.test.assertEquals
 import me.xizzhu.android.joshua.tests.MockContents
 
 @RunWith(RobolectricTestRunner::class)
-class TranslationAdapterTest : BaseUnitTest() {
+class TranslationsAdapterTest : BaseUnitTest() {
     private lateinit var context: Context
-    private lateinit var adapter: TranslationAdapter
+    private lateinit var adapter: TranslationsAdapter
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
         context = ApplicationProvider.getApplicationContext<Context>().apply { setTheme(R.style.AppTheme) }
-        adapter = TranslationAdapter(
+        adapter = TranslationsAdapter(
             inflater = LayoutInflater.from(context),
             executor = TestExecutor()
         ) {}
@@ -51,8 +51,8 @@ class TranslationAdapterTest : BaseUnitTest() {
     fun `test getItemViewType()`() {
         adapter.submitList(
             listOf(
-                TranslationItem.Header(Settings.DEFAULT, "", false),
-                TranslationItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true),
+                TranslationsItem.Header(Settings.DEFAULT, "", false),
+                TranslationsItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true),
             )
         ) {
             assertEquals(R.layout.item_title, adapter.getItemViewType(0))
@@ -67,7 +67,7 @@ class TranslationAdapterTest : BaseUnitTest() {
 
     @Test
     fun `test onCreateViewHolder()`() {
-        adapter.onCreateViewHolder(FrameLayout(context), TranslationItem.Header.VIEW_TYPE) as TranslationViewHolder.Header
-        adapter.onCreateViewHolder(FrameLayout(context), TranslationItem.Translation.VIEW_TYPE) as TranslationViewHolder.Translation
+        adapter.onCreateViewHolder(FrameLayout(context), TranslationsItem.Header.VIEW_TYPE) as TranslationsViewHolder.Header
+        adapter.onCreateViewHolder(FrameLayout(context), TranslationsItem.Translation.VIEW_TYPE) as TranslationsViewHolder.Translation
     }
 }

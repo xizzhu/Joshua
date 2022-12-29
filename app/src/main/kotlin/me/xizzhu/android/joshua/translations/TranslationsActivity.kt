@@ -38,7 +38,7 @@ class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, Transla
     @Inject
     lateinit var coroutineDispatcherProvider: CoroutineDispatcherProvider
 
-    private lateinit var adapter: TranslationAdapter
+    private lateinit var adapter: TranslationsAdapter
 
     private var downloadTranslationDialog: ProgressDialog? = null
     private var removeTranslationDialog: AlertDialog? = null
@@ -48,12 +48,12 @@ class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, Transla
     override val viewBinding: ActivityTranslationsBinding by lazy(LazyThreadSafetyMode.NONE) { ActivityTranslationsBinding.inflate(layoutInflater) }
 
     override fun initializeView() {
-        adapter = TranslationAdapter(
+        adapter = TranslationsAdapter(
             inflater = layoutInflater,
             executor = coroutineDispatcherProvider.default.asExecutor()
         ) { viewEvent ->
             when (viewEvent) {
-                is TranslationAdapter.ViewEvent.DownloadTranslation -> {
+                is TranslationsAdapter.ViewEvent.DownloadTranslation -> {
                     dialog(
                         cancelable = true,
                         title = viewEvent.translationToDownload.name,
@@ -61,7 +61,7 @@ class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, Transla
                         onPositive = { _, _ -> viewModel.downloadTranslation(viewEvent.translationToDownload) },
                     )
                 }
-                is TranslationAdapter.ViewEvent.RemoveTranslation -> {
+                is TranslationsAdapter.ViewEvent.RemoveTranslation -> {
                     dialog(
                         cancelable = true,
                         title = viewEvent.translationToRemove.name,
@@ -69,7 +69,7 @@ class TranslationsActivity : BaseActivityV2<ActivityTranslationsBinding, Transla
                         onPositive = { _, _ -> viewModel.removeTranslation(viewEvent.translationToRemove) },
                     )
                 }
-                is TranslationAdapter.ViewEvent.SelectTranslation -> viewModel.selectTranslation(viewEvent.translationToSelect)
+                is TranslationsAdapter.ViewEvent.SelectTranslation -> viewModel.selectTranslation(viewEvent.translationToSelect)
             }
         }
         viewBinding.translationList.adapter = adapter

@@ -62,7 +62,7 @@ class TranslationsViewModel @Inject constructor(
 
     data class ViewState(
         val loading: Boolean,
-        val items: List<TranslationItem>,
+        val items: List<TranslationsItem>,
         val translationDownloadingState: TranslationDownloadingState,
         val translationRemovalState: TranslationRemovalState,
         val error: Error?,
@@ -111,28 +111,28 @@ class TranslationsViewModel @Inject constructor(
                 return@launch
             }
 
-            val items: ArrayList<TranslationItem> = ArrayList()
+            val items: ArrayList<TranslationsItem> = ArrayList()
             val settings = settingsManager.settings().first()
             val currentTranslation = bibleReadingManager.currentTranslation().first()
             items.addAll(downloadedTranslations.toItems(settings, currentTranslation))
             if (availableTranslations.isNotEmpty()) {
-                items.add(TranslationItem.Header(settings, application.getString(R.string.header_available_translations), hideDivider = false))
+                items.add(TranslationsItem.Header(settings, application.getString(R.string.header_available_translations), hideDivider = false))
                 items.addAll(availableTranslations.toItems(settings, currentTranslation))
             }
             updateViewState { it.copy(loading = false, items = items) }
         }
     }
 
-    private fun List<TranslationInfo>.toItems(settings: Settings, currentTranslation: String): List<TranslationItem> {
-        val items: ArrayList<TranslationItem> = ArrayList()
+    private fun List<TranslationInfo>.toItems(settings: Settings, currentTranslation: String): List<TranslationsItem> {
+        val items: ArrayList<TranslationsItem> = ArrayList()
         var currentLanguage = ""
         forEach { translationInfo ->
             val language = translationInfo.language.split("_")[0]
             if (currentLanguage != language) {
-                items.add(TranslationItem.Header(settings, Locale(language).displayLanguage, hideDivider = true))
+                items.add(TranslationsItem.Header(settings, Locale(language).displayLanguage, hideDivider = true))
                 currentLanguage = language
             }
-            items.add(TranslationItem.Translation(
+            items.add(TranslationsItem.Translation(
                 settings = settings,
                 translationInfo = translationInfo,
                 isCurrentTranslation = translationInfo.downloaded && translationInfo.shortName == currentTranslation
