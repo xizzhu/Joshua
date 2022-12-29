@@ -105,7 +105,7 @@ abstract class AnnotatedVerseActivity<V : VerseAnnotation, VM : AnnotatedVerseVi
                 title = R.string.dialog_title_error,
                 message = R.string.dialog_message_failed_to_load_annotated_verses,
                 onPositive = { _, _ -> viewModel.loadAnnotatedVerses() },
-                onNegative = { _, _ -> finish() },
+                onNegative = { _, _ -> navigator.goBack(this@AnnotatedVerseActivity) },
                 onDismiss = { viewModel.markErrorAsShown(this) }
             )
         }

@@ -176,7 +176,7 @@ class SearchActivity : BaseActivityV2<ActivitySearchBinding, SearchViewModel.Vie
                 title = R.string.dialog_title_error,
                 message = R.string.dialog_message_failed_to_search,
                 onPositive = { _, _ -> viewModel.retrySearch() },
-                onNegative = { _, _ -> finish() },
+                onNegative = { _, _ -> navigator.goBack(this@SearchActivity) },
                 onDismiss = { viewModel.markErrorAsShown(this) }
             )
         }

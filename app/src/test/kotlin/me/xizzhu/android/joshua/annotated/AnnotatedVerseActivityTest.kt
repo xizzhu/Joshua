@@ -130,7 +130,7 @@ class AnnotatedVerseActivityTest : BaseActivityTest() {
         every { viewModel.viewState() } returns flowOf(AnnotatedVerseViewModel.ViewState(
             loading = false,
             sortOrder = Constants.SORT_BY_DATE,
-            items = listOf(AnnotatedVerseItem.Header(Settings.DEFAULT, "text")),
+            items = listOf(AnnotatedVerseItem.Header(Settings.DEFAULT, "text", false)),
             preview = Preview(
                 title = "preview_title",
                 items = listOf(PreviewItem.Verse(

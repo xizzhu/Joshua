@@ -123,7 +123,7 @@ abstract class AnnotatedVerseViewModel<V : VerseAnnotation>(
         val verses = bibleReadingManager.readVerses(currentTranslation, annotations.map { it.verseIndex })
         val verseWithAnnotations = annotations.mapNotNull { annotation -> verses[annotation.verseIndex]?.let { Pair(annotation, it) } }
         if (verseWithAnnotations.isEmpty()) {
-            return listOf(AnnotatedVerseItem.Header(settings = settings, text = application.getString(noItemText)))
+            return listOf(AnnotatedVerseItem.Header(settings = settings, text = application.getString(noItemText), hideDivider = true))
         }
 
         val bookNames = bibleReadingManager.readBookNames(currentTranslation)
@@ -151,7 +151,7 @@ abstract class AnnotatedVerseViewModel<V : VerseAnnotation>(
             val currentYear = calendar.get(Calendar.YEAR)
             val currentDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
             if (currentYear != previousYear || currentDayOfYear != previousDayOfYear) {
-                items.add(AnnotatedVerseItem.Header(settings, formatDate(calendar, verseAnnotation.timestamp)))
+                items.add(AnnotatedVerseItem.Header(settings, formatDate(calendar, verseAnnotation.timestamp), hideDivider = false))
 
                 previousYear = currentYear
                 previousDayOfYear = currentDayOfYear
@@ -207,7 +207,7 @@ abstract class AnnotatedVerseViewModel<V : VerseAnnotation>(
         verses.forEach { (verseAnnotation, verse) ->
             val bookName = bookNames[verseAnnotation.verseIndex.bookIndex]
             if (verseAnnotation.verseIndex.bookIndex != currentBookIndex) {
-                items.add(AnnotatedVerseItem.Header(settings, bookName))
+                items.add(AnnotatedVerseItem.Header(settings, bookName, hideDivider = false))
                 currentBookIndex = verseAnnotation.verseIndex.bookIndex
             }
 

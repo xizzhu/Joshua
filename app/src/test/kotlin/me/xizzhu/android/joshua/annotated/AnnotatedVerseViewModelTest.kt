@@ -180,7 +180,7 @@ class AnnotatedVerseViewModelTest : BaseUnitTest() {
         assertFalse(actual.loading)
         assertEquals(Constants.SORT_BY_DATE, actual.sortOrder)
         assertEquals(1, actual.items.size)
-        assertEquals(AnnotatedVerseItem.Header(Settings.DEFAULT, "NO ANNOTATED VERSES"), actual.items[0])
+        assertEquals(AnnotatedVerseItem.Header(Settings.DEFAULT, "NO ANNOTATED VERSES", true), actual.items[0])
         assertNull(actual.preview)
         assertNull(actual.error)
     }
@@ -242,11 +242,11 @@ class AnnotatedVerseViewModelTest : BaseUnitTest() {
                 loading = false,
                 sortOrder = Constants.SORT_BY_BOOK,
                 items = listOf(
-                    AnnotatedVerseItem.Header(Settings.DEFAULT, "Genesis"),
+                    AnnotatedVerseItem.Header(Settings.DEFAULT, "Genesis", false),
                     AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex(0, 0, 0), "Genesis", "Gen.", "In the beginning God created the heaven and the earth.", Constants.SORT_BY_BOOK),
                     AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex(0, 0, 1), "Genesis", "Gen.", "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.", Constants.SORT_BY_BOOK),
                     AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex(0, 9, 9), "Genesis", "Gen.", "And the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar.", Constants.SORT_BY_BOOK),
-                    AnnotatedVerseItem.Header(Settings.DEFAULT, "Exodus"),
+                    AnnotatedVerseItem.Header(Settings.DEFAULT, "Exodus", false),
                     AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex(1, 22, 18), "Exodus", "Ex.", "The first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.", Constants.SORT_BY_BOOK),
                 ),
                 preview = null,
@@ -302,11 +302,11 @@ class AnnotatedVerseViewModelTest : BaseUnitTest() {
                 loading = false,
                 sortOrder = Constants.SORT_BY_DATE,
                 items = listOf(
-                    AnnotatedVerseItem.Header(Settings.DEFAULT, "1-3"),
+                    AnnotatedVerseItem.Header(Settings.DEFAULT, "1-3", false),
                     AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex(0, 0, 0), "Genesis", "Gen.", "In the beginning God created the heaven and the earth.", Constants.SORT_BY_DATE),
-                    AnnotatedVerseItem.Header(Settings.DEFAULT, "1970-1-3"),
+                    AnnotatedVerseItem.Header(Settings.DEFAULT, "1970-1-3", false),
                     AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex(0, 0, 1), "Genesis", "Gen.", "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.", Constants.SORT_BY_DATE),
-                    AnnotatedVerseItem.Header(Settings.DEFAULT, "1970-1-1"),
+                    AnnotatedVerseItem.Header(Settings.DEFAULT, "1970-1-1", false),
                     AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex(0, 9, 9), "Genesis", "Gen.", "And the beginning of his kingdom was Babel, and Erech, and Accad, and Calneh, in the land of Shinar.", Constants.SORT_BY_DATE),
                     AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex(1, 22, 18), "Exodus", "Ex.", "The first of the firstfruits of thy land thou shalt bring into the house of the LORD thy God. Thou shalt not seethe a kid in his mother’s milk.", Constants.SORT_BY_DATE),
                 ),

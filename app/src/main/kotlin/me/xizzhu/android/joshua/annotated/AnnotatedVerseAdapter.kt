@@ -86,7 +86,8 @@ sealed class AnnotatedVerseItem(viewType: Int) : VerticalRecyclerViewItem(viewTy
 
     data class Header(
         val settings: Settings,
-        val text: String
+        val text: String,
+        val hideDivider: Boolean,
     ) : AnnotatedVerseItem(VIEW_TYPE) {
         companion object {
             const val VIEW_TYPE = R.layout.item_title
@@ -199,13 +200,10 @@ sealed class AnnotatedVerseViewHolder<Item : AnnotatedVerseItem, VB : ViewBindin
     class Header(inflater: LayoutInflater, parent: ViewGroup) : AnnotatedVerseViewHolder<AnnotatedVerseItem.Header, ItemTitleBinding>(
         ItemTitleBinding.inflate(inflater, parent, false)
     ) {
-        init {
-            viewBinding.divider.isVisible = true
-        }
-
-        override fun bind(item: AnnotatedVerseItem.Header, payloads: List<Any>) = with(viewBinding.title) {
-            setSecondaryTextSize(item.settings)
-            text = item.text
+        override fun bind(item: AnnotatedVerseItem.Header, payloads: List<Any>) = with(viewBinding) {
+            title.setSecondaryTextSize(item.settings)
+            title.text = item.text
+            divider.isVisible = !item.hideDivider
         }
     }
 

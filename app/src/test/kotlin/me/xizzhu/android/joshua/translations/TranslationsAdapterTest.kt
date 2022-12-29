@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package me.xizzhu.android.joshua.annotated
+package me.xizzhu.android.joshua.translations
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.R
-import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.core.Settings
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.TestExecutor
 import org.junit.runner.RunWith
@@ -31,18 +29,19 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import me.xizzhu.android.joshua.tests.MockContents
 
 @RunWith(RobolectricTestRunner::class)
-class AnnotatedVerseAdapterTest : BaseUnitTest() {
+class TranslationsAdapterTest : BaseUnitTest() {
     private lateinit var context: Context
-    private lateinit var adapter: AnnotatedVerseAdapter
+    private lateinit var adapter: TranslationsAdapter
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
         context = ApplicationProvider.getApplicationContext<Context>().apply { setTheme(R.style.AppTheme) }
-        adapter = AnnotatedVerseAdapter(
+        adapter = TranslationsAdapter(
             inflater = LayoutInflater.from(context),
             executor = TestExecutor()
         ) {}
@@ -52,16 +51,12 @@ class AnnotatedVerseAdapterTest : BaseUnitTest() {
     fun `test getItemViewType()`() {
         adapter.submitList(
             listOf(
-                AnnotatedVerseItem.Header(Settings.DEFAULT, "", false),
-                AnnotatedVerseItem.Bookmark(Settings.DEFAULT, VerseIndex.INVALID, "", "", "", Constants.DEFAULT_SORT_ORDER),
-                AnnotatedVerseItem.Highlight(Settings.DEFAULT, VerseIndex.INVALID, "", "", "", 0, Constants.DEFAULT_SORT_ORDER),
-                AnnotatedVerseItem.Note(Settings.DEFAULT, VerseIndex.INVALID, "", "", "")
+                TranslationsItem.Header(Settings.DEFAULT, "", false),
+                TranslationsItem.Translation(Settings.DEFAULT, MockContents.kjvTranslationInfo, true),
             )
         ) {
             assertEquals(R.layout.item_title, adapter.getItemViewType(0))
-            assertEquals(R.layout.item_annotated_verse_bookmark, adapter.getItemViewType(1))
-            assertEquals(R.layout.item_annotated_verse_highlight, adapter.getItemViewType(2))
-            assertEquals(R.layout.item_annotated_verse_note, adapter.getItemViewType(3))
+            assertEquals(R.layout.item_translation, adapter.getItemViewType(1))
         }
     }
 
@@ -72,9 +67,7 @@ class AnnotatedVerseAdapterTest : BaseUnitTest() {
 
     @Test
     fun `test onCreateViewHolder()`() {
-        adapter.onCreateViewHolder(FrameLayout(context), AnnotatedVerseItem.Header.VIEW_TYPE) as AnnotatedVerseViewHolder.Header
-        adapter.onCreateViewHolder(FrameLayout(context), AnnotatedVerseItem.Bookmark.VIEW_TYPE) as AnnotatedVerseViewHolder.Bookmark
-        adapter.onCreateViewHolder(FrameLayout(context), AnnotatedVerseItem.Highlight.VIEW_TYPE) as AnnotatedVerseViewHolder.Highlight
-        adapter.onCreateViewHolder(FrameLayout(context), AnnotatedVerseItem.Note.VIEW_TYPE) as AnnotatedVerseViewHolder.Note
+        adapter.onCreateViewHolder(FrameLayout(context), TranslationsItem.Header.VIEW_TYPE) as TranslationsViewHolder.Header
+        adapter.onCreateViewHolder(FrameLayout(context), TranslationsItem.Translation.VIEW_TYPE) as TranslationsViewHolder.Translation
     }
 }

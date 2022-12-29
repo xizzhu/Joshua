@@ -116,7 +116,7 @@ class StrongNumberActivity : BaseActivityV2<ActivityStrongNumberBinding, StrongN
                 title = R.string.dialog_title_error,
                 message = R.string.dialog_message_failed_to_load_strong_numbers,
                 onPositive = { _, _ -> viewModel.loadStrongNumber() },
-                onNegative = { _, _ -> finish() },
+                onNegative = { _, _ -> navigator.goBack(this@StrongNumberActivity) },
                 onDismiss = { viewModel.markErrorAsShown(this) }
             )
         }

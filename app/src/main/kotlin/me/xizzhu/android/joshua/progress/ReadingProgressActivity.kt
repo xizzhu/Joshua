@@ -78,7 +78,7 @@ class ReadingProgressActivity : BaseActivityV2<ActivityReadingProgressBinding, R
                 title = R.string.dialog_title_error,
                 message = R.string.dialog_message_failed_to_load_reading_progress,
                 onPositive = { _, _ -> viewModel.loadReadingProgress() },
-                onNegative = { _, _ -> finish() },
+                onNegative = { _, _ -> navigator.goBack(this@ReadingProgressActivity) },
                 onDismiss = { viewModel.markErrorAsShown(this) }
             )
         }

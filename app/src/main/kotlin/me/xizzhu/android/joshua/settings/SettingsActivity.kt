@@ -129,17 +129,20 @@ class SettingsActivity : BaseActivityV2<ActivitySettingsBinding, SettingsViewMod
     }
 
     private fun SettingsViewModel.ViewState.BackupRestoreState.handle(isBackup: Boolean) {
-        indeterminateProgressDialog?.dismiss()
-        indeterminateProgressDialog = null
-
         when (this) {
             is SettingsViewModel.ViewState.BackupRestoreState.Idle -> {
-                // Do nothing
+                indeterminateProgressDialog?.dismiss()
+                indeterminateProgressDialog = null
             }
             is SettingsViewModel.ViewState.BackupRestoreState.Ongoing -> {
-                indeterminateProgressDialog = indeterminateProgressDialog(R.string.dialog_title_wait)
+                if (indeterminateProgressDialog == null) {
+                    indeterminateProgressDialog = indeterminateProgressDialog(R.string.dialog_title_wait)
+                }
             }
             is SettingsViewModel.ViewState.BackupRestoreState.Completed -> {
+                indeterminateProgressDialog?.dismiss()
+                indeterminateProgressDialog = null
+
                 if (successful) {
                     toast(R.string.toast_backup_restore_succeeded)
                 }
