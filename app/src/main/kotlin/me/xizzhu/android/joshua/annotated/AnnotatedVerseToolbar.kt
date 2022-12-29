@@ -21,29 +21,16 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.BaseAdapter
+import android.widget.Spinner
 import com.google.android.material.appbar.MaterialToolbar
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Constants
 import me.xizzhu.android.joshua.databinding.SpinnerDropDownBinding
+import me.xizzhu.android.joshua.databinding.SpinnerSelectedBinding
 
 class AnnotatedVerseToolbar : MaterialToolbar {
-    var sortOrderUpdated: ((Int) -> Unit)? = null
-    private val sortOrderSpinnerItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            if (sortOrderUpdated == null) throw IllegalStateException("Sort order update listener not set yet")
-            if (position >= Constants.SORT_ORDER_COUNT) throw IllegalArgumentException("Unsupported sort order, position = $position")
-
-            sortOrderSpinnerAdapter.sortOrder = position
-            sortOrderUpdated!!.invoke(position)
-        }
-
-        override fun onNothingSelected(parent: AdapterView<*>?) {
-            // do nothing
-        }
-    }
-    private val sortOrderSpinnerAdapter = SortOrderSpinnerAdapter(context)
-
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -52,9 +39,23 @@ class AnnotatedVerseToolbar : MaterialToolbar {
 
     init {
         inflateMenu(R.menu.menu_annotated)
+    }
+
+    fun initialize(sortOrderUpdated: (Int) -> Unit) {
         (menu.findItem(R.id.action_sort).actionView as Spinner).apply {
-            onItemSelectedListener = sortOrderSpinnerItemSelectedListener
+            val sortOrderSpinnerAdapter = SortOrderSpinnerAdapter(context)
             adapter = sortOrderSpinnerAdapter
+
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    sortOrderSpinnerAdapter.sortOrder = position
+                    sortOrderUpdated.invoke(position)
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    // do nothing
+                }
+            }
         }
     }
 
@@ -77,23 +78,19 @@ private class SortOrderSpinnerAdapter(context: Context) : BaseAdapter() {
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val textView = (convertView
-                ?: inflater.inflate(R.layout.spinner_selected, parent, false)) as TextView
-        textView.text = getItem(position)
-        return textView
+        val viewBinding = convertView?.let { SpinnerSelectedBinding.bind(it) }
+            ?: SpinnerSelectedBinding.inflate(inflater, parent, false)
+        viewBinding.root.text = getItem(position)
+        return viewBinding.root
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-        if (position >= Constants.SORT_ORDER_COUNT) {
-            throw IllegalArgumentException("Unsupported sort order, position = $position")
-        }
-
         val viewBinding = convertView?.let { it.tag as SpinnerDropDownBinding }
-                ?: SpinnerDropDownBinding.inflate(inflater, parent, false)
-                        .apply {
-                            root.tag = this
-                            checkbox.isEnabled = false
-                        }
+            ?: SpinnerDropDownBinding.inflate(inflater, parent, false)
+                .apply {
+                    root.tag = this
+                    checkbox.isEnabled = false
+                }
         viewBinding.title.text = getItem(position)
         viewBinding.checkbox.isChecked = position == sortOrder
         return viewBinding.root

@@ -64,8 +64,8 @@ class SearchViewModel @Inject constructor(
         instantSearch = false,
         items = emptyList(),
         scrollItemsToPosition = -1,
+        searchResultSummary = null,
         preview = null,
-        toast = null,
         error = null,
     )
 ) {
@@ -79,8 +79,8 @@ class SearchViewModel @Inject constructor(
         val instantSearch: Boolean,
         val items: List<SearchItem>,
         val scrollItemsToPosition: Int,
+        val searchResultSummary: String?,
         val preview: Preview?,
-        val toast: String?,
         val error: Error?,
     ) {
         sealed class Error {
@@ -94,6 +94,9 @@ class SearchViewModel @Inject constructor(
     private class SearchRequest(val query: String, val instantSearch: Boolean)
 
     private val searchRequest: MutableStateFlow<SearchRequest?> = MutableStateFlow(null)
+    private val searchSuggestions: RecentSearchProvider.SearchSuggestions by lazy(LazyThreadSafetyMode.NONE) {
+        RecentSearchProvider.SearchSuggestions(application, viewModelScope, coroutineDispatcherProvider)
+    }
 
     init {
         searchManager.configuration()
@@ -111,6 +114,10 @@ class SearchViewModel @Inject constructor(
                 .mapLatest { it }
         ) { settings, searchRequest ->
             doSearch(settings, searchRequest.query, searchRequest.instantSearch)
+
+            if (!searchRequest.instantSearch) {
+                searchSuggestions.saveRecentQuery(searchRequest.query)
+            }
         }.flowOn(coroutineDispatcherProvider.default).launchIn(viewModelScope)
     }
 
@@ -197,7 +204,7 @@ class SearchViewModel @Inject constructor(
                     instantSearch = instantSearch,
                     items = items,
                     scrollItemsToPosition = 0,
-                    toast = toast,
+                    searchResultSummary = toast,
                 )
             }
         }.onFailure { e ->
@@ -323,15 +330,19 @@ class SearchViewModel @Inject constructor(
         updateViewState { it.copy(scrollItemsToPosition = -1) }
     }
 
+    fun markSearchResultSummaryAsShown() {
+        updateViewState { it.copy(searchResultSummary = null) }
+    }
+
     fun markPreviewAsClosed() {
         updateViewState { it.copy(preview = null) }
     }
 
-    fun markToastAsShown() {
-        updateViewState { it.copy(toast = null) }
-    }
-
     fun markErrorAsShown(error: ViewState.Error) {
         updateViewState { current -> if (current.error == error) current.copy(error = null) else null }
+    }
+
+    fun clearSearchHistory() {
+        searchSuggestions.clearHistory()
     }
 }

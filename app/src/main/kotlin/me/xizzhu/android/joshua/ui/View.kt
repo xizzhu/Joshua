@@ -87,10 +87,10 @@ fun View.hideKeyboard() {
 
 fun View.setOnSingleClickListener(listener: () -> Unit) {
     setOnClickListener(object : View.OnClickListener {
-        private var lastClicked = 0L
+        private var lastClicked = Long.MIN_VALUE
         override fun onClick(v: View) {
             val now = SystemClock.elapsedRealtime()
-            if (now - lastClicked > 500L) {
+            if (lastClicked < 0L || now - lastClicked > 500L) {
                 lastClicked = now
                 listener()
             }

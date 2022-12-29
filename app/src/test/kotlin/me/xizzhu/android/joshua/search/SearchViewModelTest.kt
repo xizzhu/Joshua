@@ -88,7 +88,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = SearchViewModel.ViewState.Error.SearchConfigUpdatingError
             ),
             searchViewModel.viewState().first()
@@ -105,7 +105,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = SearchViewModel.ViewState.Error.SearchConfigUpdatingError
             ),
             searchViewModel.viewState().first()
@@ -122,7 +122,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -150,7 +150,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -179,7 +179,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -208,7 +208,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -237,7 +237,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -266,7 +266,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -289,7 +289,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -314,7 +314,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = SearchViewModel.ViewState.Error.VerseSearchingError
             ),
             searchViewModel.viewState().first()
@@ -340,13 +340,13 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = 0,
                 preview = null,
-                toast = "0 result(s) found.",
+                searchResultSummary = "0 result(s) found.",
                 error = null
             ),
             searchViewModel.viewState().first()
         )
 
-        searchViewModel.markToastAsShown()
+        searchViewModel.markSearchResultSummaryAsShown()
         assertEquals(
             SearchViewModel.ViewState(
                 loading = false,
@@ -357,7 +357,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = 0,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -381,7 +381,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = 0,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -399,7 +399,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = 0,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -426,7 +426,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 scrollItemsToPosition = 0,
                 preview = null,
-                toast = "1 result(s) found.",
+                searchResultSummary = "1 result(s) found.",
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -451,7 +451,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = "1 result(s) found.",
+                searchResultSummary = "1 result(s) found.",
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -513,7 +513,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 scrollItemsToPosition = 0,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -567,7 +567,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 scrollItemsToPosition = 0,
                 preview = null,
-                toast = "3 result(s) found.",
+                searchResultSummary = "3 result(s) found.",
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -621,7 +621,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 scrollItemsToPosition = 0,
                 preview = null,
-                toast = "3 result(s) found.",
+                searchResultSummary = "3 result(s) found.",
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -675,7 +675,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 scrollItemsToPosition = 0,
                 preview = null,
-                toast = "3 result(s) found.",
+                searchResultSummary = "3 result(s) found.",
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -747,7 +747,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 ),
                 scrollItemsToPosition = 0,
                 preview = null,
-                toast = "5 result(s) found.",
+                searchResultSummary = "5 result(s) found.",
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -770,7 +770,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = SearchViewModel.ViewState.Error.VerseOpeningError(VerseIndex(0, 0, 0))
             ),
             searchViewModel.viewState().first()
@@ -795,7 +795,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()
@@ -817,7 +817,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = SearchViewModel.ViewState.Error.PreviewLoadingError(VerseIndex.INVALID)
             ),
             searchViewModel.viewState().first()
@@ -855,7 +855,7 @@ class SearchViewModelTest : BaseUnitTest() {
         )
         assertEquals("1:3 And God said, Let there be light: and there was light.", (actual.preview?.items?.get(2) as PreviewItem.VerseWithQuery).textForDisplay.toString())
         assertEquals(1, actual.preview?.currentPosition)
-        assertNull(actual.toast)
+        assertNull(actual.searchResultSummary)
         assertNull(actual.error)
 
         searchViewModel.markPreviewAsClosed()
@@ -869,7 +869,7 @@ class SearchViewModelTest : BaseUnitTest() {
                 items = emptyList(),
                 scrollItemsToPosition = -1,
                 preview = null,
-                toast = null,
+                searchResultSummary = null,
                 error = null
             ),
             searchViewModel.viewState().first()

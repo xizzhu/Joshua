@@ -17,27 +17,19 @@
 package me.xizzhu.android.joshua.strongnumber
 
 import android.content.Context
-import android.graphics.Typeface
-import android.text.SpannableStringBuilder
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import androidx.core.text.getSpans
 import androidx.test.core.app.ApplicationProvider
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import me.xizzhu.android.joshua.tests.MockContents
 import me.xizzhu.android.joshua.tests.TestExecutor
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class StrongNumberAdapterTest : BaseUnitTest() {

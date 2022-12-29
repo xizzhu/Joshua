@@ -42,9 +42,13 @@ class SearchToolbar : MaterialToolbar {
     private fun searchView(): SearchView = menu.findItem(R.id.action_search).actionView as SearchView
 
     fun initialize(
-            onIncludeOldTestamentChanged: (Boolean) -> Unit, onIncludeNewTestamentChanged: (Boolean) -> Unit,
-            onIncludeBookmarksChanged: (Boolean) -> Unit, onIncludeHighlightsChanged: (Boolean) -> Unit, onIncludeNotesChanged: (Boolean) -> Unit,
-            onQueryTextListener: SearchView.OnQueryTextListener, clearHistory: () -> Unit
+        onIncludeOldTestamentChanged: (Boolean) -> Unit,
+        onIncludeNewTestamentChanged: (Boolean) -> Unit,
+        onIncludeBookmarksChanged: (Boolean) -> Unit,
+        onIncludeHighlightsChanged: (Boolean) -> Unit,
+        onIncludeNotesChanged: (Boolean) -> Unit,
+        onQueryTextListener: SearchView.OnQueryTextListener,
+        clearHistory: () -> Unit
     ) {
         searchView().setOnQueryTextListener(onQueryTextListener)
 
@@ -80,8 +84,11 @@ class SearchToolbar : MaterialToolbar {
     }
 
     fun setSearchConfiguration(
-            includeOldTestament: Boolean, includeNewTestament: Boolean,
-            includeBookmarks: Boolean, includeHighlights: Boolean, includeNotes: Boolean
+        includeOldTestament: Boolean,
+        includeNewTestament: Boolean,
+        includeBookmarks: Boolean,
+        includeHighlights: Boolean,
+        includeNotes: Boolean
     ) {
         menu.findItem(R.id.action_search_include_old_testament).isChecked = includeOldTestament
         menu.findItem(R.id.action_search_include_new_testament).isChecked = includeNewTestament
