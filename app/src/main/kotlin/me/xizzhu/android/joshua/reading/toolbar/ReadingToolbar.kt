@@ -21,7 +21,6 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Spinner
-import androidx.annotation.VisibleForTesting
 import com.google.android.material.appbar.MaterialToolbar
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
@@ -38,29 +37,33 @@ class ReadingToolbar : MaterialToolbar {
     }
 
     fun initialize(
-            requestParallelTranslation: (String) -> Unit,
-            removeParallelTranslation: (String) -> Unit,
-            selectCurrentTranslation: (String) -> Unit,
-            titleClicked: () -> Unit,
-            navigate: (Int) -> Unit
+        requestParallelTranslation: (translationShortName: String) -> Unit,
+        removeParallelTranslation: (translationShortName: String) -> Unit,
+        selectCurrentTranslation: (translationShortName: String) -> Unit,
+        titleClicked: () -> Unit,
+        navigate: (screen: Int) -> Unit
     ) {
         with(spinner()) {
             adapter = TranslationSpinnerAdapter(
-                    context = context,
-                    requestParallelTranslation = requestParallelTranslation,
-                    removeParallelTranslation = removeParallelTranslation
+                context = context,
+                requestParallelTranslation = requestParallelTranslation,
+                removeParallelTranslation = removeParallelTranslation
             )
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                    val spinnerAdapter = spinnerAdapter()
-                    if (position == spinnerAdapter.count - 1) {
-                        // selected "More", re-select the current translation,
-                        // and start translations management activity
-                        if (spinnerPosition >= 0) setSelection(spinnerPosition)
-                        navigate(Navigator.SCREEN_TRANSLATIONS)
-                    } else {
-                        spinnerPosition = position
-                        selectCurrentTranslation(spinnerAdapter.getItem(position))
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    if (spinnerPosition == position) return
+
+                    when (val item = spinnerAdapter().getItem(position)) {
+                        is TranslationItem.Translation -> {
+                            spinnerPosition = position
+                            selectCurrentTranslation(item.translationShortName)
+                        }
+                        is TranslationItem.More -> {
+                            // selected "More", re-select the current translation,
+                            // and start translations management activity
+                            if (spinnerPosition >= 0) setSelection(spinnerPosition)
+                            navigate(Navigator.SCREEN_TRANSLATIONS)
+                        }
                     }
                 }
 
@@ -101,29 +104,27 @@ class ReadingToolbar : MaterialToolbar {
         }
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal fun spinner(): Spinner = menu.findItem(R.id.action_translations).actionView as Spinner
+    private fun spinner(): Spinner = menu.findItem(R.id.action_translations).actionView as Spinner
+
+    private fun spinnerAdapter(): TranslationSpinnerAdapter = spinner().adapter as TranslationSpinnerAdapter
 
     fun setData(currentTranslation: String, parallelTranslations: List<String>, downloadedTranslations: List<String>) {
-        spinnerAdapter().setData(
-                currentTranslation = currentTranslation,
-                parallelTranslations = parallelTranslations,
-                downloadedTranslations = ArrayList<String>(downloadedTranslations.size + 1).apply {
-                    addAll(downloadedTranslations)
+        val items = ArrayList<TranslationItem>(downloadedTranslations.size + 1)
+        downloadedTranslations.forEach { downloaded ->
+            val isCurrentTranslation = currentTranslation == downloaded
+            items.add(TranslationItem.Translation(
+                translationShortName = downloaded,
+                isCurrentTranslation = isCurrentTranslation,
+                isParallelTranslation = parallelTranslations.contains(downloaded),
+            ))
+        }
+        items.add(TranslationItem.More)
+        spinnerAdapter().setItems(items)
 
-                    // amends "More" to the end of the list
-                    add(context.getString(R.string.action_more_translation))
-                }
-        )
-
-        downloadedTranslations.indexOfFirst { it == currentTranslation }
-                .takeIf { it >= 0 }
-                ?.let { position ->
-                    spinnerPosition = position
-                    spinner().setSelection(position)
-                }
+        val currentTranslationPosition = downloadedTranslations.indexOfFirst { it == currentTranslation }
+        if (currentTranslationPosition >= 0) {
+            spinnerPosition = currentTranslationPosition
+            spinner().setSelection(currentTranslationPosition)
+        }
     }
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal fun spinnerAdapter(): TranslationSpinnerAdapter = spinner().adapter as TranslationSpinnerAdapter
 }

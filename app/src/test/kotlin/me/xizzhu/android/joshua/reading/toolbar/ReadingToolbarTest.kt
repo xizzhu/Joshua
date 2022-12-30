@@ -19,101 +19,99 @@ package me.xizzhu.android.joshua.reading.toolbar
 import android.content.Context
 import android.widget.AdapterView
 import android.widget.Spinner
-import androidx.appcompat.app.AppCompatActivity
-import io.mockk.Ordering
+import androidx.appcompat.widget.Toolbar
+import androidx.test.core.app.ApplicationProvider
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verify
 import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.tests.BaseUnitTest
-import me.xizzhu.android.joshua.tests.MockContents
 import org.junit.runner.RunWith
-import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import me.xizzhu.android.joshua.R
+import me.xizzhu.android.joshua.tests.MockContents
+import me.xizzhu.android.joshua.tests.getProperty
 
 @RunWith(RobolectricTestRunner::class)
 class ReadingToolbarTest : BaseUnitTest() {
-    private lateinit var context: Context
-    private lateinit var spinner: Spinner
-    private lateinit var spinnerAdapter: TranslationSpinnerAdapter
     private lateinit var readingToolbar: ReadingToolbar
 
     @BeforeTest
     override fun setup() {
         super.setup()
 
-        context = Robolectric.buildActivity(AppCompatActivity::class.java).get()
-        spinner = mockk()
-        every { spinner.context } returns context
-        spinnerAdapter = mockk()
+        ApplicationProvider.getApplicationContext<Context>().setTheme(R.style.AppTheme)
 
-        readingToolbar = spyk(ReadingToolbar(context))
-        every { readingToolbar.context } returns context
-        every { readingToolbar.spinner() } returns spinner
-        every { readingToolbar.spinnerAdapter() } returns spinnerAdapter
+        readingToolbar = ReadingToolbar(ApplicationProvider.getApplicationContext())
     }
 
     @Test
-    fun `test initialize`() {
-        val requestParallelTranslation: (String) -> Unit = mockk()
-        val removeParallelTranslation: (String) -> Unit = mockk()
-        val selectCurrentTranslation: (String) -> Unit = mockk()
-        every { selectCurrentTranslation(any()) } returns Unit
+    fun `test initialize()`() {
         val titleClicked: () -> Unit = mockk()
         every { titleClicked() } returns Unit
         val navigate: (Int) -> Unit = mockk()
         every { navigate(any()) } returns Unit
 
-        every { spinner.adapter = any() } returns Unit
-
-        var onItemSelected: AdapterView.OnItemSelectedListener? = null
-        every { spinner.onItemSelectedListener = any() } answers {
-            onItemSelected = this.args[0] as AdapterView.OnItemSelectedListener
-        }
-
-        readingToolbar.initialize(requestParallelTranslation, removeParallelTranslation, selectCurrentTranslation, titleClicked, navigate)
+        readingToolbar.initialize(mockk(), mockk(), mockk(), titleClicked, navigate)
 
         readingToolbar.performClick()
         verify(exactly = 1) { titleClicked() }
 
-        every { spinnerAdapter.count } returns 3
-        onItemSelected!!.onItemSelected(spinner, spinner, 2, 0) // clicks on "More"
-        verify(exactly = 1) { navigate(Navigator.SCREEN_TRANSLATIONS) }
+        val onMenuItemClickListener: Toolbar.OnMenuItemClickListener = (readingToolbar as Toolbar).getProperty("mOnMenuItemClickListener")
+        assertFalse(onMenuItemClickListener.onMenuItemClick(readingToolbar.menu.findItem(R.id.action_translations)))
 
-        every { spinnerAdapter.getItem(1) } returns MockContents.kjvShortName
-        onItemSelected!!.onItemSelected(spinner, spinner, 1, 0)
-        verify(exactly = 1) { selectCurrentTranslation(MockContents.kjvShortName) }
+        assertTrue(onMenuItemClickListener.onMenuItemClick(readingToolbar.menu.findItem(R.id.action_reading_progress)))
+        verify(exactly = 1) { navigate(Navigator.SCREEN_READING_PROGRESS) }
 
-        // clicks on "More" again, should make sure it still selects the previously selected translation
-        every { spinner.setSelection(1) } returns Unit
-        onItemSelected!!.onItemSelected(spinner, spinner, 2, 0)
-        verify(ordering = Ordering.ORDERED) {
-            spinner.setSelection(1)
-            navigate(Navigator.SCREEN_TRANSLATIONS)
-        }
+        assertTrue(onMenuItemClickListener.onMenuItemClick(readingToolbar.menu.findItem(R.id.action_bookmarks)))
+        verify(exactly = 1) { navigate(Navigator.SCREEN_BOOKMARKS) }
+
+        assertTrue(onMenuItemClickListener.onMenuItemClick(readingToolbar.menu.findItem(R.id.action_highlights)))
+        verify(exactly = 1) { navigate(Navigator.SCREEN_HIGHLIGHTS) }
+
+        assertTrue(onMenuItemClickListener.onMenuItemClick(readingToolbar.menu.findItem(R.id.action_notes)))
+        verify(exactly = 1) { navigate(Navigator.SCREEN_NOTES) }
+
+        assertTrue(onMenuItemClickListener.onMenuItemClick(readingToolbar.menu.findItem(R.id.action_search)))
+        verify(exactly = 1) { navigate(Navigator.SCREEN_SEARCH) }
+
+        assertTrue(onMenuItemClickListener.onMenuItemClick(readingToolbar.menu.findItem(R.id.action_settings)))
+        verify(exactly = 1) { navigate(Navigator.SCREEN_SETTINGS) }
     }
 
     @Test
-    fun `test setData`() {
-        every { spinner.setSelection(2) } returns Unit
-        every {
-            spinnerAdapter.setData(
-                    currentTranslation = MockContents.cuvShortName,
-                    parallelTranslations = listOf(MockContents.bbeShortName),
-                    downloadedTranslations = listOf(MockContents.bbeShortName, MockContents.kjvShortName, MockContents.cuvShortName, "More")
-            )
-        } returns Unit
+    fun `test setData()`() {
+        val requestParallelTranslation: (String) -> Unit = mockk()
+        val removeParallelTranslation: (String) -> Unit = mockk()
+        val selectCurrentTranslation: (String) -> Unit = mockk()
+        every { selectCurrentTranslation(any()) } returns Unit
+        val navigate: (Int) -> Unit = mockk()
+        every { navigate(any()) } returns Unit
+
+        readingToolbar.initialize(requestParallelTranslation, removeParallelTranslation, selectCurrentTranslation, mockk(), navigate)
 
         readingToolbar.setData(
-                currentTranslation = MockContents.cuvShortName,
-                parallelTranslations = listOf(MockContents.bbeShortName),
-                downloadedTranslations = listOf(MockContents.bbeShortName, MockContents.kjvShortName, MockContents.cuvShortName)
+            currentTranslation = MockContents.kjvShortName,
+            parallelTranslations = listOf(MockContents.bbeShortName),
+            downloadedTranslations = listOf(MockContents.bbeShortName, MockContents.kjvShortName, MockContents.cuvShortName),
         )
+        verify(exactly = 0) { selectCurrentTranslation(any()) }
 
-        verify(exactly = 1) { spinnerAdapter.setData(any(), any(), any()) }
-        verify(exactly = 1) { spinner.setSelection(any()) }
+        val spinner = readingToolbar.menu.findItem(R.id.action_translations).actionView as Spinner
+        val onItemSelectedListener: AdapterView.OnItemSelectedListener = (spinner as AdapterView<*>).getProperty("mOnItemSelectedListener")
+        onItemSelectedListener.onItemSelected(mockk(), null, 2, 0L)
+        verify(exactly = 1) { selectCurrentTranslation(MockContents.cuvShortName) }
+
+        onItemSelectedListener.onItemSelected(mockk(), null, 3, 0L)
+        verify(exactly = 1) { navigate(Navigator.SCREEN_TRANSLATIONS) }
+        assertEquals(
+            TranslationItem.Translation(MockContents.cuvShortName, false, false),
+            spinner.selectedItem
+        )
     }
 }
