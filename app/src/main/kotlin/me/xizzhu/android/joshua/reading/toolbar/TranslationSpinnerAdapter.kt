@@ -30,8 +30,7 @@ import me.xizzhu.android.joshua.ui.setOnCheckedChangeByUserListener
 
 class TranslationSpinnerAdapter(
     context: Context,
-    private val requestParallelTranslation: (translationShortName: String) -> Unit,
-    private val removeParallelTranslation: (translationShortName: String) -> Unit,
+    private val onViewEvent: (ReadingToolbar.ViewEvent) -> Unit,
 ) : BaseAdapter() {
     private val inflater = LayoutInflater.from(context)
     private val items: ArrayList<TranslationItem> = arrayListOf()
@@ -74,9 +73,9 @@ class TranslationSpinnerAdapter(
             when (val item = binding.root.tag as TranslationItem) {
                 is TranslationItem.Translation -> {
                     if (isChecked) {
-                        requestParallelTranslation(item.translationShortName)
+                        onViewEvent(ReadingToolbar.ViewEvent.RequestParallelTranslation(item.translationShortName))
                     } else {
-                        removeParallelTranslation(item.translationShortName)
+                        onViewEvent(ReadingToolbar.ViewEvent.RemoveParallelTranslation(item.translationShortName))
                     }
                 }
                 is TranslationItem.More -> {

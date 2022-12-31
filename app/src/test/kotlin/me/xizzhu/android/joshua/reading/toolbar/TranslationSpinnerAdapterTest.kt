@@ -47,8 +47,7 @@ class TranslationSpinnerAdapterTest : BaseUnitTest() {
     fun `test without data`() {
         val adapter = TranslationSpinnerAdapter(
             context = ApplicationProvider.getApplicationContext(),
-            requestParallelTranslation = { fail() },
-            removeParallelTranslation = { fail() },
+            onViewEvent = { fail() },
         )
         assertEquals(0, adapter.count)
     }
@@ -58,12 +57,24 @@ class TranslationSpinnerAdapterTest : BaseUnitTest() {
         var requestParallelTranslationCalled = 0
         val adapter = TranslationSpinnerAdapter(
             context = ApplicationProvider.getApplicationContext(),
-            requestParallelTranslation = {
-                assertEquals("MSG", it)
-                requestParallelTranslationCalled++
-            },
-            removeParallelTranslation = { fail() },
-        )
+        ) { viewEvent ->
+            when (viewEvent) {
+                is ReadingToolbar.ViewEvent.OpenBookmarks -> fail()
+                is ReadingToolbar.ViewEvent.OpenHighlights -> fail()
+                is ReadingToolbar.ViewEvent.OpenNotes -> fail()
+                is ReadingToolbar.ViewEvent.OpenReadingProgress -> fail()
+                is ReadingToolbar.ViewEvent.OpenSearch -> fail()
+                is ReadingToolbar.ViewEvent.OpenSettings -> fail()
+                is ReadingToolbar.ViewEvent.OpenTranslations -> fail()
+                is ReadingToolbar.ViewEvent.RemoveParallelTranslation -> fail()
+                is ReadingToolbar.ViewEvent.RequestParallelTranslation -> {
+                    assertEquals("MSG", viewEvent.translationToRequest)
+                    requestParallelTranslationCalled++
+                }
+                is ReadingToolbar.ViewEvent.SelectCurrentTranslation -> fail()
+                is ReadingToolbar.ViewEvent.TitleClicked -> fail()
+            }
+        }
         adapter.setItems(listOf(
             TranslationItem.Translation(
                 translationShortName = MockContents.kjvDownloadedTranslationInfo.shortName,
@@ -116,12 +127,24 @@ class TranslationSpinnerAdapterTest : BaseUnitTest() {
         var removeParallelTranslationCalled = 0
         val adapter = TranslationSpinnerAdapter(
             context = ApplicationProvider.getApplicationContext(),
-            requestParallelTranslation = { fail() },
-            removeParallelTranslation = {
-                assertEquals("MSG", it)
-                removeParallelTranslationCalled++
-            },
-        )
+        ) { viewEvent ->
+            when (viewEvent) {
+                is ReadingToolbar.ViewEvent.OpenBookmarks -> fail()
+                is ReadingToolbar.ViewEvent.OpenHighlights -> fail()
+                is ReadingToolbar.ViewEvent.OpenNotes -> fail()
+                is ReadingToolbar.ViewEvent.OpenReadingProgress -> fail()
+                is ReadingToolbar.ViewEvent.OpenSearch -> fail()
+                is ReadingToolbar.ViewEvent.OpenSettings -> fail()
+                is ReadingToolbar.ViewEvent.OpenTranslations -> fail()
+                is ReadingToolbar.ViewEvent.RemoveParallelTranslation -> {
+                    assertEquals("MSG", viewEvent.translationToRemove)
+                    removeParallelTranslationCalled++
+                }
+                is ReadingToolbar.ViewEvent.RequestParallelTranslation -> fail()
+                is ReadingToolbar.ViewEvent.SelectCurrentTranslation -> fail()
+                is ReadingToolbar.ViewEvent.TitleClicked -> fail()
+            }
+        }
         adapter.setItems(listOf(
             TranslationItem.Translation(
                 translationShortName = MockContents.kjvDownloadedTranslationInfo.shortName,

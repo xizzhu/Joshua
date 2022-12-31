@@ -22,10 +22,23 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.Spinner
 import com.google.android.material.appbar.MaterialToolbar
-import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 
 class ReadingToolbar : MaterialToolbar {
+    sealed class ViewEvent {
+        object OpenBookmarks : ViewEvent()
+        object OpenHighlights : ViewEvent()
+        object OpenNotes : ViewEvent()
+        object OpenReadingProgress : ViewEvent()
+        object OpenSearch : ViewEvent()
+        object OpenSettings : ViewEvent()
+        object OpenTranslations : ViewEvent()
+        data class RemoveParallelTranslation(val translationToRemove: String) : ViewEvent()
+        data class RequestParallelTranslation(val translationToRequest: String) : ViewEvent()
+        data class SelectCurrentTranslation(val translationToSelect: String) : ViewEvent()
+        object TitleClicked : ViewEvent()
+    }
+
     private var spinnerPosition = -1
 
     constructor(context: Context) : super(context)
@@ -36,19 +49,9 @@ class ReadingToolbar : MaterialToolbar {
         inflateMenu(R.menu.menu_reading)
     }
 
-    fun initialize(
-        requestParallelTranslation: (translationShortName: String) -> Unit,
-        removeParallelTranslation: (translationShortName: String) -> Unit,
-        selectCurrentTranslation: (translationShortName: String) -> Unit,
-        titleClicked: () -> Unit,
-        navigate: (screen: Int) -> Unit
-    ) {
+    fun initialize(onViewEvent: (ViewEvent) -> Unit) {
         with(spinner()) {
-            adapter = TranslationSpinnerAdapter(
-                context = context,
-                requestParallelTranslation = requestParallelTranslation,
-                removeParallelTranslation = removeParallelTranslation
-            )
+            adapter = TranslationSpinnerAdapter(context = context, onViewEvent = onViewEvent)
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                     if (spinnerPosition == position) return
@@ -56,13 +59,13 @@ class ReadingToolbar : MaterialToolbar {
                     when (val item = spinnerAdapter().getItem(position)) {
                         is TranslationItem.Translation -> {
                             spinnerPosition = position
-                            selectCurrentTranslation(item.translationShortName)
+                            onViewEvent(ViewEvent.SelectCurrentTranslation(item.translationShortName))
                         }
                         is TranslationItem.More -> {
                             // selected "More", re-select the current translation,
                             // and start translations management activity
                             if (spinnerPosition >= 0) setSelection(spinnerPosition)
-                            navigate(Navigator.SCREEN_TRANSLATIONS)
+                            onViewEvent(ViewEvent.OpenTranslations)
                         }
                     }
                 }
@@ -72,31 +75,31 @@ class ReadingToolbar : MaterialToolbar {
                 }
             }
         }
-        setOnClickListener { titleClicked() }
+        setOnClickListener { onViewEvent(ViewEvent.TitleClicked) }
         setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_reading_progress -> {
-                    navigate(Navigator.SCREEN_READING_PROGRESS)
+                    onViewEvent(ViewEvent.OpenReadingProgress)
                     true
                 }
                 R.id.action_bookmarks -> {
-                    navigate(Navigator.SCREEN_BOOKMARKS)
+                    onViewEvent(ViewEvent.OpenBookmarks)
                     true
                 }
                 R.id.action_highlights -> {
-                    navigate(Navigator.SCREEN_HIGHLIGHTS)
+                    onViewEvent(ViewEvent.OpenHighlights)
                     true
                 }
                 R.id.action_notes -> {
-                    navigate(Navigator.SCREEN_NOTES)
+                    onViewEvent(ViewEvent.OpenNotes)
                     true
                 }
                 R.id.action_search -> {
-                    navigate(Navigator.SCREEN_SEARCH)
+                    onViewEvent(ViewEvent.OpenSearch)
                     true
                 }
                 R.id.action_settings -> {
-                    navigate(Navigator.SCREEN_SETTINGS)
+                    onViewEvent(ViewEvent.OpenSettings)
                     true
                 }
                 else -> false
