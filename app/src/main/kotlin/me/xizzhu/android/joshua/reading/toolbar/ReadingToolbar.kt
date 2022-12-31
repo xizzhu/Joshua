@@ -108,20 +108,10 @@ class ReadingToolbar : MaterialToolbar {
 
     private fun spinnerAdapter(): TranslationSpinnerAdapter = spinner().adapter as TranslationSpinnerAdapter
 
-    fun setData(currentTranslation: String, parallelTranslations: List<String>, downloadedTranslations: List<String>) {
-        val items = ArrayList<TranslationItem>(downloadedTranslations.size + 1)
-        downloadedTranslations.forEach { downloaded ->
-            val isCurrentTranslation = currentTranslation == downloaded
-            items.add(TranslationItem.Translation(
-                translationShortName = downloaded,
-                isCurrentTranslation = isCurrentTranslation,
-                isParallelTranslation = parallelTranslations.contains(downloaded),
-            ))
-        }
-        items.add(TranslationItem.More)
+    fun setTranslationItems(items: List<TranslationItem>) {
         spinnerAdapter().setItems(items)
 
-        val currentTranslationPosition = downloadedTranslations.indexOfFirst { it == currentTranslation }
+        val currentTranslationPosition = items.indexOfFirst { (it as? TranslationItem.Translation)?.isCurrentTranslation == true }
         if (currentTranslationPosition >= 0) {
             spinnerPosition = currentTranslationPosition
             spinner().setSelection(currentTranslationPosition)

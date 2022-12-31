@@ -85,7 +85,7 @@ class ReadingToolbarTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test setData()`() {
+    fun `test setTranslationItems()`() {
         val requestParallelTranslation: (String) -> Unit = mockk()
         val removeParallelTranslation: (String) -> Unit = mockk()
         val selectCurrentTranslation: (String) -> Unit = mockk()
@@ -95,11 +95,12 @@ class ReadingToolbarTest : BaseUnitTest() {
 
         readingToolbar.initialize(requestParallelTranslation, removeParallelTranslation, selectCurrentTranslation, mockk(), navigate)
 
-        readingToolbar.setData(
-            currentTranslation = MockContents.kjvShortName,
-            parallelTranslations = listOf(MockContents.bbeShortName),
-            downloadedTranslations = listOf(MockContents.bbeShortName, MockContents.kjvShortName, MockContents.cuvShortName),
-        )
+        readingToolbar.setTranslationItems(listOf(
+            TranslationItem.Translation(MockContents.bbeShortName, isCurrentTranslation = false, isParallelTranslation = true),
+            TranslationItem.Translation(MockContents.kjvShortName, isCurrentTranslation = true, isParallelTranslation = false),
+            TranslationItem.Translation(MockContents.cuvShortName, isCurrentTranslation = false, isParallelTranslation = false),
+            TranslationItem.More,
+        ))
         verify(exactly = 0) { selectCurrentTranslation(any()) }
 
         val spinner = readingToolbar.menu.findItem(R.id.action_translations).actionView as Spinner

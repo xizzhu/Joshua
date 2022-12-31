@@ -69,6 +69,7 @@ import me.xizzhu.android.joshua.utils.copyToClipBoard
 import me.xizzhu.android.joshua.utils.shareToSystem
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
+import me.xizzhu.android.joshua.reading.toolbar.TranslationItem
 
 @AndroidEntryPoint
 class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>(), SimpleVerseItem.Callback, VerseItem.Callback,
@@ -379,11 +380,18 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                 .onSuccess { currentReadingStatus ->
                     with(viewBinding) {
                         toolbar.title = "${currentReadingStatus.bookShortNames[currentReadingStatus.currentVerseIndex.bookIndex]}, ${currentReadingStatus.currentVerseIndex.chapterIndex + 1}"
-                        toolbar.setData(
-                                currentTranslation = currentReadingStatus.currentTranslation,
-                                parallelTranslations = currentReadingStatus.parallelTranslations,
-                                downloadedTranslations = currentReadingStatus.downloadedTranslations
-                        )
+
+                        val items = ArrayList<TranslationItem>(currentReadingStatus.downloadedTranslations.size + 1)
+                        currentReadingStatus.downloadedTranslations.forEach { downloaded ->
+                            val isCurrentTranslation = currentReadingStatus.currentTranslation == downloaded
+                            items.add(TranslationItem.Translation(
+                                translationShortName = downloaded,
+                                isCurrentTranslation = isCurrentTranslation,
+                                isParallelTranslation = currentReadingStatus.parallelTranslations.contains(downloaded),
+                            ))
+                        }
+                        items.add(TranslationItem.More)
+                        toolbar.setTranslationItems(items)
 
                         chapterSelectionView.setData(currentReadingStatus.currentVerseIndex, currentReadingStatus.bookNames)
                         drawerLayout.hide()
