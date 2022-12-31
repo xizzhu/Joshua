@@ -66,8 +66,8 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
         return true
     }
 
-    fun initialize(selectChapter: (Int, Int) -> Unit) {
-        adapter = ChapterListAdapter(context, selectChapter)
+    fun initialize(onViewEvent: (ChapterSelectionView.ViewEvent) -> Unit) {
+        adapter = ChapterListAdapter(context, onViewEvent)
         setAdapter(adapter)
     }
 
@@ -87,7 +87,7 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
 
 private class ChapterTag(var bookIndex: Int, var chapterIndex: Int)
 
-private class ChapterListAdapter(context: Context, selectChapter: (Int, Int) -> Unit) : BaseExpandableListAdapter() {
+private class ChapterListAdapter(context: Context, onViewEvent: (ChapterSelectionView.ViewEvent) -> Unit) : BaseExpandableListAdapter() {
     companion object {
         private const val ROW_CHILD_COUNT = 5
     }
@@ -98,7 +98,7 @@ private class ChapterListAdapter(context: Context, selectChapter: (Int, Int) -> 
         val chapterTag = view.tag as ChapterTag
         if (chapterTag.bookIndex != currentVerseIndex.bookIndex
                 || chapterTag.chapterIndex != currentVerseIndex.chapterIndex) {
-            selectChapter(chapterTag.bookIndex, chapterTag.chapterIndex)
+            onViewEvent(ChapterSelectionView.ViewEvent.SelectChapter(chapterTag.bookIndex, chapterTag.chapterIndex))
         }
     }
 

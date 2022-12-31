@@ -69,6 +69,7 @@ import me.xizzhu.android.joshua.utils.copyToClipBoard
 import me.xizzhu.android.joshua.utils.shareToSystem
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
+import me.xizzhu.android.joshua.reading.chapter.ChapterSelectionView
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 import me.xizzhu.android.joshua.reading.toolbar.TranslationItem
 
@@ -202,7 +203,11 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
             }
         }
 
-        chapterSelectionView.initialize(::selectChapter)
+        chapterSelectionView.initialize { viewEvent ->
+            when (viewEvent) {
+                is ChapterSelectionView.ViewEvent.SelectChapter -> selectChapter(bookIndex = viewEvent.bookIndex, chapterIndex = viewEvent.chapterIndex)
+            }
+        }
 
         versePagerAdapter = VersePagerAdapter(this@ReadingActivity, ::loadVerses, ::updateCurrentVerse)
         verseViewPager.offscreenPageLimit = 1
