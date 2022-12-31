@@ -21,10 +21,7 @@ import android.widget.AdapterView
 import android.widget.Spinner
 import androidx.appcompat.widget.Toolbar
 import androidx.test.core.app.ApplicationProvider
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -183,11 +180,13 @@ class ReadingToolbarTest : BaseUnitTest() {
         assertEquals(0, requestParallelTranslationCalled)
         assertEquals(0, selectCurrentTranslationCalled)
 
-        readingToolbar.setTranslationItems(listOf(
-            TranslationItem.Translation(MockContents.bbeShortName, isCurrentTranslation = false, isParallelTranslation = true),
-            TranslationItem.Translation(MockContents.kjvShortName, isCurrentTranslation = true, isParallelTranslation = false),
-            TranslationItem.Translation(MockContents.cuvShortName, isCurrentTranslation = false, isParallelTranslation = false),
-            TranslationItem.More,
+        readingToolbar.setViewState(ReadingToolbar.ViewState(
+            translationItems = listOf(
+                ReadingToolbar.ViewState.TranslationItem.Translation(MockContents.bbeShortName, isCurrentTranslation = false, isParallelTranslation = true),
+                ReadingToolbar.ViewState.TranslationItem.Translation(MockContents.kjvShortName, isCurrentTranslation = true, isParallelTranslation = false),
+                ReadingToolbar.ViewState.TranslationItem.Translation(MockContents.cuvShortName, isCurrentTranslation = false, isParallelTranslation = false),
+                ReadingToolbar.ViewState.TranslationItem.More,
+            )
         ))
         assertEquals(0, openTranslationsCalled)
         assertEquals(0, removeParallelTranslationCalled)
@@ -208,7 +207,7 @@ class ReadingToolbarTest : BaseUnitTest() {
         assertEquals(0, requestParallelTranslationCalled)
         assertEquals(1, selectCurrentTranslationCalled)
         assertEquals(
-            TranslationItem.Translation(MockContents.cuvShortName, false, false),
+            ReadingToolbar.ViewState.TranslationItem.Translation(MockContents.cuvShortName, false, false),
             spinner.selectedItem
         )
     }

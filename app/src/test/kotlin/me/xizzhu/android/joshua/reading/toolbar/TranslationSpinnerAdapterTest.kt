@@ -76,17 +76,17 @@ class TranslationSpinnerAdapterTest : BaseUnitTest() {
             }
         }
         adapter.setItems(listOf(
-            TranslationItem.Translation(
+            ReadingToolbar.ViewState.TranslationItem.Translation(
                 translationShortName = MockContents.kjvDownloadedTranslationInfo.shortName,
                 isCurrentTranslation = true,
                 isParallelTranslation = false,
             ),
-            TranslationItem.Translation(
+            ReadingToolbar.ViewState.TranslationItem.Translation(
                 translationShortName = MockContents.msgDownloadedTranslationInfo.shortName,
                 isCurrentTranslation = false,
                 isParallelTranslation = false,
             ),
-            TranslationItem.More,
+            ReadingToolbar.ViewState.TranslationItem.More,
         ))
 
         assertEquals(0, requestParallelTranslationCalled)
@@ -146,17 +146,17 @@ class TranslationSpinnerAdapterTest : BaseUnitTest() {
             }
         }
         adapter.setItems(listOf(
-            TranslationItem.Translation(
+            ReadingToolbar.ViewState.TranslationItem.Translation(
                 translationShortName = MockContents.kjvDownloadedTranslationInfo.shortName,
                 isCurrentTranslation = true,
                 isParallelTranslation = false,
             ),
-            TranslationItem.Translation(
+            ReadingToolbar.ViewState.TranslationItem.Translation(
                 translationShortName = MockContents.msgDownloadedTranslationInfo.shortName,
                 isCurrentTranslation = false,
                 isParallelTranslation = true,
             ),
-            TranslationItem.More,
+            ReadingToolbar.ViewState.TranslationItem.More,
         ))
 
         assertEquals(0, removeParallelTranslationCalled)

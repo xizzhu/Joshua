@@ -39,6 +39,15 @@ class ReadingToolbar : MaterialToolbar {
         object TitleClicked : ViewEvent()
     }
 
+    data class ViewState(
+        val translationItems: List<TranslationItem>,
+    ) {
+        sealed class TranslationItem {
+            data class Translation(val translationShortName: String, val isCurrentTranslation: Boolean, val isParallelTranslation: Boolean) : TranslationItem()
+            object More : TranslationItem()
+        }
+    }
+
     private var spinnerPosition = -1
 
     constructor(context: Context) : super(context)
@@ -57,11 +66,11 @@ class ReadingToolbar : MaterialToolbar {
                     if (spinnerPosition == position) return
 
                     when (val item = spinnerAdapter().getItem(position)) {
-                        is TranslationItem.Translation -> {
+                        is ViewState.TranslationItem.Translation -> {
                             spinnerPosition = position
                             onViewEvent(ViewEvent.SelectCurrentTranslation(item.translationShortName))
                         }
-                        is TranslationItem.More -> {
+                        is ViewState.TranslationItem.More -> {
                             // selected "More", re-select the current translation,
                             // and start translations management activity
                             if (spinnerPosition >= 0) setSelection(spinnerPosition)
@@ -111,10 +120,10 @@ class ReadingToolbar : MaterialToolbar {
 
     private fun spinnerAdapter(): TranslationSpinnerAdapter = spinner().adapter as TranslationSpinnerAdapter
 
-    fun setTranslationItems(items: List<TranslationItem>) {
-        spinnerAdapter().setItems(items)
+    fun setViewState(viewState: ViewState) {
+        spinnerAdapter().setItems(viewState.translationItems)
 
-        val currentTranslationPosition = items.indexOfFirst { (it as? TranslationItem.Translation)?.isCurrentTranslation == true }
+        val currentTranslationPosition = viewState.translationItems.indexOfFirst { (it as? ViewState.TranslationItem.Translation)?.isCurrentTranslation == true }
         if (currentTranslationPosition >= 0) {
             spinnerPosition = currentTranslationPosition
             spinner().setSelection(currentTranslationPosition)
