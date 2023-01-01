@@ -69,6 +69,7 @@ import me.xizzhu.android.joshua.utils.copyToClipBoard
 import me.xizzhu.android.joshua.utils.shareToSystem
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
+import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.reading.chapter.ChapterSelectionView
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 
@@ -406,7 +407,15 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                     translationItems.add(ReadingToolbar.ViewState.TranslationItem.More)
                     toolbar.setViewState(ReadingToolbar.ViewState(translationItems = translationItems))
 
-                    chapterSelectionView.setData(currentReadingStatus.currentVerseIndex, currentReadingStatus.bookNames)
+                    chapterSelectionView.setViewState(
+                        viewState = ChapterSelectionView.ViewState(
+                            currentBookIndex = currentReadingStatus.currentVerseIndex.bookIndex,
+                            currentChapterIndex = currentReadingStatus.currentVerseIndex.chapterIndex,
+                            chapterSelectionItems = currentReadingStatus.bookNames.mapIndexed { index, bookName ->
+                                ChapterSelectionView.ViewState.ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
+                            }
+                        )
+                    )
                     drawerLayout.hide()
 
                     versePagerAdapter.setCurrent(

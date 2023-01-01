@@ -21,20 +21,11 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseExpandableListAdapter
 import android.widget.ExpandableListView
-import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import me.xizzhu.android.joshua.core.Bible
-import me.xizzhu.android.joshua.core.VerseIndex
-import me.xizzhu.android.joshua.databinding.ItemBookNameBinding
-import me.xizzhu.android.joshua.databinding.ItemChapterRowBinding
 
-class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListener {
+class ChapterListView : ExpandableListView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
@@ -48,22 +39,19 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
     init {
         divider = ColorDrawable(ContextCompat.getColor(context, android.R.color.darker_gray))
         dividerHeight = 1
-        setGroupIndicator(null)
-        setOnGroupClickListener(this)
-        setChildDivider(ColorDrawable(Color.TRANSPARENT))
-    }
 
-    override fun onGroupClick(parent: ExpandableListView, v: View, groupPosition: Int, id: Long): Boolean {
-        if (isGroupExpanded(groupPosition)) {
-            collapseGroup(groupPosition)
-        } else {
-            expandGroup(groupPosition)
-            if (lastExpandedGroup != groupPosition) {
-                collapseGroup(lastExpandedGroup)
-                lastExpandedGroup = groupPosition
+        setGroupIndicator(null)
+        setOnGroupClickListener { _, _, groupPosition, _ ->
+            if (isGroupExpanded(groupPosition)) {
+                collapseGroup(groupPosition)
+            } else {
+                expandBook(groupPosition)
             }
+
+            return@setOnGroupClickListener true
         }
-        return true
+
+        setChildDivider(ColorDrawable(Color.TRANSPARENT))
     }
 
     fun initialize(onViewEvent: (ChapterSelectionView.ViewEvent) -> Unit) {
@@ -71,105 +59,26 @@ class ChapterListView : ExpandableListView, ExpandableListView.OnGroupClickListe
         setAdapter(adapter)
     }
 
-    fun setData(currentVerseIndex: VerseIndex, bookNames: List<String>) {
-        adapter.setData(currentVerseIndex, bookNames)
+    fun setViewState(viewState: ChapterSelectionView.ViewState) {
+        adapter.setViewState(viewState)
+        expandBook(viewState.currentBookIndex)
+    }
 
-        val groupToExpand = currentVerseIndex.bookIndex
-        lastExpandedGroup = groupToExpand
+    fun expandBook(bookIndex: Int) {
+        val groupToExpand = bookIndex
+        if (isGroupExpanded(groupToExpand)) {
+            return
+        }
+
         expandGroup(groupToExpand)
+        if (lastExpandedGroup != groupToExpand) {
+            collapseGroup(lastExpandedGroup)
+            lastExpandedGroup = groupToExpand
+        }
         setSelectedGroup(groupToExpand)
     }
 
     fun scrollToPosition(position: Int) {
         smoothScrollToPositionFromTop(position, 0, 100)
-    }
-}
-
-private class ChapterTag(var bookIndex: Int, var chapterIndex: Int)
-
-private class ChapterListAdapter(context: Context, onViewEvent: (ChapterSelectionView.ViewEvent) -> Unit) : BaseExpandableListAdapter() {
-    companion object {
-        private const val ROW_CHILD_COUNT = 5
-    }
-
-    private val inflater = LayoutInflater.from(context)
-
-    private val onChapterClickedListener = View.OnClickListener { view ->
-        val chapterTag = view.tag as ChapterTag
-        if (chapterTag.bookIndex != currentVerseIndex.bookIndex
-                || chapterTag.chapterIndex != currentVerseIndex.chapterIndex) {
-            onViewEvent(ChapterSelectionView.ViewEvent.SelectChapter(chapterTag.bookIndex, chapterTag.chapterIndex))
-        }
-    }
-
-    private var bookNames = emptyList<String>()
-    private var currentVerseIndex = VerseIndex.INVALID
-
-    override fun hasStableIds(): Boolean = false
-
-    override fun getGroupCount(): Int = bookNames.size
-
-    override fun getGroupId(groupPosition: Int): Long = groupPosition.toLong()
-
-    override fun getGroup(groupPosition: Int): String = bookNames[groupPosition]
-
-    override fun getGroupView(groupPosition: Int, isExpanded: Boolean, convertView: View?, parent: ViewGroup?): View =
-            (convertView?.let { ItemBookNameBinding.bind(it) } ?: ItemBookNameBinding.inflate(inflater, parent, false))
-                    .apply { root.text = getGroup(groupPosition) }
-                    .root
-
-    override fun isChildSelectable(groupPosition: Int, childPosition: Int): Boolean = true
-
-    override fun getChildrenCount(groupPosition: Int): Int {
-        val chapterCount = Bible.getChapterCount(groupPosition)
-        return chapterCount / ROW_CHILD_COUNT + if (chapterCount % ROW_CHILD_COUNT == 0) 0 else 1
-    }
-
-    override fun getChildId(groupPosition: Int, childPosition: Int): Long = (groupPosition * 1000 + childPosition).toLong()
-
-    override fun getChild(groupPosition: Int, childPosition: Int): Int = childPosition
-
-    override fun getChildView(groupPosition: Int, childPosition: Int, isLastChild: Boolean, convertView: View?, parent: ViewGroup?): View {
-        val chapterRow: ItemChapterRowBinding = if (convertView == null) {
-            ItemChapterRowBinding.inflate(inflater, parent, false).apply {
-                repeat(root.childCount) { i ->
-                    with(root.getChildAt(i)) {
-                        setOnClickListener(onChapterClickedListener)
-                        tag = ChapterTag(-1, -1)
-                    }
-                }
-            }
-        } else {
-            ItemChapterRowBinding.bind(convertView)
-        }
-
-        val chapterCount = Bible.getChapterCount(groupPosition)
-        repeat(ROW_CHILD_COUNT) { i ->
-            val chapter = childPosition * ROW_CHILD_COUNT + i
-            with(chapterRow.root.getChildAt(i) as TextView) {
-                if (chapter >= chapterCount) {
-                    visibility = View.GONE
-                } else {
-                    visibility = View.VISIBLE
-                    isSelected = groupPosition == currentVerseIndex.bookIndex
-                            && chapter == currentVerseIndex.chapterIndex
-                    text = (chapter + 1).toString()
-
-                    with((tag as ChapterTag)) {
-                        bookIndex = groupPosition
-                        chapterIndex = chapter
-                    }
-                }
-            }
-        }
-
-        return chapterRow.root
-    }
-
-    fun setData(currentVerseIndex: VerseIndex, bookNames: List<String>) {
-        this.currentVerseIndex = currentVerseIndex
-        this.bookNames = bookNames
-
-        notifyDataSetChanged()
     }
 }
