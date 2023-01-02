@@ -54,6 +54,7 @@ object Versions {
         const val annotation = "1.5.0"
         const val appCompat = "1.5.1"
         const val core = "1.9.0"
+        const val fragment = "1.5.5"
         const val lifecycle = "2.5.1"
         const val multidex = "2.0.1"
 
@@ -113,6 +114,11 @@ object Dependencies {
         const val appCompat = "androidx.appcompat:appcompat:${Versions.AndroidX.appCompat}"
         const val core = "androidx.core:core:${Versions.AndroidX.core}"
         const val multidex = "androidx.multidex:multidex:${Versions.AndroidX.multidex}"
+
+        object Fragment {
+            const val core = "androidx.fragment:fragment-ktx:${Versions.AndroidX.fragment}"
+            const val test = "androidx.fragment:fragment-testing:${Versions.AndroidX.fragment}"
+        }
 
         object Lifecycle {
             const val common = "androidx.lifecycle:lifecycle-common-java8:${Versions.AndroidX.lifecycle}"
