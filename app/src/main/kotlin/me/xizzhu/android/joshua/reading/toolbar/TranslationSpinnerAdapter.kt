@@ -21,79 +21,86 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.CompoundButton
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
+import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.databinding.SpinnerDropDownBinding
 import me.xizzhu.android.joshua.databinding.SpinnerSelectedBinding
+import me.xizzhu.android.joshua.ui.setOnCheckedChangeByUserListener
 
 class TranslationSpinnerAdapter(
-        context: Context, requestParallelTranslation: (String) -> Unit, removeParallelTranslation: (String) -> Unit
+    context: Context,
+    private val onViewEvent: (ReadingToolbar.ViewEvent) -> Unit,
 ) : BaseAdapter() {
     private val inflater = LayoutInflater.from(context)
+    private val items: ArrayList<ReadingToolbar.ViewState.TranslationItem> = arrayListOf()
 
-    private val checkBoxListener = CompoundButton.OnCheckedChangeListener { checkBox, isChecked ->
-        val translationShortName = checkBox.tag as String
-        if (isChecked) {
-            requestParallelTranslation(translationShortName)
-        } else {
-            removeParallelTranslation(translationShortName)
-        }
-    }
-
-    private var currentTranslation: String = ""
-    private val parallelTranslations: MutableSet<String> = HashSet()
-    private val downloadedTranslations: MutableList<String> = ArrayList()
-
-    fun setData(currentTranslation: String, parallelTranslations: List<String>, downloadedTranslations: List<String>) {
-        this.currentTranslation = currentTranslation
-
-        this.parallelTranslations.clear()
-        this.parallelTranslations.addAll(parallelTranslations)
-
-        this.downloadedTranslations.clear()
-        this.downloadedTranslations.addAll(downloadedTranslations)
-
+    fun setItems(items: List<ReadingToolbar.ViewState.TranslationItem>) {
+        this.items.clear()
+        this.items.addAll(items)
         notifyDataSetChanged()
     }
 
-    override fun getCount(): Int = downloadedTranslations.size
+    override fun getCount(): Int = items.size
 
-    override fun getItem(position: Int): String = downloadedTranslations[position]
+    override fun getItem(position: Int): ReadingToolbar.ViewState.TranslationItem = items[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View =
-            (convertView?.let { SpinnerSelectedBinding.bind(it) } ?: SpinnerSelectedBinding.inflate(inflater, parent, false))
-                    .apply { root.text = getItem(position) }
-                    .root
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val binding = convertView?.let { SpinnerSelectedBinding.bind(it) }
+            ?: SpinnerSelectedBinding.inflate(inflater, parent, false)
+        binding.root.text = (getItem(position) as? ReadingToolbar.ViewState.TranslationItem.Translation)?.translationShortName
+        return binding.root
+    }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val spinner = convertView?.let { SpinnerDropDownBinding.bind(it) } ?: SpinnerDropDownBinding.inflate(inflater, parent, false)
+        val binding = getDropDownViewBinding(convertView, parent)
+        when (val item = getItem(position)) {
+            is ReadingToolbar.ViewState.TranslationItem.Translation -> binding.bind(item)
+            is ReadingToolbar.ViewState.TranslationItem.More -> binding.bind(item)
+        }
+        return binding.root
+    }
 
-        val translationShortName = downloadedTranslations[position]
-        spinner.title.text = translationShortName
-
-        // Nullify the listener to avoid unwanted callback when updating isChecked.
-        spinner.checkbox.setOnCheckedChangeListener(null)
-
-        if (position < count - 1) {
-            if (currentTranslation == translationShortName) {
-                spinner.checkbox.isEnabled = false
-                spinner.checkbox.isChecked = true
-            } else {
-                spinner.checkbox.isEnabled = true
-                spinner.checkbox.isChecked = parallelTranslations.contains(translationShortName)
-                spinner.checkbox.tag = translationShortName
-
-                // Sets the listener after isChecked is updated.
-                spinner.checkbox.setOnCheckedChangeListener(checkBoxListener)
-            }
-
-            spinner.checkbox.visibility = View.VISIBLE
-        } else {
-            // It's the last item ("More"), hide the check box.
-            spinner.checkbox.visibility = View.INVISIBLE
+    private fun getDropDownViewBinding(convertView: View?, parent: ViewGroup): SpinnerDropDownBinding {
+        if (convertView != null) {
+            return SpinnerDropDownBinding.bind(convertView)
         }
 
-        return spinner.root
+        val binding = SpinnerDropDownBinding.inflate(inflater, parent, false)
+        binding.checkbox.setOnCheckedChangeByUserListener { isChecked ->
+            when (val item = binding.root.tag as ReadingToolbar.ViewState.TranslationItem) {
+                is ReadingToolbar.ViewState.TranslationItem.Translation -> {
+                    if (isChecked) {
+                        onViewEvent(ReadingToolbar.ViewEvent.RequestParallelTranslation(item.translationShortName))
+                    } else {
+                        onViewEvent(ReadingToolbar.ViewEvent.RemoveParallelTranslation(item.translationShortName))
+                    }
+                }
+                is ReadingToolbar.ViewState.TranslationItem.More -> {
+                    // Do nothing
+                }
+            }
+        }
+        return binding
+    }
+
+    private fun SpinnerDropDownBinding.bind(item: ReadingToolbar.ViewState.TranslationItem.Translation) {
+        root.tag = item
+
+        title.text = item.translationShortName
+        checkbox.isVisible = true
+        checkbox.isEnabled = !item.isCurrentTranslation
+        checkbox.isChecked = item.isCurrentTranslation or item.isParallelTranslation
+    }
+
+    private fun SpinnerDropDownBinding.bind(item: ReadingToolbar.ViewState.TranslationItem.More) {
+        root.tag = item
+
+        title.setText(R.string.action_more_translation)
+        checkbox.isInvisible = true
+        checkbox.isEnabled = false
+        checkbox.isChecked = false
     }
 }

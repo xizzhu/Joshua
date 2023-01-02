@@ -25,7 +25,6 @@ import android.widget.ExpandableListView
 import androidx.annotation.IntDef
 import androidx.constraintlayout.widget.ConstraintLayout
 import me.xizzhu.android.joshua.core.Bible
-import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.databinding.InnerChapterSelectionViewBinding
 
 class ChapterSelectionView : ConstraintLayout {
@@ -38,13 +37,33 @@ class ChapterSelectionView : ConstraintLayout {
         private annotation class Selection
     }
 
+    sealed class ViewEvent {
+        data class SelectChapter(val bookIndex: Int, val chapterIndex: Int) : ViewEvent()
+    }
+
+    data class ViewState(
+        val currentBookIndex: Int,
+        val currentChapterIndex: Int,
+        val chapterSelectionItems: List<ChapterSelectionItem>,
+    ) {
+        companion object {
+            val INVALID: ViewState = ViewState(currentBookIndex = -1, currentChapterIndex = -1, chapterSelectionItems = emptyList())
+        }
+
+        data class ChapterSelectionItem(val bookIndex: Int, val bookName: String, val chapterCount: Int)
+
+        fun isValid(): Boolean =
+            currentBookIndex in 0 until Bible.BOOK_COUNT &&
+                currentChapterIndex in 0 until Bible.getChapterCount(currentBookIndex) &&
+                chapterSelectionItems.size == Bible.BOOK_COUNT
+    }
+
     private val viewBinding = InnerChapterSelectionViewBinding.inflate(LayoutInflater.from(context), this)
 
     @Selection
     private var selection = SELECTION_OLD_TESTAMENT
 
-    private var currentVerseIndex: VerseIndex = VerseIndex.INVALID
-    private var bookNames: List<String> = emptyList()
+    private var viewState: ViewState = ViewState.INVALID
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -61,7 +80,7 @@ class ChapterSelectionView : ConstraintLayout {
 
             override fun onScroll(view: AbsListView?, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
                 val firstVisibleGroup = ExpandableListView.getPackedPositionGroup(
-                        viewBinding.chapterListView.getExpandableListPosition(firstVisibleItem))
+                    viewBinding.chapterListView.getExpandableListPosition(firstVisibleItem))
                 updateSelection(if (firstVisibleGroup < Bible.OLD_TESTAMENT_COUNT) SELECTION_OLD_TESTAMENT else SELECTION_NEW_TESTAMENT, false)
             }
         })
@@ -85,19 +104,18 @@ class ChapterSelectionView : ConstraintLayout {
         }
     }
 
-    fun initialize(selectChapter: (Int, Int) -> Unit) {
-        viewBinding.chapterListView.initialize(selectChapter)
+    fun initialize(onViewEvent: (ViewEvent) -> Unit) {
+        viewBinding.chapterListView.initialize(onViewEvent)
     }
 
-    fun setData(currentVerseIndex: VerseIndex, bookNames: List<String>) {
-        this.currentVerseIndex = currentVerseIndex
-        this.bookNames = bookNames
-        expandCurrentBook()
+    fun setViewState(viewState: ViewState) {
+        this.viewState = viewState
+        viewBinding.chapterListView.setViewState(viewState)
     }
 
     fun expandCurrentBook() {
-        if (currentVerseIndex.isValid() && bookNames.isNotEmpty()) {
-            viewBinding.chapterListView.setData(currentVerseIndex, bookNames)
+        if (viewState.isValid()) {
+            viewBinding.chapterListView.expandBook(viewState.currentBookIndex)
         }
     }
 }

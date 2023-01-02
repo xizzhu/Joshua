@@ -29,13 +29,10 @@ class FloatingActionButtonScrollAwareBehavior : FloatingActionButton.Behavior {
     constructor() : super()
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    override fun onStartNestedScroll(coordinatorLayout: CoordinatorLayout, child: FloatingActionButton,
-                                     directTargetChild: View, target: View, axes: Int, type: Int): Boolean =
-            axes == ViewCompat.SCROLL_AXIS_VERTICAL
-                    || super.onStartNestedScroll(coordinatorLayout, child, directTargetChild, target, axes, type)
+    override fun onStartNestedScroll(coordinatorLayout: CoordinatorLayout, child: FloatingActionButton, directTargetChild: View, target: View, axes: Int, type: Int): Boolean =
+        axes == ViewCompat.SCROLL_AXIS_VERTICAL || super.onStartNestedScroll(coordinatorLayout, child, directTargetChild, target, axes, type)
 
-    override fun onNestedPreScroll(coordinatorLayout: CoordinatorLayout, child: FloatingActionButton,
-                                   target: View, dx: Int, dy: Int, consumed: IntArray, type: Int) {
+    override fun onNestedPreScroll(coordinatorLayout: CoordinatorLayout, child: FloatingActionButton, target: View, dx: Int, dy: Int, consumed: IntArray, type: Int) {
         super.onNestedPreScroll(coordinatorLayout, child, target, dx, dy, consumed, type)
 
         if (dy > 0) {

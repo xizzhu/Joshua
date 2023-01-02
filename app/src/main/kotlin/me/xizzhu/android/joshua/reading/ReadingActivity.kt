@@ -69,10 +69,13 @@ import me.xizzhu.android.joshua.utils.copyToClipBoard
 import me.xizzhu.android.joshua.utils.shareToSystem
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
+import me.xizzhu.android.joshua.core.Bible
+import me.xizzhu.android.joshua.reading.chapter.ChapterSelectionView
+import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
 
 @AndroidEntryPoint
 class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>(), SimpleVerseItem.Callback, VerseItem.Callback,
-        VerseTextItem.Callback, CrossReferenceItem.Callback, StrongNumberItem.Callback, VersePreviewItem.Callback {
+    VerseTextItem.Callback, CrossReferenceItem.Callback, StrongNumberItem.Callback, VersePreviewItem.Callback {
     companion object {
         private const val KEY_OPEN_NOTE = "me.xizzhu.android.joshua.KEY_OPEN_NOTE"
 
@@ -128,8 +131,8 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                 if (selectedVerses.isEmpty()) return@launch
 
                 copyToClipBoard(
-                        label = "$currentTranslation $currentBookName",
-                        text = selectedVerses.toStringForSharing(currentBookName, readingViewModel.settings().first().consolidateVersesForSharing)
+                    label = "$currentTranslation $currentBookName",
+                    text = selectedVerses.toStringForSharing(currentBookName, readingViewModel.settings().first().consolidateVersesForSharing)
                 )
                 toast(R.string.toast_verses_copied)
             } catch (e: Exception) {
@@ -147,8 +150,8 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                 if (selectedVerses.isEmpty()) return@launch
 
                 shareToSystem(
-                        title = getString(R.string.text_share_with),
-                        text = selectedVerses.toStringForSharing(currentBookName, readingViewModel.settings().first().consolidateVersesForSharing)
+                    title = getString(R.string.text_share_with),
+                    text = selectedVerses.toStringForSharing(currentBookName, readingViewModel.settings().first().consolidateVersesForSharing)
                 )
             } catch (e: Exception) {
                 Log.e(tag, "Failed to share", e)
@@ -184,15 +187,27 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
             }
         })
 
-        toolbar.initialize(
-                requestParallelTranslation = ::requestParallelTranslation,
-                removeParallelTranslation = ::removeParallelTranslation,
-                selectCurrentTranslation = ::selectTranslation,
-                titleClicked = drawerLayout::open,
-                navigate = ::startActivity
-        )
+        toolbar.initialize { viewEvent ->
+            when (viewEvent) {
+                is ReadingToolbar.ViewEvent.OpenBookmarks -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_BOOKMARKS)
+                is ReadingToolbar.ViewEvent.OpenHighlights -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_HIGHLIGHTS)
+                is ReadingToolbar.ViewEvent.OpenNotes -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_NOTES)
+                is ReadingToolbar.ViewEvent.OpenReadingProgress -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_READING_PROGRESS)
+                is ReadingToolbar.ViewEvent.OpenSearch -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_SEARCH)
+                is ReadingToolbar.ViewEvent.OpenSettings -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_SETTINGS)
+                is ReadingToolbar.ViewEvent.OpenTranslations -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_TRANSLATIONS)
+                is ReadingToolbar.ViewEvent.RemoveParallelTranslation -> removeParallelTranslation(viewEvent.translationToRemove)
+                is ReadingToolbar.ViewEvent.RequestParallelTranslation -> requestParallelTranslation(viewEvent.translationToRequest)
+                is ReadingToolbar.ViewEvent.SelectCurrentTranslation -> selectTranslation(viewEvent.translationToSelect)
+                is ReadingToolbar.ViewEvent.TitleClicked -> drawerLayout.open()
+            }
+        }
 
-        chapterSelectionView.initialize(::selectChapter)
+        chapterSelectionView.initialize { viewEvent ->
+            when (viewEvent) {
+                is ChapterSelectionView.ViewEvent.SelectChapter -> selectChapter(bookIndex = viewEvent.bookIndex, chapterIndex = viewEvent.chapterIndex)
+            }
+        }
 
         versePagerAdapter = VersePagerAdapter(this@ReadingActivity, ::loadVerses, ::updateCurrentVerse)
         verseViewPager.offscreenPageLimit = 1
@@ -215,13 +230,13 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
         val openNoteWhenCreated = intent.getBooleanExtra(KEY_OPEN_NOTE, false)
         verseDetailView.initialize(
-                onClicked = ::hideVerseDetail,
-                updateBookmark = ::onBookmarkClicked,
-                updateHighlight = ::onHighlightClicked,
-                updateNote = ::saveNote,
-                requestCrossReferences = ::downloadCrossReferences,
-                requestStrongNumber = ::downloadStrongNumber,
-                hide = !openNoteWhenCreated
+            onClicked = ::hideVerseDetail,
+            updateBookmark = ::onBookmarkClicked,
+            updateHighlight = ::onHighlightClicked,
+            updateNote = ::saveNote,
+            requestCrossReferences = ::downloadCrossReferences,
+            requestStrongNumber = ::downloadStrongNumber,
+            hide = !openNoteWhenCreated
         )
         if (openNoteWhenCreated) {
             lifecycleScope.launch { showVerseDetail(readingViewModel.currentVerseIndex(), VerseDetailViewLayout.VERSE_DETAIL_NOTE) }
@@ -238,8 +253,8 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     private fun selectTranslation(translation: String) {
         readingViewModel.selectTranslation(translation)
-                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_translation, { _, _ -> selectTranslation(translation) }) }
-                .launchIn(lifecycleScope)
+            .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_translation, { _, _ -> selectTranslation(translation) }) }
+            .launchIn(lifecycleScope)
     }
 
     private fun startActivity(@Navigator.Companion.Screen screen: Int, extras: Bundle? = null) {
@@ -253,18 +268,18 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     private fun selectChapter(bookIndex: Int, chapterIndex: Int) {
         readingViewModel.selectCurrentVerseIndex(VerseIndex(bookIndex, chapterIndex, 0))
-                .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_chapter, { _, _ -> selectChapter(bookIndex, chapterIndex) }) }
-                .launchIn(lifecycleScope)
+            .onFailure { dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_select_chapter, { _, _ -> selectChapter(bookIndex, chapterIndex) }) }
+            .launchIn(lifecycleScope)
     }
 
     private fun loadVerses(bookIndex: Int, chapterIndex: Int) {
         readingViewModel.loadVerses(bookIndex, chapterIndex)
-                .onSuccess { verses -> versePagerAdapter.setVerses(bookIndex, chapterIndex, verses.items) }
-                .onFailure { e ->
-                    Log.e(tag, "Failed to load verses", e)
-                    dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_verses, { _, _ -> loadVerses(bookIndex, chapterIndex) })
-                }
-                .launchIn(lifecycleScope)
+            .onSuccess { verses -> versePagerAdapter.setVerses(bookIndex, chapterIndex, verses.items) }
+            .onFailure { e ->
+                Log.e(tag, "Failed to load verses", e)
+                dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_verses, { _, _ -> loadVerses(bookIndex, chapterIndex) })
+            }
+            .launchIn(lifecycleScope)
     }
 
     private fun updateCurrentVerse(verseIndex: VerseIndex) {
@@ -280,39 +295,39 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
         lifecycleScope.launchWhenStarted {
             readingViewModel.downloadCrossReferences()
-                    .onEach(
-                            onLoading = { progress ->
-                                when (progress) {
-                                    in 0 until 99 -> {
-                                        downloadCrossReferencesDialog?.setProgress(progress!!)
-                                    }
-                                    else -> {
-                                        downloadCrossReferencesDialog?.run {
-                                            setTitle(R.string.dialog_title_installing)
-                                            setIsIndeterminate(true)
-                                        }
-                                    }
-                                }
-                            },
-                            onSuccess = {
-                                toast(R.string.toast_downloaded)
-
-                                viewBinding.verseDetailView.verseDetail?.let { verseDetail ->
-                                    readingViewModel.crossReferences(verseDetail.verseIndex)
-                                            .onSuccess { viewBinding.verseDetailView.setCrossReferences(it) }
-                                            .launchIn(lifecycleScope)
-                                }
-                            },
-                            onFailure = {
-                                dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_download, { _, _ -> downloadCrossReferences() })
+                .onEach(
+                    onLoading = { progress ->
+                        when (progress) {
+                            in 0 until 99 -> {
+                                downloadCrossReferencesDialog?.setProgress(progress!!)
                             }
-                    )
-                    .onCompletion {
-                        downloadCrossReferencesDialog?.dismiss()
-                        downloadCrossReferencesDialog = null
-                        downloadCrossReferencesJob = null
+                            else -> {
+                                downloadCrossReferencesDialog?.run {
+                                    setTitle(R.string.dialog_title_installing)
+                                    setIsIndeterminate(true)
+                                }
+                            }
+                        }
+                    },
+                    onSuccess = {
+                        toast(R.string.toast_downloaded)
+
+                        viewBinding.verseDetailView.verseDetail?.let { verseDetail ->
+                            readingViewModel.crossReferences(verseDetail.verseIndex)
+                                .onSuccess { viewBinding.verseDetailView.setCrossReferences(it) }
+                                .launchIn(lifecycleScope)
+                        }
+                    },
+                    onFailure = {
+                        dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_download, { _, _ -> downloadCrossReferences() })
                     }
-                    .collect()
+                )
+                .onCompletion {
+                    downloadCrossReferencesDialog?.dismiss()
+                    downloadCrossReferencesDialog = null
+                    downloadCrossReferencesJob = null
+                }
+                .collect()
         }
     }
 
@@ -325,39 +340,39 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
         lifecycleScope.launchWhenStarted {
             readingViewModel.downloadStrongNumber()
-                    .onEach(
-                            onLoading = { progress ->
-                                when (progress) {
-                                    in 0 until 99 -> {
-                                        downloadStrongNumberDialog?.setProgress(progress!!)
-                                    }
-                                    else -> {
-                                        downloadStrongNumberDialog?.run {
-                                            setTitle(R.string.dialog_title_installing)
-                                            setIsIndeterminate(true)
-                                        }
-                                    }
-                                }
-                            },
-                            onSuccess = {
-                                toast(R.string.toast_downloaded)
-
-                                viewBinding.verseDetailView.verseDetail?.let { verseDetail ->
-                                    readingViewModel.strongNumbers(verseDetail.verseIndex)
-                                            .onSuccess { viewBinding.verseDetailView.setStrongNumbers(it) }
-                                            .launchIn(lifecycleScope)
-                                }
-                            },
-                            onFailure = {
-                                dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_download, { _, _ -> downloadStrongNumber() })
+                .onEach(
+                    onLoading = { progress ->
+                        when (progress) {
+                            in 0 until 99 -> {
+                                downloadStrongNumberDialog?.setProgress(progress!!)
                             }
-                    )
-                    .onCompletion {
-                        downloadStrongNumberDialog?.dismiss()
-                        downloadStrongNumberDialog = null
-                        downloadStrongNumberJob = null
+                            else -> {
+                                downloadStrongNumberDialog?.run {
+                                    setTitle(R.string.dialog_title_installing)
+                                    setIsIndeterminate(true)
+                                }
+                            }
+                        }
+                    },
+                    onSuccess = {
+                        toast(R.string.toast_downloaded)
+
+                        viewBinding.verseDetailView.verseDetail?.let { verseDetail ->
+                            readingViewModel.strongNumbers(verseDetail.verseIndex)
+                                .onSuccess { viewBinding.verseDetailView.setStrongNumbers(it) }
+                                .launchIn(lifecycleScope)
+                        }
+                    },
+                    onFailure = {
+                        dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_download, { _, _ -> downloadStrongNumber() })
                     }
-                    .collect()
+                )
+                .onCompletion {
+                    downloadStrongNumberDialog?.dismiss()
+                    downloadStrongNumberDialog = null
+                    downloadStrongNumberJob = null
+                }
+                .collect()
         }
     }
 
@@ -376,38 +391,53 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     private fun observeCurrentReadingStatus() {
         readingViewModel.currentReadingStatus()
-                .onSuccess { currentReadingStatus ->
-                    with(viewBinding) {
-                        toolbar.title = "${currentReadingStatus.bookShortNames[currentReadingStatus.currentVerseIndex.bookIndex]}, ${currentReadingStatus.currentVerseIndex.chapterIndex + 1}"
-                        toolbar.setData(
-                                currentTranslation = currentReadingStatus.currentTranslation,
-                                parallelTranslations = currentReadingStatus.parallelTranslations,
-                                downloadedTranslations = currentReadingStatus.downloadedTranslations
-                        )
+            .onSuccess { currentReadingStatus ->
+                with(viewBinding) {
+                    toolbar.title = "${currentReadingStatus.bookShortNames[currentReadingStatus.currentVerseIndex.bookIndex]}, ${currentReadingStatus.currentVerseIndex.chapterIndex + 1}"
 
-                        chapterSelectionView.setData(currentReadingStatus.currentVerseIndex, currentReadingStatus.bookNames)
-                        drawerLayout.hide()
-
-                        versePagerAdapter.setCurrent(
-                                verseIndex = currentReadingStatus.currentVerseIndex,
-                                translation = currentReadingStatus.currentTranslation,
-                                parallel = currentReadingStatus.parallelTranslations
-                        )
-                        verseViewPager.setCurrentItem(currentReadingStatus.currentVerseIndex.toPagePosition(), false)
+                    val translationItems = ArrayList<ReadingToolbar.ViewState.TranslationItem>(currentReadingStatus.downloadedTranslations.size + 1)
+                    currentReadingStatus.downloadedTranslations.forEach { downloaded ->
+                        val isCurrentTranslation = currentReadingStatus.currentTranslation == downloaded
+                        translationItems.add(ReadingToolbar.ViewState.TranslationItem.Translation(
+                            translationShortName = downloaded,
+                            isCurrentTranslation = isCurrentTranslation,
+                            isParallelTranslation = currentReadingStatus.parallelTranslations.contains(downloaded),
+                        ))
                     }
-                    hideVerseDetail()
+                    translationItems.add(ReadingToolbar.ViewState.TranslationItem.More)
+                    toolbar.setViewState(ReadingToolbar.ViewState(translationItems = translationItems))
 
-                    actionMode?.let { actionMode ->
-                        if (currentVerseIndex.bookIndex != currentReadingStatus.currentVerseIndex.bookIndex
-                                || currentVerseIndex.chapterIndex != currentReadingStatus.currentVerseIndex.chapterIndex) {
-                            actionMode.finish()
-                        }
+                    chapterSelectionView.setViewState(
+                        viewState = ChapterSelectionView.ViewState(
+                            currentBookIndex = currentReadingStatus.currentVerseIndex.bookIndex,
+                            currentChapterIndex = currentReadingStatus.currentVerseIndex.chapterIndex,
+                            chapterSelectionItems = currentReadingStatus.bookNames.mapIndexed { index, bookName ->
+                                ChapterSelectionView.ViewState.ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
+                            }
+                        )
+                    )
+                    drawerLayout.hide()
+
+                    versePagerAdapter.setCurrent(
+                        verseIndex = currentReadingStatus.currentVerseIndex,
+                        translation = currentReadingStatus.currentTranslation,
+                        parallel = currentReadingStatus.parallelTranslations
+                    )
+                    verseViewPager.setCurrentItem(currentReadingStatus.currentVerseIndex.toPagePosition(), false)
+                }
+                hideVerseDetail()
+
+                actionMode?.let { actionMode ->
+                    if (currentVerseIndex.bookIndex != currentReadingStatus.currentVerseIndex.bookIndex
+                        || currentVerseIndex.chapterIndex != currentReadingStatus.currentVerseIndex.chapterIndex) {
+                        actionMode.finish()
                     }
+                }
 
-                    currentTranslation = currentReadingStatus.currentTranslation
-                    currentVerseIndex = currentReadingStatus.currentVerseIndex
-                    currentBookName = currentReadingStatus.bookNames[currentReadingStatus.currentVerseIndex.bookIndex]
-                }.launchIn(lifecycleScope)
+                currentTranslation = currentReadingStatus.currentTranslation
+                currentVerseIndex = currentReadingStatus.currentVerseIndex
+                currentBookName = currentReadingStatus.bookNames[currentReadingStatus.currentVerseIndex.bookIndex]
+            }.launchIn(lifecycleScope)
     }
 
     private fun hideVerseDetail(): Boolean {
@@ -436,8 +466,8 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
             if (readingViewModel.hasDownloadedTranslation()) return@launch
 
             dialog(
-                    false, R.string.dialog_title_no_translation_downloaded, R.string.dialog_message_download_translation_confirmation,
-                    { _, _ -> startActivity(Navigator.SCREEN_TRANSLATIONS) }, { _, _ -> finish() }
+                false, R.string.dialog_title_no_translation_downloaded, R.string.dialog_message_download_translation_confirmation,
+                { _, _ -> startActivity(Navigator.SCREEN_TRANSLATIONS) }, { _, _ -> finish() }
             )
         }
     }
@@ -490,21 +520,21 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     private fun showVerseDetail(verseIndex: VerseIndex, @VerseDetailViewLayout.Companion.VerseDetail content: Int) {
         readingViewModel.loadVerseDetail(verseIndex)
-                .onEach(
-                        onLoading = { viewBinding.verseDetailView.verseDetail = null },
-                        onSuccess = {
-                            with(viewBinding.verseDetailView) {
-                                verseDetail = it
-                                show(content)
-                            }
-                            readingViewModel.updateVerse(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
-                        },
-                        onFailure = { e ->
-                            Log.e(tag, "Failed to load verses", e)
-                            dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_verse_detail, { _, _ -> showVerseDetail(verseIndex, content) })
-                        }
-                )
-                .launchIn(lifecycleScope)
+            .onEach(
+                onLoading = { viewBinding.verseDetailView.verseDetail = null },
+                onSuccess = {
+                    with(viewBinding.verseDetailView) {
+                        verseDetail = it
+                        show(content)
+                    }
+                    readingViewModel.updateVerse(VerseUpdate(verseIndex, VerseUpdate.VERSE_SELECTED))
+                },
+                onFailure = { e ->
+                    Log.e(tag, "Failed to load verses", e)
+                    dialog(true, R.string.dialog_title_error, R.string.dialog_message_failed_to_load_verse_detail, { _, _ -> showVerseDetail(verseIndex, content) })
+                }
+            )
+            .launchIn(lifecycleScope)
     }
 
     override fun onVerseLongClicked(verse: Verse) {
@@ -517,9 +547,9 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
     override fun onBookmarkClicked(verseIndex: VerseIndex, currentlyBookmarked: Boolean) {
         val toBeBookmarked = !currentlyBookmarked
         readingViewModel.saveBookmark(verseIndex = verseIndex, toBeBookmarked = toBeBookmarked)
-                .onSuccess { viewBinding.verseDetailView.setBookmarked(toBeBookmarked) }
-                .onFailure { toast(R.string.toast_unknown_error) }
-                .launchIn(lifecycleScope)
+            .onSuccess { viewBinding.verseDetailView.setBookmarked(toBeBookmarked) }
+            .onFailure { toast(R.string.toast_unknown_error) }
+            .launchIn(lifecycleScope)
     }
 
     override fun onHighlightClicked(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor currentHighlightColor: Int) {
@@ -540,9 +570,9 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     private fun saveHighlight(verseIndex: VerseIndex, @Highlight.Companion.AvailableColor highlightColor: Int) {
         readingViewModel.saveHighlight(verseIndex, highlightColor)
-                .onSuccess { viewBinding.verseDetailView.setHighlightColor(highlightColor) }
-                .onFailure { toast(R.string.toast_unknown_error) }
-                .launchIn(lifecycleScope)
+            .onSuccess { viewBinding.verseDetailView.setHighlightColor(highlightColor) }
+            .onFailure { toast(R.string.toast_unknown_error) }
+            .launchIn(lifecycleScope)
     }
 
     override fun onNoteClicked(verseIndex: VerseIndex) {
@@ -551,9 +581,9 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     private fun saveNote(verseIndex: VerseIndex, note: String) {
         readingViewModel.saveNote(verseIndex, note)
-                .onSuccess { viewBinding.verseDetailView.setNote(note) }
-                .onFailure { toast(R.string.toast_unknown_error) }
-                .launchIn(lifecycleScope)
+            .onSuccess { viewBinding.verseDetailView.setNote(note) }
+            .onFailure { toast(R.string.toast_unknown_error) }
+            .launchIn(lifecycleScope)
     }
 
     override fun onVerseTextClicked(translation: String) {
@@ -565,8 +595,8 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
             try {
                 val bookName = readingViewModel.bookName(verse.text.translationShortName, verse.verseIndex.bookIndex)
                 copyToClipBoard(
-                        label = "${verse.text.translationShortName} $bookName",
-                        text = verse.toStringForSharing(bookName)
+                    label = "${verse.text.translationShortName} $bookName",
+                    text = verse.toStringForSharing(bookName)
                 )
                 toast(R.string.toast_verses_copied)
             } catch (e: Exception) {
@@ -582,12 +612,12 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
 
     override fun onCrossReferenceVerseLongClicked(verseIndex: VerseIndex) {
         readingViewModel.loadVersesForPreview(verseIndex)
-                .onSuccess { preview ->
-                    crossReferencePreviewDialog?.dismiss()
-                    crossReferencePreviewDialog = listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) { crossReferencePreviewDialog = null }
-                }
-                .onFailure { updateCurrentVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
-                .launchIn(lifecycleScope)
+            .onSuccess { preview ->
+                crossReferencePreviewDialog?.dismiss()
+                crossReferencePreviewDialog = listDialog(preview.title, preview.settings, preview.items, preview.currentPosition) { crossReferencePreviewDialog = null }
+            }
+            .onFailure { updateCurrentVerse(verseIndex) } // Very unlikely to fail, so just falls back to open the verse.
+            .launchIn(lifecycleScope)
     }
 
     override fun openStrongNumber(strongNumber: String) {
