@@ -30,7 +30,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import javax.inject.Singleton
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -61,13 +60,6 @@ class ReadingToolbarFragmentTest : BaseFragmentTest() {
 
     @BindValue
     val viewModel: ReadingToolbarViewModel = mockk(relaxed = true)
-
-    private lateinit var readingToolbarFragment: ReadingToolbarFragment
-
-    @BeforeTest
-    override fun setup() {
-        super.setup()
-    }
 
     @Test
     fun `test toolbar ViewEvent`() {

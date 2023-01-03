@@ -44,13 +44,12 @@ class ChapterSelectionViewTest : BaseUnitTest() {
     fun `test OT NT selection`() {
         val chapterSelectionView = ChapterSelectionView(ApplicationProvider.getApplicationContext())
         chapterSelectionView.initialize { fail() }
-        chapterSelectionView.setViewState(ChapterSelectionView.ViewState(
-            currentBookIndex = 0,
-            currentChapterIndex = 0,
+        chapterSelectionView.setCurrentChapter(currentBookIndex = 0, currentChapterIndex = 0)
+        chapterSelectionView.setChapterSelectionItems(
             chapterSelectionItems = MockContents.kjvBookNames.mapIndexed { index, bookName ->
-                ChapterSelectionView.ViewState.ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
+                ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
             }
-        ))
+        )
 
         val viewBinding: InnerChapterSelectionViewBinding = chapterSelectionView.getProperty("viewBinding")
         assertTrue(viewBinding.chapterSelectionOldTestament.isSelected)

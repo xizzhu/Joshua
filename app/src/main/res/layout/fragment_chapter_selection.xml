@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<me.xizzhu.android.joshua.reading.chapter.ChapterSelectionView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chapter_selection_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />

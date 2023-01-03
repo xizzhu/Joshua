@@ -60,13 +60,12 @@ class ChapterListAdapterTest : BaseUnitTest() {
             context = ApplicationProvider.getApplicationContext(),
             onViewEvent = { fail() },
         )
-        adapter.setViewState(ChapterSelectionView.ViewState(
-            currentBookIndex = 0,
-            currentChapterIndex = 0,
-            chapterSelectionItems = MockContents.kjvBookNames.mapIndexed { index, bookName ->
-                ChapterSelectionView.ViewState.ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
+        adapter.setCurrentChapter(currentBookIndex = 0, currentChapterIndex = 0)
+        adapter.setItems(
+            items = MockContents.kjvBookNames.mapIndexed { index, bookName ->
+                ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
             }
-        ))
+        )
         assertEquals(Bible.BOOK_COUNT, adapter.groupCount)
 
         val binding = ItemBookNameBinding.bind(adapter.getGroupView(1, false, null, FrameLayout(ApplicationProvider.getApplicationContext())))
@@ -95,13 +94,12 @@ class ChapterListAdapterTest : BaseUnitTest() {
                 }
             }
         }
-        adapter.setViewState(ChapterSelectionView.ViewState(
-            currentBookIndex = 2,
-            currentChapterIndex = 0,
-            chapterSelectionItems = MockContents.kjvBookNames.mapIndexed { index, bookName ->
-                ChapterSelectionView.ViewState.ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
+        adapter.setCurrentChapter(currentBookIndex = 2, currentChapterIndex = 0)
+        adapter.setItems(
+            items = MockContents.kjvBookNames.mapIndexed { index, bookName ->
+                ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
             }
-        ))
+        )
         assertEquals(Bible.BOOK_COUNT, adapter.groupCount)
         assertEquals(10, adapter.getChildrenCount(0))
         assertEquals(6, adapter.getChildrenCount(2))

@@ -41,29 +41,10 @@ class ChapterSelectionView : ConstraintLayout {
         data class SelectChapter(val bookIndex: Int, val chapterIndex: Int) : ViewEvent()
     }
 
-    data class ViewState(
-        val currentBookIndex: Int,
-        val currentChapterIndex: Int,
-        val chapterSelectionItems: List<ChapterSelectionItem>,
-    ) {
-        companion object {
-            val INVALID: ViewState = ViewState(currentBookIndex = -1, currentChapterIndex = -1, chapterSelectionItems = emptyList())
-        }
-
-        data class ChapterSelectionItem(val bookIndex: Int, val bookName: String, val chapterCount: Int)
-
-        fun isValid(): Boolean =
-            currentBookIndex in 0 until Bible.BOOK_COUNT &&
-                currentChapterIndex in 0 until Bible.getChapterCount(currentBookIndex) &&
-                chapterSelectionItems.size == Bible.BOOK_COUNT
-    }
-
     private val viewBinding = InnerChapterSelectionViewBinding.inflate(LayoutInflater.from(context), this)
 
     @Selection
     private var selection = SELECTION_OLD_TESTAMENT
-
-    private var viewState: ViewState = ViewState.INVALID
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
@@ -108,14 +89,15 @@ class ChapterSelectionView : ConstraintLayout {
         viewBinding.chapterListView.initialize(onViewEvent)
     }
 
-    fun setViewState(viewState: ViewState) {
-        this.viewState = viewState
-        viewBinding.chapterListView.setViewState(viewState)
+    fun setCurrentChapter(currentBookIndex: Int, currentChapterIndex: Int) {
+        viewBinding.chapterListView.setCurrentChapter(currentBookIndex = currentBookIndex, currentChapterIndex = currentChapterIndex)
+    }
+
+    fun setChapterSelectionItems(chapterSelectionItems: List<ChapterSelectionItem>) {
+        viewBinding.chapterListView.setChapterSelectionItems(chapterSelectionItems = chapterSelectionItems)
     }
 
     fun expandCurrentBook() {
-        if (viewState.isValid()) {
-            viewBinding.chapterListView.expandBook(viewState.currentBookIndex)
-        }
+        viewBinding.chapterListView.expandCurrentBook()
     }
 }
