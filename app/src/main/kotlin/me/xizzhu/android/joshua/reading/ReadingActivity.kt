@@ -71,7 +71,7 @@ import me.xizzhu.android.logger.Log
 import kotlin.math.max
 import me.xizzhu.android.joshua.core.Bible
 import me.xizzhu.android.joshua.reading.chapter.ChapterSelectionView
-import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
+import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarFragment
 
 @AndroidEntryPoint
 class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>(), SimpleVerseItem.Callback, VerseItem.Callback,
@@ -175,7 +175,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
     }
 
     private fun initializeUi() = with(viewBinding) {
-        drawerToggle = ActionBarDrawerToggle(this@ReadingActivity, drawerLayout, toolbar, 0, 0)
+        drawerToggle = ActionBarDrawerToggle(this@ReadingActivity, drawerLayout, toolbarFragment.getFragment<ReadingToolbarFragment>().toolbar, 0, 0)
         drawerLayout.addDrawerListener(drawerToggle)
         drawerLayout.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
             override fun onDrawerOpened(drawerView: View) {
@@ -186,22 +186,6 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
                 }
             }
         })
-
-        toolbar.initialize { viewEvent ->
-            when (viewEvent) {
-                is ReadingToolbar.ViewEvent.OpenBookmarks -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_BOOKMARKS)
-                is ReadingToolbar.ViewEvent.OpenHighlights -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_HIGHLIGHTS)
-                is ReadingToolbar.ViewEvent.OpenNotes -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_NOTES)
-                is ReadingToolbar.ViewEvent.OpenReadingProgress -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_READING_PROGRESS)
-                is ReadingToolbar.ViewEvent.OpenSearch -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_SEARCH)
-                is ReadingToolbar.ViewEvent.OpenSettings -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_SETTINGS)
-                is ReadingToolbar.ViewEvent.OpenTranslations -> navigator.navigate(this@ReadingActivity, Navigator.SCREEN_TRANSLATIONS)
-                is ReadingToolbar.ViewEvent.RemoveParallelTranslation -> removeParallelTranslation(viewEvent.translationToRemove)
-                is ReadingToolbar.ViewEvent.RequestParallelTranslation -> requestParallelTranslation(viewEvent.translationToRequest)
-                is ReadingToolbar.ViewEvent.SelectCurrentTranslation -> selectTranslation(viewEvent.translationToSelect)
-                is ReadingToolbar.ViewEvent.TitleClicked -> drawerLayout.open()
-            }
-        }
 
         chapterSelectionView.initialize { viewEvent ->
             when (viewEvent) {
@@ -241,14 +225,6 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
         if (openNoteWhenCreated) {
             lifecycleScope.launch { showVerseDetail(readingViewModel.currentVerseIndex(), VerseDetailViewLayout.VERSE_DETAIL_NOTE) }
         }
-    }
-
-    private fun requestParallelTranslation(translation: String) {
-        readingViewModel.requestParallelTranslation(translation).launchIn(lifecycleScope)
-    }
-
-    private fun removeParallelTranslation(translation: String) {
-        readingViewModel.removeParallelTranslation(translation).launchIn(lifecycleScope)
     }
 
     private fun selectTranslation(translation: String) {
@@ -393,20 +369,6 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
         readingViewModel.currentReadingStatus()
             .onSuccess { currentReadingStatus ->
                 with(viewBinding) {
-                    toolbar.title = "${currentReadingStatus.bookShortNames[currentReadingStatus.currentVerseIndex.bookIndex]}, ${currentReadingStatus.currentVerseIndex.chapterIndex + 1}"
-
-                    val translationItems = ArrayList<ReadingToolbar.ViewState.TranslationItem>(currentReadingStatus.downloadedTranslations.size + 1)
-                    currentReadingStatus.downloadedTranslations.forEach { downloaded ->
-                        val isCurrentTranslation = currentReadingStatus.currentTranslation == downloaded
-                        translationItems.add(ReadingToolbar.ViewState.TranslationItem.Translation(
-                            translationShortName = downloaded,
-                            isCurrentTranslation = isCurrentTranslation,
-                            isParallelTranslation = currentReadingStatus.parallelTranslations.contains(downloaded),
-                        ))
-                    }
-                    translationItems.add(ReadingToolbar.ViewState.TranslationItem.More)
-                    toolbar.setViewState(ReadingToolbar.ViewState(translationItems = translationItems))
-
                     chapterSelectionView.setViewState(
                         viewState = ChapterSelectionView.ViewState(
                             currentBookIndex = currentReadingStatus.currentVerseIndex.bookIndex,

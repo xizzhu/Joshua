@@ -117,13 +117,8 @@ class ReadingViewModelTest : BaseUnitTest() {
         assertTrue(actual[0] is BaseViewModel.ViewData.Loading)
         assertEquals(MockContents.kjvShortName, (actual[1] as BaseViewModel.ViewData.Success).data.currentTranslation)
         assertEquals(listOf(MockContents.cuvShortName), (actual[1] as BaseViewModel.ViewData.Success).data.parallelTranslations)
-        assertEquals(
-                listOf(MockContents.bbeShortName, MockContents.kjvShortName, MockContents.cuvShortName),
-                (actual[1] as BaseViewModel.ViewData.Success).data.downloadedTranslations
-        )
         assertEquals(VerseIndex(1, 2, 3), (actual[1] as BaseViewModel.ViewData.Success).data.currentVerseIndex)
         assertEquals(MockContents.kjvBookNames, (actual[1] as BaseViewModel.ViewData.Success).data.bookNames)
-        assertEquals(MockContents.kjvBookShortNames, (actual[1] as BaseViewModel.ViewData.Success).data.bookShortNames)
     }
 
     @Test

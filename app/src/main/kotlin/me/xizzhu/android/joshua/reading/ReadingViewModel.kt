@@ -64,16 +64,16 @@ import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
 class CurrentReadingStatusViewData(
-        val currentTranslation: String, val parallelTranslations: List<String>, val downloadedTranslations: List<String>,
-        val currentVerseIndex: VerseIndex, val bookNames: List<String>, val bookShortNames: List<String>
+    val currentTranslation: String, val parallelTranslations: List<String>,
+    val currentVerseIndex: VerseIndex, val bookNames: List<String>
 )
 
 class VersesViewData(val items: List<BaseItem>)
 
 class VerseDetailViewData(
-        val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
-        var bookmarked: Boolean, @Highlight.Companion.AvailableColor var highlightColor: Int, var note: String,
-        var crossReferencedItems: List<CrossReferenceItem>, var strongNumberItems: List<StrongNumberItem>
+    val verseIndex: VerseIndex, val verseTextItems: List<VerseTextItem>,
+    var bookmarked: Boolean, @Highlight.Companion.AvailableColor var highlightColor: Int, var note: String,
+    var crossReferencedItems: List<CrossReferenceItem>, var strongNumberItems: List<StrongNumberItem>
 )
 
 class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int, val data: Any? = null) {
@@ -87,7 +87,7 @@ class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int, val
         const val HIGHLIGHT_UPDATED = 7
 
         @IntDef(VERSE_SELECTED, VERSE_DESELECTED, NOTE_ADDED, NOTE_REMOVED,
-                BOOKMARK_ADDED, BOOKMARK_REMOVED, HIGHLIGHT_UPDATED)
+            BOOKMARK_ADDED, BOOKMARK_REMOVED, HIGHLIGHT_UPDATED)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Operation
     }
@@ -95,35 +95,31 @@ class VerseUpdate(val verseIndex: VerseIndex, @Operation val operation: Int, val
 
 @HiltViewModel
 class ReadingViewModel @Inject constructor(
-        private val bibleReadingManager: BibleReadingManager,
-        private val readingProgressManager: ReadingProgressManager,
-        private val translationManager: TranslationManager,
-        private val bookmarkManager: VerseAnnotationManager<Bookmark>,
-        private val highlightManager: VerseAnnotationManager<Highlight>,
-        private val noteManager: VerseAnnotationManager<Note>,
-        private val crossReferencesManager: CrossReferencesManager,
-        private val strongNumberManager: StrongNumberManager,
-        settingsManager: SettingsManager,
-        application: Application
+    private val bibleReadingManager: BibleReadingManager,
+    private val readingProgressManager: ReadingProgressManager,
+    private val translationManager: TranslationManager,
+    private val bookmarkManager: VerseAnnotationManager<Bookmark>,
+    private val highlightManager: VerseAnnotationManager<Highlight>,
+    private val noteManager: VerseAnnotationManager<Note>,
+    private val crossReferencesManager: CrossReferencesManager,
+    private val strongNumberManager: StrongNumberManager,
+    settingsManager: SettingsManager,
+    application: Application
 ) : BaseViewModel(settingsManager, application) {
-    private val translationComparator = TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME)
     private val currentReadingStatus: MutableStateFlow<ViewData<CurrentReadingStatusViewData>> = MutableStateFlow(ViewData.Loading())
     private val verseUpdates: MutableSharedFlow<VerseUpdate> = MutableSharedFlow()
 
     init {
         combine(
-                bibleReadingManager.currentTranslation().filterNotEmpty(),
-                bibleReadingManager.parallelTranslations(),
-                translationManager.downloadedTranslations(),
-                bibleReadingManager.currentVerseIndex().filterIsValid(),
-        ) { currentTranslation, parallelTranslations, downloadedTranslations, currentVerseIndex ->
+            bibleReadingManager.currentTranslation().filterNotEmpty(),
+            bibleReadingManager.parallelTranslations(),
+            bibleReadingManager.currentVerseIndex().filterIsValid(),
+        ) { currentTranslation, parallelTranslations, currentVerseIndex ->
             currentReadingStatus.value = ViewData.Success(CurrentReadingStatusViewData(
-                    currentTranslation = currentTranslation,
-                    parallelTranslations = parallelTranslations,
-                    downloadedTranslations = downloadedTranslations.sortedWith(translationComparator).map { it.shortName },
-                    currentVerseIndex = currentVerseIndex,
-                    bookNames = bibleReadingManager.readBookNames(currentTranslation),
-                    bookShortNames = bibleReadingManager.readBookShortNames(currentTranslation)
+                currentTranslation = currentTranslation,
+                parallelTranslations = parallelTranslations,
+                currentVerseIndex = currentVerseIndex,
+                bookNames = bibleReadingManager.readBookNames(currentTranslation),
             ))
         }.launchIn(viewModelScope)
     }
@@ -141,14 +137,6 @@ class ReadingViewModel @Inject constructor(
             Log.e(tag, "Failed to remove the selected translation from parallel", e)
         }
     }.onFailure { Log.e(tag, "Failed to select translation", it) }
-
-    fun requestParallelTranslation(translation: String): Flow<ViewData<Unit>> = viewData {
-        bibleReadingManager.requestParallelTranslation(translation)
-    }.onFailure { Log.e(tag, "Failed to request parallel translation", it) }
-
-    fun removeParallelTranslation(translation: String): Flow<ViewData<Unit>> = viewData {
-        bibleReadingManager.removeParallelTranslation(translation)
-    }.onFailure { Log.e(tag, "Failed to remove parallel translation", it) }
 
     suspend fun currentVerseIndex(): VerseIndex = bibleReadingManager.currentVerseIndex().first { it.isValid() }
 
@@ -177,7 +165,7 @@ class ReadingViewModel @Inject constructor(
             }
 
             VersesViewData(
-                    items = verses.toVerseItems(application, bookmarks.await(), highlights.await(), notes.await(), simpleReadingModeOn)
+                items = verses.toVerseItems(application, bookmarks.await(), highlights.await(), notes.await(), simpleReadingModeOn)
             )
         }
     }
@@ -193,11 +181,11 @@ class ReadingViewModel @Inject constructor(
             // build the verse
             val currentTranslation = bibleReadingManager.currentTranslation().firstNotEmpty()
             val parallelTranslations = translationManager.downloadedTranslations().first()
-                    .filter { it.shortName != currentTranslation }
-                    .sortedWith(TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME))
-                    .map { it.shortName }
+                .filter { it.shortName != currentTranslation }
+                .sortedWith(TranslationInfoComparator(TranslationInfoComparator.SORT_ORDER_LANGUAGE_THEN_SHORT_NAME))
+                .map { it.shortName }
             val verses = bibleReadingManager.readVerses(currentTranslation, parallelTranslations,
-                    verseIndex.bookIndex, verseIndex.chapterIndex)
+                verseIndex.bookIndex, verseIndex.chapterIndex)
 
             // step 1: finds the verse
             var start: VerseIndex? = null
@@ -238,47 +226,47 @@ class ReadingViewModel @Inject constructor(
             // step 3: constructs verse text items
             val verseTextItems = ArrayList<VerseTextItem>(parallelTranslations.size + 1)
             verseTextItems.add(VerseTextItem(
-                    verseIndex = verseIndex,
-                    followingEmptyVerseCount = followingEmptyVerseCount,
-                    verseText = verse.text,
-                    bookName = bibleReadingManager.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
+                verseIndex = verseIndex,
+                followingEmptyVerseCount = followingEmptyVerseCount,
+                verseText = verse.text,
+                bookName = bibleReadingManager.readBookNames(verse.text.translationShortName)[verse.verseIndex.bookIndex]
             ))
             parallelTranslations.forEachIndexed { index, translation ->
                 verseTextItems.add(VerseTextItem(
-                        verseIndex = verseIndex,
-                        followingEmptyVerseCount = followingEmptyVerseCount,
-                        verseText = Verse.Text(translation, parallel[index].toString()),
-                        bookName = bibleReadingManager.readBookNames(translation)[verse.verseIndex.bookIndex]
+                    verseIndex = verseIndex,
+                    followingEmptyVerseCount = followingEmptyVerseCount,
+                    verseText = Verse.Text(translation, parallel[index].toString()),
+                    bookName = bibleReadingManager.readBookNames(translation)[verse.verseIndex.bookIndex]
                 ))
             }
 
             VerseDetailViewData(
-                    verseIndex = verseIndex,
-                    verseTextItems = verseTextItems,
-                    bookmarked = bookmarked.await(),
-                    highlightColor = highlightColor.await(),
-                    note = note.await(),
-                    crossReferencedItems = crossReferences.await(),
-                    strongNumberItems = strongNumbers.await()
+                verseIndex = verseIndex,
+                verseTextItems = verseTextItems,
+                bookmarked = bookmarked.await(),
+                highlightColor = highlightColor.await(),
+                note = note.await(),
+                crossReferencedItems = crossReferences.await(),
+                strongNumberItems = strongNumbers.await()
             )
         }
     }
 
     private suspend fun readCrossReferences(verseIndex: VerseIndex): List<CrossReferenceItem> =
-            bibleReadingManager.readVerses(
-                    translationShortName = bibleReadingManager.currentTranslation().firstNotEmpty(),
-                    verseIndexes = crossReferencesManager.readCrossReferences(verseIndex).referenced
-            ).map { (verseIndex, verse) ->
-                CrossReferenceItem(
-                        verseIndex = verseIndex,
-                        verseText = verse.text,
-                        bookName = bibleReadingManager.readBookNames(verse.text.translationShortName)[verseIndex.bookIndex]
-                )
-            }.sortedBy { item -> item.verseIndex.bookIndex * 100000 + item.verseIndex.chapterIndex * 1000 + item.verseIndex.verseIndex }
+        bibleReadingManager.readVerses(
+            translationShortName = bibleReadingManager.currentTranslation().firstNotEmpty(),
+            verseIndexes = crossReferencesManager.readCrossReferences(verseIndex).referenced
+        ).map { (verseIndex, verse) ->
+            CrossReferenceItem(
+                verseIndex = verseIndex,
+                verseText = verse.text,
+                bookName = bibleReadingManager.readBookNames(verse.text.translationShortName)[verseIndex.bookIndex]
+            )
+        }.sortedBy { item -> item.verseIndex.bookIndex * 100000 + item.verseIndex.chapterIndex * 1000 + item.verseIndex.verseIndex }
 
     fun loadVersesForPreview(verseIndex: VerseIndex): Flow<ViewData<PreviewViewData>> =
-            loadPreview(bibleReadingManager, settingsManager, verseIndex, ::toVersePreviewItems)
-                    .onFailure { Log.e(tag, "Failed to load verses for preview", it) }
+        loadPreview(bibleReadingManager, settingsManager, verseIndex, ::toVersePreviewItems)
+            .onFailure { Log.e(tag, "Failed to load verses for preview", it) }
 
     fun verseUpdates(): Flow<VerseUpdate> = verseUpdates
 
@@ -317,34 +305,34 @@ class ReadingViewModel @Inject constructor(
     }
 
     fun downloadCrossReferences(): Flow<ViewData<Int>> =
-            crossReferencesManager.download()
-                    .map { progress ->
-                        when (progress) {
-                            -1 -> ViewData.Failure(CancellationException("Cross references downloading cancelled by user"))
-                            in 0 until 100 -> ViewData.Loading(progress)
-                            else -> ViewData.Success(100)
-                        }
-                    }
-                    .catch { e ->
-                        Log.e(tag, "Failed to download cross references", e)
-                        emit(ViewData.Failure(e))
-                    }
+        crossReferencesManager.download()
+            .map { progress ->
+                when (progress) {
+                    -1 -> ViewData.Failure(CancellationException("Cross references downloading cancelled by user"))
+                    in 0 until 100 -> ViewData.Loading(progress)
+                    else -> ViewData.Success(100)
+                }
+            }
+            .catch { e ->
+                Log.e(tag, "Failed to download cross references", e)
+                emit(ViewData.Failure(e))
+            }
 
     fun crossReferences(verseIndex: VerseIndex): Flow<ViewData<List<CrossReferenceItem>>> = viewData { readCrossReferences(verseIndex) }
 
     fun downloadStrongNumber(): Flow<ViewData<Int>> =
-            strongNumberManager.download()
-                    .map { progress ->
-                        when (progress) {
-                            -1 -> ViewData.Failure(CancellationException("Strong Number downloading cancelled by user"))
-                            in 0 until 100 -> ViewData.Loading(progress)
-                            else -> ViewData.Success(100)
-                        }
-                    }
-                    .catch { e ->
-                        Log.e(tag, "Failed to download Strong Number", e)
-                        emit(ViewData.Failure(e))
-                    }
+        strongNumberManager.download()
+            .map { progress ->
+                when (progress) {
+                    -1 -> ViewData.Failure(CancellationException("Strong Number downloading cancelled by user"))
+                    in 0 until 100 -> ViewData.Loading(progress)
+                    else -> ViewData.Success(100)
+                }
+            }
+            .catch { e ->
+                Log.e(tag, "Failed to download Strong Number", e)
+                emit(ViewData.Failure(e))
+            }
 
     fun strongNumbers(verseIndex: VerseIndex): Flow<ViewData<List<StrongNumberItem>>> = viewData {
         strongNumberManager.readStrongNumber(verseIndex).map { StrongNumberItem(it) }

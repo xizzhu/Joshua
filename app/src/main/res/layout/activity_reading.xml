@@ -31,12 +31,12 @@
             android:layout_height="wrap_content"
             app:liftOnScroll="true">
 
-            <me.xizzhu.android.joshua.reading.toolbar.ReadingToolbar
-                android:id="@+id/toolbar"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/toolbar_fragment"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_scrollFlags="scroll|enterAlways"
-                app:title="@string/app_name" />
+                android:layout_height="wrap_content"
+                android:name="me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarFragment"
+                app:layout_scrollFlags="scroll|enterAlways" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <me.xizzhu.android.joshua.reading.detail.VerseDetailViewLayout

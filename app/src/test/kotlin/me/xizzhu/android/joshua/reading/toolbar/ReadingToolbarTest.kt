@@ -180,13 +180,11 @@ class ReadingToolbarTest : BaseUnitTest() {
         assertEquals(0, requestParallelTranslationCalled)
         assertEquals(0, selectCurrentTranslationCalled)
 
-        readingToolbar.setViewState(ReadingToolbar.ViewState(
-            translationItems = listOf(
-                ReadingToolbar.ViewState.TranslationItem.Translation(MockContents.bbeShortName, isCurrentTranslation = false, isParallelTranslation = true),
-                ReadingToolbar.ViewState.TranslationItem.Translation(MockContents.kjvShortName, isCurrentTranslation = true, isParallelTranslation = false),
-                ReadingToolbar.ViewState.TranslationItem.Translation(MockContents.cuvShortName, isCurrentTranslation = false, isParallelTranslation = false),
-                ReadingToolbar.ViewState.TranslationItem.More,
-            )
+        readingToolbar.setTranslationItems(listOf(
+            TranslationItem.Translation(MockContents.bbeShortName, isCurrentTranslation = false, isParallelTranslation = true),
+            TranslationItem.Translation(MockContents.kjvShortName, isCurrentTranslation = true, isParallelTranslation = false),
+            TranslationItem.Translation(MockContents.cuvShortName, isCurrentTranslation = false, isParallelTranslation = false),
+            TranslationItem.More,
         ))
         assertEquals(0, openTranslationsCalled)
         assertEquals(0, removeParallelTranslationCalled)
@@ -207,7 +205,7 @@ class ReadingToolbarTest : BaseUnitTest() {
         assertEquals(0, requestParallelTranslationCalled)
         assertEquals(1, selectCurrentTranslationCalled)
         assertEquals(
-            ReadingToolbar.ViewState.TranslationItem.Translation(MockContents.cuvShortName, false, false),
+            TranslationItem.Translation(MockContents.cuvShortName, false, false),
             spinner.selectedItem
         )
     }

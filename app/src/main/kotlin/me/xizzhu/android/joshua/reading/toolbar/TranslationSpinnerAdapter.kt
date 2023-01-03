@@ -33,9 +33,9 @@ class TranslationSpinnerAdapter(
     private val onViewEvent: (ReadingToolbar.ViewEvent) -> Unit,
 ) : BaseAdapter() {
     private val inflater = LayoutInflater.from(context)
-    private val items: ArrayList<ReadingToolbar.ViewState.TranslationItem> = arrayListOf()
+    private val items: ArrayList<TranslationItem> = arrayListOf()
 
-    fun setItems(items: List<ReadingToolbar.ViewState.TranslationItem>) {
+    fun setItems(items: List<TranslationItem>) {
         this.items.clear()
         this.items.addAll(items)
         notifyDataSetChanged()
@@ -43,22 +43,22 @@ class TranslationSpinnerAdapter(
 
     override fun getCount(): Int = items.size
 
-    override fun getItem(position: Int): ReadingToolbar.ViewState.TranslationItem = items[position]
+    override fun getItem(position: Int): TranslationItem = items[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val binding = convertView?.let { SpinnerSelectedBinding.bind(it) }
             ?: SpinnerSelectedBinding.inflate(inflater, parent, false)
-        binding.root.text = (getItem(position) as? ReadingToolbar.ViewState.TranslationItem.Translation)?.translationShortName
+        binding.root.text = (getItem(position) as? TranslationItem.Translation)?.translationShortName
         return binding.root
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
         val binding = getDropDownViewBinding(convertView, parent)
         when (val item = getItem(position)) {
-            is ReadingToolbar.ViewState.TranslationItem.Translation -> binding.bind(item)
-            is ReadingToolbar.ViewState.TranslationItem.More -> binding.bind(item)
+            is TranslationItem.Translation -> binding.bind(item)
+            is TranslationItem.More -> binding.bind(item)
         }
         return binding.root
     }
@@ -70,15 +70,15 @@ class TranslationSpinnerAdapter(
 
         val binding = SpinnerDropDownBinding.inflate(inflater, parent, false)
         binding.checkbox.setOnCheckedChangeByUserListener { isChecked ->
-            when (val item = binding.root.tag as ReadingToolbar.ViewState.TranslationItem) {
-                is ReadingToolbar.ViewState.TranslationItem.Translation -> {
+            when (val item = binding.root.tag as TranslationItem) {
+                is TranslationItem.Translation -> {
                     if (isChecked) {
                         onViewEvent(ReadingToolbar.ViewEvent.RequestParallelTranslation(item.translationShortName))
                     } else {
                         onViewEvent(ReadingToolbar.ViewEvent.RemoveParallelTranslation(item.translationShortName))
                     }
                 }
-                is ReadingToolbar.ViewState.TranslationItem.More -> {
+                is TranslationItem.More -> {
                     // Do nothing
                 }
             }
@@ -86,7 +86,7 @@ class TranslationSpinnerAdapter(
         return binding
     }
 
-    private fun SpinnerDropDownBinding.bind(item: ReadingToolbar.ViewState.TranslationItem.Translation) {
+    private fun SpinnerDropDownBinding.bind(item: TranslationItem.Translation) {
         root.tag = item
 
         title.text = item.translationShortName
@@ -95,7 +95,7 @@ class TranslationSpinnerAdapter(
         checkbox.isChecked = item.isCurrentTranslation or item.isParallelTranslation
     }
 
-    private fun SpinnerDropDownBinding.bind(item: ReadingToolbar.ViewState.TranslationItem.More) {
+    private fun SpinnerDropDownBinding.bind(item: TranslationItem.More) {
         root.tag = item
 
         title.setText(R.string.action_more_translation)
@@ -103,4 +103,9 @@ class TranslationSpinnerAdapter(
         checkbox.isEnabled = false
         checkbox.isChecked = false
     }
+}
+
+sealed class TranslationItem {
+    data class Translation(val translationShortName: String, val isCurrentTranslation: Boolean, val isParallelTranslation: Boolean) : TranslationItem()
+    object More : TranslationItem()
 }

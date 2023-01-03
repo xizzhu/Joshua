@@ -19,9 +19,14 @@ package me.xizzhu.android.joshua.ui
 import android.content.Context
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.fragment.app.Fragment
 
 fun Context.toast(@StringRes text: Int) {
     toast(getText(text))
+}
+
+fun Fragment.toast(@StringRes text: Int) {
+    Toast.makeText(requireActivity(), text, Toast.LENGTH_SHORT).show()
 }
 
 fun Context.toast(text: CharSequence) {
