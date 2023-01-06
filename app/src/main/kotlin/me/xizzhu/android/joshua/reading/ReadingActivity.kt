@@ -25,6 +25,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ActionMode
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
@@ -69,8 +70,7 @@ import me.xizzhu.android.joshua.utils.copyToClipBoard
 import me.xizzhu.android.joshua.utils.shareToSystem
 import me.xizzhu.android.logger.Log
 import kotlin.math.max
-import me.xizzhu.android.joshua.core.Bible
-import me.xizzhu.android.joshua.reading.chapter.ChapterSelectionView
+import me.xizzhu.android.joshua.reading.chapter.ChapterSelectionFragment
 import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarFragment
 
 @AndroidEntryPoint
@@ -180,18 +180,12 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
         drawerLayout.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
             override fun onDrawerOpened(drawerView: View) {
                 try {
-                    viewBinding.chapterSelectionView.expandCurrentBook()
+                    chapterSelectionFragment.getFragment<ChapterSelectionFragment>().expandCurrentBook()
                 } catch (e: Exception) {
                     Log.e(tag, "Error occurred while expanding current book", e)
                 }
             }
         })
-
-        chapterSelectionView.initialize { viewEvent ->
-            when (viewEvent) {
-                is ChapterSelectionView.ViewEvent.SelectChapter -> selectChapter(bookIndex = viewEvent.bookIndex, chapterIndex = viewEvent.chapterIndex)
-            }
-        }
 
         versePagerAdapter = VersePagerAdapter(this@ReadingActivity, ::loadVerses, ::updateCurrentVerse)
         verseViewPager.offscreenPageLimit = 1
@@ -369,16 +363,7 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
         readingViewModel.currentReadingStatus()
             .onSuccess { currentReadingStatus ->
                 with(viewBinding) {
-                    chapterSelectionView.setViewState(
-                        viewState = ChapterSelectionView.ViewState(
-                            currentBookIndex = currentReadingStatus.currentVerseIndex.bookIndex,
-                            currentChapterIndex = currentReadingStatus.currentVerseIndex.chapterIndex,
-                            chapterSelectionItems = currentReadingStatus.bookNames.mapIndexed { index, bookName ->
-                                ChapterSelectionView.ViewState.ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
-                            }
-                        )
-                    )
-                    drawerLayout.hide()
+                    drawerLayout.closeDrawer(GravityCompat.START)
 
                     versePagerAdapter.setCurrent(
                         verseIndex = currentReadingStatus.currentVerseIndex,
@@ -450,9 +435,16 @@ class ReadingActivity : BaseActivity<ActivityReadingBinding, ReadingViewModel>()
     }
 
     override fun onBackPressed() {
-        if (!viewBinding.drawerLayout.hide() && !hideVerseDetail()) {
-            super.onBackPressed()
+        if (viewBinding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            viewBinding.drawerLayout.closeDrawer(GravityCompat.START)
+            return
         }
+
+        if (hideVerseDetail()) {
+            return
+        }
+
+        super.onBackPressed()
     }
 
     override fun inflateViewBinding(): ActivityReadingBinding = ActivityReadingBinding.inflate(layoutInflater)

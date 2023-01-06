@@ -43,13 +43,13 @@ class ChapterListViewTest : BaseUnitTest() {
     fun `test expand and collapse group`() {
         val chapterListView = ChapterListView(ApplicationProvider.getApplicationContext())
         chapterListView.initialize { fail() }
-        chapterListView.setViewState(ChapterSelectionView.ViewState(
-            currentBookIndex = 0,
-            currentChapterIndex = 0,
+        chapterListView.setCurrentChapter(currentBookIndex = 0, currentChapterIndex = 0)
+        chapterListView.setChapterSelectionItems(
             chapterSelectionItems = MockContents.kjvBookNames.mapIndexed { index, bookName ->
-                ChapterSelectionView.ViewState.ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
+                ChapterSelectionItem(bookIndex = index, bookName = bookName, chapterCount = Bible.getChapterCount(index))
             }
-        ))
+        )
+        chapterListView.expandCurrentBook()
         repeat(Bible.BOOK_COUNT) { index ->
             assertEquals(index == 0, chapterListView.isGroupExpanded(index))
         }
@@ -64,12 +64,12 @@ class ChapterListViewTest : BaseUnitTest() {
             assertEquals(index == 1, chapterListView.isGroupExpanded(index))
         }
 
-        chapterListView.expandBook(0)
+        chapterListView.expandCurrentBook()
         repeat(Bible.BOOK_COUNT) { index ->
             assertEquals(index == 0, chapterListView.isGroupExpanded(index))
         }
 
-        chapterListView.expandBook(0)
+        chapterListView.expandCurrentBook()
         repeat(Bible.BOOK_COUNT) { index ->
             assertEquals(index == 0, chapterListView.isGroupExpanded(index))
         }

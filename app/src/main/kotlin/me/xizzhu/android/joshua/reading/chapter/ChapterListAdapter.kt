@@ -38,25 +38,38 @@ class ChapterListAdapter(context: Context, onViewEvent: (ChapterSelectionView.Vi
 
     private val onChapterClickedListener = View.OnClickListener { view ->
         val tag = view.tag as Tag
-        if (tag.bookIndex != viewState.currentBookIndex || tag.chapterIndex != viewState.currentChapterIndex) {
+        if (tag.bookIndex != currentBookIndex || tag.chapterIndex != currentChapterIndex) {
             onViewEvent(ChapterSelectionView.ViewEvent.SelectChapter(tag.bookIndex, tag.chapterIndex))
         }
     }
 
-    private var viewState: ChapterSelectionView.ViewState = ChapterSelectionView.ViewState.INVALID
+    private var currentBookIndex: Int = -1
+    private var currentChapterIndex: Int = -1
+    private val items: ArrayList<ChapterSelectionItem> = ArrayList()
 
-    fun setViewState(viewState: ChapterSelectionView.ViewState) {
-        this.viewState = viewState
+    fun setCurrentChapter(currentBookIndex: Int, currentChapterIndex: Int) {
+        if (this.currentBookIndex == currentBookIndex && this.currentChapterIndex == currentChapterIndex) return
+
+        this.currentBookIndex = currentBookIndex
+        this.currentChapterIndex = currentChapterIndex
+        notifyDataSetChanged()
+    }
+
+    fun setItems(items: List<ChapterSelectionItem>) {
+        if (this.items == items) return
+
+        this.items.clear()
+        this.items.addAll(items)
         notifyDataSetChanged()
     }
 
     override fun hasStableIds(): Boolean = false
 
-    override fun getGroupCount(): Int = if (viewState.isValid()) viewState.chapterSelectionItems.size else 0
+    override fun getGroupCount(): Int = if (currentBookIndex >= 0 && currentChapterIndex >= 0) items.size else 0
 
     override fun getGroupId(groupPosition: Int): Long = groupPosition.toLong()
 
-    override fun getGroup(groupPosition: Int): ChapterSelectionView.ViewState.ChapterSelectionItem = viewState.chapterSelectionItems[groupPosition]
+    override fun getGroup(groupPosition: Int): ChapterSelectionItem = items[groupPosition]
 
     override fun getGroupView(groupPosition: Int, isExpanded: Boolean, convertView: View?, parent: ViewGroup?): View {
         val binding = convertView?.let { ItemBookNameBinding.bind(it) }
@@ -105,7 +118,7 @@ class ChapterListAdapter(context: Context, onViewEvent: (ChapterSelectionView.Vi
                     isVisible = false
                 } else {
                     isVisible = true
-                    isSelected = bookIndex == viewState.currentBookIndex && chapterIndex == viewState.currentChapterIndex
+                    isSelected = bookIndex == currentBookIndex && chapterIndex == currentChapterIndex
                     text = (chapterIndex + 1).toString()
 
                     with(tag as Tag) {
@@ -117,3 +130,5 @@ class ChapterListAdapter(context: Context, onViewEvent: (ChapterSelectionView.Vi
         }
     }
 }
+
+data class ChapterSelectionItem(val bookIndex: Int, val bookName: String, val chapterCount: Int)

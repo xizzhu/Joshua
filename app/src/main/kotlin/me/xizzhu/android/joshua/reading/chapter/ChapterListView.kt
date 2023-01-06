@@ -26,15 +26,16 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 
 class ChapterListView : ExpandableListView {
+    private lateinit var adapter: ChapterListAdapter
+    private var lastExpandedGroup: Int = -1
+    private var currentBookIndex: Int = -1
+
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
-
-    private lateinit var adapter: ChapterListAdapter
-    private var lastExpandedGroup: Int = -1
 
     init {
         divider = ColorDrawable(ContextCompat.getColor(context, android.R.color.darker_gray))
@@ -45,7 +46,7 @@ class ChapterListView : ExpandableListView {
             if (isGroupExpanded(groupPosition)) {
                 collapseGroup(groupPosition)
             } else {
-                expandBook(groupPosition)
+                expandBook(bookIndex = groupPosition)
             }
 
             return@setOnGroupClickListener true
@@ -54,17 +55,7 @@ class ChapterListView : ExpandableListView {
         setChildDivider(ColorDrawable(Color.TRANSPARENT))
     }
 
-    fun initialize(onViewEvent: (ChapterSelectionView.ViewEvent) -> Unit) {
-        adapter = ChapterListAdapter(context, onViewEvent)
-        setAdapter(adapter)
-    }
-
-    fun setViewState(viewState: ChapterSelectionView.ViewState) {
-        adapter.setViewState(viewState)
-        expandBook(viewState.currentBookIndex)
-    }
-
-    fun expandBook(bookIndex: Int) {
+    private fun expandBook(bookIndex: Int) {
         val groupToExpand = bookIndex
         if (isGroupExpanded(groupToExpand)) {
             return
@@ -76,6 +67,25 @@ class ChapterListView : ExpandableListView {
             lastExpandedGroup = groupToExpand
         }
         setSelectedGroup(groupToExpand)
+    }
+
+    fun initialize(onViewEvent: (ChapterSelectionView.ViewEvent) -> Unit) {
+        adapter = ChapterListAdapter(context, onViewEvent)
+        setAdapter(adapter)
+    }
+
+    fun setCurrentChapter(currentBookIndex: Int, currentChapterIndex: Int) {
+        this.currentBookIndex = currentBookIndex
+        adapter.setCurrentChapter(currentBookIndex = currentBookIndex, currentChapterIndex = currentChapterIndex)
+    }
+
+    fun setChapterSelectionItems(chapterSelectionItems: List<ChapterSelectionItem>) {
+        adapter.setItems(items = chapterSelectionItems)
+    }
+
+    fun expandCurrentBook() {
+        if (currentBookIndex == -1) return
+        expandBook(bookIndex = currentBookIndex)
     }
 
     fun scrollToPosition(position: Int) {

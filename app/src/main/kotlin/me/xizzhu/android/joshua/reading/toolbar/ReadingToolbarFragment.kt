@@ -16,6 +16,7 @@
 
 package me.xizzhu.android.joshua.reading.toolbar
 
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import me.xizzhu.android.joshua.Navigator
@@ -26,7 +27,7 @@ import me.xizzhu.android.joshua.ui.toast
 
 @AndroidEntryPoint
 class ReadingToolbarFragment : BaseFragment<FragmentReadingToolbarBinding, ReadingToolbarViewModel.ViewAction, ReadingToolbarViewModel.ViewState, ReadingToolbarViewModel>() {
-    val toolbar: ReadingToolbar by lazy(LazyThreadSafetyMode.NONE) { viewBinding.toolbar }
+    val toolbar: Toolbar by lazy(LazyThreadSafetyMode.NONE) { viewBinding.toolbar }
 
     override val viewModel: ReadingToolbarViewModel by viewModels()
 
