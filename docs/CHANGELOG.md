@@ -3,17 +3,17 @@ CHANGELOG
 
 #### Next release
 - Update dependencies:
-  - Gradle to 7.5.1
+  - Gradle to 7.6
   - Android Gradle plugin to 7.3.1
   - Build tool to 33.0.1
   - Compile and Target SDK to 33
-  - Kotlin to 1.7.21, Coroutines to 1.6.4, Kover to 0.6.1
+  - Kotlin to 1.8.0, Coroutines to 1.6.4, Kover to 0.6.1
   - AndroidX Activity to 1.6.1, Annotation to 1.5.0, AppCompat to 1.5.1, Core to 1.9.0, Lifecycle to 2.5.1, Constraint Layout to 2.1.4, Test to 1.5.0
   - Firebase BOM to 31.1.1, Crashlytics Gradle to 2.9.2
   - Hilt to 2.44.2
   - Material Component to 1.7.0
   - Mockk to 1.13.3
-  - Roblectric to 4.9.1
+  - Roblectric to 4.9.2
 
 #### v0.21.0
 - New features:

@@ -44,7 +44,7 @@ object Versions {
 
     object Kotlin {
         val jvmTarget = java.toString()
-        const val core = "1.7.21"
+        const val core = "1.8.0"
         const val coroutines = "1.6.4"
         const val kover = "0.6.1"
     }
@@ -87,7 +87,7 @@ object Versions {
     const val materialComponent = "1.7.0"
 
     const val mockk = "1.13.3"
-    const val robolectric = "4.9.1"
+    const val robolectric = "4.9.2"
 }
 
 object Dependencies {
