@@ -17,18 +17,21 @@
 package me.xizzhu.android.joshua.tests
 
 import android.app.Activity
+import android.content.ComponentName
+import android.content.Intent
+import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import dagger.hilt.android.testing.HiltAndroidRule
 import org.junit.Rule
-import org.robolectric.Robolectric
 
 abstract class BaseActivityTest : BaseUnitTest() {
     @get:Rule
     var hiltRule = HiltAndroidRule(this)
 
-    protected inline fun <T : Activity> withActivity(activityClass: Class<T>, block: (activity: T) -> Unit) {
-        Robolectric.buildActivity(activityClass).use { activityController ->
-            activityController.setup()
-            block(activityController.get())
+    protected inline fun <reified A : Activity> withActivity(crossinline block: (activity: A) -> Unit) {
+        val startActivityIntent = Intent.makeMainActivity(ComponentName(ApplicationProvider.getApplicationContext(), A::class.java))
+        ActivityScenario.launch<A>(startActivityIntent).onActivity { activity ->
+            block(activity)
         }
     }
 }

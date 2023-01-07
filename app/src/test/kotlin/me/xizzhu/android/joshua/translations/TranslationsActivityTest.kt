@@ -71,7 +71,7 @@ class TranslationsActivityTest : BaseActivityTest() {
 
     @Test
     fun `test adapter viewEvent, SelectTranslation`() {
-        withActivity(TranslationsActivity::class.java) { activity ->
+        withActivity<TranslationsActivity> { activity ->
             val adapter: TranslationsAdapter = activity.getProperty("adapter")
             val onViewEvent: (TranslationsAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
             onViewEvent(TranslationsAdapter.ViewEvent.SelectTranslation(MockContents.kjvDownloadedTranslationInfo))
@@ -85,7 +85,7 @@ class TranslationsActivityTest : BaseActivityTest() {
         every { viewModel.viewAction() } returns flowOf(TranslationsViewModel.ViewAction.GoBack)
         every { MockNavigationModule.mockNavigator.goBack(any()) } returns Unit
 
-        withActivity(TranslationsActivity::class.java) {
+        withActivity<TranslationsActivity> {
             verify(exactly = 1) { MockNavigationModule.mockNavigator.goBack(any()) }
         }
     }
@@ -100,7 +100,7 @@ class TranslationsActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(TranslationsActivity::class.java) { activity ->
+        withActivity<TranslationsActivity> { activity ->
             val viewBinding: ActivityTranslationsBinding = activity.getProperty("viewBinding")
             assertTrue(viewBinding.swipeRefresher.isRefreshing)
             assertFalse(viewBinding.translationList.isVisible)
@@ -120,7 +120,7 @@ class TranslationsActivityTest : BaseActivityTest() {
             error = TranslationsViewModel.ViewState.Error.TranslationDownloadingError(MockContents.kjvTranslationInfo),
         ))
 
-        withActivity(TranslationsActivity::class.java) { activity ->
+        withActivity<TranslationsActivity> { activity ->
             val viewBinding: ActivityTranslationsBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.swipeRefresher.isRefreshing)
             assertTrue(viewBinding.translationList.isVisible)
@@ -144,7 +144,7 @@ class TranslationsActivityTest : BaseActivityTest() {
             error = TranslationsViewModel.ViewState.Error.TranslationRemovalError(MockContents.kjvDownloadedTranslationInfo),
         ))
 
-        withActivity(TranslationsActivity::class.java) { activity ->
+        withActivity<TranslationsActivity> { activity ->
             val viewBinding: ActivityTranslationsBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.swipeRefresher.isRefreshing)
             assertTrue(viewBinding.translationList.isVisible)

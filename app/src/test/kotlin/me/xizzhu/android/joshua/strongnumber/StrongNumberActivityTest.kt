@@ -74,7 +74,7 @@ class StrongNumberActivityTest : BaseActivityTest() {
 
     @Test
     fun `test adapter viewEvent, OpenVerse`() {
-        withActivity(StrongNumberActivity::class.java) { activity ->
+        withActivity<StrongNumberActivity> { activity ->
             val adapter: StrongNumberAdapter = activity.getProperty("adapter")
             val onViewEvent: (StrongNumberAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
             onViewEvent(StrongNumberAdapter.ViewEvent.OpenVerse(VerseIndex(1, 2, 3)))
@@ -85,7 +85,7 @@ class StrongNumberActivityTest : BaseActivityTest() {
 
     @Test
     fun `test adapter viewEvent, ShowPreview`() {
-        withActivity(StrongNumberActivity::class.java) { activity ->
+        withActivity<StrongNumberActivity> { activity ->
             val adapter: StrongNumberAdapter = activity.getProperty("adapter")
             val onViewEvent: (StrongNumberAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
             onViewEvent(StrongNumberAdapter.ViewEvent.ShowPreview(VerseIndex(1, 2, 3)))
@@ -99,7 +99,7 @@ class StrongNumberActivityTest : BaseActivityTest() {
         every { viewModel.viewAction() } returns flowOf(StrongNumberViewModel.ViewAction.OpenReadingScreen)
         every { MockNavigationModule.mockNavigator.navigate(any(), Navigator.SCREEN_READING) } returns Unit
 
-        withActivity(StrongNumberActivity::class.java) { activity ->
+        withActivity<StrongNumberActivity> { activity ->
             verify(exactly = 1) { MockNavigationModule.mockNavigator.navigate(activity, Navigator.SCREEN_READING) }
         }
     }
@@ -113,7 +113,7 @@ class StrongNumberActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(StrongNumberActivity::class.java) { activity ->
+        withActivity<StrongNumberActivity> { activity ->
             val viewBinding: ActivityStrongNumberBinding = activity.getProperty("viewBinding")
             assertTrue(viewBinding.loadingSpinner.isVisible)
             assertFalse(viewBinding.strongNumberList.isVisible)
@@ -141,7 +141,7 @@ class StrongNumberActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(StrongNumberActivity::class.java) { activity ->
+        withActivity<StrongNumberActivity> { activity ->
             val viewBinding: ActivityStrongNumberBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.strongNumberList.isVisible)
@@ -160,7 +160,7 @@ class StrongNumberActivityTest : BaseActivityTest() {
             error = StrongNumberViewModel.ViewState.Error.PreviewLoadingError(VerseIndex(1, 2, 3)),
         ))
 
-        withActivity(StrongNumberActivity::class.java) { activity ->
+        withActivity<StrongNumberActivity> { activity ->
             val viewBinding: ActivityStrongNumberBinding = activity.getProperty("viewBinding")
             assertTrue(viewBinding.loadingSpinner.isVisible)
             assertFalse(viewBinding.strongNumberList.isVisible)
@@ -182,7 +182,7 @@ class StrongNumberActivityTest : BaseActivityTest() {
             error = StrongNumberViewModel.ViewState.Error.StrongNumberLoadingError,
         ))
 
-        withActivity(StrongNumberActivity::class.java) { activity ->
+        withActivity<StrongNumberActivity> { activity ->
             val viewBinding: ActivityStrongNumberBinding = activity.getProperty("viewBinding")
             assertTrue(viewBinding.loadingSpinner.isVisible)
             assertFalse(viewBinding.strongNumberList.isVisible)
@@ -201,7 +201,7 @@ class StrongNumberActivityTest : BaseActivityTest() {
             error = StrongNumberViewModel.ViewState.Error.VerseOpeningError(VerseIndex(1, 2, 3)),
         ))
 
-        withActivity(StrongNumberActivity::class.java) { activity ->
+        withActivity<StrongNumberActivity> { activity ->
             val viewBinding: ActivityStrongNumberBinding = activity.getProperty("viewBinding")
             assertTrue(viewBinding.loadingSpinner.isVisible)
             assertFalse(viewBinding.strongNumberList.isVisible)
