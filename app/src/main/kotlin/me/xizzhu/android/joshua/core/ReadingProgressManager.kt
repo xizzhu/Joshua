@@ -19,11 +19,12 @@ package me.xizzhu.android.joshua.core
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import me.xizzhu.android.joshua.core.provider.TimeProvider
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
-import me.xizzhu.android.joshua.utils.elapsedRealtime
 import me.xizzhu.android.joshua.utils.filterIsValid
 import me.xizzhu.android.logger.Log
 
@@ -49,7 +50,8 @@ data class ReadingProgress(val continuousReadingDays: Int, val lastReadingTimest
 class ReadingProgressManager(
         private val bibleReadingRepository: BibleReadingRepository,
         private val readingProgressRepository: ReadingProgressRepository,
-        private val appScope: CoroutineScope
+        private val timeProvider: TimeProvider,
+        private val appScope: CoroutineScope,
 ) {
     companion object {
         private val TAG: String = ReadingProgressManager::class.java.simpleName
@@ -68,14 +70,14 @@ class ReadingProgressManager(
             return
         }
 
-        lastTimestamp = elapsedRealtime()
+        lastTimestamp = timeProvider.elapsedRealtime
         currentVerseIndexObserver = bibleReadingRepository.currentVerseIndex
         appScope.launch(Dispatchers.Main) {
             currentVerseIndexObserver?.filterIsValid()
                     ?.collect {
                         trackReadingProgress()
                         currentVerseIndex = it
-                        lastTimestamp = elapsedRealtime()
+                        lastTimestamp = timeProvider.elapsedRealtime
                     }
         }
     }
@@ -89,7 +91,7 @@ class ReadingProgressManager(
                 return
             }
 
-            val now = elapsedRealtime()
+            val now = timeProvider.elapsedRealtime
             val timeSpentInMillis = now - lastTimestamp
             if (timeSpentInMillis < TIME_SPENT_THRESHOLD_IN_MILLIS) {
                 return

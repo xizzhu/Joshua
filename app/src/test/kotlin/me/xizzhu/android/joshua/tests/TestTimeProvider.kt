@@ -20,7 +20,7 @@ import me.xizzhu.android.joshua.core.provider.TimeProvider
 import java.util.Calendar
 
 class TestTimeProvider(
-    override val calendar: Calendar = Calendar.getInstance(),
-    override val currentTimeMillis: Long = System.currentTimeMillis(),
-    override val elapsedRealtime: Long = 0L
+    override var calendar: Calendar = Calendar.getInstance(),
+    override var currentTimeMillis: Long = System.currentTimeMillis(),
+    override var elapsedRealtime: Long = 0L
 ) : TimeProvider

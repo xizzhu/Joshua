@@ -17,7 +17,5 @@
 package me.xizzhu.android.joshua.utils
 
 var currentTimeMillis: Long = 0L
-var elapsedRealtime: Long = 0L
 
 fun currentTimeMillis(): Long = currentTimeMillis
-fun elapsedRealtime(): Long = elapsedRealtime

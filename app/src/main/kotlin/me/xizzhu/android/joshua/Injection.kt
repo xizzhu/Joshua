@@ -130,8 +130,9 @@ object ManagerModule {
     fun provideReadingProgressManager(
         bibleReadingRepository: BibleReadingRepository,
         readingProgressRepository: ReadingProgressRepository,
-        appScope: CoroutineScope
-    ): ReadingProgressManager = ReadingProgressManager(bibleReadingRepository, readingProgressRepository, appScope)
+        timeProvider: TimeProvider,
+        appScope: CoroutineScope,
+    ): ReadingProgressManager = ReadingProgressManager(bibleReadingRepository, readingProgressRepository, timeProvider, appScope)
 
     @Provides
     @Singleton
@@ -204,6 +205,6 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideTranslationRepository(app: Application, androidDatabase: AndroidDatabase, appScope: CoroutineScope): TranslationRepository =
-        TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService(app), appScope)
+    fun provideTranslationRepository(app: Application, androidDatabase: AndroidDatabase, timeProvider: TimeProvider, appScope: CoroutineScope): TranslationRepository =
+        TranslationRepository(AndroidTranslationStorage(androidDatabase), HttpTranslationService(app), timeProvider, appScope)
 }

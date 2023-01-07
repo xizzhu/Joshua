@@ -21,18 +21,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import me.xizzhu.android.joshua.core.TranslationInfo
+import me.xizzhu.android.joshua.core.provider.TimeProvider
 import me.xizzhu.android.joshua.core.repository.local.LocalTranslationStorage
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationInfo
 import me.xizzhu.android.joshua.core.repository.remote.RemoteTranslationService
-import me.xizzhu.android.joshua.utils.currentTimeMillis
 import me.xizzhu.android.logger.Log
 
 class TranslationRepository(
     private val localTranslationStorage: LocalTranslationStorage,
     private val remoteTranslationService: RemoteTranslationService,
+    private val timeProvider: TimeProvider,
     appScope: CoroutineScope
 ) {
     companion object {
@@ -100,7 +104,7 @@ class TranslationRepository(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     suspend fun translationListTooOld(): Boolean =
-        currentTimeMillis() - localTranslationStorage.readTranslationListRefreshTimestamp() >= TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
+        timeProvider.currentTimeMillis - localTranslationStorage.readTranslationListRefreshTimestamp() >= TRANSLATION_LIST_REFRESH_INTERVAL_IN_MILLIS
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     suspend fun readTranslationsFromBackend(): List<TranslationInfo> {
@@ -125,7 +129,7 @@ class TranslationRepository(
 
         try {
             if (translations.isNotEmpty()) {
-                localTranslationStorage.saveTranslationListRefreshTimestamp(currentTimeMillis())
+                localTranslationStorage.saveTranslationListRefreshTimestamp(timeProvider.currentTimeMillis)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save translation list refresh timestamp", e)

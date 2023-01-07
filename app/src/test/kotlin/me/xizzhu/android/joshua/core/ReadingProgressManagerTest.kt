@@ -20,21 +20,23 @@ import io.mockk.coVerify
 import io.mockk.coVerifySequence
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import me.xizzhu.android.joshua.core.repository.BibleReadingRepository
 import me.xizzhu.android.joshua.core.repository.ReadingProgressRepository
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
-import me.xizzhu.android.joshua.utils.elapsedRealtime
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import me.xizzhu.android.joshua.tests.TestTimeProvider
 
 class ReadingProgressManagerTest : BaseUnitTest() {
     private lateinit var bibleReadingRepository: BibleReadingRepository
     private lateinit var readingProgressRepository: ReadingProgressRepository
+    private lateinit var testTimeProvider: TestTimeProvider
     private lateinit var readingProgressManager: ReadingProgressManager
 
     @BeforeTest
@@ -43,7 +45,8 @@ class ReadingProgressManagerTest : BaseUnitTest() {
 
         bibleReadingRepository = mockk()
         readingProgressRepository = mockk()
-        readingProgressManager = ReadingProgressManager(bibleReadingRepository, readingProgressRepository, testScope)
+        testTimeProvider = TestTimeProvider()
+        readingProgressManager = ReadingProgressManager(bibleReadingRepository, readingProgressRepository, testTimeProvider, testScope)
     }
 
     @Test
@@ -62,18 +65,18 @@ class ReadingProgressManagerTest : BaseUnitTest() {
         every { bibleReadingRepository.currentVerseIndex } returns flowOf(VerseIndex(1, 2, 3))
         every { bibleReadingRepository.currentTranslation } returns flowOf(MockContents.kjvShortName)
 
-        elapsedRealtime = 1L
+        testTimeProvider.elapsedRealtime = 1L
         readingProgressManager.startTracking()
 
-        elapsedRealtime = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 2L
+        testTimeProvider.elapsedRealtime = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 2L
         readingProgressManager.stopTracking()
 
         coVerifySequence {
             readingProgressRepository.trackReadingProgress(
-                    bookIndex = 1,
-                    chapterIndex = 2,
-                    timeSpentInMills = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 1L,
-                    timestamp = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 2L
+                bookIndex = 1,
+                chapterIndex = 2,
+                timeSpentInMills = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 1L,
+                timestamp = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 2L
             )
         }
     }
@@ -86,7 +89,7 @@ class ReadingProgressManagerTest : BaseUnitTest() {
         readingProgressManager.startTracking()
         coVerify(exactly = 0) { readingProgressRepository.trackReadingProgress(any(), any(), any(), any()) }
 
-        elapsedRealtime = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS - 1L
+        testTimeProvider.elapsedRealtime = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS - 1L
 
         readingProgressManager.stopTracking()
         coVerify(exactly = 0) { readingProgressRepository.trackReadingProgress(any(), any(), any(), any()) }
@@ -100,7 +103,7 @@ class ReadingProgressManagerTest : BaseUnitTest() {
         readingProgressManager.startTracking()
         coVerify(exactly = 0) { readingProgressRepository.trackReadingProgress(any(), any(), any(), any()) }
 
-        elapsedRealtime = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 2L
+        testTimeProvider.elapsedRealtime = ReadingProgressManager.TIME_SPENT_THRESHOLD_IN_MILLIS + 2L
 
         readingProgressManager.stopTracking()
         coVerify(exactly = 0) { readingProgressRepository.trackReadingProgress(any(), any(), any(), any()) }
