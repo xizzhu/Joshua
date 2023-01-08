@@ -77,7 +77,7 @@ class AnnotatedVerseActivityTest : BaseActivityTest() {
 
     @Test
     fun `test adapter viewEvent, OpenVerse`() {
-        withActivity(BookmarksActivity::class.java) { activity ->
+        withActivity<BookmarksActivity> { activity ->
             val adapter: AnnotatedVerseAdapter = (activity as AnnotatedVerseActivity<*, *>).getProperty("adapter")
             val onViewEvent: (AnnotatedVerseAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
             onViewEvent(AnnotatedVerseAdapter.ViewEvent.OpenVerse(VerseIndex(1, 2, 3)))
@@ -88,7 +88,7 @@ class AnnotatedVerseActivityTest : BaseActivityTest() {
 
     @Test
     fun `test adapter viewEvent, ShowPreview`() {
-        withActivity(BookmarksActivity::class.java) { activity ->
+        withActivity<BookmarksActivity> { activity ->
             val adapter: AnnotatedVerseAdapter = (activity as AnnotatedVerseActivity<*, *>).getProperty("adapter")
             val onViewEvent: (AnnotatedVerseAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
             onViewEvent(AnnotatedVerseAdapter.ViewEvent.ShowPreview(VerseIndex(1, 2, 3)))
@@ -102,7 +102,7 @@ class AnnotatedVerseActivityTest : BaseActivityTest() {
         every { viewModel.viewAction() } returns flowOf(AnnotatedVerseViewModel.ViewAction.OpenReadingScreen)
         every { MockNavigationModule.mockNavigator.navigate(any(), Navigator.SCREEN_READING) } returns Unit
 
-        withActivity(BookmarksActivity::class.java) { activity ->
+        withActivity<BookmarksActivity> { activity ->
             verify(exactly = 1) { MockNavigationModule.mockNavigator.navigate(activity, Navigator.SCREEN_READING) }
         }
     }
@@ -117,7 +117,7 @@ class AnnotatedVerseActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(BookmarksActivity::class.java) { activity ->
+        withActivity<BookmarksActivity> { activity ->
             val viewBinding: ActivityAnnotatedBinding = activity.getProperty("viewBinding")
             assertTrue(viewBinding.loadingSpinner.isVisible)
             assertFalse(viewBinding.verseList.isVisible)
@@ -144,7 +144,7 @@ class AnnotatedVerseActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(BookmarksActivity::class.java) { activity ->
+        withActivity<BookmarksActivity> { activity ->
             val viewBinding: ActivityAnnotatedBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.verseList.isVisible)
@@ -164,7 +164,7 @@ class AnnotatedVerseActivityTest : BaseActivityTest() {
             error = AnnotatedVerseViewModel.ViewState.Error.AnnotatedVersesLoadingError,
         ))
 
-        withActivity(BookmarksActivity::class.java) { activity ->
+        withActivity<BookmarksActivity> { activity ->
             val viewBinding: ActivityAnnotatedBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.verseList.isVisible)
@@ -184,7 +184,7 @@ class AnnotatedVerseActivityTest : BaseActivityTest() {
             error = AnnotatedVerseViewModel.ViewState.Error.PreviewLoadingError(VerseIndex(1, 2, 3)),
         ))
 
-        withActivity(BookmarksActivity::class.java) { activity ->
+        withActivity<BookmarksActivity> { activity ->
             val viewBinding: ActivityAnnotatedBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.verseList.isVisible)
@@ -207,7 +207,7 @@ class AnnotatedVerseActivityTest : BaseActivityTest() {
             error = AnnotatedVerseViewModel.ViewState.Error.SortOrderSavingError(Constants.SORT_BY_BOOK),
         ))
 
-        withActivity(BookmarksActivity::class.java) { activity ->
+        withActivity<BookmarksActivity> { activity ->
             val viewBinding: ActivityAnnotatedBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.verseList.isVisible)
@@ -227,7 +227,7 @@ class AnnotatedVerseActivityTest : BaseActivityTest() {
             error = AnnotatedVerseViewModel.ViewState.Error.VerseOpeningError(VerseIndex(1, 2, 3)),
         ))
 
-        withActivity(BookmarksActivity::class.java) { activity ->
+        withActivity<BookmarksActivity> { activity ->
             val viewBinding: ActivityAnnotatedBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.verseList.isVisible)

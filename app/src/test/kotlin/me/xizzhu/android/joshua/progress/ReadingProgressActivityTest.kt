@@ -71,7 +71,7 @@ class ReadingProgressActivityTest : BaseActivityTest() {
 
     @Test
     fun `test adapter viewEvent, ExpandOrCollapseBook`() {
-        withActivity(ReadingProgressActivity::class.java) { activity ->
+        withActivity<ReadingProgressActivity> { activity ->
             val adapter: ReadingProgressAdapter = activity.getProperty("adapter")
             val onViewEvent: (ReadingProgressAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
             onViewEvent(ReadingProgressAdapter.ViewEvent.ExpandOrCollapseBook(bookIndex = 1))
@@ -82,7 +82,7 @@ class ReadingProgressActivityTest : BaseActivityTest() {
 
     @Test
     fun `test adapter viewEvent, OpenVerse`() {
-        withActivity(ReadingProgressActivity::class.java) { activity ->
+        withActivity<ReadingProgressActivity> { activity ->
             val adapter: ReadingProgressAdapter = activity.getProperty("adapter")
             val onViewEvent: (ReadingProgressAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
             onViewEvent(ReadingProgressAdapter.ViewEvent.OpenVerse(VerseIndex(1, 2, 3)))
@@ -96,7 +96,7 @@ class ReadingProgressActivityTest : BaseActivityTest() {
         every { viewModel.viewAction() } returns flowOf(ReadingProgressViewModel.ViewAction.OpenReadingScreen)
         every { MockNavigationModule.mockNavigator.navigate(any(), Navigator.SCREEN_READING) } returns Unit
 
-        withActivity(ReadingProgressActivity::class.java) { activity ->
+        withActivity<ReadingProgressActivity> { activity ->
             verify(exactly = 1) { MockNavigationModule.mockNavigator.navigate(activity, Navigator.SCREEN_READING) }
         }
     }
@@ -109,7 +109,7 @@ class ReadingProgressActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(ReadingProgressActivity::class.java) { activity ->
+        withActivity<ReadingProgressActivity> { activity ->
             val viewBinding: ActivityReadingProgressBinding = activity.getProperty("viewBinding")
             assertTrue(viewBinding.loadingSpinner.isVisible)
             assertFalse(viewBinding.readingProgressList.isVisible)
@@ -125,7 +125,7 @@ class ReadingProgressActivityTest : BaseActivityTest() {
             error = ReadingProgressViewModel.ViewState.Error.ReadingProgressLoadingError,
         ))
 
-        withActivity(ReadingProgressActivity::class.java) { activity ->
+        withActivity<ReadingProgressActivity> { activity ->
             val viewBinding: ActivityReadingProgressBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.readingProgressList.isVisible)
@@ -143,7 +143,7 @@ class ReadingProgressActivityTest : BaseActivityTest() {
             error = ReadingProgressViewModel.ViewState.Error.VerseOpeningError(VerseIndex(1, 2, 3)),
         ))
 
-        withActivity(ReadingProgressActivity::class.java) { activity ->
+        withActivity<ReadingProgressActivity> { activity ->
             val viewBinding: ActivityReadingProgressBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.readingProgressList.isVisible)

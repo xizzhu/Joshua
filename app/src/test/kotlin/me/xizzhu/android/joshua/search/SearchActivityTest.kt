@@ -76,7 +76,7 @@ class SearchActivityTest : BaseActivityTest() {
 
     @Test
     fun `test adapter viewEvent, OpenVerse`() {
-        withActivity(SearchActivity::class.java) { activity ->
+        withActivity<SearchActivity> { activity ->
             val adapter: SearchAdapter = activity.getProperty("adapter")
             val onViewEvent: (SearchAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
             onViewEvent(SearchAdapter.ViewEvent.OpenVerse(VerseIndex(1, 2, 3)))
@@ -87,7 +87,7 @@ class SearchActivityTest : BaseActivityTest() {
 
     @Test
     fun `test adapter viewEvent, ShowPreview`() {
-        withActivity(SearchActivity::class.java) { activity ->
+        withActivity<SearchActivity> { activity ->
             val adapter: SearchAdapter = activity.getProperty("adapter")
             val onViewEvent: (SearchAdapter.ViewEvent) -> Unit = adapter.getProperty("onViewEvent")
             onViewEvent(SearchAdapter.ViewEvent.ShowPreview(VerseIndex(1, 2, 3)))
@@ -101,7 +101,7 @@ class SearchActivityTest : BaseActivityTest() {
         every { viewModel.viewAction() } returns flowOf(SearchViewModel.ViewAction.OpenReadingScreen)
         every { MockNavigationModule.mockNavigator.navigate(any(), Navigator.SCREEN_READING) } returns Unit
 
-        withActivity(SearchActivity::class.java) { activity ->
+        withActivity<SearchActivity> { activity ->
             verify(exactly = 1) { MockNavigationModule.mockNavigator.navigate(activity, Navigator.SCREEN_READING) }
         }
     }
@@ -125,7 +125,7 @@ class SearchActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(SearchActivity::class.java) { activity ->
+        withActivity<SearchActivity> { activity ->
             val viewBinding: ActivitySearchBinding = activity.getProperty("viewBinding")
             assertTrue(viewBinding.loadingSpinner.isVisible)
             assertFalse(viewBinding.searchResult.isVisible)
@@ -151,7 +151,7 @@ class SearchActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(SearchActivity::class.java) { activity ->
+        withActivity<SearchActivity> { activity ->
             val viewBinding: ActivitySearchBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.searchResult.isVisible)
@@ -185,7 +185,7 @@ class SearchActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(SearchActivity::class.java) { activity ->
+        withActivity<SearchActivity> { activity ->
             val viewBinding: ActivitySearchBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.searchResult.isVisible)
@@ -208,7 +208,7 @@ class SearchActivityTest : BaseActivityTest() {
             error = SearchViewModel.ViewState.Error.PreviewLoadingError(VerseIndex(1, 2, 3)),
         ))
 
-        withActivity(SearchActivity::class.java) { activity ->
+        withActivity<SearchActivity> { activity ->
             val viewBinding: ActivitySearchBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.searchResult.isVisible)
@@ -233,7 +233,7 @@ class SearchActivityTest : BaseActivityTest() {
             error = SearchViewModel.ViewState.Error.SearchConfigUpdatingError,
         ))
 
-        withActivity(SearchActivity::class.java) { activity ->
+        withActivity<SearchActivity> { activity ->
             val viewBinding: ActivitySearchBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.searchResult.isVisible)
@@ -255,7 +255,7 @@ class SearchActivityTest : BaseActivityTest() {
             error = SearchViewModel.ViewState.Error.VerseOpeningError(VerseIndex(1, 2, 3)),
         ))
 
-        withActivity(SearchActivity::class.java) { activity ->
+        withActivity<SearchActivity> { activity ->
             val viewBinding: ActivitySearchBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.searchResult.isVisible)
@@ -278,7 +278,7 @@ class SearchActivityTest : BaseActivityTest() {
             error = SearchViewModel.ViewState.Error.VerseSearchingError,
         ))
 
-        withActivity(SearchActivity::class.java) { activity ->
+        withActivity<SearchActivity> { activity ->
             val viewBinding: ActivitySearchBinding = activity.getProperty("viewBinding")
             assertFalse(viewBinding.loadingSpinner.isVisible)
             assertTrue(viewBinding.searchResult.isVisible)

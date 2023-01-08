@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.flowOf
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.NavigationModule
 import me.xizzhu.android.joshua.Navigator
-import me.xizzhu.android.joshua.core.Settings
 import me.xizzhu.android.joshua.databinding.ActivitySettingsBinding
 import me.xizzhu.android.joshua.databinding.InnerSettingButtonBinding
 import me.xizzhu.android.joshua.settings.widgets.SettingButton
@@ -76,7 +75,7 @@ class SettingsActivityTest : BaseActivityTest() {
 
     @Test
     fun `test initializeView()`() {
-        withActivity(SettingsActivity::class.java) { activity ->
+        withActivity<SettingsActivity> { activity ->
             val viewBinding: ActivitySettingsBinding = activity.getProperty("viewBinding")
             viewBinding.keepScreenOn.performClickPressed()
             viewBinding.simpleReadingMode.performClickPressed()
@@ -111,7 +110,7 @@ class SettingsActivityTest : BaseActivityTest() {
         every { viewModel.viewAction() } returns flowOf(SettingsViewModel.ViewAction.OpenRateMe)
         every { MockNavigationModule.mockNavigator.navigate(any(), Navigator.SCREEN_RATE_ME) } returns Unit
 
-        withActivity(SettingsActivity::class.java) { activity ->
+        withActivity<SettingsActivity> { activity ->
             verify(exactly = 1) { MockNavigationModule.mockNavigator.navigate(activity, Navigator.SCREEN_RATE_ME) }
         }
     }
@@ -121,7 +120,7 @@ class SettingsActivityTest : BaseActivityTest() {
         every { viewModel.viewAction() } returns flowOf(SettingsViewModel.ViewAction.OpenWebsite)
         every { MockNavigationModule.mockNavigator.navigate(any(), Navigator.SCREEN_WEBSITE) } returns Unit
 
-        withActivity(SettingsActivity::class.java) { activity ->
+        withActivity<SettingsActivity> { activity ->
             verify(exactly = 1) { MockNavigationModule.mockNavigator.navigate(activity, Navigator.SCREEN_WEBSITE) }
         }
     }
@@ -130,7 +129,7 @@ class SettingsActivityTest : BaseActivityTest() {
     fun `test onViewActionEmitted(), RequestUriForBackup`() {
         every { viewModel.viewAction() } returns flowOf(SettingsViewModel.ViewAction.RequestUriForBackup)
 
-        withActivity(SettingsActivity::class.java) {
+        withActivity<SettingsActivity> {
             with(Shadows.shadowOf(ApplicationProvider.getApplicationContext<Application>()).nextStartedActivity) {
                 assertEquals(Intent.ACTION_CREATE_DOCUMENT, action)
                 assertEquals("application/json", type)
@@ -143,7 +142,7 @@ class SettingsActivityTest : BaseActivityTest() {
     fun `test onViewActionEmitted(), RequestUriForRestore`() {
         every { viewModel.viewAction() } returns flowOf(SettingsViewModel.ViewAction.RequestUriForRestore)
 
-        withActivity(SettingsActivity::class.java) {
+        withActivity<SettingsActivity> {
             with(Shadows.shadowOf(ApplicationProvider.getApplicationContext<Application>()).nextStartedActivity) {
                 assertEquals(Intent.ACTION_CHOOSER, action)
 
@@ -176,7 +175,7 @@ class SettingsActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(SettingsActivity::class.java) { activity ->
+        withActivity<SettingsActivity> { activity ->
             val viewBinding: ActivitySettingsBinding = activity.getProperty("viewBinding")
             assertEquals("1.0x", viewBinding.fontSize.getProperty<SettingButton, InnerSettingButtonBinding>("viewBinding").description.text)
             assertTrue(viewBinding.keepScreenOn.isChecked)
@@ -211,7 +210,7 @@ class SettingsActivityTest : BaseActivityTest() {
             error = null,
         ))
 
-        withActivity(SettingsActivity::class.java) { activity ->
+        withActivity<SettingsActivity> { activity ->
             val viewBinding: ActivitySettingsBinding = activity.getProperty("viewBinding")
             assertEquals("1.0x", viewBinding.fontSize.getProperty<SettingButton, InnerSettingButtonBinding>("viewBinding").description.text)
             assertTrue(viewBinding.keepScreenOn.isChecked)
