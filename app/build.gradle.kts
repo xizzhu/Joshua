@@ -28,6 +28,8 @@ plugins {
 apply(plugin = "kover")
 
 android {
+    namespace = Configurations.applicationId
+
     compileOptions {
         sourceCompatibility = Versions.java
         targetCompatibility = Versions.java
