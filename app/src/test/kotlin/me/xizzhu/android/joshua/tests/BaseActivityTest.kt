@@ -30,8 +30,8 @@ abstract class BaseActivityTest : BaseUnitTest() {
 
     protected inline fun <reified A : Activity> withActivity(crossinline block: (activity: A) -> Unit) {
         val startActivityIntent = Intent.makeMainActivity(ComponentName(ApplicationProvider.getApplicationContext(), A::class.java))
-        ActivityScenario.launch<A>(startActivityIntent).onActivity { activity ->
-            block(activity)
+        ActivityScenario.launch<A>(startActivityIntent).use {
+            it.onActivity { activity -> block(activity) }
         }
     }
 }
