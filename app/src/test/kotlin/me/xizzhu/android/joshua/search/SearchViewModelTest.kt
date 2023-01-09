@@ -68,6 +68,7 @@ class SearchViewModelTest : BaseUnitTest() {
             every { getString(R.string.title_highlights) } returns "Highlights"
             every { getString(R.string.title_notes) } returns "Notes"
             every { getString(R.string.toast_search_result, any()) } answers { "${(it.invocation.args[1] as Array<Any?>)[0]} result(s) found." }
+            every { contentResolver } returns mockk(relaxed = true)
         }
 
         searchViewModel = SearchViewModel(bibleReadingManager, searchManager, settingsManager, testCoroutineDispatcherProvider, application)

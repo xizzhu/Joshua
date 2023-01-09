@@ -24,10 +24,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import me.xizzhu.android.joshua.core.Settings
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class TranslationsItemTest : BaseUnitTest() {
     @Test
     fun `test DiffCallback`() {

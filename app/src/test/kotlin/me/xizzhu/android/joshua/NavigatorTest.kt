@@ -22,7 +22,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
+import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidTest
+import io.mockk.mockk
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -32,6 +34,8 @@ import me.xizzhu.android.joshua.annotated.highlights.HighlightsActivity
 import me.xizzhu.android.joshua.annotated.notes.NotesActivity
 import me.xizzhu.android.joshua.progress.ReadingProgressActivity
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.chapter.ChapterSelectionViewModel
+import me.xizzhu.android.joshua.reading.toolbar.ReadingToolbarViewModel
 import me.xizzhu.android.joshua.search.SearchActivity
 import me.xizzhu.android.joshua.settings.SettingsActivity
 import me.xizzhu.android.joshua.strongnumber.StrongNumberActivity
@@ -45,6 +49,12 @@ import org.robolectric.Shadows
 @HiltAndroidTest
 class NavigatorTest : BaseActivityTest() {
     private lateinit var navigator: Navigator
+
+    @BindValue
+    val readingToolbarViewModel: ReadingToolbarViewModel = mockk(relaxed = true)
+
+    @BindValue
+    val chapterSelectionViewModel: ChapterSelectionViewModel = mockk(relaxed = true)
 
     @BeforeTest
     override fun setup() {
