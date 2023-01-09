@@ -31,20 +31,22 @@ abstract class BaseFragmentTest : BaseUnitTest() {
     @get:Rule
     var hiltRule = HiltAndroidRule(this)
 
-    protected inline fun <reified F : Fragment, reified A: AppCompatActivity> withFragment(fragmentArgs: Bundle? = null, crossinline block: (fragment: F) -> Unit) {
+    protected inline fun <reified F : Fragment, reified A : AppCompatActivity> withFragment(fragmentArgs: Bundle? = null, crossinline block: (fragment: F) -> Unit) {
         val startActivityIntent = Intent.makeMainActivity(ComponentName(ApplicationProvider.getApplicationContext(), A::class.java))
             .putExtra("androidx.fragment.app.testing.FragmentScenario.EmptyFragmentActivity.THEME_EXTRAS_BUNDLE_KEY", R.style.AppTheme)
 
-        ActivityScenario.launch<A>(startActivityIntent).onActivity { activity ->
-            val fragment: F = activity.supportFragmentManager.fragmentFactory.instantiate(F::class.java.classLoader!!, F::class.java.name) as F
-            fragment.arguments = fragmentArgs
+        ActivityScenario.launch<A>(startActivityIntent).use {
+            it.onActivity { activity ->
+                val fragment: F = activity.supportFragmentManager.fragmentFactory.instantiate(F::class.java.classLoader!!, F::class.java.name) as F
+                fragment.arguments = fragmentArgs
 
-            activity.supportFragmentManager
-                .beginTransaction()
-                .add(android.R.id.content, fragment, "")
-                .commitNow()
+                activity.supportFragmentManager
+                    .beginTransaction()
+                    .add(android.R.id.content, fragment, "")
+                    .commitNow()
 
-            block(fragment)
+                block(fragment)
+            }
         }
     }
 }

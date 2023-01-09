@@ -39,6 +39,7 @@ import me.xizzhu.android.joshua.Navigator
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.databinding.FragmentReadingToolbarBinding
 import me.xizzhu.android.joshua.reading.ReadingActivity
+import me.xizzhu.android.joshua.reading.chapter.ChapterSelectionViewModel
 import org.junit.runner.RunWith
 import me.xizzhu.android.joshua.tests.BaseFragmentTest
 import me.xizzhu.android.joshua.tests.MockContents
@@ -59,7 +60,10 @@ class ReadingToolbarFragmentTest : BaseFragmentTest() {
     }
 
     @BindValue
-    val viewModel: ReadingToolbarViewModel = mockk(relaxed = true)
+    val readingToolbarViewModel: ReadingToolbarViewModel = mockk(relaxed = true)
+
+    @BindValue
+    val chapterSelectionViewModel: ChapterSelectionViewModel = mockk(relaxed = true)
 
     @Test
     fun `test toolbar ViewEvent`() {
@@ -84,7 +88,7 @@ class ReadingToolbarFragmentTest : BaseFragmentTest() {
 
     @Test
     fun `test onViewStateUpdated(), with null error`() {
-        every { viewModel.viewState() } returns flowOf(ReadingToolbarViewModel.ViewState(
+        every { readingToolbarViewModel.viewState() } returns flowOf(ReadingToolbarViewModel.ViewState(
             title = "my title",
             translationItems = emptyList(),
             error = null
@@ -97,7 +101,7 @@ class ReadingToolbarFragmentTest : BaseFragmentTest() {
 
     @Test
     fun `test onViewStateUpdated(), with ParallelTranslationRequestingError error`() {
-        every { viewModel.viewState() } returns flowOf(ReadingToolbarViewModel.ViewState(
+        every { readingToolbarViewModel.viewState() } returns flowOf(ReadingToolbarViewModel.ViewState(
             title = "my title",
             translationItems = emptyList(),
             error = ReadingToolbarViewModel.ViewState.Error.ParallelTranslationRequestingError(MockContents.kjvShortName)
@@ -105,7 +109,7 @@ class ReadingToolbarFragmentTest : BaseFragmentTest() {
         withFragment<ReadingToolbarFragment, ReadingActivity> { fragment ->
             val viewBinding: FragmentReadingToolbarBinding = fragment.getProperty("viewBinding")
             assertEquals("my title", viewBinding.toolbar.title.toString())
-            verify { viewModel.markErrorAsShown(ReadingToolbarViewModel.ViewState.Error.ParallelTranslationRequestingError("KJV")) }
+            verify { readingToolbarViewModel.markErrorAsShown(ReadingToolbarViewModel.ViewState.Error.ParallelTranslationRequestingError("KJV")) }
         }
     }
 }

@@ -17,7 +17,6 @@
 package me.xizzhu.android.joshua.reading.toolbar
 
 import android.app.Application
-import androidx.test.core.app.ApplicationProvider
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -28,8 +27,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import me.xizzhu.android.joshua.R
 import me.xizzhu.android.joshua.core.BibleReadingManager
 import me.xizzhu.android.joshua.core.TranslationManager
@@ -37,7 +34,6 @@ import me.xizzhu.android.joshua.core.VerseIndex
 import me.xizzhu.android.joshua.tests.BaseUnitTest
 import me.xizzhu.android.joshua.tests.MockContents
 
-@RunWith(RobolectricTestRunner::class)
 class ReadingToolbarViewModelTest : BaseUnitTest() {
     private lateinit var bibleReadingManager: BibleReadingManager
     private lateinit var translationManager: TranslationManager
@@ -57,7 +53,9 @@ class ReadingToolbarViewModelTest : BaseUnitTest() {
         translationManager = mockk<TranslationManager>().apply {
             every { downloadedTranslations() } returns emptyFlow()
         }
-        application = ApplicationProvider.getApplicationContext()
+        application = mockk<Application>().apply {
+            every { getString(R.string.app_name) } returns "Bible"
+        }
 
         readingToolbarViewModel = ReadingToolbarViewModel(bibleReadingManager, translationManager, application)
     }
