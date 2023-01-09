@@ -104,7 +104,7 @@ object Dependencies {
         const val coroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.Kotlin.coroutines}"
 
         object Kover {
-            const val classpath = "org.jetbrains.kotlinx:kover:${Versions.Kotlin.kover}"
+            const val plugin = "org.jetbrains.kotlinx.kover"
         }
     }
 

@@ -25,8 +25,6 @@ plugins {
     kotlin("kapt")
 }
 
-apply(plugin = "kover")
-
 android {
     namespace = Configurations.applicationId
 
@@ -165,4 +163,10 @@ dependencies {
     testImplementation(Dependencies.Hilt.test)
     testImplementation(Dependencies.mockk)
     testImplementation(Dependencies.robolectric)
+}
+
+kover {
+    instrumentation {
+        excludeTasks.add("testDebugUnitTest")
+    }
 }
